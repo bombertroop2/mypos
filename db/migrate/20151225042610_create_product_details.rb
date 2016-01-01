@@ -7,10 +7,12 @@ class CreateProductDetails < ActiveRecord::Migration
         t.decimal :cost
         t.decimal :price
         t.string :barcode
-        t.references :color, index: true, foreign_key: true
+        t.references :color, index: true
 
         t.timestamps null: false
       end
+      add_foreign_key :product_details, :common_fields, column: :color_id
+
     end
   end
 end
