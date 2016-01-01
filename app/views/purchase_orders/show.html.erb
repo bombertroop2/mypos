@@ -1,0 +1,49 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Number:</strong>
+  <%= @purchase_order.number %>
+</p>
+
+<p>
+  <strong>Po type:</strong>
+  <%= @purchase_order.po_type %>
+</p>
+
+<p>
+  <strong>Status:</strong>
+  <%= @purchase_order.status %>
+</p>
+
+<p>
+  <strong>Vendor:</strong>
+  <%= @purchase_order.vendor %>
+</p>
+
+<p>
+  <strong>Request delivery date:</strong>
+  <%= @purchase_order.request_delivery_date %>
+</p>
+
+<p>
+  <strong>Order value:</strong>
+  <%= @purchase_order.order_value %>
+</p>
+
+<p>
+  <strong>Receiving value:</strong>
+  <%= @purchase_order.receiving_value %>
+</p>
+
+<p>
+  <strong>Means of payment:</strong>
+  <%= @purchase_order.means_of_payment %>
+</p>
+
+<p>
+  <strong>Warehouse:</strong>
+  <%= @purchase_order.warehouse %>
+</p>
+
+<%= link_to 'Edit', edit_purchase_order_path(@purchase_order) %> |
+<%= link_to 'Back', purchase_orders_path %>

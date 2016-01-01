@@ -1,0 +1,78 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Code:</strong>
+  <%= @product.code %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @product.description %>
+</p>
+
+<p>
+  <strong>Brand:</strong>
+  <%= @product.brand.code if @product.brand %>
+</p>
+
+<p>
+  <strong>Sex:</strong>
+  <%= @product.sex.titleize %>
+</p>
+
+<p>
+  <strong>Vendor:</strong>
+  <%= @product.vendor.code if @product.vendor %>
+</p>
+
+<p>
+  <strong>Target:</strong>
+  <%= @product.target.titleize %>
+</p>
+
+<p>
+  <strong>Model:</strong>
+  <%= @product.model.code if @product.model %>
+</p>
+
+<p>
+  <strong>Goods type:</strong>
+  <%= @product.goods_type.code if @product.goods_type %>
+</p>
+
+<p>
+  <strong>Image:</strong>
+  <%= image_tag @product.image_url if @product.image.present? %>
+</p>
+
+<p>
+  <strong>Effective date:</strong>
+  <%= @product.effective_date %>
+</p>
+
+<h2>Listing product details</h2>
+
+<table>
+  <tr>
+    <th>Barcode</th>
+    <th>Product code</th>
+    <th>Size</th>
+    <th>Color code</th>
+    <th>Cost</th>
+    <th>Price</th>
+  </tr>
+
+  <% @product.product_details.each do |prod_det| %>
+    <tr>
+      <td><%= prod_det.barcode %></td>
+      <td><%= prod_det.product.code if prod_det.product %></td>
+      <td><%= prod_det.size.size if prod_det.size %></td>
+      <td><%= prod_det.color.code if prod_det.color %></td>
+      <td><%= number_to_currency(prod_det.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+      <td><%= number_to_currency(prod_det.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+    </tr>
+  <% end %>
+</table>
+
+<%= link_to 'Edit', edit_product_path(@product) %> |
+<%= link_to 'Back', products_path %>

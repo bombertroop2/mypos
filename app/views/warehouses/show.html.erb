@@ -1,0 +1,44 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Code:</strong>
+  <%= @warehouse.code %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @warehouse.name %>
+</p>
+
+<p>
+  <strong>Address:</strong>
+  <%= @warehouse.address %>
+</p>
+
+<p>
+  <strong>Is active:</strong>
+  <%= @warehouse.is_active %>
+</p>
+
+<p>
+  <strong>Supervisor:</strong>
+  <%= @warehouse.supervisor.name if @warehouse.supervisor %>
+</p>
+
+<p>
+  <strong>Region:</strong>
+  <%= @warehouse.region.code if @warehouse.region %>
+</p>
+
+<p>
+  <strong>Price code:</strong>
+  <%= @warehouse.price_code.code if @warehouse.price_code %>
+</p>
+
+<p>
+  <strong>Type:</strong>
+  <%= @warehouse.warehouse_type.titleize %>
+</p>
+
+<%= link_to 'Edit', edit_warehouse_path(@warehouse) %> |
+<%= link_to 'Back', warehouses_path %>

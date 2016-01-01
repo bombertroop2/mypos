@@ -1,0 +1,50 @@
+<%= form_for(@warehouse) do |f| %>
+  <% if @warehouse.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@warehouse.errors.count, "error") %> prohibited this warehouse from being saved:</h2>
+
+      <ul>
+        <% @warehouse.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :code %><br>
+    <%= f.text_field :code %>
+  </div>
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :address %><br>
+    <%= f.text_area :address, rows: 6 %>
+  </div>
+  <div class="field">
+    <%= f.label :is_active %><br>
+    <%= f.check_box :is_active %>
+  </div>
+  <div class="field">
+    <%= f.label :supervisor_id %><br>
+    <%= f.select :supervisor_id, options_from_collection_for_select(Supervisor.all, :id, :name, @warehouse.supervisor_id.to_s), prompt: true %>
+  </div>
+  <div class="field">
+    <%= f.label :region_id %><br>
+    <%= f.select :region_id, options_from_collection_for_select(Region.all, :id, :code, @warehouse.region_id.to_s), prompt: true %>
+  </div>
+
+  <div class="field">
+    <%= f.label :price_code_id %><br>
+    <%= f.select :price_code_id, options_from_collection_for_select(PriceCode.all, :id, :code, @warehouse.price_code_id.to_s), prompt: true %>
+  </div>
+  <div class="field">
+    <%= f.label :warehouse_type, "Type" %><br>
+    <%= f.select :warehouse_type, options_for_select(Warehouse::TYPES, @warehouse.warehouse_type), prompt: true %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

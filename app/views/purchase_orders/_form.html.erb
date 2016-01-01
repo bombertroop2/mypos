@@ -1,0 +1,53 @@
+<%= form_for(@purchase_order) do |f| %>
+  <% if @purchase_order.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
+
+      <ul>
+      <% @purchase_order.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :number %><br>
+    <%= f.text_field :number %>
+  </div>
+  <div class="field">
+    <%= f.label :po_type %><br>
+    <%= f.text_field :po_type %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br>
+    <%= f.text_field :status %>
+  </div>
+  <div class="field">
+    <%= f.label :vendor_id %><br>
+    <%= f.text_field :vendor_id %>
+  </div>
+  <div class="field">
+    <%= f.label :request_delivery_date %><br>
+    <%= f.date_select :request_delivery_date %>
+  </div>
+  <div class="field">
+    <%= f.label :order_value %><br>
+    <%= f.text_field :order_value %>
+  </div>
+  <div class="field">
+    <%= f.label :receiving_value %><br>
+    <%= f.text_field :receiving_value %>
+  </div>
+  <div class="field">
+    <%= f.label :means_of_payment %><br>
+    <%= f.number_field :means_of_payment %>
+  </div>
+  <div class="field">
+    <%= f.label :warehouse_id %><br>
+    <%= f.text_field :warehouse_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

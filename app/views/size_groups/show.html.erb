@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Code:</strong>
+  <%= @size_group.code %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @size_group.description %>
+</p>
+
+<p>
+  <strong>Sizes:</strong>
+  <%= @size_group.sizes.pluck(:size).sort.join(", ") %>
+</p>
+
+<%= link_to 'Edit', edit_size_group_path(@size_group) %> |
+<%= link_to 'Back', size_groups_path %>

@@ -1,0 +1,58 @@
+<%= form_for(@vendor) do |f| %>
+  <% if @vendor.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:</h2>
+
+      <ul>
+        <% @vendor.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :code %><br>
+    <%= f.text_field :code %>
+  </div>
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :address %><br>
+    <%= f.text_area :address, rows: 6 %>
+  </div>
+  <div class="field">
+    <%= f.label :phone %><br>
+    <%= f.telephone_field :phone %>
+  </div>
+  <div class="field">
+    <%= f.label :facsimile %><br>
+    <%= f.telephone_field :facsimile %>
+  </div>
+  <div class="field">
+    <%= f.label :email %><br>
+    <%= f.email_field :email %>
+  </div>
+  <div class="field">
+    <%= f.label :pic_name %><br>
+    <%= f.text_field :pic_name %>
+  </div>
+  <div class="field">
+    <%= f.label :pic_phone %><br>
+    <%= f.telephone_field :pic_phone %>
+  </div>
+  <div class="field">
+    <%= f.label :pic_mobile_phone %><br>
+    <%= f.telephone_field :pic_mobile_phone %>
+  </div>
+  <div class="field">
+    <%= f.label :pic_email %><br>
+    <%= f.email_field :pic_email %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

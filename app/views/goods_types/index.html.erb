@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Goods Types</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @goods_types.each do |goods_type| %>
+      <tr>
+        <td><%= goods_type.code %></td>
+        <td><%= goods_type.name %></td>
+        <td><%= link_to 'Show', goods_type %></td>
+        <td><%= link_to 'Edit', edit_goods_type_path(goods_type) %></td>
+        <td><%= link_to 'Destroy', goods_type, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Goods type', new_goods_type_path %>

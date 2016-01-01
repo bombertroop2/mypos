@@ -1,0 +1,34 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Code:</strong>
+  <%= @supervisor.code %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @supervisor.name %>
+</p>
+
+<p>
+  <strong>Address:</strong>
+  <%= @supervisor.address %>
+</p>
+
+<p>
+  <strong>Email:</strong>
+  <%= @supervisor.email %>
+</p>
+
+<p>
+  <strong>Phone:</strong>
+  <%= @supervisor.phone %>
+</p>
+
+<p>
+  <strong>Mobile phone:</strong>
+  <%= @supervisor.mobile_phone %>
+</p>
+
+<%= link_to 'Edit', edit_supervisor_path(@supervisor) %> |
+<%= link_to 'Back', supervisors_path %>

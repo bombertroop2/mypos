@@ -1,0 +1,77 @@
+<%= form_for(@product) do |f| %>
+  <% if @product.errors.any? %>
+    <div id="error_explanation">
+        <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+
+        <ul>
+            <% @product.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+        </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+      <%= f.label :code %><br>
+      <%= f.text_field :code %>
+  </div>
+  <div class="field">
+      <%= f.label :description %><br>
+      <%= f.text_area :description, rows: 6 %>
+  </div>
+  <div class="field">
+      <%= f.label :brand_id %><br>
+      <%= f.select :brand_id, options_from_collection_for_select(Brand.all, :id, :name, @product.brand_id.to_s), prompt: true %>
+  </div>
+  <div class="field">
+      <%= f.label :sex %><br>
+      <%= f.select :sex, options_for_select(Product::SEX, @product.sex), prompt: true %>
+  </div>
+  <div class="field">
+      <%= f.label :vendor_id %><br>
+      <%= f.select :vendor_id, options_from_collection_for_select(Vendor.all, :id, :name, @product.vendor_id.to_s), prompt: true %>
+  </div>
+  <div class="field">
+      <%= f.label :target %><br>
+      <%= f.select :target, options_for_select(Product::TARGETS, @product.target), prompt: true %>
+  </div>
+  <div class="field">
+      <%= f.label :model_id %><br>
+      <%= f.select :model_id, options_from_collection_for_select(Model.all, :id, :name, @product.model_id.to_s), prompt: true %>
+  </div>
+  <div class="field">
+      <%= f.label :goods_type_id %><br>
+      <%= f.select :goods_type_id, options_from_collection_for_select(GoodsType.all, :id, :name, @product.goods_type_id.to_s), prompt: true %>
+  </div>
+<!--
+  <div class="field">
+      <%# if @product.image? %>
+        <%#= image_tag(@product.image_url(:thumb)) %></br>
+      <%# end %>
+      <%#= f.label :image %><br />
+      <%#= f.file_field :image %>
+      <%#= f.hidden_field :image_cache %>
+  </div>-->
+      <!--
+  <div class="field">
+      <label>
+          <%#= f.check_box :remove_image %> Remove image
+      </label>
+  </div>-->
+  <div class="field">
+      <%= f.label :effective_date %><br>
+      <%= f.date_field :effective_date %>
+  </div>
+  <div class="field">
+      Size group
+      <%= select_tag "size_groups", options_from_collection_for_select(SizeGroup.order(:code), 'id', 'code', selected_size_group), prompt: "Please select" %>
+  </div>
+  <div id="size_collection_container">
+      <% unless @sizes.blank? %>
+        <%= render 'size_collections' %>
+      <% end %>
+  </div>
+  <div class="actions">
+      <%= f.submit %>
+  </div>
+<% end %>

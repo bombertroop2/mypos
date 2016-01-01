@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Sales Promotion Girls</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Identifier</th>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Warehouse</th>
+      <th>Mobile phone</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @sales_promotion_girls.each do |sales_promotion_girl| %>
+      <tr>
+        <td><%= sales_promotion_girl.identifier %></td>
+        <td><%= sales_promotion_girl.name %></td>
+        <td><%= sales_promotion_girl.phone %></td>
+        <td><%= sales_promotion_girl.warehouse.code if sales_promotion_girl.warehouse %></td>
+        <td><%= sales_promotion_girl.mobile_phone %></td>
+        <td><%= link_to 'Show', sales_promotion_girl %></td>
+        <td><%= link_to 'Edit', edit_sales_promotion_girl_path(sales_promotion_girl) %></td>
+        <td><%= link_to 'Destroy', sales_promotion_girl, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Sales promotion girl', new_sales_promotion_girl_path %>

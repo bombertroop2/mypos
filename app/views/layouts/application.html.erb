@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Posapp</title>
+        <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+        <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+        <%= csrf_meta_tags %>
+    </head>
+    <body>
+
+        <%= link_to "Brands", brands_path %>
+        |
+        <%= link_to "Colors", colors_path %>
+        |
+        <%= link_to "Models", models_path %>
+        |
+        <%= link_to "Goods Types", goods_types_path %>
+        |
+        <%= link_to "Regions", regions_path %>
+        |
+        <%= link_to "Price Codes", price_codes_path %>
+        |
+        <%= link_to "Vendors", vendors_path %>
+
+        |
+        <%= link_to "Products", products_path %>
+        |
+        <%= link_to "Size Groups", size_groups_path %>
+        |
+        <%= link_to "Sales Promotion Girls", sales_promotion_girls_path %>
+        |
+        <%= link_to "Supervisors", supervisors_path %>
+        |
+        <%= link_to "Warehouses", warehouses_path %>
+<%#*|%>
+<%#= link_to "Purchase Orders", purchase_orders_path %>
+<%#*|%>
+<%#= link_to "Stocks", stocks_path %>
+
+        <%= yield %>
+
+    </body>
+</html>

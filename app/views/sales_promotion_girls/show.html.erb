@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Identifier:</strong>
+  <%= @sales_promotion_girl.identifier %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @sales_promotion_girl.name %>
+</p>
+
+<p>
+  <strong>Address:</strong>
+  <%= @sales_promotion_girl.address %>
+</p>
+
+<p>
+  <strong>Phone:</strong>
+  <%= @sales_promotion_girl.phone %>
+</p>
+
+<p>
+  <strong>Province:</strong>
+  <%= @sales_promotion_girl.province %>
+</p>
+
+<p>
+  <strong>Warehouse:</strong>
+  <%= @sales_promotion_girl.warehouse.code if @sales_promotion_girl.warehouse %>
+</p>
+
+<p>
+  <strong>Mobile phone:</strong>
+  <%= @sales_promotion_girl.mobile_phone %>
+</p>
+
+<%= link_to 'Edit', edit_sales_promotion_girl_path(@sales_promotion_girl) %> |
+<%= link_to 'Back', sales_promotion_girls_path %>

@@ -1,0 +1,56 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Code:</strong>
+  <%= @vendor.code %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @vendor.name %>
+</p>
+
+<p>
+  <strong>Address:</strong>
+  <%= @vendor.address %>
+</p>
+
+
+<p>
+  <strong>Phone:</strong>
+  <%= @vendor.phone %>
+</p>
+
+<p>
+  <strong>Facsimile:</strong>
+  <%= @vendor.facsimile %>
+</p>
+
+<p>
+  <strong>Email:</strong>
+  <%= @vendor.email %>
+</p>
+
+<p>
+  <strong>Pic name:</strong>
+  <%= @vendor.pic_name %>
+</p>
+
+<p>
+  <strong>Pic phone:</strong>
+  <%= @vendor.pic_phone %>
+</p>
+
+<p>
+  <strong>Pic mobile phone:</strong>
+  <%= @vendor.pic_mobile_phone %>
+</p>
+
+<p>
+  <strong>Pic email:</strong>
+  <%= @vendor.pic_email %>
+</p>
+
+
+<%= link_to 'Edit', edit_vendor_path(@vendor) %> |
+<%= link_to 'Back', vendors_path %>
