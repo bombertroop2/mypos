@@ -55,8 +55,13 @@ class GoodsTypesController < ApplicationController
   # DELETE /goods_types/1.json
   def destroy
     @goods_type.destroy
+    if @goods_type.errors.present? and @goods_type.errors.messages[:base].present?
+      message = @goods_type.errors.messages[:base].to_sentence
+    else
+      message = 'Goods type was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to goods_types_url, notice: 'Goods type was successfully destroyed.' }
+      format.html { redirect_to goods_types_url, notice: message }
       format.json { head :no_content }
     end
   end

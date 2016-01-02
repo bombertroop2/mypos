@@ -55,8 +55,13 @@ class PriceCodesController < ApplicationController
   # DELETE /price_codes/1.json
   def destroy
     @price_code.destroy
+    if @price_code.errors.present? and @price_code.errors.messages[:base].present?
+      message = @price_code.errors.messages[:base].to_sentence
+    else
+      message = 'Price code was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to price_codes_url, notice: 'Price code was successfully destroyed.' }
+      format.html { redirect_to price_codes_url, notice: message }
       format.json { head :no_content }
     end
   end

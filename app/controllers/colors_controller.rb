@@ -55,8 +55,13 @@ class ColorsController < ApplicationController
   # DELETE /colors/1.json
   def destroy
     @color.destroy
+    if @color.errors.present? and @color.errors.messages[:base].present?
+      message = @color.errors.messages[:base].to_sentence
+    else
+      message = 'Color was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to colors_url, notice: 'Color was successfully destroyed.' }
+      format.html { redirect_to colors_url, notice: message }
       format.json { head :no_content }
     end
   end

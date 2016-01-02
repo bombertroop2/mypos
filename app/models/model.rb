@@ -1,5 +1,5 @@
 class Model < CommonField
-  has_many :products
+  has_many :products, dependent: :restrict_with_error
 
   before_validation :titleize_name, :upcase_code
 

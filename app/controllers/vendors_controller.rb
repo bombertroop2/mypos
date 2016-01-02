@@ -55,8 +55,13 @@ class VendorsController < ApplicationController
   # DELETE /vendors/1.json
   def destroy
     @vendor.destroy
+    message = if @vendor.errors.present? and @vendor.errors.messages[:base].present?
+      @vendor.errors.messages[:base].to_sentence
+    else
+      'Vendor was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to vendors_url, notice: 'Vendor was successfully destroyed.' }
+      format.html { redirect_to vendors_url, notice: message }
       format.json { head :no_content }
     end
   end

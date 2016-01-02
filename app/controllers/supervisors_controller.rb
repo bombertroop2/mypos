@@ -55,8 +55,13 @@ class SupervisorsController < ApplicationController
   # DELETE /supervisors/1.json
   def destroy
     @supervisor.destroy
+    message = if @supervisor.errors.present? and @supervisor.errors.messages[:base].present?
+      @supervisor.errors.messages[:base].to_sentence
+    else
+      'Supervisor was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to supervisors_url, notice: 'Supervisor was successfully destroyed.' }
+      format.html { redirect_to supervisors_url, notice: message }
       format.json { head :no_content }
     end
   end

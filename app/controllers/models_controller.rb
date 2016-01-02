@@ -55,8 +55,13 @@ class ModelsController < ApplicationController
   # DELETE /models/1.json
   def destroy
     @model.destroy
+    if @model.errors.present? and @model.errors.messages[:base].present?
+      message = @model.errors.messages[:base].to_sentence
+    else
+      message = 'Model was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to models_url, notice: 'Model was successfully destroyed.' }
+      format.html { redirect_to models_url, notice: message }
       format.json { head :no_content }
     end
   end

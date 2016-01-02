@@ -54,21 +54,27 @@ class SizeGroupsController < ApplicationController
   # DELETE /size_groups/1
   # DELETE /size_groups/1.json
   def destroy
-    @size_group.destroy
+    begin
+      @size_group.destroy
+      message = 'Size group was successfully destroyed.'
+    rescue Exception => exc
+      message = exc.message
+    end
+    
     respond_to do |format|
-      format.html { redirect_to size_groups_url, notice: 'Size group was successfully destroyed.' }
+      format.html { redirect_to size_groups_url, notice: message }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_size_group
-      @size_group = SizeGroup.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_size_group
+    @size_group = SizeGroup.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def size_group_params
-      params.require(:size_group).permit(:code, :description, sizes_attributes: [:id, :size, :_destroy])
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def size_group_params
+    params.require(:size_group).permit(:code, :description, sizes_attributes: [:id, :size, :_destroy])
+  end
 end

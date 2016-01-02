@@ -54,21 +54,26 @@ class BrandsController < ApplicationController
   # DELETE /brands/1
   # DELETE /brands/1.json
   def destroy
-    @brand.destroy
+    @brand.destroy    
+    if @brand.errors.present? and @brand.errors.messages[:base].present?
+      message = @brand.errors.messages[:base].to_sentence
+    else
+      message = 'Brand was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to brands_url, notice: 'Brand was successfully destroyed.' }
+      format.html { redirect_to brands_url, notice: message }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_brand
-      @brand = Brand.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_brand
+    @brand = Brand.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def brand_params
-      params[:brand].permit(:code, :name, :description)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def brand_params
+    params[:brand].permit(:code, :name, :description)
+  end
 end

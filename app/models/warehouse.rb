@@ -4,7 +4,7 @@ class Warehouse < ActiveRecord::Base
   belongs_to :price_code
 
   #  has_many :purchase_orders
-  has_many :sales_promotion_girls
+  has_many :sales_promotion_girls, dependent: :restrict_with_error
   #  has_many :purchase_order_products
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
