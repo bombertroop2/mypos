@@ -13,11 +13,11 @@
 
   <div class="field">
     <%= f.label :code %><br>
-    <%= f.text_field :code %>
+    <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
   </div>
   <div class="field">
     <%= f.label :description %><br>
-    <%= f.text_area :description, rows: 6 %>
+    <%= f.text_area :description, rows: 6, tabindex: "2" %>
   </div>
   <h3>Sizes</h3>
   <div id="sizes">

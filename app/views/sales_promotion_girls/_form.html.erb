@@ -1,41 +1,42 @@
 <%= form_for(@sales_promotion_girl) do |f| %>
   <% if @sales_promotion_girl.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@sales_promotion_girl.errors.count, "error") %> prohibited this sales_promotion_girl from being saved:</h2>
+        <h2><%= pluralize(@sales_promotion_girl.errors.count, "error") %> prohibited this sales_promotion_girl from being saved:</h2>
 
-      <ul>
-        <% @sales_promotion_girl.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+        <ul>
+            <% @sales_promotion_girl.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+        </ul>
     </div>
   <% end %>
 
   <div class="field">
-    <%= f.label :name %><br>
-    <%= f.text_field :name %>
-  </div>
-  <div class="field">
-    <%= f.label :address %><br>
-    <%= f.text_area :address, rows: 6 %>
-  </div>
-  <div class="field">
-    <%= f.label :phone %><br>
-    <%= f.telephone_field :phone %>
-  </div>
-  <div class="field">
-    <%= f.label :province %><br>
-    <%= f.text_field :province %>
-  </div>
-  <div class="field">
-    <%= f.label :warehouse_id %><br>
-    <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.all, :id, :code, @sales_promotion_girl.warehouse_id.to_s), prompt: true %>
-  </div>
-  <div class="field">
-    <%= f.label :mobile_phone %><br>
-    <%= f.telephone_field :mobile_phone %>
-  </div>
-  <div class="actions">
-    <%= f.submit %>
-  </div>
-<% end %>
+      <%= f.label :name %><br>
+      <%= f.text_field :name, class: "capitalize inputs", tabindex: "1" %>
+    </div>
+    <div class="field">
+        <%= f.label :address %><br>
+        <%= f.text_area :address, rows: 6, tabindex: "2" %>
+    </div>
+    <div class="field">
+        <%= f.label :phone %><br>
+        <%= f.telephone_field :phone, size: 10, class: "inputs", tabindex: "3" %>
+      </div>
+      <div class="field">
+          <%= f.label :mobile_phone %><br>
+          <%= f.telephone_field :mobile_phone, size: 12, class: "inputs", tabindex: "4" %>
+        </div>
+        <div class="field">
+            <%= f.label :province %><br>
+            <%= f.text_field :province, tabindex: "5" %>
+          </div>
+          <div class="field">
+              <%= f.label :warehouse_id %><br>
+              <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.all, :id, :code, @sales_promotion_girl.warehouse_id.to_s), prompt: true %>
+          </div>
+
+          <div class="actions">
+              <%= f.submit %>
+          </div>
+        <% end %>

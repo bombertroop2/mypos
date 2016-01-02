@@ -15,3 +15,23 @@
 //= require turbolinks
 //= require_tree .
 //= require cocoon
+//= require vendors
+
+
+$(function () {
+    $('.inputs').bind('keypress', function (event) {
+        if (event.which === 13) {
+            $('[tabindex=' + (+this.tabIndex + 1) + ']').focus();
+            return false;
+        }
+    });
+});
+
+$(document).on('page:load', function () {
+    $('.inputs').bind('keypress', function (event) {
+        if (event.which === 13) {
+            $('[tabindex=' + (+this.tabIndex + 1) + ']').focus();
+            return false;
+        }
+    });
+});

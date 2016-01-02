@@ -18,12 +18,12 @@
 
 <p>
   <strong>Phone:</strong>
-  <%= @vendor.phone %>
+  <%= remove_empty_space_from_phone_number(@vendor.phone) %>
 </p>
 
 <p>
   <strong>Facsimile:</strong>
-  <%= @vendor.facsimile %>
+  <%= remove_empty_space_from_phone_number(@vendor.facsimile) %>
 </p>
 
 <p>
@@ -38,12 +38,12 @@
 
 <p>
   <strong>Pic phone:</strong>
-  <%= @vendor.pic_phone %>
+  <%= remove_empty_space_from_phone_number(@vendor.pic_phone) %>
 </p>
 
 <p>
   <strong>Pic mobile phone:</strong>
-  <%= @vendor.pic_mobile_phone %>
+  <%= remove_empty_space_from_phone_number(@vendor.pic_mobile_phone) %>
 </p>
 
 <p>

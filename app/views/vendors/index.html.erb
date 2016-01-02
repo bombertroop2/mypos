@@ -19,8 +19,8 @@
       <tr>
         <td><%= vendor.code %></td>
         <td><%= vendor.name %></td>
-        <td><%= vendor.phone %></td>
-        <td><%= vendor.facsimile %></td>
+        <td><%= remove_empty_space_from_phone_number(vendor.phone) %></td>
+        <td><%= remove_empty_space_from_phone_number(vendor.facsimile) %></td>
         <td><%= vendor.email %></td>
         <td><%= link_to 'Show', vendor %></td>
         <td><%= link_to 'Edit', edit_vendor_path(vendor) %></td>

@@ -20,8 +20,8 @@
         <td><%= supervisor.code %></td>
         <td><%= supervisor.name %></td>
         <td><%= supervisor.email %></td>
-        <td><%= supervisor.phone %></td>
-        <td><%= supervisor.mobile_phone %></td>
+        <td><%= remove_empty_space_from_phone_number(supervisor.phone) %></td>
+        <td><%= remove_empty_space_from_phone_number(supervisor.mobile_phone) %></td>
         <td><%= link_to 'Show', supervisor %></td>
         <td><%= link_to 'Edit', edit_supervisor_path(supervisor) %></td>
         <td><%= link_to 'Destroy', supervisor, method: :delete, data: { confirm: 'Are you sure?' } %></td>

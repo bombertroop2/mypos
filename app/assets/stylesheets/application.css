@@ -13,3 +13,11 @@
  *= require_tree .
  *= require_self
  */
+
+.upcase {
+    text-transform: uppercase;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}

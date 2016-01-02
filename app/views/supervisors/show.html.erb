@@ -22,12 +22,12 @@
 
 <p>
   <strong>Phone:</strong>
-  <%= @supervisor.phone %>
+  <%= remove_empty_space_from_phone_number(@supervisor.phone) %>
 </p>
 
 <p>
   <strong>Mobile phone:</strong>
-  <%= @supervisor.mobile_phone %>
+  <%= remove_empty_space_from_phone_number(@supervisor.mobile_phone) %>
 </p>
 
 <%= link_to 'Edit', edit_supervisor_path(@supervisor) %> |

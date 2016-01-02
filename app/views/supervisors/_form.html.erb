@@ -1,41 +1,41 @@
 <%= form_for(@supervisor) do |f| %>
   <% if @supervisor.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@supervisor.errors.count, "error") %> prohibited this supervisor from being saved:</h2>
+        <h2><%= pluralize(@supervisor.errors.count, "error") %> prohibited this supervisor from being saved:</h2>
 
-      <ul>
-        <% @supervisor.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+        <ul>
+            <% @supervisor.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+        </ul>
     </div>
   <% end %>
 
   <div class="field">
-    <%= f.label :code %><br>
-    <%= f.text_field :code %>
-  </div>
-  <div class="field">
-    <%= f.label :name %><br>
-    <%= f.text_field :name %>
-  </div>
-  <div class="field">
-    <%= f.label :address %><br>
-    <%= f.text_area :address, rows: 6 %>
-  </div>
-  <div class="field">
-    <%= f.label :email %><br>
-    <%= f.email_field :email %>
-  </div>
-  <div class="field">
-    <%= f.label :phone %><br>
-    <%= f.telephone_field :phone %>
-  </div>
-  <div class="field">
-    <%= f.label :mobile_phone %><br>
-    <%= f.telephone_field :mobile_phone %>
-  </div>
-  <div class="actions">
-    <%= f.submit %>
-  </div>
-<% end %>
+      <%= f.label :code %><br>
+      <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
+    </div>
+    <div class="field">
+        <%= f.label :name %><br>
+        <%= f.text_field :name, class: "capitalize inputs", tabindex: "2" %>
+      </div>
+      <div class="field">
+          <%= f.label :address %><br>
+          <%= f.text_area :address, rows: 6, tabindex: "3" %>
+      </div>
+      <div class="field">
+          <%= f.label :email %><br>
+          <%= f.email_field :email, class: "inputs", tabindex: "4" %>
+      </div>
+      <div class="field">
+          <%= f.label :phone %><br>
+          <%= f.telephone_field :phone, class: "inputs", tabindex: "5", size: 10 %>
+      </div>
+      <div class="field">
+          <%= f.label :mobile_phone %><br>
+          <%= f.telephone_field :mobile_phone, tabindex: "6", size: 12 %>
+      </div>
+      <div class="actions">
+          <%= f.submit %>
+      </div>
+    <% end %>

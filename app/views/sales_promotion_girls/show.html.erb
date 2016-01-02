@@ -17,7 +17,7 @@
 
 <p>
   <strong>Phone:</strong>
-  <%= @sales_promotion_girl.phone %>
+  <%= remove_empty_space_from_phone_number(@sales_promotion_girl.phone) %>
 </p>
 
 <p>
@@ -32,7 +32,7 @@
 
 <p>
   <strong>Mobile phone:</strong>
-  <%= @sales_promotion_girl.mobile_phone %>
+  <%= remove_empty_space_from_phone_number(@sales_promotion_girl.mobile_phone) %>
 </p>
 
 <%= link_to 'Edit', edit_sales_promotion_girl_path(@sales_promotion_girl) %> |
