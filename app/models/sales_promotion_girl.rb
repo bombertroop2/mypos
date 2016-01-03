@@ -4,8 +4,13 @@ class SalesPromotionGirl < ActiveRecord::Base
   before_save :titleize_name
   before_create :create_identifier
 
-  validates :address, :name, :province, :warehouse_id, presence: true
+  validates :address, :name, :province, :warehouse_id, :gender, presence: true
   validates :identifier, uniqueness: true
+  
+  GENDERS = [
+    ["Male", "male"],
+    ["Female", "female"],
+  ]
 
   private
 

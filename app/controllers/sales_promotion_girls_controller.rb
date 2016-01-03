@@ -69,6 +69,6 @@ class SalesPromotionGirlsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def sales_promotion_girl_params
-      params.require(:sales_promotion_girl).permit(:identifier, :name, :address, :phone, :province, :warehouse_id, :mobile_phone)
+      params.require(:sales_promotion_girl).permit(:gender, :identifier, :name, :address, :phone, :province, :warehouse_id, :mobile_phone)
     end
 end
