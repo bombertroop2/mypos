@@ -21,7 +21,7 @@ class Product < ActiveRecord::Base
   validates :code, presence: true, uniqueness: true
   validates :effective_date, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   #  validate :require_at_least_one_detail
-  validates :effective_date, date: {after: Proc.new { Date.today }, message: 'must be after today' }, if: :is_validable
+  validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: :is_validable
   
     SEX = [
       ["Man", "man"],
