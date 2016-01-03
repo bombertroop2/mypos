@@ -1,58 +1,62 @@
 <%= form_for(@vendor) do |f| %>
   <% if @vendor.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:</h2>
+        <h2><%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:</h2>
 
-      <ul>
-        <% @vendor.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+        <ul>
+            <% @vendor.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+        </ul>
     </div>
   <% end %>
 
   <div class="field">
-    <%= f.label :code %><br>
-    <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
-  </div>
-  <div class="field">
-    <%= f.label :name %><br>
-    <%= f.text_field :name, class: "capitalize inputs", tabindex: "2" %>
-  </div>
-  <div class="field">
-    <%= f.label :address %><br>
-    <%= f.text_area :address, rows: 6, tabindex: "3" %>
-  </div>
-  <div class="field">
-    <%= f.label :phone %><br>
-    <%= f.telephone_field :phone, class: "inputs", tabindex: "4", size: 10 %>
-  </div>
-  <div class="field">
-    <%= f.label :facsimile %><br>
-    <%= f.telephone_field :facsimile, class: "inputs", tabindex: "5", size: 10 %>
-  </div>
-  <div class="field">
-    <%= f.label :email %><br>
-    <%= f.email_field :email, class: "inputs", tabindex: "6" %>
-  </div>
-  <div class="field">
-    <%= f.label :pic_name %><br>
-    <%= f.text_field :pic_name, class: "capitalize inputs", tabindex: "7" %>
-  </div>
-  <div class="field">
-    <%= f.label :pic_phone %><br>
-    <%= f.telephone_field :pic_phone, class: "inputs", tabindex: "8", size: 10 %>
-  </div>
-  <div class="field">
-    <%= f.label :pic_mobile_phone %><br>
-    <%= f.telephone_field :pic_mobile_phone, class: "inputs", tabindex: "9", size: 12 %>
-  </div>
-  <div class="field">
-    <%= f.label :pic_email %><br>
-    <%= f.email_field :pic_email, tabindex: "10" %>
-  </div>
+      <%= f.label :code %><br>
+      <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
+    </div>
+    <div class="field">
+        <%= f.label :name %><br>
+        <%= f.text_field :name, class: "capitalize inputs", tabindex: "2" %>
+      </div>
+      <div class="field">
+          <%= f.label :address %><br>
+          <%= f.text_area :address, rows: 6, tabindex: "3" %>
+      </div>
+      <div class="field">
+          <%= f.label :phone %><br>
+          <%= f.telephone_field :phone, class: "inputs", tabindex: "4", size: 10 %>
+        </div>
+        <div class="field">
+            <%= f.label :facsimile %><br>
+            <%= f.telephone_field :facsimile, class: "inputs", tabindex: "5", size: 10 %>
+          </div>
+          <div class="field">
+              <%= f.label :email %><br>
+              <%= f.email_field :email, class: "inputs", tabindex: "6" %>
+            </div>
+            <div class="field">
+                <%= f.label :pic_name %><br>
+                <%= f.text_field :pic_name, class: "capitalize inputs", tabindex: "7" %>
+              </div>
+              <div class="field">
+                  <%= f.label :pic_phone %><br>
+                  <%= f.telephone_field :pic_phone, class: "inputs", tabindex: "8", size: 10 %>
+                </div>
+                <div class="field">
+                    <%= f.label :pic_mobile_phone %><br>
+                    <%= f.telephone_field :pic_mobile_phone, class: "inputs", tabindex: "9", size: 12 %>
+                  </div>
+                  <div class="field">
+                      <%= f.label :pic_email %><br>
+                      <%= f.email_field :pic_email, class: "inputs", tabindex: "10" %>
+                    </div>
+                    <div class="field">
+                        <%= f.label :terms_of_payment %><br />
+                        <%= f.number_field :terms_of_payment, tabindex: "11" %>
+                    </div>
 
-  <div class="actions">
-    <%= f.submit %>
-  </div>
-<% end %>
+                    <div class="actions">
+                        <%= f.submit "Submit", tabindex: "12" %>
+                    </div>
+                  <% end %>
