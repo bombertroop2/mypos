@@ -1,52 +1,62 @@
 <p>
-  <strong>Code:</strong>
-  <%= @vendor.code %>
+    <strong>Code:</strong>
+    <%= @vendor.code %>
 </p>
 
 <p>
-  <strong>Name:</strong>
-  <%= @vendor.name %>
+    <strong>Name:</strong>
+    <%= @vendor.name %>
 </p>
 
 <p>
-  <strong>Address:</strong>
-  <%= @vendor.address %>
+    <strong>Address:</strong>
+    <%= @vendor.address %>
 </p>
 
 
 <p>
-  <strong>Phone:</strong>
-  <%= remove_empty_space_from_phone_number(@vendor.phone) %>
+    <strong>Phone:</strong>
+    <%= remove_empty_space_from_phone_number(@vendor.phone) %>
 </p>
 
 <p>
-  <strong>Facsimile:</strong>
-  <%= remove_empty_space_from_phone_number(@vendor.facsimile) %>
+    <strong>Facsimile:</strong>
+    <%= remove_empty_space_from_phone_number(@vendor.facsimile) %>
 </p>
 
 <p>
-  <strong>Email:</strong>
-  <%= @vendor.email %>
+    <strong>Email:</strong>
+    <%= @vendor.email %>
 </p>
 
 <p>
-  <strong>Pic name:</strong>
-  <%= @vendor.pic_name %>
+    <strong>Pic name:</strong>
+    <%= @vendor.pic_name %>
 </p>
 
 <p>
-  <strong>Pic phone:</strong>
-  <%= remove_empty_space_from_phone_number(@vendor.pic_phone) %>
+    <strong>Pic phone:</strong>
+    <%= remove_empty_space_from_phone_number(@vendor.pic_phone) %>
 </p>
 
 <p>
-  <strong>Pic mobile phone:</strong>
-  <%= remove_empty_space_from_phone_number(@vendor.pic_mobile_phone) %>
+    <strong>Pic mobile phone:</strong>
+    <%= remove_empty_space_from_phone_number(@vendor.pic_mobile_phone) %>
 </p>
 
 <p>
-  <strong>Pic email:</strong>
-  <%= @vendor.pic_email %>
+    <strong>Pic email:</strong>
+    <%= @vendor.pic_email %>
+</p>
+
+<p>
+    <strong>Terms of payment:</strong>
+    <%= @vendor.terms_of_payment %> days
+</p>
+
+<p>
+    <strong>Value added tax:</strong>
+    <%= @vendor.value_added_tax.capitalize %>
 </p>
 
 

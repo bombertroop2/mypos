@@ -53,10 +53,14 @@
                     </div>
                     <div class="field">
                         <%= f.label :terms_of_payment %><br />
-                        <%= f.number_field :terms_of_payment, tabindex: "11" %>
-                    </div>
+                        <%= f.number_field :terms_of_payment, class: "inputs", tabindex: "11" %>
+                      </div>
+                      <div class="field">
+                          <%= f.label :value_added_tax %><br />
+                          <%= f.select :value_added_tax, options_for_select(Vendor::VAT, @vendor.value_added_tax), {prompt: true}, {tabindex: "12", class: "inputs"} %>
+                        </div>
 
-                    <div class="actions">
-                        <%= f.submit "Submit", tabindex: "12" %>
-                    </div>
-                  <% end %>
+                        <div class="actions">
+                            <%= f.submit "Submit", tabindex: "13" %>
+                        </div>
+                      <% end %>
