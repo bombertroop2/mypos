@@ -25,6 +25,7 @@ $(function () {
             return false;
         }
     });
+    $('#product_cost').autoNumeric('init');  //autoNumeric with defaults    
 });
 
 $(document).on('page:load', function () {
@@ -34,4 +35,5 @@ $(document).on('page:load', function () {
             return false;
         }
     });
+    $('#product_cost').autoNumeric('init');  //autoNumeric with defaults
 });

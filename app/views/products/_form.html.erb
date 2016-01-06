@@ -61,8 +61,13 @@
         <%= f.date_field :effective_date, tabindex: "11" %>
     </div>
     <div class="field">
+        <%= f.label :cost %><br>
+        <%= f.text_field :cost, tabindex: "12", placeholder: "price", "data-a-sep" => ".",
+          "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16 %>
+    </div>
+    <div class="field">
         Size group
-        <%= select_tag "size_groups", options_from_collection_for_select(SizeGroup.order(:code), 'id', 'code', selected_size_group), {prompt: "Please select", tabindex: "12"} %>
+        <%= select_tag "size_groups", options_from_collection_for_select(SizeGroup.order(:code), 'id', 'code', selected_size_group), {prompt: "Please select", tabindex: "13"} %>
     </div>
     <div id="size_collection_container">
         <% unless @sizes.blank? %>
@@ -70,6 +75,6 @@
         <% end %>
     </div>
     <div class="actions">
-        <%= f.submit "Submit", tabindex: "13" %>
+        <%= f.submit "Submit", tabindex: "14" %>
     </div>
   <% end %>

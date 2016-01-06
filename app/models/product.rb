@@ -19,44 +19,46 @@ class Product < ActiveRecord::Base
       attributes[:price].blank? and attributes[:id].blank? }
   
   validates :code, presence: true, uniqueness: true
-  validates :effective_date, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
+  validates :cost, :effective_date, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   #  validate :require_at_least_one_detail
   validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: :is_validable
+    validates :cost, numericality: true, if: proc { |product| product.cost.present? }
+      validates :cost, numericality: {greater_than: 0}, if: proc { |product| product.cost.is_a?(Numeric) }
   
-    SEX = [
-      ["Man", "man"],
-      ["Ladies", "ladies"],
-      ["Kids", "kids"],
-      ["Unisex", "unisex"]
-    ]
+        SEX = [
+          ["Man", "man"],
+          ["Ladies", "ladies"],
+          ["Kids", "kids"],
+          ["Unisex", "unisex"]
+        ]
 
-    TARGETS = [
-      ["Normal", "normal"],
-      ["Special Price", "special price"],
-      ["Sale", "sale"]
-    ]
+        TARGETS = [
+          ["Normal", "normal"],
+          ["Special Price", "special price"],
+          ["Sale", "sale"]
+        ]
     
-    before_validation :upcase_code
+        before_validation :upcase_code
   
-    private
+        private
 
-    def is_validable
-      return false unless effective_date.present?
-      return true if new_record?
-      unless effective_date.eql?(effective_date_was)
-        return false if Date.today >= effective_date_was
-        return true if Date.today < effective_date_was
-      end
-      return false
-    end
+        def is_validable
+          return false unless effective_date.present?
+          return true if new_record?
+          unless effective_date.eql?(effective_date_was)
+            return false if Date.today >= effective_date_was
+            return true if Date.today < effective_date_was
+          end
+          return false
+        end
     
-    def upcase_code
-      self.code = code.upcase
-    end
+        def upcase_code
+          self.code = code.upcase
+        end
     
-    def require_at_least_one_detail
-      if product_details.map(&:cost).reject(&:blank?).sum == 0 or product_details.map(&:price).reject(&:blank?).sum == 0
-        errors.add(:base, "A product must have at least one detail.")
+        def require_at_least_one_detail
+          if product_details.map(&:cost).reject(&:blank?).sum == 0 or product_details.map(&:price).reject(&:blank?).sum == 0
+            errors.add(:base, "A product must have at least one detail.")
+          end
+        end
       end
-    end
-  end
