@@ -3,12 +3,12 @@
     <% @price_codes.each do |price_code| %>
       <tr style="text-align: center">
           <th colspan="2" rowspan="2"></th>
-          <th colspan="<%= @colors.size %>">Colors<br /><%= text_field_tag "price["+price_code.id.to_s+"]", "", {placeholder: "price", class: "money", "data-a-sep" => ".",
+          <th colspan="<%= @colors.size %>">Colors<br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "money", "data-a-sep" => ".",
                   "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16} %></th>
         </tr>
         <tr style="text-align: center">
             <% @colors.each do |color| %>
-              <td><%= color.code %><br /><%= text_field_tag "price["+price_code.id.to_s+"]["+color.id.to_s+"]", "", {placeholder: "price", class: "money price-"+price_code.id.to_s, "data-a-sep" => ".",
+              <td><%= color.code %><br /><%= text_field_tag "price_"+price_code.code+"_"+color.code, "", {placeholder: "price", class: "money price-"+price_code.code, "data-a-sep" => ".",
                       "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16} %></td>
               <% end %>
           </tr>
@@ -35,7 +35,7 @@
                         <%= product_detail_form.hidden_field :color_id %>
                         <%= product_detail_form.hidden_field :price_code_id %>
                         <div class="field">
-                            <%= product_detail_form.text_field :price, placeholder: "price", class: "money price-"+price_code.id.to_s+"-"+color.id.to_s+" price-"+price_code.id.to_s, "data-a-sep" => ".",
+                            <%= product_detail_form.text_field :price, placeholder: "price", class: "money price-"+price_code.code+"-"+color.code+" price-"+price_code.code, "data-a-sep" => ".",
                                 "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16 %>
                           </div>  
                         <% end %>
@@ -46,16 +46,22 @@
             <% end %>
             <script>
         <% @colors.each do |color| %>
-                $('#price_<%= price_code.id.to_s %>_<%= color.id.to_s %>').keyup(function () {
-                    $('.price-<%= price_code.id.to_s %>-<%= color.id.to_s %>').val($('#price_<%= price_code.id.to_s %>_<%= color.id.to_s %>').val());
+                $('#price_<%= price_code.code %>_<%= color.code %>').keyup(function () {
+                    $('.price-<%= price_code.code %>-<%= color.code %>').val($('#price_<%= price_code.code %>_<%= color.code %>').val());
                 });
         <% end %>
 
-              $('#price_<%= price_code.id.to_s %>').keyup(function () {
-                  $('.price-<%= price_code.id.to_s %>').val($('#<%= "price_"+price_code.id.to_s %>').val());
+              $('#price_<%= price_code.code %>').keyup(function () {
+                  $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
               });
             </script>
           <% end %>
+
+          <script>
+            $(function () {
+                $('.money').autoNumeric('init');  //autoNumeric with defaults
+            });
+          </script>
 
 
       </table>

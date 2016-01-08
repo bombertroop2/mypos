@@ -62,12 +62,12 @@
     </div>
     <div class="field">
         <%= f.label :cost %><br>
-        <%= f.text_field :cost, tabindex: "12", placeholder: "price", "data-a-sep" => ".",
+        <%= f.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
           "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16 %>
     </div>
     <div class="field">
         Size group
-        <%= select_tag "size_groups", options_from_collection_for_select(SizeGroup.order(:code), 'id', 'code', selected_size_group), {prompt: "Please select", tabindex: "13"} %>
+        <%= f.select :size_group, options_from_collection_for_select(SizeGroup.order(:code), :id, :code, (@size_group.id if @size_group)), {prompt: true}, {tabindex: "13"} %>
     </div>
     <div id="size_collection_container">
         <% unless @sizes.blank? %>

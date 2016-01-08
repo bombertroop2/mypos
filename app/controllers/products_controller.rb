@@ -1,5 +1,6 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
+  before_filter :convert_cost_price_to_numeric, only: [:create, :update]
 
   # GET /products
   # GET /products.json
@@ -19,8 +20,8 @@ class ProductsController < ApplicationController
 
   # GET /products/1/edit
   def edit
-    sg = @product.sizes.first.size_group rescue nil
-    @sizes = sg ? sg.sizes.order(:size) : []
+    @size_group = @product.sizes.first.size_group rescue nil
+    @sizes = @size_group ? @size_group.sizes.order(:size) : []
     @price_codes = PriceCode.order :code
     @colors = Color.order :code
   end
@@ -35,8 +36,8 @@ class ProductsController < ApplicationController
         format.html { redirect_to @product, notice: 'Product was successfully created.' }
         format.json { render :show, status: :created, location: @product }
       else
-        sg = SizeGroup.find(params[:size_groups]) rescue nil
-        @sizes = sg ? sg.sizes.order(:size) : []
+        @size_group = SizeGroup.find(@product.size_group) rescue nil
+        @sizes = @size_group ? @size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
         @colors = Color.order :code
         format.html { render :new }
@@ -53,8 +54,8 @@ class ProductsController < ApplicationController
         format.html { redirect_to @product, notice: 'Product was successfully updated.' }
         format.json { render :show, status: :ok, location: @product }
       else
-        sg = SizeGroup.find(params[:size_groups]) rescue nil
-        @sizes = sg ? sg.sizes.order(:size) : []
+        @size_group = SizeGroup.find(@product.size_group) rescue nil
+        @sizes = @size_group ? @size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
         @colors = Color.order :code
         format.html { render :edit }
@@ -79,13 +80,6 @@ class ProductsController < ApplicationController
     @sizes = sg.sizes.order(:size) if sg
     @price_codes = PriceCode.order :code
     @colors = Color.order :code
-    #    @price_codes.each do |price_code|
-    #      @sizes.each do |size|
-    #        @colors.each do |color|
-    #          @product.product_details.build(price_code_id: price_code.id, size_id: size.id, color_id: color.id)  
-    #        end
-    #      end
-    #    end
     respond_to { |format| format.js }
   end
 
@@ -98,7 +92,14 @@ class ProductsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id, :target, :model_id,
-      :goods_type_id, :image, :effective_date, :image_cache, :remove_image, :cost,
+      :goods_type_id, :image, :effective_date, :image_cache, :remove_image, :cost, :size_group,
       product_details_attributes: [:id, :size_id, :color_id, :price_code_id, :price])
+  end
+  
+  def convert_cost_price_to_numeric
+    params[:product][:cost] = params[:product][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+    params[:product][:product_details_attributes].each do |key, value|
+      params[:product][:product_details_attributes][key][:price] = params[:product][:product_details_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+    end if params[:product][:product_details_attributes].present?
   end
 end

@@ -6,7 +6,7 @@
 
 
 $(function () {
-    $("#size_groups").change(function () {
+    $("#product_size_group").change(function () {
         $.get("/products/populate_detail_form", {
             id: $(this).val()
         });
@@ -15,7 +15,7 @@ $(function () {
 
 // ini untuk turbolink gem
 $(document).on('page:load', function() {
-    $("#size_groups").change(function () {
+    $("#product_size_group").change(function () {
         $.get("/products/populate_detail_form", {
             id: $(this).val()
         });
