@@ -1,1 +1,9 @@
-<h1>Hello, Admin!</h1>
+<% if user_signed_in? %>
+  <% if current_user.has_role? :admin %>
+    <h1>Hello, Admin!</h1>
+  <% else %>
+    <h1>Hello, <%= current_user.sales_promotion_girl.name %>!</h1>
+  <% end %>
+<% else %>
+  <h1>Hello, Guest!</h1>
+<% end %>

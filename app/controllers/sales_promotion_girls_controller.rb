@@ -15,6 +15,7 @@ class SalesPromotionGirlsController < ApplicationController
   # GET /sales_promotion_girls/new
   def new
     @sales_promotion_girl = SalesPromotionGirl.new
+    @sales_promotion_girl.build_user
   end
 
   # GET /sales_promotion_girls/1/edit
@@ -31,6 +32,7 @@ class SalesPromotionGirlsController < ApplicationController
         format.html { redirect_to @sales_promotion_girl, notice: 'Sales promotion girl was successfully created.' }
         format.json { render :show, status: :created, location: @sales_promotion_girl }
       else
+        @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
         format.html { render :new }
         format.json { render json: @sales_promotion_girl.errors, status: :unprocessable_entity }
       end
@@ -62,13 +64,14 @@ class SalesPromotionGirlsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_sales_promotion_girl
-      @sales_promotion_girl = SalesPromotionGirl.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_sales_promotion_girl
+    @sales_promotion_girl = SalesPromotionGirl.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def sales_promotion_girl_params
-      params.require(:sales_promotion_girl).permit(:gender, :identifier, :name, :address, :phone, :province, :warehouse_id, :mobile_phone)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def sales_promotion_girl_params
+    params.require(:sales_promotion_girl).permit(:gender, :identifier, :name, :address, :phone, :role,
+      :province, :warehouse_id, :mobile_phone, user_attributes: [:email, :password, :spg_role])
+  end
 end

@@ -32,6 +32,12 @@
         <%= link_to "Supervisors", supervisors_path %>
         |
         <%= link_to "Warehouses", warehouses_path %>
+        |
+        <% if user_signed_in? %>
+          <%= link_to('Logout', destroy_user_session_path, :method => :delete) %>        
+        <% else %>
+          <%= link_to('Login', new_user_session_path)  %>  
+        <% end %>
 <%#*|%>
 <%#= link_to "Purchase Orders", purchase_orders_path %>
 <%#*|%>

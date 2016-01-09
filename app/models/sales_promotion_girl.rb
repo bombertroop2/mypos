@@ -1,15 +1,24 @@
 class SalesPromotionGirl < ActiveRecord::Base
   belongs_to :warehouse
+  has_one :user, dependent: :destroy
 
   before_save :titleize_name
   before_create :create_identifier
 
-  validates :address, :name, :province, :warehouse_id, :gender, presence: true
+  validates :address, :name, :province, :warehouse_id, :gender, :role, presence: true
   validates :identifier, uniqueness: true
+  
+  accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
   
   GENDERS = [
     ["Male", "male"],
     ["Female", "female"],
+  ]
+  
+  ROLES = [
+    ["SPG", "spg"],
+    ["Cashier", "cashier"],
+    ["Supervisor", "supervisor"],
   ]
 
   private

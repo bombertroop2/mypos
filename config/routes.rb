@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users, only: :sessions
   get 'welcome/index'
 
   resources :purchase_orders
