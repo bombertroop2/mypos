@@ -12,6 +12,9 @@ class User < ActiveRecord::Base
   after_save :add_user_role
   
   def add_user_role
+    roles.each do |role|
+      remove_role role.name.to_sym
+    end if spg_role.present?
     add_role spg_role.to_sym if spg_role.present?
   end
 end

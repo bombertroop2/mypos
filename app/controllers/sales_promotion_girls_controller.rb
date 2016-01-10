@@ -1,5 +1,6 @@
 class SalesPromotionGirlsController < ApplicationController
   before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
+  skip_before_action :is_user_can_cud?, if: :user_is_supervisor
 
   # GET /sales_promotion_girls
   # GET /sales_promotion_girls.json
@@ -20,6 +21,7 @@ class SalesPromotionGirlsController < ApplicationController
 
   # GET /sales_promotion_girls/1/edit
   def edit
+    @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
   end
 
   # POST /sales_promotion_girls
@@ -47,6 +49,7 @@ class SalesPromotionGirlsController < ApplicationController
         format.html { redirect_to @sales_promotion_girl, notice: 'Sales promotion girl was successfully updated.' }
         format.json { render :show, status: :ok, location: @sales_promotion_girl }
       else
+        @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
         format.html { render :edit }
         format.json { render json: @sales_promotion_girl.errors, status: :unprocessable_entity }
       end
@@ -73,5 +76,9 @@ class SalesPromotionGirlsController < ApplicationController
   def sales_promotion_girl_params
     params.require(:sales_promotion_girl).permit(:gender, :identifier, :name, :address, :phone, :role,
       :province, :warehouse_id, :mobile_phone, user_attributes: [:email, :password, :spg_role])
+  end
+  
+  def user_is_supervisor
+    current_user.has_role? :supervisor
   end
 end
