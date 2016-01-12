@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
   rolify
+  
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -17,7 +18,9 @@ class User < ActiveRecord::Base
         remove_role role.name.to_sym
       end
     
-      add_role spg_role.to_sym if roles.blank?
+      if roles.blank?
+        add_role spg_role.to_sym, sales_promotion_girl
+      end
     end
   end
 end

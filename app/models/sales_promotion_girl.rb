@@ -1,4 +1,6 @@
 class SalesPromotionGirl < ActiveRecord::Base
+  resourcify
+  
   belongs_to :warehouse
   has_one :user, dependent: :destroy
 
