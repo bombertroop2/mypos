@@ -27,12 +27,17 @@ class ModelsController < ApplicationController
     @model = Model.new(model_params)
 
     respond_to do |format|
-      if @model.save
-        format.html { redirect_to @model, notice: 'Model was successfully created.' }
-        format.json { render :show, status: :created, location: @model }
-      else
+      begin
+        if @model.save
+          format.html { redirect_to @model, notice: 'Model was successfully created.' }
+          format.json { render :show, status: :created, location: @model }
+        else
+          format.html { render :new }
+          format.json { render json: @model.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @model.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @model.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class ModelsController < ApplicationController
   # PATCH/PUT /models/1.json
   def update
     respond_to do |format|
-      if @model.update(model_params)
-        format.html { redirect_to @model, notice: 'Model was successfully updated.' }
-        format.json { render :show, status: :ok, location: @model }
-      else
+      begin
+        if @model.update(model_params)
+          format.html { redirect_to @model, notice: 'Model was successfully updated.' }
+          format.json { render :show, status: :ok, location: @model }
+        else
+          format.html { render :edit }
+          format.json { render json: @model.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @model.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @model.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -67,13 +77,13 @@ class ModelsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_model
-      @model = Model.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_model
+    @model = Model.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def model_params
-      params[:model].permit(:code, :name, :description)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def model_params
+    params[:model].permit(:code, :name, :description)
+  end
 end

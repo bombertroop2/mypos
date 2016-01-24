@@ -27,12 +27,17 @@ class ColorsController < ApplicationController
     @color = Color.new(color_params)
 
     respond_to do |format|
-      if @color.save
-        format.html { redirect_to @color, notice: 'Color was successfully created.' }
-        format.json { render :show, status: :created, location: @color }
-      else
+      begin
+        if @color.save
+          format.html { redirect_to @color, notice: 'Color was successfully created.' }
+          format.json { render :show, status: :created, location: @color }
+        else
+          format.html { render :new }
+          format.json { render json: @color.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @color.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @color.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class ColorsController < ApplicationController
   # PATCH/PUT /colors/1.json
   def update
     respond_to do |format|
-      if @color.update(color_params)
-        format.html { redirect_to @color, notice: 'Color was successfully updated.' }
-        format.json { render :show, status: :ok, location: @color }
-      else
+      begin
+        if @color.update(color_params)
+          format.html { redirect_to @color, notice: 'Color was successfully updated.' }
+          format.json { render :show, status: :ok, location: @color }
+        else
+          format.html { render :edit }
+          format.json { render json: @color.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @color.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @color.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -67,13 +77,13 @@ class ColorsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_color
-      @color = Color.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_color
+    @color = Color.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def color_params
-      params[:color].permit(:code, :name, :description)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def color_params
+    params[:color].permit(:code, :name, :description)
+  end
 end

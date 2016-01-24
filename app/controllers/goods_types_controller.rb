@@ -27,12 +27,17 @@ class GoodsTypesController < ApplicationController
     @goods_type = GoodsType.new(goods_type_params)
 
     respond_to do |format|
-      if @goods_type.save
-        format.html { redirect_to @goods_type, notice: 'Goods type was successfully created.' }
-        format.json { render :show, status: :created, location: @goods_type }
-      else
+      begin
+        if @goods_type.save
+          format.html { redirect_to @goods_type, notice: 'Goods type was successfully created.' }
+          format.json { render :show, status: :created, location: @goods_type }
+        else
+          format.html { render :new }
+          format.json { render json: @goods_type.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @goods_type.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @goods_type.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class GoodsTypesController < ApplicationController
   # PATCH/PUT /goods_types/1.json
   def update
     respond_to do |format|
-      if @goods_type.update(goods_type_params)
-        format.html { redirect_to @goods_type, notice: 'Goods type was successfully updated.' }
-        format.json { render :show, status: :ok, location: @goods_type }
-      else
+      begin
+        if @goods_type.update(goods_type_params)
+          format.html { redirect_to @goods_type, notice: 'Goods type was successfully updated.' }
+          format.json { render :show, status: :ok, location: @goods_type }
+        else
+          format.html { render :edit }
+          format.json { render json: @goods_type.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @goods_type.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @goods_type.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -67,13 +77,13 @@ class GoodsTypesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_goods_type
-      @goods_type = GoodsType.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_goods_type
+    @goods_type = GoodsType.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def goods_type_params
-      params[:goods_type].permit(:code, :name, :description)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def goods_type_params
+    params[:goods_type].permit(:code, :name, :description)
+  end
 end

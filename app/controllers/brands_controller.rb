@@ -27,12 +27,17 @@ class BrandsController < ApplicationController
     @brand = Brand.new(brand_params)
 
     respond_to do |format|
-      if @brand.save
-        format.html { redirect_to @brand, notice: 'Brand was successfully created.' }
-        format.json { render :show, status: :created, location: @brand }
-      else
+      begin
+        if @brand.save
+          format.html { redirect_to @brand, notice: 'Brand was successfully created.' }
+          format.json { render :show, status: :created, location: @brand }
+        else
+          format.html { render :new }
+          format.json { render json: @brand.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @brand.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @brand.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class BrandsController < ApplicationController
   # PATCH/PUT /brands/1.json
   def update
     respond_to do |format|
-      if @brand.update(brand_params)
-        format.html { redirect_to @brand, notice: 'Brand was successfully updated.' }
-        format.json { render :show, status: :ok, location: @brand }
-      else
+      begin
+        if @brand.update(brand_params)
+          format.html { redirect_to @brand, notice: 'Brand was successfully updated.' }
+          format.json { render :show, status: :ok, location: @brand }
+        else
+          format.html { render :edit }
+          format.json { render json: @brand.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @brand.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @brand.errors, status: :unprocessable_entity }
       end
     end
   end

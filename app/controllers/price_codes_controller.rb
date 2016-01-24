@@ -27,12 +27,17 @@ class PriceCodesController < ApplicationController
     @price_code = PriceCode.new(price_code_params)
 
     respond_to do |format|
-      if @price_code.save
-        format.html { redirect_to @price_code, notice: 'Price code was successfully created.' }
-        format.json { render :show, status: :created, location: @price_code }
-      else
+      begin
+        if @price_code.save
+          format.html { redirect_to @price_code, notice: 'Price code was successfully created.' }
+          format.json { render :show, status: :created, location: @price_code }
+        else
+          format.html { render :new }
+          format.json { render json: @price_code.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @price_code.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @price_code.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class PriceCodesController < ApplicationController
   # PATCH/PUT /price_codes/1.json
   def update
     respond_to do |format|
-      if @price_code.update(price_code_params)
-        format.html { redirect_to @price_code, notice: 'Price code was successfully updated.' }
-        format.json { render :show, status: :ok, location: @price_code }
-      else
+      begin
+        if @price_code.update(price_code_params)
+          format.html { redirect_to @price_code, notice: 'Price code was successfully updated.' }
+          format.json { render :show, status: :ok, location: @price_code }
+        else
+          format.html { render :edit }
+          format.json { render json: @price_code.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @price_code.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @price_code.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -67,13 +77,13 @@ class PriceCodesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_price_code
-      @price_code = PriceCode.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_price_code
+    @price_code = PriceCode.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def price_code_params
-      params.require(:price_code).permit(:code, :name, :description)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def price_code_params
+    params.require(:price_code).permit(:code, :name, :description)
+  end
 end
