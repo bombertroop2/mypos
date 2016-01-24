@@ -12,6 +12,15 @@ class User < ActiveRecord::Base
   
   after_save :add_user_role
   
+  # supaya user bisa update datanya tanpa harus memasukkan password
+  def password_required?
+    if new_record?
+      super
+    else
+      false
+    end
+  end
+  
   def add_user_role
     if spg_role.present?
       roles.each do |role|

@@ -1,5 +1,6 @@
 class SalesPromotionGirlsController < ApplicationController
   before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
+  before_action :retain_cashier_role, only: :update
   skip_before_action :is_user_can_cud?
 
   # GET /sales_promotion_girls
@@ -100,7 +101,7 @@ class SalesPromotionGirlsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def sales_promotion_girl_params
     params.require(:sales_promotion_girl).permit(:gender, :identifier, :name, :address, :phone, :role,
-      :province, :warehouse_id, :mobile_phone, user_attributes: [:email, :password, :spg_role])
+      :province, :warehouse_id, :mobile_phone, user_attributes: [:email, :password, :spg_role, :id])
   end
   
   def user_can_edit
@@ -108,6 +109,7 @@ class SalesPromotionGirlsController < ApplicationController
       user_role = current_user.roles.first.name
       if user_role.eql?("cashier")
         return false unless current_user.has_role? user_role.to_sym, @sales_promotion_girl
+        return false if current_user.has_role? user_role.to_sym, SalesPromotionGirl
       elsif user_role.eql?("supervisor")
         unless @sales_promotion_girl.role.eql?("cashier")
           return false unless current_user.has_role? user_role.to_sym, @sales_promotion_girl
@@ -121,4 +123,13 @@ class SalesPromotionGirlsController < ApplicationController
   def user_is_not_cashier
     current_user.has_role?(:supervisor) || current_user.has_role?(:admin)
   end
+  
+  # agar cashier tidak dapat role dia, yang dapat melakukannya adalah atasannya
+  def retain_cashier_role
+    # hanya untuk antisipasi agar role cashier tidak diubah user
+    if current_user.has_role? :cashier, SalesPromotionGirl.find(params[:id])
+      params[:sales_promotion_girl][:role] = "cashier"
+    end
+  end
+  
 end
