@@ -1,6 +1,7 @@
 class SalesPromotionGirlsController < ApplicationController
   before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
   before_action :retain_cashier_role, only: :update
+  before_action :set_role_to_spg, only: :create
   skip_before_action :is_user_can_cud?
 
   # GET /sales_promotion_girls
@@ -111,7 +112,7 @@ class SalesPromotionGirlsController < ApplicationController
         return false unless current_user.has_role? user_role.to_sym, @sales_promotion_girl
         return false if current_user.has_role? user_role.to_sym, SalesPromotionGirl
       elsif user_role.eql?("supervisor")
-        unless @sales_promotion_girl.role.eql?("cashier")
+        unless (@sales_promotion_girl.role.eql?("cashier") or @sales_promotion_girl.role.eql?("spg"))
           return false unless current_user.has_role? user_role.to_sym, @sales_promotion_girl
         end
       end
@@ -121,15 +122,38 @@ class SalesPromotionGirlsController < ApplicationController
   end
   
   def user_is_not_cashier
-    current_user.has_role?(:supervisor) || current_user.has_role?(:admin)
+    unless current_user.has_role?(:admin)
+      unless current_user.sales_promotion_girl.role.eql? "supervisor"
+        return false
+      else
+        if @sales_promotion_girl and !@sales_promotion_girl.new_record? and @sales_promotion_girl.role.eql?("supervisor")
+          return false
+        end
+      end
+    end
+    
+    return true
   end
   
-  # agar cashier tidak dapat role dia, yang dapat melakukannya adalah atasannya
+  # agar cashier tidak dapat mengganti role dia, yang dapat melakukannya adalah atasannya
   def retain_cashier_role
-    # hanya untuk antisipasi agar role cashier tidak diubah user
-    if current_user.has_role? :cashier, SalesPromotionGirl.find(params[:id])
+    # hanya untuk antisipasi agar role tidak diubah user selain admin atau role diatasnya (supervisor)
+    spg = SalesPromotionGirl.find(params[:id])
+    
+    if current_user.has_role? :cashier, spg # jika cashier merubah role nya selain dari cashier
       params[:sales_promotion_girl][:role] = "cashier"
+    elsif current_user.has_role? :supervisor, spg # jika supervisor merubah role nya selain dari supervisor
+      params[:sales_promotion_girl][:role] = "supervisor"
+    elsif !current_user.has_role?(:admin) and params[:sales_promotion_girl][:role].eql?("supervisor") # jika supervisor merubah role user dibawahnya ke supervisor
+      params[:sales_promotion_girl][:role] = spg.role
     end
+  end
+  
+  # agar supervisor tidak dapat menambahkan supervisor
+  def set_role_to_spg
+    if !current_user.has_role?(:admin) and params[:sales_promotion_girl][:role].eql?("supervisor")
+      params[:sales_promotion_girl][:role] = "spg"
+    end    
   end
   
 end

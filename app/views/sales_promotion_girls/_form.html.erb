@@ -42,7 +42,7 @@
 
               <div class="field">
                   <%= f.label :role %><br>
-                  <%= f.select :role, options_for_select(SalesPromotionGirl::ROLES, @sales_promotion_girl.role), {prompt: true}, {tabindex: "8", class: "inputs", disabled: (current_user.sales_promotion_girl.role.eql?("cashier") rescue false) } %>
+                  <%= f.select :role, options_for_select(user_roles, @sales_promotion_girl.role), {prompt: true}, {tabindex: "8", class: "inputs", disabled: (is_user_cant_change_role? rescue false) } %>
                 </div>
 
                 <div id="user_auth">
