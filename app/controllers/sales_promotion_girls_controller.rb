@@ -41,16 +41,23 @@ class SalesPromotionGirlsController < ApplicationController
   def create
     if user_is_not_cashier
       @sales_promotion_girl = SalesPromotionGirl.new(sales_promotion_girl_params)
-
+      is_exception_raised = false
       respond_to do |format|
-        if @sales_promotion_girl.save
-          format.html { redirect_to @sales_promotion_girl, notice: 'Sales promotion girl was successfully created.' }
-          format.json { render :show, status: :created, location: @sales_promotion_girl }
-        else
-          @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
-          format.html { render :new }
-          format.json { render json: @sales_promotion_girl.errors, status: :unprocessable_entity }
-        end
+        begin
+          begin
+            if @sales_promotion_girl.save
+              format.html { redirect_to @sales_promotion_girl, notice: 'Sales promotion girl was successfully created.' }
+              format.json { render :show, status: :created, location: @sales_promotion_girl }
+            else
+              @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
+              format.html { render :new }
+              format.json { render json: @sales_promotion_girl.errors, status: :unprocessable_entity }
+            end
+            is_exception_raised = false
+          rescue ActiveRecord::RecordNotUnique => e
+            is_exception_raised = true
+          end
+        end while is_exception_raised
       end
     else
       flash[:alert] = "Sorry, you can't access this request!"

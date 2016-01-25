@@ -27,12 +27,17 @@ class VendorsController < ApplicationController
     @vendor = Vendor.new(vendor_params)
 
     respond_to do |format|
-      if @vendor.save
-        format.html { redirect_to @vendor, notice: 'Vendor was successfully created.' }
-        format.json { render :show, status: :created, location: @vendor }
-      else
+      begin
+        if @vendor.save
+          format.html { redirect_to @vendor, notice: 'Vendor was successfully created.' }
+          format.json { render :show, status: :created, location: @vendor }
+        else
+          format.html { render :new }
+          format.json { render json: @vendor.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @vendor.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @vendor.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class VendorsController < ApplicationController
   # PATCH/PUT /vendors/1.json
   def update
     respond_to do |format|
-      if @vendor.update(vendor_params)
-        format.html { redirect_to @vendor, notice: 'Vendor was successfully updated.' }
-        format.json { render :show, status: :ok, location: @vendor }
-      else
+      begin
+        if @vendor.update(vendor_params)
+          format.html { redirect_to @vendor, notice: 'Vendor was successfully updated.' }
+          format.json { render :show, status: :ok, location: @vendor }
+        else
+          format.html { render :edit }
+          format.json { render json: @vendor.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @vendor.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @vendor.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -67,13 +77,13 @@ class VendorsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_vendor
-      @vendor = Vendor.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_vendor
+    @vendor = Vendor.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def vendor_params
-      params.require(:vendor).permit(:terms_of_payment, :value_added_tax, :code, :name, :phone, :facsimile, :email, :pic_name, :pic_phone, :pic_mobile_phone, :pic_email, :address)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def vendor_params
+    params.require(:vendor).permit(:terms_of_payment, :value_added_tax, :code, :name, :phone, :facsimile, :email, :pic_name, :pic_phone, :pic_mobile_phone, :pic_email, :address)
+  end
 end

@@ -32,16 +32,25 @@ class ProductsController < ApplicationController
     @product = Product.new(product_params)
 
     respond_to do |format|
-      if @product.save
-        format.html { redirect_to @product, notice: 'Product was successfully created.' }
-        format.json { render :show, status: :created, location: @product }
-      else
+      begin
+        if @product.save
+          format.html { redirect_to @product, notice: 'Product was successfully created.' }
+          format.json { render :show, status: :created, location: @product }
+        else
+          @size_group = SizeGroup.find(@product.size_group) rescue nil
+          @sizes = @size_group ? @size_group.sizes.order(:size) : []
+          @price_codes = PriceCode.order :code
+          @colors = Color.order :code
+          format.html { render :new }
+          format.json { render json: @product.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
         @size_group = SizeGroup.find(@product.size_group) rescue nil
         @sizes = @size_group ? @size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
         @colors = Color.order :code
+        @product.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -50,16 +59,25 @@ class ProductsController < ApplicationController
   # PATCH/PUT /products/1.json
   def update
     respond_to do |format|
-      if @product.update(product_params)
-        format.html { redirect_to @product, notice: 'Product was successfully updated.' }
-        format.json { render :show, status: :ok, location: @product }
-      else
+      begin
+        if @product.update(product_params)
+          format.html { redirect_to @product, notice: 'Product was successfully updated.' }
+          format.json { render :show, status: :ok, location: @product }
+        else
+          @size_group = SizeGroup.find(@product.size_group) rescue nil
+          @sizes = @size_group ? @size_group.sizes.order(:size) : []
+          @price_codes = PriceCode.order :code
+          @colors = Color.order :code
+          format.html { render :edit }
+          format.json { render json: @product.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
         @size_group = SizeGroup.find(@product.size_group) rescue nil
         @sizes = @size_group ? @size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
         @colors = Color.order :code
+        @product.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
       end
     end
   end

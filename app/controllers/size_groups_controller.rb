@@ -27,12 +27,17 @@ class SizeGroupsController < ApplicationController
     @size_group = SizeGroup.new(size_group_params)
 
     respond_to do |format|
-      if @size_group.save
-        format.html { redirect_to @size_group, notice: 'Size group was successfully created.' }
-        format.json { render :show, status: :created, location: @size_group }
-      else
+      begin
+        if @size_group.save
+          format.html { redirect_to @size_group, notice: 'Size group was successfully created.' }
+          format.json { render :show, status: :created, location: @size_group }
+        else
+          format.html { render :new }
+          format.json { render json: @size_group.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @size_group.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @size_group.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +46,17 @@ class SizeGroupsController < ApplicationController
   # PATCH/PUT /size_groups/1.json
   def update
     respond_to do |format|
-      if @size_group.update(size_group_params)
-        format.html { redirect_to @size_group, notice: 'Size group was successfully updated.' }
-        format.json { render :show, status: :ok, location: @size_group }
-      else
+      begin
+        if @size_group.update(size_group_params)
+          format.html { redirect_to @size_group, notice: 'Size group was successfully updated.' }
+          format.json { render :show, status: :ok, location: @size_group }
+        else
+          format.html { render :edit }
+          format.json { render json: @size_group.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        @size_group.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
-        format.json { render json: @size_group.errors, status: :unprocessable_entity }
       end
     end
   end
