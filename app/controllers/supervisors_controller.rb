@@ -27,12 +27,21 @@ class SupervisorsController < ApplicationController
     @supervisor = Supervisor.new(supervisor_params)
 
     respond_to do |format|
-      if @supervisor.save
-        format.html { redirect_to @supervisor, notice: 'Supervisor was successfully created.' }
-        format.json { render :show, status: :created, location: @supervisor }
-      else
+      begin
+        if @supervisor.save
+          format.html { redirect_to @supervisor, notice: 'Supervisor was successfully created.' }
+          format.json { render :show, status: :created, location: @supervisor }
+        else
+          format.html { render :new }
+          format.json { render json: @supervisor.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        if e.message.include? "column email is not unique"        
+          @supervisor.errors.messages[:email] = ["has already been taken"]
+        else
+          @supervisor.errors.messages[:code] = ["has already been taken"]
+        end
         format.html { render :new }
-        format.json { render json: @supervisor.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -41,12 +50,21 @@ class SupervisorsController < ApplicationController
   # PATCH/PUT /supervisors/1.json
   def update
     respond_to do |format|
-      if @supervisor.update(supervisor_params)
-        format.html { redirect_to @supervisor, notice: 'Supervisor was successfully updated.' }
-        format.json { render :show, status: :ok, location: @supervisor }
-      else
+      begin
+        if @supervisor.update(supervisor_params)
+          format.html { redirect_to @supervisor, notice: 'Supervisor was successfully updated.' }
+          format.json { render :show, status: :ok, location: @supervisor }
+        else
+          format.html { render :edit }
+          format.json { render json: @supervisor.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        if e.message.include? "column email is not unique"
+          @supervisor.errors.messages[:email] = ["has already been taken"]
+        else
+          @supervisor.errors.messages[:code] = ["has already been taken"]
+        end
         format.html { render :edit }
-        format.json { render json: @supervisor.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -67,13 +85,13 @@ class SupervisorsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_supervisor
-      @supervisor = Supervisor.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_supervisor
+    @supervisor = Supervisor.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def supervisor_params
-      params.require(:supervisor).permit(:code, :name, :address, :email, :phone, :mobile_phone)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def supervisor_params
+    params.require(:supervisor).permit(:code, :name, :address, :email, :phone, :mobile_phone)
+  end
 end

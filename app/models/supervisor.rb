@@ -4,9 +4,17 @@ class Supervisor < ActiveRecord::Base
 
   validates :code, :name, :address, presence: true
   validates :code, uniqueness: true
-  validates :email, uniqueness: true, if: Proc.new { |spv| spv.email.present? }
+  validates :email, uniqueness: true, if: proc { |spv| spv.email.present? }
+
+    before_save :convert_email_value_to_nil
 
     before_validation :titleize_name, :upcase_code
+    
+    private
+    
+    def convert_email_value_to_nil
+      self.email = nil unless email.present?
+    end
 
     def titleize_name
       self.name = name.titleize
