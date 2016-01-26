@@ -25,15 +25,20 @@ class PurchaseOrdersController < ApplicationController
   # POST /purchase_orders.json
   def create
     @purchase_order = PurchaseOrder.new(purchase_order_params)
-
+    is_exception_raised = false
     respond_to do |format|
-      if @purchase_order.save
-        format.html { redirect_to @purchase_order, notice: 'Purchase order was successfully created.' }
-        format.json { render :show, status: :created, location: @purchase_order }
-      else
-        format.html { render :new }
-        format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
-      end
+      begin
+        if @purchase_order.save
+          format.html { redirect_to @purchase_order, notice: 'Purchase order was successfully created.' }
+          format.json { render :show, status: :created, location: @purchase_order }
+        else
+          format.html { render :new }
+          format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
+        end
+        is_exception_raised = false
+      rescue ActiveRecord::RecordNotUnique => e
+        is_exception_raised = true
+      end while is_exception_raised
     end
   end
 
@@ -62,13 +67,13 @@ class PurchaseOrdersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_purchase_order
-      @purchase_order = PurchaseOrder.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_purchase_order
+    @purchase_order = PurchaseOrder.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def purchase_order_params
-      params.require(:purchase_order).permit(:number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment, :warehouse_id)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def purchase_order_params
+    params.require(:purchase_order).permit(:number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment, :warehouse_id)
+  end
 end
