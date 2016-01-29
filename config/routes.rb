@@ -2,7 +2,11 @@ Rails.application.routes.draw do
   devise_for :users, only: :sessions
   get 'welcome/index'
 
-  resources :purchase_orders
+  resources :purchase_orders do
+    collection do
+      get 'get_product_details'
+    end
+  end
   resources :products do
     collection do
       get 'populate_detail_form'

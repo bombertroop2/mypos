@@ -1,4 +1,5 @@
 class PurchaseOrdersController < ApplicationController
+  before_action :populate_combobox_list, only: [:new, :edit]
   before_action :set_purchase_order, only: [:show, :edit, :update, :destroy]
 
   # GET /purchase_orders
@@ -32,6 +33,9 @@ class PurchaseOrdersController < ApplicationController
           format.html { redirect_to @purchase_order, notice: 'Purchase order was successfully created.' }
           format.json { render :show, status: :created, location: @purchase_order }
         else
+          populate_combobox_list
+          @store_warehouses = Warehouse.where("warehouse_type != 'central'")
+#          @products = Product.find(params[:product_ids].split(","))
           format.html { render :new }
           format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
         end
@@ -55,6 +59,13 @@ class PurchaseOrdersController < ApplicationController
       end
     end
   end
+  
+  def get_product_details
+    @purchase_order = PurchaseOrder.new
+    @store_warehouses = Warehouse.where("warehouse_type != 'central'")
+    @products = Product.find(params[:product_ids].split(","))
+    respond_to { |format| format.js }
+  end
 
   # DELETE /purchase_orders/1
   # DELETE /purchase_orders/1.json
@@ -75,5 +86,11 @@ class PurchaseOrdersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
     params.require(:purchase_order).permit(:number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment, :warehouse_id)
+  end
+  
+  def populate_combobox_list
+    @suppliers = Vendor.all
+    @warehouses = Warehouse.where("warehouse_type = 'central'")
+    @store_warehouses = Warehouse.where("warehouse_type != 'central'")
   end
 end

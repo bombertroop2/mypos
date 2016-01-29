@@ -6,11 +6,12 @@ class Product < ActiveRecord::Base
   
   mount_uploader :image, ImageUploader
   
-  has_many :colors, -> {group "common_fields.id"}, through: :product_details
+  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   #  has_many :purchase_order_products
   has_many :product_details, dependent: :destroy
   has_many :product_detail_histories, through: :product_details
-  has_many :sizes, -> {group "sizes.id"}, through: :product_details
+  has_many :sizes, -> {group("sizes.id").order(:size)}, through: :product_details
+  has_many :price_codes, -> {group("common_fields.id").order(:code)}, through: :product_details
   #  has_many :purchase_order_details, through: :product_details
   
   

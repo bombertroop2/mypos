@@ -1,53 +1,43 @@
 <%= form_for(@purchase_order) do |f| %>
   <% if @purchase_order.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
+        <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
 
-      <ul>
-      <% @purchase_order.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
+        <ul>
+            <% @purchase_order.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+        </ul>
     </div>
   <% end %>
 
   <div class="field">
-    <%= f.label :number %><br>
-    <%= f.text_field :number %>
+      <%= f.label :vendor_id %><br>
+      <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @purchase_order.vendor_id.to_s), prompt: 'Select Vendor' %>
   </div>
   <div class="field">
-    <%= f.label :po_type %><br>
-    <%= f.text_field :po_type %>
+      <%= f.label :means_of_payment %><br>
+      <%= f.number_field :means_of_payment %>
   </div>
   <div class="field">
-    <%= f.label :status %><br>
-    <%= f.text_field :status %>
+      <%= f.label :warehouse_id %><br>
+      <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @purchase_order.warehouse_id.to_s), prompt: 'Select Warehouse' %>
   </div>
   <div class="field">
-    <%= f.label :vendor_id %><br>
-    <%= f.text_field :vendor_id %>
+      <%= f.label :request_delivery_date %><br>
+      <%= f.date_field :request_delivery_date %>
   </div>
+  <h3>PO Details</h3>
   <div class="field">
-    <%= f.label :request_delivery_date %><br>
-    <%= f.date_select :request_delivery_date %>
+      <%= select_tag "product_collections", options_from_collection_for_select(Product.order(:code), 'id', 'code', selected_product_collection), multiple: true, "data-placeholder" => "Choose a product..." %>
+      <%= submit_tag "Generate detail form", disabled: true, id: "generate_po_detail_form" %>
   </div>
-  <div class="field">
-    <%= f.label :order_value %><br>
-    <%= f.text_field :order_value %>
-  </div>
-  <div class="field">
-    <%= f.label :receiving_value %><br>
-    <%= f.text_field :receiving_value %>
-  </div>
-  <div class="field">
-    <%= f.label :means_of_payment %><br>
-    <%= f.number_field :means_of_payment %>
-  </div>
-  <div class="field">
-    <%= f.label :warehouse_id %><br>
-    <%= f.text_field :warehouse_id %>
+  <div id="products_detail">
+      <%# unless @sizes.blank? %>
+        <%#= render 'size_collections' %>
+      <%# end %>
   </div>
   <div class="actions">
-    <%= f.submit %>
+      <%= f.submit %>
   </div>
 <% end %>
