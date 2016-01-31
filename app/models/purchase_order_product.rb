@@ -11,10 +11,11 @@ class PurchaseOrderProduct < ActiveRecord::Base
 
   validates :product_id, uniqueness: {scope: :purchase_order_id}, if: proc { |pop| pop.product_id.present? }
     validates :product_id, presence: true
-    validates :purchase_order_details, :length => { :minimum => 1 }
+    #    validates :purchase_order_details, :length => { :minimum => 1 }
 
-    accepts_nested_attributes_for :purchase_order_details, allow_destroy: true,
-      reject_if: lambda { |a| a[:quantity].blank? }
+    accepts_nested_attributes_for :purchase_order_details, allow_destroy: true
+    #    ,
+    #      reject_if: lambda { |a| a[:quantity].blank? }
 
     accepts_nested_attributes_for :received_purchase_orders, allow_destroy: true,
       reject_if: lambda { |a| a[:is_received].eql?("0") }

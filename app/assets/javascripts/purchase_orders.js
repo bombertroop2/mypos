@@ -10,14 +10,21 @@ $(function () {
         else
             $("#generate_po_detail_form").removeAttr("disabled");
     });
-    
-    $("#generate_po_detail_form").click(function() {
-        $.get("/purchase_orders/get_product_details", {
-            product_ids:$("#product_collections").val().join(",")
-        });
+
+    $("#generate_po_detail_form").click(function () {
+        if (typeof purchaseOrderId === 'undefined')
+            $.get("/purchase_orders/get_product_details", {
+                product_ids: $("#product_collections").val().join(",")
+            });
+        else
+            $.get("/purchase_orders/get_product_details", {
+                product_ids: $("#product_collections").val().join(","),
+                purchase_order_id: purchaseOrderId
+            });
 
         return false;
     });
+
 });
 
 $(document).on('page:load', function () {
@@ -32,11 +39,17 @@ $(document).on('page:load', function () {
         else
             $("#generate_po_detail_form").removeAttr("disabled");
     });
-    
-    $("#generate_po_detail_form").click(function() {
-        $.get("/purchase_orders/get_product_details", {
-            product_ids:$("#product_collections").val().join(",")
-        });
+
+    $("#generate_po_detail_form").click(function () {
+        if (typeof purchaseOrderId === 'undefined')
+            $.get("/purchase_orders/get_product_details", {
+                product_ids: $("#product_collections").val().join(",")
+            });
+        else
+            $.get("/purchase_orders/get_product_details", {
+                product_ids: $("#product_collections").val().join(","),
+                purchase_order_id: purchaseOrderId
+            });
 
         return false;
     });

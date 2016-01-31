@@ -20,6 +20,8 @@ class PurchaseOrdersController < ApplicationController
 
   # GET /purchase_orders/1/edit
   def edit
+    @store_warehouses = Warehouse.where("warehouse_type != 'central'")
+    @products = @purchase_order.products
   end
 
   # POST /purchase_orders
@@ -35,7 +37,7 @@ class PurchaseOrdersController < ApplicationController
         else
           populate_combobox_list
           @store_warehouses = Warehouse.where("warehouse_type != 'central'")
-#          @products = Product.find(params[:product_ids].split(","))
+          @products = Product.find(params[:product_ids].split(",")) rescue []
           format.html { render :new }
           format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
         end
@@ -61,7 +63,11 @@ class PurchaseOrdersController < ApplicationController
   end
   
   def get_product_details
-    @purchase_order = PurchaseOrder.new
+    @purchase_order = if params[:purchase_order_id].present?
+      PurchaseOrder.find params[:purchase_order_id]
+    else
+      PurchaseOrder.new
+    end
     @store_warehouses = Warehouse.where("warehouse_type != 'central'")
     @products = Product.find(params[:product_ids].split(","))
     respond_to { |format| format.js }
@@ -85,12 +91,13 @@ class PurchaseOrdersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
-    params.require(:purchase_order).permit(:number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment, :warehouse_id)
+    params.require(:purchase_order).permit(:number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment,
+      :warehouse_id, purchase_order_products_attributes: [:id, :product_id, :warehouse_id,
+        purchase_order_details_attributes: [:id, :product_detail_id, :quantity]])
   end
   
   def populate_combobox_list
     @suppliers = Vendor.all
     @warehouses = Warehouse.where("warehouse_type = 'central'")
-    @store_warehouses = Warehouse.where("warehouse_type != 'central'")
   end
 end

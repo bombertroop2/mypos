@@ -29,15 +29,21 @@
   </div>
   <h3>PO Details</h3>
   <div class="field">
-      <%= select_tag "product_collections", options_from_collection_for_select(Product.order(:code), 'id', 'code', selected_product_collection), multiple: true, "data-placeholder" => "Choose a product..." %>
-      <%= submit_tag "Generate detail form", disabled: true, id: "generate_po_detail_form" %>
+      <%= select_tag "product_collections", options_from_collection_for_select(Product.order(:code), 'id', 'code', selected_product_collection), multiple: true, "data-placeholder" => "Choose a product..." %>            
+      <%= submit_tag "Generate detail form", disabled: @purchase_order.new_record?, id: "generate_po_detail_form" %>
   </div>
   <div id="products_detail">
-      <%# unless @sizes.blank? %>
-        <%#= render 'size_collections' %>
-      <%# end %>
+      <% if @products.present? %>
+        <%= render 'product_quantities' %>
+      <% end %>
   </div>
   <div class="actions">
       <%= f.submit %>
   </div>
+<% end %>
+
+<% unless @purchase_order.new_record? %>
+  <script>
+    var purchaseOrderId = "<%= params[:id] %>";
+  </script>
 <% end %>
