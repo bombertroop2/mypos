@@ -1,5 +1,6 @@
 class SizeGroup < ActiveRecord::Base
   has_many :sizes, dependent: :destroy
+  has_many :products
   validates :code, presence: true, uniqueness: true
 
   accepts_nested_attributes_for :sizes,

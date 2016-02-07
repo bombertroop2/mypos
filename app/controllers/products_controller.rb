@@ -20,8 +20,8 @@ class ProductsController < ApplicationController
 
   # GET /products/1/edit
   def edit
-    @size_group = @product.sizes.first.size_group rescue nil
-    @sizes = @size_group ? @size_group.sizes.order(:size) : []
+    @product.effective_date = @product.effective_date.strftime("%d/%m/%Y")
+    @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
     @price_codes = PriceCode.order :code
     @colors = Color.order :code
   end
@@ -30,23 +30,22 @@ class ProductsController < ApplicationController
   # POST /products.json
   def create
     @product = Product.new(product_params)
-
     respond_to do |format|
       begin
         if @product.save
           format.html { redirect_to @product, notice: 'Product was successfully created.' }
           format.json { render :show, status: :created, location: @product }
         else
-          @size_group = SizeGroup.find(@product.size_group) rescue nil
-          @sizes = @size_group ? @size_group.sizes.order(:size) : []
+          size_group = SizeGroup.find(@product.size_group_id) rescue nil
+          @sizes = size_group ? size_group.sizes.order(:size) : []
           @price_codes = PriceCode.order :code
           @colors = Color.order :code
           format.html { render :new }
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        @size_group = SizeGroup.find(@product.size_group) rescue nil
-        @sizes = @size_group ? @size_group.sizes.order(:size) : []
+        size_group = SizeGroup.find(@product.size_group_id) rescue nil
+        @sizes = size_group ? size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
         @colors = Color.order :code
         @product.errors.messages[:code] = ["has already been taken"]
@@ -64,16 +63,14 @@ class ProductsController < ApplicationController
           format.html { redirect_to @product, notice: 'Product was successfully updated.' }
           format.json { render :show, status: :ok, location: @product }
         else
-          @size_group = SizeGroup.find(@product.size_group) rescue nil
-          @sizes = @size_group ? @size_group.sizes.order(:size) : []
+          @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
           @price_codes = PriceCode.order :code
           @colors = Color.order :code
           format.html { render :edit }
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        @size_group = SizeGroup.find(@product.size_group) rescue nil
-        @sizes = @size_group ? @size_group.sizes.order(:size) : []
+        @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
         @colors = Color.order :code
         @product.errors.messages[:code] = ["has already been taken"]
@@ -110,14 +107,17 @@ class ProductsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id, :target, :model_id,
-      :goods_type_id, :image, :effective_date, :image_cache, :remove_image, :cost, :size_group,
-      product_details_attributes: [:id, :size_id, :color_id, :price_code_id, :price])
+      :goods_type_id, :image, :effective_date, :image_cache, :remove_image, :cost, :size_group_id,
+      product_price_codes_attributes: [:id, :product_id, :price_code_id, :total_size, product_details_attributes: [:id, :size_id, :color_id, :product_price_code_id, :price]]
+    )
   end
   
   def convert_cost_price_to_numeric
     params[:product][:cost] = params[:product][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
-    params[:product][:product_details_attributes].each do |key, value|
-      params[:product][:product_details_attributes][key][:price] = params[:product][:product_details_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
-    end if params[:product][:product_details_attributes].present?
+    params[:product][:product_price_codes_attributes].each do |price_code_key, value|            
+      params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes].each do |key, value|
+        params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes][key][:price] = params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+      end if params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes].present?
+    end if params[:product][:product_price_codes_attributes].present?    
   end
 end

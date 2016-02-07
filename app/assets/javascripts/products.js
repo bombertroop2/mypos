@@ -6,18 +6,26 @@
 
 
 $(function () {
-    $("#product_size_group").change(function () {
+    $("#product_size_group_id").change(function () {
         $.get("/products/populate_detail_form", {
             id: $(this).val()
         });
     });
+
+    $("#product_effective_date").datepicker({
+        dateFormat:"dd/mm/yy"
+    });
 });
 
 // ini untuk turbolink gem
-$(document).on('page:load', function() {
-    $("#product_size_group").change(function () {
+$(document).on('page:load', function () {
+    $("#product_size_group_id").change(function () {
         $.get("/products/populate_detail_form", {
             id: $(this).val()
         });
+    });
+    
+    $("#product_effective_date").datepicker({
+        dateFormat:"dd/mm/yy"
     });
 });

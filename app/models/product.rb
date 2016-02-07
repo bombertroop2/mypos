@@ -3,32 +3,30 @@ class Product < ActiveRecord::Base
   belongs_to :vendor
   belongs_to :model
   belongs_to :goods_type
+  belongs_to :size_group
   
   mount_uploader :image, ImageUploader
   
+  has_many :product_price_codes, dependent: :destroy
+  has_many :price_codes, through: :product_price_codes  
+  has_many :product_details, through: :product_price_codes  
   has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
-  #  has_many :purchase_order_products
-  has_many :product_details, dependent: :destroy
-  has_many :product_detail_histories, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size)}, through: :product_details
-  has_many :price_codes, -> {group("common_fields.id").order(:code)}, through: :product_details
-  has_many :grouped_product_details, -> {group("size_id, color_id")}, foreign_key: :product_id, class_name: "ProductDetail"
+  has_many :product_detail_histories, through: :product_details
+  #  has_many :grouped_product_details, -> {group("size_id, color_id")}, foreign_key: :product_id, class_name: "ProductDetail"
   #  has_many :purchase_order_details, through: :product_details
+  #  has_many :purchase_order_products  
   
-  
-  accepts_nested_attributes_for :product_details,
-    reject_if: proc {|attributes| attributes[:cost].blank? and
-      attributes[:price].blank? and attributes[:id].blank? }
+  accepts_nested_attributes_for :product_price_codes, allow_destroy: true
   
   validates :code, presence: true, uniqueness: true
-  validates :cost, :effective_date, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
-  #  validate :require_at_least_one_detail
+  validates :size_group_id, :cost, :effective_date, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: :is_validable
     validates :cost, numericality: true, if: proc { |product| product.cost.present? }
       validates :cost, numericality: {greater_than: 0}, if: proc { |product| product.cost.is_a?(Numeric) }
-        validate :require_prices_at_least_one_color_per_price_code
+        validate :validate_product_price_codes
+  
 
-        attr_accessor :size_group
   
         SEX = [
           ["Man", "man"],
@@ -43,32 +41,24 @@ class Product < ActiveRecord::Base
           ["Sale", "sale"]
         ]
     
-        before_validation :upcase_code
+        before_validation :upcase_code, :remove_old_product_details
+        
   
         private
         
-        def require_prices_at_least_one_color_per_price_code          
-          if size_group.present?
-            sizes_count = SizeGroup.find(size_group).sizes.count rescue 0          
-          end
-          
-          price_code_ids = PriceCode.pluck(:id)
-          is_valid = Array.new
-          price_code_ids.count.times { is_valid << false }
-          
-          price_code_ids.each_with_index do |price_code_id, idx|
-            Color.pluck(:id).each do |color_id|
-              product_details_count = product_details.select {|product_detail| product_detail.color_id == color_id and product_detail.price_code_id == price_code_id}.count
-              if sizes_count == product_details_count
-                is_valid[idx] = true
-                break
-              else
-                is_valid[idx] = false
-              end
-            end
-          end
-          
-          errors.add(:base, "A product must have at least one prices detail on one color per price code.") if is_valid.include?(false)
+#        def get_newest_product_detail_ids
+#          @newest_product_detail_ids = product_details.pluck(:id) unless size_group_id_was.eql?(size_group_id)
+#        end
+        
+        def remove_old_product_details
+          product_price_codes.each do |ppc|
+            oldest_product_detail_ids = ppc.product_details.pluck(:id)
+            ProductDetail.destroy_all(['id IN (?)', oldest_product_detail_ids]) if oldest_product_detail_ids.present?
+          end unless size_group_id_was.eql?(size_group_id)
+        end
+        
+        def validate_product_price_codes
+          errors.add(:base, "You should add at least one price code per product") if product_price_codes.size < 1
         end
 
         def is_validable
@@ -85,9 +75,4 @@ class Product < ActiveRecord::Base
           self.code = code.upcase
         end
     
-        def require_at_least_one_detail
-          if product_details.map(&:cost).reject(&:blank?).sum == 0 or product_details.map(&:price).reject(&:blank?).sum == 0
-            errors.add(:base, "A product must have at least one detail.")
-          end
-        end
       end

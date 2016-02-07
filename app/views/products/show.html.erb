@@ -64,14 +64,17 @@
         <th>Price</th>
     </tr>
 
-    <% @product.product_details.each do |prod_det| %>
-      <tr>
-          <td><%= prod_det.barcode %></td>
-          <td><%= prod_det.product.code if prod_det.product %></td>
-          <td><%= prod_det.size.size if prod_det.size %></td>
-          <td><%= prod_det.color.code if prod_det.color %></td>
-          <td><%= number_to_currency(prod_det.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-      </tr>
+    <% @product.product_price_codes.each do |price_code| %>
+      <tr><th colspan="5"><%= price_code.price_code.code if price_code.price_code %></th></tr>
+      <% price_code.product_details.each do |prod_det| %>
+        <tr>
+            <td><%= prod_det.barcode %></td>
+            <td><%= prod_det.product_price_code.product.code if prod_det.product_price_code and prod_det.product_price_code.product %></td>
+            <td><%= prod_det.size.size if prod_det.size %></td>
+            <td><%= prod_det.color.code if prod_det.color %></td>
+            <td><%= number_to_currency(prod_det.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+        </tr>
+      <% end %>
     <% end %>
 </table>
 

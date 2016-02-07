@@ -58,7 +58,7 @@
     </div>
     <div class="field">
         <%= f.label :effective_date %><br>
-        <%= f.date_field :effective_date, tabindex: "11" %>
+        <%= f.text_field :effective_date, size: 10, readonly: true, tabindex: "11" %>
     </div>
     <div class="field">
         <%= f.label :cost %><br>
@@ -66,8 +66,8 @@
           "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16 %>
     </div>
     <div class="field">
-        Size group
-        <%= f.select :size_group, options_from_collection_for_select(SizeGroup.order(:code), :id, :code, (@size_group.id if @size_group)), {prompt: true}, {tabindex: "13"} %>
+        <%= f.label :size_group_id %><br>
+        <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.all, :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13"} %>
     </div>
     <div id="size_collection_container">
         <% unless @sizes.blank? %>
