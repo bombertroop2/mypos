@@ -9,14 +9,16 @@ class PurchaseOrderProduct < ActiveRecord::Base
   has_many :colors, -> { group("common_fields.id").order(:code) }, through: :purchase_order_details
 
 
-  validates :product_id, uniqueness: {scope: :purchase_order_id}, if: proc { |pop| pop.product_id.present? }
-    validates :product_id, presence: true
-    #    validates :purchase_order_details, :length => { :minimum => 1 }
 
-    accepts_nested_attributes_for :purchase_order_details, allow_destroy: true
-    #    ,
-    #      reject_if: lambda { |a| a[:quantity].blank? }
+  accepts_nested_attributes_for :purchase_order_details, allow_destroy: true
 
-    accepts_nested_attributes_for :received_purchase_orders, allow_destroy: true,
-      reject_if: lambda { |a| a[:is_received].eql?("0") }
+  accepts_nested_attributes_for :received_purchase_orders, reject_if: proc { |attributes| attributes[:is_received].eql?("0") }
+  
+  def total_quantity
+    purchase_order_details.sum :quantity
   end
+  
+  def total_cost
+    purchase_order_details.sum(:quantity) * product.cost
+  end
+end

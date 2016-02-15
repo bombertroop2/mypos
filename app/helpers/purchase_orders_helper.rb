@@ -4,6 +4,13 @@ module PurchaseOrdersHelper
     return @products.map(&:id) if @products.present?
   end
   
+  def get_or_build_received_po_object(po_product, color)
+    received_purchase_order_detail = po_product.received_purchase_orders.select{|rpo| rpo.color.eql?(color)}.first
+    unless received_purchase_order_detail
+      received_purchase_order_detail = po_product.received_purchase_orders.build(color: color)
+    end
+    received_purchase_order_detail
+  end
   
   def get_or_build_purchase_order_product_object(purchase_order, product)
     purchase_order_product_detail = purchase_order.purchase_order_products.select{|pop| pop.product.eql?(product)}.first
@@ -13,10 +20,10 @@ module PurchaseOrdersHelper
     purchase_order_product_detail
   end
   
-  def get_or_build_purchase_order_detail_object(purchase_order_product, product_detail)    
-    purchase_order_detail_detail = purchase_order_product.purchase_order_details.select{|pod| pod.product_detail.eql?(product_detail)}.first
+  def get_or_build_purchase_order_detail_object(purchase_order_product, size, color)    
+    purchase_order_detail_detail = purchase_order_product.purchase_order_details.select{|pod| pod.size.eql?(size) and pod.color.eql?(color)}.first
     unless purchase_order_detail_detail
-      purchase_order_detail_detail = purchase_order_product.purchase_order_details.build(product_detail: product_detail)
+      purchase_order_detail_detail = purchase_order_product.purchase_order_details.build(size: size, color: color)
     end
     purchase_order_detail_detail
   end
@@ -25,7 +32,7 @@ module PurchaseOrdersHelper
     if purchase_order_product.new_record?
       "purchase_order[purchase_order_products_attributes][#{Time.now.to_i.to_s+product.id.to_s}]"
     else
-      "purchase_order[purchase_order_products_attributes][]"
+      "purchase_order[purchase_order_products_attributes][#{purchase_order_product.id}]"
     end
   end
   
@@ -35,5 +42,9 @@ module PurchaseOrdersHelper
     else
       "#{purchase_order_product_array_index}[purchase_order_details_attributes][]"
     end
+  end
+  
+  def create_received_purchase_order_array_variable_name(received_po_detail, purchase_order_product, color)
+      "purchase_order[purchase_order_products_attributes][#{purchase_order_product.id}][received_purchase_orders_attributes][#{color.id}]"
   end
 end

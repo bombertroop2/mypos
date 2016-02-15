@@ -1,10 +1,16 @@
 Rails.application.routes.draw do
+  resources :stocks, only: :index
   devise_for :users, only: :sessions
   get 'welcome/index'
 
   resources :purchase_orders do
     collection do
       get 'get_product_details'
+    end
+    
+    member do
+      get 'receive'
+      post 'receive'
     end
   end
   resources :products do

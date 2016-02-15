@@ -1,10 +1,10 @@
-<%= hidden_field_tag "product_ids", params[:product_ids] %>
-<table border="1">
-    <tr style="text-align: center">
-        <th>Product code</th>
-        <th>Size X Color</th>
-    </tr>
-    <% @products.each do |product| %>
+<%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
+<% @products.each do |product| %>
+  <table border="1" class="product-table" id="product_table_<%= product.id %>">
+      <tr style="text-align: center">
+          <th>Product code</th>
+          <th>Size X Color</th>
+      </tr>    
       <tr>
           <th>
               <%= product.code %>
@@ -52,12 +52,13 @@
                           <% end %>
                           <% product_detail = product.grouped_product_details.select{|pd| pd.size_id.eql?(size.id) && pd.color_id.eql?(color.id)}.first %>
                           <% if product_detail.present? %>
-                            <% purchase_order_detail_detail = get_or_build_purchase_order_detail_object(purchase_order_product_detail, product_detail) %>
+                            <% purchase_order_detail_detail = get_or_build_purchase_order_detail_object(purchase_order_product_detail, size, color) %>
                             <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
                             <td>
                                 <%= fields_for purchase_order_detail_array_index, purchase_order_detail_detail do |purchase_order_detail_detail_form| %>
                                   <%= purchase_order_detail_detail_form.hidden_field :id %>
-                                  <%= purchase_order_detail_detail_form.hidden_field :product_detail_id %>
+                                  <%= purchase_order_detail_detail_form.hidden_field :size_id %>
+                                  <%= purchase_order_detail_detail_form.hidden_field :color_id %>
                                   <div class="field">
                                       <%= purchase_order_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{product.id}-#{color.code} quantity-#{product.id} quantity", style: "text-align:right;", size: 16 %>
                                     </div>  
@@ -83,9 +84,19 @@
           $('#<%= "quantity_#{product.id}" %>').keyup(function () {
               $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
           });
-        </script>        
+        </script>
+        <% unless purchase_order_product_detail.new_record? %>
+          <tr>
+              <td colspan="2">
+                  <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
+                    <%= purchase_order_product_detail_form.check_box :_destroy %> remove
+                  <% end %>
+              </td>
+          </tr>          
+        <% end %>
+        </table>
+
       <% end %>
-      </table>
 
       <script>
         $(".quantity").numeric({

@@ -1,3 +1,21 @@
+function intersection(x, y) {
+    x.sort();
+    y.sort();
+    var i = j = 0;
+    ret = [];
+    while (i < x.length && j < y.length) {
+        if (x[i] < y[j])
+            i++;
+        else if (y[j] < x[i])
+            j++;
+        else {
+            ret.push(x[i]);
+            i++, j++;
+        }
+    }
+    return ret;
+}
+
 $(function () {
     $("#product_collections").chosen({
         width: "25%"
@@ -23,6 +41,10 @@ $(function () {
             });
 
         return false;
+    });
+    
+    $("#purchase_order_request_delivery_date").datepicker({
+        dateFormat:"dd/mm/yy"
     });
 
 });
@@ -52,5 +74,9 @@ $(document).on('page:load', function () {
             });
 
         return false;
+    });
+    
+    $("#purchase_order_request_delivery_date").datepicker({
+        dateFormat:"dd/mm/yy"
     });
 });

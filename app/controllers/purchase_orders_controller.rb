@@ -1,6 +1,6 @@
 class PurchaseOrdersController < ApplicationController
   before_action :populate_combobox_list, only: [:new, :edit]
-  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy]
+  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :receive]
 
   # GET /purchase_orders
   # GET /purchase_orders.json
@@ -20,6 +20,7 @@ class PurchaseOrdersController < ApplicationController
 
   # GET /purchase_orders/1/edit
   def edit
+    @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
     @store_warehouses = Warehouse.where("warehouse_type != 'central'")
     @products = @purchase_order.products
   end
@@ -56,6 +57,9 @@ class PurchaseOrdersController < ApplicationController
         format.html { redirect_to @purchase_order, notice: 'Purchase order was successfully updated.' }
         format.json { render :show, status: :ok, location: @purchase_order }
       else
+        populate_combobox_list
+        @store_warehouses = Warehouse.where("warehouse_type != 'central'")
+        @products = Product.find(params[:product_ids].split(",")) rescue []
         format.html { render :edit }
         format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
       end
@@ -76,10 +80,41 @@ class PurchaseOrdersController < ApplicationController
   # DELETE /purchase_orders/1
   # DELETE /purchase_orders/1.json
   def destroy
-    @purchase_order.destroy
+    unless @purchase_order.destroy
+      flash[:notice] = @purchase_order.errors.full_messages.first 
+    else
+      flash[:notice] = 'Purchase order was successfully destroyed.'
+    end
     respond_to do |format|
-      format.html { redirect_to purchase_orders_url, notice: 'Purchase order was successfully destroyed.' }
+      format.html { redirect_to purchase_orders_url }
       format.json { head :no_content }
+    end
+  end
+  
+  def receive
+    if request.method.eql?("POST")
+      respond_to do |format|
+        if @purchase_order.update(purchase_order_params)
+          format.html { redirect_to purchase_orders_url, notice: 'Purchase order was successfully updated.' }
+          format.json { head :no_content }
+        else
+          @purchase_order.receiving_po = true
+          @purchase_order.purchase_order_products.each do |po_product|
+            po_product.colors.each do |color|
+              po_product.received_purchase_orders.build(color_id: color.id) if po_product.received_purchase_orders.where(color_id: color.id).first.nil?
+            end
+          end
+          format.html { render action: "receive" }
+          format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
+        end
+      end
+    else
+      @purchase_order.receiving_po = true
+      @purchase_order.purchase_order_products.each do |po_product|
+        po_product.colors.each do |color|
+          po_product.received_purchase_orders.build(color_id: color.id) if po_product.received_purchase_orders.where(color_id: color.id).first.nil?
+        end
+      end
     end
   end
 
@@ -91,9 +126,9 @@ class PurchaseOrdersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
-    params.require(:purchase_order).permit(:number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment,
-      :warehouse_id, purchase_order_products_attributes: [:id, :product_id, :warehouse_id,
-        purchase_order_details_attributes: [:id, :product_detail_id, :quantity]])
+    params.require(:purchase_order).permit(:receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :means_of_payment,
+      :warehouse_id, purchase_order_products_attributes: [:id, :product_id, :warehouse_id, :_destroy,
+        purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity], received_purchase_orders_attributes: [:id, :color_id, :purchase_order_product_id, :is_received]])
   end
   
   def populate_combobox_list

@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing stocks</h1>
+
+<table border="1">
+    <tr>
+        <th rowspan="2">PO Number</th>
+        <th rowspan="2">Warehouse Code</th>
+        <th colspan="3">Product</th>
+        <th rowspan="2">Type</th>
+        <th rowspan="2">Quantity</th>
+        <th rowspan="2">Arrived at</th>
+    </tr>
+    <tr>
+        <th>Code</th>
+        <th>Color</th>
+        <th>Size</th>
+    </tr>
+
+    <% @stocks.each do |stock| %>
+      <tr>
+          <td><%= stock.po_number %></td>
+          <td><%= stock.warehouse_code %></td>
+          <td><%= stock.product_code %></td>
+          <td><%= stock.product_color %></td>
+          <td><%= stock.product_size %></td>
+          <td><%= stock.stock_type %></td>
+          <td><%= stock.quantity_on_hand %> pcs</td>
+          <td><%= stock.created_at.strftime("%d/%m/%Y") %></td>
+      </tr>
+    <% end %>
+</table>
+
+
+
