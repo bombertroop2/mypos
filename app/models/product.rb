@@ -13,7 +13,7 @@ class Product < ActiveRecord::Base
   has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
-  has_many :grouped_product_details, -> {group("size_id, color_id")}, through: :product_price_codes,  source: :product_details
+  has_many :grouped_product_details, -> {group("size_id, color_id, product_details.id")}, through: :product_price_codes,  source: :product_details
   #  has_many :purchase_order_details, through: :product_details
   #  has_many :purchase_order_products  
   
