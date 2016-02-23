@@ -15,13 +15,12 @@ class PurchaseOrder < ActiveRecord::Base
 
     before_destroy :prevent_destroy_if_article_received
 
-    validates :number, :vendor_id, :means_of_payment, :request_delivery_date, presence: true, unless: proc { |po| po.receiving_po }
+    validates :number, :vendor_id, :request_delivery_date, presence: true, unless: proc { |po| po.receiving_po }
       validates :number, uniqueness: true, unless: proc { |po| po.receiving_po }
-        validates :means_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |po| po.means_of_payment.present? and !po.receiving_po }
-          validates :request_delivery_date, date: {after: proc { Date.today }, message: 'must be after today' }, if: :is_validable
-            validate :require_at_least_one_received_color, if: proc { |po| po.receiving_po }
-              validate :prevent_update_if_article_received, on: :update
-              validate :disable_receive_po_if_finish, if: proc { |po| po.receiving_po }
+        validates :request_delivery_date, date: {after: proc { Date.today }, message: 'must be after today' }, if: :is_validable
+          validate :require_at_least_one_received_color, if: proc { |po| po.receiving_po }
+            validate :prevent_update_if_article_received, on: :update
+            validate :disable_receive_po_if_finish, if: proc { |po| po.receiving_po }
 
               accepts_nested_attributes_for :purchase_order_products, allow_destroy: true
 
@@ -80,10 +79,10 @@ class PurchaseOrder < ActiveRecord::Base
                 current_month = today.month.to_s.rjust(2, '0')
                 current_year = today.strftime("%y").rjust(2, '0')
                 if last_po
-                  seq_number = last_po.number.split(last_po.number.scan(/PO\d.{3}/).first).last.succ
-                  new_po_number = "#{(warehouse.code if warehouse)}PO#{current_month}#{current_year}#{seq_number}"
+                  seq_number = last_po.number.split(last_po.number.scan(/POR\d.{3}/).first).last.succ
+                  new_po_number = "#{(warehouse.code if warehouse)}POR#{current_month}#{current_year}#{seq_number}"
                 else
-                  new_po_number = "#{(warehouse.code if warehouse)}PO#{current_month}#{current_year}0001"
+                  new_po_number = "#{(warehouse.code if warehouse)}POR#{current_month}#{current_year}0001"
                 end
                 self.number = new_po_number
               end

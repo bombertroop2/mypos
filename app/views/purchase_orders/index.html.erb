@@ -26,7 +26,7 @@
         <td><%= purchase_order.request_delivery_date %></td>
         <td><%= purchase_order.order_value %></td>
         <td><%= purchase_order.receiving_value %></td>
-        <td><%= purchase_order.means_of_payment %></td>
+        <td><%= "#{purchase_order.vendor.terms_of_payment} day(s)" if purchase_order.vendor %></td>
         <td><%= purchase_order.warehouse %></td>
         <td><%= link_to 'Show', purchase_order %></td>
         <td><%= link_to 'Edit', edit_purchase_order_path(purchase_order) %></td>

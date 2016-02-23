@@ -16,10 +16,6 @@
       <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @purchase_order.vendor_id.to_s), prompt: 'Select Vendor' %>
   </div>
   <div class="field">
-      <%= f.label :means_of_payment %><br>
-      <%= f.number_field :means_of_payment %>
-  </div>
-  <div class="field">
       <%= f.label :warehouse_id %><br>
       <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @purchase_order.warehouse_id.to_s), prompt: 'Select Warehouse' %>
   </div>

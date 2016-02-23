@@ -3,10 +3,10 @@
         <td>
             <table>
                 <tr>
-                    <th align="center">PURCHASE ORDER</th>
+                    <th align="center" colspan="2">PURCHASE ORDER</th>
                 </tr>
                 <tr>
-                    <td align="center"><%= @purchase_order.number %></td>
+                    <td align="center" colspan="2"><%= @purchase_order.number %></td>
                 </tr>
                 <tr>
                     <td>
@@ -15,6 +15,11 @@
                                 <td>To</td>
                                 <td>:</td>
                                 <td><%= @purchase_order.vendor.name if @purchase_order.vendor %></td>
+                            </tr>
+                            <tr>
+                                <td>Means of Payment</td>
+                                <td>:</td>
+                                <td><%= "#{@purchase_order.vendor.terms_of_payment} day(s)" if @purchase_order.vendor %></td>
                             </tr>
                             <tr>
                                 <td>Created Date</td>
@@ -28,9 +33,23 @@
                             </tr>
                         </table>
                     </td>
+                    <td valign="top">
+                      <table align="right">
+                            <tr>
+                                <td>Warehouse</td>
+                                <td>:</td>
+                                <td><%= @purchase_order.warehouse.code if @purchase_order.warehouse %></td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td>:</td>
+                                <td><%= @purchase_order.warehouse.address if @purchase_order.warehouse %></td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
                 <tr>
-                    <td align="center">
+                    <td align="center" colspan="2">
                         <table border="1">
                             <tbody>
                                 <tr>
