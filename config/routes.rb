@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :purchase_returns, except: [:destroy, :edit, :update] do
+    collection do
+      get 'get_purchase_order_details'
+    end    
+  end
   resources :stocks, only: :index
   devise_for :users, only: :sessions
   get 'welcome/index'

@@ -5,6 +5,7 @@ class PurchaseOrder < ActiveRecord::Base
   has_many :purchase_order_products, dependent: :destroy
   has_many :purchase_order_details, through: :purchase_order_products
   has_many :products, through: :purchase_order_products
+  has_one :purchase_return
   #  has_many :received_purchase_orders, through: :purchase_order_products
 
   attr_accessor :receiving_po  

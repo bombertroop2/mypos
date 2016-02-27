@@ -1,0 +1,9 @@
+$("#purchase_order_detail").html("<%= j(render(partial: "purchase_order_details")) %>");
+$(".quantity").numeric({
+decimal: false,
+negative: false
+}, function () {
+alert("Positive integers only");
+this.value = "";
+this.focus();
+});
