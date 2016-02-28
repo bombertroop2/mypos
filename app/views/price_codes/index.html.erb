@@ -1,27 +1,27 @@
-<h1>Listing Price Codes</h1>
+<div class="page-header"><h1>Listing Price Codes</h1></div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Code</th>
-      <th>Name</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
+<table class="table table-condensed table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
 
-  <tbody>
-    <% @price_codes.each do |price_code| %>
-      <tr>
-        <td><%= price_code.code %></td>
-        <td><%= price_code.name %></td>
-        <td><%= link_to 'Show', price_code %></td>
-        <td><%= link_to 'Edit', edit_price_code_path(price_code) %></td>
-        <td><%= link_to 'Destroy', price_code, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+    <tbody>
+        <% @price_codes.each do |price_code| %>
+          <tr>
+              <td><%= price_code.code %></td>
+              <td><%= price_code.name %></td>
+              <td>
+                  <%= link_to 'Show', price_code, class: "btn btn-info btn-xs active" %>
+                    <%= link_to 'Edit', edit_price_code_path(price_code), class: "btn btn-warning btn-xs active" %>
+                      <%= link_to 'Destroy', price_code, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
+                    </td>
+                </tr>
+              <% end %>
+          </tbody>
+      </table>
 
-<br>
-
-<%= link_to 'New Price code', new_price_code_path %>
+      <%= link_to 'New Price code', new_price_code_path, class: "btn btn-default active" %>
