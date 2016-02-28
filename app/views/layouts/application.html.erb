@@ -7,47 +7,64 @@
         <%= csrf_meta_tags %>
     </head>
     <body>
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <!--
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    -->
+                    <%= link_to "Winaya POS", root_path, class: "navbar-brand" %>
+                  </div>
+                  <div id="navbar" class="navbar-collapse collapse">
+                      <ul class="nav navbar-nav navbar-right">
+                          <li>
+                              <% if user_signed_in? %>
+                                <%= link_to('Logout', destroy_user_session_path, :method => :delete) %>
+                              <% else %>
+                                <%= link_to('Login', new_user_session_path)  %>  
+                              <% end %>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </nav>
 
-        <%= link_to "Brands", brands_path %>
-        |
-        <%= link_to "Colors", colors_path %>
-        |
-        <%= link_to "Models", models_path %>
-        |
-        <%= link_to "Goods Types", goods_types_path %>
-        |
-        <%= link_to "Regions", regions_path %>
-        |
-        <%= link_to "Price Codes", price_codes_path %>
-        |
-        <%= link_to "Vendors", vendors_path %>
-        |
-        <%= link_to "Products", products_path %>
-        |
-        <%= link_to "Size Groups", size_groups_path %>
-        |
-        <%= link_to "Sales Promotion Girls", sales_promotion_girls_path %>
-        |
-        <%= link_to "Supervisors", supervisors_path %>
-        |
-        <%= link_to "Warehouses", warehouses_path %>
-        |        
-        <%= link_to "Purchase Orders", purchase_orders_path %>
-        |
-        <%= link_to "Stocks", stocks_path %>
-        |
-        <%= link_to "Purchase Returns", purchase_returns_path %>
-        |
-        <% if user_signed_in? %>
-          <%= link_to('Logout', destroy_user_session_path, :method => :delete) %>        
-        <% else %>
-          <%= link_to('Login', new_user_session_path)  %>  
-        <% end %>
 
-        <p class="notice" id="notice"><%= notice %></p>
-        <p class="alert"><%= alert %></p>
+          <div class="container-fluid">
+              <div class="row">
+                  <div class="col-sm-3 col-md-2 sidebar">
+                      <ul class="nav nav-sidebar">
+                          <li class="<%= params[:controller].eql?("brands") ? "active" : "" %>"><%= link_to "Brands", brands_path %></li>
+                          <li class="<%= params[:controller].eql?("colors") ? "active" : "" %>"><%= link_to "Colors", colors_path %></li>
+                          <li class="<%= params[:controller].eql?("models") ? "active" : "" %>"><%= link_to "Models", models_path %></li>
+                          <li class="<%= params[:controller].eql?("goods_types") ? "active" : "" %>"><%= link_to "Goods Types", goods_types_path %></li>
+                          <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path %></li>
+                          <li class="<%= params[:controller].eql?("price_codes") ? "active" : "" %>"><%= link_to "Price Codes", price_codes_path %></li>
+                          <li class="<%= params[:controller].eql?("vendors") ? "active" : "" %>"><%= link_to "Vendors", vendors_path %></li>
+                          <li class="<%= params[:controller].eql?("products") ? "active" : "" %>"><%= link_to "Products", products_path %></li>
+                          <li class="<%= params[:controller].eql?("size_groups") ? "active" : "" %>"><%= link_to "Size Groups", size_groups_path %></li>
+                          <li class="<%= params[:controller].eql?("sales_promotion_girls") ? "active" : "" %>"><%= link_to "Sales Promotion Girls", sales_promotion_girls_path %></li>
+                          <li class="<%= params[:controller].eql?("supervisors") ? "active" : "" %>"><%= link_to "Supervisors", supervisors_path %></li>
+                          <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path %></li>
+                          <li class="<%= params[:controller].eql?("purchase_orders") ? "active" : "" %>"><%= link_to "Purchase Orders", purchase_orders_path %></li>
+                          <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stocks", stocks_path %></li>
+                          <li class="<%= params[:controller].eql?("purchase_returns") ? "active" : "" %>"><%= link_to "Purchase Returns", purchase_returns_path %></li>
+                      </ul>
+                  </div>
+                  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                      <p class="notice" id="notice"><%= notice %></p>
+                      <p class="alert"><%= alert %></p>
 
-        <%= yield %>
+                      <%= yield %>
+                  </div>
+              </div>
 
-    </body>
-</html>
+
+          </div>
+      </body>
+  </html>
