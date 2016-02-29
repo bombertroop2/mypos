@@ -1,66 +1,105 @@
-<%= form_for(@vendor) do |f| %>
-  <% if @vendor.errors.any? %>
-    <div id="error_explanation">
-        <h2><%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:</h2>
+<%= form_for(@vendor, html: {class: "form-horizontal"}) do |f| %>
+    <!--
+    <% if @vendor.errors.any? %>
+                                    <div id="error_explanation">
+                                        <h2><%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:</h2>
 
-        <ul>
-            <% @vendor.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-        </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-      <%= f.label :code %><br>
-      <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
-    </div>
-    <div class="field">
-        <%= f.label :name %><br>
-        <%= f.text_field :name, class: "capitalize inputs", tabindex: "2" %>
-      </div>
-      <div class="field">
-          <%= f.label :address %><br>
-          <%= f.text_area :address, rows: 6, tabindex: "3" %>
-      </div>
-      <div class="field">
-          <%= f.label :phone %><br>
-          <%= f.telephone_field :phone, class: "inputs", tabindex: "4", size: 10 %>
-        </div>
-        <div class="field">
-            <%= f.label :facsimile %><br>
-            <%= f.telephone_field :facsimile, class: "inputs", tabindex: "5", size: 10 %>
-          </div>
-          <div class="field">
-              <%= f.label :email %><br>
-              <%= f.email_field :email, class: "inputs", tabindex: "6" %>
+                                        <ul>
+      <% @vendor.errors.full_messages.each do |message| %>
+                                                                          <li><%= message %></li>
+      <% end %>
+                                        </ul>
+                                    </div>
+    <% end %>
+    -->
+    <div class="form-group<%= control_group_error(@vendor, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1" %>
+                <%= error_help_text(@vendor, :code) %>
             </div>
-            <div class="field">
-                <%= f.label :pic_name %><br>
-                <%= f.text_field :pic_name, class: "capitalize inputs", tabindex: "7" %>
-              </div>
-              <div class="field">
-                  <%= f.label :pic_phone %><br>
-                  <%= f.telephone_field :pic_phone, class: "inputs", tabindex: "8", size: 10 %>
+        </div>
+        <div class="form-group<%= control_group_error(@vendor, :name) %>">
+            <%= f.label :name, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :name, class: "form-control capitalize inputs", tabindex: "2" %>
+                    <%= error_help_text(@vendor, :name) %>
                 </div>
-                <div class="field">
-                    <%= f.label :pic_mobile_phone %><br>
-                    <%= f.telephone_field :pic_mobile_phone, class: "inputs", tabindex: "9", size: 12 %>
-                  </div>
-                  <div class="field">
-                      <%= f.label :pic_email %><br>
-                      <%= f.email_field :pic_email, class: "inputs", tabindex: "10" %>
+            </div>
+            <div class="form-group<%= control_group_error(@vendor, :address) %>">
+                <%= f.label :address, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_area :address, rows: 6, tabindex: "3", class: "form-control" %>
+                        <%= error_help_text(@vendor, :address) %>
                     </div>
-                    <div class="field">
-                        <%= f.label :terms_of_payment %><br />
-                        <%= f.number_field :terms_of_payment, class: "inputs", tabindex: "11" %>
-                      </div>
-                      <div class="field">
-                          <%= f.label :value_added_tax %><br />
-                          <%= f.select :value_added_tax, options_for_select(Vendor::VAT, @vendor.value_added_tax), {prompt: true}, {tabindex: "12", class: "inputs"} %>
+                </div>
+                <div class="form-group<%= control_group_error(@vendor, :phone) %>">
+                    <%= f.label :phone, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.telephone_field :phone, class: "inputs form-control", tabindex: "4", size: 10 %>
+                            <%= error_help_text(@vendor, :phone) %>
                         </div>
+                    </div>
+                    <div class="form-group<%= control_group_error(@vendor, :facsimile) %>">
+                        <%= f.label :facsimile, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.telephone_field :facsimile, class: "form-control inputs", tabindex: "5", size: 10 %>
+                                <%= error_help_text(@vendor, :facsimile) %>
+                            </div>
+                        </div>
+                        <div class="form-group<%= control_group_error(@vendor, :email) %>">
+                            <%= f.label :email, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.email_field :email, class: "form-control inputs", tabindex: "6" %>
+                                    <%= error_help_text(@vendor, :email) %>
+                                </div>
+                            </div>
+                            <div class="form-group<%= control_group_error(@vendor, :pic_name) %>">
+                                <%= f.label :pic_name, class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.text_field :pic_name, class: "form-control capitalize inputs", tabindex: "7" %>
+                                        <%= error_help_text(@vendor, :pic_name) %>
+                                    </div>
+                                </div>
+                                <div class="form-group<%= control_group_error(@vendor, :pic_phone) %>">
+                                    <%= f.label :pic_phone, class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.telephone_field :pic_phone, class: "form-control inputs", tabindex: "8", size: 10 %>
+                                            <%= error_help_text(@vendor, :pic_phone) %>
+                                        </div>
+                                    </div>
+                                    <div class="form-group<%= control_group_error(@vendor, :pic_mobile_phone) %>">
+                                        <%= f.label :pic_mobile_phone, class: "col-sm-2 control-label" %>
+                                          <div class="col-sm-10">
+                                              <%= f.telephone_field :pic_mobile_phone, class: "form-control inputs", tabindex: "9", size: 12 %>
+                                                <%= error_help_text(@vendor, :pic_mobile_phone) %>
+                                            </div>
+                                        </div>
+                                        <div class="form-group<%= control_group_error(@vendor, :pic_email) %>">
+                                            <%= f.label :pic_email, class: "col-sm-2 control-label" %>
+                                              <div class="col-sm-10">
+                                                  <%= f.email_field :pic_email, class: "form-control inputs", tabindex: "10" %>
+                                                    <%= error_help_text(@vendor, :pic_email) %>
+                                                </div>
+                                            </div>
+                                            <div class="form-group<%= control_group_error(@vendor, :terms_of_payment) %>">
+                                                <%= f.label :terms_of_payment, class: "col-sm-2 control-label" %>
+                                                  <div class="col-sm-10">
+                                                      <%= f.number_field :terms_of_payment, class: "form-control inputs", tabindex: "11" %>
+                                                        <%= error_help_text(@vendor, :terms_of_payment) %>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group<%= control_group_error(@vendor, :value_added_tax) %>">
+                                                    <%= f.label :value_added_tax, class: "col-sm-2 control-label" %>
+                                                      <div class="col-sm-10">
+                                                          <%= f.select :value_added_tax, options_for_select(Vendor::VAT, @vendor.value_added_tax), {prompt: true}, {tabindex: "12", class: "form-control inputs"} %>
+                                                            <%= error_help_text(@vendor, :value_added_tax) %>
+                                                        </div>
+                                                    </div>
 
-                        <div class="actions">
-                            <%= f.submit "Submit", tabindex: "13" %>
-                        </div>
-                      <% end %>
+                                                    <div class="form-group">
+                                                        <div class="col-sm-offset-2 col-sm-10">
+                                                            <%= f.submit "Save", class: "btn btn-default active" %>
+                                                          </div>
+                                                      </div>
+                                                    <% end %>

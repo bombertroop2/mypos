@@ -1,80 +1,126 @@
-<%= form_for(@product) do |f| %>
-  <% if @product.errors.any? %>
-    <div id="error_explanation">
-        <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+<%= form_for(@product, html: {class: "form-horizontal"}) do |f| %>
+    <!--
+    <% if @product.errors.any? %>
+                                                <div id="error_explanation">
+                                                    <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
 
-        <ul>
-            <% @product.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-        </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-      <%= f.label :code %><br>
-      <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
-    </div>
-    <div class="field">
-        <%= f.label :description %><br>
-        <%= f.text_area :description, rows: 6, tabindex: "2" %>
-    </div>
-    <div class="field">
-        <%= f.label :brand_id %><br>
-        <%= f.select :brand_id, options_from_collection_for_select(Brand.all, :id, :name, @product.brand_id.to_s), {prompt: true}, {tabindex: "3"} %>
-    </div>
-    <div class="field">
-        <%= f.label :sex %><br>
-        <%= f.select :sex, options_for_select(Product::SEX, @product.sex), {prompt: true}, {tabindex: "4"} %>
-    </div>
-    <div class="field">
-        <%= f.label :vendor_id %><br>
-        <%= f.select :vendor_id, options_from_collection_for_select(Vendor.all, :id, :name, @product.vendor_id.to_s), {prompt: true}, {tabindex: "5"} %>
-    </div>
-    <div class="field">
-        <%= f.label :target %><br>
-        <%= f.select :target, options_for_select(Product::TARGETS, @product.target), {prompt: true}, {tabindex: "6"} %>
-    </div>
-    <div class="field">
-        <%= f.label :model_id %><br>
-        <%= f.select :model_id, options_from_collection_for_select(Model.all, :id, :name, @product.model_id.to_s), {prompt: true}, {tabindex: "7"} %>
-    </div>
-    <div class="field">
-        <%= f.label :goods_type_id %><br>
-        <%= f.select :goods_type_id, options_from_collection_for_select(GoodsType.all, :id, :name, @product.goods_type_id.to_s), {prompt: true}, {tabindex: "8"} %>
-    </div>
-    <div class="field">
-        <% if @product.image? %>
-          <%= image_tag(@product.image_url(:thumb)) %></br>
-        <% end %>
-        <%= f.label :image %><br />
-        <%= f.file_field :image, tabindex: "9" %>
-        <%= f.hidden_field :image_cache %>
-    </div>    
-    <div class="field">
-        <label>
-            <%= f.check_box :remove_image, tabindex: "10" %> Remove image
-        </label>
-    </div>
-    <div class="field">
-        <%= f.label :effective_date %><br>
-        <%= f.text_field :effective_date, size: 10, readonly: true, tabindex: "11" %>
-    </div>
-    <div class="field">
-        <%= f.label :cost %><br>
-        <%= f.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
-          "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16 %>
-    </div>
-    <div class="field">
-        <%= f.label :size_group_id %><br>
-        <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.all, :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13"} %>
-    </div>
-    <div id="size_collection_container">
-        <% unless @sizes.blank? %>
-          <%= render 'size_collections' %>
-        <% end %>
-    </div>
-    <div class="actions">
-        <%= f.submit "Submit", tabindex: "14" %>
-    </div>
-  <% end %>
+                                                    <ul>
+      <% @product.errors.full_messages.each do |message| %>
+                                                                                                  <li><%= message %></li>
+      <% end %>
+                                                    </ul>
+                                                </div>
+    <% end %>
+    -->
+    <div class="form-group<%= control_group_error(@product, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1" %>
+                <%= error_help_text(@product, :code) %>
+            </div>
+        </div>
+        <div class="form-group<%= control_group_error(@product, :description) %>">
+            <%= f.label :description, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_area :description, rows: 6, tabindex: "2", class: "form-control" %>
+                    <%= error_help_text(@product, :description) %>
+                </div>
+            </div>
+            <div class="form-group<%= control_group_error(@product, :brand_id) %>">
+                <%= f.label :brand_id, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.select :brand_id, options_from_collection_for_select(Brand.all, :id, :name, @product.brand_id.to_s), {prompt: true}, {tabindex: "3", class: "form-control"} %>
+                        <%= error_help_text(@product, :brand_id) %>
+                    </div>
+                </div>
+                <div class="form-group<%= control_group_error(@product, :sex) %>">
+                    <%= f.label :sex, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.select :sex, options_for_select(Product::SEX, @product.sex), {prompt: true}, {tabindex: "4", class: "form-control"} %>
+                            <%= error_help_text(@product, :sex) %>
+                        </div>
+                    </div>
+                    <div class="form-group<%= control_group_error(@product, :vendor_id) %>">
+                        <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.select :vendor_id, options_from_collection_for_select(Vendor.all, :id, :name, @product.vendor_id.to_s), {prompt: true}, {tabindex: "5", class: "form-control"} %>
+                                <%= error_help_text(@product, :vendor_id) %>
+                            </div>
+                        </div>
+                        <div class="form-group<%= control_group_error(@product, :target) %>">
+                            <%= f.label :target, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.select :target, options_for_select(Product::TARGETS, @product.target), {prompt: true}, {tabindex: "6", class: "form-control"} %>
+                                    <%= error_help_text(@product, :target) %>
+                                </div>
+                            </div>
+                            <div class="form-group<%= control_group_error(@product, :model_id) %>">
+                                <%= f.label :model_id, class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.select :model_id, options_from_collection_for_select(Model.all, :id, :name, @product.model_id.to_s), {prompt: true}, {tabindex: "7", class: "form-control"} %>
+                                        <%= error_help_text(@product, :model_id) %>
+                                    </div>
+                                </div>
+                                <div class="form-group<%= control_group_error(@product, :goods_type_id) %>">
+                                    <%= f.label :goods_type_id, class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.select :goods_type_id, options_from_collection_for_select(GoodsType.all, :id, :name, @product.goods_type_id.to_s), {prompt: true}, {tabindex: "8", class: "form-control"} %>
+                                            <%= error_help_text(@product, :goods_type_id) %>
+                                        </div>
+                                    </div>
+                                    <div class="form-group<%= control_group_error(@product, :image) %>">
+                                        <% if @product.image? %>
+                                          <%= image_tag(@product.image_url(:thumb)) %></br>
+                                        <% end %>
+                                        <%= f.label :image, class: "col-sm-2 control-label" %>
+                                          <div class="col-sm-10">
+                                              <%= f.file_field :image, tabindex: "9" %>
+                                              <%= f.hidden_field :image_cache %>
+                                              <%= error_help_text(@product, :image) %>
+                                          </div>
+                                      </div>    
+                                      <div class="form-group">
+                                          <div class="col-sm-offset-2 col-sm-10">
+                                              <%= f.check_box :remove_image, tabindex: "10" %> Remove image
+                                          </div>
+                                      </div>
+                                      <div class="form-group<%= control_group_error(@product, :effective_date) %>">
+                                          <%= f.label :effective_date, class: "col-sm-2 control-label" %>
+                                            <div class="col-sm-10">
+                                                <%= f.text_field :effective_date, size: 10, readonly: true, tabindex: "11", class: "form-control" %>
+                                                  <%= error_help_text(@product, :effective_date) %>
+                                              </div>
+                                          </div>
+                                          <div class="form-group<%= control_group_error(@product, :cost) %>">
+                                              <%= f.label :cost, class: "col-sm-2 control-label" %>
+                                                <div class="col-sm-10">
+                                                    <%= f.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
+                                                      "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
+                                                      <%= error_help_text(@product, :cost) %>
+                                                  </div>
+                                              </div>
+                                              <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
+                                                  <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
+                                                    <div class="col-sm-10">
+                                                        <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.all, :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13", class: "form-control"} %>
+                                                          <%= error_help_text(@product, :size_group_id) %>
+                                                      </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                      <div class="col-sm-offset-2 col-sm-10">
+                                                          <div id="size_collection_container">
+                                                              <% unless @sizes.blank? %>
+                                                                <%= render 'size_collections' %>
+                                                              <% end %>
+                                                          </div>
+                                                          <% if @product.errors and @product.errors.messages[:"product_price_codes.base"] %>
+                                                          <span class='help-block'><%= @product.errors.messages[:"product_price_codes.base"][0] %></span>
+                                                          <% end %>
+                                                      </div>                                                      
+                                                  </div>
+                                                  <div class="form-group">
+                                                      <div class="col-sm-offset-2 col-sm-10">
+                                                          <%= f.submit "Save", class: "btn btn-default active" %>
+                                                        </div>
+                                                    </div>
+                                                  <% end %>
