@@ -1,42 +1,78 @@
-<p>
-  <strong>Identifier:</strong>
-  <%= @sales_promotion_girl.identifier %>
-</p>
+<div class="page-header"><h1>Sales Promotion Girl Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Identifier:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @sales_promotion_girl.identifier %>
+        </div>
+    </div>
 
-<p>
-  <strong>Name:</strong>
-  <%= @sales_promotion_girl.name %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Name:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @sales_promotion_girl.name %>
+        </div>
+    </div>
 
-<p>
-  <strong>Address:</strong>
-  <%= @sales_promotion_girl.address %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Address:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @sales_promotion_girl.address %>
+        </div>
+    </div>
 
-<p>
-  <strong>Gender:</strong>
-  <%= @sales_promotion_girl.gender.capitalize %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Gender:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @sales_promotion_girl.gender.capitalize %>
+        </div>
+    </div>
 
-<p>
-  <strong>Phone:</strong>
-  <%= remove_empty_space_from_phone_number(@sales_promotion_girl.phone) %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Phone:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= remove_empty_space_from_phone_number(@sales_promotion_girl.phone) %>
+        </div>
+    </div>
 
-<p>
-  <strong>Province:</strong>
-  <%= @sales_promotion_girl.province %>
-</p>
 
-<p>
-  <strong>Warehouse:</strong>
-  <%= @sales_promotion_girl.warehouse.code if @sales_promotion_girl.warehouse %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Province:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @sales_promotion_girl.province %>
+        </div>
+    </div>
 
-<p>
-  <strong>Mobile phone:</strong>
-  <%= remove_empty_space_from_phone_number(@sales_promotion_girl.mobile_phone) %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Warehouse:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @sales_promotion_girl.warehouse.code if @sales_promotion_girl.warehouse %>
+        </div>
+    </div>
 
-<%= link_to 'Edit', edit_sales_promotion_girl_path(@sales_promotion_girl) %> |
-<%= link_to 'Back', sales_promotion_girls_path %>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Mobile phone:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= remove_empty_space_from_phone_number(@sales_promotion_girl.mobile_phone) %>
+        </div>
+    </div>
+
+</div>
+<%= link_to 'Edit', edit_sales_promotion_girl_path(@sales_promotion_girl), class: "btn btn-default active" %>

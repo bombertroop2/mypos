@@ -1,18 +1,31 @@
-<p>
-  <b>Code:</b>
-  <%= @region.code %>
-</p>
+<div class="page-header"><h1>Region Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @region.code %>
+        </div>
+    </div>
 
-<p>
-  <b>Name:</b>
-  <%= @region.name %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Name:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @region.name %>
+        </div>
+    </div>
 
-<p>
-  <b>Description:</b>
-  <%= @region.description %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Description:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @region.description %>
+        </div>
+    </div>
 
-
-<%= link_to 'Edit', edit_region_path(@region) %> |
-<%= link_to 'Back', regions_path %>
+</div>
+<%= link_to 'Edit', edit_region_path(@region), class: "btn btn-default active" %>

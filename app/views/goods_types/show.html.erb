@@ -1,16 +1,30 @@
-<p>
-  <b>Code:</b>
-  <%= @goods_type.code %>
-</p>
+<div class="page-header"><h1>Goods Type Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @goods_type.code %>
+        </div>
+    </div>
 
-<p>
-  <b>Name:</b>
-  <%= @goods_type.name %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Name:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @goods_type.name %>
+        </div>
+    </div>
 
-<p>
-  <b>Description:</b>
-  <%= @goods_type.description %>
-</p>
-<%= link_to 'Edit', edit_goods_type_path(@goods_type) %> |
-<%= link_to 'Back', goods_types_path %>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Description:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @goods_type.description %>
+        </div>
+    </div>
+</div>
+<%= link_to 'Edit', edit_goods_type_path(@goods_type), class: "btn btn-default active" %>

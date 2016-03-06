@@ -1,10 +1,16 @@
 <%= f.hidden_field :spg_role %>
-<div class="field">
-    <%= f.label :email %><br>
-    <%= f.email_field :email, class: "inputs", tabindex: "9" %>
-  </div>
-
-  <div class="field">
-      <%= f.label :password %><br />
-      <%= f.password_field :password, autocomplete: "off", class: "inputs", tabindex: "10" %>
+<div class="form-group<%= control_group_error(f.object, :email) %>">
+    <%= f.label :email, class: "col-sm-2 control-label" %>
+      <div class="col-sm-10">
+          <%= f.email_field :email, class: "inputs form-control", tabindex: "9" %>
+            <%= error_help_text(f.object, :email) %>
+        </div>
     </div>
+
+    <div class="form-group<%= control_group_error(f.object, :password) %>">
+        <%= f.label :password, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.password_field :password, autocomplete: "off", class: "form-control inputs", tabindex: "10" %>
+                <%= error_help_text(f.object, :password) %>
+            </div>
+        </div>

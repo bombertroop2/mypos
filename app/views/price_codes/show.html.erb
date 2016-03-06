@@ -1,17 +1,31 @@
-<p>
-  <strong>Code:</strong>
-  <%= @price_code.code %>
-</p>
+<div class="page-header"><h1>Price Code Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @price_code.code %>
+        </div>
+    </div>
 
-<p>
-  <strong>Name:</strong>
-  <%= @price_code.name %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Name:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @price_code.name %>
+        </div>
+    </div>
 
-<p>
-  <strong>Description:</strong>
-  <%= @price_code.description %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Description:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @price_code.description %>
+        </div>
+    </div>
+</div>
 
-<%= link_to 'Edit', edit_price_code_path(@price_code) %> |
-<%= link_to 'Back', price_codes_path %>
+<%= link_to 'Edit', edit_price_code_path(@price_code), class: "btn btn-default active" %>

@@ -1,17 +1,30 @@
-<p>
-  <strong>Code:</strong>
-  <%= @size_group.code %>
-</p>
+<div class="page-header"><h1>Size Group Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @size_group.code %>
+        </div>
+    </div>
 
-<p>
-  <strong>Description:</strong>
-  <%= @size_group.description %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Description:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @size_group.description %>
+        </div>
+    </div>
 
-<p>
-  <strong>Sizes:</strong>
-  <%= @size_group.sizes.pluck(:size).sort.join(", ") %>
-</p>
-
-<%= link_to 'Edit', edit_size_group_path(@size_group) %> |
-<%= link_to 'Back', size_groups_path %>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Sizes:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @size_group.sizes.pluck(:size).sort.join(", ") %>
+        </div>
+    </div>
+</div>
+<%= link_to 'Edit', edit_size_group_path(@size_group), class: "btn btn-default active" %>

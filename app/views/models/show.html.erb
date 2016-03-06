@@ -1,17 +1,30 @@
-<p>
-  <b>Code:</b>
-  <%= @model.code %>
-</p>
+<div class="page-header"><h1>Model Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @model.code %>
+        </div>
+    </div>
 
-<p>
-  <b>Name:</b>
-  <%= @model.name %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Name:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @model.name %>
+        </div>
+    </div>
 
-<p>
-  <b>Description:</b>
-  <%= @model.description %>
-</p>
-
-<%= link_to 'Edit', edit_model_path(@model) %> |
-<%= link_to 'Back', models_path %>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Description:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @model.description %>
+        </div>
+    </div>
+</div>
+<%= link_to 'Edit', edit_model_path(@model), class: "btn btn-default active" %>

@@ -1,82 +1,139 @@
-<p>
-    <strong>Code:</strong>
-    <%= @product.code %>
-</p>
+<div class="page-header"><h1>Product Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.code %>
+        </div>
+    </div>
 
-<p>
-    <strong>Description:</strong>
-    <%= @product.description %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Description:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.description %>
+        </div>
+    </div>
 
-<p>
-    <strong>Brand:</strong>
-    <%= @product.brand.code if @product.brand %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Brand:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.brand.code if @product.brand %>
+        </div>
+    </div>
 
-<p>
-    <strong>Sex:</strong>
-    <%= @product.sex.titleize %>
-</p>
 
-<p>
-    <strong>Vendor:</strong>
-    <%= @product.vendor.code if @product.vendor %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Sex:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.sex.titleize %>
+        </div>
+    </div>
 
-<p>
-    <strong>Target:</strong>
-    <%= @product.target.titleize %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Vendor:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.vendor.code if @product.vendor %>
+        </div>
+    </div>
 
-<p>
-    <strong>Model:</strong>
-    <%= @product.model.code if @product.model %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Target:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.target.titleize %>
+        </div>
+    </div>
 
-<p>
-    <strong>Goods type:</strong>
-    <%= @product.goods_type.code if @product.goods_type %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Model:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.model.code if @product.model %>
+        </div>
+    </div>
 
-<p>
-    <strong>Cost:</strong>
-    <%= number_to_currency(@product.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Goods type:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.goods_type.code if @product.goods_type %>
+        </div>
+    </div>
 
-<p>
-    <strong>Image:</strong>
-    <%= image_tag @product.image_url if @product.image.present? %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Cost:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= number_to_currency(@product.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+        </div>
+    </div>
 
-<p>
-    <strong>Effective date:</strong>
-    <%= @product.effective_date %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Image:
+        </label>
+        <div class="col-sm-10">
+            <%= image_tag @product.image_url if @product.image.present? %>
+        </div>
+    </div>
 
-<h2>Listing product details</h2>
-
-<table>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Effective date:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @product.effective_date %>
+        </div>
+    </div>
+</div>
+<table class="table table-condensed table-responsive table-striped">
     <tr>
-        <th>Barcode</th>
-        <th>Product code</th>
-        <th>Size</th>
-        <th>Color code</th>
-        <th>Price</th>
+        <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>
+        <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Size</strong></td>
+        <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Color</strong></td>
+        <td colspan="<%= @product.product_price_codes.count %>" align="center"><strong>Price</strong></td>
     </tr>
 
-    <% @product.product_price_codes.each do |price_code| %>
-      <tr><th colspan="5"><%= price_code.price_code.code if price_code.price_code %></th></tr>
-      <% price_code.product_details.each do |prod_det| %>
-        <tr>
-            <td><%= prod_det.barcode %></td>
-            <td><%= prod_det.product_price_code.product.code if prod_det.product_price_code and prod_det.product_price_code.product %></td>
-            <td><%= prod_det.size.size if prod_det.size %></td>
-            <td><%= prod_det.color.code if prod_det.color %></td>
-            <td><%= number_to_currency(prod_det.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-        </tr>
-      <% end %>
+    <tr>
+        <% @product.product_price_codes.each do |ppc| %>
+          <td align="center">
+              <strong>
+                  <%= ppc.price_code.code %>
+              </strong>
+          </td>
+        <% end %>
+    </tr>
+
+    <% @product.product_details.each do |prod_det| %>
+      <tr>
+          <td><%= prod_det.barcode %></td>
+          <td><%= prod_det.size.size if prod_det.size %></td>
+          <td><%= prod_det.color.code if prod_det.color %></td>
+          <% @product.product_price_codes.each do |ppc| %>
+            <% if prod_det.product_price_code_id.eql?(ppc.id) %>
+              <td align="right">
+                  <%= number_to_currency(prod_det.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+              </td>
+            <% else %>
+              <td></td>
+            <% end %>
+          <% end %>
+      </tr>
     <% end %>
 </table>
 
-<%= link_to 'Edit', edit_product_path(@product) %> |
-<%= link_to 'Back', products_path %>
+<%= link_to 'Edit', edit_product_path(@product) %>

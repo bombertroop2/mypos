@@ -1,32 +1,58 @@
-<p>
-  <strong>Code:</strong>
-  <%= @supervisor.code %>
-</p>
+<div class="page-header"><h1>Supervisor Detail</h1></div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Code:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @supervisor.code %>
+        </div>
+    </div>
 
-<p>
-  <strong>Name:</strong>
-  <%= @supervisor.name %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Name:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @supervisor.name %>
+        </div>
+    </div>
 
-<p>
-  <strong>Address:</strong>
-  <%= @supervisor.address %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Address:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @supervisor.address %>
+        </div>
+    </div>
 
-<p>
-  <strong>Email:</strong>
-  <%= @supervisor.email %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Email:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= @supervisor.email %>
+        </div>
+    </div>
 
-<p>
-  <strong>Phone:</strong>
-  <%= remove_empty_space_from_phone_number(@supervisor.phone) %>
-</p>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Phone:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= remove_empty_space_from_phone_number(@supervisor.phone) %>
+        </div>
+    </div>
 
-<p>
-  <strong>Mobile phone:</strong>
-  <%= remove_empty_space_from_phone_number(@supervisor.mobile_phone) %>
-</p>
 
-<%= link_to 'Edit', edit_supervisor_path(@supervisor) %> |
-<%= link_to 'Back', supervisors_path %>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+            Mobile phone:
+        </label>
+        <div class="col-sm-10 form-control hidden-box">
+            <%= remove_empty_space_from_phone_number(@supervisor.mobile_phone) %>
+        </div>
+    </div>        
+</div>
+<%= link_to 'Edit', edit_supervisor_path(@supervisor), class: "btn btn-default active" %>

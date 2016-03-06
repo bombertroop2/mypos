@@ -1,41 +1,62 @@
-<%= form_for(@supervisor) do |f| %>
-  <% if @supervisor.errors.any? %>
-    <div id="error_explanation">
-        <h2><%= pluralize(@supervisor.errors.count, "error") %> prohibited this supervisor from being saved:</h2>
+<%= form_for(@supervisor, html: {class: "form-horizontal"}) do |f| %>
+    <!--
+    <% if @supervisor.errors.any? %>
+                      <div id="error_explanation">
+                          <h2><%= pluralize(@supervisor.errors.count, "error") %> prohibited this supervisor from being saved:</h2>
 
-        <ul>
-            <% @supervisor.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-        </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-      <%= f.label :code %><br>
-      <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
-    </div>
-    <div class="field">
-        <%= f.label :name %><br>
-        <%= f.text_field :name, class: "capitalize inputs", tabindex: "2" %>
-      </div>
-      <div class="field">
-          <%= f.label :address %><br>
-          <%= f.text_area :address, rows: 6, tabindex: "3" %>
-      </div>
-      <div class="field">
-          <%= f.label :email %><br>
-          <%= f.email_field :email, class: "inputs", tabindex: "4" %>
-      </div>
-      <div class="field">
-          <%= f.label :phone %><br>
-          <%= f.telephone_field :phone, class: "inputs", tabindex: "5", size: 10 %>
-      </div>
-      <div class="field">
-          <%= f.label :mobile_phone %><br>
-          <%= f.telephone_field :mobile_phone, tabindex: "6", size: 12 %>
-      </div>
-      <div class="actions">
-          <%= f.submit %>
-      </div>
+                          <ul>
+      <% @supervisor.errors.full_messages.each do |message| %>
+                                              <li><%= message %></li>
+      <% end %>
+                          </ul>
+                      </div>
     <% end %>
+    -->
+    <div class="form-group<%= control_group_error(@supervisor, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1" %>
+                <%= error_help_text(@supervisor, :code) %>
+            </div>
+        </div>
+        <div class="form-group<%= control_group_error(@supervisor, :name) %>">
+            <%= f.label :name, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :name, class: "form-control capitalize inputs", tabindex: "2" %>
+                    <%= error_help_text(@supervisor, :name) %>
+                </div>
+            </div>
+            <div class="form-group<%= control_group_error(@supervisor, :address) %>">
+                <%= f.label :address, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_area :address, rows: 6, tabindex: "3", class: "form-control" %>
+                        <%= error_help_text(@supervisor, :address) %>
+                    </div>
+                </div>
+                <div class="form-group<%= control_group_error(@supervisor, :email) %>">
+                    <%= f.label :email, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.email_field :email, class: "form-control inputs", tabindex: "4" %>
+                            <%= error_help_text(@supervisor, :email) %>
+                        </div>
+                    </div>
+                    <div class="form-group<%= control_group_error(@supervisor, :phone) %>">
+                        <%= f.label :phone, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.telephone_field :phone, class: "form-control inputs", tabindex: "5", size: 10 %>
+                                <%= error_help_text(@supervisor, :phone) %>
+                            </div>
+                        </div>
+                        <div class="form-group<%= control_group_error(@supervisor, :mobile_phone) %>">
+                            <%= f.label :mobile_phone, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.telephone_field :mobile_phone, tabindex: "6", size: 12, class: "form-control" %>
+                                    <%= error_help_text(@supervisor, :mobile_phone) %>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <%= f.submit "Save", class: "btn btn-default active" %>
+                                  </div>
+                              </div>
+                            <% end %>

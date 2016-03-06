@@ -114,3 +114,8 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+.hidden-box{
+    border: none !important;
+    box-shadow: none !important;
+}

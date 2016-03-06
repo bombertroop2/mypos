@@ -1,38 +1,49 @@
-<%= form_for(@size_group) do |f| %>
-  <% if @size_group.errors.any? %>
-    <div id="error_explanation">
-        <h2><%= pluralize(@size_group.errors.count, "error") %> prohibited this size_group from being saved:</h2>
+<%= form_for(@size_group, html: {class: "form-horizontal"}) do |f| %>
+    <!--
+    <% if @size_group.errors.any? %>
+                                                            <div id="error_explanation">
+                                                                <h2><%= pluralize(@size_group.errors.count, "error") %> prohibited this size_group from being saved:</h2>
 
-        <ul>
-            <% @size_group.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-        </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-      <%= f.label :code %><br>
-      <%= f.text_field :code, class: "upcase inputs", tabindex: "1" %>
-    </div>
-    <div class="field">
-        <%= f.label :description %><br>
-        <%= f.text_area :description, rows: 6, tabindex: "2" %>
-    </div>
-    <div class="field">
-        Total size<br>
-        <%= text_field_tag :total_size, "", type: :number %> <%= submit_tag "Create", id: "total_size_btn" %>
-    </div>
-    <h3>Sizes</h3>
-    <div id="sizes">
-        <%= f.fields_for :sizes do |size| %>
-          <%= render 'size_fields', f: size %>
-        <% end %>
-        <div class="links">
-            <%= link_to_add_association 'add size', f, :sizes %>
+                                                                <ul>
+      <% @size_group.errors.full_messages.each do |message| %>
+                                                                                                                          <li><%= message %></li>
+      <% end %>
+                                                                </ul>
+                                                            </div>
+    <% end %>
+    -->
+    <div class="form-group<%= control_group_error(@size_group, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1" %>
+                <%= error_help_text(@size_group, :code) %>
+            </div>
         </div>
-    </div>
-    <div class="actions">
-        <%= f.submit %>
-    </div>
-  <% end %>
+        <div class="form-group<%= control_group_error(@size_group, :description) %>">
+            <%= f.label :description, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_area :description, rows: 6, tabindex: "2", class: "form-control" %>
+                    <%= error_help_text(@size_group, :description) %>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">
+                    Total size
+                </label>
+                <div class="col-sm-10">
+                    <%= text_field_tag :total_size, "",style: "display: inline;", type: :number, class: "form-control" %> <%= submit_tag "Create", id: "total_size_btn", class: "btn btn-default active" %>
+                    </div>
+                </div>
+                <div id="sizes">
+                    <%= f.fields_for :sizes do |size| %>
+                      <%= render 'size_fields', f: size %>
+                    <% end %>
+                    <%= link_to_add_association 'add size', f, :sizes %>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <%= f.submit "Save", class: "btn btn-default active" %>
+                      </div>
+                  </div>
+                <% end %>
