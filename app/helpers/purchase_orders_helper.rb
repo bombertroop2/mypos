@@ -13,9 +13,9 @@ module PurchaseOrdersHelper
   end
   
   def get_or_build_purchase_order_product_object(purchase_order, product)
-    purchase_order_product_detail = purchase_order.purchase_order_products.select{|pop| pop.product.eql?(product)}.first
+    purchase_order_product_detail = purchase_order.purchase_order_products.select{|pop| pop.product_id.eql?(product.id)}.first
     unless purchase_order_product_detail
-      purchase_order_product_detail = purchase_order.purchase_order_products.build(product: product)
+      purchase_order_product_detail = purchase_order.purchase_order_products.build(product_id: product.id)
     end
     purchase_order_product_detail
   end

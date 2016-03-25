@@ -1,41 +1,40 @@
+$("#product_ids").val("<%= params[:product_ids] %>");
 if($("#products_detail").html().trim().length == 0)
-  $("#products_detail").html("<%= j(render(partial: "product_quantities")) %>");
-else  {
-  var previousSelectedProductIds = [];
-  var selectedProductIds = "<%= params[:product_ids] %>".split(",");
-  $(".product-table").each(function(){
-    var id = $(this).attr("id").split("_")[2];
-    previousSelectedProductIds.push(id);
-  });
-  
-  
-  var retainedProductIds = intersection(previousSelectedProductIds, selectedProductIds);
-  
-  // remove unuse product
-  $(".product-table").each(function(){
-    var id = $(this).attr("id").split("_")[2];
-    if(retainedProductIds.indexOf(id) == -1)
-      $(this).remove();    
-  });
-  
-  
-  
-  
-  
-  if(!($(previousSelectedProductIds).not(selectedProductIds).length === 0 && $(selectedProductIds).not(previousSelectedProductIds).length === 0))  {
-    $("#products_detail").append("<%= j(render(partial: "product_quantities")) %>");
-    // remove double product
-    var duplicateCount = 0;
-    $(".product-table").each(function(){
-      var id = $(this).attr("id").split("_")[2];
-      if(retainedProductIds.indexOf(id) != -1)
-        duplicateCount++;
-      if(duplicateCount == 2){
-        duplicateCount = 0;
-        $(this).remove();
+$("#products_detail").html("<%= j(render(partial: "product_quantities")) %>");
+else{
+<% if @removed_ids.present? %>
+  <% @removed_ids.each do |removed_id| %>
+    // remove unuse product
+    <% if @purchase_order.new_record? %>
+      $("#product_table_<%= removed_id %>").remove();
+    <% else %>
+      // jika product sudah ada di database
+      if($("#product_table_<%= removed_id %>").find("[type='checkbox']").length > 0){
+      $("#product_table_<%= removed_id %>").hide();
+      $("#product_table_<%= removed_id %>").find("[type='checkbox']").attr("checked", true);
       }
-    });
-    // end remove double product
-  }
-  
+      else // jika produk belum ada di database
+      $("#product_table_<%= removed_id %>").remove();
+    <% end %>
+  <% end %>
+<% else %>
+  <% if @replaced_ids.present? %>
+    <% @replaced_ids.each do |replaced_id| %>
+      // remove unuse product
+      <% if @purchase_order.new_record? %>
+        $("#product_table_<%= replaced_id %>").remove();
+      <% else %>
+        // jika product sudah ada di database
+        if($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0){
+        $("#product_table_<%= replaced_id %>").hide();
+        $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
+        }
+        else // jika produk belum ada di database
+        $("#product_table_<%= replaced_id %>").remove();
+      <% end %>
+    <% end %>      
+  <% end %>
+  $("#products_detail").append("<%= j(render(partial: "product_quantities")) %>");
+  showDeleteMarkedProduct();
+<% end %>
 }

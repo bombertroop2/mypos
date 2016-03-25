@@ -104,29 +104,28 @@
     <tr>
         <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>
         <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Size</strong></td>
-        <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Color</strong></td>
-        <td colspan="<%= @product.product_price_codes.count %>" align="center"><strong>Price</strong></td>
+        <td colspan="<%= @product.price_codes.size %>" align="center"><strong>Price</strong></td>
     </tr>
 
     <tr>
-        <% @product.product_price_codes.each do |ppc| %>
+        <% @product.price_codes.each do |price_code| %>
           <td align="center">
               <strong>
-                  <%= ppc.price_code.code %>
+                  <%= price_code.code %>
               </strong>
           </td>
         <% end %>
     </tr>
 
-    <% @product.product_details.each do |prod_det| %>
+    <% @product.grouped_product_details.each do |prod_det| %>
       <tr>
           <td><%= prod_det.barcode %></td>
           <td><%= prod_det.size.size if prod_det.size %></td>
-          <td><%= prod_det.color.code if prod_det.color %></td>
-          <% @product.product_price_codes.each do |ppc| %>
-            <% if prod_det.product_price_code_id.eql?(ppc.id) %>
+          <% @product.price_codes.each do |price_code| %>
+            <% product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
+            <% if product_detail %>
               <td align="right">
-                  <%= number_to_currency(prod_det.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                  <%= number_to_currency(product_detail.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
               </td>
             <% else %>
               <td></td>
@@ -136,4 +135,4 @@
     <% end %>
 </table>
 
-<%= link_to 'Edit', edit_product_path(@product) %>
+<%= link_to 'Edit', edit_product_path(@product), class: "btn btn-default active" %>

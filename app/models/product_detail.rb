@@ -1,12 +1,12 @@
 class ProductDetail < ActiveRecord::Base
   belongs_to :size
-  belongs_to :color
-  belongs_to :product_price_code
+  belongs_to :price_code
+  belongs_to :product
   
   has_many :product_detail_histories, dependent: :destroy
   #  has_many :purchase_order_details
   
-  validates :barcode, uniqueness: {scope: [:size_id, :product_price_code_id]}
+  validates :barcode, uniqueness: {scope: :price_code_id}
   validates :price, numericality: true, if: proc { |prdet| prdet.price.present? }        
     validates :price, numericality: {greater_than_or_equal_to: 1}, if: proc { |prdet| prdet.price.is_a?(Numeric) }
 
@@ -26,14 +26,14 @@ class ProductDetail < ActiveRecord::Base
             
             
       def create_barcode
-        product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_price_code.product_id.eql?(product_price_code.product_id)}.first
+        product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_id.eql?(product_id)}.first
         if product_detail
           self.barcode = product_detail.barcode
         else
           last_detail = ProductDetail.last
           self.barcode = "000000000000001" if last_detail.nil?
           self.barcode = last_detail.barcode.succ unless last_detail.nil?
-        end        
+        end
       end
         
 

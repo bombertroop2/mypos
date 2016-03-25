@@ -10,7 +10,7 @@ class PurchaseReturn < ActiveRecord::Base
   
   private
   
-  def check_min_return_quantity 
+  def check_min_return_quantity
     valid = false
     purchase_return_products.each do |purchase_return_product|
       if purchase_return_product.purchase_return_items.present?

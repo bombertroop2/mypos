@@ -113,8 +113,8 @@
                                                                 <%= render 'size_collections' %>
                                                               <% end %>
                                                           </div>
-                                                          <% if @product.errors and @product.errors.messages[:"product_price_codes.base"] %>
-                                                            <span class='help-block'><%= @product.errors.messages[:"product_price_codes.base"][0] %></span>
+                                                          <% if @product.errors and @product.errors.messages[:base] %>
+                                                            <span class='help-block'><%= @product.errors.messages[:base][0] %></span>
                                                           <% end %>
                                                       </div>                                                      
                                                   </div>

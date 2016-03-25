@@ -1,77 +1,57 @@
+<% index = 0 %>
 <table class="table table-condensed table-responsive table-bordered">
-    <% index = 0 %>
-    <% @price_codes.each do |price_code| %>
-      <% product_price_code = get_or_build_product_price_code_object(@product, price_code) %>
-      <% product_price_code_array_index = create_price_code_array_variable_name(product_price_code, price_code) %>
-      <%= fields_for product_price_code_array_index, product_price_code do |product_price_code_form| %>
-        <%= product_price_code_form.hidden_field :id %>
-        <%= product_price_code_form.hidden_field :product_id %>
-        <%= product_price_code_form.hidden_field :price_code_id %>
-        <%= product_price_code_form.hidden_field :total_size, value: @sizes.count %>
-      <% end %>
-
-      <tr style="text-align: center">
-          <td colspan="2" rowspan="2"></td>
-          <td colspan="<%= @colors.size %>" align="center"><b>Colors</b><br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "money form-control", "data-a-sep" => ".",
+    <tr style="text-align: center">
+        <td colspan="2" rowspan="2"></td>
+        <td colspan="<%= @price_codes.size %>" align="center"><b>Price</b></td>
+    </tr>
+    <tr style="text-align: center">
+        <% @price_codes.each do |price_code| %>
+          <td align="center"><%= price_code.code %><br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money", "data-a-sep" => ".",
                   "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;width:150px;", size: 16} %></td>
-        </tr>
+          <% end %>
+      </tr>
+      <% @sizes.each_with_index do |size, idx| %>
         <tr style="text-align: center">
-            <% @colors.each do |color| %>
-              <td align="center"><%= color.code %><br /><%= text_field_tag "price_"+price_code.code+"_"+color.code, "", {placeholder: "price", class: "form-control money price-"+price_code.code, "data-a-sep" => ".",
-                      "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;width:150px;", size: 16} %></td>
+            <% if idx.eql? 0 %>
+              <td rowspan="<%= @sizes.size %>" style="vertical-align:middle"><b>Sizes</b></td>
+            <% end %>
+            <td><%= size.size %></td>
+            <% @price_codes.each do |price_code| %>
+              <% product_detail = @product.product_details.select{|pd| pd.size_id.eql?(size.id) && pd.price_code_id.eql?(price_code.id) }.first %>
+              <td align="center">                      
+                  <% if product_detail.new_record? %>
+                    <% product_detail_array_index = "product[product_details_attributes]["+Time.now.to_i.to_s+index.to_s+"]" %>
+                  <% else %>
+                    <% product_detail_array_index = "product[product_details_attributes][]" %>
+                  <% end %>
+                  <%= fields_for product_detail_array_index, product_detail do |product_detail_form| %>
+                    <%= product_detail_form.hidden_field :id %>
+                    <%= product_detail_form.hidden_field :size_id %>
+                    <%= product_detail_form.hidden_field :price_code_id %>
+                    <div class="<%= control_group_error(product_detail, :price) %>">
+                        <%= product_detail_form.text_field :price, placeholder: "price", class: "form-control money price-"+price_code.code, "data-a-sep" => ".",
+                            "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;width:150px;", size: 16 %>
+                          <%= error_help_text(product_detail, :price) %>
+                      </div>  
+                    <% end %>
+                </td>
+                <% index += 1 %>
               <% end %>
           </tr>
-          <% @sizes.each_with_index do |size, idx| %>
-            <tr style="text-align: center">
-                <% if idx.eql? 0 %>
-                  <td rowspan="<%= @sizes.size %>" style="vertical-align:middle"><b><%= price_code.code %></b></td>
-                        <% end %>
-                <td><%= size.size %></td>
-                <% @colors.each do |color| %>
-                  <% product_detail = product_price_code.product_details.select{|pd| pd.size_id.eql?(size.id) && pd.color_id.eql?(color.id) }.first %>
-                  <% unless product_detail %>
-                    <% product_detail = product_price_code.product_details.build(size_id: size.id, color_id: color.id) %>
-                  <% end %>
-                  <td align="center">                      
-                      <% if product_detail.new_record? %>
-                        <% product_detail_array_index = "#{product_price_code_array_index}[product_details_attributes]["+Time.now.to_i.to_s+index.to_s+"]" %>
-                      <% else %>
-                        <% product_detail_array_index = "#{product_price_code_array_index}[product_details_attributes][]" %>
-                      <% end %>
-                      <%= fields_for product_detail_array_index, product_detail do |product_detail_form| %>
-                        <%= product_detail_form.hidden_field :id %>
-                        <%= product_detail_form.hidden_field :size_id %>
-                        <%= product_detail_form.hidden_field :color_id %>
-                        <%= product_detail_form.hidden_field :product_price_code_id %>
-                        <div class="<%= control_group_error(product_detail, :price) %>">
-                            <%= product_detail_form.text_field :price, placeholder: "price", class: "form-control money price-"+price_code.code+"-"+color.code+" price-"+price_code.code, "data-a-sep" => ".",
-                                "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;width:150px;", size: 16 %>
-                              <%= error_help_text(product_detail, :price) %>
-                          </div>  
-                        <% end %>
-                    </td>
-                    <% index += 1 %>
-                  <% end %>
-              </tr>
-            <% end %>
-            <script>
-        <% @colors.each do |color| %>
-                $('#price_<%= price_code.code %>_<%= color.code %>').keyup(function () {
-                    $('.price-<%= price_code.code %>-<%= color.code %>').val($('#price_<%= price_code.code %>_<%= color.code %>').val());
-                });
         <% end %>
-
-              $('#price_<%= price_code.code %>').keyup(function () {
-                  $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
-              });
-            </script>
-          <% end %>
-
-          <script>
-            $(function () {
-                $('.money').autoNumeric('init');  //autoNumeric with defaults
+        <script>
+    <% @price_codes.each do |price_code| %>
+            $('#price_<%= price_code.code %>').keyup(function () {
+                $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
             });
-          </script>
+    <% end %>
+        </script>
+
+        <script>
+          $(function () {
+              $('.money').autoNumeric('init');  //autoNumeric with defaults
+          });
+        </script>
 
 
-      </table>
+    </table>

@@ -23,7 +23,11 @@ class ProductsController < ApplicationController
     @product.effective_date = @product.effective_date.strftime("%d/%m/%Y")
     @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
     @price_codes = PriceCode.order :code
-    @colors = Color.order :code
+    @price_codes.each do |price_code|
+      @sizes.each do |size|
+        @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+      end
+    end
   end
 
   # POST /products
@@ -39,7 +43,11 @@ class ProductsController < ApplicationController
           size_group = SizeGroup.find(@product.size_group_id) rescue nil
           @sizes = size_group ? size_group.sizes.order(:size) : []
           @price_codes = PriceCode.order :code
-          @colors = Color.order :code
+          @price_codes.each do |price_code|
+            @sizes.each do |size|
+              @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+            end
+          end
           format.html { render :new }
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
@@ -47,7 +55,11 @@ class ProductsController < ApplicationController
         size_group = SizeGroup.find(@product.size_group_id) rescue nil
         @sizes = size_group ? size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
-        @colors = Color.order :code
+        @price_codes.each do |price_code|
+          @sizes.each do |size|
+            @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+          end
+        end
         @product.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
       end
@@ -65,14 +77,22 @@ class ProductsController < ApplicationController
         else
           @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
           @price_codes = PriceCode.order :code
-          @colors = Color.order :code
+          @price_codes.each do |price_code|
+            @sizes.each do |size|
+              @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+            end
+          end
           format.html { render :edit }
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
         @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
         @price_codes = PriceCode.order :code
-        @colors = Color.order :code
+        @price_codes.each do |price_code|
+          @sizes.each do |size|
+            @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+          end
+        end
         @product.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
       end
@@ -94,7 +114,11 @@ class ProductsController < ApplicationController
     sg = SizeGroup.find(params[:id]) rescue nil
     @sizes = sg.sizes.order(:size) if sg
     @price_codes = PriceCode.order :code
-    @colors = Color.order :code
+    @price_codes.each do |price_code|
+      @sizes.each do |size|
+        @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
+      end
+    end
     respond_to { |format| format.js }
   end
 
@@ -108,16 +132,14 @@ class ProductsController < ApplicationController
   def product_params
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id, :target, :model_id,
       :goods_type_id, :image, :effective_date, :image_cache, :remove_image, :cost, :size_group_id,
-      product_price_codes_attributes: [:id, :product_id, :price_code_id, :total_size, product_details_attributes: [:id, :size_id, :color_id, :product_price_code_id, :price]]
+      product_details_attributes: [:id, :size_id, :price_code_id, :price]
     )
   end
   
   def convert_cost_price_to_numeric
     params[:product][:cost] = params[:product][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
-    params[:product][:product_price_codes_attributes].each do |price_code_key, value|            
-      params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes].each do |key, value|
-        params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes][key][:price] = params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
-      end if params[:product][:product_price_codes_attributes][price_code_key][:product_details_attributes].present?
-    end if params[:product][:product_price_codes_attributes].present?    
+    params[:product][:product_details_attributes].each do |key, value|
+      params[:product][:product_details_attributes][key][:price] = params[:product][:product_details_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+    end if params[:product][:product_details_attributes].present?
   end
 end

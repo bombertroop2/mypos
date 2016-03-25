@@ -10,7 +10,7 @@ class PurchaseOrderProduct < ActiveRecord::Base
 
 
 
-  accepts_nested_attributes_for :purchase_order_details, allow_destroy: true
+  accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? and attributes[:id].blank? }
 
   accepts_nested_attributes_for :received_purchase_orders, reject_if: proc { |attributes| attributes[:is_received].eql?("0") }
   

@@ -1,16 +1,16 @@
-<table border="1">
+<table class="table table-condensed table-responsive table-bordered">
     <tr>
         <td>
-            <table>
+            <table width="100%">
                 <tr>
-                    <th align="center" colspan="2">PURCHASE ORDER</th>
+                    <td align="center" colspan="2"><strong>PURCHASE ORDER</strong></td>
                 </tr>
                 <tr>
                     <td align="center" colspan="2"><%= @purchase_order.number %></td>
                 </tr>
                 <tr>
                     <td>
-                        <table>
+                        <table class="table-condensed table-responsive">
                             <tr>
                                 <td>To</td>
                                 <td>:</td>
@@ -34,7 +34,7 @@
                         </table>
                     </td>
                     <td valign="top">
-                      <table align="right">
+                        <table align="right" class="table-condensed table-responsive">
                             <tr>
                                 <td>Warehouse</td>
                                 <td>:</td>
@@ -50,24 +50,24 @@
                 </tr>
                 <tr>
                     <td align="center" colspan="2">
-                        <table border="1">
+                        <table class="table table-condensed table-responsive table-bordered">
                             <tbody>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Warehouse Name</th>
-                                    <th>Article Code</th>
-                                    <th>Quantity</th>
-                                    <th>Total Quantity</th>
-                                    <th>Unit Cost</th>
-                                    <th>Total Cost</th>
+                                <tr style="text-align: center">
+                                    <td><strong>No</strong></td>
+                                    <td><strong>Warehouse Name</strong></td>
+                                    <td><strong>Article Code</strong></td>
+                                    <td><strong>Quantity</strong></td>
+                                    <td><strong>Total Quantity</strong></td>
+                                    <td><strong>Unit Cost</strong></td>
+                                    <td><strong>Total Cost</strong></td>
                                 </tr>
                                 <% @purchase_order.purchase_order_products.each_with_index do |po_product, idx| %>
                                   <tr align="center">
-                                      <td><%= idx.succ %></td>
-                                      <td><%= po_product.warehouse.name if po_product.warehouse %></td>
-                                      <td><%= po_product.product.code if po_product.product %></td>
-                                      <td>
-                                          <table border="1" width="100%">
+                                      <td style="vertical-align: middle"><%= idx.succ %></td>
+                                      <td style="vertical-align: middle"><%= po_product.warehouse.name if po_product.warehouse %></td>
+                                      <td style="vertical-align: middle"><%= po_product.product.code if po_product.product %></td>
+                                      <td style="vertical-align: middle">
+                                          <table class="table table-condensed table-responsive table-bordered">
                                               <tbody>
                                                   <tr>
                                                       <td colspan="2" rowspan="2"></td>
@@ -79,9 +79,9 @@
                                                       <% end %>
                                                   </tr>
                                                   <% po_product.colors.each_with_index do |color, idx| %>
-                                                    <tr>
+                                                    <tr align="center">
                                                         <% if idx == 0 %>
-                                                          <td valign="middle" rowspan="<%= po_product.colors.length %>">Colors</td>
+                                                          <td style="vertical-align: middle" rowspan="<%= po_product.colors.length %>">Colors</td>
                                                         <% end %>
                                                         <td align="center"><%= color.code %></td>
                                                         <% po_product.sizes.each do |size| %>
@@ -97,15 +97,15 @@
                                               </tbody>
                                           </table>
                                       </td>
-                                      <td align="right"><%= po_product.total_quantity %></td>
-                                      <td align="right">
+                                      <td align="right" style="vertical-align: middle"><%= po_product.total_quantity %></td>
+                                      <td align="right" style="vertical-align: middle">
                                           <%= number_to_currency(po_product.product.cost,
                                             :separator => ",",
                                             :delimiter => ".",
                                             :unit => "Rp",
                                             :precision => 2) %>
                                       </td>
-                                      <td align="right">
+                                      <td align="right" style="vertical-align: middle">
                                           <%= number_to_currency(po_product.total_cost,
                                             :separator => ",",
                                             :delimiter => ".",
@@ -124,8 +124,6 @@
     </tr>
 </table>
 
-<br />
 
-<%= link_to 'Receive', receive_purchase_order_path(@purchase_order) %> |
-<%= link_to 'Edit', edit_purchase_order_path(@purchase_order) %> |
-<%= link_to 'Back', purchase_orders_path %>
+<%= link_to 'Receive', receive_purchase_order_path(@purchase_order), class: "btn btn-default active" %>
+  <%= link_to 'Edit', edit_purchase_order_path(@purchase_order), class: "btn btn-default active" %>

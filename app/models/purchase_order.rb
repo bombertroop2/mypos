@@ -15,6 +15,10 @@ class PurchaseOrder < ActiveRecord::Base
   before_save :calculate_order_value, unless: proc {|po| po.receiving_po}
 
     before_destroy :prevent_destroy_if_article_received
+    
+    before_update :is_product_has_one_color?
+    
+    after_update :delete_po_if_products_removed
 
     validates :number, :vendor_id, :request_delivery_date, presence: true, unless: proc { |po| po.receiving_po }
       validates :number, uniqueness: true, unless: proc { |po| po.receiving_po }
@@ -22,10 +26,15 @@ class PurchaseOrder < ActiveRecord::Base
           validate :require_at_least_one_received_color, if: proc { |po| po.receiving_po }
             validate :prevent_update_if_article_received, on: :update
             validate :disable_receive_po_if_finish, if: proc { |po| po.receiving_po }
+              validate :minimum_one_color_per_product
 
               accepts_nested_attributes_for :purchase_order_products, allow_destroy: true
 
               private
+              
+              def delete_po_if_products_removed
+                destroy if purchase_order_products.blank?
+              end
 
               def disable_receive_po_if_finish
                 errors.add(:base, "Sorry, this PO's status was finished, you can't receive it anymore") if status.eql?("Finish")
@@ -65,7 +74,7 @@ class PurchaseOrder < ActiveRecord::Base
               def calculate_order_value
                 total_product_value = 0
                 purchase_order_products.each do |pop|
-                  total_quantity = pop.purchase_order_details.map(&:quantity).sum
+                  total_quantity = pop.purchase_order_details.map(&:quantity).compact.sum
                   total_product_value += pop.product.cost * total_quantity 
                 end
         
@@ -94,6 +103,53 @@ class PurchaseOrder < ActiveRecord::Base
 
               def set_status
                 self.status = "Open"
+              end
+              
+              def minimum_one_color_per_product
+                is_valid = false
+                colors = Color.order :id
+                purchase_order_products.each do |pop|
+                  colors.each_with_index do |color, index|
+                    if pop.purchase_order_details.select{|pod| pod.color_id.eql?(color.id)}.size.eql?(pop.product.sizes.size)
+                      is_valid = true
+                      break
+                    else
+                      if index.eql?(colors.size - 1)
+                        is_valid = false
+                        break
+                      end
+                    end
+                  end
+                  
+                  break unless is_valid
+                end
+                
+                errors.add(:base, "Purchase order must have at least one item color per product!") unless is_valid
+              end
+              
+              def is_product_has_one_color?                
+                is_valid = false
+                colors = Color.order :id
+                purchase_order_products.each do |pop|
+                  colors.each_with_index do |color, index|
+                    if pop.purchase_order_details.select{|pod| pod.color_id.eql?(color.id)}.map(&:quantity).compact.size.eql?(pop.product.sizes.size)
+                      is_valid = true
+                      break
+                    else
+                      if index.eql?(colors.size - 1)
+                        is_valid = false
+                        break
+                      end
+                    end
+                  end
+                  
+                  break unless is_valid
+                end
+                
+                unless is_valid
+                  errors.add(:base, "Purchase order must have at least one item color per product!")
+                  false
+                end
               end
 
             end

@@ -1,112 +1,106 @@
-<%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
-<% @products.each do |product| %>
-  <table border="1" class="product-table" id="product_table_<%= product.id %>">
-      <tr style="text-align: center">
-          <th>Product code</th>
-          <th>Size X Color</th>
-      </tr>    
-      <tr>
-          <th>
-              <%= product.code %>
-          </th>
-          <td>
-              <% purchase_order_product_detail = get_or_build_purchase_order_product_object(@purchase_order, product) %>
-              <% purchase_order_product_array_index = create_product_array_variable_name(purchase_order_product_detail, product) %>
-              <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
-                <%= purchase_order_product_detail_form.hidden_field :id %>
-                <%= purchase_order_product_detail_form.hidden_field :product_id %>
-                <%= purchase_order_product_detail_form.select :warehouse_id, options_from_collection_for_select(@store_warehouses, :id, :name), {prompt: true} %>
-              <% end %>
-
-              <% colors = product.colors %>
-              <% sizes = product.sizes %>
-              <% index = 0 %>
-
-              <script>
-                var colorCodes = [];
-              </script>
-
-              <table border="1">
-                  <tr style="text-align: center">
-                      <th colspan="2" rowspan="2"></th>
-                      <th colspan="<%= colors.size %>">Colors<br /><%= text_field_tag "quantity_#{product.id}", "", {placeholder: "quantity", style: "text-align:right;", size: 16, class: "quantity"} %></th>
-                    </tr>
-
-                    <tr style="text-align: center">
-                        <% colors.each do |color| %>
-                          <td><%= color.code %><br /><%= text_field_tag "quantity_#{product.id}_#{color.code}", "", {placeholder: "quantity", class: "quantity-#{product.id} quantity", style: "text-align:right;", size: 16} %></td>
-                          <% end %>
-                      </tr>
-
-                      <% sizes.each_with_index do |size, idx| %>                          
-                        <tr style="text-align: center">
-                            <% if idx.eql? 0 %>
-                              <th rowspan="<%= sizes.size %>">Sizes</th>
-                            <% end %>
-                            <td><%= size.size %></td>                            
-                            <% colors.each do |color| %>
-                              <% if idx == 0 %>
-                            <script>
-                              colorCodes.push('<%= color.code %>');
-                            </script>
-                          <% end %>
-                          <% product_detail = product.grouped_product_details.select{|pd| pd.size_id.eql?(size.id) && pd.color_id.eql?(color.id)}.first %>
-                          <% if product_detail.present? %>
-                            <% purchase_order_detail_detail = get_or_build_purchase_order_detail_object(purchase_order_product_detail, size, color) %>
-                            <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
-                            <td>
-                                <%= fields_for purchase_order_detail_array_index, purchase_order_detail_detail do |purchase_order_detail_detail_form| %>
-                                  <%= purchase_order_detail_detail_form.hidden_field :id %>
-                                  <%= purchase_order_detail_detail_form.hidden_field :size_id %>
-                                  <%= purchase_order_detail_detail_form.hidden_field :color_id %>
-                                  <div class="field">
-                                      <%= purchase_order_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{product.id}-#{color.code} quantity-#{product.id} quantity", style: "text-align:right;", size: 16 %>
-                                    </div>  
-                                  <% end %>
-
-                              </td>
-                              <% index += 1 %>
-                            <% else %>
-                              <td>
-                              </td>
-                            <% end %>
-                          <% end %>
-              </tr>
-            <% end %>              
-        </table></td>
-        </tr>
-        <script>
-          $.each(colorCodes, function (index, value) {
-              $('#quantity_<%= product.id %>_' + value).keyup(function () {
-                  $('.quantity-<%= product.id %>-' + value).val($('#quantity_<%= product.id %>_' + value).val());
-              });
-          });
-          $('#<%= "quantity_#{product.id}" %>').keyup(function () {
-              $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
-          });
-        </script>
-        <% unless purchase_order_product_detail.new_record? %>
-          <tr>
-              <td colspan="2">
-                  <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
-                    <%= purchase_order_product_detail_form.check_box :_destroy %> remove
+<% @purchase_order.purchase_order_products.each do |pop| %>
+  <% if (params[:purchase_order_id].present? and !@purchase_order.new_record? and pop.new_record?) or !params[:purchase_order_id].present? %>
+    <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= pop.product.id %>">
+        <tr style="text-align: center">
+            <td style="vertical-align: middle"><strong>Product code</strong></td>
+            <td style="vertical-align: middle"><strong>Size X Color</strong></td>
+        </tr>    
+        <tr style="text-align: center">
+            <td style="vertical-align: middle">
+                <strong><%= pop.product.code %></strong>
+            </td>
+            <td>
+                <% purchase_order_product_detail = pop %>
+                <% purchase_order_product_array_index = create_product_array_variable_name(purchase_order_product_detail, pop.product) %>
+                <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
+                  <%= purchase_order_product_detail_form.hidden_field :id %>
+                  <%= purchase_order_product_detail_form.hidden_field :product_id %>
+                  <%= purchase_order_product_detail_form.select :warehouse_id, options_from_collection_for_select(@store_warehouses, :id, :name), {prompt: true}, {class: "form-control"} %>
                   <% end %>
-              </td>
-          </tr>          
+
+                  <% sizes = pop.product.sizes %>
+                  <% index = 0 %>
+
+                  <script>
+                    var colorCodes = [];
+                  </script>
+
+                  <table border="1" class="table table-condensed table-responsive table-bordered">
+                      <tr style="text-align: center">
+                          <th colspan="2" rowspan="2"></th>
+                          <td colspan="<%= @colors.size %>" align="center"><strong>Colors</strong><br /><%= text_field_tag "quantity_#{pop.product.id}", "", {placeholder: "quantity", style: "text-align:right;", size: 16, class: "quantity form-control"} %></td>
+                        </tr>
+
+                        <tr style="text-align: center">
+                            <% @colors.each do |color| %>
+                              <td align="center"><%= color.code %><br /><%= text_field_tag "quantity_#{pop.product.id}_#{color.code}", "", {placeholder: "quantity", class: "quantity-#{pop.product.id} quantity form-control", style: "text-align:right;", size: 16} %></td>
+                              <% end %>
+                          </tr>
+
+                          <% sizes.each_with_index do |size, idx| %>                          
+                            <tr style="text-align: center">
+                                <% if idx.eql? 0 %>
+                                  <td rowspan="<%= sizes.size %>" style="vertical-align: middle"><strong>Sizes</strong></td>
+                                <% end %>
+                                <td style="vertical-align: middle"><%= size.size %></td>                            
+                                <% @colors.each do |color| %>
+                                  <% if idx == 0 %>
+                                <script>
+                                  colorCodes.push('<%= color.code %>');
+                                </script>
+                              <% end %>
+                              <% purchase_order_detail_detail = pop.purchase_order_details.select{|pod| pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id)}.first %>
+                              <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
+                              <td align="center" style="vertical-align: middle">
+                                  <%= fields_for purchase_order_detail_array_index, purchase_order_detail_detail do |purchase_order_detail_detail_form| %>
+                                    <%= purchase_order_detail_detail_form.hidden_field :id %>
+                                    <%= purchase_order_detail_detail_form.hidden_field :size_id %>
+                                    <%= purchase_order_detail_detail_form.hidden_field :color_id %>
+                                    <div class="<%= control_group_error(purchase_order_detail_detail, :quantity) %>">
+                                        <%= purchase_order_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{pop.product.id}-#{color.code} quantity-#{pop.product.id} quantity form-control", style: "text-align:right;", size: 16 %>
+                                          <%= error_help_text(purchase_order_detail_detail, :quantity) %>
+                                      </div>
+                                    <% end %>
+
+                                </td>
+                                <% index += 1 %>
+                              <% end %>
+                  </tr>
+                <% end %>              
+            </table></td>
+            </tr>
+            <script>
+              $.each(colorCodes, function (index, value) {
+                  $('#quantity_<%= pop.product.id %>_' + value).keyup(function () {
+                      $('.quantity-<%= pop.product.id %>-' + value).val($('#quantity_<%= pop.product.id %>_' + value).val());
+                  });
+              });
+              $('#<%= "quantity_#{pop.product.id}" %>').keyup(function () {
+                  $('.quantity-<%= pop.product.id %>').val($('#<%= "quantity_#{pop.product.id}" %>').val());
+              });
+            </script>
+            <% unless purchase_order_product_detail.new_record? %>
+              <tr>
+                  <td colspan="2">
+                      <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
+                        <%= purchase_order_product_detail_form.check_box :_destroy %> remove
+                      <% end %>
+                  </td>
+              </tr>          
+            <% end %>
+            </table>
+          <% end %>
         <% end %>
-        </table>
 
-      <% end %>
+        <script>
+          $(".quantity").numeric({
+              decimal: false,
+              negative: false
+          }, function () {
+              alert("Positive integers only");
+              this.value = "";
+              this.focus();
+          });
 
-      <script>
-        $(".quantity").numeric({
-            decimal: false,
-            negative: false
-        }, function () {
-            alert("Positive integers only");
-            this.value = "";
-            this.focus();
-        });
-
-      </script>
+        </script>
 
