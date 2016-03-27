@@ -57,6 +57,10 @@ class SizeGroupsController < ApplicationController
       rescue ActiveRecord::RecordNotUnique => e
         @size_group.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
+      rescue ActiveRecord::RecordNotDestroyed => e
+        @size_group.reload
+        flash.now[:alert] = "Cannot delete size because dependent product exist"
+        format.html { render :edit }
       end
     end
   end
@@ -66,13 +70,23 @@ class SizeGroupsController < ApplicationController
   def destroy
     begin
       @size_group.destroy
-      message = 'Size group was successfully destroyed.'
+      if @size_group.errors.present? and @size_group.errors.messages[:base].present?
+        alert = @size_group.errors.messages[:base].to_sentence
+      else
+        notice = 'Size group was successfully deleted.'
+      end
     rescue Exception => exc
-      message = exc.message
+      alert = exc.message
     end
     
     respond_to do |format|
-      format.html { redirect_to size_groups_url, notice: message }
+      format.html do 
+        if notice.present?
+          redirect_to size_groups_url, notice: notice
+        else
+          redirect_to size_groups_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end
