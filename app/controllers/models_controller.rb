@@ -66,12 +66,18 @@ class ModelsController < ApplicationController
   def destroy
     @model.destroy
     if @model.errors.present? and @model.errors.messages[:base].present?
-      message = @model.errors.messages[:base].to_sentence
+      alert = @model.errors.messages[:base].to_sentence
     else
-      message = 'Model was successfully destroyed.'
+      notice = 'Model was successfully destroyed.'
     end
     respond_to do |format|
-      format.html { redirect_to models_url, notice: message }
+      format.html do
+        if notice.present?
+          redirect_to models_url, notice: notice
+        else
+          redirect_to models_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end
