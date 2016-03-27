@@ -13,8 +13,8 @@ class Product < ActiveRecord::Base
   has_many :sizes, -> {group("sizes.id").order(:size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {group("barcode")}, class_name: "ProductDetail"
+  has_many :purchase_order_products, dependent: :restrict_with_error
   #  has_many :purchase_order_details, through: :product_details
-  #  has_many :purchase_order_products  
   
   accepts_nested_attributes_for :product_details, allow_destroy: true, reject_if: proc {|attributes| attributes[:price].blank? and attributes[:id].blank?}
   
@@ -23,7 +23,7 @@ class Product < ActiveRecord::Base
   validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: :is_validable
     validates :cost, numericality: true, if: proc { |product| product.cost.present? }
       validates :cost, numericality: {greater_than: 0}, if: proc { |product| product.cost.is_a?(Numeric) }
-        validate :check_item
+        validate :check_item, :code_not_changed
   
 
   
@@ -45,6 +45,11 @@ class Product < ActiveRecord::Base
         
   
         private
+        
+        # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
+        def code_not_changed
+          errors.add(:code, "change is not allowed!") if code_changed? && persisted? && purchase_order_products.present?
+        end
         
         def is_all_existed_items_deleted?
           unless product_details.map(&:price).compact.present?

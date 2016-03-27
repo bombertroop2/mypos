@@ -103,8 +103,21 @@ class ProductsController < ApplicationController
   # DELETE /products/1.json
   def destroy
     @product.destroy
+    if @product.errors.present? and @product.errors.messages[:base].present?
+      error_message = @product.errors.messages[:base].to_sentence
+      error_message.slice! "products "
+      alert = error_message
+    else
+      notice = 'Product was successfully deleted.'
+    end
     respond_to do |format|
-      format.html { redirect_to products_url, notice: 'Product was successfully destroyed.' }
+      format.html do 
+        if notice.present?
+          redirect_to products_url, notice: notice
+        else
+          redirect_to products_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end
