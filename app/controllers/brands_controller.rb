@@ -66,12 +66,18 @@ class BrandsController < ApplicationController
   def destroy
     @brand.destroy    
     if @brand.errors.present? and @brand.errors.messages[:base].present?
-      message = @brand.errors.messages[:base].to_sentence
+      alert = @brand.errors.messages[:base].to_sentence
     else
-      message = 'Brand was successfully destroyed.'
+      notice = 'Brand was successfully deleted.'
     end
     respond_to do |format|
-      format.html { redirect_to brands_url, notice: message }
+      format.html do
+        if notice.present?
+          redirect_to brands_url, notice: notice
+        else
+          redirect_to brands_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end
