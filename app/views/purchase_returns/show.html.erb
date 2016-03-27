@@ -1,16 +1,16 @@
-<table border="1">
+<table class="table table-condensed table-responsive table-bordered">
     <tr>
         <td>
-            <table>
+            <table width="100%">
                 <tr>
-                    <th align="center">PURCHASE RETURN</th>
+                    <td align="center"><strong>PURCHASE RETURN</strong></td>
                 </tr>
                 <tr>
                     <td align="center"><%= @purchase_return.number %></td>
                 </tr>
                 <tr>
                     <td>
-                        <table>
+                        <table class="table-condensed table-responsive">
                             <tr>
                                 <td>To</td>
                                 <td>:</td>
@@ -36,29 +36,29 @@
                 </tr>
                 <tr>
                     <td align="center">
-                        <table border="1">
+                        <table class="table table-condensed table-responsive table-bordered">
                             <tbody>
-                                <tr>
-                                    <th rowspan="2">No</th>
-                                    <th rowspan="2">Article Code</th>
-                                    <th colspan="4">Order</th>
-                                    <th colspan="3">Return</th>
+                                <tr style="text-align: center">
+                                    <td rowspan="2" style="vertical-align: middle"><strong>No</strong></td>
+                                    <td rowspan="2" style="vertical-align: middle"><strong>Article Code</strong></td>
+                                    <td colspan="4"><strong>Order</strong></td>
+                                    <td colspan="3"><strong>Return</strong></td>
                                 </tr>
-                                <tr>
-                                    <th>Quantity</th>
-                                    <th>Total Quantity</th>
-                                    <th>Unit Cost</th>
-                                    <th>Total Cost</th>
-                                    <th>Quantity</th>
-                                    <th>Total Quantity</th>
-                                    <th>Total Cost</th>
+                                <tr style="text-align: center">
+                                    <td style="vertical-align: middle"><strong>Quantity</strong></td>
+                                    <td style="vertical-align: middle"><strong>Total Quantity</strong></td>
+                                    <td style="vertical-align: middle"><strong>Unit Cost</strong></td>
+                                    <td style="vertical-align: middle"><strong>Total Cost</strong></td>
+                                    <td style="vertical-align: middle"><strong>Quantity</strong></td>
+                                    <td style="vertical-align: middle"><strong>Total Quantity</strong></td>
+                                    <td style="vertical-align: middle"><strong>Total Cost</strong></td>
                                 </tr>
                                 <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
                                   <tr align="center">
-                                      <td><%= idx.succ %></td>
-                                      <td><%= pr_product.purchase_order_product.product.code if pr_product.purchase_order_product and pr_product.purchase_order_product.product %></td>
-                                      <td>
-                                          <table border="1" width="100%">
+                                      <td style="vertical-align: middle"><%= idx.succ %></td>
+                                      <td style="vertical-align: middle"><%= pr_product.purchase_order_product.product.code if pr_product.purchase_order_product and pr_product.purchase_order_product.product %></td>
+                                      <td style="vertical-align: middle">
+                                          <table class="table table-condensed table-responsive table-bordered">
                                               <tbody>
                                                   <tr>
                                                       <td colspan="2" rowspan="2"></td>
@@ -72,7 +72,7 @@
                                                   <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
                                                     <tr>
                                                         <% if idx == 0 %>
-                                                          <td valign="middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                                          <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
                                                         <% end %>
                                                         <td align="center"><%= color.code %></td>
                                                         <% pr_product.purchase_order_product.sizes.each do |size| %>
@@ -88,23 +88,23 @@
                                               </tbody>
                                           </table>
                                       </td>
-                                      <td align="right"><%= pr_product.purchase_order_product.total_quantity %></td>
-                                      <td align="right">
+                                      <td align="right" style="vertical-align: middle"><%= pr_product.purchase_order_product.total_quantity %></td>
+                                      <td align="right" style="vertical-align: middle">
                                           <%= number_to_currency(pr_product.purchase_order_product.product.cost,
                                             :separator => ",",
                                             :delimiter => ".",
                                             :unit => "Rp",
                                             :precision => 2) %>
                                       </td>
-                                      <td align="right">
+                                      <td align="right" style="vertical-align: middle">
                                           <%= number_to_currency(pr_product.purchase_order_product.total_cost,
                                             :separator => ",",
                                             :delimiter => ".",
                                             :unit => "Rp",
                                             :precision => 2) %>
                                       </td>
-                                      <td>
-                                          <table border="1" width="100%">
+                                      <td style="vertical-align: middle">
+                                          <table class="table table-condensed table-responsive table-bordered">
                                               <tbody>
                                                   <tr>
                                                       <td colspan="2" rowspan="2"></td>
@@ -118,7 +118,7 @@
                                                   <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
                                                     <tr>
                                                         <% if idx == 0 %>
-                                                          <td valign="middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                                          <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
                                                         <% end %>
                                                         <td align="center"><%= color.code %></td>
                                                         <% pr_product.purchase_order_product.sizes.each do |size| %>
@@ -134,8 +134,8 @@
                                               </tbody>
                                           </table>
                                       </td>
-                                      <td align="right"><%= pr_product.total_quantity %></td>
-                                      <td align="right">
+                                      <td align="right" style="vertical-align: middle"><%= pr_product.total_quantity %></td>
+                                      <td align="right" style="vertical-align: middle">
                                           <%= number_to_currency(pr_product.return_total_cost,
                                             :separator => ",",
                                             :delimiter => ".",
@@ -154,8 +154,3 @@
     </tr>
 </table>
 
-<br />
-
-
-
-<%= link_to 'Back', purchase_returns_path %>

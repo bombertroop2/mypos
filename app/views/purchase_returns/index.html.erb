@@ -1,8 +1,8 @@
-<p id="notice"><%= notice %></p>
+<div class="page-header">
+    <h1>Listing Purchase Returns</h1>
+</div>
 
-<h1>Listing Purchase Returns</h1>
-
-<table>
+<table class="table table-condensed table-responsive table-striped">
     <thead>
         <tr>
             <th>Number</th>
@@ -16,12 +16,10 @@
           <tr>
               <td><%= purchase_return.number %></td>
               <td><%= purchase_return.purchase_order.vendor.name %></td>
-              <td><%= link_to 'Show', purchase_return %></td>
+              <td><%= link_to 'Show', purchase_return, class: "btn btn-info btn-xs active" %></td>
           </tr>
         <% end %>
     </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Purchase return', new_purchase_return_path %>
+<%= link_to 'New Purchase return', new_purchase_return_path, class: "btn btn-default active" %>

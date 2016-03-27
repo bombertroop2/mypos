@@ -1,10 +1,10 @@
-<table border="1">
+<table class="table table-condensed table-responsive table-bordered">
     <tbody>
-        <tr>
-            <th>No</th>
-            <th>Article Code</th>
-            <th>Quantity on Hand</th>
-            <th>Return Quantity</th>
+        <tr style="text-align: center">
+            <td><strong>No</strong></td>
+            <td><strong>Article Code</strong></td>
+            <td><strong>Quantity on Hand</strong></td>
+            <td><strong>Return Quantity</strong></td>
         </tr>
         <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
           <% purchase_return_product_array_index = create_return_product_array_variable_name(pr_product, pr_product.purchase_order_product.product) %>
@@ -13,10 +13,10 @@
             <%= purchase_return_product_detail_form.hidden_field :purchase_order_product_id %>
           <% end %>
           <tr align="center">
-              <td><%= idx.succ %></td>
-              <td><%= pr_product.purchase_order_product.product.code if pr_product.purchase_order_product and pr_product.purchase_order_product.product %></td>
-              <td>
-                  <table border="1" width="100%">
+              <td style="vertical-align: middle"><%= idx.succ %></td>
+              <td style="vertical-align: middle"><%= pr_product.purchase_order_product.product.code if pr_product.purchase_order_product and pr_product.purchase_order_product.product %></td>
+              <td style="vertical-align: top">
+                  <table class="table table-condensed table-responsive table-bordered">
                       <tbody>
                           <tr>
                               <td colspan="2" rowspan="2"></td>
@@ -30,19 +30,19 @@
                           <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
                             <tr>
                                 <% if idx == 0 %>
-                                  <td valign="middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                  <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
                                 <% end %>
-                                <td align="center"><%= color.code %></td>
+                                <td style="vertical-align: middle"><%= color.code %></td>
                                 <% pr_product.purchase_order_product.sizes.each do |size| %>
                                   <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
 
                                   <% if pr_item and pr_item.purchase_order_detail and pr_item.purchase_order_detail.stock %>
-                                    <td>      
-                                        <%= pr_item.purchase_order_detail.stock.quantity_on_hand %> pcs
+                                    <td align="right" style="vertical-align: middle">      
+                                        <%= pr_item.purchase_order_detail.stock.quantity_on_hand %>
                                     </td>
                                   <% else %>
-                                    <td>      
-                                        0 pcs
+                                    <td align="right" style="vertical-align: middle">      
+                                        0
                                     </td>
                                   <% end %>
 
@@ -52,8 +52,8 @@
                       </tbody>
                   </table>
               </td>
-              <td>
-                  <table border="1" width="100%">
+              <td style="vertical-align: top">
+                  <table class="table table-condensed table-responsive table-bordered">
                       <tbody>
                           <tr>
                               <td colspan="2" rowspan="2"></td>
@@ -67,20 +67,21 @@
                           <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
                             <tr>
                                 <% if idx == 0 %>
-                                  <td valign="middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                  <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
                                 <% end %>
-                                <td align="center"><%= color.code %></td>
+                                <td style="vertical-align: middle"><%= color.code %></td>
                                 <% pr_product.purchase_order_product.sizes.each do |size| %>
                                   <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
-                                  <td>
+                                  <td style="vertical-align: middle">
                                       <% if pr_item %>
                                         <% purchase_return_item_array_index = create_return_item_array_variable_name(pr_item, pr_item.purchase_order_detail.id, purchase_return_product_array_index) %>
                                         <%= fields_for purchase_return_item_array_index, pr_item do |purchase_return_detail_detail_form| %>
                                           <%= purchase_return_detail_detail_form.hidden_field :id %>
                                           <%= purchase_return_detail_detail_form.hidden_field :purchase_order_detail_id %>
-                                          <div class="field">
-                                              <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity", style: "text-align:right;", size: 5 %>
-                                            </div>  
+                                          <div class="<%= control_group_error(pr_item, :quantity) %>">
+                                              <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control", style: "text-align:right;", size: 5 %>
+                                                <%= error_help_text(pr_item, :quantity) %>
+                                            </div>
                                           <% end %>
                                         <% end %>
                                     </td>

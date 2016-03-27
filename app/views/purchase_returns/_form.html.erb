@@ -1,26 +1,40 @@
-<%= form_for(@purchase_return) do |f| %>
-  <% if @purchase_return.errors.any? %>
-    <div id="error_explanation">
-        <h2><%= pluralize(@purchase_return.errors.count, "error") %> prohibited this purchase_return from being saved:</h2>
+<%= form_for(@purchase_return, html: {class: "form-horizontal"}) do |f| %>
+    <!--
+    <% if @purchase_return.errors.any? %>
+                <div id="error_explanation">
+                    <h2><%= pluralize(@purchase_return.errors.count, "error") %> prohibited this purchase_return from being saved:</h2>
 
-        <ul>
-            <% @purchase_return.errors.each do |attr, message| %>
-              <li><%= message %></li>
-            <% end %>
-        </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-      <%= f.label :purchase_order_id %><br>
-      <%= f.select :purchase_order_id, options_from_collection_for_select(@purchase_orders, :id, :number, @purchase_return.purchase_order_id.to_s), {prompt: true} %>
-  </div>
-  <div id="purchase_order_detail">
-      <% if @purchase_return.purchase_return_products.present? %>
-      <%= render "purchase_order_details" %>
+                    <ul>
+      <% @purchase_return.errors.each do |attr, message| %>
+                                  <li><%= message %></li>
       <% end %>
-  </div>
-  <div class="actions">
-      <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" } %>
-  </div>
-<% end %>
+                    </ul>
+                </div>
+    <% end %>
+    -->
+    <div class="form-group<%= control_group_error(@purchase_return, :purchase_order_id) %>">
+        <%= f.label :purchase_order_id, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.select :purchase_order_id, options_from_collection_for_select(@purchase_orders, :id, :number, @purchase_return.purchase_order_id.to_s), {prompt: true}, {class: "form-control"} %>
+                <%= error_help_text(@purchase_return, :purchase_order_id) %>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div id="purchase_order_detail">
+                    <% if @purchase_return.purchase_return_products.present? %>
+                      <%= render "purchase_order_details" %>
+                    <% end %>
+                </div>
+
+                <% if @purchase_return.errors and @purchase_return.errors.messages[:base] %>
+                  <span class='help-block'><%= @purchase_return.errors.messages[:base][0] %></span>
+                <% end %>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
+              </div>
+          </div>
+        <% end %>
