@@ -66,12 +66,18 @@ class RegionsController < ApplicationController
   def destroy
     @region.destroy
     if @region.errors.present? and @region.errors.messages[:base].present?
-      message = @region.errors.messages[:base].to_sentence
+      alert = @region.errors.messages[:base].to_sentence
     else
-      message = 'Region was successfully destroyed.'
+      notice = 'Region was successfully destroyed.'
     end
     respond_to do |format|
-      format.html { redirect_to regions_url, notice: message }
+      format.html do 
+        if notice.present?
+          redirect_to regions_url, notice: notice
+        else
+          redirect_to regions_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end
