@@ -68,7 +68,7 @@ class GoodsTypesController < ApplicationController
     if @goods_type.errors.present? and @goods_type.errors.messages[:base].present?
       alert = @goods_type.errors.messages[:base].to_sentence
     else
-      notice = 'Goods type was successfully destroyed.'
+      notice = 'Goods type was successfully deleted.'
     end
     respond_to do |format|
       format.html do 

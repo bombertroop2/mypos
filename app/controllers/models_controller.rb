@@ -68,7 +68,7 @@ class ModelsController < ApplicationController
     if @model.errors.present? and @model.errors.messages[:base].present?
       alert = @model.errors.messages[:base].to_sentence
     else
-      notice = 'Model was successfully destroyed.'
+      notice = 'Model was successfully deleted.'
     end
     respond_to do |format|
       format.html do

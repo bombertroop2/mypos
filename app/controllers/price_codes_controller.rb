@@ -66,12 +66,20 @@ class PriceCodesController < ApplicationController
   def destroy
     @price_code.destroy
     if @price_code.errors.present? and @price_code.errors.messages[:base].present?
-      message = @price_code.errors.messages[:base].to_sentence
+      error_message = @price_code.errors.messages[:base].to_sentence
+      error_message.slice! "details "
+      alert = error_message
     else
-      message = 'Price code was successfully destroyed.'
+      notice = 'Price code was successfully deleted.'
     end
     respond_to do |format|
-      format.html { redirect_to price_codes_url, notice: message }
+      format.html do 
+        if notice.present?
+          redirect_to price_codes_url, notice: notice
+        else
+          redirect_to price_codes_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end

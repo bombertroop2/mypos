@@ -68,7 +68,7 @@ class RegionsController < ApplicationController
     if @region.errors.present? and @region.errors.messages[:base].present?
       alert = @region.errors.messages[:base].to_sentence
     else
-      notice = 'Region was successfully destroyed.'
+      notice = 'Region was successfully deleted.'
     end
     respond_to do |format|
       format.html do 
