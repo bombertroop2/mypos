@@ -66,12 +66,18 @@ class GoodsTypesController < ApplicationController
   def destroy
     @goods_type.destroy
     if @goods_type.errors.present? and @goods_type.errors.messages[:base].present?
-      message = @goods_type.errors.messages[:base].to_sentence
+      alert = @goods_type.errors.messages[:base].to_sentence
     else
-      message = 'Goods type was successfully destroyed.'
+      notice = 'Goods type was successfully destroyed.'
     end
     respond_to do |format|
-      format.html { redirect_to goods_types_url, notice: message }
+      format.html do 
+        if notice.present?
+          redirect_to goods_types_url, notice: notice
+        else
+          redirect_to goods_types_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end
