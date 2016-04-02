@@ -66,13 +66,19 @@ class WarehousesController < ApplicationController
   # DELETE /warehouses/1.json
   def destroy
     @warehouse.destroy
-    message = if @warehouse.errors.present? and @warehouse.errors.messages[:base].present?
-      @warehouse.errors.messages[:base].to_sentence
+    if @warehouse.errors.present? and @warehouse.errors.messages[:base].present?
+      alert = @warehouse.errors.messages[:base].to_sentence
     else
-      'Warehouse was successfully destroyed.'
+      notice = 'Warehouse was successfully deleted.'
     end
     respond_to do |format|
-      format.html { redirect_to warehouses_url, notice: message }
+      format.html do 
+        if notice.present?
+          redirect_to warehouses_url, notice: notice
+        else
+          redirect_to warehouses_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end

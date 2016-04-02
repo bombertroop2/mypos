@@ -154,12 +154,18 @@ class PurchaseOrdersController < ApplicationController
   # DELETE /purchase_orders/1.json
   def destroy
     unless @purchase_order.destroy
-      flash[:notice] = @purchase_order.errors.full_messages.first 
+      alert = @purchase_order.errors.full_messages.first 
     else
-      flash[:notice] = 'Purchase order was successfully destroyed.'
+      notice = 'Purchase order was successfully deleted.'
     end
     respond_to do |format|
-      format.html { redirect_to purchase_orders_url }
+      format.html do 
+        if notice.present?
+          redirect_to purchase_orders_url, notice: notice
+        else
+          redirect_to purchase_orders_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end

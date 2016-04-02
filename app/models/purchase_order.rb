@@ -20,7 +20,7 @@ class PurchaseOrder < ActiveRecord::Base
     
     after_update :delete_po_if_products_removed
 
-    validates :number, :vendor_id, :request_delivery_date, presence: true, unless: proc { |po| po.receiving_po }
+    validates :number, :vendor_id, :request_delivery_date, :warehouse_id, presence: true, unless: proc { |po| po.receiving_po }
       validates :number, uniqueness: true, unless: proc { |po| po.receiving_po }
         validates :request_delivery_date, date: {after: proc { Date.today }, message: 'must be after today' }, if: :is_validable
           validate :require_at_least_one_received_color, if: proc { |po| po.receiving_po }

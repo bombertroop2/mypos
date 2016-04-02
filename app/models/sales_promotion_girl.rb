@@ -28,9 +28,7 @@ class SalesPromotionGirl < ActiveRecord::Base
   private
   
   def unlink_from_user_if_role_downgraded
-    if role_was.eql?("cashier") and role.eql?("spg")
-      user.destroy
-    end
+    user.destroy if role_was.eql?("cashier") and role.eql?("spg")
   end
 
   def titleize_name

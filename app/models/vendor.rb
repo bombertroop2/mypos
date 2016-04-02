@@ -14,7 +14,7 @@ class Vendor < ActiveRecord::Base
     ]
 
     has_many :products, dependent: :restrict_with_error
-    #  has_many :purchase_orders
+    has_many :purchase_orders, dependent: :restrict_with_error
 
     before_validation :upcase_code
 
@@ -25,6 +25,6 @@ class Vendor < ActiveRecord::Base
     end
     
     def code_not_changed
-      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && products.present?
+      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (products.present? || purchase_orders.present?)
     end
   end
