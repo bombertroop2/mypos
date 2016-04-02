@@ -7,7 +7,7 @@ class PurchaseReturn < ActiveRecord::Base
   accepts_nested_attributes_for :purchase_return_products
   
   before_validation :generate_number
-  
+    
   private
   
   def check_min_return_quantity

@@ -26,21 +26,26 @@ class PurchaseReturnsController < ApplicationController
   # POST /purchase_returns.json
   def create
     @purchase_return = PurchaseReturn.new(purchase_return_params)
-
+    is_exception_raised = false
     respond_to do |format|
-      if @purchase_return.save
-        format.html { redirect_to @purchase_return, notice: 'Purchase return was successfully created.' }
-        format.json { render :show, status: :created, location: @purchase_return }
-      else
-        @purchase_return.purchase_return_products.each do |prp|
-          prp.purchase_order_product.purchase_order_details.each do |pod|
-            prp.purchase_return_items.build purchase_order_detail_id: pod.id if prp.purchase_return_items.select{|pri| pri.purchase_order_detail.eql?(pod)}.blank?
+      begin
+        if @purchase_return.save
+          format.html { redirect_to @purchase_return, notice: 'Purchase return was successfully created.' }
+          format.json { render :show, status: :created, location: @purchase_return }
+        else
+          @purchase_return.purchase_return_products.each do |prp|
+            prp.purchase_order_product.purchase_order_details.each do |pod|
+              prp.purchase_return_items.build purchase_order_detail_id: pod.id if prp.purchase_return_items.select{|pri| pri.purchase_order_detail.eql?(pod)}.blank?
+            end
           end
+          @purchase_orders = PurchaseOrder.all
+          format.html { render :new }
+          format.json { render json: @purchase_return.errors, status: :unprocessable_entity }
         end
-        @purchase_orders = PurchaseOrder.all
-        format.html { render :new }
-        format.json { render json: @purchase_return.errors, status: :unprocessable_entity }
-      end
+        is_exception_raised = false
+      rescue ActiveRecord::RecordNotUnique => e
+        is_exception_raised = true
+      end while is_exception_raised
     end
   end
 
