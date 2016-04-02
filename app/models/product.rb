@@ -12,7 +12,7 @@ class Product < ActiveRecord::Base
   has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
-  has_many :grouped_product_details, -> {group("product_details.barcode")}, class_name: "ProductDetail"
+  has_many :grouped_product_details, -> {group("barcode, size_id")}, class_name: "ProductDetail"
   has_many :purchase_order_products, dependent: :restrict_with_error
   #  has_many :purchase_order_details, through: :product_details
   
