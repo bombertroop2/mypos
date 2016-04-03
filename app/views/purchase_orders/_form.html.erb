@@ -1,15 +1,15 @@
 <%= form_for(@purchase_order, html: {class: "form-horizontal"}) do |f| %>
     <!--
     <% if @purchase_order.errors.any? %>
-                                <div id="error_explanation">
-                                    <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
+                                                  <div id="error_explanation">
+                                                      <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
 
-                                    <ul>
+                                                      <ul>
       <% @purchase_order.errors.full_messages.each do |message| %>
-                                                                  <li><%= message %></li>
+                                                                                                      <li><%= message %></li>
       <% end %>
-                                    </ul>
-                                </div>
+                                                      </ul>
+                                                  </div>
     <% end %>
     -->
     <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
@@ -35,10 +35,28 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">Items</label>
+                    <label class="col-sm-2 control-label">Products</label>
                     <div class="col-sm-10">
-                        <%= select_tag "product_collections", options_from_collection_for_select(Product.order(:code), 'id', 'code', selected_product_collection), multiple: true, "data-placeholder" => "Choose a product..." %>
-                        <%= submit_tag "Generate form", disabled: @purchase_order.new_record?, id: "generate_po_detail_form", class: "btn btn-default active" %>
+                        <table id="listing_product_table" class="display">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Code</th>
+                                    <th>Brand</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <% Product.order(:code).each_with_index do |product, index| %>
+                                  <tr id="product_<%= product.id %>">
+                                      <td></td>
+                                      <td><%= product.code %></td>
+                                      <td><%= product.brand.name if product.brand %></td>
+                                  </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                        <%= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
                       </div>
                   </div>
                   <div class="form-group">

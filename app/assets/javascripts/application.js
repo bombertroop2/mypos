@@ -16,6 +16,7 @@
 //= require bootstrap-sprockets
 //= require cocoon
 //= require vendors
+//= require jquery.dataTables.min
 //= require_tree .
 
 

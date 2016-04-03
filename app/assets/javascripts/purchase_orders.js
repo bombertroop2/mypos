@@ -1,3 +1,4 @@
+var dataTable;
 function intersection(x, y) {
     x.sort();
     y.sort();
@@ -37,30 +38,45 @@ function showDeleteMarkedProduct() {
 }
 
 $(function () {
-    $("#product_collections").chosen({
-        width: "25%"
-    });
-
-    $("#product_collections").change(function () {
-        $("#submit-button").attr("disabled", "disabled");
-        if ($(this).val() == null)
-            $("#generate_po_detail_form").attr("disabled", "disabled");
-        else
-            $("#generate_po_detail_form").removeAttr("disabled");
+    dataTable = $('#listing_product_table').DataTable({
+        order: [1, 'asc'],
+        dom: 'T<"clear">lfrtip',
+        columns: [
+            {data: null, defaultContent: '', orderable: false},
+            {data: 'code'},
+            {data: 'brand'}
+        ],
+        tableTools: {
+            sRowSelect: 'os',
+            sRowSelector: 'td:first-child',
+            aButtons: ['select_all', 'select_none']
+        },
+        paging: false,
+        info: false,
+        scrollY: "250px",
+        scrollCollapse: true
     });
 
     $("#generate_po_detail_form").click(function () {
-        if (typeof purchaseOrderId === 'undefined')
-            $.get("/purchase_orders/get_product_details", {
-                product_ids: $("#product_collections").val().join(","),
-                previous_selected_product_ids: $("#product_ids").val()
+        if (dataTable.rows('.selected').data().length == 0)
+            alert('You have not selected a product yet!');
+        else {
+            var productIds = [];
+            $.each(dataTable.rows('.selected')[0], function (index, value) {
+                productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
             });
-        else
-            $.get("/purchase_orders/get_product_details", {
-                product_ids: $("#product_collections").val().join(","),
-                purchase_order_id: purchaseOrderId,
-                previous_selected_product_ids: $("#product_ids").val()
-            });
+            if (typeof purchaseOrderId === 'undefined')
+                $.get("/purchase_orders/get_product_details", {
+                    product_ids: productIds.join(","),
+                    previous_selected_product_ids: $("#product_ids").val()
+                });
+            else
+                $.get("/purchase_orders/get_product_details", {
+                    product_ids: productIds.join(","),
+                    purchase_order_id: purchaseOrderId,
+                    previous_selected_product_ids: $("#product_ids").val()
+                });
+        }
 
         return false;
     });
@@ -70,34 +86,59 @@ $(function () {
     });
 
     hideDeleteMarkedProduct();
+
+    if ($("#product_ids").val() != undefined && $("#product_ids").val() != "") {
+        var splittedProductIds = $("#product_ids").val().split(",");
+        $.each(splittedProductIds, function (index, value) {
+            var e = jQuery.Event("click");
+            e.ctrlKey = true;
+            $("#product_" + value).find("td:first-child").trigger(e);
+        });
+    }
 
 });
 
 $(document).on('page:load', function () {
-    $("#product_collections").chosen({
-        width: "25%"
+    dataTable = $('#listing_product_table').DataTable({
+        order: [1, 'asc'],
+        dom: 'T<"clear">lfrtip',
+        columns: [
+            {data: null, defaultContent: '', orderable: false},
+            {data: 'code'},
+            {data: 'brand'}
+        ],
+        tableTools: {
+            sRowSelect: 'os',
+            sRowSelector: 'td:first-child',
+            aButtons: ['select_all', 'select_none']
+        },
+        paging: false,
+        info: false,
+        scrollY: "250px",
+        scrollCollapse: true
     });
 
-    $("#product_collections").change(function () {
-        $("#submit-button").attr("disabled", "disabled");
-        if ($(this).val() == null)
-            $("#generate_po_detail_form").attr("disabled", "disabled");
-        else
-            $("#generate_po_detail_form").removeAttr("disabled");
-    });
 
     $("#generate_po_detail_form").click(function () {
-        if (typeof purchaseOrderId === 'undefined')
-            $.get("/purchase_orders/get_product_details", {
-                product_ids: $("#product_collections").val().join(","),
-                previous_selected_product_ids: $("#product_ids").val()
+        if (dataTable.rows('.selected').data().length == 0)
+            alert('You have not selected a product yet!');
+        else {
+            var productIds = [];
+            $.each(dataTable.rows('.selected')[0], function (index, value) {
+                productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
             });
-        else
-            $.get("/purchase_orders/get_product_details", {
-                product_ids: $("#product_collections").val().join(","),
-                purchase_order_id: purchaseOrderId,
-                previous_selected_product_ids: $("#product_ids").val()
-            });
+            if (typeof purchaseOrderId === 'undefined')
+                $.get("/purchase_orders/get_product_details", {
+                    product_ids: productIds.join(","),
+                    previous_selected_product_ids: $("#product_ids").val()
+                });
+            else
+                $.get("/purchase_orders/get_product_details", {
+                    product_ids: productIds.join(","),
+                    purchase_order_id: purchaseOrderId,
+                    previous_selected_product_ids: $("#product_ids").val()
+                });
+        }
 
         return false;
     });
@@ -107,4 +148,13 @@ $(document).on('page:load', function () {
     });
 
     hideDeleteMarkedProduct();
+
+    if ($("#product_ids").val() != undefined && $("#product_ids").val() != "") {
+        var splittedProductIds = $("#product_ids").val().split(",");
+        $.each(splittedProductIds, function (index, value) {
+            var e = jQuery.Event("click");
+            e.ctrlKey = true;
+            $("#product_" + value).find("td:first-child").trigger(e);
+        });
+    }
 });

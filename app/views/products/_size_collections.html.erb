@@ -6,8 +6,8 @@
     </tr>
     <tr style="text-align: center">
         <% @price_codes.each do |price_code| %>
-          <td align="center"><%= price_code.code %><br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money", "data-a-sep" => ".",
-                  "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;width:150px;", size: 16} %></td>
+          <td align="center"><%= price_code.code %><br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
+                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %></td>
           <% end %>
       </tr>
       <% @sizes.each_with_index do |size, idx| %>
@@ -29,8 +29,8 @@
                     <%= product_detail_form.hidden_field :size_id %>
                     <%= product_detail_form.hidden_field :price_code_id %>
                     <div class="<%= control_group_error(product_detail, :price) %>">
-                        <%= product_detail_form.text_field :price, placeholder: "price", class: "form-control money price-"+price_code.code, "data-a-sep" => ".",
-                            "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;width:150px;", size: 16 %>
+                        <%= product_detail_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
+                            "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
                           <%= error_help_text(product_detail, :price) %>
                       </div>  
                     <% end %>

@@ -1,0 +1,29 @@
+#listing_product_table_filter label, #listing_product_table_length label {
+    font-weight: normal;
+}
+
+table.dataTable thead .sorting_asc {
+    background-image: url("sort_asc.png");
+}
+
+table.dataTable thead .sorting_desc {
+    background-image: url("sort_desc.png");
+}
+
+table.dataTable thead .sorting {
+    background-image: url("sort_both.png");
+}
+
+#listing_product_table tr td:first-child {
+    text-align: center;
+}
+
+#listing_product_table tr td:first-child:before {
+    content: "\f096"; /* fa-square-o */
+    font-family: FontAwesome;
+}
+
+#listing_product_table tr.selected td:first-child:before {
+    content: "\f046"; /* fa-check-square-o */
+}
+

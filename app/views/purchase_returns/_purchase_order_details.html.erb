@@ -79,7 +79,7 @@
                                           <%= purchase_return_detail_detail_form.hidden_field :id %>
                                           <%= purchase_return_detail_detail_form.hidden_field :purchase_order_detail_id %>
                                           <div class="<%= control_group_error(pr_item, :quantity) %>">
-                                              <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control", style: "text-align:right;", size: 5 %>
+                                              <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", size: 5 %>
                                                 <%= error_help_text(pr_item, :quantity) %>
                                             </div>
                                           <% end %>
