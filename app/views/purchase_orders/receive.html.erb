@@ -32,7 +32,6 @@
                   <tbody>
                       <tr style="text-align: center">
                           <td><strong>No</strong></td>
-                          <td><strong>Warehouse Name</strong></td>
                           <td><strong>Article Code</strong></td>
                           <td><strong>Details</strong></td>
                       </tr>
@@ -40,7 +39,6 @@
                         <%= f.fields_for :purchase_order_products, po_product do |purchase_order_product_form| %>
                           <tr align="center">
                               <td style="vertical-align: middle"><%= idx.succ %></td>
-                              <td style="vertical-align: middle"><%= po_product.warehouse.name if po_product.warehouse %></td>
                               <td style="vertical-align: middle"><%= po_product.product.code if po_product.product %></td>
                               <td style="vertical-align: middle">
                                   <table class="table table-condensed table-responsive table-bordered">

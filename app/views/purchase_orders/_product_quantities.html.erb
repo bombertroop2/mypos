@@ -15,7 +15,6 @@
                 <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
                   <%= purchase_order_product_detail_form.hidden_field :id %>
                   <%= purchase_order_product_detail_form.hidden_field :product_id %>
-                  <%= purchase_order_product_detail_form.select :warehouse_id, options_from_collection_for_select(@store_warehouses, :id, :name), {prompt: true}, {class: "form-control"} %>
                   <% end %>
 
                   <% sizes = pop.product.sizes %>

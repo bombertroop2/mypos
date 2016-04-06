@@ -5,7 +5,6 @@ class Warehouse < ActiveRecord::Base
 
   has_many :purchase_orders, dependent: :restrict_with_error
   has_many :sales_promotion_girls, dependent: :restrict_with_error
-  #  has_many :purchase_order_products
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
   validates :code, uniqueness: true, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}

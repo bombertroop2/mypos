@@ -21,7 +21,6 @@ class PurchaseOrdersController < ApplicationController
   # GET /purchase_orders/1/edit
   def edit
     @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
-    @store_warehouses = Warehouse.where("warehouse_type != 'central'")
     @products = @purchase_order.products
     @colors = Color.order :code
     @purchase_order.purchase_order_products.each do |pop|
@@ -46,7 +45,6 @@ class PurchaseOrdersController < ApplicationController
         else
           populate_combobox_list
           @colors = Color.order :code
-          @store_warehouses = Warehouse.where("warehouse_type != 'central'")
           @products = Product.find(params[:product_ids].split(",")) rescue []
           @purchase_order.purchase_order_products.each do |pop|
             pop.product.grouped_product_details.each do |gpd|
@@ -80,7 +78,6 @@ class PurchaseOrdersController < ApplicationController
         format.json { render :show, status: :ok, location: @purchase_order }
       else
         populate_combobox_list
-        @store_warehouses = Warehouse.where("warehouse_type != 'central'")
         @products = Product.find(params[:product_ids].split(",")) rescue []
         @colors = Color.order :code
         @purchase_order.purchase_order_products.each do |pop|
@@ -117,7 +114,6 @@ class PurchaseOrdersController < ApplicationController
     end
     if splitted_selected_product_ids.present?
       @colors = Color.order :code
-      @store_warehouses = Warehouse.where("warehouse_type != 'central'")
       @products = Product.find(splitted_selected_product_ids)
       @products.each do |product|
         existing_pop = @purchase_order.purchase_order_products.select{|pop| pop.product_id.eql?(product.id)}.first
@@ -206,7 +202,7 @@ class PurchaseOrdersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
     params.require(:purchase_order).permit(:receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
-      :warehouse_id, purchase_order_products_attributes: [:id, :product_id, :warehouse_id, :_destroy,
+      :warehouse_id, purchase_order_products_attributes: [:id, :product_id, :_destroy,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity], received_purchase_orders_attributes: [:id, :color_id, :purchase_order_product_id, :is_received]])
   end
   

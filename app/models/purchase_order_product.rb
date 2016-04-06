@@ -1,7 +1,6 @@
 class PurchaseOrderProduct < ActiveRecord::Base
   belongs_to :purchase_order
   belongs_to :product
-  belongs_to :warehouse
   
   has_many :purchase_order_details, dependent: :destroy
   has_many :received_purchase_orders, dependent: :destroy
