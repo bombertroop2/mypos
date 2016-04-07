@@ -23,12 +23,13 @@
               <td>
                   <%= link_to 'Show', purchase_order, class: "btn btn-info btn-xs active" %>
                     <%= link_to 'Edit', edit_purchase_order_path(purchase_order), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Delete', purchase_order, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
-                    </td>
-                </tr>
-              <% end %>
-          </tbody>
-      </table>
+                      <%= link_to 'Close', close_purchase_order_path(purchase_order), method: :get, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
+                        <%= link_to 'Delete', purchase_order, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
+                      </td>
+                  </tr>
+                <% end %>
+            </tbody>
+        </table>
 
 
-      <%= link_to 'New Purchase order', new_purchase_order_path, class: "btn btn-default active" %>
+        <%= link_to 'New Purchase order', new_purchase_order_path, class: "btn btn-default active" %>

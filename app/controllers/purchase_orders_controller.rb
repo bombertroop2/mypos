@@ -1,6 +1,6 @@
 class PurchaseOrdersController < ApplicationController
   before_action :populate_combobox_list, only: [:new, :edit]
-  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :receive]
+  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :receive, :close]
 
   # GET /purchase_orders
   # GET /purchase_orders.json
@@ -148,13 +148,14 @@ class PurchaseOrdersController < ApplicationController
 
   # DELETE /purchase_orders/1
   # DELETE /purchase_orders/1.json
-  def destroy
-    unless @purchase_order.destroy
-      alert = @purchase_order.errors.full_messages.first 
-    else
-      notice = 'Purchase order was successfully deleted.'
-    end
+  def destroy    
     respond_to do |format|
+      @purchase_order.deleting_po = true
+      if @purchase_order.update(status: "Deleted")
+        notice = 'Purchase order was successfully deleted.'
+      else
+        alert = @purchase_order.errors.messages[:base][0]
+      end
       format.html do 
         if notice.present?
           redirect_to purchase_orders_url, notice: notice
@@ -190,6 +191,25 @@ class PurchaseOrdersController < ApplicationController
           po_product.received_purchase_orders.build(color_id: color.id) if po_product.received_purchase_orders.where(color_id: color.id).first.nil?
         end
       end
+    end
+  end
+  
+  def close
+    respond_to do |format|
+      @purchase_order.closing_po = true
+      if @purchase_order.update(status: "Closed")
+        notice = 'Purchase order was successfully closed.'
+      else
+        alert = @purchase_order.errors.messages[:base][0]
+      end
+      format.html do 
+        if notice.present?
+          redirect_to purchase_orders_url, notice: notice
+        else
+          redirect_to purchase_orders_url, alert: alert
+        end
+      end
+      format.json { head :no_content }
     end
   end
 

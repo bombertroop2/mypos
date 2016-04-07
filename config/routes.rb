@@ -16,6 +16,7 @@ Rails.application.routes.draw do
     member do
       get 'receive'
       post 'receive'
+      get 'close'
     end
   end
   resources :products do
