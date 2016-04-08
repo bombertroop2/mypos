@@ -36,7 +36,11 @@ class SizeGroupsController < ApplicationController
           format.json { render json: @size_group.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        @size_group.errors.messages[:code] = ["has already been taken"]
+        if $!.message.include? "size_group_id"
+          flash.now[:alert] = "Size should be unique!"
+        else
+          @size_group.errors.messages[:code] = ["has already been taken"]
+        end        
         format.html { render :new }
       end
     end
