@@ -85,6 +85,10 @@ $(function () {
         dateFormat: "dd/mm/yy"
     });
 
+    $('#purchase_order_purchase_order_date').datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
     hideDeleteMarkedProduct();
 
     if ($("#product_ids").val() != undefined && $("#product_ids").val() != "") {
@@ -144,6 +148,10 @@ $(document).on('page:load', function () {
     });
 
     $("#purchase_order_request_delivery_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+    
+    $('#purchase_order_purchase_order_date').datepicker({
         dateFormat: "dd/mm/yy"
     });
 

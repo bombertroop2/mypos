@@ -1,15 +1,15 @@
 <%= form_for(@purchase_order, html: {class: "form-horizontal"}) do |f| %>
     <!--
     <% if @purchase_order.errors.any? %>
-                                                  <div id="error_explanation">
-                                                      <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
+                                                    <div id="error_explanation">
+                                                        <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
 
-                                                      <ul>
+                                                        <ul>
       <% @purchase_order.errors.full_messages.each do |message| %>
-                                                                                                      <li><%= message %></li>
+                                                                                                          <li><%= message %></li>
       <% end %>
-                                                      </ul>
-                                                  </div>
+                                                        </ul>
+                                                    </div>
     <% end %>
     -->
     <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
@@ -27,75 +27,82 @@
                     <%= error_help_text(@purchase_order, :warehouse_id) %>
                 </div>
             </div>
-            <div class="form-group<%= control_group_error(@purchase_order, :request_delivery_date) %>">
-                <%= f.label :request_delivery_date, class: "col-sm-2 control-label" %>
+            <div class="form-group<%= control_group_error(@purchase_order, :purchase_order_date) %>">
+                <%= f.label :purchase_order_date, class: "col-sm-2 control-label" %>
                   <div class="col-sm-10">
-                      <%= f.text_field :request_delivery_date, size: 10, readonly: true, class: "form-control" %>
-                        <%= error_help_text(@purchase_order, :request_delivery_date) %>
+                      <%= f.text_field :purchase_order_date, size: 10, readonly: true, class: "form-control" %>
+                        <%= error_help_text(@purchase_order, :purchase_order_date) %>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Products</label>
-                    <div class="col-sm-10">
-                        <table id="listing_product_table" class="display">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Code</th>
-                                    <th>Brand</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <% Product.order(:code).each_with_index do |product, index| %>
-                                  <tr id="product_<%= product.id %>">
-                                      <td></td>
-                                      <td><%= product.code %></td>
-                                      <td><%= product.brand.name if product.brand %></td>
-                                  </tr>
-                                <% end %>
-                            </tbody>
-                        </table>
-                        <%= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
-                      </div>
-                  </div>
-                  <div class="form-group">
-                      <div class="col-sm-offset-2 col-sm-10">
-                          <div id="products_detail">
-                              <% if @products.present? %>
-                                <%= render 'product_quantities' %>
-                              <% end %>
-                          </div>
-                          <% if @purchase_order.errors and @purchase_order.errors.messages[:base] %>
-                            <span class='help-block'><%= @purchase_order.errors.messages[:base][0] %></span>
-                          <% end %>
-                      </div>                                                      
-                  </div>
-                  <div class="form-group">
-                      <div class="col-sm-offset-2 col-sm-10">
-                          <%= f.submit "Save", class: "btn btn-default active" %>
+                <div class="form-group<%= control_group_error(@purchase_order, :request_delivery_date) %>">
+                    <%= f.label :request_delivery_date, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :request_delivery_date, size: 10, readonly: true, class: "form-control" %>
+                            <%= error_help_text(@purchase_order, :request_delivery_date) %>
                         </div>
                     </div>
-                  <% end %>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Products</label>
+                        <div class="col-sm-10">
+                            <table id="listing_product_table" class="display">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Code</th>
+                                        <th>Brand</th>
+                                    </tr>
+                                </thead>
 
-
-                  <script>
-                  <% unless @purchase_order.new_record? %>
-                      var purchaseOrderId = "<%= params[:id] %>";
-                      $(function () {
-                    <% if @replaced_ids.present? %>
-                      <% @replaced_ids.each do |replaced_id| %>
-                              // jika product sudah ada di database sembunyikan produk dan check remove
-                              if ($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0) {
-                                  $("#product_table_<%= replaced_id %>").hide();
-                                  $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
-                              }
+                                <tbody>
+                                    <% Product.order(:code).each_with_index do |product, index| %>
+                                      <tr id="product_<%= product.id %>">
+                                          <td></td>
+                                          <td><%= product.code %></td>
+                                          <td><%= product.brand.name if product.brand %></td>
+                                      </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                            <%= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-10">
+                              <div id="products_detail">
+                                  <% if @products.present? %>
+                                    <%= render 'product_quantities' %>
+                                  <% end %>
+                              </div>
+                              <% if @purchase_order.errors and @purchase_order.errors.messages[:base] %>
+                                <span class='help-block'><%= @purchase_order.errors.messages[:base][0] %></span>
+                              <% end %>
+                          </div>                                                      
+                      </div>
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-10">
+                              <%= f.submit "Save", class: "btn btn-default active" %>
+                            </div>
+                        </div>
                       <% end %>
-                    <% end %>
-                      });
-                  <% else %>
-                      var purchaseOrderId = null;
-                  <% end %>
 
-                  </script>
+
+                      <script>
+                      <% unless @purchase_order.new_record? %>
+                          var purchaseOrderId = "<%= params[:id] %>";
+                          $(function () {
+                        <% if @replaced_ids.present? %>
+                          <% @replaced_ids.each do |replaced_id| %>
+                                  // jika product sudah ada di database sembunyikan produk dan check remove
+                                  if ($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0) {
+                                      $("#product_table_<%= replaced_id %>").hide();
+                                      $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
+                                  }
+                          <% end %>
+                        <% end %>
+                          });
+                      <% else %>
+                          var purchaseOrderId = null;
+                      <% end %>
+
+                      </script>
 

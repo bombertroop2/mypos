@@ -27,6 +27,11 @@
                                 <td><%= @purchase_order.created_at.strftime("%d/%m/%Y") %></td>
                             </tr>
                             <tr>
+                                <td>Purchase Order Date</td>
+                                <td>:</td>
+                                <td><%= @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date %></td>
+                            </tr>
+                            <tr>
                                 <td>Delivery Date</td>
                                 <td>:</td>
                                 <td><%= @purchase_order.request_delivery_date.strftime("%d/%m/%Y") if @purchase_order.request_delivery_date.present? %></td>
