@@ -100,6 +100,15 @@ $(function () {
         });
     }
 
+    $(".do-radio-button").click(function () {
+        if ($(this).val() == "yes")
+            $(".do-number-field").prop("disabled", false);
+        else {
+            $(".do-number-field").val("");
+            $(".do-number-field").prop("disabled", true);
+        }
+    });
+
 });
 
 $(document).on('page:load', function () {
@@ -150,7 +159,7 @@ $(document).on('page:load', function () {
     $("#purchase_order_request_delivery_date").datepicker({
         dateFormat: "dd/mm/yy"
     });
-    
+
     $('#purchase_order_purchase_order_date').datepicker({
         dateFormat: "dd/mm/yy"
     });
@@ -165,4 +174,13 @@ $(document).on('page:load', function () {
             $("#product_" + value).find("td:first-child").trigger(e);
         });
     }
+
+    $(".do-radio-button").click(function () {
+        if ($(this).val() == "yes")
+            $(".do-number-field").prop("disabled", false);
+        else {
+            $(".do-number-field").val("");
+            $(".do-number-field").prop("disabled", true);
+        }
+    });
 });

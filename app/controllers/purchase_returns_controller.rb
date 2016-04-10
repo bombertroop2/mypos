@@ -15,7 +15,7 @@ class PurchaseReturnsController < ApplicationController
   # GET /purchase_returns/new
   def new
     @purchase_return = PurchaseReturn.new
-    @purchase_orders = PurchaseOrder.all
+    @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'")
   end
 
   # GET /purchase_returns/1/edit

@@ -1,101 +1,131 @@
 <div class="page-header"><h1>Receive purchase order</h1></div>
 
-<%= form_for(@purchase_order, url: receive_purchase_order_path(@purchase_order), method: :post) do |f| %>
-  <!--
-  <% if @purchase_order.errors.any? %>
-            <div id="error_explanation">
-                <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
+<%= form_for(@purchase_order, html: {class: "form-horizontal"}, url: receive_purchase_order_path(@purchase_order), method: :post) do |f| %>
+    <!--
+    <% if @purchase_order.errors.any? %>
+                                                                                                    <div id="error_explanation">
+                                                                                                        <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
 
-                <ul>
-    <% @purchase_order.errors.full_messages.each do |msg| %>
-                            <li><%= msg %></li>
+                                                                                                        <ul>
+      <% @purchase_order.errors.full_messages.each do |msg| %>
+                                                                                                                                                                                                          <li><%= msg %></li>
+      <% end %>
+                                                                                                        </ul>
+                                                                                                    </div>
     <% end %>
-                </ul>
+    -->
+    <%= f.hidden_field :receiving_po %>
+    <%= f.fields_for :received_purchase_orders do |received_purchase_order_form| %>
+      <% if received_purchase_order_form.object.new_record? %>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                PO Number
+            </label>
+            <div class="col-sm-10 form-control hidden-box">
+                <%= @purchase_order.number %>
             </div>
-  <% end %>
-  -->
-  <%= f.hidden_field :receiving_po %>
-  <table class="table-condensed table-responsive">
-      <tr>
-          <td>Number</td>
-          <td>:</td>
-          <td><%= @purchase_order.number %></td>
-      </tr>
-      <tr>
-          <td>To</td>
-          <td>:</td>
-          <td><%= @purchase_order.vendor.name if @purchase_order.vendor %></td>
-      </tr>
-      <tr>
-          <td align="center" colspan="3">
-              <table class="table table-condensed table-responsive table-bordered">
-                  <tbody>
-                      <tr style="text-align: center">
-                          <td><strong>No</strong></td>
-                          <td><strong>Article Code</strong></td>
-                          <td><strong>Details</strong></td>
-                      </tr>
-                      <% @purchase_order.purchase_order_products.each_with_index do |po_product, idx| %>
-                        <%= f.fields_for :purchase_order_products, po_product do |purchase_order_product_form| %>
-                          <tr align="center">
-                              <td style="vertical-align: middle"><%= idx.succ %></td>
-                              <td style="vertical-align: middle"><%= po_product.product.code if po_product.product %></td>
-                              <td style="vertical-align: middle">
-                                  <table class="table table-condensed table-responsive table-bordered">
-                                      <tbody>
-                                          <tr>
-                                              <td colspan="2" rowspan="2"></td>
-                                              <td align="center" colspan="<%= po_product.sizes.length %>">Sizes</td>
-                                          </tr>
-                                          <tr>
-                                              <% po_product.sizes.each do |size| %>
-                                                <td align="center"><%= size.size %></td>
-                                              <% end %>
-                                          </tr>
-                                          <% po_product.colors.each_with_index do |color, idx| %>
-                                            <tr>
-                                                <% if idx == 0 %>
-                                                  <td style="vertical-align: middle" rowspan="<%= po_product.colors.length %>">Colors</td>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                To
+            </label>
+            <div class="col-sm-10 form-control hidden-box">
+                <%= @purchase_order.vendor.name if @purchase_order.vendor %>
+            </div>
+        </div>
+        <div class="form-group">
+            <%= received_purchase_order_form.label :is_using_delivery_order, "Delivery Order", class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= received_purchase_order_form.radio_button :is_using_delivery_order, "yes", checked: true, class: "do-radio-button" %> Yes
+                    <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button" %> No
+                  </div>
+              </div>
+              <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
+                  <%= received_purchase_order_form.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
+                    <div class="col-sm-10">
+                        <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control do-number-field" %>
+                          <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label"></label>
+                      <div class="col-sm-10">
+                          <table class="table-condensed table-responsive">
+                              <tr>
+                                  <td align="center">
+                                      <table class="table table-condensed table-responsive table-bordered">
+                                          <tbody>
+                                              <tr style="text-align: center">
+                                                  <td style="vertical-align: middle"><strong>No</strong></td>
+                                                  <td style="vertical-align: middle"><strong>Article Code</strong></td>
+                                                  <td style="vertical-align: middle"><strong>Details</strong></td>
+                                              </tr>
+                                              <% number = 1 %>
+                                              <%= received_purchase_order_form.fields_for :received_purchase_order_products do |received_purchase_order_product_form| %>
+                                                <%= received_purchase_order_product_form.hidden_field :purchase_order_product_id %>
+                                                <% received_purchase_order_product = received_purchase_order_product_form.object %>
+                                                <% purchase_order_product = received_purchase_order_product.purchase_order_product %>
+                                                <% colors = purchase_order_product.colors rescue [] %>
+                                                <% sizes = purchase_order_product.sizes rescue [] %>
+                                                <tr align="center">
+                                                    <td style="vertical-align: middle"><%= number %></td>
+                                                    <td style="vertical-align: middle"><%= purchase_order_product.product.code if purchase_order_product.product %></td>
+                                                    <td style="vertical-align: middle">                                    
+                                                        <table class="table table-condensed table-responsive table-bordered">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td colspan="2" rowspan="2"></td>
+                                                                    <td align="center" colspan="<%= sizes.length %>">Sizes</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <% sizes.each do |size| %>
+                                                                      <td align="center"><%= size.size %></td>
+                                                                    <% end %>
+                                                                </tr>                                            
+                                                                <% colors.each_with_index do |color, idx| %>
+                                                                  <tr>
+                                                                      <% if idx == 0 %>
+                                                                        <td style="vertical-align: middle" rowspan="<%= colors.length %>">Colors</td>
+                                                                      <% end %>
+                                                                      <td style="vertical-align: middle">
+                                                                          <%= color.code %>
+                                                                      </td>
+                                                                      <% sizes.each do |size| %>              
+                                                                        <td style="vertical-align: middle">
+                                                                            <%= received_purchase_order_product_form.fields_for :received_purchase_order_items do |received_purchase_order_item_form| %>
+                                                                              <% received_purchase_order_item = received_purchase_order_item_form.object %>
+                                                                              <% purchase_order_detail = received_purchase_order_item.purchase_order_detail %>
+                                                                              <% if purchase_order_detail.size_id.eql?(size.id) && purchase_order_detail.color_id.eql?(color.id) %>
+                                                                                <%= received_purchase_order_item_form.hidden_field :purchase_order_detail_id %>
+                                                                                <div class="<%= control_group_error(received_purchase_order_item, :quantity) %>">
+                                                                                    <%= received_purchase_order_item_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", size: 16 %>
+                                                                                      <%= error_help_text(received_purchase_order_item, :quantity) %>
+                                                                                  </div>
+                                                                                <% end %>
+                                                                              <% end %>
+                                                                          </td>
+                                                                        <% end %>
+                                                                    </tr>
+                                                                  <% end %>
+                                                              </tbody>
+                                                          </table>
+                                                      </td>
+                                                  </tr>
+                                                  <% number += 1 %>
                                                 <% end %>
-                                                <td>
-                                                    <% received_purchase_order = po_product.received_purchase_orders.select{|rpo| rpo.color.eql?(color)}.first %>
-                                                    <%= purchase_order_product_form.fields_for :received_purchase_orders, received_purchase_order do |received_purchase_order_detail_form| %>
-                                                      <%= received_purchase_order_detail_form.hidden_field :id %>
-                                                      <%= received_purchase_order_detail_form.hidden_field :color_id %>
-                                                      <%= received_purchase_order_detail_form.hidden_field :purchase_order_product_id %>
-                                                      <% if received_purchase_order.new_record? %>
-                                                        <%= received_purchase_order_detail_form.check_box :is_received %>
-                                                      <% else %>
-                                                        <%= received_purchase_order_detail_form.hidden_field :is_received, value: 1 %>
-                                                        &#x2713;
-                                                      <% end %>
-                                                    <% end %>
-                                                    <%= color.code %>
-                                                </td>
-                                                <% po_product.sizes.each do |size| %>
-                                                  <% po_detail = po_product.purchase_order_details.select{ |pod| pod.color.eql?(color) && pod.size.eql?(size) }.first %>
-                                                  <td>
-                                                      <% if po_detail %>
-                                                        <%= po_detail.quantity %> pcs
-                                                      <% end %>
-                                                  </td>
-                                                <% end %>
-                                            </tr>
-                                          <% end %>
-                                      </tbody>
-                                  </table>
-                              </td>
-                          </tr>
-                        <% end %>
-                      <% end %>
-                  </tbody>
-              </table>
-          </td>
-      </tr>
-  </table>
-  <% if @purchase_order.errors and @purchase_order.errors.messages[:base] %>
-    <span class='help-block'><%= @purchase_order.errors.messages[:base][0] %></span>
-  <% end %>
-  <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
-  <% end %>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>                                                      
+                    </div>
+                  <% end %>
+                <% end %>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
+                      </div>
+                  </div>              
+                <% end %>
 

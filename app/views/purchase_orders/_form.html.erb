@@ -73,9 +73,6 @@
                                     <%= render 'product_quantities' %>
                                   <% end %>
                               </div>
-                              <% if @purchase_order.errors and @purchase_order.errors.messages[:base] %>
-                                <span class='help-block'><%= @purchase_order.errors.messages[:base][0] %></span>
-                              <% end %>
                           </div>                                                      
                       </div>
                       <div class="form-group">

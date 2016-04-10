@@ -14,7 +14,6 @@ class Product < ActiveRecord::Base
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {group("size_id, barcode").select("size_id, barcode").order(:barcode)}, class_name: "ProductDetail"
   has_many :purchase_order_products, dependent: :restrict_with_error
-  #  has_many :purchase_order_details, through: :product_details
   
   accepts_nested_attributes_for :product_details, allow_destroy: true, reject_if: proc {|attributes| attributes[:price].blank? and attributes[:id].blank?}
   

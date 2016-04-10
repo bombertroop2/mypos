@@ -54,6 +54,11 @@ class PurchaseOrdersController < ApplicationController
               end
             end
           end
+          
+          if @purchase_order.errors[:base].present?
+            flash.now[:alert] = @purchase_order.errors[:base].to_sentence
+          end
+        
           format.html { render :new }
           format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
         end
@@ -96,6 +101,10 @@ class PurchaseOrdersController < ApplicationController
         if splitted_selected_product_ids.present?
           # id yang diganti, caranya yang lama dihapus dan yang baru ditambahkan      
           @replaced_ids = previous_selected_product_ids.map(&:to_s) - selected_product_ids.split(",")
+        end
+        
+        if @purchase_order.errors[:base].present?
+          flash.now[:alert] = @purchase_order.errors[:base].to_sentence
         end
         
         format.html { render :edit }
@@ -175,11 +184,20 @@ class PurchaseOrdersController < ApplicationController
           format.html { redirect_to purchase_orders_url, notice: 'Purchase order was successfully updated.' }
           format.json { head :no_content }
         else
-          @purchase_order.receiving_po = true
+          received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
           @purchase_order.purchase_order_products.each do |po_product|
-            po_product.colors.each do |color|
-              po_product.received_purchase_orders.build(color_id: color.id) if po_product.received_purchase_orders.where(color_id: color.id).first.nil?
+            received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
+            received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id if received_purchase_order_product.blank?
+            po_product.purchase_order_details.each do |purchase_order_detail|
+              if received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.blank?
+                received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
+              end
             end
+          end
+          if @purchase_order.errors[:base].present?
+            flash.now[:alert] = @purchase_order.errors[:base].to_sentence
+          elsif @purchase_order.errors[:"received_purchase_orders.base"].present?
+            flash.now[:alert] = @purchase_order.errors[:"received_purchase_orders.base"].to_sentence
           end
           format.html { render action: "receive" }
           format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
@@ -187,9 +205,11 @@ class PurchaseOrdersController < ApplicationController
       end
     else
       @purchase_order.receiving_po = true
+      received_purchase_order = @purchase_order.received_purchase_orders.build
       @purchase_order.purchase_order_products.each do |po_product|
-        po_product.colors.each do |color|
-          po_product.received_purchase_orders.build(color_id: color.id) if po_product.received_purchase_orders.where(color_id: color.id).first.nil?
+        received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id
+        po_product.purchase_order_details.each do |purchase_order_detail|
+          received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
         end
       end
     end
@@ -224,7 +244,8 @@ class PurchaseOrdersController < ApplicationController
   def purchase_order_params
     params.require(:purchase_order).permit(:receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
       :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:id, :product_id, :_destroy,
-        purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity], received_purchase_orders_attributes: [:id, :color_id, :purchase_order_product_id, :is_received]])
+        purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
+        received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
   end
   
   def populate_combobox_list

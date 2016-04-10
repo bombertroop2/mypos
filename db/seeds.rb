@@ -58,3 +58,10 @@ if Size.count < 1
   Size.create size: "8", size_group_id: size_group.id
 end
 
+if Supervisor.count < 1
+  Supervisor.create code: "ACN", name: "Acien", address: "Jakarta", email: "acien@gmail.com"
+end
+
+if Warehouse.count < 1
+  Warehouse.create code: "GDP", name: "Gudang Pusat", address: "Jakarta", is_active: true, supervisor_id: Supervisor.first.id, region_id: Region.first.id, price_code_id: PriceCode.first.id, warehouse_type: "central"
+end

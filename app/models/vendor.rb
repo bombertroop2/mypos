@@ -15,6 +15,7 @@ class Vendor < ActiveRecord::Base
 
     has_many :products, dependent: :restrict_with_error
     has_many :purchase_orders, dependent: :restrict_with_error
+    has_many :received_purchase_orders, -> { order("received_purchase_orders.id ASC").where("received_purchase_orders.is_using_delivery_order = 'no'") }, through: :purchase_orders
 
     before_validation :upcase_code
 

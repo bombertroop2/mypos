@@ -1,44 +1,43 @@
 class ReceivedPurchaseOrder < ActiveRecord::Base
-  belongs_to :purchase_order_product
-  belongs_to :color
-  attr_accessor :is_received
-  
-  after_save :update_receiving_value
-  after_destroy :update_receiving_value, :remove_stock
-  after_create :create_stock
+  belongs_to :purchase_order
+  has_many :received_purchase_order_products, dependent: :destroy
   
   
-  private
-
-  def update_receiving_value
-    po = purchase_order_product.purchase_order
-    unless self.destroyed?
-      po.receiving_value = po.receiving_value.to_f + purchase_order_product.purchase_order_details.select { |pod| pod.color.eql?(color) }.sum(&:total_unit_price)
-      po.status = if po.receiving_value != po.order_value
-        "Partial"
-      else
-        "Finish"
+  before_create :create_auto_do_number, if: proc{|rpo| rpo.is_using_delivery_order.eql?("no")}
+  
+    accepts_nested_attributes_for :received_purchase_order_products, reject_if: :child_blank
+  
+    validates :delivery_order_number, presence: true, unless: proc{|rpo| rpo.is_using_delivery_order.eql?("no")}, on: :create
+      validate :minimum_receiving_item, on: :create
+  
+  
+      private
+    
+      def create_auto_do_number
+        vendor = purchase_order.vendor
+        last_received_po = vendor.received_purchase_orders.last
+        today = Date.today
+        current_month = today.month.to_s.rjust(2, '0')
+        current_year = today.strftime("%y").rjust(2, '0')
+        if last_received_po
+          seq_number = last_received_po.delivery_order_number.split(last_received_po.delivery_order_number.scan(/#{vendor.code}\d.{3}/).first).last.succ
+          new_do_number = "#{(vendor.code if vendor)}#{current_month}#{current_year}#{seq_number}"
+        else
+          new_do_number = "#{(vendor.code if vendor)}#{current_month}#{current_year}001"
+        end
+        self.delivery_order_number = new_do_number
       end
-      po.save validate: false
-    else
-      po.receiving_value = po.receiving_value.to_f - purchase_order_product.purchase_order_details.select { |pod| pod.color.eql?(color) }.sum(&:total_unit_price)
-      po.status = "Open" if po.receiving_value == 0
-      po.save validate: false
-    end
-  end
+    
+      def minimum_receiving_item
+        errors.add(:base, "Please insert at least one item") if received_purchase_order_products.blank?
+      end
+    
+      def child_blank(attributed)
+        attributed[:received_purchase_order_items_attributes].each do |key, value| 
+          return false if value[:quantity].present?
+        end
+      
+        return true
+      end
 
-  def create_stock    
-    po_details = purchase_order_product.purchase_order_details.select { |pod| pod.color.eql?(color) }
-    po_details.each do |po_det|
-      po_det.build_stock(stock_type: "PO", quantity_on_hand: po_det.quantity)
-      po_det.save
     end
-  end
-
-  def remove_stock
-    po_details = purchase_order_product.purchase_order_details.select { |pod| pod.color.eql?(color) }
-    po_details.each do |po_det|
-      po_det.stock.destroy if po_det.stock
-    end
-  end
-end
