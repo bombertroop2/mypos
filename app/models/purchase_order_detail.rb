@@ -3,8 +3,6 @@ class PurchaseOrderDetail < ActiveRecord::Base
   belongs_to :color
   belongs_to :size
   
-  has_one :stock
-
   attr_accessor :is_updating_receiving_quantity
 
   validates :quantity, presence: true, on: :create
