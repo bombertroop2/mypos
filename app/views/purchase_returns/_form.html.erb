@@ -1,15 +1,15 @@
 <%= form_for(@purchase_return, html: {class: "form-horizontal"}) do |f| %>
     <!--
     <% if @purchase_return.errors.any? %>
-                <div id="error_explanation">
-                    <h2><%= pluralize(@purchase_return.errors.count, "error") %> prohibited this purchase_return from being saved:</h2>
+                  <div id="error_explanation">
+                      <h2><%= pluralize(@purchase_return.errors.count, "error") %> prohibited this purchase_return from being saved:</h2>
 
-                    <ul>
+                      <ul>
       <% @purchase_return.errors.each do |attr, message| %>
-                                  <li><%= message %></li>
+                                      <li><%= message %></li>
       <% end %>
-                    </ul>
-                </div>
+                      </ul>
+                  </div>
     <% end %>
     -->
     <div class="form-group<%= control_group_error(@purchase_return, :purchase_order_id) %>">
@@ -27,9 +27,6 @@
                     <% end %>
                 </div>
 
-                <% if @purchase_return.errors and @purchase_return.errors.messages[:base] %>
-                  <span class='help-block'><%= @purchase_return.errors.messages[:base][0] %></span>
-                <% end %>
             </div>
         </div>
         <div class="form-group">

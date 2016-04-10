@@ -39,6 +39,9 @@ class PurchaseReturnsController < ApplicationController
             end
           end
           @purchase_orders = PurchaseOrder.all
+          if @purchase_return.errors[:base].present?
+            flash.now[:alert] = @purchase_return.errors[:base].to_sentence
+          end
           format.html { render :new }
           format.json { render json: @purchase_return.errors, status: :unprocessable_entity }
         end

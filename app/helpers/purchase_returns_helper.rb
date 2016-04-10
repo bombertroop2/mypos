@@ -14,5 +14,16 @@ module PurchaseReturnsHelper
       "#{purchase_return_product_array_index}[purchase_return_items_attributes][]"
     end
   end
+  
+  def is_having_stock?(pr_item)
+    purchase_order_detail = pr_item.purchase_order_detail rescue nil
+    purchase_order_product = purchase_order_detail.purchase_order_product rescue nil
+    product = purchase_order_product.product rescue nil
+    warehouse = purchase_order_product.purchase_order.warehouse rescue nil
+    stock_product = warehouse.stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first rescue nil
+    size = purchase_order_detail.size rescue nil
+    color = purchase_order_detail.color rescue nil
+    quantity = stock_product.stock_details.select{|sd| sd.size_id.eql?(size.id) && sd.color_id.eql?(color.id)}.first.quantity rescue nil
+  end
 
 end

@@ -36,9 +36,9 @@
                                 <% pr_product.purchase_order_product.sizes.each do |size| %>
                                   <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
 
-                                  <% if pr_item and pr_item.purchase_order_detail and pr_item.purchase_order_detail.stock %>
+                                  <% if quantity = is_having_stock?(pr_item) %>
                                     <td align="right" style="vertical-align: middle">      
-                                        <%= pr_item.purchase_order_detail.stock.quantity_on_hand %>
+                                        <%= quantity %>
                                     </td>
                                   <% else %>
                                     <td align="right" style="vertical-align: middle">      
