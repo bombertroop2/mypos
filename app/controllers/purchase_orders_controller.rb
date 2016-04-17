@@ -1,6 +1,7 @@
 class PurchaseOrdersController < ApplicationController
   before_action :populate_combobox_list, only: [:new, :edit]
   before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :receive, :close]
+  before_action :convert_price_discount_to_numeric, only: [:create, :update]
 
   # GET /purchase_orders
   # GET /purchase_orders.json
@@ -242,7 +243,7 @@ class PurchaseOrdersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
-    params.require(:purchase_order).permit(:receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
+    params.require(:purchase_order).permit(:is_additional_disc_from_net, :first_discount, :second_discount, :price_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
       :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:id, :product_id, :_destroy,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
@@ -251,5 +252,9 @@ class PurchaseOrdersController < ApplicationController
   def populate_combobox_list
     @suppliers = Vendor.all
     @warehouses = Warehouse.where("warehouse_type = 'central'")
+  end
+  
+  def convert_price_discount_to_numeric
+    params[:purchase_order][:price_discount] = params[:purchase_order][:price_discount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:purchase_order][:price_discount].present?
   end
 end
