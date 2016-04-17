@@ -3,13 +3,13 @@
         <td>
             <table width="100%">
                 <tr>
-                    <td align="center"><strong>PURCHASE RETURN</strong></td>
+                    <td align="center" colspan="2"><strong>PURCHASE RETURN</strong></td>
                 </tr>
                 <tr>
-                    <td align="center"><%= @purchase_return.number %></td>
+                    <td align="center" colspan="2"><%= @purchase_return.number %></td>
                 </tr>
                 <tr>
-                    <td>
+                    <td valign="top" align="left">
                         <table class="table-condensed table-responsive">
                             <tr>
                                 <td>To</td>
@@ -33,9 +33,82 @@
                             </tr>
                         </table>
                     </td>
+                    <td valign="top" align="right">
+                        <table class="table-condensed table-responsive">
+                            <tr>
+                                <td>Tax Basis</td>
+                                <td>:</td>
+                                <td align="right">
+                                    <%= number_to_currency(total_return_value(@purchase_return),
+                                      :separator => ",",
+                                      :delimiter => ".",
+                                      :unit => "Rp",
+                                      :precision => 2) %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1st Discount (<%= @purchase_return.purchase_order.first_discount.to_f %>%)</td>
+                                <td>:</td>
+                                <td align="right">
+                                  <%= number_to_currency((@purchase_return.purchase_order.first_discount.to_f / 100) * total_return_value(@purchase_return),
+                                      :separator => ",",
+                                      :delimiter => ".",
+                                      :unit => "Rp",
+                                      :precision => 2) %>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>2nd Discount (<%= @purchase_return.purchase_order.second_discount.to_f %>%)<% if @purchase_return.purchase_order.is_additional_disc_from_net %> (net)<% elsif @purchase_return.purchase_order.second_discount.present? %> (gross)<% end %></td>
+                                <td>:</td>
+                                <td align="right">
+                                <%= number_to_currency(get_second_discount_in_money_pr(@purchase_return),
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %>
+                                </td>
+                            </tr>                            
+                            <tr>
+                                <td>Discount (Rp)</td>
+                                <td>:</td>
+                                <td align="right">
+                                <%= number_to_currency(@purchase_return.purchase_order.price_discount.to_f,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %>
+                                </td>
+                            </tr>
+                        <% if @purchase_return.purchase_order.is_taxable_entrepreneur %>                            
+                            <tr>
+                                <td>Value Added Tax (<%= @purchase_return.purchase_order.value_added_tax %> 10%)</td>
+                                <td>:</td>
+                                <td align="right">
+                                  <%= number_to_currency(get_vat_in_money_pr(@purchase_return),
+                                    :separator => ",",
+                                    :delimiter => ".",
+                                    :unit => "Rp",
+                                    :precision => 2) %>
+                                </td>
+                            </tr>
+                        <% end %>                            
+                            <tr>
+                                <td>Total Return Value</td>
+                                <td>:</td>
+                                <td align="right">
+                                <%= number_to_currency(value_after_ppn_pr(@purchase_return),
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
                 <tr>
-                    <td align="center">
+                    <td align="center" colspan="2">
                         <table class="table table-condensed table-responsive table-bordered">
                             <tbody>
                                 <tr style="text-align: center">
@@ -53,97 +126,97 @@
                                     <td style="vertical-align: middle"><strong>Total Quantity</strong></td>
                                     <td style="vertical-align: middle"><strong>Total Cost</strong></td>
                                 </tr>
-                                <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
-                                  <tr align="center">
-                                      <td style="vertical-align: middle"><%= idx.succ %></td>
-                                      <td style="vertical-align: middle"><%= pr_product.purchase_order_product.product.code if pr_product.purchase_order_product and pr_product.purchase_order_product.product %></td>
-                                      <td style="vertical-align: middle">
-                                          <table class="table table-condensed table-responsive table-bordered">
-                                              <tbody>
-                                                  <tr>
-                                                      <td colspan="2" rowspan="2"></td>
-                                                      <td align="center" colspan="<%= pr_product.purchase_order_product.sizes.length %>">Sizes</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                        <td align="center"><%= size.size %></td>
-                                                      <% end %>
-                                                  </tr>
-                                                  <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
-                                                    <tr>
-                                                        <% if idx == 0 %>
-                                                          <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
-                                                        <% end %>
-                                                        <td align="center"><%= color.code %></td>
-                                                        <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                          <% po_detail = pr_product.purchase_order_product.purchase_order_details.select{ |pod| pod.color.eql?(color) && pod.size.eql?(size) }.first %>
-                                                          <td>
-                                                              <% if po_detail %>
-                                                                <%= po_detail.quantity %>
-                                                              <% end %>
-                                                          </td>
-                                                        <% end %>
-                                                    </tr>
+                            <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
+                                <tr align="center">
+                                    <td style="vertical-align: middle"><%= idx.succ %></td>
+                                    <td style="vertical-align: middle"><%= pr_product.purchase_order_product.product.code if pr_product.purchase_order_product and pr_product.purchase_order_product.product %></td>
+                                    <td style="vertical-align: middle">
+                                        <table class="table table-condensed table-responsive table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="2" rowspan="2"></td>
+                                                    <td align="center" colspan="<%= pr_product.purchase_order_product.sizes.length %>">Sizes</td>
+                                                </tr>
+                                                <tr>
+                                                  <% pr_product.purchase_order_product.sizes.each do |size| %>
+                                                    <td align="center"><%= size.size %></td>
                                                   <% end %>
-                                              </tbody>
-                                          </table>
-                                      </td>
-                                      <td align="right" style="vertical-align: middle"><%= pr_product.purchase_order_product.total_quantity %></td>
-                                      <td align="right" style="vertical-align: middle">
-                                          <%= number_to_currency(pr_product.purchase_order_product.product.cost,
-                                            :separator => ",",
-                                            :delimiter => ".",
-                                            :unit => "Rp",
-                                            :precision => 2) %>
-                                      </td>
-                                      <td align="right" style="vertical-align: middle">
-                                          <%= number_to_currency(pr_product.purchase_order_product.total_cost,
-                                            :separator => ",",
-                                            :delimiter => ".",
-                                            :unit => "Rp",
-                                            :precision => 2) %>
-                                      </td>
-                                      <td style="vertical-align: middle">
-                                          <table class="table table-condensed table-responsive table-bordered">
-                                              <tbody>
-                                                  <tr>
-                                                      <td colspan="2" rowspan="2"></td>
-                                                      <td align="center" colspan="<%= pr_product.purchase_order_product.sizes.length %>">Sizes</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                        <td align="center"><%= size.size %></td>
-                                                      <% end %>
-                                                  </tr>
-                                                  <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
-                                                    <tr>
-                                                        <% if idx == 0 %>
-                                                          <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
-                                                        <% end %>
-                                                        <td align="center"><%= color.code %></td>
-                                                        <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                          <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
-                                                          <td>
-                                                              <% if pr_item %>
-                                                                <%= pr_item.quantity %>
-                                                              <% end %>
-                                                          </td>
-                                                        <% end %>
-                                                    </tr>
+                                                </tr>
+                                              <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
+                                                <tr>
+                                                    <% if idx == 0 %>
+                                                      <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                                    <% end %>
+                                                    <td align="center"><%= color.code %></td>
+                                                    <% pr_product.purchase_order_product.sizes.each do |size| %>
+                                                      <% po_detail = pr_product.purchase_order_product.purchase_order_details.select{ |pod| pod.color.eql?(color) && pod.size.eql?(size) }.first %>
+                                                      <td>
+                                                          <% if po_detail %>
+                                                            <%= po_detail.quantity %>
+                                                          <% end %>
+                                                      </td>
+                                                    <% end %>
+                                                </tr>
+                                              <% end %>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td align="right" style="vertical-align: middle"><%= pr_product.purchase_order_product.total_quantity %></td>
+                                    <td align="right" style="vertical-align: middle">
+                                      <%= number_to_currency(pr_product.purchase_order_product.product.cost,
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %>
+                                    </td>
+                                    <td align="right" style="vertical-align: middle">
+                                      <%= number_to_currency(pr_product.purchase_order_product.total_cost,
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %>
+                                    </td>
+                                    <td style="vertical-align: middle">
+                                        <table class="table table-condensed table-responsive table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="2" rowspan="2"></td>
+                                                    <td align="center" colspan="<%= pr_product.purchase_order_product.sizes.length %>">Sizes</td>
+                                                </tr>
+                                                <tr>
+                                                  <% pr_product.purchase_order_product.sizes.each do |size| %>
+                                                    <td align="center"><%= size.size %></td>
                                                   <% end %>
-                                              </tbody>
-                                          </table>
-                                      </td>
-                                      <td align="right" style="vertical-align: middle"><%= pr_product.total_quantity %></td>
-                                      <td align="right" style="vertical-align: middle">
-                                          <%= number_to_currency(pr_product.return_total_cost,
-                                            :separator => ",",
-                                            :delimiter => ".",
-                                            :unit => "Rp",
-                                            :precision => 2) %>
-                                      </td>
-                                  </tr>
-                                <% end %>
+                                                </tr>
+                                              <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
+                                                <tr>
+                                                    <% if idx == 0 %>
+                                                      <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                                    <% end %>
+                                                    <td align="center"><%= color.code %></td>
+                                                    <% pr_product.purchase_order_product.sizes.each do |size| %>
+                                                      <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
+                                                      <td>
+                                                          <% if pr_item %>
+                                                            <%= pr_item.quantity %>
+                                                          <% end %>
+                                                      </td>
+                                                    <% end %>
+                                                </tr>
+                                              <% end %>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td align="right" style="vertical-align: middle"><%= pr_product.total_quantity %></td>
+                                    <td align="right" style="vertical-align: middle">
+                                      <%= number_to_currency(pr_product.return_total_cost,
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %>
+                                    </td>
+                                </tr>
+                            <% end %>
 
                             </tbody>
                         </table>

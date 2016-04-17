@@ -1,25 +1,28 @@
 class PurchaseReturnItem < ActiveRecord::Base
   belongs_to :purchase_order_detail
   
-  validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true, message: "Quantity must be greater than or equal to 1"}, if: proc { |pri| pri.quantity.present? }
+  validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true, message: "must be greater than or equal to 1"}, if: proc { |pri| pri.quantity.present? }
     validate :less_than_or_equal_to_stock, if: proc {|pri| pri.quantity.present? and pri.quantity > 0}
       
-      after_create :update_stock
-      
-      attr_accessor :stock
-    
+      after_create :update_stock, :update_returning_qty
+          
       private
       
+      def update_returning_qty
+        purchase_order_detail.is_updating_returning_quantity = true
+        purchase_order_detail.returning_qty = purchase_order_detail.returning_qty.to_i + quantity
+        purchase_order_detail.save
+      end
       
       def update_stock
-        stock = self.stock
+        stock = get_stock
         stock.quantity -= quantity
         stock.save
       end
     
       def less_than_or_equal_to_stock
-        self.stock = get_stock
-        errors.add(:quantity, "must be less than or equal to quantity on hand.") if (stock and quantity > stock.quantity) or !stock
+        stock = purchase_order_detail.receiving_qty.to_i - purchase_order_detail.returning_qty.to_i
+        errors.add(:quantity, "must be less than or equal to quantity on hand.") if quantity > stock
       end
       
       def get_stock

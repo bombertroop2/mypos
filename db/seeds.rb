@@ -41,9 +41,9 @@ if PriceCode.count < 1
   PriceCode.create name: "Price Luar Jakarta", code: "NJK"
 end
 
-if Vendor.count < 1
-  Vendor.create name: "Delami", code: "DLM01", address: "Jakarta", terms_of_payment: 90, value_added_tax: "Exclude"
-end
+#if Vendor.count < 1
+#  Vendor.create name: "Delami", code: "DLM01", address: "Jakarta", terms_of_payment: 90, value_added_tax: "exclude"
+#end
 
 if SizeGroup.count < 1
   SizeGroup.create code: "A"
