@@ -4,7 +4,7 @@ class ColorsController < ApplicationController
   # GET /colors
   # GET /colors.json
   def index
-    @colors = Color.all
+    @colors = Color.select :id, :code, :name
   end
 
   # GET /colors/1
@@ -87,7 +87,7 @@ class ColorsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_color
-    @color = Color.find(params[:id])
+    @color = Color.where(id: params[:id]).select(:id, :code, :name, :description).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
