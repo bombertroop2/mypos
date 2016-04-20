@@ -98,16 +98,7 @@ $(function () {
             e.ctrlKey = true;
             $("#product_" + value).find("td:first-child").trigger(e);
         });
-    }
-
-    $(".do-radio-button").click(function () {
-        if ($(this).val() == "yes")
-            $(".do-number-field").prop("disabled", false);
-        else {
-            $(".do-number-field").val("");
-            $(".do-number-field").prop("disabled", true);
-        }
-    });
+    }    
 
     if ($(".discount-fields").length > 0)
         $(".discount-fields").numeric();
@@ -194,16 +185,7 @@ $(document).on('page:load', function () {
             e.ctrlKey = true;
             $("#product_" + value).find("td:first-child").trigger(e);
         });
-    }
-
-    $(".do-radio-button").click(function () {
-        if ($(this).val() == "yes")
-            $(".do-number-field").prop("disabled", false);
-        else {
-            $(".do-number-field").val("");
-            $(".do-number-field").prop("disabled", true);
-        }
-    });
+    }    
 
     if ($(".discount-fields").length > 0)
         $(".discount-fields").numeric();

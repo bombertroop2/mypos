@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  resources :receiving, only: :new do
+    member do
+      get 'get_purchase_order'
+      post 'receive_products_from_purchase_order'
+    end
+  end
+
   resources :purchase_returns, except: [:destroy, :edit, :update] do
     collection do
       get 'get_purchase_order_details'
@@ -14,8 +21,8 @@ Rails.application.routes.draw do
     end
     
     member do
-      get 'receive'
-      post 'receive'
+#      get 'receive'
+#      post 'receive'
       get 'close'
     end
   end

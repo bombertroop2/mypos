@@ -27,7 +27,7 @@ class PurchaseOrder < ActiveRecord::Base
                     validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po}
                       validate :prevent_delete_if_article_received, if: proc { |po| po.deleting_po }
                         validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
-                          validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.first_discount.present?}
+                          validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.first_discount.present? && !po.receiving_po}
                             validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.second_discount.present?}
                               validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| po.second_discount.present?}
                                 validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| po.second_discount.present? && !po.is_additional_disc_from_net}

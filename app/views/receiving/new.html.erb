@@ -1,0 +1,63 @@
+<div class="page-header"><h1>Receiving Products</h1></div>
+<div>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#purchase_order" aria-controls="purchase_orde" role="tab" data-toggle="tab">Purchase Order</a></li>
+        <li role="presentation"><a href="#direct_purchase" aria-controls="direct_purchase" role="tab" data-toggle="tab">Direct Purchase</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane fade in active" id="purchase_order" style="padding-top: 20px">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Purchase Orders</label>
+                    <div class="col-sm-10">
+                        <table id="listing_purchase_order_table" class="display">
+                            <thead>
+                                <tr>
+                                    <th>Number</th>
+                                    <th>Status</th>
+                                    <th>Vendor</th>
+                                    <th>Warehouse</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <% @purchase_orders.each do |purchase_order| %>
+                                  <tr id="purchase_order_<%= purchase_order.id %>">
+                                      <td><%= purchase_order.number %></td>
+                                      <td><%= purchase_order.status %></td>
+                                      <td><%= purchase_order.vendors_name %></td>
+                                      <td><%= purchase_order.warehouses_name %></td>
+                                  </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                        <%= submit_tag "Generate form", id: "generate_receiving_po_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+                      </div>
+                  </div>
+                  <div id="purchase_order_form_container">
+                      <% if params[:id].present? %>
+                        <%= render 'receiving_purchase_order_form' %>
+                      <% end %>
+                  </div>
+              </div>
+
+          </div>
+          <div role="tabpanel" class="tab-pane fade" id="direct_purchase" style="padding-top: 15px">Under construction</div>
+      </div>
+
+  </div>
+
+  <script>
+    $(function () {
+  <% if @purchase_order %>
+          selectRow('<%= params[:id] %>');
+  <% end %>
+  <% if @purchase_order && !@purchase_order.errors[:base].present? && !@purchase_order.errors[:"received_purchase_orders.base"].present? %>
+          autoScrollToBottomOfPage();
+  <% end %>
+    });
+  </script>
