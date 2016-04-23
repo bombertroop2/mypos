@@ -1,0 +1,20 @@
+$("#receiving_product_ids").val("<%= params[:product_ids] %>");
+if($("#products_detail").html().trim().length == 0)
+$("#products_detail").html("<%= j(render(partial: "product_quantities")) %>");
+else{
+<% if @removed_ids.present? %>
+  <% @removed_ids.each do |removed_id| %>
+    // remove unuse product
+    $("#product_table_<%= removed_id %>").remove();
+  <% end %>
+<% else %>
+  <% if @replaced_ids.present? %>
+    <% @replaced_ids.each do |replaced_id| %>
+      // remove unuse product
+      $("#product_table_<%= replaced_id %>").remove();
+    <% end %>      
+  <% end %>
+  $("#products_detail").append("<%= j(render(partial: "product_quantities")) %>");
+<% end %>
+}
+autoScrollToBottomOfPage();

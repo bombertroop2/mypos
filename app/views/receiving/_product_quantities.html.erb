@@ -1,0 +1,92 @@
+<% @direct_purchase.direct_purchase_products.each do |dpp| %>
+  <% product = dpp.product %>
+  <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= dpp.product_id %>">
+      <tr style="text-align: center">
+          <td style="vertical-align: middle"><strong>Product code</strong></td>
+          <td style="vertical-align: middle"><strong>Size X Color</strong></td>
+      </tr>    
+      <tr style="text-align: center">
+          <td style="vertical-align: middle">
+              <strong><%= product.code %></strong>
+          </td>
+          <td>
+              <% direct_purchase_product_array_index = create_direct_purchase_product_array_variable_name(product) %>
+              <%= fields_for direct_purchase_product_array_index, dpp do |dpp_form| %>
+                <%= dpp_form.hidden_field :product_id %>
+              <% end %>
+
+              <% sizes = product.sizes.select(:id, :size) %>
+              <% index = 0 %>
+
+              <script>
+                var colorCodes = [];
+              </script>
+
+              <table border="1" class="table table-condensed table-responsive table-bordered">
+                  <tr style="text-align: center">
+                      <th colspan="2" rowspan="2"></th>
+                      <td colspan="<%= @colors.size %>" align="center"><strong>Colors</strong><br /><%= text_field_tag "quantity_#{product.id}", "", {placeholder: "quantity", size: 16, class: "quantity form-control quantity-fields"} %></td>
+                    </tr>
+
+                    <tr style="text-align: center">
+                        <% @colors.each do |color| %>
+                          <td align="center"><%= color.code %><br /><%= text_field_tag "quantity_#{product.id}_#{color.code}", "", {placeholder: "quantity", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16} %></td>
+                          <% end %>
+                      </tr>
+
+                      <% sizes.each_with_index do |size, idx| %>                          
+                        <tr style="text-align: center">
+                            <% if idx.eql? 0 %>
+                              <td rowspan="<%= sizes.size %>" style="vertical-align: middle"><strong>Sizes</strong></td>
+                            <% end %>
+                            <td style="vertical-align: middle"><%= size.size %></td>                            
+                            <% @colors.each do |color| %>
+                              <% if idx == 0 %>
+                            <script>
+                              colorCodes.push('<%= color.code %>');
+                            </script>
+                          <% end %>
+                          <% direct_purchase_detail_detail = dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(size.id) and dpd.color_id.eql?(color.id)}.first %>
+                          <% direct_purchase_detail_array_index = create_direct_purchase_detail_array_variable_name(index, direct_purchase_product_array_index) %>
+                          <td align="center" style="vertical-align: middle">
+                              <%= fields_for direct_purchase_detail_array_index, direct_purchase_detail_detail do |direct_purchase_detail_detail_form| %>
+                                <%= direct_purchase_detail_detail_form.hidden_field :size_id %>
+                                <%= direct_purchase_detail_detail_form.hidden_field :color_id %>
+                                <div class="<%= control_group_error(direct_purchase_detail_detail, :quantity) %>">
+                                    <%= direct_purchase_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{product.id}-#{color.code} quantity-#{product.id} quantity form-control quantity-fields", size: 16 %>
+                                      <%= error_help_text(direct_purchase_detail_detail, :quantity) %>
+                                  </div>
+                                <% end %>
+
+                            </td>
+                            <% index += 1 %>
+                          <% end %>
+              </tr>
+            <% end %>              
+        </table></td>
+        </tr>
+        <script>
+          $.each(colorCodes, function (index, value) {
+              $('#quantity_<%= product.id %>_' + value).keyup(function () {
+                  $('.quantity-<%= product.id %>-' + value).val($('#quantity_<%= product.id %>_' + value).val());
+              });
+          });
+          $('#<%= "quantity_#{product.id}" %>').keyup(function () {
+              $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
+          });
+        </script>
+        </table>
+      <% end %>
+
+      <script>
+        $(".quantity").numeric({
+            decimal: false,
+            negative: false
+        }, function () {
+            alert("Positive integers only");
+            this.value = "";
+            this.focus();
+        });
+
+      </script>
+

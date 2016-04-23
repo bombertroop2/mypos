@@ -1,5 +1,6 @@
 class ReceivedPurchaseOrder < ActiveRecord::Base
   belongs_to :purchase_order
+  belongs_to :direct_purchase
   has_many :received_purchase_order_products, dependent: :destroy
   
   
@@ -8,13 +9,15 @@ class ReceivedPurchaseOrder < ActiveRecord::Base
     accepts_nested_attributes_for :received_purchase_order_products, reject_if: :child_blank
   
     validates :delivery_order_number, presence: true, unless: proc{|rpo| rpo.is_using_delivery_order.eql?("no")}, on: :create
-      validate :minimum_receiving_item, on: :create
+      validate :minimum_receiving_item, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
+      
+      attr_accessor :is_it_direct_purchasing
   
   
       private
     
       def create_auto_do_number
-        vendor = purchase_order.vendor
+        vendor = !is_it_direct_purchasing ? purchase_order.vendor : direct_purchase.vendor
         last_received_po = vendor.received_purchase_orders.last
         today = Date.today
         current_month = today.month.to_s.rjust(2, '0')
