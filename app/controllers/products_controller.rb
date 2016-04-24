@@ -48,6 +48,9 @@ class ProductsController < ApplicationController
               @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
             end
           end
+          if @product.errors[:base].present?
+            flash.now[:alert] = @product.errors[:base].to_sentence
+          end
           format.html { render :new }
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
