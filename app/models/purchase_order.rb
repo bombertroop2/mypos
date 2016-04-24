@@ -119,7 +119,7 @@ class PurchaseOrder < ActiveRecord::Base
                                             total_product_value = 0
                                             purchase_order_products.each do |pop|
                                               total_quantity = pop.purchase_order_details.map(&:quantity).compact.sum
-                                              total_product_value += pop.product.cost * total_quantity 
+                                              total_product_value += pop.product.active_cost.cost * total_quantity 
                                             end
         
                                             unless order_value == total_product_value

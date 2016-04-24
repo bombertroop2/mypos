@@ -48,6 +48,19 @@ class Product < ActiveRecord::Base
         before_create :create_cost_list
         
   
+        def active_cost
+          cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("id DESC")
+          if cost_lists.size == 1
+            return cost_lists.first
+          else
+            cost_lists.each do |cost_list|
+              if Date.today >= cost_list.effective_date
+                return cost_list
+              end
+            end
+          end
+        end
+        
         private
         
         def is_user_adding_new_cost          

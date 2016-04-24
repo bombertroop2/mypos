@@ -20,7 +20,7 @@ class PurchaseOrderDetail < ActiveRecord::Base
         end
 
         def calculate_total_price
-          self.total_unit_price = quantity * purchase_order_product.product.cost if quantity.present?
+          self.total_unit_price = quantity * purchase_order_product.cost_list.cost if quantity.present?
         end
 
       end
