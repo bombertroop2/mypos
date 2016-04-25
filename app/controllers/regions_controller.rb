@@ -4,7 +4,7 @@ class RegionsController < ApplicationController
   # GET /regions
   # GET /regions.json
   def index
-    @regions = Region.all
+    @regions = Region.select :id, :code, :name
   end
 
   # GET /regions/1
@@ -85,7 +85,7 @@ class RegionsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_region
-    @region = Region.find(params[:id])
+    @region = Region.where(id: params[:id]).select(:id, :code, :name, :description).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
