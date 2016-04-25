@@ -4,7 +4,7 @@ class GoodsTypesController < ApplicationController
   # GET /goods_types
   # GET /goods_types.json
   def index
-    @goods_types = GoodsType.all
+    @goods_types = GoodsType.select :id, :code, :name
   end
 
   # GET /goods_types/1
@@ -85,7 +85,7 @@ class GoodsTypesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_goods_type
-    @goods_type = GoodsType.find(params[:id])
+    @goods_type = GoodsType.where(id: params[:id]).select(:id, :code, :name, :description).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
