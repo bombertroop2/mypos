@@ -4,7 +4,7 @@ class PriceCodesController < ApplicationController
   # GET /price_codes
   # GET /price_codes.json
   def index
-    @price_codes = PriceCode.all
+    @price_codes = PriceCode.select :id, :code, :name
   end
 
   # GET /price_codes/1
@@ -87,7 +87,7 @@ class PriceCodesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_price_code
-    @price_code = PriceCode.find(params[:id])
+    @price_code = PriceCode.where(id: params[:id]).select(:id, :code, :name, :description).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
