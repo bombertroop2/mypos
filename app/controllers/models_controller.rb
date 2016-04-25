@@ -4,7 +4,7 @@ class ModelsController < ApplicationController
   # GET /models
   # GET /models.json
   def index
-    @models = Model.all
+    @models = Model.select :id, :code, :name
   end
 
   # GET /models/1
@@ -85,7 +85,7 @@ class ModelsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_model
-    @model = Model.find(params[:id])
+    @model = Model.where(id: params[:id]).select(:id, :code, :name, :description).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
