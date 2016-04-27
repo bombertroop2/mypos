@@ -163,7 +163,7 @@
                                     </td>
                                     <td align="right" style="vertical-align: middle"><%= pr_product.purchase_order_product.total_quantity %></td>
                                     <td align="right" style="vertical-align: middle">
-                                      <%= number_to_currency(pr_product.purchase_order_product.product.cost,
+                                      <%= number_to_currency(pr_product.purchase_order_product.cost_list.cost,
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",

@@ -9,7 +9,7 @@ class PurchaseReturnProduct < ActiveRecord::Base
   before_create :update_total_quantity
   
   def return_total_cost
-    total_quantity * purchase_order_product.product.cost
+    total_quantity * purchase_order_product.cost_list.cost
   end
   
   private

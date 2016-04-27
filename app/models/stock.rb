@@ -1,11 +1,11 @@
 class Stock < ActiveRecord::Base
   belongs_to :warehouse
   
-  has_many :stock_products
+  has_many :stock_products, dependent: :destroy
   has_many :stock_details, through: :stock_products
   
   def product_cost
-    purchase_order_detail.purchase_order_product.product.cost
+    purchase_order_detail.purchase_order_product.cost_list.cost
   end
   
   def po_number

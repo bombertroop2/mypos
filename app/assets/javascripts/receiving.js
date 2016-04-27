@@ -13,6 +13,10 @@ function selectRow(purchaseOrderId) {
 }
 
 $(function () {
+    $("#direct_purchase_receiving_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
     // funny solution for silly bug
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var target = $(e.target).attr("href") // activated tab
@@ -124,6 +128,10 @@ $(function () {
 });
 
 $(document).on('page:load', function () {
+    $("#direct_purchase_receiving_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
     // funny solution for silly bug
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var target = $(e.target).attr("href") // activated tab

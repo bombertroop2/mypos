@@ -49,118 +49,125 @@
           <div role="tabpanel" class="tab-pane fade<% if !params[:action].eql?("receive_products_from_purchase_order") && !params[:action].eql?("new") %> in active<% end %>" id="direct_purchase" style="padding-top: 20px">
               <%= form_for(@direct_purchase, html: {class: "form-horizontal"}, url: receiving_index_path) do |f| %>
                   <%= hidden_field_tag "receiving_product_ids", params[:receiving_product_ids] %>
-                  <div class="form-group<%= control_group_error(@direct_purchase, :vendor_id) %>">
-                      <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
+                  <div class="form-group<%= control_group_error(@direct_purchase, :receiving_date) %>">
+                      <%= f.label :receiving_date, class: "col-sm-2 control-label" %>
                         <div class="col-sm-10">
-                            <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @direct_purchase.vendor_id.to_s), {prompt: 'Select Vendor'}, {class: "form-control"} %>
-                              <%= error_help_text(@direct_purchase, :vendor_id) %>
+                            <%= f.text_field :receiving_date, size: 10, readonly: true, tabindex: "0", class: "form-control" %>
+                              <%= error_help_text(@direct_purchase, :receiving_date) %>
                           </div>
                       </div>
-                      <div class="form-group<%= control_group_error(@direct_purchase, :warehouse_id) %>">
-                          <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>            
+                      <div class="form-group<%= control_group_error(@direct_purchase, :vendor_id) %>">
+                          <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
                             <div class="col-sm-10">
-                                <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @direct_purchase.warehouse_id.to_s), {prompt: 'Select Warehouse'}, {class: "form-control"} %>
-                                  <%= error_help_text(@direct_purchase, :warehouse_id) %>
+                                <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @direct_purchase.vendor_id.to_s), {prompt: 'Select Vendor'}, {class: "form-control"} %>
+                                  <%= error_help_text(@direct_purchase, :vendor_id) %>
                               </div>
                           </div>
-                          <div class="form-group<%= control_group_error(@direct_purchase, :first_discount) %>">
-                              <%= f.label :first_discount, "First discount (%)", class: "col-sm-2 control-label" %>
+                          <div class="form-group<%= control_group_error(@direct_purchase, :warehouse_id) %>">
+                              <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>            
                                 <div class="col-sm-10">
-                                    <%= f.text_field :first_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "1" %>
-                                      <%= error_help_text(@direct_purchase, :first_discount) %>
+                                    <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @direct_purchase.warehouse_id.to_s), {prompt: 'Select Warehouse'}, {class: "form-control"} %>
+                                      <%= error_help_text(@direct_purchase, :warehouse_id) %>
                                   </div>
                               </div>
-                              <div class="form-group<%= control_group_error(@direct_purchase, :second_discount) %>">
-                                  <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>                              
+                              <div class="form-group<%= control_group_error(@direct_purchase, :first_discount) %>">
+                                  <%= f.label :first_discount, "First discount (%)", class: "col-sm-2 control-label" %>
                                     <div class="col-sm-10">
-                                        <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "2", disabled: !@direct_purchase.second_discount.present? %>
-                                          <%= error_help_text(@direct_purchase, :second_discount) %>
-                                      </div>
-                                      <span class="col-sm-2"></span>
-                                      <div class="col-sm-10">
-                                          <%= f.radio_button :is_additional_disc_from_net, true, checked: true %> From net
-                                          &nbsp;&nbsp;&nbsp;&nbsp;<%= f.radio_button :is_additional_disc_from_net, false %> From gross
+                                        <%= f.text_field :first_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "1" %>
+                                          <%= error_help_text(@direct_purchase, :first_discount) %>
                                       </div>
                                   </div>
-                                  <div class="form-group<%= control_group_error(@direct_purchase, :price_discount) %>">
-                                      <%= f.label :price_discount, "Price discount", class: "col-sm-2 control-label" %>
+                                  <div class="form-group<%= control_group_error(@direct_purchase, :second_discount) %>">
+                                      <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>                              
                                         <div class="col-sm-10">
-                                            <%= f.text_field :price_discount, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
-                                                "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
-                                              <%= error_help_text(@direct_purchase, :price_discount) %>
+                                            <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "2", disabled: !@direct_purchase.second_discount.present? %>
+                                              <%= error_help_text(@direct_purchase, :second_discount) %>
+                                          </div>
+                                          <span class="col-sm-2"></span>
+                                          <div class="col-sm-10">
+                                              <%= f.radio_button :is_additional_disc_from_net, true, checked: true %> From net
+                                              &nbsp;&nbsp;&nbsp;&nbsp;<%= f.radio_button :is_additional_disc_from_net, false %> From gross
                                           </div>
                                       </div>
-                                      <%= f.fields_for :received_purchase_order do |received_purchase_order_form| %>
-                                        <div class="form-group">
-                                            <%= received_purchase_order_form.label :is_using_delivery_order, "Delivery Order", class: "col-sm-2 control-label" %>
-                                              <div class="col-sm-10">
-                                                  <%= received_purchase_order_form.radio_button :is_using_delivery_order, "yes", checked: true, class: "do-radio-button-direct-purchase" %> Yes
-                                                    <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button-direct-purchase" %> No
-                                                  </div>
+                                      <div class="form-group<%= control_group_error(@direct_purchase, :price_discount) %>">
+                                          <%= f.label :price_discount, "Price discount", class: "col-sm-2 control-label" %>
+                                            <div class="col-sm-10">
+                                                <%= f.text_field :price_discount, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
+                                                    "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
+                                                  <%= error_help_text(@direct_purchase, :price_discount) %>
                                               </div>
-                                              <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
-                                                  <%= received_purchase_order_form.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
-                                                    <div class="col-sm-10">
-                                                        <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
-                                                          <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
+                                          </div>
+                                          <%= f.fields_for :received_purchase_order do |received_purchase_order_form| %>
+                                            <div class="form-group">
+                                                <%= received_purchase_order_form.label :is_using_delivery_order, "Delivery Order", class: "col-sm-2 control-label" %>
+                                                  <div class="col-sm-10">
+                                                      <%= received_purchase_order_form.radio_button :is_using_delivery_order, "yes", checked: true, class: "do-radio-button-direct-purchase" %> Yes
+                                                        <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button-direct-purchase" %> No
                                                       </div>
                                                   </div>
-                                                <% end %>
-                                                <div class="form-group">
-                                                    <label class="col-sm-2 control-label">Products</label>
-                                                    <div class="col-sm-10">
-                                                        <table id="listing_product_table_receiving" class="display">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th></th>
-                                                                    <th id="code_th">Code</th>
-                                                                    <th>Brand</th>
-                                                                </tr>
-                                                            </thead>
-
-                                                            <tbody>
-                                                                <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
-                                                                  <tr id="product_<%= product.id %>">
-                                                                      <td></td>
-                                                                      <td><%= product.code %></td>
-                                                                      <td><%= product.name %></td>
-                                                                  </tr>
-                                                                <% end %>
-                                                            </tbody>
-                                                        </table>
-                                                        <%= submit_tag "Generate form", id: "generate_dp_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
-                                                      </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                      <div class="col-sm-offset-2 col-sm-10">
-                                                          <div id="products_detail">
-                                                              <% if params[:action].eql?("create") %>
-                                                                <%= render 'product_quantities' %>
-                                                              <% end %>
+                                                  <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
+                                                      <%= received_purchase_order_form.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
+                                                        <div class="col-sm-10">
+                                                            <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
+                                                              <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
                                                           </div>
-                                                      </div>                                                      
-                                                  </div>
-                                                  <div class="form-group">
-                                                      <div class="col-sm-offset-2 col-sm-10">
-                                                          <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
+                                                      </div>
+                                                    <% end %>
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">Products</label>
+                                                        <div class="col-sm-10">
+                                                            <table id="listing_product_table_receiving" class="display">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th id="code_th">Code</th>
+                                                                        <th>Brand</th>
+                                                                    </tr>
+                                                                </thead>
+
+                                                                <tbody>
+                                                                    <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
+                                                                      <tr id="product_<%= product.id %>">
+                                                                          <td></td>
+                                                                          <td><%= product.code %></td>
+                                                                          <td><%= product.name %></td>
+                                                                      </tr>
+                                                                    <% end %>
+                                                                </tbody>
+                                                            </table>
+                                                            <%= submit_tag "Generate form", id: "generate_dp_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+                                                          </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                          <div class="col-sm-offset-2 col-sm-10">
+                                                              <div id="products_detail">
+                                                                  <% if params[:action].eql?("create") %>
+                                                                    <%= render 'product_quantities' %>
+                                                                  <% end %>
+                                                              </div>
+                                                          </div>                                                      
+                                                      </div>
+                                                      <div class="form-group">
+                                                          <div class="col-sm-offset-2 col-sm-10">
+                                                              <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                  <% end %>
+                                                      <% end %>
+                                                  </div>
                                               </div>
+
                                           </div>
 
-                                      </div>
+                                          <script>
+                                            $(function () {
+                                          <% if @purchase_order %>
+                                                  selectRow('<%= params[:id] %>');
+                                          <% end %>
+                                          <% if @purchase_order && !@purchase_order.errors[:base].present? && !@purchase_order.errors[:"received_purchase_orders.base"].present? %>
+                                                  autoScrollToBottomOfPage();
+                                          <% elsif @direct_purchase && params[:direct_purchase].present? && !@direct_purchase.errors[:base].present? && !@direct_purchase.errors[:"direct_purchase_products.base"].present? && @direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.quantity"].present? %>
+                                                  autoScrollToBottomOfPage();
+                                          <% end %>
 
-                                      <script>
-                                        $(function () {
-                                      <% if @purchase_order %>
-                                              selectRow('<%= params[:id] %>');
-                                      <% end %>
-                                      <% if @purchase_order && !@purchase_order.errors[:base].present? && !@purchase_order.errors[:"received_purchase_orders.base"].present? %>
-                                              autoScrollToBottomOfPage();
-                                      <% elsif @direct_purchase && params[:direct_purchase].present? && !@direct_purchase.errors[:base].present? && !@direct_purchase.errors[:"direct_purchase_products.base"].present? && @direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.quantity"].present? %>
-                                              autoScrollToBottomOfPage();
-                                      <% end %>
-
-                                        });
-                                      </script>
+                                            });
+                                          </script>

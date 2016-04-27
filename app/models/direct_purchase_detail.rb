@@ -10,9 +10,13 @@ class DirectPurchaseDetail < ActiveRecord::Base
   validates :quantity, presence: true
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |dpd| dpd.quantity.present? }
     
-    before_create :create_received_purchase_order_item
+    before_create :create_received_purchase_order_item, :calculate_total_unit_price
     
     private
+    
+    def calculate_total_unit_price
+      self.total_unit_price = quantity * direct_purchase_product.cost_list.cost
+    end
     
     def create_received_purchase_order_item
       self.attributes = self.attributes.merge(received_purchase_order_item_attributes: {

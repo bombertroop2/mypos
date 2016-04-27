@@ -18,7 +18,7 @@ class ReceivedPurchaseOrderItem < ActiveRecord::Base
             def update_receiving_value
               purchase_order = received_purchase_order_product.received_purchase_order.purchase_order
               purchase_order.receiving_po = true
-              purchase_order.receiving_value = purchase_order.receiving_value.to_f + received_purchase_order_product.purchase_order_product.product.cost * quantity
+              purchase_order.receiving_value = purchase_order.receiving_value.to_f + received_purchase_order_product.purchase_order_product.cost_list.cost * quantity
               purchase_order.status = if purchase_order.receiving_value != purchase_order.order_value
                 "Partial"
               else

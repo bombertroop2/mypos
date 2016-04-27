@@ -21,7 +21,20 @@ class PurchaseOrderProduct < ActiveRecord::Base
   
   private
   
+  def active_cost
+    cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("id DESC")
+    if cost_lists.size == 1
+      return cost_lists.first
+    else
+      cost_lists.each do |cost_list|
+        if purchase_order.purchase_order_date >= cost_list.effective_date
+          return cost_list
+        end
+      end
+    end
+  end
+  
   def set_active_cost
-    self.cost_list_id = product.active_cost.id
+    self.cost_list_id = active_cost.id
   end
 end
