@@ -6,8 +6,12 @@
     </tr>
     <tr style="text-align: center">
         <% @price_codes.each do |price_code| %>
-          <td align="center"><%= price_code.code %><br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
-                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %></td>
+          <td align="center"><%= price_code.code %>
+              <% if @product.new_record? %>
+                <br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
+                    "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %>
+                <% end %>
+            </td>
           <% end %>
       </tr>
       <% @sizes.each_with_index do |size, idx| %>
@@ -19,39 +23,45 @@
             <% @price_codes.each do |price_code| %>
               <% product_detail = @product.product_details.select{|pd| pd.size_id.eql?(size.id) && pd.price_code_id.eql?(price_code.id) }.first %>
               <td align="center">                      
-                  <% if product_detail.new_record? %>
+                  <% if @product.new_record? %>
                     <% product_detail_array_index = "product[product_details_attributes]["+Time.now.to_i.to_s+index.to_s+"]" %>
-                  <% else %>
-                    <% product_detail_array_index = "product[product_details_attributes][]" %>
-                  <% end %>
-                  <%= fields_for product_detail_array_index, product_detail do |product_detail_form| %>
-                    <%= product_detail_form.hidden_field :id %>
-                    <%= product_detail_form.hidden_field :size_id %>
-                    <%= product_detail_form.hidden_field :price_code_id %>
-                    <div class="<%= control_group_error(product_detail, :price) %>">
-                        <%= product_detail_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
-                            "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
-                          <%= error_help_text(product_detail, :price) %>
-                      </div>  
-                    <% end %>
-                </td>
-                <% index += 1 %>
-              <% end %>
-          </tr>
+                    <%= fields_for product_detail_array_index, product_detail do |product_detail_form| %>
+                      <%= product_detail_form.hidden_field :size_id %>
+                      <%= product_detail_form.hidden_field :price_code_id %>
+                      <%= product_detail_form.fields_for :price_lists do |price_list_form| %>                        
+                        <%= price_list_form.hidden_field :effective_date, class: "price-effective-date" %>
+                          <div class="<%= control_group_error(price_list_form.object, :price) %>">
+                              <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
+                                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
+                                <%= error_help_text(price_list_form.object, :price) %>
+                            </div>
+                          <% end %>
+                        <% end %>
+                      <% else %>
+                        <div class="money-fields form-control">
+                            <%= number_to_currency(product_detail.active_price.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if product_detail && product_detail.active_price.present? %>
+                        </div>
+                      <% end %>
+
+                  </td>
+                  <% index += 1 %>
+                <% end %>
+            </tr>
+          <% end %>
+          <% if @product.new_record? %>
+            <script>
+        <% @price_codes.each do |price_code| %>
+                $('#price_<%= price_code.code %>').keyup(function () {
+                    $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
+                });
         <% end %>
-        <script>
-    <% @price_codes.each do |price_code| %>
-            $('#price_<%= price_code.code %>').keyup(function () {
-                $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
-            });
-    <% end %>
-        </script>
+            </script>
 
-        <script>
-          $(function () {
-              $('.money').autoNumeric('init');  //autoNumeric with defaults
-          });
-        </script>
+            <script>
+              $(function () {
+                  $('.money').autoNumeric('init');  //autoNumeric with defaults
+              });
+            </script>
+          <% end %>
 
-
-    </table>
+      </table>

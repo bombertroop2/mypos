@@ -3,46 +3,42 @@ class ProductDetail < ActiveRecord::Base
   belongs_to :price_code
   belongs_to :product
   
-  has_many :product_detail_histories, dependent: :destroy
+  has_many :price_lists, dependent: :destroy
   #  has_many :purchase_order_details
   
-  validates :barcode, uniqueness: {scope: :price_code_id}
-  validates :price, numericality: true, if: proc { |prdet| prdet.price.present? }        
-    validates :price, numericality: {greater_than_or_equal_to: 1}, if: proc { |prdet| prdet.price.is_a?(Numeric) }
+  validates :barcode, uniqueness: {scope: :price_code_id} 
 
-      accepts_nested_attributes_for :product_detail_histories
+  accepts_nested_attributes_for :price_lists, reject_if: proc {|attributes| attributes[:price].blank?}
 
-      before_validation :delete_record
-      before_create :create_barcode
-      before_save :create_history
-
-      private
-      
-      def delete_record
-        unless new_record?
-          destroy if price.blank?
-        end
-      end
-            
-            
-      def create_barcode
-        product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_id.eql?(product_id)}.first
-        if product_detail
-          self.barcode = product_detail.barcode
-        else
-          last_detail = ProductDetail.last
-          self.barcode = "000000000000001" if last_detail.nil?
-          self.barcode = last_detail.barcode.succ unless last_detail.nil?
-        end
-      end
-        
-
-      def create_history
-        if !price_was.eql?(price)
-          self.attributes = self.attributes.merge(product_detail_histories_attributes: {"0" => {
-                price: self.price,
-                product_detail_id: self.id
-              }})
+  before_create :create_barcode
+  
+  def active_price
+    price_lists = self.price_lists.select(:id, :price, :effective_date).order("id DESC")
+    if price_lists.size == 1
+      return price_lists.first
+    else
+      price_lists.each do |price_list|
+        if Date.today >= price_list.effective_date
+          return price_list
         end
       end
     end
+  end
+
+  private
+      
+            
+            
+  def create_barcode
+    product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_id.eql?(product_id)}.first
+    if product_detail
+      self.barcode = product_detail.barcode
+    else
+      last_detail = ProductDetail.last
+      self.barcode = "000000000000001" if last_detail.nil?
+      self.barcode = last_detail.barcode.succ unless last_detail.nil?
+    end
+  end
+        
+
+end

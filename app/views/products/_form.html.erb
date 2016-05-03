@@ -1,15 +1,15 @@
 <%= form_for(@product, html: {class: "form-horizontal"}) do |f| %>
     <!--
     <% if @product.errors.any? %>
-                                                          <div id="error_explanation">
-                                                              <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+                                                                                            <div id="error_explanation">
+                                                                                                <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
 
-                                                              <ul>
+                                                                                                <ul>
       <% @product.errors.full_messages.each do |message| %>
-                                                                                                                      <li><%= message %></li>
+                                                                                                                                                                                          <li><%= message %></li>
       <% end %>
-                                                              </ul>
-                                                          </div>
+                                                                                                </ul>
+                                                                                            </div>
     <% end %>
     -->
     <div class="form-group<%= control_group_error(@product, :code) %>">
@@ -84,21 +84,26 @@
                                               <%= f.check_box :remove_image, tabindex: "10" %> Remove image
                                           </div>
                                       </div>
-                                      <div class="form-group<%= control_group_error(@product, :effective_date) %>">
-                                          <%= f.label :effective_date, class: "col-sm-2 control-label" %>
-                                            <div class="col-sm-10">
-                                                <%= f.text_field :effective_date, size: 10, readonly: true, tabindex: "11", class: "form-control" %>
-                                                  <%= error_help_text(@product, :effective_date) %>
-                                              </div>
-                                          </div>
-                                          <div class="form-group<%= control_group_error(@product, :cost) %>">
-                                              <%= f.label :cost, class: "col-sm-2 control-label" %>
+                                      <% if @product.new_record? %>
+                                        <%= f.fields_for :cost_lists do |cost_list_form| %>
+                                          <%= cost_list_form.hidden_field :is_user_creating_product, value: true %>
+                                          <div class="form-group<%= control_group_error(cost_list_form.object, :effective_date) %>">
+                                              <%= f.label :effective_date, class: "col-sm-2 control-label" %>
                                                 <div class="col-sm-10">
-                                                    <%= f.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
-                                                      "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
-                                                      <%= error_help_text(@product, :cost) %>
+                                                    <%= cost_list_form.text_field :effective_date, size: 10, readonly: true, tabindex: "11", class: "form-control" %>
+                                                      <%= error_help_text(cost_list_form.object, :effective_date) %>
                                                   </div>
-                                              </div>
+                                              </div>                                          
+                                              <div class="form-group<%= control_group_error(cost_list_form.object, :cost) %>">
+                                                  <%= cost_list_form.label :cost, class: "col-sm-2 control-label" %>
+                                                    <div class="col-sm-10">
+                                                        <%= cost_list_form.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
+                                                          "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
+                                                          <%= error_help_text(cost_list_form.object, :cost) %>
+                                                      </div>
+                                                  </div>
+                                                <% end %>
+                                              <% end %>
                                               <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
                                                   <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
                                                     <div class="col-sm-10">

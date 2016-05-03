@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :price_lists
+  resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create] do
     collection do
       get "get_product_details"

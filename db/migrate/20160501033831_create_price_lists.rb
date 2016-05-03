@@ -1,7 +1,7 @@
-class CreateProductDetailHistories < ActiveRecord::Migration
+class CreatePriceLists < ActiveRecord::Migration
   def change
-    create_table :product_detail_histories do |t|
-      t.decimal :cost
+    create_table :price_lists do |t|
+      t.date :effective_date
       t.decimal :price
       t.references :product_detail, index: true, foreign_key: true
 

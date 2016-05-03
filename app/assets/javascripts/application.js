@@ -28,7 +28,7 @@ $(function () {
             return false;
         }
     });
-    $('#product_cost').autoNumeric('init');  //autoNumeric with defaults
+    
     if ($("#taxable_entrepreneur").length == 0) {
         $(document).off("keydown");
     }
@@ -41,7 +41,7 @@ $(document).on('page:load', function () {
             return false;
         }
     });
-    $('#product_cost').autoNumeric('init');  //autoNumeric with defaults
+    
     if ($("#taxable_entrepreneur").length == 0) {
         $(document).off("keydown");
     }

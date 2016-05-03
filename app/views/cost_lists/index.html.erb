@@ -1,0 +1,30 @@
+<div class="page-header">
+    <h1>Listing Costs</h1>
+</div>
+
+<table class="table table-condensed table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Product Code</th>
+            <th>Cost</th>
+            <th>Effective Date</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <% @cost_lists.each do |cost_list| %>
+          <tr>
+              <td><%= cost_list.code %></td>
+              <td><%= number_to_currency(cost_list.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+              <td><%= cost_list.effective_date.strftime("%d/%m/%Y") %></td>
+              <td>
+                  <%= link_to 'Edit', edit_cost_list_path(cost_list), class: "btn btn-warning btn-xs active" %>
+                    <%= link_to 'Destroy', cost_list, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
+                  </td>
+              </tr>
+            <% end %>
+        </tbody>
+    </table>
+
+    <%= link_to 'New Cost', new_cost_list_path, class: "btn btn-default active" %>

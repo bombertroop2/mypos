@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Effective date:</strong>
+  <%= @price_list.effective_date %>
+</p>
+
+<p>
+  <strong>Price:</strong>
+  <%= @price_list.price %>
+</p>
+
+<p>
+  <strong>Product detail:</strong>
+  <%= @price_list.product_detail %>
+</p>
+
+<%= link_to 'Edit', edit_price_list_path(@price_list) %> |
+<%= link_to 'Back', price_lists_path %>

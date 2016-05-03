@@ -12,8 +12,14 @@ $(function () {
         });
     });
 
-    $("#product_effective_date").datepicker({
-        dateFormat:"dd/mm/yy"
+    $("#product_cost_lists_attributes_0_effective_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
+    $('#product_cost_lists_attributes_0_cost').autoNumeric('init');  //autoNumeric with defaults
+
+    $("#new_product").submit(function () {
+        $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
     });
 });
 
@@ -24,8 +30,14 @@ $(document).on('page:load', function () {
             id: $(this).val()
         });
     });
-    
-    $("#product_effective_date").datepicker({
-        dateFormat:"dd/mm/yy"
+
+    $("#product_cost_lists_attributes_0_effective_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
+    $('#product_cost_lists_attributes_0_cost').autoNumeric('init');  //autoNumeric with defaults
+
+    $("#new_product").submit(function () {
+        $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
     });
 });

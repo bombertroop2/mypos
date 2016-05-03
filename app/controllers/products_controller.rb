@@ -16,18 +16,14 @@ class ProductsController < ApplicationController
   # GET /products/new
   def new
     @product = Product.new
+    @product.cost_lists.build
   end
 
   # GET /products/1/edit
   def edit
-    @product.effective_date = @product.effective_date.strftime("%d/%m/%Y")
+    #    @product.effective_date = @product.effective_date.strftime("%d/%m/%Y")
     @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
     @price_codes = PriceCode.order :code
-    @price_codes.each do |price_code|
-      @sizes.each do |size|
-        @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
-      end
-    end
   end
 
   # POST /products
@@ -45,7 +41,10 @@ class ProductsController < ApplicationController
           @price_codes = PriceCode.order :code
           @price_codes.each do |price_code|
             @sizes.each do |size|
-              @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+              product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+              product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.blank?
+              price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+              product_detail.price_lists.build if price_list.blank?
             end
           end
           if @product.errors[:base].present?
@@ -60,7 +59,10 @@ class ProductsController < ApplicationController
         @price_codes = PriceCode.order :code
         @price_codes.each do |price_code|
           @sizes.each do |size|
-            @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+            product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.blank?
+            price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+            product_detail.price_lists.build if price_list.blank?
           end
         end
         @product.errors.messages[:code] = ["has already been taken"]
@@ -132,7 +134,8 @@ class ProductsController < ApplicationController
     @price_codes = PriceCode.order :code
     @price_codes.each do |price_code|
       @sizes.each do |size|
-        @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
+        product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
+        product_detail.price_lists.build
       end
     end
     respond_to { |format| format.js }
@@ -147,15 +150,21 @@ class ProductsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id, :target, :model_id,
-      :goods_type_id, :image, :effective_date, :image_cache, :remove_image, :cost, :size_group_id,
-      product_details_attributes: [:id, :size_id, :price_code_id, :price]
+      :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
+      product_details_attributes: [:id, :size_id, :price_code_id, :price,
+        price_lists_attributes: [:price, :effective_date]],
+      cost_lists_attributes: [:effective_date, :cost, :is_user_creating_product]
     )
   end
   
   def convert_cost_price_to_numeric
-    params[:product][:cost] = params[:product][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+    params[:product][:cost_lists_attributes].each do |key, value|
+      params[:product][:cost_lists_attributes][key][:cost] = params[:product][:cost_lists_attributes][key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+    end if params[:product][:cost_lists_attributes].present?
     params[:product][:product_details_attributes].each do |key, value|
-      params[:product][:product_details_attributes][key][:price] = params[:product][:product_details_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+      params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+      end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
   end
 end
