@@ -21,7 +21,7 @@ class ProductsController < ApplicationController
 
   # GET /products/1/edit
   def edit
-    #    @product.effective_date = @product.effective_date.strftime("%d/%m/%Y")
+    @product.effective_date = @product.active_effective_date.strftime("%d/%m/%Y")
     @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
     @price_codes = PriceCode.order :code
   end
@@ -84,8 +84,14 @@ class ProductsController < ApplicationController
           @price_codes = PriceCode.order :code
           @price_codes.each do |price_code|
             @sizes.each do |size|
-              @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+              product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+              product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.nil?
+              price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+              product_detail.price_lists.build if price_list.blank?
             end
+          end
+          if @product.errors[:base].present?
+            flash.now[:alert] = @product.errors[:base].to_sentence
           end
           format.html { render :edit }
           format.json { render json: @product.errors, status: :unprocessable_entity }
@@ -95,7 +101,10 @@ class ProductsController < ApplicationController
         @price_codes = PriceCode.order :code
         @price_codes.each do |price_code|
           @sizes.each do |size|
-            @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.blank?
+            product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.nil?
+            price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+            product_detail.price_lists.build if price_list.blank?
           end
         end
         @product.errors.messages[:code] = ["has already been taken"]
@@ -128,16 +137,34 @@ class ProductsController < ApplicationController
   end
   
   def populate_detail_form
-    @product = Product.new
-    sg = SizeGroup.find(params[:id]) rescue nil
-    @sizes = sg.sizes.order(:size) if sg
     @price_codes = PriceCode.order :code
-    @price_codes.each do |price_code|
-      @sizes.each do |size|
-        product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
-        product_detail.price_lists.build
+    unless params[:product_id].present?
+      @product = Product.new
+      sg = SizeGroup.find(params[:id]) rescue nil
+      @sizes = sg.sizes.order(:size) if sg
+      @price_codes.each do |price_code|
+        @sizes.each do |size|
+          product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
+          product_detail.price_lists.build
+        end
+      end
+    else
+      @product = Product.find(params[:product_id])
+      @product.size_group_id = params[:id]
+      unless @product.size_group_id_changed?
+        @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
+      else        
+        sg = SizeGroup.find(params[:id]) rescue nil
+        @sizes = sg.sizes.order(:size) if sg
+        @price_codes.each do |price_code|
+          @sizes.each do |size|
+            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
+            product_detail.price_lists.build
+          end
+        end
       end
     end
+    
     respond_to { |format| format.js }
   end
 
@@ -149,7 +176,8 @@ class ProductsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
-    params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id, :target, :model_id,
+    params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
+      :target, :model_id, :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
       product_details_attributes: [:id, :size_id, :price_code_id, :price,
         price_lists_attributes: [:price, :effective_date]],

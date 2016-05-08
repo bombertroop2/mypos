@@ -71,9 +71,20 @@ class CostListsController < ApplicationController
   # DELETE /cost_lists/1
   # DELETE /cost_lists/1.json
   def destroy
-    @cost_list.destroy
+    @cost_list.user_is_deleting_from_child = true
+    unless @cost_list.destroy
+      alert = @cost_list.errors.messages[:base].to_sentence
+    else
+      notice = "Cost was successfully deleted."
+    end
     respond_to do |format|
-      format.html { redirect_to cost_lists_url, notice: 'Cost list was successfully destroyed.' }
+      format.html do 
+        if notice.present?
+          redirect_to cost_lists_url, notice: notice
+        else
+          redirect_to cost_lists_url, alert: alert
+        end
+      end
       format.json { head :no_content }
     end
   end

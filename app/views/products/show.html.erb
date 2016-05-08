@@ -126,7 +126,7 @@
             <% product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
             <% if product_detail %>
               <td align="right">
-                  <%= number_to_currency(product_detail.active_price.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                  <%= number_to_currency((product_detail.active_price.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
               </td>
             <% else %>
               <td></td>

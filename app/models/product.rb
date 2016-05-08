@@ -1,4 +1,6 @@
 class Product < ActiveRecord::Base
+  attr_accessor :effective_date
+  
   belongs_to :brand
   belongs_to :vendor
   belongs_to :model
@@ -10,7 +12,7 @@ class Product < ActiveRecord::Base
   has_many :price_codes, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :product_details, dependent: :destroy
   has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
-  has_many :sizes, -> {group("sizes.id").order(:size)}, through: :product_details
+  has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {group("size_id, barcode").select("size_id, barcode").order(:barcode)}, class_name: "ProductDetail"
   has_many :purchase_order_products, dependent: :restrict_with_error
@@ -23,7 +25,7 @@ class Product < ActiveRecord::Base
   accepts_nested_attributes_for :product_details, reject_if: :price_blank
   accepts_nested_attributes_for :cost_lists
   
-  validates :code, presence: true, uniqueness: true
+  validates :code, presence: true#, uniqueness: true
   validates :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validate :check_item, :code_not_changed
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
@@ -44,12 +46,15 @@ class Product < ActiveRecord::Base
   ]
     
   before_validation :upcase_code
-  #        before_update :is_all_existed_items_deleted?, :update_cost_list, :update_purchase_order_cost
+  before_update :delete_old_children_if_size_group_changed
   
   def active_cost
-    cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("id DESC")
+    cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
     if cost_lists.size == 1
-      return cost_lists.first
+      cost_list = cost_lists.first
+      if Date.today >= cost_list.effective_date
+        return cost_list
+      end
     else
       cost_lists.each do |cost_list|
         if Date.today >= cost_list.effective_date
@@ -58,8 +63,39 @@ class Product < ActiveRecord::Base
       end
     end
   end
+  
+  def active_effective_date
+    cost_lists = self.cost_lists.select(:effective_date).order("effective_date DESC")
+    if cost_lists.size == 1
+      return cost_lists.first.effective_date
+    else
+      cost_lists.each do |cost_list|
+        if Date.today >= cost_list.effective_date
+          return cost_list
+        end
+      end
+      cost_lists.last.effective_date
+    end
+  end
+  
+  def cost_count
+    cost_lists.count(:id)
+  end
+  
+  def product_details_count
+    product_details.count(:id)
+  end
         
   private
+  
+  
+  def delete_old_children_if_size_group_changed
+    if size_group_id_changed?
+      self.product_details.each do |product_detail|
+        product_detail.destroy unless product_detail.id.nil?
+      end
+    end
+  end
     
   def price_blank(attributed)
     attributed[:price_lists_attributes].each do |key, value|
@@ -162,11 +198,19 @@ class Product < ActiveRecord::Base
   #          end
   #        end
         
-  def check_item         
-    valid = if product_details.present?
-      true
-    else
-      false
+  def check_item
+    if new_record?
+      valid = if product_details.present?
+        true
+      else
+        false
+      end
+    else    
+      valid = if size_group_id_changed? && product_details.select{|product_detail| product_detail.id.nil?}.present?
+        true
+      else
+        false
+      end
     end
     errors.add(:base, "Product must have at least one item!") unless valid
   end

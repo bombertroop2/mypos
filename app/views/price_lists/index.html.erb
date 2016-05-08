@@ -1,31 +1,34 @@
-<p id="notice"><%= notice %></p>
+<div class="page-header">
+    <h1>Listing Prices</h1>
+</div>
 
-<h1>Listing Price Lists</h1>
+<table class="table table-condensed table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Product Code</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Price Code</th>
+            <th>Effective Date</th>
+            <th></th>
+        </tr>
+    </thead>
 
-<table>
-  <thead>
-    <tr>
-      <th>Effective date</th>
-      <th>Price</th>
-      <th>Product detail</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @price_lists.each do |price_list| %>
-      <tr>
-        <td><%= price_list.effective_date %></td>
-        <td><%= price_list.price %></td>
-        <td><%= price_list.product_detail %></td>
-        <td><%= link_to 'Show', price_list %></td>
-        <td><%= link_to 'Edit', edit_price_list_path(price_list) %></td>
-        <td><%= link_to 'Destroy', price_list, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
+    <tbody>
+        <% @price_lists.each do |price_list| %>
+          <tr>
+              <td><%= price_list.products_code %></td>
+              <td><%= price_list.size %></td>
+              <td><%= price_list.price %></td>
+              <td><%= price_list.price_codes_code %></td>
+              <td><%= price_list.effective_date.strftime("%d/%m/%Y") %></td>
+              <td>
+                  <%= link_to 'Edit', edit_price_list_path(price_list), class: "btn btn-warning btn-xs active" %>
+                  <%= link_to 'Destroy', price_list, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
+              </td>
+          </tr>
+        <% end %>
+    </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Price list', new_price_list_path %>
+<%= link_to 'New Price', new_price_list_path, class: "btn btn-default active" %>

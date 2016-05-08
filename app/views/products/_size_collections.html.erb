@@ -7,7 +7,7 @@
     <tr style="text-align: center">
         <% @price_codes.each do |price_code| %>
           <td align="center"><%= price_code.code %>
-              <% if @product.new_record? %>
+              <% if @product.new_record? || (!@product.new_record? && @product.size_group_id_changed?) %>
                 <br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
                     "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %>
                 <% end %>
@@ -23,7 +23,7 @@
             <% @price_codes.each do |price_code| %>
               <% product_detail = @product.product_details.select{|pd| pd.size_id.eql?(size.id) && pd.price_code_id.eql?(price_code.id) }.first %>
               <td align="center">                      
-                  <% if @product.new_record? %>
+                  <% if @product.new_record? || (!@product.new_record? && @product.size_group_id_changed?) %>
                     <% product_detail_array_index = "product[product_details_attributes]["+Time.now.to_i.to_s+index.to_s+"]" %>
                     <%= fields_for product_detail_array_index, product_detail do |product_detail_form| %>
                       <%= product_detail_form.hidden_field :size_id %>
@@ -48,7 +48,7 @@
                 <% end %>
             </tr>
           <% end %>
-          <% if @product.new_record? %>
+          <% if @product.new_record? || (!@product.new_record? && @product.size_group_id_changed?) %>
             <script>
         <% @price_codes.each do |price_code| %>
                 $('#price_<%= price_code.code %>').keyup(function () {

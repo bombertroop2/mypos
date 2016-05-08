@@ -1,29 +1,44 @@
-<%= form_for(@price_list) do |f| %>
-  <% if @price_list.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@price_list.errors.count, "error") %> prohibited this price_list from being saved:</h2>
+<div class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Select Product</label>
+        <div class="col-sm-10">
+            <table id="listing_products_table_price_lists" class="display">
+                <thead>
+                    <tr>
+                        <th>Product Code</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Goods Type</th>
+                        <th>Vendor</th>
+                        <th>Target</th>
+                    </tr>
+                </thead>
 
-      <ul>
-      <% @price_list.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
+                <tbody>
+                    <% @products.each do |product| %>
+                      <tr id="listing_products_table_price_lists_<%= product.id %>">
+                          <td id="products_code_<%= product.id %>"><%= product.products_code %></td>
+                          <td><%= product.name %></td>
+                          <td><%= product.models_products_name %></td>
+                          <td><%= product.goods_types_products_name %></td>
+                          <td><%= product.vendors_name %></td>
+                          <td><%= product.target %></td>
+                      </tr>
+                    <% end %>
+                </tbody>
+            </table>
+            <%= submit_tag "Generate form", id: "generate_price_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+          </div>
+      </div>
+      <div id="price_form_container">
+          <% if params[:action].eql?("create") || params[:action].eql?("edit") || params[:action].eql?("update") %>
+            <%= render partial: "price_form", locals: {f: @price_list} %>
+          <% end %>
+      </div>
+  </div>
+
+  <% if params[:action].eql?("create") || params[:action].eql?("edit") || params[:action].eql?("update") %>
+    <script>
+      selectedPriceListProductId = '<%= params[:price_list][:product_id] rescue @price_list.products_id %>';
+    </script>
   <% end %>
-
-  <div class="field">
-    <%= f.label :effective_date %><br>
-    <%= f.date_select :effective_date %>
-  </div>
-  <div class="field">
-    <%= f.label :price %><br>
-    <%= f.text_field :price %>
-  </div>
-  <div class="field">
-    <%= f.label :product_detail_id %><br>
-    <%= f.text_field :product_detail_id %>
-  </div>
-  <div class="actions">
-    <%= f.submit %>
-  </div>
-<% end %>

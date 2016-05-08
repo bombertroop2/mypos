@@ -1,0 +1,5 @@
+$("#price_form_container").html("<%= j(render(partial: "price_form", locals: {f: @price_list})) %>");
+$("#price_list_effective_date").datepicker({
+  dateFormat: "dd/mm/yy"
+});
+$('#price_list_price').autoNumeric('init');

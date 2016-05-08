@@ -1,9 +1,13 @@
 Rails.application.routes.draw do
-  resources :price_lists
+  resources :price_lists, except: :show do
+    collection do
+      get "generate_price_form"
+    end
+  end
   resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create] do
     collection do
-      get "get_product_details"
+      get "get_product_details"      
     end
     
     member do
@@ -27,8 +31,8 @@ Rails.application.routes.draw do
     end
     
     member do
-#      get 'receive'
-#      post 'receive'
+      #      get 'receive'
+      #      post 'receive'
       get 'close'
     end
   end

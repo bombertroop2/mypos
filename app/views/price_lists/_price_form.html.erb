@@ -1,0 +1,78 @@
+<%= form_for(@price_list) do |f| %>
+  <!--
+  <% if @price_list.errors.any? %>
+                                            <div id="error_explanation">
+                                              <h2><%= pluralize(@price_list.errors.count, "error") %> prohibited this price_list from being saved:</h2>
+
+                                              <ul>
+    <% @price_list.errors.full_messages.each do |message| %>
+                                                                                      <li><%= message %></li>
+    <% end %>
+                                              </ul>
+                                            </div>
+  <% end %>
+  -->
+  <div class="form-group<%= control_group_error(@price_list, :product_id) %>">
+      <%= f.label :product_id, class: "col-sm-2 control-label" %>
+        <div class="col-sm-10">
+            <%= f.hidden_field :product_id %>
+            <span class="form-control" disabled="true">
+                <%= @product.code rescue @price_list.code %>
+            </span>
+            <%= error_help_text(@price_list, :product_id) %>
+        </div>
+    </div>
+    <div class="form-group<%= control_group_error(@price_list, :effective_date) %>">
+        <%= f.label :effective_date, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :effective_date, size: 10, readonly: true, tabindex: "1", class: "form-control" %>
+                <%= error_help_text(@price_list, :effective_date) %>
+            </div>
+        </div>
+        <div class="form-group<%= control_group_error(@price_list, :price) %>">
+            <%= f.label :price, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :price, tabindex: "2", placeholder: "price", "data-a-sep" => ".",
+                    "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
+                    <%= error_help_text(@price_list, :price) %>
+                </div>
+            </div>
+            <% if @price_list.new_record? %>
+              <div class="form-group<%= control_group_error(@price_list, :size_id) %>">
+                  <%= f.label :size_id, class: "col-sm-2 control-label" %>
+                    <div class="col-sm-10">
+                        <%= f.select :size_id, options_from_collection_for_select(@sizes, :id, :size, @price_list.size_id.to_s), {prompt: true}, {tabindex: "3", class: "form-control"} %>
+                          <%= error_help_text(@price_list, :size_id) %>
+                      </div>
+                  </div>
+                  <div class="form-group<%= control_group_error(@price_list, :price_code_id) %>">
+                      <%= f.label :price_code_id, class: "col-sm-2 control-label" %>
+                        <div class="col-sm-10">
+                            <%= f.select :price_code_id, options_from_collection_for_select(@price_codes, :id, :code, @price_list.price_code_id.to_s), {prompt: true}, {tabindex: "4", class: "form-control"} %>
+                              <%= error_help_text(@price_list, :price_code_id) %>
+                          </div>
+                      </div>
+                    <% else %>
+                      <div class="form-group">
+                          <%= f.label :size_id, class: "col-sm-2 control-label" %>
+                            <div class="col-sm-10">
+                                <span class="form-control" disabled="true">
+                                    <%= @price_list.size %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <%= f.label :price_code_id, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <span class="form-control" disabled="true">
+                                      <%= @price_list.price_code %>
+                                  </span>
+                              </div>
+                          </div>
+                        <% end %>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <%= f.submit "Save", class: "btn btn-default active" %>
+                              </div>
+                          </div>
+                        <% end %>

@@ -55,7 +55,8 @@
                           <li class="<%= params[:controller].eql?("receiving") ? "active" : "" %>"><%= link_to "Receiving", new_receiving_path %></li>
                           <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stocks", stocks_path %></li>
                           <li class="<%= params[:controller].eql?("purchase_returns") ? "active" : "" %>"><%= link_to "Purchase Returns", purchase_returns_path %></li>
-                          <li class="<%= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%= link_to "Costs", cost_lists_path %></li>                          
+                          <li class="<%= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%= link_to "Costs", cost_lists_path %></li>
+                          <li class="<%= params[:controller].eql?("price_lists") ? "active" : "" %>"><%= link_to "Prices", price_lists_path %></li>                          
                       </ul>
                   </div>
                   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

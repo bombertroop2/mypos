@@ -13,9 +13,12 @@ class ProductDetail < ActiveRecord::Base
   before_create :create_barcode
   
   def active_price
-    price_lists = self.price_lists.select(:id, :price, :effective_date).order("id DESC")
+    price_lists = self.price_lists.select(:id, :price, :effective_date).order("effective_date DESC")
     if price_lists.size == 1
-      return price_lists.first
+      price_list = price_lists.first
+      if Date.today >= price_list.effective_date
+        return price_list
+      end
     else
       price_lists.each do |price_list|
         if Date.today >= price_list.effective_date
@@ -24,10 +27,12 @@ class ProductDetail < ActiveRecord::Base
       end
     end
   end
+  
+  def price_count
+    price_lists.count(:id)
+  end
 
-  private
-      
-            
+  private            
             
   def create_barcode
     product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_id.eql?(product_id)}.first
