@@ -21,6 +21,7 @@ class PurchaseOrdersController < ApplicationController
 
   # GET /purchase_orders/1/edit
   def edit
+    unless @purchase_order.status.eql?("Deleted")
     @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
     @purchase_order.purchase_order_date = @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date
     @products = @purchase_order.products
@@ -31,6 +32,9 @@ class PurchaseOrdersController < ApplicationController
           pop.purchase_order_details.build size_id: gpd.size.id, color_id: color.id if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size.id) and pod.color_id.eql?(color.id)}.blank?
         end
       end
+    end
+    else
+      redirect_to purchase_orders_url, alert: "Sorry, this PO is not editable"
     end
   end
 
@@ -206,7 +210,7 @@ class PurchaseOrdersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
     params.require(:purchase_order).permit(:is_additional_disc_from_net, :first_discount, :second_discount, :price_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
-      :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:id, :product_id, :_destroy,
+      :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:id, :product_id, :purchase_order_date, :_destroy,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
   end

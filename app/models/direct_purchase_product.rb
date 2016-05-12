@@ -15,12 +15,15 @@ class DirectPurchaseProduct < ActiveRecord::Base
 
   
   def active_cost(receiving_date)
-    cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("id DESC")
+    cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
     if cost_lists.size == 1
-      return cost_lists.first
+      cost_list = cost_lists.first
+      if receiving_date >= cost_list.effective_date
+        return cost_list
+      end
     else
       cost_lists.each_with_index do |cost_list, index|
-        if receiving_date >= cost_list.effective_date || index.eql?(cost_lists.length - 1)
+        if receiving_date >= cost_list.effective_date
           return cost_list
         end
       end

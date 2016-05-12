@@ -170,14 +170,14 @@
                                     </td>
                                     <td align="right" style="vertical-align: middle"><%= po_product.total_quantity %></td>
                                     <td align="right" style="vertical-align: middle">
-                                      <%= number_to_currency(po_product.cost_list.cost,
+                                      <%= number_to_currency((po_product.cost_list.cost rescue 0),
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",
                                         :precision => 2) %>
                                     </td>
                                     <td align="right" style="vertical-align: middle">
-                                      <%= number_to_currency(po_product.total_cost,
+                                      <%= number_to_currency((po_product.total_cost rescue 0),
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",

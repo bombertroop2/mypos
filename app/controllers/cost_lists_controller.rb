@@ -73,7 +73,9 @@ class CostListsController < ApplicationController
   def destroy
     @cost_list.user_is_deleting_from_child = true
     unless @cost_list.destroy
-      alert = @cost_list.errors.messages[:base].to_sentence
+      error_message = @cost_list.errors.messages[:base].to_sentence
+      error_message.slice! "products "
+      alert = error_message
     else
       notice = "Cost was successfully deleted."
     end

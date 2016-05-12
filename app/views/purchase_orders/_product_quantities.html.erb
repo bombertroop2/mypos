@@ -1,5 +1,8 @@
 <% @purchase_order.purchase_order_products.each do |pop| %>
   <% if (params[:purchase_order_id].present? and !@purchase_order.new_record? and pop.new_record?) or !params[:purchase_order_id].present? %>
+    <% if pop.errors and pop.errors.messages[:base] %>
+      <span class='help-block'><%= pop.errors.messages[:base][0] %></span>
+    <% end %>
     <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= pop.product.id %>">
         <tr style="text-align: center">
             <td style="vertical-align: middle"><strong>Product code</strong></td>
@@ -14,7 +17,8 @@
                 <% purchase_order_product_array_index = create_product_array_variable_name(purchase_order_product_detail, pop.product) %>
                 <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
                   <%= purchase_order_product_detail_form.hidden_field :id %>
-                  <%= purchase_order_product_detail_form.hidden_field :product_id %>
+                  <%= purchase_order_product_detail_form.hidden_field :purchase_order_date, class: "purchase-order-date" %>
+                    <%= purchase_order_product_detail_form.hidden_field :product_id %>
                   <% end %>
 
                   <% sizes = pop.product.sizes %>

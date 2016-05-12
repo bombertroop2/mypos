@@ -98,7 +98,7 @@ $(function () {
             e.ctrlKey = true;
             $("#product_" + value).find("td:first-child").trigger(e);
         });
-    }    
+    }
 
     if ($(".discount-fields").length > 0)
         $(".discount-fields").numeric();
@@ -121,6 +121,12 @@ $(function () {
             $("#purchase_order_second_discount").prop("disabled", true);
         }
     });
+
+// ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
+    $(".po-form").submit(function () {
+        $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
+    });
+
 });
 
 $(document).on('page:load', function () {
@@ -185,7 +191,7 @@ $(document).on('page:load', function () {
             e.ctrlKey = true;
             $("#product_" + value).find("td:first-child").trigger(e);
         });
-    }    
+    }
 
     if ($(".discount-fields").length > 0)
         $(".discount-fields").numeric();
@@ -208,4 +214,10 @@ $(document).on('page:load', function () {
             $("#purchase_order_second_discount").prop("disabled", true);
         }
     });
+
+    // ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
+    $(".po-form").submit(function () {
+        $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
+    });
+
 });

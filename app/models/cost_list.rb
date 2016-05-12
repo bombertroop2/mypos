@@ -1,7 +1,7 @@
 class CostList < ActiveRecord::Base
   belongs_to :product
   
-  has_many :purchase_order_products
+  has_many :purchase_order_products#, dependent: :restrict_with_error
   
   validates :cost, :effective_date, presence: true
   validates :product_id, presence: true, unless: proc{|cost_list| cost_list.is_user_creating_product}

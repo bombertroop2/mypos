@@ -15,21 +15,25 @@ class Product < ActiveRecord::Base
   has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {group("size_id, barcode").select("size_id, barcode").order(:barcode)}, class_name: "ProductDetail"
-  has_many :purchase_order_products, dependent: :restrict_with_error
+  has_many :purchase_order_products
   has_many :cost_lists, dependent: :destroy
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open' AND purchase_orders.status <> 'Deleted'")}, through: :purchase_order_products, source: :purchase_order
   has_many :open_purchase_orders, -> {select("purchase_orders.id, purchase_order_date, purchase_orders.order_value, purchase_orders.price_discount").where("purchase_orders.status = 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :direct_purchase_products, dependent: :restrict_with_error
-  has_one :direct_purchase_product_relation, -> {select("id")}, class_name: "DirectPurchaseProduct"
+  has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
+  has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
+  
   
   accepts_nested_attributes_for :product_details, reject_if: :price_blank
   accepts_nested_attributes_for :cost_lists
   
-  validates :code, presence: true#, uniqueness: true
-  validates :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
-  validate :check_item, :code_not_changed
+  validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
+  validate :check_item, :code_not_changed, :size_group_not_changed
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
+  before_validation :upcase_code
+  before_update :delete_old_children_if_size_group_changed
+  before_destroy :prevent_delete_if_purchase_order_created
 
   
   SEX = [
@@ -45,8 +49,6 @@ class Product < ActiveRecord::Base
     ["Sale", "sale"]
   ]
     
-  before_validation :upcase_code
-  before_update :delete_old_children_if_size_group_changed
   
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
@@ -58,6 +60,22 @@ class Product < ActiveRecord::Base
     else
       cost_lists.each do |cost_list|
         if Date.today >= cost_list.effective_date
+          return cost_list
+        end
+      end
+    end
+  end
+  
+  def active_cost_by_po_date(po_date)
+    cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
+    if cost_lists.size == 1
+      cost_list = cost_lists.first
+      if po_date >= cost_list.effective_date
+        return cost_list
+      end
+    else
+      cost_lists.each do |cost_list|
+        if po_date >= cost_list.effective_date
           return cost_list
         end
       end
@@ -87,6 +105,13 @@ class Product < ActiveRecord::Base
   end
         
   private
+  
+  def prevent_delete_if_purchase_order_created   
+    if purchase_order_relation
+      errors.add(:base, "Cannot delete record with purchase order")
+      return false
+    end
+  end
   
   
   def delete_old_children_if_size_group_changed
@@ -188,7 +213,11 @@ class Product < ActiveRecord::Base
         
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def code_not_changed
-    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (purchase_order_products.present? || direct_purchase_product_relation.present?)
+    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (purchase_order_relation.present? || direct_purchase_product_relation.present?)
+  end
+  
+  def size_group_not_changed
+    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (purchase_order_relation.present? || direct_purchase_product_relation.present?)
   end
         
   #        def is_all_existed_items_deleted?
@@ -206,7 +235,7 @@ class Product < ActiveRecord::Base
         false
       end
     else    
-      valid = if size_group_id_changed? && product_details.select{|product_detail| product_detail.id.nil?}.present?
+      valid = if !size_group_id_changed? || (size_group_id_changed? && product_details.select{|product_detail| product_detail.id.nil?}.present?)
         true
       else
         false

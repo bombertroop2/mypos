@@ -8,13 +8,13 @@ class PurchaseOrder < ActiveRecord::Base
   has_many :received_purchase_orders
   has_one :purchase_return
 
-  attr_accessor :receiving_po, :deleting_po, :closing_po, :changing_po_cost
+  attr_accessor :receiving_po, :deleting_po, :closing_po
 
   before_validation :generate_number, :set_type, :set_status, on: :create
   
-  before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.changing_po_cost}
+  before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po}
     before_create :set_vat_and_entrepreneur_status
-    before_update :is_product_has_one_color?, :update_cost, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.changing_po_cost}
+    before_update :is_product_has_one_color?, :update_cost, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po}
     
       validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, unless: proc { |po| po.receiving_po }
         validates :number, uniqueness: true, unless: proc { |po| po.receiving_po }
@@ -42,9 +42,12 @@ class PurchaseOrder < ActiveRecord::Base
                                           private
                                           
                                           def active_cost(product)
-                                            cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("id DESC")
+                                            cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
                                             if cost_lists.size == 1
-                                              return cost_lists.first
+                                              cost_list = cost_lists.first
+                                              if purchase_order_date >= cost_list.effective_date
+                                                return cost_list
+                                              end
                                             else
                                               cost_lists.each do |cost_list|
                                                 if purchase_order_date >= cost_list.effective_date
@@ -56,10 +59,13 @@ class PurchaseOrder < ActiveRecord::Base
                                           
                                           def update_cost
                                             unless purchase_order_date_was.eql?(purchase_order_date)
+                                              is_cost_available = true
                                               purchase_order_products.each do |purchase_order_product|
-                                                purchase_order_product.cost_list_id = active_cost(purchase_order_product.product).id
-                                                purchase_order_product.save
+                                                purchase_order_product.purchase_order_date = purchase_order_date.strftime "%d/%m/%Y"
+                                                purchase_order_product.cost_list_id = active_cost(purchase_order_product.product).id rescue nil
+                                                is_cost_available = false unless purchase_order_product.save
                                               end
+                                              return false unless is_cost_available 
                                             end
                                           end
                                           
@@ -145,7 +151,7 @@ class PurchaseOrder < ActiveRecord::Base
                                               if cost_list.present?
                                                 total_product_value += cost_list.cost * total_quantity
                                               else
-                                                total_product_value += pop.product.active_cost.cost * total_quantity 
+                                                total_product_value += pop.product.active_cost_by_po_date(purchase_order_date).cost * total_quantity 
                                               end                                              
                                             end
         
