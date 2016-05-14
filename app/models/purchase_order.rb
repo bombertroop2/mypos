@@ -8,31 +8,31 @@ class PurchaseOrder < ActiveRecord::Base
   has_many :received_purchase_orders
   has_one :purchase_return
 
-  attr_accessor :receiving_po, :deleting_po, :closing_po
+  attr_accessor :receiving_po, :deleting_po, :closing_po, :is_user_changing_cost
 
   before_validation :generate_number, :set_type, :set_status, on: :create
   
-  before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po}
+  before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
     before_create :set_vat_and_entrepreneur_status
-    before_update :is_product_has_one_color?, :update_cost, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po}
+    before_update :is_product_has_one_color?, :update_cost, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
     
-      validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, unless: proc { |po| po.receiving_po }
-        validates :number, uniqueness: true, unless: proc { |po| po.receiving_po }
+      validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
+        validates :number, uniqueness: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
           validates :request_delivery_date, date: {after: proc { Date.today }, message: 'must be after today' }, if: :is_validable
             validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: :is_po_date_validable
               validates :purchase_order_date, date: {after_or_equal_to: proc { Date.today }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}
-                validates :purchase_order_date, date: {after_or_equal_to: proc { |po| po.created_at }, message: 'must be after or equal to created date' }, on: :update, if: proc {|po| po.purchase_order_date.present? && !po.receiving_po && !po.closing_po && !po.deleting_po}
+                validates :purchase_order_date, date: {after_or_equal_to: proc { |po| po.created_at }, message: 'must be after or equal to created date' }, on: :update, if: proc {|po| !po.receiving_po && !po.closing_po && !po.deleting_po && !po.is_user_changing_cost && po.purchase_order_date.present?}
                   validate :prevent_update_if_article_received, on: :update
                   validate :disable_receive_po_if_finish, :disable_receive_po_if_po_deleted, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
-                    validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po}
+                    validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
                       validate :prevent_delete_if_article_received, if: proc { |po| po.deleting_po }
                         validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
-                          validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.first_discount.present? && !po.receiving_po}
-                            validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.second_discount.present?}
-                              validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| po.second_discount.present?}
-                                validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| po.second_discount.present? && !po.is_additional_disc_from_net}
-                                  validates :first_discount, presence: true, if: proc {|po| po.second_discount.present?}
-                                    validate :prevent_combining_discount, if: proc {|po| po.first_discount.present? && po.price_discount.present?}
+                          validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.first_discount.present?}
+                            validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
+                              validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
+                                validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present? && !po.is_additional_disc_from_net}
+                                  validates :first_discount, presence: true, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
+                                    validate :prevent_combining_discount, if: proc {|po| !po.is_user_changing_cost && po.first_discount.present? && po.price_discount.present?}
                                       validates :price_discount, numericality: true, if: proc { |po| po.price_discount.present? }
                                         validates :price_discount, numericality: {greater_than: 0}, if: proc { |po| po.price_discount.is_a?(Numeric) }
                                 
@@ -122,12 +122,12 @@ class PurchaseOrder < ActiveRecord::Base
                                           end
 
                                           def prevent_update_if_article_received
-                                            errors.add(:base, "Sorry, this PO is not updateable") if !receiving_po && !deleting_po && !closing_po && !status.eql?("Open")
+                                            errors.add(:base, "Sorry, this PO is not updateable") if !receiving_po && !deleting_po && !closing_po && !is_user_changing_cost && !status.eql?("Open")
                                           end
 
 
                                           def is_validable
-                                            return false if receiving_po || closing_po || deleting_po
+                                            return false if receiving_po || closing_po || deleting_po || is_user_changing_cost
                                             return true if request_delivery_date.present?
                                             unless request_delivery_date.eql?(request_delivery_date_was)
                                               return true if request_delivery_date_was.blank?
@@ -138,7 +138,7 @@ class PurchaseOrder < ActiveRecord::Base
                                           end
                   
                                           def is_po_date_validable
-                                            return false if receiving_po || closing_po || deleting_po
+                                            return false if receiving_po || closing_po || deleting_po || is_user_changing_cost
                                             return false if request_delivery_date.blank? || purchase_order_date.blank?
                                             return true
                                           end
@@ -155,14 +155,14 @@ class PurchaseOrder < ActiveRecord::Base
                                               end                                              
                                             end
         
-                                            unless order_value == total_product_value
-                                              if (price_discount.present? && price_discount <= total_product_value) || price_discount.blank?
-                                                self.order_value = total_product_value
-                                              else
-                                                errors.add(:price_discount, "must be less than or equal to order value")
-                                                return false
-                                              end
+                                            #                                            unless order_value == total_product_value
+                                            if (price_discount.present? && price_discount <= total_product_value) || price_discount.blank?
+                                              self.order_value = total_product_value
+                                            else
+                                              errors.add(:price_discount, "must be less than or equal to order value")
+                                              return false
                                             end
+                                            #                                            end
                                           end
 
                                           def generate_number
