@@ -18,6 +18,7 @@
                 <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
                   <%= purchase_order_product_detail_form.hidden_field :id %>
                   <%= purchase_order_product_detail_form.hidden_field :purchase_order_date, class: "purchase-order-date" %>
+                    <%= purchase_order_product_detail_form.hidden_field :cost_list_id, value: nil unless purchase_order_product_detail.new_record? %>
                     <%= purchase_order_product_detail_form.hidden_field :product_id %>
                   <% end %>
 

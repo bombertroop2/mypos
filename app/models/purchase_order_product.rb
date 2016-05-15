@@ -9,43 +9,58 @@ class PurchaseOrderProduct < ActiveRecord::Base
   has_many :sizes, -> { group("sizes.id").order(:size) }, through: :purchase_order_details
   has_many :colors, -> { group("common_fields.id").order(:code) }, through: :purchase_order_details
   
+  
   validate :existing_cost, if: proc {|pop| pop.purchase_order_date.present?}
 
-  before_create :set_active_cost
+    before_save :set_active_cost
+    after_update :update_total_unit_cost, if: proc {|pop| pop.cost_list_id_changed?}
 
-  accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? and attributes[:id].blank? }
+    accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? and attributes[:id].blank? }
 
-  def total_quantity
-    purchase_order_details.sum :quantity
-  end
+    def total_quantity
+      purchase_order_details.sum :quantity
+    end
   
-  def total_cost
-    purchase_order_details.sum(:quantity) * cost_list.cost
-  end
+    def total_cost
+      purchase_order_details.sum(:quantity) * cost_list.cost
+    end
   
-  private
-  
-  def existing_cost
-    errors.add(:base, "Sorry, there is no active cost for product #{product.code} on #{purchase_order_date}") if (@cost = active_cost).blank?
-  end
-  
-  def active_cost
-    cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
-    if cost_lists.size == 1
-      cost_list = cost_lists.first
-      if purchase_order_date.to_date >= cost_list.effective_date
-        return cost_list
+    private
+    
+    def update_total_unit_cost
+      cost = cost_list.cost
+      purchase_order_details.select(:id, :quantity, :total_unit_price).each do |purchase_order_detail|
+        purchase_order_detail.is_user_changing_po_date = true
+        purchase_order_detail.total_unit_price = cost * purchase_order_detail.quantity
+        purchase_order_detail.save
       end
-    else
-      cost_lists.each do |cost_list|
+    end
+    
+    def set_cost_list_id
+      self.cost_list_id = active_cost.id rescue nil
+    end
+  
+    def existing_cost
+      errors.add(:base, "Sorry, there is no active cost for product #{product.code} on #{purchase_order_date}") if (@cost = active_cost).blank?
+    end
+  
+    def active_cost
+      cost_lists = product.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
+      if cost_lists.size == 1
+        cost_list = cost_lists.first
         if purchase_order_date.to_date >= cost_list.effective_date
           return cost_list
         end
+      else
+        cost_lists.each do |cost_list|
+          if purchase_order_date.to_date >= cost_list.effective_date
+            return cost_list
+          end
+        end
       end
     end
-  end
   
-  def set_active_cost
-    self.cost_list_id = @cost.id
+    def set_active_cost
+      self.cost_list_id = @cost.id
+    end
   end
-end
