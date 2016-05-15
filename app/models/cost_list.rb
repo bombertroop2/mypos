@@ -17,10 +17,40 @@ class CostList < ActiveRecord::Base
           before_destroy :prevent_user_delete_last_record, if: proc {|cost_list| cost_list.user_is_deleting_from_child}
             before_destroy :prevent_delete_if_purchase_order_created
             before_update :update_total_unit_cost_of_purchase_order, if: proc {|cost_list| cost_list.cost_changed?}
+              after_create :update_purchase_order_cost              
+              
           
               private
               
-            
+              def update_purchase_order_cost
+                purchase_orders = PurchaseOrder.open_purchase_order_filter_by_po_date(effective_date)
+                purchase_orders.each do |purchase_order|
+                  purchase_order_products = purchase_order.purchase_order_products.joins(:cost_list).select("purchase_order_products.id, cost_list_id, effective_date, purchase_order_products.product_id as product_id")
+                  total_order_value = 0
+                  purchase_order_products.each do |purchase_order_product|
+                    if purchase_order_product.effective_date.to_date < effective_date && product_id.eql?(purchase_order_product.product_id)
+                      purchase_order_product.is_user_adding_new_cost = true
+                      purchase_order_product.cost_list_id = id
+                      if purchase_order_product.save
+                        total_unit_cost = purchase_order_product.purchase_order_details.sum(:total_unit_price)
+                        total_order_value += total_unit_cost
+                      end
+                    else
+                      total_unit_cost = purchase_order_product.purchase_order_details.sum(:total_unit_price)
+                      total_order_value += total_unit_cost
+                    end
+                  end
+                  
+                  price_discount = purchase_order.price_discount
+                  if (price_discount.present? && price_discount <= total_order_value) || price_discount.blank?
+                    purchase_order.is_user_changing_cost = true
+                    purchase_order.order_value = total_order_value
+                    purchase_order.save
+                  else
+                    raise "add is not allowed, because discount is greater than total order value"
+                  end
+                end
+              end
             
               def update_total_unit_cost_of_purchase_order
                 purchase_order_products = self.purchase_order_products.joins(:purchase_order).select("purchase_order_products.id, purchase_orders.id as purchase_orders_id")

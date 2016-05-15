@@ -38,6 +38,11 @@ class PurchaseOrder < ActiveRecord::Base
                                 
                                           accepts_nested_attributes_for :purchase_order_products, allow_destroy: true
                                           accepts_nested_attributes_for :received_purchase_orders
+                                          
+                                          def self.open_purchase_order_filter_by_po_date(po_date)
+                                            select(:id, :price_discount).where("status = 'Open' AND purchase_order_date >= '#{po_date.strftime("%Y-%m-%d")}'")
+                                          end
+
 
                                           private                                                                                    
                                           

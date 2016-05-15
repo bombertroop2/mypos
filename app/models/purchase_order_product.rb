@@ -1,5 +1,5 @@
 class PurchaseOrderProduct < ActiveRecord::Base
-  attr_accessor :purchase_order_date
+  attr_accessor :purchase_order_date, :is_user_adding_new_cost
   
   belongs_to :purchase_order
   belongs_to :product
@@ -12,7 +12,7 @@ class PurchaseOrderProduct < ActiveRecord::Base
   
   validate :existing_cost, if: proc {|pop| pop.purchase_order_date.present?}
 
-    before_save :set_active_cost
+    before_save :set_active_cost, unless: proc {|pop| pop.is_user_adding_new_cost}
     after_update :update_total_unit_cost, if: proc {|pop| pop.cost_list_id_changed?}
 
     accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? and attributes[:id].blank? }

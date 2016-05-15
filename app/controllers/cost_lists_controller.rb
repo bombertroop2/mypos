@@ -43,6 +43,10 @@ class CostListsController < ApplicationController
         @products = Product.joins(:brand, :model, :goods_type, :vendor).select("products.id, products.code as products_code, common_fields.name, models_products.name as models_products_name, goods_types_products.name as goods_types_products_name, vendors.name as vendors_name, target")
         @cost_list.errors.messages[:effective_date] = ["has already been taken"]
         format.html { render :new }
+      rescue Exception => e
+        @products = Product.joins(:brand, :model, :goods_type, :vendor).select("products.id, products.code as products_code, common_fields.name, models_products.name as models_products_name, goods_types_products.name as goods_types_products_name, vendors.name as vendors_name, target")
+        @cost_list.errors.add(:cost, e.message)
+        format.html { render :new }
       end
     end
   end
