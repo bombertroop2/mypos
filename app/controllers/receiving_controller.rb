@@ -118,7 +118,8 @@ class ReceivingController < ApplicationController
         if @direct_purchase.errors[:base].present?
           flash.now[:alert] = @direct_purchase.errors[:base].to_sentence
         elsif @direct_purchase.errors[:"direct_purchase_products.base"].present?
-          flash.now[:alert] = @direct_purchase.errors[:"direct_purchase_products.base"].to_sentence
+          error_message = "Please insert at least one piece per product!"
+          flash.now[:alert] = error_message if @direct_purchase.errors[:"direct_purchase_products.base"].to_sentence.eql?(error_message)
         end
         
         format.html { render :new }
@@ -130,14 +131,14 @@ class ReceivingController < ApplicationController
   private
   
   def purchase_order_params
-    params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
+    params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:receiving_date, :is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]]).merge(receiving_po: true)
   end
   
   def direct_purchase_params
     params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net, :price_discount,
       received_purchase_order_attributes: [:is_it_direct_purchasing, :is_using_delivery_order, :delivery_order_number], 
-      direct_purchase_products_attributes: [:product_id,
+      direct_purchase_products_attributes: [:product_id, :receiving_date,
         direct_purchase_details_attributes: [:size_id, :color_id, :quantity]])
   end
   

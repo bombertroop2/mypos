@@ -125,6 +125,33 @@ $(function () {
             $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", true);
         }
     });
+
+    $(".do-radio-button").click(function () {
+        if ($(this).val() == "yes")
+            $(".do-number-field").prop("disabled", false);
+        else {
+            $(".do-number-field").val("");
+            $(".do-number-field").prop("disabled", true);
+        }
+    });
+
+    $("#purchase_order_received_purchase_orders_attributes_0_receiving_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
+    if ($(".do-radio-button:checked").val() == "yes")
+        $(".do-number-field").prop("disabled", false);
+    else {
+        $(".do-number-field").val("");
+        $(".do-number-field").prop("disabled", true);
+    }
+
+    // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
+    $(".direct-purchase-form").submit(function () {
+        $(".receiving-date").val($("#direct_purchase_receiving_date").val());
+    });
+
+
 });
 
 $(document).on('page:load', function () {
@@ -239,6 +266,31 @@ $(document).on('page:load', function () {
             $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").val("");
             $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", true);
         }
+    });
+
+    $(".do-radio-button").click(function () {
+        if ($(this).val() == "yes")
+            $(".do-number-field").prop("disabled", false);
+        else {
+            $(".do-number-field").val("");
+            $(".do-number-field").prop("disabled", true);
+        }
+    });
+
+    $("#purchase_order_received_purchase_orders_attributes_0_receiving_date").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
+    if ($(".do-radio-button:checked").val() == "yes")
+        $(".do-number-field").prop("disabled", false);
+    else {
+        $(".do-number-field").val("");
+        $(".do-number-field").prop("disabled", true);
+    }
+
+    // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
+    $(".direct-purchase-form").submit(function () {
+        $(".receiving-date").val($("#direct_purchase_receiving_date").val());
     });
 
 });

@@ -47,7 +47,7 @@
 
           </div>
           <div role="tabpanel" class="tab-pane fade<% if !params[:action].eql?("receive_products_from_purchase_order") && !params[:action].eql?("new") %> in active<% end %>" id="direct_purchase" style="padding-top: 20px">
-              <%= form_for(@direct_purchase, html: {class: "form-horizontal"}, url: receiving_index_path) do |f| %>
+              <%= form_for(@direct_purchase, html: {class: "form-horizontal direct-purchase-form"}, url: receiving_index_path) do |f| %>
                   <%= hidden_field_tag "receiving_product_ids", params[:receiving_product_ids] %>
                   <div class="form-group<%= control_group_error(@direct_purchase, :receiving_date) %>">
                       <%= f.label :receiving_date, class: "col-sm-2 control-label" %>
