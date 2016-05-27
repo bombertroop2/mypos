@@ -210,7 +210,7 @@ class PurchaseOrdersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
     params.require(:purchase_order).permit(:is_additional_disc_from_net, :first_discount, :second_discount, :price_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
-      :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:cost_list_id, :id, :product_id, :purchase_order_date, :_destroy,
+      :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:vendor_id, :cost_list_id, :id, :product_id, :purchase_order_date, :_destroy,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
   end

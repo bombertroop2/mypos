@@ -30,7 +30,7 @@ class Vendor < ActiveRecord::Base
         end
     
         def init
-          self.is_taxable_entrepreneur = true if is_taxable_entrepreneur.nil?
+          self.is_taxable_entrepreneur = true if attributes[:is_taxable_entrepreneur].blank? || is_taxable_entrepreneur.nil?
         end
 
         def upcase_code

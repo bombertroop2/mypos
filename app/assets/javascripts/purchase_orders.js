@@ -125,6 +125,7 @@ $(function () {
 // ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
     $(".po-form").submit(function () {
         $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
+        $(".purchase-order-vendor-id").val($("#purchase_order_vendor_id").val());
     });
 
 });
@@ -218,6 +219,7 @@ $(document).on('page:load', function () {
     // ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
     $(".po-form").submit(function () {
         $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
+        $(".purchase-order-vendor-id").val($("#purchase_order_vendor_id").val());
     });
 
 });
