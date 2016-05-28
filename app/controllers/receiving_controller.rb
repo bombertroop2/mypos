@@ -138,7 +138,7 @@ class ReceivingController < ApplicationController
   def direct_purchase_params
     params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net, :price_discount,
       received_purchase_order_attributes: [:is_it_direct_purchasing, :is_using_delivery_order, :delivery_order_number], 
-      direct_purchase_products_attributes: [:product_id, :receiving_date,
+      direct_purchase_products_attributes: [:vendor_id, :product_id, :receiving_date,
         direct_purchase_details_attributes: [:size_id, :color_id, :quantity]])
   end
   

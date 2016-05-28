@@ -149,8 +149,8 @@ $(function () {
     // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
     $(".direct-purchase-form").submit(function () {
         $(".receiving-date").val($("#direct_purchase_receiving_date").val());
+        $(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
     });
-
 
 });
 
@@ -291,6 +291,7 @@ $(document).on('page:load', function () {
     // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
     $(".direct-purchase-form").submit(function () {
         $(".receiving-date").val($("#direct_purchase_receiving_date").val());
+        $(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
     });
 
 });
