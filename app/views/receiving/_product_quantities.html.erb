@@ -1,5 +1,5 @@
 <% @direct_purchase.direct_purchase_products.each do |dpp| %>
-  <% if dpp.errors && dpp.errors.messages[:base] && !dpp.errors.messages[:base][0].eql?("Please insert at least one piece per product!") %>
+  <% if dpp.errors && dpp.errors.messages[:base] %>
     <span class='help-block'><%= dpp.errors.messages[:base][0] %></span>
   <% end %>
 

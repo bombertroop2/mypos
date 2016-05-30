@@ -20,7 +20,7 @@
       <div class="form-group">
           <%= received_purchase_order_form.label :receiving_date, class: "col-sm-2 control-label" %>
             <div class="col-sm-10">
-                <%= received_purchase_order_form.text_field :receiving_date, size: 10, readonly: true, class: "form-control" %>
+                <%= received_purchase_order_form.text_field :receiving_date, size: 10, readonly: true, class: "form-control receiving-po-date" %>
                   <%= error_help_text(received_purchase_order_form.object, :receiving_date) %>
               </div>
           </div>

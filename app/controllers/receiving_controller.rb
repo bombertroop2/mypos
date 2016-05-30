@@ -24,10 +24,35 @@ class ReceivingController < ApplicationController
   
   def receive_products_from_purchase_order    
     respond_to do |format|
-      if @purchase_order.update(purchase_order_params)
-        format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
-        format.json { head :no_content }
-      else        
+      begin
+        if @purchase_order.update(purchase_order_params)
+          format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
+          format.json { head :no_content }
+        else        
+          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
+          @suppliers = Vendor.all
+          @warehouses = Warehouse.select :id, :code
+          @direct_purchase = DirectPurchase.new
+          @direct_purchase.build_received_purchase_order is_using_delivery_order: true
+          received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
+          @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
+            received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
+            received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id if received_purchase_order_product.blank?
+            po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
+              if received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.blank?
+                received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
+              end
+            end
+          end
+          if @purchase_order.errors[:base].present?
+            flash.now[:alert] = @purchase_order.errors[:base].to_sentence
+          elsif @purchase_order.errors[:"received_purchase_orders.base"].present?
+            flash.now[:alert] = @purchase_order.errors[:"received_purchase_orders.base"].to_sentence
+          end        
+          format.html { render action: "new" }
+          format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
         @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
         @suppliers = Vendor.all
         @warehouses = Warehouse.select :id, :code
@@ -43,13 +68,8 @@ class ReceivingController < ApplicationController
             end
           end
         end
-        if @purchase_order.errors[:base].present?
-          flash.now[:alert] = @purchase_order.errors[:base].to_sentence
-        elsif @purchase_order.errors[:"received_purchase_orders.base"].present?
-          flash.now[:alert] = @purchase_order.errors[:"received_purchase_orders.base"].to_sentence
-        end        
+        received_purchase_order.errors.messages[:delivery_order_number] = ["has already been taken"]
         format.html { render action: "new" }
-        format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -97,10 +117,36 @@ class ReceivingController < ApplicationController
     @direct_purchase = DirectPurchase.new(direct_purchase_params)
     @direct_purchase.received_purchase_order.is_it_direct_purchasing = true
     respond_to do |format|
-      if @direct_purchase.save
-        format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
-        format.json { render :show, status: :created, location: @direct_purchase }
-      else
+      begin
+        if @direct_purchase.save
+          format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
+          format.json { render :show, status: :created, location: @direct_purchase }
+        else
+          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
+          @suppliers = Vendor.all
+          @warehouses = Warehouse.select :id, :code
+          @colors = Color.select(:id, :code).order :code
+          @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)
+
+          @direct_purchase.direct_purchase_products.each do |dpp|
+            dpp.product.grouped_product_details.each do |gpd|
+              @colors.each do |color|
+                dpp.direct_purchase_details.build size_id: gpd.size.id, color_id: color.id if dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(gpd.size.id) and dpd.color_id.eql?(color.id)}.blank?
+              end
+            end
+          end
+          
+          if @direct_purchase.errors[:base].present?
+            flash.now[:alert] = @direct_purchase.errors[:base].to_sentence
+          elsif @direct_purchase.errors[:"direct_purchase_products.base"].present?
+            error_message = "Please insert at least one piece per product!"
+            flash.now[:alert] = error_message if @direct_purchase.errors[:"direct_purchase_products.base"].to_sentence.eql?(error_message)
+          end
+        
+          format.html { render :new }
+          format.json { render json: @direct_purchase.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
         @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
         @suppliers = Vendor.all
         @warehouses = Warehouse.select :id, :code
@@ -114,16 +160,8 @@ class ReceivingController < ApplicationController
             end
           end
         end
-          
-        if @direct_purchase.errors[:base].present?
-          flash.now[:alert] = @direct_purchase.errors[:base].to_sentence
-        elsif @direct_purchase.errors[:"direct_purchase_products.base"].present?
-          error_message = "Please insert at least one piece per product!"
-          flash.now[:alert] = error_message if @direct_purchase.errors[:"direct_purchase_products.base"].to_sentence.eql?(error_message)
-        end
-        
+        @direct_purchase.received_purchase_order.errors.messages[:delivery_order_number] = ["has already been taken"]
         format.html { render :new }
-        format.json { render json: @direct_purchase.errors, status: :unprocessable_entity }
       end
     end
   end

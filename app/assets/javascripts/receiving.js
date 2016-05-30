@@ -135,7 +135,7 @@ $(function () {
         }
     });
 
-    $("#purchase_order_received_purchase_orders_attributes_0_receiving_date").datepicker({
+    $(".receiving-po-date").datepicker({
         dateFormat: "dd/mm/yy"
     });
 
@@ -277,7 +277,7 @@ $(document).on('page:load', function () {
         }
     });
 
-    $("#purchase_order_received_purchase_orders_attributes_0_receiving_date").datepicker({
+    $(".receiving-po-date").datepicker({
         dateFormat: "dd/mm/yy"
     });
 
