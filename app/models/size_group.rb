@@ -1,4 +1,4 @@
-class SizeGroup < ActiveRecord::Base
+class SizeGroup < ApplicationRecord
   has_many :sizes, dependent: :destroy
   has_many :products, dependent: :restrict_with_error
   validates :code, presence: true, uniqueness: true

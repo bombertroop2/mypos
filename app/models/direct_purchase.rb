@@ -1,4 +1,4 @@
-class DirectPurchase < ActiveRecord::Base
+class DirectPurchase < ApplicationRecord
   belongs_to :vendor
   belongs_to :warehouse
   

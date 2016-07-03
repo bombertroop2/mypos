@@ -1,4 +1,4 @@
-class SalesPromotionGirl < ActiveRecord::Base
+class SalesPromotionGirl < ApplicationRecord
   resourcify
   
   belongs_to :warehouse

@@ -1,4 +1,4 @@
-class DirectPurchaseDetail < ActiveRecord::Base
+class DirectPurchaseDetail < ApplicationRecord
   belongs_to :direct_purchase_product
   belongs_to :size
   belongs_to :color

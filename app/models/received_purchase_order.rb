@@ -1,4 +1,4 @@
-class ReceivedPurchaseOrder < ActiveRecord::Base
+class ReceivedPurchaseOrder < ApplicationRecord
   belongs_to :purchase_order
   belongs_to :direct_purchase
   has_many :received_purchase_order_products, dependent: :destroy

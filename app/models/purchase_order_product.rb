@@ -1,4 +1,4 @@
-class PurchaseOrderProduct < ActiveRecord::Base
+class PurchaseOrderProduct < ApplicationRecord
   attr_accessor :purchase_order_date, :is_user_adding_new_cost, :vendor_id
   
   belongs_to :purchase_order

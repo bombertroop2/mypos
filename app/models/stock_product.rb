@@ -1,4 +1,4 @@
-class StockProduct < ActiveRecord::Base
+class StockProduct < ApplicationRecord
   belongs_to :stock
   belongs_to :product
   

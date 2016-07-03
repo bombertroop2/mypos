@@ -1,4 +1,4 @@
-class Warehouse < ActiveRecord::Base
+class Warehouse < ApplicationRecord
   belongs_to :supervisor
   belongs_to :region
   belongs_to :price_code

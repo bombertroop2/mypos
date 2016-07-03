@@ -1,4 +1,4 @@
-class Supervisor < ActiveRecord::Base
+class Supervisor < ApplicationRecord
   has_many :sales_promotion_girls, through: :warehouses
   has_many :warehouses, dependent: :restrict_with_error
 

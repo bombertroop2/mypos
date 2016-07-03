@@ -1,4 +1,4 @@
-class ReceivedPurchaseOrderProduct < ActiveRecord::Base
+class ReceivedPurchaseOrderProduct < ApplicationRecord
   belongs_to :received_purchase_order
   belongs_to :purchase_order_product
   belongs_to :direct_purchase_product

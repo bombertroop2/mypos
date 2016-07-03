@@ -1,4 +1,4 @@
-class DirectPurchaseProduct < ActiveRecord::Base
+class DirectPurchaseProduct < ApplicationRecord
   attr_accessor :receiving_date, :vendor_id
 
   belongs_to :direct_purchase

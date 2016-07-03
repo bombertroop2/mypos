@@ -1,4 +1,4 @@
-class PurchaseOrderDetail < ActiveRecord::Base
+class PurchaseOrderDetail < ApplicationRecord
   belongs_to :purchase_order_product
   belongs_to :color
   belongs_to :size

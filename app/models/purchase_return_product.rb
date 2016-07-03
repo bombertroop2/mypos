@@ -1,4 +1,4 @@
-class PurchaseReturnProduct < ActiveRecord::Base
+class PurchaseReturnProduct < ApplicationRecord
   belongs_to :purchase_order_product
   belongs_to :purchase_return
   

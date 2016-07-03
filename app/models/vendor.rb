@@ -1,4 +1,4 @@
-class Vendor < ActiveRecord::Base
+class Vendor < ApplicationRecord
 
   validates :code, presence: true, uniqueness: true
   validates :name, :address, :terms_of_payment, presence: true

@@ -1,4 +1,4 @@
-class PriceList < ActiveRecord::Base
+class PriceList < ApplicationRecord
   belongs_to :product_detail
   
   attr_accessor :product_id, :size_id, :price_code_id, :user_is_adding_new_price,

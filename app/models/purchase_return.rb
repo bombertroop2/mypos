@@ -1,4 +1,4 @@
-class PurchaseReturn < ActiveRecord::Base
+class PurchaseReturn < ApplicationRecord
   has_many :purchase_return_products, dependent: :destroy
   belongs_to :purchase_order
   

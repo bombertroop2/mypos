@@ -1,4 +1,4 @@
-class PurchaseReturnItem < ActiveRecord::Base
+class PurchaseReturnItem < ApplicationRecord
   belongs_to :purchase_order_detail
   
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true, message: "must be greater than or equal to 1"}, if: proc { |pri| pri.quantity.present? }

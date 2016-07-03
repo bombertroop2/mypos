@@ -1,4 +1,4 @@
-class CostList < ActiveRecord::Base
+class CostList < ApplicationRecord
   belongs_to :product
 
   has_many :purchase_order_products#, dependent: :restrict_with_error

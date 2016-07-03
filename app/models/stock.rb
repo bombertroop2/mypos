@@ -1,4 +1,4 @@
-class Stock < ActiveRecord::Base
+class Stock < ApplicationRecord
   belongs_to :warehouse
   
   has_many :stock_products, dependent: :destroy

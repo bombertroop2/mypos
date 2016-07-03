@@ -1,4 +1,4 @@
-class Product < ActiveRecord::Base
+class Product < ApplicationRecord
   attr_accessor :effective_date
   
   belongs_to :brand

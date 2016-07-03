@@ -1,4 +1,4 @@
-class ProductDetail < ActiveRecord::Base
+class ProductDetail < ApplicationRecord
   belongs_to :size
   belongs_to :price_code
   belongs_to :product

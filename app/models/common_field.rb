@@ -1,4 +1,4 @@
-class CommonField < ActiveRecord::Base
+class CommonField < ApplicationRecord
   validates :code, :name, presence: true
 
 	# We will need a way to know which animals
