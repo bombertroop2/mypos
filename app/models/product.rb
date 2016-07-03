@@ -109,7 +109,7 @@ class Product < ApplicationRecord
   def prevent_delete_if_purchase_order_created   
     if purchase_order_relation
       errors.add(:base, "Cannot delete record with purchase order")
-      return false
+      throw :abort
     end
   end
   

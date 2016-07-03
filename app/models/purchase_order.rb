@@ -138,7 +138,7 @@ class PurchaseOrder < ApplicationRecord
                                               self.order_value = total_product_value
                                             else
                                               errors.add(:price_discount, "must be less than or equal to order value")
-                                              return false
+                                              throw :abort
                                             end
                                             #                                            end
                                           end
@@ -209,7 +209,7 @@ class PurchaseOrder < ApplicationRecord
                 
                                             unless is_valid
                                               errors.add(:base, "Purchase order must have at least one item color per product!")
-                                              false
+                                              throw :abort
                                             end
                                           end
 

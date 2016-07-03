@@ -83,7 +83,7 @@ class CostList < ApplicationRecord
                       end
                     else
                       errors.add(:cost, "change is not allowed, because discount is greater than total order value")
-                      return false
+                      throw :abort
                     end
                   end
                 end
@@ -98,14 +98,14 @@ class CostList < ApplicationRecord
               def prevent_user_delete_last_record
                 if product.cost_count.eql?(1)
                   errors.add(:base, "Sorry, you can't delete a record")
-                  return false
+                  throw :abort
                 end
               end
             
               def prevent_delete_if_purchase_order_created   
                 if created_purchase_order
                   errors.add(:base, "Cannot delete record with purchase order")
-                  return false
+                  throw :abort
                 end
               end
           

@@ -31,7 +31,7 @@ class PriceList < ApplicationRecord
             def prevent_user_delete_last_record
               if @product_detail.price_count.eql?(1) && @product_detail.product.product_details_count.eql?(1)
                 errors.add(:base, "Sorry, you can't delete a record")
-                return false
+                throw :abort
               end
             end            
           
