@@ -1,6 +1,6 @@
 class Model < CommonField
   has_many :products, dependent: :restrict_with_error
-  has_one :product_relation, -> {select("id")}, class_name: "Product"
+  has_one :product_relation, -> {select("1 AS one")}, class_name: "Product"
 
   before_validation :upcase_code
 

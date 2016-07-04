@@ -2,7 +2,7 @@ class Region < CommonField
   has_many :warehouses, dependent: :restrict_with_error
   has_many :sales_promotion_girls, through: :warehouses
   has_many :supervisors, through: :warehouses
-  has_one :warehouse_relation, -> {select("id")}, class_name: "Warehouse"
+  has_one :warehouse_relation, -> {select("1 AS one")}, class_name: "Warehouse"
 
   before_validation :upcase_code
 

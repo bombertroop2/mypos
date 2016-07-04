@@ -1,8 +1,8 @@
 class PriceCode < CommonField
   has_many :warehouses, dependent: :restrict_with_error
   has_many :product_details, dependent: :restrict_with_error
-  has_one :warehouse_relation, -> {select("id")}, class_name: "Warehouse"
-  has_one :product_detail_relation, -> {select("id")}, class_name: "ProductDetail"
+  has_one :warehouse_relation, -> {select("1 AS one")}, class_name: "Warehouse"
+  has_one :product_detail_relation, -> {select("1 AS one")}, class_name: "ProductDetail"
 
   before_validation :upcase_code
 
