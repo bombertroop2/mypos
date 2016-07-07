@@ -4,7 +4,7 @@ class VendorsController < ApplicationController
   # GET /vendors
   # GET /vendors.json
   def index
-    @vendors = Vendor.all
+    @vendors = Vendor.select :id, :code, :name, :phone, :facsimile, :email
   end
 
   # GET /vendors/1
@@ -85,7 +85,7 @@ class VendorsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_vendor
-    @vendor = Vendor.find(params[:id])
+    @vendor = Vendor.where(id: params[:id]).select(:id, :code, :name, :address, :phone, :facsimile, :email, :pic_name, :pic_phone, :pic_mobile_phone, :pic_email, :terms_of_payment, :value_added_tax).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

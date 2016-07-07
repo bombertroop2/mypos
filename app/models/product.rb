@@ -9,12 +9,12 @@ class Product < ApplicationRecord
   
   mount_uploader :image, ImageUploader
   
-  has_many :price_codes, -> {group("common_fields.id").order(:code)}, through: :product_details
+  has_many :price_codes, -> {group("common_fields.id").order(:code).select(:id, :code)}, through: :product_details
   has_many :product_details, dependent: :destroy
   has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
-  has_many :grouped_product_details, -> {group("size_id, barcode").select("size_id, barcode").order(:barcode)}, class_name: "ProductDetail"
+  has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
   has_many :purchase_order_products
   has_many :cost_lists, dependent: :destroy
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open' AND purchase_orders.status <> 'Deleted'")}, through: :purchase_order_products, source: :purchase_order
@@ -116,7 +116,7 @@ class Product < ApplicationRecord
   
   def delete_old_children_if_size_group_changed
     if size_group_id_changed?
-      self.product_details.each do |product_detail|
+      self.product_details.select(:id).each do |product_detail|
         product_detail.destroy unless product_detail.id.nil?
       end
     end

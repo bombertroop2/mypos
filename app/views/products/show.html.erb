@@ -24,7 +24,7 @@
             Brand:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @product.brand.code if @product.brand %>
+            <%= @product.brand_code %>
         </div>
     </div>
 
@@ -43,7 +43,7 @@
             Vendor:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @product.vendor.code if @product.vendor %>
+            <%= @product.vendor_code %>
         </div>
     </div>
 
@@ -61,7 +61,7 @@
             Model:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @product.model.code if @product.model %>
+            <%= @product.model_code %>
         </div>
     </div>
 
@@ -70,7 +70,7 @@
             Goods type:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @product.goods_type.code if @product.goods_type %>
+            <%= @product.goods_type_code %>
         </div>
     </div>
 
@@ -101,15 +101,17 @@
         </div>
     </div>
 </div>
+<% product_price_codes = @product.price_codes %>
+<% product_details = @product.product_details %>
 <table class="table table-condensed table-responsive table-striped">
     <tr>
         <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>
         <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Size</strong></td>
-        <td colspan="<%= @product.price_codes.size %>" align="center"><strong>Price</strong></td>
+        <td colspan="<%= product_price_codes.size %>" align="center"><strong>Price</strong></td>
     </tr>
 
     <tr>
-        <% @product.price_codes.each do |price_code| %>
+        <% product_price_codes.each do |price_code| %>
           <td align="center">
               <strong>
                   <%= price_code.code %>
@@ -121,9 +123,9 @@
     <% @product.grouped_product_details.each do |prod_det| %>
       <tr>
           <td><%= prod_det.barcode %></td>
-          <td><%= prod_det.size.size if prod_det.size %></td>
-          <% @product.price_codes.each do |price_code| %>
-            <% product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
+          <td><%= prod_det.item_size %></td>
+          <% product_price_codes.each do |price_code| %>
+            <% product_detail = product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
             <% if product_detail %>
               <td align="right">
                   <%= number_to_currency((product_detail.active_price.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>

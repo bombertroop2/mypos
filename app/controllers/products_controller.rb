@@ -1,11 +1,11 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
-  before_filter :convert_cost_price_to_numeric, only: [:create, :update]
+  before_action :convert_cost_price_to_numeric, only: [:create, :update]
 
   # GET /products
   # GET /products.json
   def index
-    @products = Product.all
+    @products = Product.joins(:brand, :vendor, :model, :goods_type).select("products.id, products.code, common_fields.name as brand_name, sex, vendors.name as vendor_name, target, models_products.name as models_name, goods_types_products.name as goods_type_name")
   end
 
   # GET /products/1
@@ -22,8 +22,8 @@ class ProductsController < ApplicationController
   # GET /products/1/edit
   def edit
     @product.effective_date = @product.active_effective_date.strftime("%d/%m/%Y")
-    @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
-    @price_codes = PriceCode.order :code
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+    @price_codes = PriceCode.select(:id, :code).order :code
   end
 
   # POST /products
@@ -36,9 +36,9 @@ class ProductsController < ApplicationController
           format.html { redirect_to @product, notice: 'Product was successfully created.' }
           format.json { render :show, status: :created, location: @product }
         else
-          size_group = SizeGroup.find(@product.size_group_id) rescue nil
-          @sizes = size_group ? size_group.sizes.order(:size) : []
-          @price_codes = PriceCode.order :code
+          size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
+          @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+          @price_codes = PriceCode.select(:id, :code).order :code
           @price_codes.each do |price_code|
             @sizes.each do |size|
               product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
@@ -54,9 +54,9 @@ class ProductsController < ApplicationController
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        size_group = SizeGroup.find(@product.size_group_id) rescue nil
-        @sizes = size_group ? size_group.sizes.order(:size) : []
-        @price_codes = PriceCode.order :code
+        size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
+        @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+        @price_codes = PriceCode.select(:id, :code).order :code
         @price_codes.each do |price_code|
           @sizes.each do |size|
             product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
@@ -80,8 +80,8 @@ class ProductsController < ApplicationController
           format.html { redirect_to @product, notice: 'Product was successfully updated.' }
           format.json { render :show, status: :ok, location: @product }
         else
-          @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
-          @price_codes = PriceCode.order :code
+          @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+          @price_codes = PriceCode.select(:id, :code).order :code
           @price_codes.each do |price_code|
             @sizes.each do |size|
               product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
@@ -97,8 +97,8 @@ class ProductsController < ApplicationController
           format.json { render json: @product.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
-        @price_codes = PriceCode.order :code
+        @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+        @price_codes = PriceCode.select(:id, :code).order :code
         @price_codes.each do |price_code|
           @sizes.each do |size|
             product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
@@ -137,11 +137,11 @@ class ProductsController < ApplicationController
   end
   
   def populate_detail_form
-    @price_codes = PriceCode.order :code
+    @price_codes = PriceCode.select(:id, :code).order :code
     unless params[:product_id].present?
       @product = Product.new
-      sg = SizeGroup.find(params[:id]) rescue nil
-      @sizes = sg.sizes.order(:size) if sg
+      sg = SizeGroup.where(id: params[:id]).select(:id).first
+      @sizes = sg.sizes.select(:id, :size).order(:size) if sg
       @price_codes.each do |price_code|
         @sizes.each do |size|
           product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
@@ -149,13 +149,13 @@ class ProductsController < ApplicationController
         end
       end
     else
-      @product = Product.find(params[:product_id])
+      @product = Product.where(id: params[:product_id]).select(:id, :size_group_id).first
       @product.size_group_id = params[:id]
       unless @product.size_group_id_changed?
-        @sizes = @product.size_group ? @product.size_group.sizes.order(:size) : []
+        @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
       else        
-        sg = SizeGroup.find(params[:id]) rescue nil
-        @sizes = sg.sizes.order(:size) if sg
+        sg = SizeGroup.where(id: params[:id]).select(:id).first
+        @sizes = sg.sizes.select(:id, :size).order(:size) if sg
         @price_codes.each do |price_code|
           @sizes.each do |size|
             product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
@@ -171,7 +171,9 @@ class ProductsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_product
-    @product = Product.find(params[:id])
+    @product = Product.joins(:brand, :vendor, :model, :goods_type).
+      where(id: params[:id]).
+      select("products.id, products.code, products.description, common_fields.code AS brand_code, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
