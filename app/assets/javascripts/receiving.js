@@ -154,7 +154,7 @@ $(function () {
 
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     $("#direct_purchase_receiving_date").datepicker({
         dateFormat: "dd/mm/yy"
     });

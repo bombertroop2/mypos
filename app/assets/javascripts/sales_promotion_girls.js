@@ -16,7 +16,7 @@ $(function () {
 
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     MaskedInput({
         elm: document.getElementById('sales_promotion_girl_phone'),
         format: '____-_______',

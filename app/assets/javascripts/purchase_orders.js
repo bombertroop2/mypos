@@ -130,7 +130,7 @@ $(function () {
 
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     dataTable = $('#listing_product_table').DataTable({
         order: [1, 'asc'],
         dom: 'T<"clear">lfrtip',

@@ -37,7 +37,7 @@ $(function () {
     }
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     MaskedInput({
         elm: document.getElementById('vendor_phone'),
         format: '____-_______',

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-
+/*
 $(function () {
     $("#product_size_group_id").change(function () {
         // split isi dari action attributnya form untuk ambil id produk
@@ -36,9 +36,9 @@ $(function () {
         });
 
 });
-
+*/
 // ini untuk turbolink gem
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     $("#product_size_group_id").change(function () {
         // split isi dari action attributnya form untuk ambil id produk
         var splittedAction = $(".form-horizontal").attr("action").split("/");

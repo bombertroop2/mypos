@@ -16,7 +16,7 @@ $(function () {
 
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     $("#purchase_return_purchase_order_id").change(function () {
         $.get("/purchase_returns/get_purchase_order_details", {
             purchase_order_id: $(this).val()

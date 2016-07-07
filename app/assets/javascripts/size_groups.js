@@ -13,7 +13,7 @@ $(function () {
     });
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     $("#total_size_btn").click(function () {
         var totalSize = $("#total_size").val();
         if (!isNaN(totalSize)) {

@@ -21,20 +21,20 @@
 
 
 
-$(function () {
-    $('.inputs').bind('keypress', function (event) {
-        if (event.which === 13) {
-            $('[tabindex=' + (+this.tabIndex + 1) + ']').focus();
-            return false;
-        }
-    });
-    
-    if ($("#taxable_entrepreneur").length == 0) {
-        $(document).off("keydown");
-    }
-});
+//$(function () {
+//    $('.inputs').bind('keypress', function (event) {
+//        if (event.which === 13) {
+//            $('[tabindex=' + (+this.tabIndex + 1) + ']').focus();
+//            return false;
+//        }
+//    });
+//    
+//    if ($("#taxable_entrepreneur").length == 0) {
+//        $(document).off("keydown");
+//    }
+//});
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     $('.inputs').bind('keypress', function (event) {
         if (event.which === 13) {
             $('[tabindex=' + (+this.tabIndex + 1) + ']').focus();

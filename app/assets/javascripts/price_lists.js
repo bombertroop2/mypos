@@ -58,7 +58,7 @@ $(function () {
 
 });
 
-$(document).on('page:load', function () {
+$(document).on('turbolinks:load', function () {
     var productsPriceListsDataTable = $('#listing_products_table_price_lists').DataTable({
         order: [0, 'asc'],
         dom: 'T<"clear">lfrtip',
