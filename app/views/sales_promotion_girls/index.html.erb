@@ -18,7 +18,7 @@
               <td><%= sales_promotion_girl.identifier %></td>
               <td><%= sales_promotion_girl.name %></td>
               <td><%= remove_empty_space_from_phone_number(sales_promotion_girl.phone) %></td>
-              <td><%= sales_promotion_girl.warehouse.code if sales_promotion_girl.warehouse %></td>
+              <td><%= sales_promotion_girl.warehouse_code %></td>
               <td><%= remove_empty_space_from_phone_number(sales_promotion_girl.mobile_phone) %></td>
               <td>
                   <%= link_to 'Show', sales_promotion_girl, class: "btn btn-info btn-xs active" %>

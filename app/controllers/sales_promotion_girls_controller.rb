@@ -7,7 +7,7 @@ class SalesPromotionGirlsController < ApplicationController
   # GET /sales_promotion_girls
   # GET /sales_promotion_girls.json
   def index
-    @sales_promotion_girls = SalesPromotionGirl.all
+    @sales_promotion_girls = SalesPromotionGirl.joins(:warehouse).select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, phone, warehouses.code AS warehouse_code, mobile_phone")
   end
 
   # GET /sales_promotion_girls/1
@@ -103,7 +103,8 @@ class SalesPromotionGirlsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_sales_promotion_girl
-    @sales_promotion_girl = SalesPromotionGirl.find(params[:id])
+    @sales_promotion_girl = SalesPromotionGirl.joins(:warehouse).where(id: params[:id]).
+      select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, sales_promotion_girls.address, gender, phone, province, warehouses.code AS warehouse_code, mobile_phone, warehouse_id, role").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
