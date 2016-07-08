@@ -4,7 +4,7 @@ class SizeGroupsController < ApplicationController
   # GET /size_groups
   # GET /size_groups.json
   def index
-    @size_groups = SizeGroup.all
+    @size_groups = SizeGroup.select(:id, :code, :description)
   end
 
   # GET /size_groups/1
@@ -98,7 +98,7 @@ class SizeGroupsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_size_group
-    @size_group = SizeGroup.find(params[:id])
+    @size_group = SizeGroup.where(id: params[:id]).select(:id, :code, :description).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
