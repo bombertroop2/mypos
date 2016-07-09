@@ -4,7 +4,7 @@ class SupervisorsController < ApplicationController
   # GET /supervisors
   # GET /supervisors.json
   def index
-    @supervisors = Supervisor.all
+    @supervisors = Supervisor.select :id, :code, :name, :email, :phone, :mobile_phone
   end
 
   # GET /supervisors/1
@@ -36,7 +36,7 @@ class SupervisorsController < ApplicationController
           format.json { render json: @supervisor.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        if e.message.include? "column email is not unique"        
+        if e.message.include? "supervisors.email"
           @supervisor.errors.messages[:email] = ["has already been taken"]
         else
           @supervisor.errors.messages[:code] = ["has already been taken"]
@@ -93,7 +93,7 @@ class SupervisorsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_supervisor
-    @supervisor = Supervisor.find(params[:id])
+    @supervisor = Supervisor.where(id: params[:id]).select(:id, :code, :name, :address, :email, :phone, :mobile_phone).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
