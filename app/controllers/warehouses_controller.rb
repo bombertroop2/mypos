@@ -4,7 +4,8 @@ class WarehousesController < ApplicationController
   # GET /warehouses
   # GET /warehouses.json
   def index
-    @warehouses = Warehouse.all
+    @warehouses = Warehouse.joins(:supervisor, :region).
+      select("warehouses.id, warehouses.code, warehouses.name, supervisors.name AS supervisor_name, common_fields.code AS region_code, warehouse_type")
   end
 
   # GET /warehouses/1
@@ -86,7 +87,8 @@ class WarehousesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_warehouse
-    @warehouse = Warehouse.find(params[:id])
+    @warehouse = Warehouse.joins(:supervisor, :region, :price_code).where(id: params[:id]).
+      select("warehouses.id, warehouses.code, warehouses.name, warehouses.address, is_active, supervisors.name AS supervisor_name, common_fields.code AS region_code, price_codes_warehouses.code AS price_code_code, warehouse_type, supervisor_id, region_id, price_code_id").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

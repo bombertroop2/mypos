@@ -41,7 +41,7 @@
             Supervisor:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @warehouse.supervisor.name if @warehouse.supervisor %>
+            <%= @warehouse.supervisor_name %>
         </div>
     </div>
 
@@ -51,7 +51,7 @@
             Region:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @warehouse.region.code if @warehouse.region %>
+            <%= @warehouse.region_code %>
         </div>
     </div>
 
@@ -61,7 +61,7 @@
             Price code:
         </label>
         <div class="col-sm-10 form-control hidden-box">
-            <%= @warehouse.price_code.code if @warehouse.price_code %>
+            <%= @warehouse.price_code_code %>
         </div>
     </div>
 

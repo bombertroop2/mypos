@@ -6,9 +6,11 @@ class Warehouse < ApplicationRecord
   has_many :purchase_orders, dependent: :restrict_with_error
   has_many :sales_promotion_girls, dependent: :restrict_with_error
   has_one :stock
+  has_one :po_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
+  has_one :spg_relation, -> {select("1 AS one")}, class_name: "SalesPromotionGirl"
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
-  validates :code, uniqueness: true, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}
+  validates :code, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}
     validate :code_not_changed
 
     before_validation :upcase_code
@@ -26,6 +28,6 @@ class Warehouse < ApplicationRecord
     end
     
     def code_not_changed
-      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (sales_promotion_girls.present? || purchase_orders.present?)
+      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (spg_relation.present? || po_relation.present?)
     end
   end
