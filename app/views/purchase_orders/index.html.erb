@@ -19,7 +19,7 @@
               <td><%= purchase_order.number %></td>
               <td><%= purchase_order.po_type %></td>
               <td><%= purchase_order.status %></td>
-              <td><%= purchase_order.vendor.name if purchase_order.vendor %></td>
+              <td><%= purchase_order.vendor_name %></td>
               <td>
                   <%= link_to 'Show', purchase_order, class: "btn btn-info btn-xs active" %>
                     <%= link_to 'Edit', edit_purchase_order_path(purchase_order), class: "btn btn-warning btn-xs active" %>

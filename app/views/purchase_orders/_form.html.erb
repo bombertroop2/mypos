@@ -81,11 +81,11 @@
                                             </thead>
 
                                             <tbody>
-                                                <% Product.order(:code).each_with_index do |product, index| %>
+                                                <% Product.joins(:brand).select("products.id, products.code, common_fields.name AS brand_name").order(:code).each_with_index do |product, index| %>
                                                   <tr id="product_<%= product.id %>">
                                                       <td></td>
                                                       <td><%= product.code %></td>
-                                                      <td><%= product.brand.name if product.brand %></td>
+                                                      <td><%= product.brand_name %></td>
                                                   </tr>
                                                 <% end %>
                                             </tbody>

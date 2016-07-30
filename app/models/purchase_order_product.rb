@@ -23,8 +23,8 @@ class PurchaseOrderProduct < ApplicationRecord
             purchase_order_details.sum :quantity
           end
   
-          def total_cost
-            purchase_order_details.sum(:quantity) * cost_list.cost
+          def total_cost(cost)
+            purchase_order_details.sum(:quantity) * cost
           end
   
           private

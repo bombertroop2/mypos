@@ -28,9 +28,9 @@ module PurchaseOrdersHelper
     purchase_order_detail_detail
   end
   
-  def create_product_array_variable_name(purchase_order_product, product)
+  def create_product_array_variable_name(purchase_order_product, product_id)
     if purchase_order_product.new_record?
-      "purchase_order[purchase_order_products_attributes][#{Time.now.to_i.to_s+product.id.to_s}]"
+      "purchase_order[purchase_order_products_attributes][#{Time.now.to_i.to_s+product_id.to_s}]"
     else
       "purchase_order[purchase_order_products_attributes][#{purchase_order_product.id}]"
     end

@@ -14,12 +14,12 @@
                             <tr>
                                 <td>To</td>
                                 <td>:</td>
-                                <td><%= @purchase_order.vendor.name if @purchase_order.vendor %></td>
+                                <td><%= @purchase_order.vendor_name %></td>
                             </tr>
                             <tr>
                                 <td>Means of Payment</td>
                                 <td>:</td>
-                                <td><%= "#{@purchase_order.vendor.terms_of_payment} day(s)" if @purchase_order.vendor %></td>
+                                <td><%= "#{@purchase_order.terms_of_payment} day(s)" %></td>
                             </tr>
                             <tr>
                                 <td>Created Date</td>
@@ -111,12 +111,12 @@
                             <tr>
                                 <td>Warehouse</td>
                                 <td>:</td>
-                                <td><%= @purchase_order.warehouse.code if @purchase_order.warehouse %></td>
+                                <td><%= @purchase_order.warehouse_code %></td>
                             </tr>
                             <tr>
                                 <td>Address</td>
                                 <td>:</td>
-                                <td><%= @purchase_order.warehouse.address if @purchase_order.warehouse %></td>
+                                <td><%= @purchase_order.warehouse_address %></td>
                             </tr>
                         </table>
                     </td>
@@ -133,33 +133,38 @@
                                     <td><strong>Unit Cost</strong></td>
                                     <td><strong>Total Cost</strong></td>
                                 </tr>
-                            <% @purchase_order.purchase_order_products.each_with_index do |po_product, idx| %>
+                            <% @purchase_order.purchase_order_products.joins(:product, :cost_list).select("cost, purchase_order_products.id, products.code AS product_code").each_with_index do |po_product, idx| %>
+                              <% total_quantity = 0 %>
+                              <% product_sizes = po_product.sizes.select(:id, :size) %>
+                              <% product_colors = po_product.colors.select(:id, :code) %>
+                              <% purchase_order_details = po_product.purchase_order_details.select(:size_id, :color_id, :quantity) %>
                                 <tr align="center">
                                     <td style="vertical-align: middle"><%= idx.succ %></td>
-                                    <td style="vertical-align: middle"><%= po_product.product.code if po_product.product %></td>
+                                    <td style="vertical-align: middle"><%= po_product.product_code %></td>
                                     <td style="vertical-align: middle">
                                         <table class="table table-condensed table-responsive table-bordered">
                                             <tbody>
                                                 <tr>
                                                     <td colspan="2" rowspan="2"></td>
-                                                    <td align="center" colspan="<%= po_product.sizes.length %>">Sizes</td>
+                                                    <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
                                                 </tr>
                                                 <tr>
-                                                  <% po_product.sizes.each do |size| %>
+                                                  <% product_sizes.each do |size| %>
                                                     <td align="center"><%= size.size %></td>
                                                   <% end %>
                                                 </tr>
-                                              <% po_product.colors.each_with_index do |color, idx| %>
+                                              <% product_colors.each_with_index do |color, idx| %>
                                                 <tr align="center">
                                                     <% if idx == 0 %>
-                                                      <td style="vertical-align: middle" rowspan="<%= po_product.colors.length %>">Colors</td>
+                                                      <td style="vertical-align: middle" rowspan="<%= product_colors.length %>">Colors</td>
                                                     <% end %>
                                                     <td align="center"><%= color.code %></td>
-                                                    <% po_product.sizes.each do |size| %>
-                                                      <% po_detail = po_product.purchase_order_details.select{ |pod| pod.color.eql?(color) && pod.size.eql?(size) }.first %>
+                                                    <% product_sizes.each do |size| %>
+                                                      <% po_detail = purchase_order_details.select{|pod| pod.color_id.eql?(color.id) && pod.size_id.eql?(size.id)}.first %>
                                                       <td>
                                                           <% if po_detail %>
                                                             <%= po_detail.quantity %>
+                                                            <% total_quantity += po_detail.quantity %>
                                                           <% end %>
                                                       </td>
                                                     <% end %>
@@ -168,16 +173,16 @@
                                             </tbody>
                                         </table>
                                     </td>
-                                    <td align="right" style="vertical-align: middle"><%= po_product.total_quantity %></td>
+                                    <td align="right" style="vertical-align: middle"><%= total_quantity %></td>
                                     <td align="right" style="vertical-align: middle">
-                                      <%= number_to_currency((po_product.cost_list.cost rescue 0),
+                                      <%= number_to_currency((po_product.cost rescue 0),
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",
                                         :precision => 2) %>
                                     </td>
                                     <td align="right" style="vertical-align: middle">
-                                      <%= number_to_currency((po_product.total_cost rescue 0),
+                                      <%= number_to_currency(((total_quantity * po_product.cost) rescue 0),
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",
