@@ -13,14 +13,14 @@
     </tr>
 
     <% @stocks.each do |stock| %>
-      <% stock.stock_products.each_with_index do |stock_product, stock_product_index| %>
-        <% stock_product.stock_details.each_with_index do |stock_detail, index| %>
+      <% stock.stock_products.select(:id, :warehouse_id, :product_id).each_with_index do |stock_product, stock_product_index| %>
+        <% stock_product.stock_details.select(:color_id, :size_id, :quantity).each_with_index do |stock_detail, index| %>
           <tr>
               <% if index == 0 && stock_product_index == 0 %>
-                <td rowspan="<%= stock.stock_details.size %>" style="vertical-align: middle" align="center"><%= stock.warehouse.name if stock.warehouse %></td>
+                <td rowspan="<%= stock.stock_details.select("1 AS one").size %>" style="vertical-align: middle" align="center"><%= stock.warehouse.name if stock.warehouse %></td>
               <% end %>
               <% if index == 0 %>
-                <td rowspan="<%= stock_product.stock_details.size %>" style="vertical-align: middle" align="center"><%= stock_product.product.code if stock_product.product %></td>
+                <td rowspan="<%= stock_product.stock_details.select("1 AS one").size %>" style="vertical-align: middle" align="center"><%= stock_product.product.code if stock_product.product %></td>
               <% end %>
               <td align="center"><%= stock_detail.color.name if stock_detail.color %></td>
               <td align="center"><%= stock_detail.size.size if stock_detail.size %></td>
