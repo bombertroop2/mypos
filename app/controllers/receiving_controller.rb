@@ -3,8 +3,8 @@ class ReceivingController < ApplicationController
   before_action :convert_price_discount_to_numeric, only: :create
   
   def new
-    @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
-    @suppliers = Vendor.all
+    @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+    @suppliers = Vendor.select(:id, :name)
     @warehouses = Warehouse.select :id, :code
     @direct_purchase = DirectPurchase.new
     @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
@@ -29,8 +29,8 @@ class ReceivingController < ApplicationController
           format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
           format.json { head :no_content }
         else        
-          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
-          @suppliers = Vendor.all
+          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+          @suppliers = Vendor.select(:id, :name)
           @warehouses = Warehouse.select :id, :code
           @direct_purchase = DirectPurchase.new
           @direct_purchase.build_received_purchase_order is_using_delivery_order: true
@@ -53,8 +53,8 @@ class ReceivingController < ApplicationController
           format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
-        @suppliers = Vendor.all
+        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+        @suppliers = Vendor.select(:id, :name)
         @warehouses = Warehouse.select :id, :code
         @direct_purchase = DirectPurchase.new
         @direct_purchase.build_received_purchase_order is_using_delivery_order: true
@@ -122,8 +122,8 @@ class ReceivingController < ApplicationController
           format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
           format.json { render :show, status: :created, location: @direct_purchase }
         else
-          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
-          @suppliers = Vendor.all
+          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+          @suppliers = Vendor.select(:id, :name)
           @warehouses = Warehouse.select :id, :code
           @colors = Color.select(:id, :code).order :code
           @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)
@@ -147,8 +147,8 @@ class ReceivingController < ApplicationController
           format.json { render json: @direct_purchase.errors, status: :unprocessable_entity }
         end
       rescue ActiveRecord::RecordNotUnique => e
-        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name")
-        @suppliers = Vendor.all
+        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+        @suppliers = Vendor.select(:id, :name)
         @warehouses = Warehouse.select :id, :code
         @colors = Color.select(:id, :code).order :code
         @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)

@@ -21,7 +21,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
     
             def create_auto_do_number
               vendor = !is_it_direct_purchasing ? purchase_order.vendor : direct_purchase.vendor
-              last_received_po = vendor.received_purchase_orders.last
+              last_received_po = vendor.received_purchase_orders.select(:delivery_order_number).last
               today = Date.today
               current_month = today.month.to_s.rjust(2, '0')
               current_year = today.strftime("%y").rjust(2, '0')
