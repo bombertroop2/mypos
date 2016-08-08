@@ -26,7 +26,7 @@ class ReceivingController < ApplicationController
     respond_to do |format|
       begin
         if @purchase_order.update(purchase_order_params)
-          format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
+          format.html { redirect_to new_receiving_url, notice: "#{@purchase_order.received_purchase_orders.select(:delivery_order_number).last.delivery_order_number}'s items were successfully received." }
           format.json { head :no_content }
         else        
           @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
@@ -119,7 +119,7 @@ class ReceivingController < ApplicationController
     respond_to do |format|
       begin
         if @direct_purchase.save
-          format.html { redirect_to new_receiving_url, notice: 'Products were successfully received.' }
+          format.html { redirect_to new_receiving_url, notice: "#{@direct_purchase.received_purchase_order.delivery_order_number}'s items were successfully received." }
           format.json { render :show, status: :created, location: @direct_purchase }
         else
           @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
