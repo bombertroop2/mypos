@@ -13,7 +13,7 @@
     </tr>
 
     <% @stocks.each do |stock| %>
-      <% stock.stock_products.select(:id, :warehouse_id, :product_id).each_with_index do |stock_product, stock_product_index| %>
+      <% stock.stock_products.select(:id, :product_id).each_with_index do |stock_product, stock_product_index| %>
         <% stock_product.stock_details.select(:color_id, :size_id, :quantity).each_with_index do |stock_detail, index| %>
           <tr>
               <% if index == 0 && stock_product_index == 0 %>
