@@ -30,7 +30,12 @@ class PurchaseOrdersController < ApplicationController
       @purchase_order_products.each do |pop|
         pop.product.grouped_product_details.each do |gpd|
           @colors.each do |color|
-            pop.purchase_order_details.build size_id: gpd.size_id, color_id: color.id if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
+            if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
+              puts "terbuat"
+              pop.purchase_order_details.build size_id: gpd.size_id, color_id: color.id 
+            else
+              puts "ga terbuat"
+            end
           end
         end
       end
