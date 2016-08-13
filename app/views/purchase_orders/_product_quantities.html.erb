@@ -54,7 +54,10 @@
                                     colorCodes.push('<%= color.code %>');
                                   </script>
                                 <% end %>
-                                <% purchase_order_detail_detail = pop.purchase_order_details.select{|pod| pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id)}.first %>
+                                <% purchase_order_detail_detail = pop.purchase_order_details.select do |pod|
+                                  puts "pod.size_id - #{pod.size_id}, size.id - #{size.id} <=> pod.color_id - #{pod.color_id}, color.id - #{color.id}"
+                                  pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id)
+                                  end.first %>
                                 <% if purchase_order_detail_detail.present? %>                
                                   <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
                                   <td align="center" style="vertical-align: middle">
