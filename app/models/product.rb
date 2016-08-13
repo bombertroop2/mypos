@@ -14,7 +14,7 @@ class Product < ApplicationRecord
   has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
-  has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
+  has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode, size").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
   has_many :purchase_order_products
   has_many :cost_lists, dependent: :destroy
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open' AND purchase_orders.status <> 'Deleted'")}, through: :purchase_order_products, source: :purchase_order
