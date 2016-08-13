@@ -54,22 +54,25 @@
                                     colorCodes.push('<%= color.code %>');
                                   </script>
                                 <% end %>
-                                <% puts  "#{size.id} and #{color.id}" %>
                                 <% purchase_order_detail_detail = pop.purchase_order_details.select{|pod| pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id)}.first %>
-                                <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
-                                <td align="center" style="vertical-align: middle">
-                                    <%= fields_for purchase_order_detail_array_index, purchase_order_detail_detail do |purchase_order_detail_detail_form| %>
-                                      <%= purchase_order_detail_detail_form.hidden_field :id %>
-                                      <%= purchase_order_detail_detail_form.hidden_field :size_id %>
-                                      <%= purchase_order_detail_detail_form.hidden_field :color_id %>
-                                      <div class="<%= control_group_error(purchase_order_detail_detail, :quantity) %>">
-                                          <%= purchase_order_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{pop.product_id}-#{color.code} quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16 %>
-                                            <%= error_help_text(purchase_order_detail_detail, :quantity) %>
-                                        </div>
-                                      <% end %>
+                                <% if purchase_order_detail_detail.present? %>                
+                                  <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
+                                  <td align="center" style="vertical-align: middle">
+                                      <%= fields_for purchase_order_detail_array_index, purchase_order_detail_detail do |purchase_order_detail_detail_form| %>
+                                        <%= purchase_order_detail_detail_form.hidden_field :id %>
+                                        <%= purchase_order_detail_detail_form.hidden_field :size_id %>
+                                        <%= purchase_order_detail_detail_form.hidden_field :color_id %>
+                                        <div class="<%= control_group_error(purchase_order_detail_detail, :quantity) %>">
+                                            <%= purchase_order_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{pop.product_id}-#{color.code} quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16 %>
+                                              <%= error_help_text(purchase_order_detail_detail, :quantity) %>
+                                          </div>
+                                        <% end %>
 
-                                  </td>
-                                  <% index += 1 %>
+                                    </td>
+                                    <% index += 1 %>
+                                  <% else %>
+                                    <td></td>
+                                  <% end %>
                                 <% end %>
                     </tr>
                   <% end %>              
