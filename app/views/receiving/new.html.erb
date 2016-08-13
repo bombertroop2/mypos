@@ -98,76 +98,73 @@
                                               </div>
                                           </div>
                                           <%= f.fields_for :received_purchase_order do |received_purchase_order_form| %>
-                                            <div class="form-group">
-                                                <%= received_purchase_order_form.label :is_using_delivery_order, "Delivery Order", class: "col-sm-2 control-label" %>
+                                            <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
+                                                <%= received_purchase_order_form.label :is_using_delivery_order, simple_format("Expedition Number<br>(<i>Surat Jalan</i>)"), class: "col-sm-2 control-label" %>
                                                   <div class="col-sm-10">
                                                       <%= received_purchase_order_form.radio_button :is_using_delivery_order, "yes", checked: true, class: "do-radio-button-direct-purchase" %> Yes
                                                         <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button-direct-purchase" %> No
                                                       </div>
-                                                  </div>
-                                                  <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
-                                                      <%= received_purchase_order_form.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
-                                                        <div class="col-sm-10">
-                                                            <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
-                                                              <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
+                                                      <div class="col-sm-10">
+                                                          <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
+                                                            <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
+                                                        </div>
+                                                    </div>
+                                                  <% end %>
+                                                  <div class="form-group">
+                                                      <label class="col-sm-2 control-label">Products</label>
+                                                      <div class="col-sm-10">
+                                                          <table id="listing_product_table_receiving" class="display">
+                                                              <thead>
+                                                                  <tr>
+                                                                      <th></th>
+                                                                      <th id="code_th">Code</th>
+                                                                      <th>Brand</th>
+                                                                  </tr>
+                                                              </thead>
+
+                                                              <tbody>
+                                                                  <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
+                                                                    <tr id="product_<%= product.id %>">
+                                                                        <td></td>
+                                                                        <td><%= product.code %></td>
+                                                                        <td><%= product.name %></td>
+                                                                    </tr>
+                                                                  <% end %>
+                                                              </tbody>
+                                                          </table>
+                                                          <%= submit_tag "Generate form", id: "generate_dp_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-sm-offset-2 col-sm-10">
+                                                            <div id="products_detail">
+                                                                <% if params[:action].eql?("create") %>
+                                                                  <%= render 'product_quantities' %>
+                                                                <% end %>
+                                                            </div>
+                                                        </div>                                                      
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-sm-offset-2 col-sm-10">
+                                                            <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
                                                           </div>
                                                       </div>
                                                     <% end %>
-                                                    <div class="form-group">
-                                                        <label class="col-sm-2 control-label">Products</label>
-                                                        <div class="col-sm-10">
-                                                            <table id="listing_product_table_receiving" class="display">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th></th>
-                                                                        <th id="code_th">Code</th>
-                                                                        <th>Brand</th>
-                                                                    </tr>
-                                                                </thead>
+                                                </div>
+                                            </div>
 
-                                                                <tbody>
-                                                                    <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
-                                                                      <tr id="product_<%= product.id %>">
-                                                                          <td></td>
-                                                                          <td><%= product.code %></td>
-                                                                          <td><%= product.name %></td>
-                                                                      </tr>
-                                                                    <% end %>
-                                                                </tbody>
-                                                            </table>
-                                                            <%= submit_tag "Generate form", id: "generate_dp_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
-                                                          </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                          <div class="col-sm-offset-2 col-sm-10">
-                                                              <div id="products_detail">
-                                                                  <% if params[:action].eql?("create") %>
-                                                                    <%= render 'product_quantities' %>
-                                                                  <% end %>
-                                                              </div>
-                                                          </div>                                                      
-                                                      </div>
-                                                      <div class="form-group">
-                                                          <div class="col-sm-offset-2 col-sm-10">
-                                                              <%= f.submit "Save", data: { confirm: "This action cannot be undone\nAre you sure?" }, class: "btn btn-default active" %>
-                                                            </div>
-                                                        </div>
-                                                      <% end %>
-                                                  </div>
-                                              </div>
+                                        </div>
 
-                                          </div>
+                                        <script>
+                                          $(function () {
+                                        <% if @purchase_order %>
+                                                selectRow('<%= params[:id] %>');
+                                        <% end %>
+                                        <% if @purchase_order && !@purchase_order.errors[:base].present? && !@purchase_order.errors[:"received_purchase_orders.base"].present? %>
+                                                autoScrollToBottomOfPage();
+                                        <% elsif @direct_purchase && params[:direct_purchase].present? && !@direct_purchase.errors[:base].present? && !@direct_purchase.errors[:"direct_purchase_products.base"].present? && @direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.quantity"].present? %>
+                                                autoScrollToBottomOfPage();
+                                        <% end %>
 
-                                          <script>
-                                            $(function () {
-                                          <% if @purchase_order %>
-                                                  selectRow('<%= params[:id] %>');
-                                          <% end %>
-                                          <% if @purchase_order && !@purchase_order.errors[:base].present? && !@purchase_order.errors[:"received_purchase_orders.base"].present? %>
-                                                  autoScrollToBottomOfPage();
-                                          <% elsif @direct_purchase && params[:direct_purchase].present? && !@direct_purchase.errors[:base].present? && !@direct_purchase.errors[:"direct_purchase_products.base"].present? && @direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.quantity"].present? %>
-                                                  autoScrollToBottomOfPage();
-                                          <% end %>
-
-                                            });
-                                          </script>
+                                          });
+                                        </script>
