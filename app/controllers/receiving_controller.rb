@@ -5,7 +5,7 @@ class ReceivingController < ApplicationController
   def new
     @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
     @suppliers = Vendor.select(:id, :name)
-    @warehouses = Warehouse.select :id, :code
+    @warehouses = Warehouse.central.select :id, :code
     @direct_purchase = DirectPurchase.new
     @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
   end

@@ -20,6 +20,10 @@ class Warehouse < ApplicationRecord
       ["Counter", "counter"],
       ["Showroom", "showroom"]
     ]
+    
+    def self.central
+      where(warehouse_type: "central")
+    end
 
     private
 
