@@ -57,7 +57,7 @@
                             <div class="form-group<%= control_group_error(@sales_promotion_girl, :warehouse_id) %>">
                                 <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>
                                   <div class="col-sm-10">
-                                      <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.select(:id, :code), :id, :code, @sales_promotion_girl.warehouse_id.to_s), {prompt: true}, {tabindex: "7", class: "inputs form-control"} %>
+                                      <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.select(:id, :code).where("warehouse_type <> 'central'"), :id, :code, @sales_promotion_girl.warehouse_id.to_s), {prompt: true}, {tabindex: "7", class: "inputs form-control"} %>
                                         <%= error_help_text(@sales_promotion_girl, :warehouse_id) %>
                                     </div>
                                 </div>
