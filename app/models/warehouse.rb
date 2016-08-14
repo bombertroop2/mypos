@@ -21,6 +21,10 @@ class Warehouse < ApplicationRecord
       ["Showroom", "showroom"]
     ]
     
+    def self.has_supervisor?(id)
+      SalesPromotionGirl.where(["warehouse_id = ? AND role = 'supervisor'", id]).select("1 AS one").present?
+    end
+    
     def self.central
       where(warehouse_type: "central")
     end

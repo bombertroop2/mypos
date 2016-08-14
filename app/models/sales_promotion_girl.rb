@@ -11,6 +11,7 @@ class SalesPromotionGirl < ApplicationRecord
 
   validates :address, :name, :province, :warehouse_id, :gender, :role, presence: true
   validates :identifier, uniqueness: true
+  validate :warehouse_has_supervisor?
   
   accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
   
@@ -26,6 +27,10 @@ class SalesPromotionGirl < ApplicationRecord
   ]
 
   private
+  
+  def warehouse_has_supervisor?
+    errors.add(:warehouse_id, "is being supervised by another supervisor") if Warehouse.has_supervisor?(warehouse_id) && warehouse_id_changed?
+  end
   
   def unlink_from_user_if_role_downgraded
     user.destroy if role_was.eql?("cashier") and role.eql?("spg")
