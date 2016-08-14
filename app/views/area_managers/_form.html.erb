@@ -1,4 +1,4 @@
-<%= form_for(@supervisor, html: {class: "form-horizontal"}) do |f| %>
+<%= form_for(@supervisor, url: (@supervisor.new_record? ? area_managers_path : area_manager_path(@supervisor)), html: {class: "form-horizontal"}) do |f| %>
     <!--
     <% if @supervisor.errors.any? %>
                       <div id="error_explanation">

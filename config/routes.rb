@@ -45,7 +45,7 @@ Rails.application.routes.draw do
   resources :sales_promotion_girls
   resources :warehouses
   resources :price_codes
-  resources :supervisors
+  resources :area_managers
   resources :vendors
   resources :regions
   resources :goods_types

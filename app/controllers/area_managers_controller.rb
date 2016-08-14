@@ -1,5 +1,5 @@
-class SupervisorsController < ApplicationController
-  before_action :set_supervisor, only: [:show, :edit, :update, :destroy]
+class AreaManagersController < ApplicationController
+  before_action :set_area_manager, only: [:show, :edit, :update, :destroy]
 
   # GET /supervisors
   # GET /supervisors.json
@@ -24,12 +24,12 @@ class SupervisorsController < ApplicationController
   # POST /supervisors
   # POST /supervisors.json
   def create
-    @supervisor = Supervisor.new(supervisor_params)
+    @supervisor = Supervisor.new(area_manager_params)
 
     respond_to do |format|
       begin
         if @supervisor.save
-          format.html { redirect_to @supervisor, notice: 'Supervisor was successfully created.' }
+          format.html { redirect_to area_manager_url(@supervisor), notice: 'Area Manager was successfully created.' }
           format.json { render :show, status: :created, location: @supervisor }
         else
           format.html { render :new }
@@ -51,8 +51,8 @@ class SupervisorsController < ApplicationController
   def update
     respond_to do |format|
       begin
-        if @supervisor.update(supervisor_params)
-          format.html { redirect_to @supervisor, notice: 'Supervisor was successfully updated.' }
+        if @supervisor.update(area_manager_params)
+          format.html { redirect_to area_manager_url(@supervisor), notice: 'Area Manager was successfully updated.' }
           format.json { render :show, status: :ok, location: @supervisor }
         else
           format.html { render :edit }
@@ -76,14 +76,14 @@ class SupervisorsController < ApplicationController
     if @supervisor.errors.present? and @supervisor.errors.messages[:base].present?
       alert = @supervisor.errors.messages[:base].to_sentence
     else
-      notice = 'Supervisor was successfully deleted.'
+      notice = 'Area Manager was successfully deleted.'
     end
     respond_to do |format|
       format.html do 
         if notice.present?
-          redirect_to supervisors_url, notice: notice
+          redirect_to area_managers_url, notice: notice
         else
-          redirect_to supervisors_url, alert: alert
+          redirect_to area_managers_url, alert: alert
         end
       end
       format.json { head :no_content }
@@ -92,12 +92,12 @@ class SupervisorsController < ApplicationController
 
   private
   # Use callbacks to share common setup or constraints between actions.
-  def set_supervisor
+  def set_area_manager
     @supervisor = Supervisor.where(id: params[:id]).select(:id, :code, :name, :address, :email, :phone, :mobile_phone).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
-  def supervisor_params
+  def area_manager_params
     params.require(:supervisor).permit(:code, :name, :address, :email, :phone, :mobile_phone)
   end
 end

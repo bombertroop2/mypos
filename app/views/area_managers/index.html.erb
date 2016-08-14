@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Listing Supervisors</h1></div>
+<div class="page-header"><h1>Listing Area Managers</h1></div>
 
 <table class="table table-condensed table-responsive table-striped">
     <thead>
@@ -21,9 +21,9 @@
               <td><%= remove_empty_space_from_phone_number(supervisor.phone) %></td>
               <td><%= remove_empty_space_from_phone_number(supervisor.mobile_phone) %></td>
               <td>
-                  <%= link_to 'Show', supervisor, class: "btn btn-info btn-xs active" %>
-                    <%= link_to 'Edit', edit_supervisor_path(supervisor), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Delete', supervisor, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
+                  <%= link_to 'Show', area_manager_path(supervisor), class: "btn btn-info btn-xs active" %>
+                    <%= link_to 'Edit', edit_area_manager_path(supervisor), class: "btn btn-warning btn-xs active" %>
+                      <%= link_to 'Delete', area_manager_path(supervisor), method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
                     </td>
                 </tr>
               <% end %>
@@ -31,4 +31,4 @@
       </table>
 
 
-      <%= link_to 'New Supervisor', new_supervisor_path, class: "btn btn-default active" %>
+      <%= link_to 'New Area Manager', new_area_manager_path, class: "btn btn-default active" %>
