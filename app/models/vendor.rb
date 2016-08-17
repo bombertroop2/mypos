@@ -21,7 +21,6 @@ class Vendor < ApplicationRecord
       before_validation :upcase_code
       before_save :remove_vat, if: proc {|vendor| !vendor.value_added_tax_was.eql?("") && vendor.persisted? && !vendor.is_taxable_entrepreneur}
     
-        after_initialize :init
 
         private
     
@@ -29,9 +28,6 @@ class Vendor < ApplicationRecord
           self.value_added_tax = ""
         end
     
-        def init
-          self.is_taxable_entrepreneur = true if attributes[:is_taxable_entrepreneur].blank? || is_taxable_entrepreneur.nil?
-        end
 
         def upcase_code
           self.code = code.upcase

@@ -14,7 +14,6 @@ class PurchaseOrder < ApplicationRecord
   before_validation :remove_double_discount, if: proc {|po| po.price_discount.present?}, on: :update
   
     before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
-      before_create :set_vat_and_entrepreneur_status
       before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
     
         validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
@@ -64,11 +63,6 @@ class PurchaseOrder < ApplicationRecord
                                               self.is_additional_disc_from_net = nil if second_discount.blank?
                                             end
                                       
-                                            def set_vat_and_entrepreneur_status
-                                              self.value_added_tax = vendor.value_added_tax
-                                              self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur
-                                              return true
-                                            end
               
                                             def prevent_combining_discount
                                               errors.add(:first_discount, "can't be combined with price discount")
@@ -151,6 +145,8 @@ class PurchaseOrder < ApplicationRecord
                                             end
 
                                             def generate_number
+                                              self.value_added_tax = vendor.value_added_tax
+                                              self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur
                                               pkp_code = is_taxable_entrepreneur ? "1" : "0"
                                               last_po_number = PurchaseOrder.where("number LIKE '#{pkp_code}%'").select(:number).limit(1).order("id DESC").first.number rescue nil
                                               today = Date.today
