@@ -41,8 +41,12 @@ $(document).on('turbolinks:load', function () {
             return false;
         }
     });
-    
+
     if ($("#taxable_entrepreneur").length == 0) {
         $(document).off("keydown");
     }
+}).ajaxStart(function () {
+    $("#json-overlay").show();
+}).ajaxStop(function () {
+    $("#json-overlay").hide();
 });
