@@ -20,15 +20,18 @@ class Product < ApplicationRecord
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open' AND purchase_orders.status <> 'Deleted'")}, through: :purchase_order_products, source: :purchase_order
   has_many :open_purchase_orders, -> {select("purchase_orders.id, purchase_order_date, purchase_orders.order_value, purchase_orders.price_discount").where("purchase_orders.status = 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :direct_purchase_products, dependent: :restrict_with_error
+  has_many :product_colors, dependent: :destroy
+  has_many :color_codes, -> {select(:code)}, through: :product_colors, source: :color
   has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
   has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
   
   
   accepts_nested_attributes_for :product_details, reject_if: :price_blank
+  accepts_nested_attributes_for :product_colors, reject_if: proc { |attributes| attributes['selected_color_id'].blank? }, allow_destroy: true
   accepts_nested_attributes_for :cost_lists
   
   validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
-  validate :check_item, :code_not_changed, :size_group_not_changed
+  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
   before_validation :upcase_code
@@ -106,6 +109,23 @@ class Product < ApplicationRecord
         
   private
   
+  def color_selected
+    if new_record?
+      valid = if product_colors.present?
+        true
+      else
+        false
+      end
+    else    
+      valid = if product_colors.map(&:_destroy).include?(false)
+        true
+      else
+        false
+      end
+    end
+    errors.add(:base, "Product must have at least one color!") unless valid
+  end
+  
   def prevent_delete_if_purchase_order_created   
     if purchase_order_relation
       errors.add(:base, "Cannot delete record with purchase order")
@@ -129,6 +149,7 @@ class Product < ApplicationRecord
       
     return true
   end
+  
         
   #        def update_po_active_cost(purchase_order_date)
   #          cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("id DESC")

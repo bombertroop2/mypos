@@ -11,12 +11,17 @@ class ProductsController < ApplicationController
   # GET /products/1
   # GET /products/1.json
   def show
+    @product_colors = @product.color_codes.pluck(:code).to_sentence
   end
 
   # GET /products/new
   def new
     @product = Product.new
     @product.cost_lists.build
+    @colors = Color.select(:id, :code, :name).order(:code)
+    @colors.each do |color|
+      @product.product_colors.build color_id: color.id, code: color.code, name: color.name
+    end
   end
 
   # GET /products/1/edit
@@ -24,6 +29,17 @@ class ProductsController < ApplicationController
     @product.effective_date = @product.active_effective_date.strftime("%d/%m/%Y")
     @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
     @price_codes = PriceCode.select(:id, :code).order :code
+    @colors = Color.select(:id, :code, :name).order(:code)
+    @colors.each do |color|
+      product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
+      if product_color
+        product_color.selected_color_id = color.id
+        product_color.code = color.code
+        product_color.name = color.name
+      else
+        @product.product_colors.build color_id: color.id, code: color.code, name: color.name
+      end      
+    end
   end
 
   # POST /products
@@ -47,6 +63,10 @@ class ProductsController < ApplicationController
               product_detail.price_lists.build if price_list.blank?
             end
           end
+          @colors = Color.select(:id, :code, :name).order(:code)
+          @colors.each do |color|
+            @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
+          end
           if @product.errors[:base].present?
             flash.now[:alert] = @product.errors[:base].to_sentence
           end
@@ -64,6 +84,10 @@ class ProductsController < ApplicationController
             price_list = product_detail.price_lists.select{|pl| pl.price.present?}
             product_detail.price_lists.build if price_list.blank?
           end
+        end
+        @colors = Color.select(:id, :code, :name).order(:code)
+        @colors.each do |color|
+          @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
         end
         @product.errors.messages[:code] = ["has already been taken"]
         format.html { render :new }
@@ -90,6 +114,17 @@ class ProductsController < ApplicationController
               product_detail.price_lists.build if price_list.blank?
             end
           end
+          @colors = Color.select(:id, :code, :name).order(:code)
+          @colors.each do |color|
+            product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
+            if product_color
+              product_color.selected_color_id = color.id
+              product_color.code = color.code
+              product_color.name = color.name
+            else
+              @product.product_colors.build color_id: color.id, code: color.code, name: color.name
+            end      
+          end
           if @product.errors[:base].present?
             flash.now[:alert] = @product.errors[:base].to_sentence
           end
@@ -106,6 +141,17 @@ class ProductsController < ApplicationController
             price_list = product_detail.price_lists.select{|pl| pl.price.present?}
             product_detail.price_lists.build if price_list.blank?
           end
+        end
+        @colors = Color.select(:id, :code, :name).order(:code)
+        @colors.each do |color|
+          product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
+          if product_color
+            product_color.selected_color_id = color.id
+            product_color.code = color.code
+            product_color.name = color.name
+          else
+            @product.product_colors.build color_id: color.id, code: color.code, name: color.name
+          end      
         end
         @product.errors.messages[:code] = ["has already been taken"]
         format.html { render :edit }
@@ -183,7 +229,8 @@ class ProductsController < ApplicationController
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
       product_details_attributes: [:id, :size_id, :price_code_id, :price,
         price_lists_attributes: [:price, :effective_date]],
-      cost_lists_attributes: [:effective_date, :cost, :is_user_creating_product]
+      cost_lists_attributes: [:effective_date, :cost, :is_user_creating_product],
+      product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
     )
   end
   

@@ -1,15 +1,15 @@
 <%= form_for(@product, html: {class: "form-horizontal"}) do |f| %>
     <!--
     <% if @product.errors.any? %>
-                                                                                                <div id="error_explanation">
-                                                                                                    <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+                                                                                                                  <div id="error_explanation">
+                                                                                                                      <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
 
-                                                                                                    <ul>
+                                                                                                                      <ul>
       <% @product.errors.full_messages.each do |message| %>
-                                                                                                                                                                                                  <li><%= message %></li>
+                                                                                                                                                                                                                <li><%= message %></li>
       <% end %>
-                                                                                                    </ul>
-                                                                                                </div>
+                                                                                                                      </ul>
+                                                                                                                  </div>
     <% end %>
     -->
     <div class="form-group<%= control_group_error(@product, :code) %>">
@@ -68,63 +68,94 @@
                                             <%= error_help_text(@product, :goods_type_id) %>
                                         </div>
                                     </div>
-                                    <div class="form-group<%= control_group_error(@product, :image) %>">
-                                        <%= f.label :image, class: "col-sm-2 control-label" %>
-                                          <div class="col-sm-10">
-                                              <% if @product.image? %>
-                                                <%= image_tag(@product.image_url(:thumb)) %>
-                                              <% end %>
-                                              <%= f.file_field :image, tabindex: "9" %>
-                                              <%= f.hidden_field :image_cache %>
-                                              <%= error_help_text(@product, :image) %>
-                                          </div>
-                                      </div>    
-                                      <div class="form-group">
-                                          <div class="col-sm-offset-2 col-sm-10">
-                                              <%= f.check_box :remove_image, tabindex: "10" %> Remove image
-                                          </div>
-                                      </div>
-                                      <% if @product.new_record? %>
-                                        <%= f.fields_for :cost_lists do |cost_list_form| %>
-                                          <%= cost_list_form.hidden_field :is_user_creating_product, value: true %>
-                                          <div class="form-group<%= control_group_error(cost_list_form.object, :effective_date) %>">
-                                              <%= f.label :effective_date, class: "col-sm-2 control-label" %>
-                                                <div class="col-sm-10">
-                                                    <%= cost_list_form.text_field :effective_date, size: 10, readonly: true, tabindex: "11", class: "form-control" %>
-                                                      <%= error_help_text(cost_list_form.object, :effective_date) %>
-                                                  </div>
-                                              </div>                                          
-                                              <div class="form-group<%= control_group_error(cost_list_form.object, :cost) %>">
-                                                  <%= cost_list_form.label :cost, class: "col-sm-2 control-label" %>
-                                                    <div class="col-sm-10">
-                                                        <%= cost_list_form.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
-                                                          "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
-                                                          <%= error_help_text(cost_list_form.object, :cost) %>
-                                                      </div>
-                                                  </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Colors</label>
+                                        <div class="col-sm-10">
+                                            <%= f.fields_for :product_colors do |product_color_form| %>
+                                              <%= product_color_form.hidden_field :selected_color_id, id: "selected_color_id_#{product_color_form.object.color_id}", class: "selected-colors" %>
+                                                <%= product_color_form.hidden_field :color_id %>
+                                                <%= product_color_form.hidden_field :code %>
+                                                <%= product_color_form.hidden_field :name %>
+                                                <%= product_color_form.hidden_field :_destroy, value: true, class: "color-delete-marker", id: "color_delete_marker_#{product_color_form.object.color_id}" unless product_color_form.object.new_record? %>
                                                 <% end %>
-                                              <% else %>
-                                                <%= f.hidden_field :effective_date %>
-                                              <% end %>
-                                              <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
-                                                  <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
-                                                    <div class="col-sm-10">
-                                                        <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.select(:id, :code), :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13", class: "form-control"} %>
-                                                          <%= error_help_text(@product, :size_group_id) %>
-                                                      </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                      <div class="col-sm-offset-2 col-sm-10">
-                                                          <div id="size_collection_container">
-                                                              <% unless @sizes.blank? %>
-                                                                <%= render 'size_collections' %>
-                                                              <% end %>
-                                                          </div>
-                                                      </div>                                                      
-                                                  </div>
-                                                  <div class="form-group">
-                                                      <div class="col-sm-offset-2 col-sm-10">
-                                                          <%= f.submit "Save", class: "btn btn-default active" %>
-                                                        </div>
-                                                    </div>
+                                                <table id="listing_product_colors_table" class="display">
+                                                    <thead>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>Code</th>
+                                                            <th>Name</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <%= f.fields_for :product_colors do |product_color_form| %>                                                      
+                                                          <tr id="product_color_<%= product_color_form.object.color_id %>">
+                                                              <td></td>
+                                                              <td><%= product_color_form.object.code %></td>
+                                                              <td><%= product_color_form.object.name %></td>
+                                                          </tr>
+                                                        <% end %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="form-group<%= control_group_error(@product, :image) %>">
+                                            <%= f.label :image, class: "col-sm-2 control-label" %>
+                                              <div class="col-sm-10">
+                                                  <% if @product.image? %>
+                                                    <%= image_tag(@product.image_url(:thumb)) %>
                                                   <% end %>
+                                                  <%= f.file_field :image, tabindex: "9" %>
+                                                  <%= f.hidden_field :image_cache %>
+                                                  <%= error_help_text(@product, :image) %>
+                                              </div>
+                                          </div>    
+                                          <div class="form-group">
+                                              <div class="col-sm-offset-2 col-sm-10">
+                                                  <%= f.check_box :remove_image, tabindex: "10" %> Remove image
+                                              </div>
+                                          </div>
+                                          <% if @product.new_record? %>
+                                            <%= f.fields_for :cost_lists do |cost_list_form| %>
+                                              <%= cost_list_form.hidden_field :is_user_creating_product, value: true %>
+                                              <div class="form-group<%= control_group_error(cost_list_form.object, :effective_date) %>">
+                                                  <%= f.label :effective_date, class: "col-sm-2 control-label" %>
+                                                    <div class="col-sm-10">
+                                                        <%= cost_list_form.text_field :effective_date, size: 10, readonly: true, tabindex: "11", class: "form-control" %>
+                                                          <%= error_help_text(cost_list_form.object, :effective_date) %>
+                                                      </div>
+                                                  </div>                                          
+                                                  <div class="form-group<%= control_group_error(cost_list_form.object, :cost) %>">
+                                                      <%= cost_list_form.label :cost, class: "col-sm-2 control-label" %>
+                                                        <div class="col-sm-10">
+                                                            <%= cost_list_form.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
+                                                              "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
+                                                              <%= error_help_text(cost_list_form.object, :cost) %>
+                                                          </div>
+                                                      </div>
+                                                    <% end %>
+                                                  <% else %>
+                                                    <%= f.hidden_field :effective_date %>
+                                                  <% end %>
+                                                  <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
+                                                      <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
+                                                        <div class="col-sm-10">
+                                                            <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.select(:id, :code), :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13", class: "form-control"} %>
+                                                              <%= error_help_text(@product, :size_group_id) %>
+                                                          </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                          <div class="col-sm-offset-2 col-sm-10">
+                                                              <div id="size_collection_container">
+                                                                  <% unless @sizes.blank? %>
+                                                                    <%= render 'size_collections' %>
+                                                                  <% end %>
+                                                              </div>
+                                                          </div>                                                      
+                                                      </div>
+                                                      <div class="form-group">
+                                                          <div class="col-sm-offset-2 col-sm-10">
+                                                              <%= f.submit "Save", class: "btn btn-default active", id: "submit_product" %>
+                                                            </div>
+                                                        </div>
+                                                      <% end %>
