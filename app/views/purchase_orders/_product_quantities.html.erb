@@ -1,104 +1,116 @@
 <% @purchase_order.purchase_order_products.each do |pop| %>
   <% if (params[:purchase_order_id].present? and !@purchase_order.new_record? and pop.new_record?) or !params[:purchase_order_id].present? %>
+    <% product = pop.product %>
+    <% remove_product = false %>
     <% if pop.errors and pop.errors.messages[:base] %>
       <span class='help-block'><%= pop.errors.messages[:base][0] %></span>
     <% end %>
-    <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= pop.product_id %>">
+    <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= product.id %>">
         <tr style="text-align: center">
             <td style="vertical-align: middle"><strong>Product code</strong></td>
             <td style="vertical-align: middle"><strong>Size X Color</strong></td>
         </tr>    
         <tr style="text-align: center">
             <td style="vertical-align: middle">
-                <strong><%= pop.product.code %></strong>
+                <strong><%= product.code %></strong>
             </td>
-            <td>
-                <% purchase_order_product_detail = pop %>
-                <% purchase_order_product_array_index = create_product_array_variable_name(purchase_order_product_detail, pop.product_id) %>
-                <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
-                  <%= purchase_order_product_detail_form.hidden_field :id %>
-                  <%= purchase_order_product_detail_form.hidden_field :purchase_order_date, class: "purchase-order-date" %>
-                    <%= purchase_order_product_detail_form.hidden_field :vendor_id, class: "purchase-order-vendor-id" %>
-                      <%= purchase_order_product_detail_form.hidden_field :cost_list_id, value: nil unless purchase_order_product_detail.new_record? %>
-                      <%= purchase_order_product_detail_form.hidden_field :product_id %>
+            <td>                
+                <% pop_field_name = create_product_array_variable_name(pop, product.id) %>
+                <%= fields_for pop_field_name, pop do |pop_form| %>
+                  <% remove_product = pop_form.object._destroy %>                
+                  <%= pop_form.hidden_field :id %>
+                  <%= pop_form.hidden_field :purchase_order_date, class: "purchase-order-date" %>
+                    <%= pop_form.hidden_field :vendor_id, class: "purchase-order-vendor-id" %>
+                      <%= pop_form.hidden_field :cost_list_id, value: nil unless pop.new_record? %>
+                      <%= pop_form.hidden_field :product_id %>
                     <% end %>
 
-                    <% sizes = pop.product.sizes.select(:size) %>
+                    <% sizes = product.sizes.select(:id, :size) %>
                     <% index = 0 %>
 
                     <script>
-                      var colorCodes = [];
+                      var colorSizes = [];
                     </script>
 
                     <table border="1" class="table table-condensed table-responsive table-bordered">
                         <tr style="text-align: center">
                             <th colspan="2" rowspan="2"></th>
-                            <td colspan="<%= @colors.size %>" align="center"><strong>Colors</strong><br /><%= text_field_tag "quantity_#{pop.product_id}", "", {placeholder: "quantity", size: 16, class: "quantity form-control quantity-fields"} %></td>
+                            <td colspan="<%= sizes.length %>" align="center">
+                                <strong>Sizes</strong>
+                                <br />
+                                <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "quantity", size: 16, class: "quantity form-control quantity-fields"} unless remove_product %>
+                              </td>
                           </tr>
 
                           <tr style="text-align: center">
-                              <% @colors.each do |color| %>
-                                <td align="center"><%= color.code %><br /><%= text_field_tag "quantity_#{pop.product_id}_#{color.code}", "", {placeholder: "quantity", class: "quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16} %></td>
+                              <% sizes.each do |size| %>
+                                <td align="center">
+                                    <%= size.size %>
+                                    <br />
+                                    <%= text_field_tag "quantity_#{product.id}_#{size.id}", "", {placeholder: "quantity", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16} unless remove_product %>
+                                  </td>
                                 <% end %>
                             </tr>
 
-                            <% sizes.each_with_index do |size, idx| %>                          
+                            <% product_colors = product.colors %>
+                            <% product_colors.each_with_index do |color, idx| %>                          
                               <tr style="text-align: center">
                                   <% if idx.eql? 0 %>
-                                    <td rowspan="<%= sizes.size %>" style="vertical-align: middle"><strong>Sizes</strong></td>
+                                    <td rowspan="<%= product_colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>
                                   <% end %>
-                                  <td style="vertical-align: middle"><%= size.size %></td>                            
-                                  <% @colors.each do |color| %>
+                                  <td style="vertical-align: middle"><%= color.code %></td>                            
+                                  <% sizes.each do |size| %>
                                     <% if idx == 0 %>
                                   <script>
-                                    colorCodes.push('<%= color.code %>');
+                                    colorSizes.push('<%= size.id %>');
                                   </script>
                                 <% end %>
-                                <% purchase_order_detail_detail = pop.purchase_order_details.select do |pod|
-                                  puts "pod.size_id - #{pod.size_id}, size.id - #{size.id} <=> pod.color_id - #{pod.color_id}, color.id - #{color.id}"
-                                  pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id)
-                                  end.first %>
-                                <% if purchase_order_detail_detail.present? %>                
-                                  <% purchase_order_detail_array_index = create_product_detail_array_variable_name(purchase_order_detail_detail, index, purchase_order_product_array_index) %>
-                                  <td align="center" style="vertical-align: middle">
-                                      <%= fields_for purchase_order_detail_array_index, purchase_order_detail_detail do |purchase_order_detail_detail_form| %>
-                                        <%= purchase_order_detail_detail_form.hidden_field :id %>
-                                        <%= purchase_order_detail_detail_form.hidden_field :size_id %>
-                                        <%= purchase_order_detail_detail_form.hidden_field :color_id %>
-                                        <div class="<%= control_group_error(purchase_order_detail_detail, :quantity) %>">
-                                            <%= purchase_order_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{pop.product_id}-#{color.code} quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16 %>
-                                              <%= error_help_text(purchase_order_detail_detail, :quantity) %>
+                                <% pod = pop.purchase_order_details.select { |pod| pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id) }.first %>
+                <%# if pod.present? %>                
+                                <% pod_field_name = create_product_detail_array_variable_name(pod, index, pop_field_name) %>
+                                <td align="center" style="vertical-align: middle">
+                                    <%= fields_for pod_field_name, pod do |pod_form| %>
+                                      <%= pod_form.hidden_field :id %>
+                                      <%= pod_form.hidden_field :size_id %>
+                                      <%= pod_form.hidden_field :color_id %>
+                                      <% unless remove_product %>
+                                        <div class="<%= control_group_error(pod, :quantity) %>">
+                                            <%= pod_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16 %>
+                                              <%= error_help_text(pod, :quantity) %>
                                           </div>
                                         <% end %>
+                                      <% end %>
 
-                                    </td>
-                                    <% index += 1 %>
-                                  <% else %>
-                                    <td></td>
-                                  <% end %>
+                                  </td>
+                                  <% index += 1 %>
+                  <%# else %>
+                                  <!--<td></td>-->
+                  <%# end %>
                                 <% end %>
                     </tr>
                   <% end %>              
               </table></td>
-              </tr>
-              <script>
-                $.each(colorCodes, function (index, value) {
-                    $('#quantity_<%= pop.product_id %>_' + value).keyup(function () {
-                        $('.quantity-<%= pop.product_id %>-' + value).val($('#quantity_<%= pop.product_id %>_' + value).val());
-                    });
-                });
-                $('#<%= "quantity_#{pop.product_id}" %>').keyup(function () {
-                    $('.quantity-<%= pop.product_id %>').val($('#<%= "quantity_#{pop.product_id}" %>').val());
-                });
-              </script>
-              <% unless purchase_order_product_detail.new_record? %>
+              </tr>              
+              <% unless pop.new_record? %>
                 <tr>
                     <td colspan="2">
-                        <%= fields_for purchase_order_product_array_index, purchase_order_product_detail do |purchase_order_product_detail_form| %>
-                          <%= purchase_order_product_detail_form.check_box :_destroy %> remove
+                        <%= fields_for pop_field_name, pop do |pop_form| %>
+                          <%= pop_form.check_box :_destroy %> remove
                         <% end %>
                     </td>
                 </tr>          
+              <% end %>
+              <% unless remove_product %>
+                <script>
+                  $.each(colorSizes, function (index, value) {
+                      $('#quantity_<%= product.id %>_' + value).keyup(function () {
+                          $('.quantity-<%= product.id %>-' + value).val($('#quantity_<%= product.id %>_' + value).val());
+                      });
+                  });
+                  $('#<%= "quantity_#{product.id}" %>').keyup(function () {
+                      $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
+                  });
+                </script>
               <% end %>
               </table>
             <% end %>

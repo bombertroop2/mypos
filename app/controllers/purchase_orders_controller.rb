@@ -1,5 +1,5 @@
 class PurchaseOrdersController < ApplicationController
-  before_action :populate_combobox_list, only: [:new, :edit]
+  before_action :populate_combobox_list, :populate_products, only: [:new, :edit]
   before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :close]
   before_action :convert_price_discount_to_numeric, only: [:create, :update]
 
@@ -25,17 +25,12 @@ class PurchaseOrdersController < ApplicationController
       @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
       @purchase_order.purchase_order_date = @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date
       @products = @purchase_order.products.select :id
-      @colors = Color.select(:id, :code).order :code
-      @purchase_order_products = @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, product_id, products.code AS product_code")
-      @purchase_order_products.each do |pop|
-        pop.product.grouped_product_details.each do |gpd|
-          @colors.each do |color|
-            if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
-              puts "terbuat - #{gpd.size_id} - #{color.id}"
-              pop.purchase_order_details.build size_id: gpd.size_id, color_id: color.id 
-            else
-              puts "ga terbuat"
-            end
+      @purchase_order.purchase_order_products.each do |pop|
+        colors = pop.product.colors.select :id
+        sizes = pop.product.sizes.select :id
+        colors.each do |color|
+          sizes.each do |size|
+            pop.purchase_order_details.build size_id: size.id, color_id: color.id             
           end
         end
       end
@@ -56,12 +51,14 @@ class PurchaseOrdersController < ApplicationController
           format.json { render :show, status: :created, location: @purchase_order }
         else
           populate_combobox_list
-          @colors = Color.select(:id, :code).order :code          
+          populate_products
           @products = Product.where(id: params[:product_ids].split(",")).select(:id)
           @purchase_order.purchase_order_products.each do |pop|
-            pop.product.grouped_product_details.each do |gpd|
-              @colors.each do |color|
-                pop.purchase_order_details.build size_id: gpd.size_id, color_id: color.id if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
+            colors = pop.product.colors.select :id
+            sizes = pop.product.sizes.select :id
+            colors.each do |color|
+              sizes.each do |size|
+                pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
               end
             end
           end
@@ -95,12 +92,14 @@ class PurchaseOrdersController < ApplicationController
         format.json { render :show, status: :ok, location: @purchase_order }
       else
         populate_combobox_list
+        populate_products
         @products = Product.where(id: params[:product_ids].split(",")).select(:id)
-        @colors = Color.select(:id, :code).order :code
         @purchase_order.purchase_order_products.each do |pop|
-          pop.product.grouped_product_details.each do |gpd|
-            @colors.each do |color|
-              pop.purchase_order_details.build size_id: gpd.size_id, color_id: color.id if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
+          colors = pop.product.colors.select :id
+          sizes = pop.product.sizes.select :id
+          colors.each do |color|
+            sizes.each do |size|  
+              pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?              
             end
           end
         end
@@ -134,32 +133,23 @@ class PurchaseOrdersController < ApplicationController
     else
       PurchaseOrder.new
     end
-    #    @purchase_order_products = @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, product_id, products.code AS product_code")
-    if splitted_selected_product_ids.present?
-      @colors = Color.select(:id, :code).order :code
+    if splitted_selected_product_ids.present?      
       products = Product.where(id: splitted_selected_product_ids).select(:id)
       products.each do |product|
-        existing_pop = @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, product_id, products.code AS product_code").select{|pop| pop.product_id.eql?(product.id)}.first
-        pop = if existing_pop.nil?
-          @purchase_order.purchase_order_products.build product_id: product.id
-        else
-          existing_pop        
-        end
-        #        pop = @purchase_order.purchase_order_products.build product_id: product.id
-        product.grouped_product_details.each do |gpd|
-          @colors.each do |color|
-            existing_item = pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.first
-            pop.purchase_order_details.build size_id: gpd.size_id, color_id: color.id unless existing_item
+        colors = product.colors.select :id
+        sizes = product.sizes.select :id
+        pop = @purchase_order.purchase_order_products.build product_id: product.id
+        colors.each do |color|
+          sizes.each do |size|
+            pop.purchase_order_details.build size_id: size.id, color_id: color.id #unless existing_item
           end
-        end
+        end        
       end
 
       # id yang diganti, caranya yang lama dihapus dan yang baru ditambahkan      
       @replaced_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")
       respond_to { |format| format.js }
     else      
-      previous_selected_product_ids = params[:previous_selected_product_ids]
-      selected_product_ids = params[:product_ids]
       if previous_selected_product_ids.split(",").length > selected_product_ids.split(",").length
         @removed_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")
         respond_to { |format| format.js }
@@ -231,5 +221,9 @@ class PurchaseOrdersController < ApplicationController
   
   def convert_price_discount_to_numeric
     params[:purchase_order][:price_discount] = params[:purchase_order][:price_discount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:purchase_order][:price_discount].present?
+  end
+  
+  def populate_products
+    @product_list = Product.joins(:brand).select("products.id, products.code, common_fields.name AS brand_name").order(:code)
   end
 end

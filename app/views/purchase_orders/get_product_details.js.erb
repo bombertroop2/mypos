@@ -8,13 +8,16 @@ else{
     <% if @purchase_order.new_record? %>
       $("#product_table_<%= removed_id %>").remove();
     <% else %>
-      // jika product sudah ada di database
-      if($("#product_table_<%= removed_id %>").find("[type='checkbox']").length > 0){
-      $("#product_table_<%= removed_id %>").hide();
-      $("#product_table_<%= removed_id %>").find("[type='checkbox']").attr("checked", true);
+      $(".product-table").each(function(){
+      var productId = $(this).attr("id").split("_")[2];
+      if($(this).find("[type='checkbox']").length > 0 && $(this).attr("id").localeCompare("product_table_"+<%= removed_id %>) == 0) {
+      $(this).hide();
+      $(this).find("[type='checkbox']").attr("checked", true);
+      $(this).find("input:text").remove();
       }
-      else // jika produk belum ada di database
-      $("#product_table_<%= removed_id %>").remove();
+      else if($(this).find("[type='checkbox']").length == 0 && $(this).attr("id").localeCompare("product_table_"+<%= removed_id %>) == 0)
+      $(this).remove();
+      });      
     <% end %>
   <% end %>
 <% else %>
@@ -24,17 +27,20 @@ else{
       <% if @purchase_order.new_record? %>
         $("#product_table_<%= replaced_id %>").remove();
       <% else %>
-        // jika product sudah ada di database
-        if($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0){
-        $("#product_table_<%= replaced_id %>").hide();
-        $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
+        $(".product-table").each(function(){
+        var productId = $(this).attr("id").split("_")[2];
+        if($(this).find("[type='checkbox']").length > 0 && $(this).attr("id").localeCompare("product_table_"+<%= replaced_id %>) == 0) {
+        $(this).hide();
+        $(this).find("[type='checkbox']").attr("checked", true);
+        $(this).find("input:text").remove();
         }
-        else // jika produk belum ada di database
-        $("#product_table_<%= replaced_id %>").remove();
+        else if($(this).find("[type='checkbox']").length == 0 && $(this).attr("id").localeCompare("product_table_"+<%= replaced_id %>) == 0)
+        $(this).remove();
+        });
       <% end %>
     <% end %>      
   <% end %>
   $("#products_detail").append("<%= j(render(partial: "product_quantities")) %>");
-  showDeleteMarkedProduct();
+  //showDeleteMarkedProduct();
 <% end %>
 }

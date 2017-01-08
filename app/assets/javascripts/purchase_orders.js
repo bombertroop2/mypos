@@ -21,8 +21,9 @@ function intersection(x, y) {
 function hideDeleteMarkedProduct() {
     $(".product-table").each(function () {
         var productId = $(this).attr("id").split("_")[2];
-        if ($(this).find("[type='checkbox']").length > 0 && $(this).find("[type='checkbox']").is(":checked") && $("#product_collections").val().indexOf(productId) < 0)
+        if ($(this).find("[type='checkbox']").length > 0 && $(this).find("[type='checkbox']").is(":checked")/* && $("#product_collections").val().indexOf(productId) < 0*/) {
             $(this).hide();
+        }
     });
 }
 

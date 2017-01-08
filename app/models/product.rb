@@ -11,7 +11,7 @@ class Product < ApplicationRecord
   
   has_many :price_codes, -> {group("common_fields.id").order(:code).select(:id, :code)}, through: :product_details
   has_many :product_details, dependent: :destroy
-  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
+#  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode, size").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
@@ -22,6 +22,7 @@ class Product < ApplicationRecord
   has_many :direct_purchase_products, dependent: :restrict_with_error
   has_many :product_colors, dependent: :destroy
   has_many :color_codes, -> {select(:code)}, through: :product_colors, source: :color
+  has_many :colors, -> {select(:id, :code).order(:code)}, through: :product_colors, source: :color
   has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
   has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
   
