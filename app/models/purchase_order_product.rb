@@ -11,7 +11,7 @@ class PurchaseOrderProduct < ApplicationRecord
   
   
   validate :existing_cost, if: proc {|pop| pop.purchase_order_date.present?}
-    validate :vendor_products, if: proc {|pop| pop.vendor_id.present?}
+#    validate :vendor_products, if: proc {|pop| pop.vendor_id.present?}
       validates :vendor_id, presence: true
 
       before_save :set_active_cost, unless: proc {|pop| pop.is_user_adding_new_cost}
@@ -29,11 +29,11 @@ class PurchaseOrderProduct < ApplicationRecord
   
           private
     
-          def vendor_products
-            vendor = Vendor.select(:id, :name).where(id: vendor_id).limit(1).first
-            is_vendor_having_product = vendor.products.where(id: product_id).select("1 AS one").present?
-            errors.add(:base, "This product is not available on #{vendor.name}") unless is_vendor_having_product
-          end
+#          def vendor_products
+#            vendor = Vendor.select(:id, :name).where(id: vendor_id).limit(1).first
+#            is_vendor_having_product = vendor.products.where(id: product_id).select("1 AS one").present?
+#            errors.add(:base, "This product is not available on #{vendor.name}") unless is_vendor_having_product
+#          end
     
           def update_total_unit_cost
             cost = cost_list.cost
