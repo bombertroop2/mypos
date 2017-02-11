@@ -2,11 +2,11 @@ class Brand < CommonField
   has_many :products, dependent: :restrict_with_error
   has_one :product_relation, -> {select("1 AS one")}, class_name: "Product"
 
-
   before_validation :upcase_code
-
-  #  validates :code, uniqueness: true # tidak menggunakan ini untuk mempercepat proses
+  
+  validates :code, uniqueness: true
   validate :code_not_changed
+  
   
   private
   

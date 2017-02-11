@@ -2,27 +2,16 @@
     <h1>Listing Brands</h1>
 </div>
 
-<table class="table table-condensed table-responsive table-striped">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th></th>
-        </tr>
-    </thead>
 
-    <tbody>
-        <% @brands.each do |brand| %>
-          <tr>
-              <td><%= brand.code %></td>
-              <td><%= brand.name %></td>
-              <td><%= link_to 'Show', brand, class: "btn btn-info btn-xs active" %>
-                    <%= link_to 'Edit', edit_brand_path(brand), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Delete', brand, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %></td>
-                </tr>
-              <% end %>
-          </tbody>
-      </table>
+<%= smart_listing_controls_for(:brands, {class: "form-inline text-right"}) do %>
 
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Search...", autocomplete: :off %>
+      </div>
 
-      <%= link_to 'New Brand', new_brand_path, class: "btn btn-default active" %>
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:brands) %>

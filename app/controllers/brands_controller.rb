@@ -1,10 +1,15 @@
-class BrandsController < ApplicationController
+include SmartListing::Helper::ControllerExtensions
+class BrandsController < ApplicationController  
   before_action :set_brand, only: [:show, :edit, :update, :destroy]
-
+  helper SmartListing::Helper
   # GET /brands
   # GET /brands.json
   def index
-    @brands = Brand.select :id, :code, :name
+    brands_scope = Brand.select(:id, :code, :name, :description)
+    brands_scope = brands_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(brands_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(brands_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @brands = smart_listing_create(:brands, brands_scope, partial: 'brands/listing', default_sort: {code: "asc"})
   end
 
   # GET /brands/1
@@ -26,38 +31,22 @@ class BrandsController < ApplicationController
   def create
     @brand = Brand.new(brand_params)
 
-    respond_to do |format|
-      begin
-        if @brand.save
-          format.html { redirect_to @brand, notice: 'Brand was successfully created.' }
-          format.json { render :show, status: :created, location: @brand }
-        else
-          format.html { render :new }
-          format.json { render json: @brand.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @brand.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    begin
+      @brand.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{brands_url}'"
     end
   end
 
   # PATCH/PUT /brands/1
   # PATCH/PUT /brands/1.json
   def update
-    respond_to do |format|
-      begin
-        if @brand.update(brand_params)
-          format.html { redirect_to @brand, notice: 'Brand was successfully updated.' }
-          format.json { render :show, status: :ok, location: @brand }
-        else
-          format.html { render :edit }
-          format.json { render json: @brand.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @brand.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @brand.update(brand_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{brands_url}'"
     end
   end
 
@@ -66,19 +55,8 @@ class BrandsController < ApplicationController
   def destroy
     @brand.destroy    
     if @brand.errors.present? and @brand.errors.messages[:base].present?
-      alert = @brand.errors.messages[:base].to_sentence
-    else
-      notice = 'Brand was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do
-        if notice.present?
-          redirect_to brands_url, notice: notice
-        else
-          redirect_to brands_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = @brand.errors.messages[:base].to_sentence
+      render js: "window.location = '#{brands_url}'"
     end
   end
 

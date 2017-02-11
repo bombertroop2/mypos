@@ -15,6 +15,7 @@
 //= require turbolinks
 //= require bootstrap-sprockets
 //= require cocoon
+//= require smart_listing
 //= require vendors
 //= require jquery.dataTables.min
 //= require_tree .
