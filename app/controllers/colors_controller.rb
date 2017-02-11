@@ -1,10 +1,16 @@
+include SmartListing::Helper::ControllerExtensions
 class ColorsController < ApplicationController
   before_action :set_color, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /colors
   # GET /colors.json
   def index
-    @colors = Color.select :id, :code, :name
+    colors_scope = Color.select(:id, :code, :name, :description)
+    colors_scope = colors_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(colors_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(colors_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @colors = smart_listing_create(:colors, colors_scope, partial: 'colors/listing', default_sort: {code: "asc"})
   end
 
   # GET /colors/1
@@ -25,39 +31,24 @@ class ColorsController < ApplicationController
   # POST /colors.json
   def create
     @color = Color.new(color_params)
-
-    respond_to do |format|
-      begin
-        if @color.save
-          format.html { redirect_to @color, notice: 'Color was successfully created.' }
-          format.json { render :show, status: :created, location: @color }
-        else
-          format.html { render :new }
-          format.json { render json: @color.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @color.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    
+    begin
+      @color.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{colors_url}'"
     end
+
   end
 
   # PATCH/PUT /colors/1
   # PATCH/PUT /colors/1.json
   def update
-    respond_to do |format|
-      begin
-        if @color.update(color_params)
-          format.html { redirect_to @color, notice: 'Color was successfully updated.' }
-          format.json { render :show, status: :ok, location: @color }
-        else
-          format.html { render :edit }
-          format.json { render json: @color.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @color.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @color.update(color_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{colors_url}'"
     end
   end
 
@@ -65,22 +56,12 @@ class ColorsController < ApplicationController
   # DELETE /colors/1.json
   def destroy
     @color.destroy
+    
     if @color.errors.present? and @color.errors.messages[:base].present?
       error_message = @color.errors.messages[:base].to_sentence
       error_message.slice! "details "
-      alert = error_message
-    else
-      notice = 'Color was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do
-        if notice.present?
-          redirect_to colors_url, notice: notice
-        else
-          redirect_to colors_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = error_message
+      render js: "window.location = '#{colors_url}'"
     end
   end
 

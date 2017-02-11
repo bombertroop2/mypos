@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   
   before_action :authenticate_user!, except: [:show, :index]
   before_action :is_user_can_cud?, except: [:show, :index]
+  helper_method :is_admin?
   
   
   def after_sign_in_path_for(resource)
@@ -16,11 +17,14 @@ class ApplicationController < ActionController::Base
     end
   end
   
+  
+  
   private
   
   def is_admin?
     current_user.has_role? :admin
   end
+  
   
   def is_request_from_auth_system?
     controller_name.eql?("sessions")

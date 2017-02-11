@@ -50,4 +50,8 @@ $(document).on('turbolinks:load', function () {
     $("#json-overlay").show();
 }).ajaxStop(function () {
     $("#json-overlay").hide();
+}).ajaxComplete(function (event, jqxhr, settings, thrownError) {
+    if (jqxhr.status == 401) {
+        window.location.replace('/users/sign_in');
+    }
 });

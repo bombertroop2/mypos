@@ -9,13 +9,13 @@
           </tr>
       </thead>
       <tbody>
-          <% smart_listing.collection.each do |brand| %>
-            <tr class="editable" data-id="<%= brand.id %>">
-                <%= smart_listing.render object: brand, partial: "brands/brand", locals: {object: brand} %>
+          <% smart_listing.collection.each do |color| %>
+            <tr class="editable" data-id="<%= color.id %>">
+                <%= smart_listing.render object: color, partial: "colors/color", locals: {object: color} %>
             </tr>
           <% end %>
           <% if user_signed_in? && is_admin? %>
-            <%= smart_listing.item_new colspan: 4, link: new_brand_path %>
+            <%= smart_listing.item_new colspan: 4, link: new_color_path %>
           <% end %>
       </tbody>
   </table>
