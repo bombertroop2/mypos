@@ -1,10 +1,16 @@
+include SmartListing::Helper::ControllerExtensions
 class PriceCodesController < ApplicationController
   before_action :set_price_code, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /price_codes
   # GET /price_codes.json
   def index
-    @price_codes = PriceCode.select :id, :code, :name
+    price_codes_scope = PriceCode.select(:id, :code, :name, :description)
+    price_codes_scope = price_codes_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(price_codes_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(price_codes_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @price_codes = smart_listing_create(:price_codes, price_codes_scope, partial: 'price_codes/listing', default_sort: {code: "asc"})
   end
 
   # GET /price_codes/1
@@ -26,38 +32,23 @@ class PriceCodesController < ApplicationController
   def create
     @price_code = PriceCode.new(price_code_params)
 
-    respond_to do |format|
-      begin
-        if @price_code.save
-          format.html { redirect_to @price_code, notice: 'Price code was successfully created.' }
-          format.json { render :show, status: :created, location: @price_code }
-        else
-          format.html { render :new }
-          format.json { render json: @price_code.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @price_code.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    begin
+      @price_code.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{price_codes_url}'"
     end
+
   end
 
   # PATCH/PUT /price_codes/1
   # PATCH/PUT /price_codes/1.json
   def update
-    respond_to do |format|
-      begin
-        if @price_code.update(price_code_params)
-          format.html { redirect_to @price_code, notice: 'Price code was successfully updated.' }
-          format.json { render :show, status: :ok, location: @price_code }
-        else
-          format.html { render :edit }
-          format.json { render json: @price_code.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @price_code.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @price_code.update(price_code_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{price_codes_url}'"
     end
   end
 
@@ -65,22 +56,12 @@ class PriceCodesController < ApplicationController
   # DELETE /price_codes/1.json
   def destroy
     @price_code.destroy
+    
     if @price_code.errors.present? and @price_code.errors.messages[:base].present?
       error_message = @price_code.errors.messages[:base].to_sentence
       error_message.slice! "details "
-      alert = error_message
-    else
-      notice = 'Price code was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do 
-        if notice.present?
-          redirect_to price_codes_url, notice: notice
-        else
-          redirect_to price_codes_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = error_message
+      render js: "window.location = '#{price_codes_url}'"
     end
   end
 

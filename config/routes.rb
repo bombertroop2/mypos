@@ -44,7 +44,7 @@ Rails.application.routes.draw do
   resources :size_groups
   resources :sales_promotion_girls
   resources :warehouses
-  resources :price_codes
+  resources :price_codes, except: :show
   resources :area_managers
   resources :vendors
   resources :regions, except: :show

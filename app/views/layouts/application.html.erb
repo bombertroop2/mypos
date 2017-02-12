@@ -51,7 +51,7 @@
                           <li class="<%= params[:controller].eql?("models") ? "active" : "" %>"><%= link_to "Models", models_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("goods_types") ? "active" : "" %>"><%= link_to "Goods Types", goods_types_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
-                          <li class="<%= params[:controller].eql?("price_codes") ? "active" : "" %>"><%= link_to "Price Codes", price_codes_path %></li>
+                          <li class="<%= params[:controller].eql?("price_codes") ? "active" : "" %>"><%= link_to "Price Codes", price_codes_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("vendors") ? "active" : "" %>"><%= link_to "Vendors", vendors_path %></li>
                           <li class="<%= params[:controller].eql?("products") ? "active" : "" %>"><%= link_to "Products", products_path %></li>
                           <li class="<%= params[:controller].eql?("size_groups") ? "active" : "" %>"><%= link_to "Size Groups", size_groups_path %></li>
