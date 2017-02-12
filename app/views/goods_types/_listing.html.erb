@@ -1,0 +1,25 @@
+<% unless smart_listing.empty? %>
+  <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+      <thead>
+          <tr>
+              <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
+              <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+              <th class="col-md-5"><%= smart_listing.sortable "Description", "description" %></th>
+              <th class="col-md-1"></th>
+          </tr>
+      </thead>
+      <tbody>
+          <% smart_listing.collection.each do |goods_type| %>
+            <tr class="editable" data-id="<%= goods_type.id %>">
+                <%= smart_listing.render object: goods_type, partial: "goods_types/goods_type", locals: {object: goods_type} %>
+            </tr>
+          <% end %>
+          <% if user_signed_in? && is_admin? %>
+            <%= smart_listing.item_new colspan: 4, link: new_goods_type_path %>
+          <% end %>
+      </tbody>
+  </table>
+  <%= smart_listing.paginate %>
+<% else %>
+  <p class="warning">No records!</p>
+<% end %>

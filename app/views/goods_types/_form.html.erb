@@ -1,41 +1,45 @@
-<%= form_for(@goods_type, html: {class: "form-horizontal"}) do |f| %>
-    <!--
-    <% if @goods_type.errors.any? %>
-                <div id="error_explanation">
-                  <h2><%= pluralize(@goods_type.errors.count, "error") %> prohibited this goods_type from being saved:</h2>
+<td colspan="4">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@goods_type, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <!--
+        <% if @goods_type.errors.any? %>
+                      <div id="error_explanation">
+                        <h2><%= pluralize(@goods_type.errors.count, "error") %> prohibited this goods_type from being saved:</h2>
 
-                  <ul>
-      <% @goods_type.errors.full_messages.each do |message| %>
-                              <li><%= message %></li>
-      <% end %>
-                  </ul>
-                </div>
-    <% end %>
-    -->
-    <div class="form-group<%= control_group_error(@goods_type, :code) %>">
-        <%= f.label :code, class: "col-sm-2 control-label" %>
-          <div class="col-sm-10">
-              <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1", size: 4, maxlength: 4 %>
-                <%= error_help_text(@goods_type, :code) %>
-            </div>
-        </div>
-        <div class="form-group<%= control_group_error(@goods_type, :name) %>">
-            <%= f.label :name, class: "col-sm-2 control-label" %>
+                        <ul>
+          <% @goods_type.errors.full_messages.each do |message| %>
+                                      <li><%= message %></li>
+          <% end %>
+                        </ul>
+                      </div>
+        <% end %>
+        -->
+        <div class="form-group<%= control_group_error(@goods_type, :code) %>">
+            <%= f.label :code, class: "col-sm-2 control-label" %>
               <div class="col-sm-10">
-                  <%= f.text_field :name, class: "form-control capitalize inputs", tabindex: "2" %>
-                    <%= error_help_text(@goods_type, :name) %>
+                  <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1", size: 4, maxlength: 4 %>
+                    <%= error_help_text(@goods_type, :code) %>
                 </div>
             </div>
-            <div class="form-group">
-                <%= f.label :description, class: "col-sm-2 control-label" %>
+            <div class="form-group<%= control_group_error(@goods_type, :name) %>">
+                <%= f.label :name, class: "col-sm-2 control-label" %>
                   <div class="col-sm-10">
-                      <%= f.text_area :description, rows: 6, tabindex: "3", class: "form-control" %>
+                      <%= f.text_field :name, class: "form-control capitalize inputs", tabindex: "2" %>
+                        <%= error_help_text(@goods_type, :name) %>
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <%= f.submit "Save", class: "btn btn-default active" %>
+                    <%= f.label :description, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_area :description, rows: 6, tabindex: "3", class: "form-control" %>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <%= f.submit "Save", class: "btn btn-primary" %>
+                              <button class="btn btn-link cancel">Cancel</button>
+                          </div>
                       </div>
-                  </div>
-                <% end %>
+                    <% end %>
+                </td>

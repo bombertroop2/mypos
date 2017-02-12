@@ -48,7 +48,7 @@ Rails.application.routes.draw do
   resources :area_managers
   resources :vendors
   resources :regions
-  resources :goods_types
+  resources :goods_types, except: :show
   resources :models, except: :show
   resources :colors, except: :show
   resources :brands, except: :show

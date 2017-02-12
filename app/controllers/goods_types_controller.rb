@@ -1,10 +1,16 @@
+include SmartListing::Helper::ControllerExtensions
 class GoodsTypesController < ApplicationController
   before_action :set_goods_type, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /goods_types
   # GET /goods_types.json
   def index
-    @goods_types = GoodsType.select :id, :code, :name
+    goods_types_scope = GoodsType.select(:id, :code, :name, :description)
+    goods_types_scope = goods_types_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(goods_types_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(goods_types_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @goods_types = smart_listing_create(:goods_types, goods_types_scope, partial: 'goods_types/listing', default_sort: {code: "asc"})
   end
 
   # GET /goods_types/1
@@ -26,38 +32,23 @@ class GoodsTypesController < ApplicationController
   def create
     @goods_type = GoodsType.new(goods_type_params)
 
-    respond_to do |format|
-      begin
-        if @goods_type.save
-          format.html { redirect_to @goods_type, notice: 'Goods type was successfully created.' }
-          format.json { render :show, status: :created, location: @goods_type }
-        else
-          format.html { render :new }
-          format.json { render json: @goods_type.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @goods_type.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    begin
+      @goods_type.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{goods_types_url}'"
     end
+
   end
 
   # PATCH/PUT /goods_types/1
   # PATCH/PUT /goods_types/1.json
   def update
-    respond_to do |format|
-      begin
-        if @goods_type.update(goods_type_params)
-          format.html { redirect_to @goods_type, notice: 'Goods type was successfully updated.' }
-          format.json { render :show, status: :ok, location: @goods_type }
-        else
-          format.html { render :edit }
-          format.json { render json: @goods_type.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @goods_type.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @goods_type.update(goods_type_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{goods_types_url}'"
     end
   end
 
@@ -65,20 +56,10 @@ class GoodsTypesController < ApplicationController
   # DELETE /goods_types/1.json
   def destroy
     @goods_type.destroy
+    
     if @goods_type.errors.present? and @goods_type.errors.messages[:base].present?
-      alert = @goods_type.errors.messages[:base].to_sentence
-    else
-      notice = 'Goods type was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do 
-        if notice.present?
-          redirect_to goods_types_url, notice: notice
-        else
-          redirect_to goods_types_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = @goods_type.errors.messages[:base].to_sentence
+      render js: "window.location = '#{goods_types_url}'"
     end
   end
 
