@@ -6,7 +6,7 @@ class BrandsController < ApplicationController
   # GET /brands.json
   def index
     like_command =  if Rails.env.eql?("production")
-      "ILIKE"
+      "iLIKE"
     else
       "LIKE"
     end
