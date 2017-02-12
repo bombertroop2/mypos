@@ -1,10 +1,18 @@
+include SmartListing::Helper::ControllerExtensions
 class VendorsController < ApplicationController
   before_action :set_vendor, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /vendors
   # GET /vendors.json
   def index
-    @vendors = Vendor.select :id, :code, :name, :phone, :facsimile, :email
+    vendors_scope = Vendor.select(:id, :code, :name, :phone, :facsimile, :email)
+    vendors_scope = vendors_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(vendors_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(vendors_scope.where(["phone LIKE ?", "%"+params[:filter]+"%"])).
+      or(vendors_scope.where(["facsimile LIKE ?", "%"+params[:filter]+"%"])).
+      or(vendors_scope.where(["email LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @vendors = smart_listing_create(:vendors, vendors_scope, partial: 'vendors/listing', default_sort: {code: "asc"})
   end
 
   # GET /vendors/1
@@ -26,38 +34,23 @@ class VendorsController < ApplicationController
   def create
     @vendor = Vendor.new(vendor_params)
 
-    respond_to do |format|
-      begin
-        if @vendor.save
-          format.html { redirect_to @vendor, notice: 'Vendor was successfully created.' }
-          format.json { render :show, status: :created, location: @vendor }
-        else
-          format.html { render :new }
-          format.json { render json: @vendor.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @vendor.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    begin
+      @vendor.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{vendors_url}'"
     end
+
   end
 
   # PATCH/PUT /vendors/1
   # PATCH/PUT /vendors/1.json
   def update
-    respond_to do |format|
-      begin
-        if @vendor.update(vendor_params)
-          format.html { redirect_to @vendor, notice: 'Vendor was successfully updated.' }
-          format.json { render :show, status: :ok, location: @vendor }
-        else
-          format.html { render :edit }
-          format.json { render json: @vendor.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @vendor.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @vendor.update(vendor_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{vendors_url}'"
     end
   end
 
@@ -65,20 +58,10 @@ class VendorsController < ApplicationController
   # DELETE /vendors/1.json
   def destroy
     @vendor.destroy
+    
     if @vendor.errors.present? and @vendor.errors.messages[:base].present?
-      alert = @vendor.errors.messages[:base].to_sentence
-    else
-      notice = 'Vendor was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do 
-        if notice.present?
-          redirect_to vendors_url, notice: notice
-        else
-          redirect_to vendors_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = @vendor.errors.messages[:base].to_sentence
+      render js: "window.location = '#{vendors_url}'"
     end
   end
 

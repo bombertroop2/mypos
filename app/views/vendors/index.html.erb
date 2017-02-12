@@ -1,34 +1,14 @@
 <div class="page-header"><h1>Listing Vendors</h1></div>
 
-<table class="table table-condensed table-responsive table-striped">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Facsimile</th>
-            <th>Email</th>
-            <th></th>
-        </tr>
-    </thead>
+<%= smart_listing_controls_for(:vendors, {class: "form-inline text-right"}) do %>
 
-    <tbody>
-        <% @vendors.each do |vendor| %>
-          <tr>
-              <td><%= vendor.code %></td>
-              <td><%= vendor.name %></td>
-              <td><%= remove_empty_space_from_phone_number(vendor.phone) %></td>
-              <td><%= remove_empty_space_from_phone_number(vendor.facsimile) %></td>
-              <td><%= vendor.email %></td>
-              <td>
-                  <%= link_to 'Show', vendor, class: "btn btn-info btn-xs active" %>
-                    <%= link_to 'Edit', edit_vendor_path(vendor), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Delete', vendor, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
-                    </td>
-                </tr>
-              <% end %>
-          </tbody>
-      </table>
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Search...", autocomplete: :off %>
+      </div>
 
-
-      <%= link_to 'New Vendor', new_vendor_path, class: "btn btn-default active" %>
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:vendors) %>
