@@ -1,10 +1,16 @@
+include SmartListing::Helper::ControllerExtensions
 class RegionsController < ApplicationController
   before_action :set_region, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /regions
   # GET /regions.json
   def index
-    @regions = Region.select :id, :code, :name
+    regions_scope = Region.select(:id, :code, :name, :description)
+    regions_scope = regions_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(regions_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(regions_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @regions = smart_listing_create(:regions, regions_scope, partial: 'regions/listing', default_sort: {code: "asc"})
   end
 
   # GET /regions/1
@@ -26,38 +32,22 @@ class RegionsController < ApplicationController
   def create
     @region = Region.new(region_params)
 
-    respond_to do |format|
-      begin
-        if @region.save
-          format.html { redirect_to @region, notice: 'Region was successfully created.' }
-          format.json { render :show, status: :created, location: @region }
-        else
-          format.html { render :new }
-          format.json { render json: @region.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @region.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    begin
+      @region.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{regions_url}'"
     end
   end
 
   # PATCH/PUT /regions/1
   # PATCH/PUT /regions/1.json
   def update
-    respond_to do |format|
-      begin
-        if @region.update(region_params)
-          format.html { redirect_to @region, notice: 'Region was successfully updated.' }
-          format.json { render :show, status: :ok, location: @region }
-        else
-          format.html { render :edit }
-          format.json { render json: @region.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @region.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @region.update(region_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{regions_url}'"
     end
   end
 
@@ -65,20 +55,10 @@ class RegionsController < ApplicationController
   # DELETE /regions/1.json
   def destroy
     @region.destroy
+    
     if @region.errors.present? and @region.errors.messages[:base].present?
-      alert = @region.errors.messages[:base].to_sentence
-    else
-      notice = 'Region was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do 
-        if notice.present?
-          redirect_to regions_url, notice: notice
-        else
-          redirect_to regions_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = @region.errors.messages[:base].to_sentence
+      render js: "window.location = '#{regions_url}'"
     end
   end
 
