@@ -49,7 +49,7 @@ Rails.application.routes.draw do
   resources :vendors
   resources :regions
   resources :goods_types
-  resources :models
+  resources :models, except: :show
   resources :colors, except: :show
   resources :brands, except: :show
   # The priority is based upon order of creation: first created -> highest priority.

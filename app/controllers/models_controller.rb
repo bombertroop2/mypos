@@ -1,10 +1,16 @@
+include SmartListing::Helper::ControllerExtensions
 class ModelsController < ApplicationController
   before_action :set_model, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /models
   # GET /models.json
-  def index
-    @models = Model.select :id, :code, :name
+  def index    
+    models_scope = Model.select(:id, :code, :name, :description)
+    models_scope = models_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
+      or(models_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
+      or(models_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @models = smart_listing_create(:models, models_scope, partial: 'models/listing', default_sort: {code: "asc"})
   end
 
   # GET /models/1
@@ -26,38 +32,22 @@ class ModelsController < ApplicationController
   def create
     @model = Model.new(model_params)
 
-    respond_to do |format|
-      begin
-        if @model.save
-          format.html { redirect_to @model, notice: 'Model was successfully created.' }
-          format.json { render :show, status: :created, location: @model }
-        else
-          format.html { render :new }
-          format.json { render json: @model.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @model.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    begin
+      @model.save
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{models_url}'"
     end
   end
 
   # PATCH/PUT /models/1
   # PATCH/PUT /models/1.json
   def update
-    respond_to do |format|
-      begin
-        if @model.update(model_params)
-          format.html { redirect_to @model, notice: 'Model was successfully updated.' }
-          format.json { render :show, status: :ok, location: @model }
-        else
-          format.html { render :edit }
-          format.json { render json: @model.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @model.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
-      end
+    begin        
+      @model.update(model_params)
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{models_url}'"
     end
   end
 
@@ -65,21 +55,12 @@ class ModelsController < ApplicationController
   # DELETE /models/1.json
   def destroy
     @model.destroy
+    
     if @model.errors.present? and @model.errors.messages[:base].present?
-      alert = @model.errors.messages[:base].to_sentence
-    else
-      notice = 'Model was successfully deleted.'
+      flash[:alert] = @model.errors.messages[:base].to_sentence
+      render js: "window.location = '#{models_url}'"
     end
-    respond_to do |format|
-      format.html do
-        if notice.present?
-          redirect_to models_url, notice: notice
-        else
-          redirect_to models_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
-    end
+
   end
 
   private

@@ -4,7 +4,7 @@ class Model < CommonField
 
   before_validation :upcase_code
 
-  #  validates :code, uniqueness: true # tidak menggunakan ini untuk mempercepat proses
+  validates :code, uniqueness: true
   validate :code_not_changed
 
   private
