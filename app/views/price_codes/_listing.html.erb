@@ -1,25 +1,35 @@
-<% unless smart_listing.empty? %>
-  <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
-      <thead>
-          <tr>
-              <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
-              <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
-              <th class="col-md-5"><%= smart_listing.sortable "Description", "description" %></th>
-              <th class="col-md-1"></th>
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-price-code-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-5"><%= smart_listing.sortable "Description", "description" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |price_code| %>
+          <tr class="editable" data-id="<%= price_code.id %>">
+              <%= smart_listing.render object: price_code, partial: "price_codes/price_code", locals: {object: price_code} %>
           </tr>
-      </thead>
-      <tbody>
-          <% smart_listing.collection.each do |price_code| %>
-            <tr class="editable" data-id="<%= price_code.id %>">
-                <%= smart_listing.render object: price_code, partial: "price_codes/price_code", locals: {object: price_code} %>
-            </tr>
-          <% end %>
-          <% if user_signed_in? && is_admin? %>
-            <%= smart_listing.item_new colspan: 4, link: new_price_code_path %>
-          <% end %>
-      </tbody>
-  </table>
-  <%= smart_listing.paginate %>
-<% else %>
-  <p class="warning">No records!</p>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_price_code_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-price-code-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-price-code-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
 <% end %>
+</script>
