@@ -26,9 +26,9 @@
       }
   }, 0);
 <% if !user_signed_in? || !is_admin? %>
-    $('#new-brand-btn').css({'opacity': 0.0, 'cursor': 'default'});
-    $('#new-brand-btn').unbind("click");
-    $('#new-brand-btn').click(function (e) {
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
         return false;
     });
 <% end %>

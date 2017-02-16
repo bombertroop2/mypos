@@ -22,7 +22,7 @@
     <%#= content_tag(:p, :class => no_items_classes + %w{pull-left}) do %>
       <%#= no_items_text %>
     <%# end %>
-    <%= link_to(new_item_button_url, id: "new-brand-btn", :remote => true, :class => new_item_button_classes + %w{btn pull-right}) do %>
+    <%= link_to(new_item_button_url, id: "new-item-btn", :remote => true, :class => new_item_button_classes + %w{btn pull-right}) do %>
       <%= content_tag(:i, '', :class => smart_listing_config.classes(:icon_new)) %>
       <%= new_item_button_text %>
     <% end %>
