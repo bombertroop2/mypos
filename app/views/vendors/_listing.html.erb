@@ -1,27 +1,37 @@
-<% unless smart_listing.empty? %>
-  <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
-      <thead>
-          <tr>
-              <th class="col-md-2"><%= smart_listing.sortable "Code", "code" %></th>
-              <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
-              <th class="col-md-2">Phone</th>
-              <th class="col-md-2">Facsimile</th>
-              <th class="col-md-2"><%= smart_listing.sortable "Email", "email" %></th>
-              <th class="col-md-1"></th>
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-vendor-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-2">Phone</th>
+            <th class="col-md-2">Facsimile</th>
+            <th class="col-md-2"><%= smart_listing.sortable "Email", "email" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |vendor| %>
+          <tr class="editable" data-id="<%= vendor.id %>">
+              <%= smart_listing.render object: vendor, partial: "vendors/vendor", locals: {object: vendor} %>
           </tr>
-      </thead>
-      <tbody>
-          <% smart_listing.collection.each do |vendor| %>
-            <tr class="editable" data-id="<%= vendor.id %>">
-                <%= smart_listing.render object: vendor, partial: "vendors/vendor", locals: {object: vendor} %>
-            </tr>
-          <% end %>
-          <% if user_signed_in? && is_admin? %>
-            <%= smart_listing.item_new colspan: 6, link: new_vendor_path %>
-          <% end %>
-      </tbody>
-  </table>
-  <%= smart_listing.paginate %>
-<% else %>
-  <p class="warning">No records!</p>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_vendor_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-vendor-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-vendor-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
 <% end %>
+</script>
