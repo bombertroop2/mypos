@@ -1,0 +1,36 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-region-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-5"><%= smart_listing.sortable "Description", "description" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |region| %>
+          <tr class="editable" data-id="<%= region.id %>">
+              <%= smart_listing.render object: region, partial: "regions/region", locals: {object: region} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_region_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-region-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-region-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

@@ -14,6 +14,7 @@ class User < ApplicationRecord
   
   # supaya user bisa update datanya tanpa harus memasukkan password
   def password_required?
+    puts "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHH"
     if new_record?
       super
     else
