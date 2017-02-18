@@ -1,0 +1,12 @@
+<%= smart_listing_item :warehouses, :update, @warehouse, 
+  @warehouse.valid? ? "warehouses/warehouse" : "warehouses/form" %>
+
+<% if @new_supervisor_name.present? %>
+  // kode ini untuk update supervisor name apabila di update, karena smart listing belum bisa handle ini, disebabkan supervisor adalah model yang berelasi
+  $("#warehouse-supervisor-name-<%= @warehouse.id %>").html("<%= @new_supervisor_name %>");
+<% end %>
+
+<% if @new_region_code.present? %>
+  // kode ini untuk update region code apabila di update, karena smart listing belum bisa handle ini, disebabkan region adalah model yang berelasi
+  $("#warehouse-region-code-<%= @warehouse.id %>").html("<%= @new_region_code %>");
+<% end %>

@@ -1,11 +1,24 @@
+include SmartListing::Helper::ControllerExtensions
 class WarehousesController < ApplicationController
   before_action :set_warehouse, only: [:show, :edit, :update, :destroy]
+  helper SmartListing::Helper
 
   # GET /warehouses
   # GET /warehouses.json
   def index
-    @warehouses = Warehouse.joins(:supervisor, :region).
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    warehouses_scope = Warehouse.joins(:supervisor, :region).
       select("warehouses.id, warehouses.code, warehouses.name, supervisors.name AS supervisor_name, common_fields.code AS region_code, warehouse_type")
+    warehouses_scope = warehouses_scope.where(["warehouses.code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(warehouses_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(warehouses_scope.where(["supervisors.name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(warehouses_scope.where(["common_fields.code #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(warehouses_scope.where(["warehouse_type #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @warehouses = smart_listing_create(:warehouses, warehouses_scope, partial: 'warehouses/listing', default_sort: {:"warehouses.code" => "asc"})
   end
 
   # GET /warehouses/1
@@ -26,40 +39,37 @@ class WarehousesController < ApplicationController
   # POST /warehouses.json
   def create
     @warehouse = Warehouse.new(warehouse_params)
-
-    respond_to do |format|
-      begin
-        if @warehouse.save
-          format.html { redirect_to @warehouse, notice: 'Warehouse was successfully created.' }
-          format.json { render :show, status: :created, location: @warehouse }
-        else
-          format.html { render :new }
-          format.json { render json: @warehouse.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        @warehouse.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
-      end
+    
+    begin
+      @warehouse.save
+      @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
+      @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{warehouses_url}'"
     end
   end
 
   # PATCH/PUT /warehouses/1
   # PATCH/PUT /warehouses/1.json
-  def update
-    respond_to do |format|
-      begin
-        if @warehouse.update(warehouse_params)
-          format.html { redirect_to @warehouse, notice: 'Warehouse was successfully updated.' }
-          format.json { render :show, status: :ok, location: @warehouse }
-        else
-          format.html { render :edit }
-          format.json { render json: @warehouse.errors, status: :unprocessable_entity }
+  def update    
+    begin
+      supervisor_id_was = @warehouse.supervisor_id_was
+      region_id_was = @warehouse.region_id_was
+      if @warehouse.update(warehouse_params)
+        #cek apakah supervisor diganti
+        unless supervisor_id_was.to_s.eql?(params[:warehouse][:supervisor_id])
+          @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
         end
-      rescue ActiveRecord::RecordNotUnique => e
-        @warehouse.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
+        
+        #cek apakah region diganti
+        unless region_id_was.to_s.eql?(params[:warehouse][:region_id])
+          @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+        end
       end
-
+    rescue ActiveRecord::RecordNotUnique => e
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{warehouses_url}'"
     end
   end
 
@@ -68,19 +78,8 @@ class WarehousesController < ApplicationController
   def destroy
     @warehouse.destroy
     if @warehouse.errors.present? and @warehouse.errors.messages[:base].present?
-      alert = @warehouse.errors.messages[:base].to_sentence
-    else
-      notice = 'Warehouse was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do 
-        if notice.present?
-          redirect_to warehouses_url, notice: notice
-        else
-          redirect_to warehouses_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = @warehouse.errors.messages[:base].to_sentence
+      render js: "window.location = '#{warehouses_url}'"
     end
   end
 

@@ -1,0 +1,37 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-warehouse-thead">
+        <tr>
+            <th class="col-md-1"><%= smart_listing.sortable "Code", "warehouses.code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "warehouses.name" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Area Manager", "supervisor_name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Region", "region_code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Type", "warehouse_type" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |warehouse| %>
+          <tr class="editable" data-id="<%= warehouse.id %>">
+              <%= smart_listing.render object: warehouse, partial: "warehouses/warehouse", locals: {object: warehouse} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_warehouse_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-warehouse-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-warehouse-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

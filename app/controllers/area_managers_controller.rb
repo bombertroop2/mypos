@@ -18,7 +18,6 @@ class AreaManagersController < ApplicationController
       or(supervisors_scope.where(["phone #{like_command} ?", "%"+params[:filter]+"%"])).
       or(supervisors_scope.where(["mobile_phone #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @supervisors = smart_listing_create(:supervisors, supervisors_scope, partial: 'area_managers/listing', default_sort: {code: "asc"})
-    @supervisors = Supervisor.select :id, :code, :name, :email, :phone, :mobile_phone
   end
 
   # GET /supervisors/1
