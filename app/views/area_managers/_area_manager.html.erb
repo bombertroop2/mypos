@@ -1,0 +1,12 @@
+<td><%= object.code %></td>
+<td><%= object.name %></td>
+<td><%= object.email %></td>
+<td><%= remove_empty_space_from_phone_number(object.phone) %></td>
+<td><%= remove_empty_space_from_phone_number(object.mobile_phone) %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, area_manager_path(object), data: {remote: true}, title: "Show" %>
+    <% if user_signed_in? && is_admin? %>
+      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_area_manager_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
+        <%= link_to_if(!object.warehouse_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), area_manager_path(object), :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <% end %>
+  </td>

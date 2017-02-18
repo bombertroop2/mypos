@@ -1,0 +1,37 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-am-thead">
+        <tr>
+            <th class="col-md-1"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Email", "email" %></th>
+            <th class="col-md-2">Phone</th>
+            <th class="col-md-2">Mobile Phone</th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |supervisor| %>
+          <tr class="editable" data-id="<%= supervisor.id %>">
+              <%= smart_listing.render object: supervisor, partial: "area_managers/area_manager", locals: {object: supervisor} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_area_manager_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-am-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-am-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

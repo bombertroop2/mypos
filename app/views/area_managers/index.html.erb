@@ -1,34 +1,14 @@
 <div class="page-header"><h1>Listing Area Managers</h1></div>
 
-<table class="table table-condensed table-responsive table-striped">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Mobile phone</th>
-            <th colspan="3"></th>
-        </tr>
-    </thead>
+<%= smart_listing_controls_for(:supervisors, {class: "form-inline text-right"}) do %>
 
-    <tbody>
-        <% @supervisors.each do |supervisor| %>
-          <tr>
-              <td><%= supervisor.code %></td>
-              <td><%= supervisor.name %></td>
-              <td><%= supervisor.email %></td>
-              <td><%= remove_empty_space_from_phone_number(supervisor.phone) %></td>
-              <td><%= remove_empty_space_from_phone_number(supervisor.mobile_phone) %></td>
-              <td>
-                  <%= link_to 'Show', area_manager_path(supervisor), class: "btn btn-info btn-xs active" %>
-                    <%= link_to 'Edit', edit_area_manager_path(supervisor), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Delete', area_manager_path(supervisor), method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
-                    </td>
-                </tr>
-              <% end %>
-          </tbody>
-      </table>
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Search...", autocomplete: :off %>
+      </div>
 
-
-      <%= link_to 'New Area Manager', new_area_manager_path, class: "btn btn-default active" %>
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:supervisors) %>
