@@ -6,10 +6,15 @@ class GoodsTypesController < ApplicationController
   # GET /goods_types
   # GET /goods_types.json
   def index
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
     goods_types_scope = GoodsType.select(:id, :code, :name, :description)
-    goods_types_scope = goods_types_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
-      or(goods_types_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
-      or(goods_types_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    goods_types_scope = goods_types_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(goods_types_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(goods_types_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @goods_types = smart_listing_create(:goods_types, goods_types_scope, partial: 'goods_types/listing', default_sort: {code: "asc"})
   end
 

@@ -6,12 +6,17 @@ class VendorsController < ApplicationController
   # GET /vendors
   # GET /vendors.json
   def index
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
     vendors_scope = Vendor.select(:id, :code, :name, :phone, :facsimile, :email)
-    vendors_scope = vendors_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
-      or(vendors_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
-      or(vendors_scope.where(["phone LIKE ?", "%"+params[:filter]+"%"])).
-      or(vendors_scope.where(["facsimile LIKE ?", "%"+params[:filter]+"%"])).
-      or(vendors_scope.where(["email LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    vendors_scope = vendors_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(vendors_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(vendors_scope.where(["phone #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(vendors_scope.where(["facsimile #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(vendors_scope.where(["email #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @vendors = smart_listing_create(:vendors, vendors_scope, partial: 'vendors/listing', default_sort: {code: "asc"})
   end
 

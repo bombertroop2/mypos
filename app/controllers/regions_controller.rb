@@ -6,10 +6,15 @@ class RegionsController < ApplicationController
   # GET /regions
   # GET /regions.json
   def index
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
     regions_scope = Region.select(:id, :code, :name, :description)
-    regions_scope = regions_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
-      or(regions_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
-      or(regions_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    regions_scope = regions_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(regions_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(regions_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @regions = smart_listing_create(:regions, regions_scope, partial: 'regions/listing', default_sort: {code: "asc"})
   end
 

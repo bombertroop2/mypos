@@ -6,10 +6,15 @@ class ColorsController < ApplicationController
   # GET /colors
   # GET /colors.json
   def index
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
     colors_scope = Color.select(:id, :code, :name, :description)
-    colors_scope = colors_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
-      or(colors_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
-      or(colors_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    colors_scope = colors_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(colors_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(colors_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @colors = smart_listing_create(:colors, colors_scope, partial: 'colors/listing', default_sort: {code: "asc"})
   end
 

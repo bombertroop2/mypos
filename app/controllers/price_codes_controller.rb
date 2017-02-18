@@ -6,10 +6,15 @@ class PriceCodesController < ApplicationController
   # GET /price_codes
   # GET /price_codes.json
   def index
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
     price_codes_scope = PriceCode.select(:id, :code, :name, :description)
-    price_codes_scope = price_codes_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
-      or(price_codes_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
-      or(price_codes_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    price_codes_scope = price_codes_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(price_codes_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(price_codes_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @price_codes = smart_listing_create(:price_codes, price_codes_scope, partial: 'price_codes/listing', default_sort: {code: "asc"})
   end
 

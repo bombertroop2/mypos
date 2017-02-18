@@ -5,11 +5,16 @@ class ModelsController < ApplicationController
 
   # GET /models
   # GET /models.json
-  def index    
+  def index
+    like_command =  if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end    
     models_scope = Model.select(:id, :code, :name, :description)
-    models_scope = models_scope.where(["code LIKE ?", "%"+params[:filter]+"%"]).
-      or(models_scope.where(["name LIKE ?", "%"+params[:filter]+"%"])).
-      or(models_scope.where(["description LIKE ?", "%"+params[:filter]+"%"])) if params[:filter]
+    models_scope = models_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(models_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(models_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @models = smart_listing_create(:models, models_scope, partial: 'models/listing', default_sort: {code: "asc"})
   end
 
