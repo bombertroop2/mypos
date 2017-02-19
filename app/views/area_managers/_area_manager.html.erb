@@ -1,5 +1,5 @@
 <td><%= object.code %></td>
-<td><%= object.name %></td>
+<td><%= link_to object.name, "javascript:getAreaManagerWarehouses('#{object.id}', '#{object.name}')", style: "text-decoration: none" %></td>
 <td><%= object.email %></td>
 <td><%= remove_empty_space_from_phone_number(object.phone) %></td>
 <td><%= remove_empty_space_from_phone_number(object.mobile_phone) %></td>

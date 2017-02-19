@@ -11,7 +11,7 @@
     </thead>
     <tbody>
         <% smart_listing.collection.each do |supervisor| %>
-          <tr class="editable area-manager" data-id="<%= supervisor.id %>" data-am-name="<%= supervisor.name %>" style="cursor: pointer">
+          <tr class="editable" data-id="<%= supervisor.id %>">
               <%= smart_listing.render object: supervisor, partial: "area_managers/area_manager", locals: {object: supervisor} %>
           </tr>
         <% end %>
@@ -34,16 +34,4 @@
         return false;
     });
 <% end %>
-
-  $(".editable.area-manager").each(function () {
-      $(this).dblclick(function () {
-          var amName = $(this).attr("data-am-name");
-          $.get("/area_managers/" + $(this).attr("data-id") + "/get_warehouses").done(function (data) {
-              bootbox.alert({
-                  title: "Warehouses managed by " + amName,
-                  message: data
-              });
-          });
-      });
-  });
 </script>

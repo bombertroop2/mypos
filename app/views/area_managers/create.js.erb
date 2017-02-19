@@ -1,14 +1,2 @@
 <%= smart_listing_item :supervisors, :create, @supervisor, 
   @supervisor.valid? ? "area_managers/area_manager" : "area_managers/form" %>
-
-<% if @supervisor.valid? %>
-  $("[data-id='<%= @supervisor.id %>']").css('cursor', 'pointer');
-  $("[data-id='<%= @supervisor.id %>']").dblclick(function(){
-    $.get("/area_managers/<%= @supervisor.id %>/get_warehouses").done(function (data) {
-      bootbox.alert({
-        title: "Warehouses managed by <%= @supervisor.name %>",
-        message: data
-      });
-    });
-  });
-<% end %>
