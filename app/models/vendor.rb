@@ -17,6 +17,9 @@ class Vendor < ApplicationRecord
       has_many :products, dependent: :restrict_with_error
       has_many :purchase_orders, dependent: :restrict_with_error
       has_many :received_purchase_orders, -> { order("received_purchase_orders.id ASC").where("received_purchase_orders.is_using_delivery_order = 'no'") }, through: :purchase_orders
+      has_one :product_relation, -> {select("1 AS one")}, class_name: "Product"
+      has_one :purchase_order_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
+
 
       before_validation :upcase_code
       before_save :remove_vat, if: proc {|vendor| !vendor.value_added_tax_was.eql?("") && vendor.persisted? && !vendor.is_taxable_entrepreneur}
@@ -34,6 +37,6 @@ class Vendor < ApplicationRecord
         end
     
         def code_not_changed
-          errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (products.present? || purchase_orders.present?)
+          errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (product_relation.present? || purchase_order_relation.present?)
         end
       end
