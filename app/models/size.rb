@@ -2,7 +2,7 @@ class Size < ApplicationRecord
   belongs_to :size_group
   has_many :product_details, dependent: :restrict_with_error
   has_one :product_detail_relation, -> {select("1 AS one")}, class_name: "ProductDetail"
-  validates :size, presence: true#, uniqueness: {scope: :size_group_id}
+  validates :size, presence: true, uniqueness: {scope: :size_group_id}
   validate :size_not_changed
   
   private

@@ -1,0 +1,17 @@
+<%= smart_listing_item :size_groups, :edit, @size_group, "size_groups/form" %>
+
+    $("#total_size_btn").click(function () {
+        var totalSize = $("#total_size").val();
+        if (!isNaN(totalSize)) {
+            var totalSizeInt = parseInt(totalSize);
+            if (totalSizeInt > 0) {
+              $(".remove_fields").each(function(){
+                $(this).click();
+              });
+                for (var i = 0; i < totalSizeInt; i++)
+                    $(".add_fields").click();
+            }
+        }
+        return false;
+    });
+

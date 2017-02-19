@@ -1,0 +1,35 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-size-group-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-6"><%= smart_listing.sortable "Description", "description" %></th>
+            <th class="col-md-3">Sizes</th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |size_group| %>
+          <tr class="editable" data-id="<%= size_group["id"] %>">
+              <%= smart_listing.render object: size_group, partial: "size_groups/size_group", locals: {object: size_group} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_size_group_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-size-group-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-size-group-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

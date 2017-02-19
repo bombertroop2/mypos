@@ -41,7 +41,7 @@ Rails.application.routes.draw do
       get 'populate_detail_form'
     end
   end
-  resources :size_groups
+  resources :size_groups, except: :show
   resources :sales_promotion_girls
   resources :warehouses
   resources :price_codes, except: :show
