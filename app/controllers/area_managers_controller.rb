@@ -10,14 +10,16 @@ class AreaManagersController < ApplicationController
       "ILIKE"
     else
       "LIKE"
-    end
-    supervisors_scope = Supervisor.select(:id, :code, :name, :email, :phone, :mobile_phone)
-    supervisors_scope = supervisors_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(supervisors_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+    end    
+    supervisors_scope = Supervisor.joins("LEFT JOIN warehouses on supervisors.id = warehouses.supervisor_id").select("supervisors.id, supervisors.code, supervisors.name, email, phone, mobile_phone").group("supervisors.id")
+    supervisors_scope = supervisors_scope.where(["supervisors.code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(supervisors_scope.where(["supervisors.name #{like_command} ?", "%"+params[:filter]+"%"])).
       or(supervisors_scope.where(["email #{like_command} ?", "%"+params[:filter]+"%"])).
       or(supervisors_scope.where(["phone #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(supervisors_scope.where(["warehouses.code #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(supervisors_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"])).
       or(supervisors_scope.where(["mobile_phone #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
-    @supervisors = smart_listing_create(:supervisors, supervisors_scope, partial: 'area_managers/listing', default_sort: {code: "asc"})
+    @supervisors = smart_listing_create(:supervisors, supervisors_scope, partial: 'area_managers/listing', default_sort: {:"supervisors.code" => "asc"})
   end
 
   # GET /supervisors/1
