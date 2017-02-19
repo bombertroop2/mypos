@@ -1,37 +1,14 @@
 <div class="page-header"><h1>Listing Products</h1></div>
 
-<table class="table table-condensed table-responsive table-striped">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Brand</th>
-            <th>Sex</th>
-            <th>Vendor</th>
-            <th>Target</th>
-            <th>Model</th>
-            <th>Goods type</th>
-            <th></th>
-        </tr>
-    </thead>
+<%= smart_listing_controls_for(:products, {class: "form-inline text-right"}) do %>
 
-    <tbody>
-        <% @products.each do |product| %>
-          <tr>
-              <td><%= product.code %></td>
-              <td><%= product.brand_name %></td>
-              <td><%= product.sex.titleize %></td>
-              <td><%= product.vendor_name %></td>
-              <td><%= product.target.titleize %></td>
-              <td><%= product.models_name %></td>
-              <td><%= product.goods_type_name %></td>
-              <td>
-                  <%= link_to 'Show', product, class: "btn btn-info btn-xs active" %>
-                    <%= link_to 'Edit', edit_product_path(product), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Delete', product, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
-                    </td>
-                </tr>
-              <% end %>
-          </tbody>
-      </table>
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Search...", autocomplete: :off %>
+      </div>
 
-      <%= link_to 'New Product', new_product_path, class: "btn btn-default active" %>
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:products) %>

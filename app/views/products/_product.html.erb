@@ -1,0 +1,11 @@
+<td><%= object.code %></td>
+<td><%= object.brand_name %></td>
+<td><%= object.vendor_name %></td>
+<td><%= object.models_name %></td>
+<td><%= object.goods_type_name %></td>
+<td class="actions" style="text-align: right">
+    <% if user_signed_in? && is_admin? %>
+      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_product_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
+        <%#= link_to_if(!object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <% end %>
+  </td>

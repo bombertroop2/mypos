@@ -1,11 +1,25 @@
+include SmartListing::Helper::ControllerExtensions
 class ProductsController < ApplicationController
+  helper SmartListing::Helper
   before_action :set_product, only: [:show, :edit, :update, :destroy]
   before_action :convert_cost_price_to_numeric, only: [:create, :update]
 
   # GET /products
   # GET /products.json
   def index
-    @products = Product.joins(:brand, :vendor, :model, :goods_type).select("products.id, products.code, common_fields.name as brand_name, sex, vendors.name as vendor_name, target, models_products.name as models_name, goods_types_products.name as goods_type_name")
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    products_scope = Product.joins(:brand, :vendor, :model, :goods_type).
+      select("products.id, products.code, common_fields.name as brand_name, vendors.name as vendor_name, models_products.name as models_name, goods_types_products.name as goods_type_name")
+    products_scope = products_scope.where(["products.code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(products_scope.where(["common_fields.name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(products_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(products_scope.where(["models_products.name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(products_scope.where(["goods_types_products.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @products = smart_listing_create(:products, products_scope, partial: 'products/listing', default_sort: {:"products.code" => "asc"})
   end
 
   # GET /products/1

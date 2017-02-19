@@ -1,0 +1,37 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-product-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Code", "products.code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Brand", "brand_name" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Vendor", "vendor_name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Model", "models_name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Goods type", "goods_type_name" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |product| %>
+          <tr class="editable" data-id="<%= product.id %>">
+              <%= smart_listing.render object: product, partial: "products/product", locals: {object: product} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_product_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-product-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-product-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>
