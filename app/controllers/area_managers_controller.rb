@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class AreaManagersController < ApplicationController
+  skip_before_action :authenticate_user!, :is_user_can_cud?, only: :get_warehouses
   before_action :set_area_manager, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
 
@@ -76,6 +77,12 @@ class AreaManagersController < ApplicationController
       flash[:alert] = @supervisor.errors.messages[:base].to_sentence
       render js: "window.location = '#{area_managers_url}'"
     end    
+  end
+  
+  def get_warehouses
+    @warehouses = Warehouse.joins(:supervisor, :region).select("warehouses.code, warehouses.name, common_fields.code AS region_code, warehouse_type").
+      where(["supervisors.id = ?", params[:id]])
+    render partial: 'show_warehouses'
   end
 
   private

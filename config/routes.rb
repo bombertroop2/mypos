@@ -45,7 +45,11 @@ Rails.application.routes.draw do
   resources :sales_promotion_girls
   resources :warehouses
   resources :price_codes, except: :show
-  resources :area_managers
+  resources :area_managers do
+    member do
+      get "get_warehouses"
+    end
+  end
   resources :vendors
   resources :regions, except: :show
   resources :goods_types, except: :show
