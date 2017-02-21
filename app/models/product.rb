@@ -9,30 +9,33 @@ class Product < ApplicationRecord
   
   mount_uploader :image, ImageUploader
   
-  has_many :price_codes, -> {group("common_fields.id").order(:code).select(:id, :code)}, through: :product_details
   has_many :product_details, dependent: :destroy
-#  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
+  has_many :cost_lists, dependent: :destroy
+  has_many :product_colors, dependent: :destroy
+  has_many :direct_purchase_products, dependent: :restrict_with_error
+  has_many :purchase_order_products
+
+  has_many :price_codes, -> {group("common_fields.id").order(:code).select(:id, :code)}, through: :product_details
+  #  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
   has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode, size").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
-  has_many :purchase_order_products
-  has_many :cost_lists, dependent: :destroy
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open' AND purchase_orders.status <> 'Deleted'")}, through: :purchase_order_products, source: :purchase_order
   has_many :open_purchase_orders, -> {select("purchase_orders.id, purchase_order_date, purchase_orders.order_value, purchase_orders.price_discount").where("purchase_orders.status = 'Open'")}, through: :purchase_order_products, source: :purchase_order
-  has_many :direct_purchase_products, dependent: :restrict_with_error
-  has_many :product_colors, dependent: :destroy
   has_many :color_codes, -> {select(:code)}, through: :product_colors, source: :color
   has_many :colors, -> {select(:id, :code).order(:code)}, through: :product_colors, source: :color
   has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
   has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
   
   
-  accepts_nested_attributes_for :product_details, reject_if: :price_blank
+  accepts_nested_attributes_for :product_details#, reject_if: :price_blank
   accepts_nested_attributes_for :product_colors, reject_if: proc { |attributes| attributes['selected_color_id'].blank? }, allow_destroy: true
   accepts_nested_attributes_for :cost_lists
   
   validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
-  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
+  validates :code, uniqueness: true
+  validate :code_not_changed, :size_group_not_changed, :color_selected
+#  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
   before_validation :upcase_code
@@ -143,13 +146,13 @@ class Product < ApplicationRecord
     end
   end
     
-  def price_blank(attributed)
-    attributed[:price_lists_attributes].each do |key, value|
-      return false if attributed[:price_lists_attributes][key][:price].present?
-    end
-      
-    return true
-  end
+#  def price_blank(attributed)
+#    attributed[:price_lists_attributes].each do |key, value|
+#      return false if attributed[:price_lists_attributes][key][:price].present?
+#    end
+#      
+#    return true
+#  end
   
         
   #        def update_po_active_cost(purchase_order_date)
@@ -263,7 +266,7 @@ class Product < ApplicationRecord
         false
       end
     end
-    errors.add(:base, "Product must have at least one item!") unless valid
+    errors.add(:base, "Product prices must be filled in!") unless valid
   end
             
   def upcase_code

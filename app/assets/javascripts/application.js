@@ -18,6 +18,7 @@
 //= require smart_listing
 //= require vendors
 //= require jquery.dataTables.min
+//= require jquery.remotipart
 //= require_tree .
 
 

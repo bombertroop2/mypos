@@ -8,7 +8,7 @@ class ProductDetail < ApplicationRecord
   
   validates :barcode, uniqueness: {scope: :price_code_id} 
 
-  accepts_nested_attributes_for :price_lists, reject_if: proc {|attributes| attributes[:price].blank?}
+  accepts_nested_attributes_for :price_lists#, reject_if: proc {|attributes| attributes[:price].blank?}
 
   before_create :create_barcode
   

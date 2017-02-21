@@ -1,8 +1,8 @@
 <td><%= object.code %></td>
-<td><%= object.brand_name %></td>
-<td><%= object.vendor_name %></td>
-<td><%= object.models_name %></td>
-<td><%= object.goods_type_name %></td>
+<td id="product-brand-name-<%= object.id %>"><%= object.brand_name rescue nil %></td>
+<td id="product-vendor-name-<%= object.id %>"><%= object.vendor_name rescue nil %></td>
+<td id="product-model-name-<%= object.id %>"><%= object.models_name rescue nil %></td>
+<td id="product-goods-type-name-<%= object.id %>"><%= object.goods_type_name rescue nil %></td>
 <td class="actions" style="text-align: right">
     <% if user_signed_in? && is_admin? %>
       <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_product_path(object), data: {remote: true}, class: :edit, title: "Edit" %>

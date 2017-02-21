@@ -60,52 +60,48 @@ class ProductsController < ApplicationController
   # POST /products.json
   def create
     @product = Product.new(product_params)
-    respond_to do |format|
-      begin
-        if @product.save
-          format.html { redirect_to @product, notice: 'Product was successfully created.' }
-          format.json { render :show, status: :created, location: @product }
-        else
-          size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-          @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
-          @price_codes = PriceCode.select(:id, :code).order :code
-          @price_codes.each do |price_code|
-            @sizes.each do |size|
-              product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-              product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.blank?
-              price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-              product_detail.price_lists.build if price_list.blank?
-            end
-          end
-          @colors = Color.select(:id, :code, :name).order(:code)
-          @colors.each do |color|
-            @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
-          end
-          if @product.errors[:base].present?
-            flash.now[:alert] = @product.errors[:base].to_sentence
-          end
-          format.html { render :new }
-          format.json { render json: @product.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
+    begin
+      unless @product.save
         size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
         @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
         @price_codes = PriceCode.select(:id, :code).order :code
-        @price_codes.each do |price_code|
-          @sizes.each do |size|
-            product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.blank?
-            price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-            product_detail.price_lists.build if price_list.blank?
-          end
-        end
+        #        @price_codes.each do |price_code|
+        #          @sizes.each do |size|
+        #            product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+        #            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)# if product_detail.blank?
+        #            price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+        #            product_detail.price_lists.build #if price_list.blank?
+        #          end
+        #        end
         @colors = Color.select(:id, :code, :name).order(:code)
         @colors.each do |color|
           @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
         end
-        @product.errors.messages[:code] = ["has already been taken"]
-        format.html { render :new }
+        render js: "alert('#{@product.errors[:base].join("\\n")}')" if @product.errors[:base].present?
+      else
+        @new_brand_name = Brand.select(:name).where(id: params[:product][:brand_id]).first.name
+        @new_vendor_name = Vendor.select(:name).where(id: params[:product][:vendor_id]).first.name
+        @new_model_name = Model.select(:name).where(id: params[:product][:model_id]).first.name
+        @new_goods_type_name = GoodsType.select(:name).where(id: params[:product][:goods_type_id]).first.name
       end
+    rescue ActiveRecord::RecordNotUnique => e
+      #      size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
+      #      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+      #      @price_codes = PriceCode.select(:id, :code).order :code
+      #      @price_codes.each do |price_code|
+      #        @sizes.each do |size|
+      #          product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+      #          product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.blank?
+      #          price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+      #          product_detail.price_lists.build if price_list.blank?
+      #        end
+      #      end
+      #      @colors = Color.select(:id, :code, :name).order(:code)
+      #      @colors.each do |color|
+      #        @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
+      #      end
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{products_url}'"
     end
   end
 
@@ -227,7 +223,7 @@ class ProductsController < ApplicationController
     
     respond_to { |format| format.js }
   end
-
+  
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_product

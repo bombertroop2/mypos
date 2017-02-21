@@ -41,9 +41,10 @@ class WarehousesController < ApplicationController
     @warehouse = Warehouse.new(warehouse_params)
     
     begin
-      @warehouse.save
-      @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
-      @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+      if @warehouse.save
+        @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
+        @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+      end
     rescue ActiveRecord::RecordNotUnique => e
       flash[:alert] = "That code has already been taken"
       render js: "window.location = '#{warehouses_url}'"

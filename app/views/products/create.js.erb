@@ -1,0 +1,19 @@
+<%= smart_listing_item :products, :create, @product, 
+  @product.valid? ? "products/product" : "products/form" %>
+
+// kode ini untuk update kolom apabila di update, karena smart listing belum bisa handle ini, disebabkan model yang berelasi
+<% if @new_brand_name.present? %>
+  $("#product-brand-name-<%= @product.id %>").html("<%= @new_brand_name %>");
+<% end %>
+
+<% if @new_vendor_name.present? %>
+  $("#product-vendor-name-<%= @product.id %>").html("<%= @new_vendor_name %>");
+<% end %>
+
+<% if @new_model_name.present? %>
+  $("#product-model-name-<%= @product.id %>").html("<%= @new_model_name %>");
+<% end %>
+
+<% if @new_goods_type_name.present? %>
+  $("#product-goods-type-name-<%= @product.id %>").html("<%= @new_goods_type_name %>");
+<% end %>
