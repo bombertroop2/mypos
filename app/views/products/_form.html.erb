@@ -3,15 +3,15 @@
     <%= form_for(@product, remote: true, html: {class: "form-horizontal"}) do |f| %>
         <!--
         <% if @product.errors.any? %>
-                                                                                                                                          <div id="error_explanation">
-                                                                                                                                              <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+                                                                                                                                                        <div id="error_explanation">
+                                                                                                                                                            <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
 
-                                                                                                                                              <ul>
+                                                                                                                                                            <ul>
           <% @product.errors.full_messages.each do |message| %>
                                                                                                                                                                                                                 <li><%= message %></li>
           <% end %>
-                                                                                                                                              </ul>
-                                                                                                                                          </div>
+                                                                                                                                                            </ul>
+                                                                                                                                                        </div>
         <% end %>
         -->
         <div class="form-group<%= control_group_error(@product, :code) %>">
@@ -192,15 +192,15 @@
 
                                                             $('#product_cost_lists_attributes_0_cost').autoNumeric('init');  //autoNumeric with defaults
 
-/*
-                                                            if ($("#new_product").length > 0)
-                                                                $("#new_product").submit(function () {
-                                                                    $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
-                                                                });
-                                                            else if ($(".form-horizontal").length > 0)
-                                                                $(".form-horizontal").submit(function () {
-                                                                    $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
-                                                                });*/
+                                                            /*
+                                                             if ($("#new_product").length > 0)
+                                                             $("#new_product").submit(function () {
+                                                             $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
+                                                             });
+                                                             else if ($(".form-horizontal").length > 0)
+                                                             $(".form-horizontal").submit(function () {
+                                                             $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
+                                                             });*/
 
                                                             var productColorDataTable = $('#listing_product_colors_table').DataTable({
                                                                 order: [1, 'asc'],
@@ -239,7 +239,14 @@
                                                                 if (selectedColorId != "") {
                                                                     var e = jQuery.Event("click");
                                                                     e.ctrlKey = true;
-                                                                    $("#product_color_" + selectedColorId).find("td:first-child").trigger(e);
+                                                                    var clickRowProcessId = setInterval(function () {
+                                                                        if (!$("#product_color_" + selectedColorId).hasClass("DTTT_selected") || !$("#product_color_" + selectedColorId).hasClass("selected")) {
+                                                                            $("#product_color_" + selectedColorId).find("td:first-child").trigger(e);
+                                                                        } else
+                                                                            clearInterval(clickRowProcessId);
+                                                                    }, 0);
+
+
                                                                 }
                                                             });
                                                         });
