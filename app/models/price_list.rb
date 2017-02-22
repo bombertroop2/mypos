@@ -2,21 +2,19 @@ class PriceList < ApplicationRecord
   belongs_to :product_detail
   
   attr_accessor :product_id, :size_id, :price_code_id, :user_is_adding_new_price,
-    :user_is_updating_price, :user_is_deleting_from_child
+    :user_is_updating_price, :user_is_deleting_from_child, :user_is_manipulating_price_from_product_master
   
   validates :price, numericality: {greater_than_or_equal_to: 1}, if: proc { |price_list| price_list.price.is_a?(Numeric) && price_list.price.present? }
     validates :product_id, :size_id, :price_code_id, presence: true, if: proc {|price_list| price_list.user_is_adding_new_price}
       validates :effective_date, :price, presence: true        
       validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed?}
+        validate :price_is_changable, if: proc { |price_list| price_list.user_is_manipulating_price_from_product_master }
           
         before_create :create_product_detail, if: proc {|price_list| price_list.product_detail_is_not_existed_yet && price_list.user_is_adding_new_price}
           before_destroy :get_parent
           before_destroy :prevent_user_delete_last_record, if: proc {|price_list| price_list.user_is_deleting_from_child}
             after_destroy :delete_parent
-
-
-          
-          
+                    
             protected            
           
             def product_detail_is_not_existed_yet
@@ -27,6 +25,12 @@ class PriceList < ApplicationRecord
             end
           
             private
+            
+            def price_is_changable
+                if effective_date.present? && Date.today > effective_date && price.present? && price_changed?
+                  errors.add(:price, "change is not allowed!") 
+                end
+            end
             
             def prevent_user_delete_last_record
               if @product_detail.price_count.eql?(1) && @product_detail.product.product_details_count.eql?(1)

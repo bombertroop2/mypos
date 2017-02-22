@@ -19,6 +19,7 @@ class CostList < ApplicationRecord
             before_update :update_total_unit_cost_of_purchase_order, if: proc {|cost_list| cost_list.cost_changed?}
               after_create :update_purchase_order_cost              
               
+              default_scope { order(effective_date: :desc) }
           
               private
               
@@ -91,7 +92,7 @@ class CostList < ApplicationRecord
             
               def fields_not_changed
                 errors.add(:effective_date, "change is not allowed!") if effective_date_changed? && persisted? && created_purchase_order.present?
-                errors.add(:cost, "change is not allowed!") if cost_changed? && persisted? && received_purchase_order.present?
+                errors.add(:cost, "change is not allowed!") if cost_changed? && persisted? && created_purchase_order.present?#received_purchase_order.present?
                 errors.add(:product_id, "change is not allowed!") if product_id_changed? && persisted? && created_purchase_order.present?
               end
           

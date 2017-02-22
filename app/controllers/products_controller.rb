@@ -40,7 +40,7 @@ class ProductsController < ApplicationController
 
   # GET /products/1/edit
   def edit
-    @product.effective_date = @product.active_effective_date.strftime("%d/%m/%Y")
+    #    @product.effective_date = @product.active_effective_date.strftime("%d/%m/%Y")
     @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
     @price_codes = PriceCode.select(:id, :code).order :code
     @colors = Color.select(:id, :code, :name).order(:code)
@@ -108,50 +108,18 @@ class ProductsController < ApplicationController
   # PATCH/PUT /products/1
   # PATCH/PUT /products/1.json
   def update
-    respond_to do |format|
-      begin
-        if @product.update(product_params)
-          format.html { redirect_to @product, notice: 'Product was successfully updated.' }
-          format.json { render :show, status: :ok, location: @product }
-        else
-          @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
-          @price_codes = PriceCode.select(:id, :code).order :code
-          @price_codes.each do |price_code|
-            @sizes.each do |size|
-              product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-              product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.nil?
-              price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-              product_detail.price_lists.build if price_list.blank?
-            end
-          end
-          @colors = Color.select(:id, :code, :name).order(:code)
-          @colors.each do |color|
-            product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
-            if product_color
-              product_color.selected_color_id = color.id
-              product_color.code = color.code
-              product_color.name = color.name
-            else
-              @product.product_colors.build color_id: color.id, code: color.code, name: color.name
-            end      
-          end
-          if @product.errors[:base].present?
-            flash.now[:alert] = @product.errors[:base].to_sentence
-          end
-          format.html { render :edit }
-          format.json { render json: @product.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
+    begin        
+      unless @product.update(product_params)
         @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
         @price_codes = PriceCode.select(:id, :code).order :code
-        @price_codes.each do |price_code|
-          @sizes.each do |size|
-            product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.nil?
-            price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-            product_detail.price_lists.build if price_list.blank?
-          end
-        end
+        #          @price_codes.each do |price_code|
+        #            @sizes.each do |size|
+        #              product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
+        #              product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.nil?
+        #              price_list = product_detail.price_lists.select{|pl| pl.price.present?}
+        #              product_detail.price_lists.build if price_list.blank?
+        #            end
+        #          end
         @colors = Color.select(:id, :code, :name).order(:code)
         @colors.each do |color|
           product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
@@ -163,32 +131,27 @@ class ProductsController < ApplicationController
             @product.product_colors.build color_id: color.id, code: color.code, name: color.name
           end      
         end
-        @product.errors.messages[:code] = ["has already been taken"]
-        format.html { render :edit }
+      else
+        @new_brand_name = Brand.select(:name).where(id: params[:product][:brand_id]).first.name
+        @new_vendor_name = Vendor.select(:name).where(id: params[:product][:vendor_id]).first.name
+        @new_model_name = Model.select(:name).where(id: params[:product][:model_id]).first.name
+        @new_goods_type_name = GoodsType.select(:name).where(id: params[:product][:goods_type_id]).first.name
       end
+    rescue ActiveRecord::RecordNotUnique => e   
+      flash[:alert] = "That code has already been taken"
+      render js: "window.location = '#{products_url}'"
     end
   end
 
   # DELETE /products/1
   # DELETE /products/1.json
-  def destroy
-    @product.destroy
+  def destroy    
+    @product.destroy    
     if @product.errors.present? and @product.errors.messages[:base].present?
       error_message = @product.errors.messages[:base].to_sentence
       error_message.slice! "products "
-      alert = error_message
-    else
-      notice = 'Product was successfully deleted.'
-    end
-    respond_to do |format|
-      format.html do 
-        if notice.present?
-          redirect_to products_url, notice: notice
-        else
-          redirect_to products_url, alert: alert
-        end
-      end
-      format.json { head :no_content }
+      flash[:alert] = error_message
+      render js: "window.location = '#{products_url}'"
     end
   end
   
@@ -212,12 +175,12 @@ class ProductsController < ApplicationController
       else        
         sg = SizeGroup.where(id: params[:id]).select(:id).first
         @sizes = sg.sizes.select(:id, :size).order(:size) if sg
-        @price_codes.each do |price_code|
-          @sizes.each do |size|
-            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
-            product_detail.price_lists.build
-          end
-        end
+        #        @price_codes.each do |price_code|
+        #          @sizes.each do |size|
+        #            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
+        #            product_detail.price_lists.build
+        #          end
+        #        end
       end
     end
     
@@ -229,17 +192,17 @@ class ProductsController < ApplicationController
   def set_product
     @product = Product.joins(:brand, :vendor, :model, :goods_type).
       where(id: params[:id]).
-      select("products.id, products.code, products.description, common_fields.code AS brand_code, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id").first
+      select("products.id, products.code, products.description, common_fields.name AS brand_name, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
-      :target, :model_id, :effective_date,
+      :target, :model_id,# :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
       product_details_attributes: [:id, :size_id, :price_code_id, :price,
-        price_lists_attributes: [:price, :effective_date]],
-      cost_lists_attributes: [:effective_date, :cost, :is_user_creating_product],
+        price_lists_attributes: [:id, :price, :effective_date, :user_is_manipulating_price_from_product_master]],
+      cost_lists_attributes: [:id, :effective_date, :cost, :is_user_creating_product],
       product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
     )
   end

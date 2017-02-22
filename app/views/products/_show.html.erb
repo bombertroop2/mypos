@@ -1,0 +1,105 @@
+<% active_cost = @product.active_cost %>
+
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Code</dt>
+        <dd><%= object.code %> - <%= object.brand_name %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Description</dt>
+        <dd><%= object.description %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Sex</dt>
+        <dd><%= object.sex.titleize %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Vendor</dt>
+        <dd><%= object.vendor_code %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Target</dt>
+        <dd><%= object.target.titleize %></dd>
+    </dl>        
+
+    <dl class="dl-horizontal">
+        <dt>Model</dt>
+        <dd><%= object.model_code %></dd>
+    </dl>        
+
+    <dl class="dl-horizontal">
+        <dt>Goods type</dt>
+        <dd><%= object.goods_type_code %></dd>
+    </dl>        
+
+    <dl class="dl-horizontal">
+        <dt>Colors</dt>
+        <dd><%= @product_colors %></dd>
+    </dl>        
+
+    <dl class="dl-horizontal">
+        <dt>Image</dt>
+        <dd><%= image_tag object.image_url if object.image.present? %></dd>
+    </dl>        
+
+    <dl class="dl-horizontal">
+        <dt>Effective date</dt>
+        <dd><%= active_cost.effective_date.strftime("%d/%m/%Y") rescue "" %></dd>
+    </dl>        
+
+    <dl class="dl-horizontal">
+        <dt>Cost</dt>
+        <dd><%= number_to_currency((active_cost.cost rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>        
+
+    <% product_price_codes = object.price_codes %>
+    <% product_details = object.product_details %>
+    <dl class="dl-horizontal">
+        <dt>Prices</dt>
+        <dd>
+            <table class="table table-condensed table-responsive table-striped">
+                <tr>
+                    <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>
+                    <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Size</strong></td>
+                    <td colspan="<%= product_price_codes.size %>" align="center"><strong>Price</strong></td>
+                </tr>
+
+                <tr>
+                    <% product_price_codes.each do |price_code| %>
+                      <td align="center">
+                          <strong>
+                              <%= price_code.code %>
+                          </strong>
+                      </td>
+                    <% end %>
+                </tr>
+
+                <% object.grouped_product_details.each do |prod_det| %>
+                  <tr>
+                      <td><%= prod_det.barcode %></td>
+                      <td><%= prod_det.item_size %></td>
+                      <% product_price_codes.each do |price_code| %>
+                        <% product_detail = product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
+                        <% if product_detail %>
+                          <td align="right">
+                              <%= number_to_currency((product_detail.active_price.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                          </td>
+                        <% else %>
+                          <td></td>
+                        <% end %>
+                      <% end %>
+                  </tr>
+                <% end %>
+            </table>
+        </dd>
+    </dl>        
+</td>

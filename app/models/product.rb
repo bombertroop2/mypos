@@ -1,5 +1,5 @@
 class Product < ApplicationRecord
-  attr_accessor :effective_date
+#  attr_accessor :effective_date
   
   belongs_to :brand
   belongs_to :vendor
@@ -9,11 +9,11 @@ class Product < ApplicationRecord
   
   mount_uploader :image, ImageUploader
   
+  has_many :direct_purchase_products, dependent: :restrict_with_error
+  has_many :purchase_order_products, dependent: :restrict_with_error
   has_many :product_details, dependent: :destroy
   has_many :cost_lists, dependent: :destroy
   has_many :product_colors, dependent: :destroy
-  has_many :direct_purchase_products, dependent: :restrict_with_error
-  has_many :purchase_order_products
 
   has_many :price_codes, -> {group("common_fields.id").order(:code).select(:id, :code)}, through: :product_details
   #  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
@@ -35,12 +35,12 @@ class Product < ApplicationRecord
   validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
-#  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
+  #  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
   before_validation :upcase_code
   before_update :delete_old_children_if_size_group_changed
-  before_destroy :prevent_delete_if_purchase_order_created
+  #  before_destroy :prevent_delete_if_purchase_order_created
 
   
   SEX = [
@@ -58,7 +58,7 @@ class Product < ApplicationRecord
     
   
   def active_cost
-    cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
+    cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
     if cost_lists.size == 1
       cost_list = cost_lists.first
       if Date.today >= cost_list.effective_date
@@ -74,7 +74,7 @@ class Product < ApplicationRecord
   end
   
   def active_cost_by_po_date(po_date)
-    cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("effective_date DESC")
+    cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
     if cost_lists.size == 1
       cost_list = cost_lists.first
       if po_date >= cost_list.effective_date
@@ -90,13 +90,13 @@ class Product < ApplicationRecord
   end
   
   def active_effective_date
-    cost_lists = self.cost_lists.select(:effective_date).order("effective_date DESC")
+    cost_lists = self.cost_lists.select(:effective_date)
     if cost_lists.size == 1
       return cost_lists.first.effective_date
     else
       cost_lists.each do |cost_list|
         if Date.today >= cost_list.effective_date
-          return cost_list
+          return cost_list.effective_date
         end
       end
       cost_lists.last.effective_date
@@ -130,12 +130,13 @@ class Product < ApplicationRecord
     errors.add(:base, "Product must have at least one color!") unless valid
   end
   
-  def prevent_delete_if_purchase_order_created   
-    if purchase_order_relation
-      errors.add(:base, "Cannot delete record with purchase order")
-      throw :abort
-    end
-  end
+#  def prevent_delete_if_purchase_order_created
+#    if purchase_order_relation
+#      errors.add(:base, "Cannot delete record with purchase order")
+#      throw :abort
+#    end
+#    return true
+#  end
   
   
   def delete_old_children_if_size_group_changed
@@ -146,13 +147,13 @@ class Product < ApplicationRecord
     end
   end
     
-#  def price_blank(attributed)
-#    attributed[:price_lists_attributes].each do |key, value|
-#      return false if attributed[:price_lists_attributes][key][:price].present?
-#    end
-#      
-#    return true
-#  end
+  #  def price_blank(attributed)
+  #    attributed[:price_lists_attributes].each do |key, value|
+  #      return false if attributed[:price_lists_attributes][key][:price].present?
+  #    end
+  #      
+  #    return true
+  #  end
   
         
   #        def update_po_active_cost(purchase_order_date)

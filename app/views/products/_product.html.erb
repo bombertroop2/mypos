@@ -4,8 +4,9 @@
 <td id="product-model-name-<%= object.id %>"><%= object.models_name rescue nil %></td>
 <td id="product-goods-type-name-<%= object.id %>"><%= object.goods_type_name rescue nil %></td>
 <td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, product_path(object), data: {remote: true}, title: "Show" %>
     <% if user_signed_in? && is_admin? %>
       <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_product_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
-        <%#= link_to_if(!object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+        <%= link_to_if(!object.purchase_order_relation.present? && !object.direct_purchase_product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
       <% end %>
   </td>

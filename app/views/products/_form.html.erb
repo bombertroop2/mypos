@@ -3,15 +3,15 @@
     <%= form_for(@product, remote: true, html: {class: "form-horizontal"}) do |f| %>
         <!--
         <% if @product.errors.any? %>
-                                                                                                                                <div id="error_explanation">
-                                                                                                                                    <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+                                                                                                                                          <div id="error_explanation">
+                                                                                                                                              <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
 
-                                                                                                                                    <ul>
+                                                                                                                                              <ul>
           <% @product.errors.full_messages.each do |message| %>
                                                                                                                                                                                                                 <li><%= message %></li>
           <% end %>
-                                                                                                                                    </ul>
-                                                                                                                                </div>
+                                                                                                                                              </ul>
+                                                                                                                                          </div>
         <% end %>
         -->
         <div class="form-group<%= control_group_error(@product, :code) %>">
@@ -117,11 +117,16 @@
                                                       <%= f.check_box :remove_image, tabindex: "10" %> Remove image
                                                   </div>
                                               </div>
-                                              <% if @product.new_record? %>
-                                                <%= f.fields_for :cost_lists do |cost_list_form| %>
-                                                  <%= cost_list_form.hidden_field :is_user_creating_product, value: true %>
+                                          <%# if @product.new_record? %>
+                                              <% last_row_rendered = false %>
+                                              <%= f.fields_for :cost_lists do |cost_list_form| %>
+                                                <% unless last_row_rendered %>
+                                                  <% cost_list_form.object.effective_date = cost_list_form.object.effective_date.strftime("%d/%m/%Y") unless @product.new_record? %>
+                                                  <% if @product.new_record? %>
+                                                    <%= cost_list_form.hidden_field :is_user_creating_product, value: true %>
+                                                  <% end %>
                                                   <div class="form-group<%= control_group_error(cost_list_form.object, :effective_date) %>">
-                                                      <%= f.label :effective_date, class: "col-sm-2 control-label" %>
+                                                      <%= cost_list_form.label :effective_date, class: "col-sm-2 control-label" %>
                                                         <div class="col-sm-10">
                                                             <%= cost_list_form.text_field :effective_date, size: 10, readonly: true, tabindex: "11", class: "form-control" %>
                                                               <%= error_help_text(cost_list_form.object, :effective_date) %>
@@ -135,10 +140,12 @@
                                                                   <%= error_help_text(cost_list_form.object, :cost) %>
                                                               </div>
                                                           </div>
+                                                          <% last_row_rendered = true %>
                                                         <% end %>
-                                                      <% else %>
-                                                        <%= f.hidden_field :effective_date %>
                                                       <% end %>
+                                                  <%# else %>
+                                                  <%#= f.hidden_field :effective_date %>
+                                                  <%# end %>
                                                       <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
                                                           <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
                                                             <div class="col-sm-10">
@@ -185,14 +192,15 @@
 
                                                             $('#product_cost_lists_attributes_0_cost').autoNumeric('init');  //autoNumeric with defaults
 
+/*
                                                             if ($("#new_product").length > 0)
                                                                 $("#new_product").submit(function () {
                                                                     $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
                                                                 });
                                                             else if ($(".form-horizontal").length > 0)
                                                                 $(".form-horizontal").submit(function () {
-                                                                    $(".price-effective-date").val($("#product_effective_date").val());
-                                                                });
+                                                                    $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
+                                                                });*/
 
                                                             var productColorDataTable = $('#listing_product_colors_table').DataTable({
                                                                 order: [1, 'asc'],
@@ -214,6 +222,7 @@
                                                             });
 
                                                             $("#submit_product").click(function () {
+                                                                $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
                                                                 $(".selected-colors").val("");
                                                                 $(".color-delete-marker").val("true");
                                                                 $.each(productColorDataTable.rows('.selected')[0], function (index, value) {
