@@ -29,7 +29,7 @@ class SalesPromotionGirl < ApplicationRecord
   private
   
   def warehouse_has_supervisor?
-    errors.add(:warehouse_id, "is being supervised by another supervisor") if Warehouse.has_supervisor?(warehouse_id) && warehouse_id_changed?
+    errors.add(:warehouse_id, "is being supervised by another supervisor") if Warehouse.has_supervisor?(warehouse_id) && warehouse_id_changed? && role.eql?("supervisor")
   end
   
   def unlink_from_user_if_role_downgraded

@@ -10,6 +10,8 @@ class User < ApplicationRecord
        
   belongs_to :sales_promotion_girl
   
+  before_validation :prevent_system_creating_user
+  
   after_save :add_user_role
   
   # supaya user bisa update datanya tanpa harus memasukkan password
@@ -31,5 +33,13 @@ class User < ApplicationRecord
         add_role spg_role.to_sym, sales_promotion_girl
       end
     end
+  end
+  
+  private
+  
+  # method ini untuk membatalkan user object dari proses creating,
+  # karena reject_if di spg model meloloskan user meskipun spg_role nya kosong atau spg
+  def prevent_system_creating_user
+    throw :abort if spg_role.blank? || spg_role.eql?("spg")
   end
 end

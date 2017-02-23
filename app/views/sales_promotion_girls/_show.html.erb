@@ -1,87 +1,57 @@
-<div class="page-header"><h1>Sales Promotion Girl Detail</h1></div>
-<div class="form-horizontal">
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Identifier:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.identifier %>
-        </div>
-    </div>
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Name:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.name %>
-        </div>
-    </div>
+    <dl class="dl-horizontal">
+        <dt>Identifier</dt>
+        <dd><%= object.identifier %></dd>
+    </dl>
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Address:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.address %>
-        </div>
-    </div>
+    <dl class="dl-horizontal">
+        <dt>Name</dt>
+        <dd><%= object.name %></dd>
+    </dl>
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Gender:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.gender.capitalize %>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Phone:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= remove_empty_space_from_phone_number(@sales_promotion_girl.phone) %>
-        </div>
-    </div>
+    <dl class="dl-horizontal">
+        <dt>Address</dt>
+        <dd><%= object.address %></dd>
+    </dl>
 
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Province:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.province %>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Warehouse:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.warehouse_code %>
-        </div>
-    </div>
+    <dl class="dl-horizontal">
+        <dt>Gender</dt>
+        <dd><%= object.gender.capitalize %></dd>
+    </dl>
 
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Mobile phone:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= remove_empty_space_from_phone_number(@sales_promotion_girl.mobile_phone) %>
-        </div>
-    </div>
-    
-    <div class="form-group">
-        <label class="col-sm-2 control-label">
-            Role:
-        </label>
-        <div class="col-sm-10 form-control hidden-box">
-            <%= @sales_promotion_girl.role %>
-        </div>
-    </div>
+    <dl class="dl-horizontal">
+        <dt>Phone</dt>
+        <dd><%= remove_empty_space_from_phone_number(object.phone) %></dd>
+    </dl>
 
-</div>
-<%= link_to 'Edit', edit_sales_promotion_girl_path(@sales_promotion_girl), class: "btn btn-default active" %>
+
+    <dl class="dl-horizontal">
+        <dt>Province</dt>
+        <dd><%= object.province %></dd>
+    </dl>
+
+
+    <dl class="dl-horizontal">
+        <dt>Warehouse</dt>
+        <dd><%= object.warehouse_code %></dd>
+    </dl>
+
+
+    <dl class="dl-horizontal">
+        <dt>Mobile phone</dt>
+        <dd><%= remove_empty_space_from_phone_number(object.mobile_phone) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Role</dt>
+        <dd><%= object.role %></dd>
+    </dl>
+
+</td>
