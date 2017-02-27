@@ -1,0 +1,34 @@
+<div class="page-header"><h1>Listing Costs</h1></div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-effective-date" placeholder="Effective date">
+    </div>
+    <div class="form-group">
+        <input type="text" id="filter-product-code" class="form-control" placeholder="Product code/name">
+    </div>
+    <div class="form-group">
+        <input size="16" style="text-align: right" data-a-sep="." data-a-dec="," data-a-sign="Rp" type="text" class="form-control" id="search-cost" placeholder="Cost">
+    </div>
+    <button id="search-cost-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+</div>
+<div class="hidden">
+    <%= smart_listing_controls_for(:costs, {class: "form-inline text-right"}) do %>
+        <%= text_field_tag :filter_effective_date, '', class: "search form-control", autocomplete: :off %>
+          <%= text_field_tag :filter_product_code, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_cost, '', class: "search form-control", autocomplete: :off %>
+            <% end %>
+        </div>
+        <%= smart_listing_render(:costs) %>
+
+        <script>
+          $(function () {
+              $("#search-cost-btn").click(function () {
+                  $("#filter_effective_date").val($("#filter-effective-date").val());
+                  $("#filter_product_code").val($("#filter-product-code").val());
+                  $("#filter_cost").val($("#search-cost").val());
+                  //$(".smart-listing-controls").html($("#search-form-container").html());
+                  $(".smart-listing-controls").submit();
+              });
+          });
+        </script>

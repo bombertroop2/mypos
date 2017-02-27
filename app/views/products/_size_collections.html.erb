@@ -8,10 +8,8 @@
     <tr style="text-align: center">
         <% @price_codes.each do |price_code| %>
           <td align="center"><%= price_code.code %>
-  <%# if @product.new_record? || (!@product.new_record? && @product.size_group_id_changed?) %>
               <br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
                   "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %>
-    <%# end %>
             </td>
           <% end %>
       </tr>
@@ -28,48 +26,44 @@
                 <% product_detail.price_lists.build %>
               <% end %>
               <td align="center">                      
-      <%# if @product.new_record? || (!@product.new_record? && @product.size_group_id_changed?) %>
                   <% product_detail_array_index = "product[product_details_attributes][#{!product_detail.new_record? ? product_detail.id : Time.now.to_i.to_s+index.to_s}]" %>
                   <%= fields_for product_detail_array_index, product_detail do |product_detail_form| %>
                     <%= product_detail_form.hidden_field :id unless product_detail_form.object.new_record? %>
-                    <%= product_detail_form.hidden_field :size_id %>
-                    <%= product_detail_form.hidden_field :price_code_id %>
-                    <%= product_detail_form.fields_for :price_lists do |price_list_form| %>                        
-                      <%= price_list_form.hidden_field :effective_date, class: "price-effective-date" %>
-                        <%= price_list_form.hidden_field :user_is_manipulating_price_from_product_master, value: true %>
-                        <div class="<%= control_group_error(price_list_form.object, :price) %>">
-                            <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
-                                "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
-                              <%= error_help_text(price_list_form.object, :price) %>
-                          </div>
+                    <%= product_detail_form.hidden_field :user_is_adding_new_product, value: @product.new_record? %>
+                    <% if product_detail_form.object.new_record? %>
+                      <%= product_detail_form.hidden_field :size_id %>
+                      <%= product_detail_form.hidden_field :price_code_id %>
+                    <% end %>
+                    <%= product_detail_form.fields_for :price_lists do |price_list_form| %> 
+                      <% if price_list_form.object.new_record? || product_detail_form.object.active_price.id == price_list_form.object.id %>
+                        <%= price_list_form.hidden_field :user_is_adding_new_price, value: product_detail_form.object.new_record? %>
+            <%#= price_list_form.hidden_field :effective_date, class: "price-effective-date" %>
+                        <%= price_list_form.hidden_field :cost, class: "price-cost-value" %>
+              <%#= price_list_form.hidden_field :user_is_manipulating_price_from_product_master, value: true %>
+                          <div class="<%= control_group_error(price_list_form.object, :price) %>">
+                              <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
+                                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
+                                <%= error_help_text(price_list_form.object, :price) %>
+                            </div>
+                          <% end %>
                         <% end %>
                       <% end %>
-          <%# else %>
-                      <!--
-                            <div class="money-fields form-control">
-                      <%= number_to_currency(product_detail.active_price.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if product_detail && product_detail.active_price.present? %>
-                            </div>-->
-          <%# end %>
 
                   </td>
                   <% index += 1 %>
                 <% end %>
             </tr>
           <% end %>
-      <%# if @product.new_record? || (!@product.new_record? && @product.size_group_id_changed?) %>
           <script>
       <% @price_codes.each do |price_code| %>
               $('#price_<%= price_code.code %>').keyup(function () {
                   $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
               });
       <% end %>
-          </script>
-
-          <script>
             $(function () {
                 $('.money').autoNumeric('init');  //autoNumeric with defaults
             });
           </script>
-      <%# end %>
+
 
       </table>

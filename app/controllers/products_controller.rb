@@ -200,9 +200,9 @@ class ProductsController < ApplicationController
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
       :target, :model_id,# :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
-      product_details_attributes: [:id, :size_id, :price_code_id, :price,
-        price_lists_attributes: [:id, :price, :effective_date, :user_is_manipulating_price_from_product_master]],
-      cost_lists_attributes: [:id, :effective_date, :cost, :is_user_creating_product],
+      product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product,
+        price_lists_attributes: [:id, :price, :user_is_manipulating_price_from_product_master, :user_is_adding_new_price, :cost]],
+      cost_lists_attributes: [:id, :cost, :is_user_creating_product],
       product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
     )
   end
@@ -214,6 +214,7 @@ class ProductsController < ApplicationController
     params[:product][:product_details_attributes].each do |key, value|
       params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
   end

@@ -1,4 +1,4 @@
-<% active_cost = @product.active_cost %>
+<% latest_cost = object.active_cost %>
 
 <td colspan="6">
     <button type="button" class="close cancel" aria-label="Close">
@@ -53,12 +53,12 @@
 
     <dl class="dl-horizontal">
         <dt>Effective date</dt>
-        <dd><%= active_cost.effective_date.strftime("%d/%m/%Y") rescue "" %></dd>
+        <dd><%= latest_cost.effective_date.strftime("%d/%m/%Y") rescue "" %></dd>
     </dl>        
 
     <dl class="dl-horizontal">
         <dt>Cost</dt>
-        <dd><%= number_to_currency((active_cost.cost rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+        <dd><%= number_to_currency((latest_cost.cost rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
     </dl>        
 
     <% product_price_codes = object.price_codes %>
@@ -91,7 +91,7 @@
                         <% product_detail = product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
                         <% if product_detail %>
                           <td align="right">
-                              <%= number_to_currency((product_detail.active_price.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                              <%= number_to_currency((product_detail.price_lists.select(:price).where(effective_date: latest_cost.effective_date).first.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                           </td>
                         <% else %>
                           <td></td>

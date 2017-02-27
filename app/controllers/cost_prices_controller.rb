@@ -1,0 +1,120 @@
+include SmartListing::Helper::ControllerExtensions
+class CostPricesController < ApplicationController
+  helper SmartListing::Helper
+  #  before_action :set_product, only: [:show, :edit, :update, :destroy, :new_cost, :create_cost, :edit_cost]
+  #  before_action :convert_cost_price_to_numeric, only: [:create, :update, :create_cost]
+  before_action :set_cost, only: :show
+  before_action :convert_cost_price_to_numeric, only: :create
+
+  def index
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    if params[:filter_cost].present?
+      params[:filter_cost] = params[:filter_cost].gsub("Rp","").gsub(".","").gsub(",",".").gsub(".00","")
+    end
+    if params[:filter_effective_date].present?
+      splitted_date_range = params[:filter_effective_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
+    costs_scope = CostList.unscoped.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name")
+    costs_scope = costs_scope.where(["products.code #{like_command} ?", "%"+params[:filter_product_code]+"%"]).
+      or(costs_scope.where(["name #{like_command} ?", "%"+params[:filter_product_code]+"%"])) if params[:filter_product_code].present?
+    costs_scope = costs_scope.where(["cost #{like_command} ?", "%"+params[:filter_cost]+"%"]) if params[:filter_cost].present?
+    costs_scope = costs_scope.where(["DATE(effective_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_effective_date].present?
+    @costs = smart_listing_create(:costs, costs_scope, partial: 'cost_prices/listing', default_sort: {:"products.code" => "asc"})
+  end
+
+  def new
+    @products = Product.select(:id, :code).order :code
+    @cost = CostList.new
+  end
+
+  def create
+    @product = Product.where(id: params[:product][:id]).select(:id, :code, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, :size_group_id).first
+    params[:product].delete :id
+    unless @product.update(product_params)
+      #      @new_brand_name = Brand.select(:name).where(id: params[:product][:brand_id]).first.name
+      #      @new_vendor_name = Vendor.select(:name).where(id: params[:product][:vendor_id]).first.name
+      #      @new_model_name = Model.select(:name).where(id: params[:product][:model_id]).first.name
+      #      @new_goods_type_name = GoodsType.select(:name).where(id: params[:product][:goods_type_id]).first.name
+      #    else
+      @products = Product.select(:id, :code).order :code
+      @price_codes = PriceCode.select(:id, :code).order :code
+      size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
+      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+    else
+      effective_date = nil
+      params[:product][:cost_lists_attributes].each do |key, value|
+        effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
+      end if params[:product][:cost_lists_attributes].present?
+      @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
+    end
+  end
+
+  def edit
+  end
+
+  def update
+  end
+
+  def show
+    #    @prices = Product.select(:id).where(id: @cost.product_id).first.prices.where(effective_date: @cost.effective_date)
+    @price_codes = PriceCode.select(:id, :code).order :code
+    @product = Product.select(:id, :size_group_id).where(id: @cost.product_id).first
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+  end
+
+  def destroy
+  end
+  
+  def generate_form
+    @product = Product.where(id: params[:product_id]).
+      select("id, size_group_id").first
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+    @price_codes = PriceCode.select(:id, :code).order :code
+    @product.cost_lists.build
+    @sizes.each do |size|
+      @price_codes.each do |price_code|
+        product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == price_code.id}.first
+        unless product_detail
+          product_detail = @product.product_details.build size_id: size.id, price_code_id: price_code.id
+        end
+        product_detail.price_lists.build
+      end 
+    end
+  end
+  
+  private
+  
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def product_params
+    params.require(:product).permit(#:code, :description, :brand_id, :sex, :vendor_id,
+      #:target, :model_id, :effective_date, :goods_type_id, :image, :image_cache, :remove_image,
+      :size_group_id, :id,
+      product_details_attributes: [:id, :size_id, :price_code_id, :product_id,
+        price_lists_attributes: [:id, :price, :effective_date, :product_detail_id, :user_is_adding_price_from_cost_prices_page, :cost]],
+      cost_lists_attributes: [:effective_date, :cost, :product_id])
+  end
+
+  
+  def set_cost
+    @cost = CostList.joins(:product).select("cost_lists.id, effective_date, cost, products.id AS product_id, products.code").where(id: params[:id]).first
+  end
+  
+  def convert_cost_price_to_numeric
+    params[:product][:cost_lists_attributes].each do |key, value|
+      params[:product][:cost_lists_attributes][key][:cost] = params[:product][:cost_lists_attributes][key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+    end if params[:product][:cost_lists_attributes].present?
+    params[:product][:product_details_attributes].each do |key, value|
+      params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+      end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
+    end if params[:product][:product_details_attributes].present?
+  end
+
+end

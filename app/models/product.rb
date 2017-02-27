@@ -24,6 +24,7 @@ class Product < ApplicationRecord
   has_many :open_purchase_orders, -> {select("purchase_orders.id, purchase_order_date, purchase_orders.order_value, purchase_orders.price_discount").where("purchase_orders.status = 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :color_codes, -> {select(:code)}, through: :product_colors, source: :color
   has_many :colors, -> {select(:id, :code).order(:code)}, through: :product_colors, source: :color
+  has_many :prices, -> {select(:price).order(:price)}, through: :product_details, source: :price_lists
   has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
   has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
   
@@ -59,18 +60,19 @@ class Product < ApplicationRecord
   
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
-    if cost_lists.size == 1
-      cost_list = cost_lists.first
-      if Date.today >= cost_list.effective_date
-        return cost_list
-      end
-    else
+#    if cost_lists.size == 1
+#      cost_list = cost_lists.first
+#      if Date.today >= cost_list.effective_date
+#        return cost_list
+#      end
+#    else
       cost_lists.each do |cost_list|
         if Date.today >= cost_list.effective_date
           return cost_list
         end
       end
-    end
+      return nil
+#    end
   end
   
   def active_cost_by_po_date(po_date)

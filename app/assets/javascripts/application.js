@@ -19,6 +19,8 @@
 //= require vendors
 //= require jquery.dataTables.min
 //= require jquery.remotipart
+//= require moment.min
+//= require daterangepicker
 //= require_tree .
 
 

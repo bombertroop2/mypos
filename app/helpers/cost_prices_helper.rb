@@ -1,0 +1,2 @@
+module CostPricesHelper
+end

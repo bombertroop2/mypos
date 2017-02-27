@@ -1,0 +1,35 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;margin-top: 10px">
+    <thead id="listing-cost-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Product code", "products.code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Cost", "cost" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Effective date", "effective_date" %></th>
+            <th class="col-md-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |cost| %>
+          <tr class="editable" data-id="<%= cost.id %>">
+              <%= smart_listing.render object: cost, partial: "cost_prices/cost", locals: {object: cost} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_cost_price_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-cost-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-cost-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

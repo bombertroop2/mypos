@@ -1,0 +1,5 @@
+<% if @product.valid? %>
+  <%= smart_listing_item :costs, :create, @cost, "cost_prices/cost" %>
+<% else %>
+  <%= smart_listing_item :costs, :new, @product, "cost_prices/form" %>
+<% end %>

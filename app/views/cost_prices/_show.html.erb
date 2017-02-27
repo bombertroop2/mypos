@@ -1,0 +1,55 @@
+<td colspan="4">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Code</dt>
+        <dd><%= object.code %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Effective date</dt>
+        <dd><%= object.effective_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Cost</dt>
+        <dd><%= number_to_currency(object.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Prices</dt>
+        <dd>
+            <table class="table table-condensed table-responsive table-bordered">
+                <tr style="text-align: center">
+                    <td colspan="2" rowspan="2"></td>
+                    <td colspan="<%= @price_codes.size %>" align="center"><b>Price codes</b></td>
+                </tr>
+                <tr style="text-align: center">
+                    <% @price_codes.each do |price_code| %>
+                      <td align="center"><%= price_code.code %></td>
+                    <% end %>
+                </tr>
+                <% @sizes.each_with_index do |size, idx| %>
+                  <tr style="text-align: center">
+                      <% if idx.eql? 0 %>
+                        <td rowspan="<%= @sizes.size %>" style="vertical-align:middle"><b>Sizes</b></td>
+                      <% end %>
+                      <td><%= size.size %></td>
+                      <% @price_codes.each do |price_code| %>
+                        <% product_detail = @product.product_details.select{|pd| pd.size_id.eql?(size.id) && pd.price_code_id.eql?(price_code.id) }.first %>
+                        <% price = product_detail.price_lists.select{|pl| pl.effective_date.eql?(object.effective_date)}.first if product_detail.present? %>
+                        <td align="center">                      
+                            <%= number_to_currency((price.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                        </td>
+                      <% end %>
+                  </tr>
+                <% end %>
+
+            </table>
+        </dd>
+    </dl>
+
+</td>
