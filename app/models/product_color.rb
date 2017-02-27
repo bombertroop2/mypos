@@ -8,7 +8,7 @@ class ProductColor < ApplicationRecord
   
   private
   
-  def prevent_deleting_if_po_is_created
-    throw :abort if Product.select(:id).where(id: product_id).first.purchase_order_relation.present?
+  def prevent_deleting_if_po_is_created    
+    throw :abort if PurchaseOrderDetail.joins(purchase_order_product: :purchase_order).select("1 AS one").where(["color_id = ? AND purchase_order_products.product_id = ? AND purchase_orders.status <> 'Deleted'", color_id, product_id]).first.present?
   end
 end
