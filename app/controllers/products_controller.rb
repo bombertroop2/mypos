@@ -140,6 +140,8 @@ class ProductsController < ApplicationController
     rescue ActiveRecord::RecordNotUnique => e   
       flash[:alert] = "That code has already been taken"
       render js: "window.location = '#{products_url}'"
+    rescue ActiveRecord::RecordNotDestroyed => e
+        render js: "bootbox.alert({message: \"Sorry, you can't change colors!\",size: 'small'});"
     end
   end
 
@@ -209,7 +211,7 @@ class ProductsController < ApplicationController
   
   def convert_cost_price_to_numeric
     params[:product][:cost_lists_attributes].each do |key, value|
-      params[:product][:cost_lists_attributes][key][:cost] = params[:product][:cost_lists_attributes][key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+      params[:product][:cost_lists_attributes][key][:cost] = params[:product][:cost_lists_attributes][key][:cost].gsub("Rp","").gsub(".","").gsub(",",".") if params[:product][:cost_lists_attributes][key][:cost].present?
     end if params[:product][:cost_lists_attributes].present?
     params[:product][:product_details_attributes].each do |key, value|
       params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|

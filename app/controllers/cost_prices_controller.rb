@@ -102,7 +102,7 @@ class CostPricesController < ApplicationController
 
   
   def set_cost
-    @cost = CostList.joins(:product).select("cost_lists.id, effective_date, cost, products.id AS product_id, products.code").where(id: params[:id]).first
+    @cost = CostList.joins(product: :brand).select("name, cost_lists.id, effective_date, cost, products.id AS product_id, products.code").where(id: params[:id]).first
   end
   
   def convert_cost_price_to_numeric
