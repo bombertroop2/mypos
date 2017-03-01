@@ -77,7 +77,7 @@ class ProductsController < ApplicationController
         @colors.each do |color|
           @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
         end
-        render js: "alert('#{@product.errors[:base].join("\\n")}')" if @product.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@product.errors[:base].join("\\n")}\",size: 'small'});" if @product.errors[:base].present?        
       else
         @new_brand_name = Brand.select(:name).where(id: params[:product][:brand_id]).first.name
         @new_vendor_name = Vendor.select(:name).where(id: params[:product][:vendor_id]).first.name
@@ -141,7 +141,7 @@ class ProductsController < ApplicationController
       flash[:alert] = "That code has already been taken"
       render js: "window.location = '#{products_url}'"
     rescue ActiveRecord::RecordNotDestroyed => e
-        render js: "bootbox.alert({message: \"Sorry, you can't change colors!\",size: 'small'});"
+      render js: "bootbox.alert({message: \"Sorry, you can't change colors!\",size: 'small'});"
     end
   end
 
@@ -203,12 +203,13 @@ class ProductsController < ApplicationController
       :target, :model_id,# :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
       product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product,
-        price_lists_attributes: [:id, :price, :user_is_manipulating_price_from_product_master, :user_is_adding_new_price, :cost]],
+        price_lists_attributes: [:id, :price, :user_is_manipulating_price_from_product_master, :user_is_adding_new_price, :cost, :product_id]],
       cost_lists_attributes: [:id, :cost, :is_user_creating_product],
       product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
     )
   end
   
+
   def convert_cost_price_to_numeric
     params[:product][:cost_lists_attributes].each do |key, value|
       params[:product][:cost_lists_attributes][key][:cost] = params[:product][:cost_lists_attributes][key][:cost].gsub("Rp","").gsub(".","").gsub(",",".") if params[:product][:cost_lists_attributes][key][:cost].present?
@@ -217,6 +218,7 @@ class ProductsController < ApplicationController
       params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:product_id] = @product.id if @product.present? && !@product.new_record?
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
   end

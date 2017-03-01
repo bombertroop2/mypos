@@ -56,6 +56,10 @@ Rails.application.routes.draw do
   resources :models, except: :show
   resources :colors, except: :show
   resources :brands, except: :show
+  resources :cost_prices do
+    get "generate_form", on: :collection
+    patch "create", on: :collection
+  end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

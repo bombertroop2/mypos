@@ -1,6 +1,9 @@
 <%= smart_listing_item :products, :create, @product, 
   @product.valid? ? "products/product" : "products/form" %>
 
+<% if @product.valid? %>
+  $(".new-item-placeholder").html("");
+<% end %>
 // kode ini untuk update kolom apabila di update, karena smart listing belum bisa handle ini, disebabkan model yang berelasi
 <% if @new_brand_name.present? %>
   $("#product-brand-name-<%= @product.id %>").html("<%= @new_brand_name %>");

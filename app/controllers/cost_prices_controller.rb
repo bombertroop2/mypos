@@ -3,7 +3,7 @@ class CostPricesController < ApplicationController
   helper SmartListing::Helper
   #  before_action :set_product, only: [:show, :edit, :update, :destroy, :new_cost, :create_cost, :edit_cost]
   #  before_action :convert_cost_price_to_numeric, only: [:create, :update, :create_cost]
-  before_action :set_cost, only: :show
+  before_action :set_cost, only: [:show, :destroy]
   before_action :convert_cost_price_to_numeric, only: :create
 
   def index
@@ -20,7 +20,7 @@ class CostPricesController < ApplicationController
       start_date = splitted_date_range[0].strip.to_date
       end_date = splitted_date_range[1].strip.to_date
     end
-    costs_scope = CostList.unscoped.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name")
+    costs_scope = CostList.unscoped.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name, product_id")
     costs_scope = costs_scope.where(["products.code #{like_command} ?", "%"+params[:filter_product_code]+"%"]).
       or(costs_scope.where(["name #{like_command} ?", "%"+params[:filter_product_code]+"%"])) if params[:filter_product_code].present?
     costs_scope = costs_scope.where(["cost #{like_command} ?", "%"+params[:filter_cost]+"%"]) if params[:filter_cost].present?
@@ -51,7 +51,7 @@ class CostPricesController < ApplicationController
       params[:product][:cost_lists_attributes].each do |key, value|
         effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
       end if params[:product][:cost_lists_attributes].present?
-      @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
+      @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name, product_id").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
     end
   end
 
@@ -69,6 +69,12 @@ class CostPricesController < ApplicationController
   end
 
   def destroy
+    @cost.user_is_deleting_from_child = true
+    @cost.destroy    
+    if @cost.errors.present? and @cost.errors.messages[:base].present?
+      flash[:alert] = @cost.errors.messages[:base].to_sentence
+      render js: "window.location = '/cost_prices'"
+    end
   end
   
   def generate_form

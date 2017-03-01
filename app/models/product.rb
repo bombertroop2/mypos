@@ -1,5 +1,5 @@
 class Product < ApplicationRecord
-#  attr_accessor :effective_date
+  #  attr_accessor :effective_date
   
   belongs_to :brand
   belongs_to :vendor
@@ -60,19 +60,19 @@ class Product < ApplicationRecord
   
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
-#    if cost_lists.size == 1
-#      cost_list = cost_lists.first
-#      if Date.today >= cost_list.effective_date
-#        return cost_list
-#      end
-#    else
-      cost_lists.each do |cost_list|
-        if Date.today >= cost_list.effective_date
-          return cost_list
-        end
+    #    if cost_lists.size == 1
+    #      cost_list = cost_lists.first
+    #      if Date.today >= cost_list.effective_date
+    #        return cost_list
+    #      end
+    #    else
+    cost_lists.each do |cost_list|
+      if Date.today >= cost_list.effective_date
+        return cost_list
       end
-      return nil
-#    end
+    end
+    return nil
+    #    end
   end
   
   def active_cost_by_po_date(po_date)
@@ -132,13 +132,13 @@ class Product < ApplicationRecord
     errors.add(:base, "Product must have at least one color!") unless valid
   end
   
-#  def prevent_delete_if_purchase_order_created
-#    if purchase_order_relation
-#      errors.add(:base, "Cannot delete record with purchase order")
-#      throw :abort
-#    end
-#    return true
-#  end
+  #  def prevent_delete_if_purchase_order_created
+  #    if purchase_order_relation
+  #      errors.add(:base, "Cannot delete record with purchase order")
+  #      throw :abort
+  #    end
+  #    return true
+  #  end
   
   
   def delete_old_children_if_size_group_changed
@@ -245,7 +245,7 @@ class Product < ApplicationRecord
   end
   
   def size_group_not_changed
-    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (purchase_order_relation.present? || direct_purchase_product_relation.present?)
+    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1)
   end
         
   #        def is_all_existed_items_deleted?
