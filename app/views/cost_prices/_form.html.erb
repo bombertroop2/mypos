@@ -1,41 +1,47 @@
 <td colspan="4">
     <div style="padding-top: 20px"></div>
-    <div class="form-horizontal">
-        <div class="form-group">
-            <%= label_tag "product_id", "Product", class: "col-sm-2 control-label" %>
-              <div class="col-sm-10">
-                  <%= select_tag "product_id", options_from_collection_for_select(@products, :id, :code, (@product.id.to_s rescue nil)), {prompt: "Please select", class: "form-control"} %>
-                </div>
-            </div>
-            <div id="cost-form-container">
-                <% if params[:product].present? %>
-                  <%= render "cost_form" %>
-                <% else %>
-                  <div class="form-group">
-                      <div class="col-sm-offset-2 col-sm-10">
-                          <button class="btn btn-primary disabled" id="btn-save-cost-form">Save</button>
-                          <button class="btn btn-link cancel">Cancel</button>
-                      </div>
+    <% if !params[:action].eql?("edit") && !params[:action].eql?("update") %>
+      <div class="form-horizontal">
+          <div class="form-group">
+              <%= label_tag "product_id", "Product", class: "col-sm-2 control-label" %>
+                <div class="col-sm-10">
+                    <%= select_tag "product_id", options_from_collection_for_select(@products, :id, :code, (@product.id.to_s rescue nil)), {prompt: "Please select", class: "form-control"} %>
                   </div>
-                <% end %>
-            </div>
-        </div>
+              </div>
+              <div id="cost-form-container">
+                  <% if params[:product].present? %>
+                    <%= render "cost_form" %>
+                  <% else %>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button class="btn btn-primary disabled" id="btn-save-cost-form">Save</button>
+                            <button class="btn btn-link cancel">Cancel</button>
+                        </div>
+                    </div>
+                  <% end %>
+              </div>
+          </div>
+        <% else %>
+          <%= render "cost_form" %>
+        <% end %>
     </td>
-    <script>
-      $(function () {
-          $("#product_id").change(function () {
-              // split isi dari action attributnya form untuk ambil id produk
-    //var splittedAction = $(".form-horizontal").attr("action").split("/");
-    //if (splittedAction.length == 2)
-              if ($(this).val() != "")
-                  $.get("/cost_prices/generate_form", {
-                      product_id: $(this).val()
-                  });
-              /*else if (splittedAction.length == 3)
-               $.get("/products/populate_detail_form", {
-               id: $(this).val(),
-               product_id: splittedAction[2]
-               });*/
-          });
-      });
-    </script>
+    <% if !params[:action].eql?("edit") && !params[:action].eql?("update") %>
+      <script>
+        $(function () {
+            $("#product_id").change(function () {
+                // split isi dari action attributnya form untuk ambil id produk
+                //var splittedAction = $(".form-horizontal").attr("action").split("/");
+                //if (splittedAction.length == 2)
+                if ($(this).val() != "")
+                    $.get("/cost_prices/generate_form", {
+                        product_id: $(this).val()
+                    });
+                /*else if (splittedAction.length == 3)
+                 $.get("/products/populate_detail_form", {
+                 id: $(this).val(),
+                 product_id: splittedAction[2]
+                 });*/
+            });
+        });
+      </script>
+    <% end %>

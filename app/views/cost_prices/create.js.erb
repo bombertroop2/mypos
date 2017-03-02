@@ -1,5 +1,8 @@
 <% if @product.valid? %>
   <%= smart_listing_item :costs, :create, @cost, "cost_prices/cost" %>
+  <% if @product.valid? %>
+    $(".new-item-placeholder").html("");
+  <% end %>
 <% else %>
   <%= smart_listing_item :costs, :new, @product, "cost_prices/form" %>
 <% end %>

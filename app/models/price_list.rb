@@ -2,8 +2,8 @@ class PriceList < ApplicationRecord
   belongs_to :product_detail
   
   attr_accessor :product_id, :size_id, :price_code_id, :user_is_adding_new_price,
-    :user_is_updating_price, :user_is_deleting_from_child, :user_is_manipulating_price_from_product_master,
-    :user_is_adding_price_from_cost_prices_page
+    :user_is_updating_price, :user_is_deleting_from_child,
+    :user_is_adding_price_from_cost_prices_page, :turn_off_date_validation, :editable_record
     
   attr_reader :cost
   
@@ -13,9 +13,8 @@ class PriceList < ApplicationRecord
       #    validates :product_id, :size_id, :price_code_id, presence: true, if: proc {|price_list| price_list.user_is_adding_new_price}
   validates :effective_date, :price, :cost, presence: true        
   validates :product_detail_id, presence: true, if: proc {|price_list| !price_list.user_is_adding_new_price && !price_list.user_is_adding_price_from_cost_prices_page}
-  validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed?}
+  validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation}
   validates :effective_date, uniqueness: {scope: :product_detail_id}, if: proc {|price_list| price_list.effective_date.present?}
-  validate :price_is_changable, if: proc { |price_list| price_list.user_is_manipulating_price_from_product_master }
   validate :price_greater_or_equal_to_cost, if: proc {|price_list| price_list.price.present? && price_list.cost.present?}
           
                 #            before_create :create_product_detail, if: proc {|price_list| price_list.product_detail_is_not_existed_yet && price_list.user_is_adding_new_price}
@@ -52,12 +51,6 @@ class PriceList < ApplicationRecord
     errors.add(:price, "must be greater than or equal to cost") if price < cost.to_f
   end
 
-  def price_is_changable
-    if effective_date.present? && Date.today > effective_date && price.present? && price_changed?
-      errors.add(:price, "change is not allowed!") 
-    end
-  end
-            
   def prevent_user_delete_last_record
     if @product_detail.price_count.eql?(1) && @product_detail.product.product_details_count.eql?(1)
       errors.add(:base, "Sorry, you can't delete a record")

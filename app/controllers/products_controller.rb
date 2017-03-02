@@ -203,7 +203,7 @@ class ProductsController < ApplicationController
       :target, :model_id,# :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
       product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product,
-        price_lists_attributes: [:id, :price, :user_is_manipulating_price_from_product_master, :user_is_adding_new_price, :cost, :product_id]],
+        price_lists_attributes: [:id, :price, :user_is_adding_new_price, :cost, :product_id]],
       cost_lists_attributes: [:id, :cost, :is_user_creating_product],
       product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
     )
