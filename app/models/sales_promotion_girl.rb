@@ -9,7 +9,7 @@ class SalesPromotionGirl < ApplicationRecord
   
   after_update :unlink_from_user_if_role_downgraded
 
-  validates :address, :name, :province, :warehouse_id, :gender, :role, presence: true
+  validates :mobile_phone, :address, :name, :province, :warehouse_id, :gender, :role, presence: true
   validates :identifier, uniqueness: true
   validate :warehouse_has_supervisor?
   

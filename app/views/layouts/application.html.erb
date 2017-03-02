@@ -62,8 +62,8 @@
                           <li class="<%= params[:controller].eql?("receiving") ? "active" : "" %>"><%= link_to "Receiving", new_receiving_path %></li>
                           <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stocks", stocks_path %></li>
                           <li class="<%= params[:controller].eql?("purchase_returns") ? "active" : "" %>"><%= link_to "Purchase Returns", purchase_returns_path %></li>
-                          <li class="<%= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%= link_to "Costs", cost_lists_path %></li>
-                          <li class="<%= params[:controller].eql?("price_lists") ? "active" : "" %>"><%= link_to "Prices", price_lists_path %></li>                          
+                          <!--<li class="<%#= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%#= link_to "Costs", cost_lists_path %></li>
+                          <li class="<%#= params[:controller].eql?("price_lists") ? "active" : "" %>"><%#= link_to "Prices", price_lists_path %></li>-->
                           <li class="<%= params[:controller].eql?("cost_prices") ? "active" : "" %>"><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
                       </ul>
                   </div>

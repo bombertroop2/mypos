@@ -54,6 +54,7 @@ class SalesPromotionGirlsController < ApplicationController
   # POST /sales_promotion_girls.json
   def create    
     if user_is_not_cashier
+      params[:sales_promotion_girl][:mobile_phone] = params[:sales_promotion_girl][:mobile_phone].gsub("_","")
       @sales_promotion_girl = SalesPromotionGirl.new(sales_promotion_girl_params)
       is_exception_raised = false
       begin
@@ -78,6 +79,7 @@ class SalesPromotionGirlsController < ApplicationController
   # PATCH/PUT /sales_promotion_girls/1.json
   def update
     if user_can_edit
+      params[:sales_promotion_girl][:mobile_phone] = params[:sales_promotion_girl][:mobile_phone].gsub("_","")
       if @sales_promotion_girl.update(sales_promotion_girl_params)
         @new_warehouse_code = Warehouse.select(:code).where(id: params[:sales_promotion_girl][:warehouse_id]).first.code
       else

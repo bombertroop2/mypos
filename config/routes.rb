@@ -1,10 +1,10 @@
 Rails.application.routes.draw do
-  resources :price_lists, except: :show do
-    collection do
-      get "generate_price_form"
-    end
-  end
-  resources :cost_lists, except: :show
+#  resources :price_lists, except: :show do
+#    collection do
+#      get "generate_price_form"
+#    end
+#  end
+#  resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create] do
     collection do
       get "get_product_details"      
