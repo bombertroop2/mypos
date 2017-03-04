@@ -1,0 +1,5 @@
+<%= smart_listing_item :purchase_orders, :update, @purchase_order, "purchase_orders/purchase_order" %>
+<% unless @valid %>
+  $("#po-status-<%= @purchase_order.id %>").html("<%= @old_status %>");
+  bootbox.alert({message: "<%= @purchase_order.errors[:base].join("\\n") %>",size: 'small'});
+<% end %>

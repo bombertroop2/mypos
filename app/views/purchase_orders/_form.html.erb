@@ -1,139 +1,251 @@
-<%= form_for(@purchase_order, html: {class: "form-horizontal po-form"}) do |f| %>
-    <!--
-    <% if @purchase_order.errors.any? %>
-                                                                            <div id="error_explanation">
-                                                                                <h2><%= pluralize(@purchase_order.errors.count, "error") %> prohibited this purchase_order from being saved:</h2>
-
-                                                                                <ul>
-      <% @purchase_order.errors.full_messages.each do |message| %>
-                                                                                                                                                          <li><%= message %></li>
-      <% end %>
-                                                                                </ul>
-                                                                            </div>
-    <% end %>
-    -->
-    <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
-    <div class="form-group<%= control_group_error(@purchase_order, :vendor_id) %>">
-        <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
-          <div class="col-sm-10">
-              <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @purchase_order.vendor_id.to_s), {prompt: 'Select Vendor'}, {class: "form-control"} %>
-                <%= error_help_text(@purchase_order, :vendor_id) %>
-            </div>
-        </div>
-        <div class="form-group<%= control_group_error(@purchase_order, :warehouse_id) %>">
-            <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>            
+<td colspan="5">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@purchase_order, remote: true, html: {class: "form-horizontal po-form"}) do |f| %>
+        <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
+        <div class="form-group<%= control_group_error(@purchase_order, :vendor_id) %>">
+            <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
               <div class="col-sm-10">
-                  <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @purchase_order.warehouse_id.to_s), {prompt: 'Select Warehouse'}, {class: "form-control"} %>
-                    <%= error_help_text(@purchase_order, :warehouse_id) %>
+                  <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @purchase_order.vendor_id.to_s), {prompt: 'Select Vendor'}, {class: "form-control"} %>
+                    <%= error_help_text(@purchase_order, :vendor_id) %>
                 </div>
             </div>
-            <div class="form-group<%= control_group_error(@purchase_order, :purchase_order_date) %>">
-                <%= f.label :purchase_order_date, class: "col-sm-2 control-label" %>
+            <div class="form-group<%= control_group_error(@purchase_order, :warehouse_id) %>">
+                <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>            
                   <div class="col-sm-10">
-                      <%= f.text_field :purchase_order_date, size: 10, readonly: true, class: "form-control" %>
-                        <%= error_help_text(@purchase_order, :purchase_order_date) %>
+                      <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @purchase_order.warehouse_id.to_s), {prompt: 'Select Warehouse'}, {class: "form-control"} %>
+                        <%= error_help_text(@purchase_order, :warehouse_id) %>
                     </div>
                 </div>
-                <div class="form-group<%= control_group_error(@purchase_order, :request_delivery_date) %>">
-                    <%= f.label :request_delivery_date, class: "col-sm-2 control-label" %>
+                <div class="form-group<%= control_group_error(@purchase_order, :purchase_order_date) %>">
+                    <%= f.label :purchase_order_date, class: "col-sm-2 control-label" %>
                       <div class="col-sm-10">
-                          <%= f.text_field :request_delivery_date, size: 10, readonly: true, class: "form-control" %>
-                            <%= error_help_text(@purchase_order, :request_delivery_date) %>
+                          <%= f.text_field :purchase_order_date, size: 10, readonly: true, class: "form-control" %>
+                            <%= error_help_text(@purchase_order, :purchase_order_date) %>
                         </div>
                     </div>
-                    <div class="form-group<%= control_group_error(@purchase_order, :first_discount) %>">
-                        <%= f.label :first_discount, "First discount (%)", class: "col-sm-2 control-label" %>
+                    <div class="form-group<%= control_group_error(@purchase_order, :request_delivery_date) %>">
+                        <%= f.label :request_delivery_date, class: "col-sm-2 control-label" %>
                           <div class="col-sm-10">
-                              <%= f.text_field :first_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "1" %>
-                                <%= error_help_text(@purchase_order, :first_discount) %>
+                              <%= f.text_field :request_delivery_date, size: 10, readonly: true, class: "form-control" %>
+                                <%= error_help_text(@purchase_order, :request_delivery_date) %>
                             </div>
                         </div>
-                        <div class="form-group<%= control_group_error(@purchase_order, :second_discount) %>">
-                            <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>                              
+                        <div class="form-group<%= control_group_error(@purchase_order, :first_discount) %>">
+                            <%= f.label :first_discount, "First discount (%)", class: "col-sm-2 control-label" %>
                               <div class="col-sm-10">
-                                  <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "2", disabled: !@purchase_order.second_discount.present? %>
-                                    <%= error_help_text(@purchase_order, :second_discount) %>
-                                </div>
-                                <span class="col-sm-2"></span>
-                                <div class="col-sm-10">
-                                    <%= f.radio_button :is_additional_disc_from_net, true, checked: true %> From net
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<%= f.radio_button :is_additional_disc_from_net, false %> From gross
+                                  <%= f.text_field :first_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "1" %>
+                                    <%= error_help_text(@purchase_order, :first_discount) %>
                                 </div>
                             </div>
-                            <div class="form-group<%= control_group_error(@purchase_order, :price_discount) %>">
-                                <%= f.label :price_discount, "Price discount", class: "col-sm-2 control-label" %>
+                            <div class="form-group<%= control_group_error(@purchase_order, :second_discount) %>">
+                                <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>                              
                                   <div class="col-sm-10">
-                                      <%= f.text_field :price_discount, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
-                                          "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
-                                        <%= error_help_text(@purchase_order, :price_discount) %>
+                                      <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "2", disabled: !@purchase_order.second_discount.present? %>
+                                        <%= error_help_text(@purchase_order, :second_discount) %>
+                                    </div>
+                                    <span class="col-sm-2"></span>
+                                    <div class="col-sm-10">
+                                        <%= f.radio_button :is_additional_disc_from_net, true, checked: true %> From net
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<%= f.radio_button :is_additional_disc_from_net, false %> From gross
                                     </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <%= f.label :note, class: "col-sm-2 control-label" %>
+                                <div class="form-group<%= control_group_error(@purchase_order, :price_discount) %>">
+                                    <%= f.label :price_discount, "Price discount", class: "col-sm-2 control-label" %>
                                       <div class="col-sm-10">
-                                          <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>                                            
+                                          <%= f.text_field :price_discount, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
+                                              "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
+                                            <%= error_help_text(@purchase_order, :price_discount) %>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">Products</label>
-                                        <div class="col-sm-10">
-                                            <table id="listing_product_table" class="display">
-                                                <thead>
-                                                    <tr>
-                                                        <th></th>
-                                                        <th>Code</th>
-                                                        <th>Brand</th>
-                                                    </tr>
-                                                </thead>
 
-                                                <tbody>
-                                                    <% @product_list.each_with_index do |product, index| %>
-                                                      <tr id="product_<%= product.id %>">
-                                                          <td></td>
-                                                          <td><%= product.code %></td>
-                                                          <td><%= product.brand_name %></td>
-                                                      </tr>
+                                    <div class="form-group">
+                                        <%= f.label :note, class: "col-sm-2 control-label" %>
+                                          <div class="col-sm-10">
+                                              <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>                                            
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Products</label>
+                                            <div class="col-sm-10">
+                                                <table id="listing_product_table" class="display">
+                                                    <thead>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>Code</th>
+                                                            <th>Brand</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <% @product_list.each_with_index do |product, index| %>
+                                                          <tr id="product_<%= product.id %>">
+                                                              <td></td>
+                                                              <td><%= product.code %></td>
+                                                              <td><%= product.brand_name %></td>
+                                                          </tr>
+                                                        <% end %>
+                                                    </tbody>
+                                                </table>
+                                    <%#= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+                                                <a class="btn btn-default active" id="generate_po_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-10">
+                                                <div id="products_detail">
+                                                    <% if @products.present? %>
+                                                      <%= render 'product_quantities' %>
                                                     <% end %>
-                                                </tbody>
-                                            </table>
-                                            <%= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
-                                          </div>
-                                      </div>
-                                      <div class="form-group">
-                                          <div class="col-sm-offset-2 col-sm-10">
-                                              <div id="products_detail">
-                                                  <% if @products.present? %>
-                                                    <%= render 'product_quantities' %>
-                                                  <% end %>
-                                              </div>
-                                          </div>                                                      
-                                      </div>
-                                      <div class="form-group">
-                                          <div class="col-sm-offset-2 col-sm-10">
-                                              <%= f.submit "Save", class: "btn btn-default active" %>
+                                                </div>
+                                            </div>                                                      
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-10">
+                                    <%#= f.submit "Save", class: "btn btn-primary" %>
+                                                <a class="btn btn-primary" id="save_btn">Save</a>
+                                                <a class="btn btn-link" id="btn-cancel-new-po">Cancel</a>
                                             </div>
                                         </div>
                                       <% end %>
-
-
-                                      <script>
-                                      <% unless @purchase_order.new_record? %>
-                                          var purchaseOrderId = "<%= params[:id] %>";
-                                          $(function () {
-                                        <% if @replaced_ids.present? %>
-                                          <% @replaced_ids.each do |replaced_id| %>
-                                                  // jika product sudah ada di database sembunyikan produk dan check remove
-                                                  if ($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0) {
-                                                      $("#product_table_<%= replaced_id %>").hide();
-                                                      $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
-                                                  }
-                                          <% end %>
-                                        <% end %>
-                                          });
-                                      <% else %>
-                                          var purchaseOrderId = null;
+                                  </td>
+                                  <script>
+                                  <% unless @purchase_order.new_record? %>
+                                      var purchaseOrderId = "<%= params[:id] %>";
+                                      $(function () {
+                                    <% if @replaced_ids.present? %>
+                                      <% @replaced_ids.each do |replaced_id| %>
+                                              // jika product sudah ada di database sembunyikan produk dan check remove
+                                              if ($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0) {
+                                                  $("#product_table_<%= replaced_id %>").hide();
+                                                  $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
+                                              }
                                       <% end %>
+                                    <% end %>
+                                      });
+                                  <% else %>
+                                      var purchaseOrderId = null;
+                                  <% end %>
 
-                                      </script>
+                                    $(function () {
+                                        $("#btn-cancel-new-po").click(function () {
+                                            $(".new-item-placeholder.info").html("");
+                                            $(".new-item-placeholder.info").addClass("hidden");
+                                            $(".new-item-action.info").removeClass("hidden");
+                                        });
 
+
+                                        dataTable = $('#listing_product_table').DataTable({
+                                            order: [1, 'asc'],
+                                            dom: 'T<"clear">lfrtip',
+                                            columns: [
+                                                {data: null, defaultContent: '', orderable: false},
+                                                {data: 'code'},
+                                                {data: 'brand'}
+                                            ],
+                                            tableTools: {
+                                                sRowSelect: 'os',
+                                                sRowSelector: 'td:first-child',
+                                                aButtons: ['select_all', 'select_none']
+                                            },
+                                            paging: false,
+                                            info: false,
+                                            scrollY: "250px",
+                                            scrollCollapse: true
+                                        });
+
+
+                                        $("#generate_po_detail_form").click(function () {
+                                            if (dataTable.rows('.selected').data().length == 0)
+                                                bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+                                            else if ($("#purchase_order_purchase_order_date").val() == "")
+                                                bootbox.alert({message: "Please fill in purchase order date first", size: 'small'});
+                                            else {
+                                                var productIds = [];
+                                                $.each(dataTable.rows('.selected')[0], function (index, value) {
+                                                    productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                                });
+                                                if (typeof purchaseOrderId === 'undefined')
+                                                    $.get("/purchase_orders/get_product_details", {
+                                                        product_ids: productIds.join(","),
+                                                        previous_selected_product_ids: $("#product_ids").val(),
+                                                        po_date: $("#purchase_order_purchase_order_date").val()
+                                                    });
+                                                else
+                                                    $.get("/purchase_orders/get_product_details", {
+                                                        product_ids: productIds.join(","),
+                                                        purchase_order_id: purchaseOrderId,
+                                                        previous_selected_product_ids: $("#product_ids").val(),
+                                                        po_date: $("#purchase_order_purchase_order_date").val()
+                                                    });
+                                            }
+
+                                            return false;
+                                        });
+
+                                        $("#purchase_order_request_delivery_date").datepicker({
+                                            dateFormat: "dd/mm/yy"
+                                        });
+
+                                        $('#purchase_order_purchase_order_date').datepicker({
+                                            dateFormat: "dd/mm/yy"
+                                        });
+
+                                        hideDeleteMarkedProduct();
+
+                                        if ($("#product_ids").val() != undefined && $("#product_ids").val() != "") {
+                                            var splittedProductIds = $("#product_ids").val().split(",");
+                                            $.each(splittedProductIds, function (index, value) {
+                                                var e = jQuery.Event("click");
+                                                e.ctrlKey = true;
+                                                $("#product_" + value).find("td:first-child").trigger(e);
+                                            });
+                                        }
+
+                                        if ($(".discount-fields").length > 0)
+                                            $(".discount-fields").numeric();
+
+                                        $('#purchase_order_price_discount').autoNumeric('init');
+                                        $('#purchase_order_first_discount').keypress(function (e) {
+                                            if (e.which == 13) {
+                                                if ($(this).val().trim() != "") {
+                                                    $("#purchase_order_second_discount").prop("disabled", false);
+                                                    $("#purchase_order_second_discount").focus();
+                                                    $("#purchase_order_price_discount").val("");
+                                                }
+                                            }
+                                        });
+
+                                        $("#purchase_order_price_discount").keyup(function () {
+                                            if ($(this).val().trim() != "" && $(this).val().trim() != "Rp") {
+                                                $('#purchase_order_first_discount').val("");
+                                                $('#purchase_order_second_discount').val("");
+                                                $("#purchase_order_second_discount").prop("disabled", true);
+                                            }
+                                        });
+
+                                        $("#save_btn").click(function () {
+                                            bootbox.confirm({
+                                                title: "Create purchase order?",
+                                                message: "Please check your entries carefully! This document can't be edited.",
+                                                buttons: {
+                                                    confirm: {
+                                                        label: '<i class="fa fa-check"></i> Confirm'
+                                                    },
+                                                    cancel: {
+                                                        label: '<i class="fa fa-times"></i> Cancel'
+                                                    }
+                                                },
+                                                callback: function (result) {
+                                                    if (result) {
+                                                        $("body").css('padding-right', '0px');
+                                                        // ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
+                                                        $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
+                                                        $(".purchase-order-vendor-id").val($("#purchase_order_vendor_id").val());
+                                                        $(".po-form").submit();
+                                                    }
+                                                }
+                                            });
+                                        });
+
+                                    });
+                                  </script>

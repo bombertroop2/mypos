@@ -2,34 +2,15 @@
     <h1>Listing Purchase Orders</h1>
 </div>
 
-<table class="table table-condensed table-responsive table-striped">
-    <thead>
-        <tr>
-            <th>Number</th>
-            <th>Po type</th>
-            <th>Status</th>
-            <th>Vendor</th>
-            <th></th>
-        </tr>
-    </thead>
+<%= smart_listing_controls_for(:purchase_orders, {class: "form-inline text-right"}) do %>
 
-    <tbody>
-        <% @purchase_orders.each do |purchase_order| %>
-          <tr>
-              <td><%= purchase_order.number %></td>
-              <td><%= purchase_order.po_type %></td>
-              <td><%= purchase_order.status %></td>
-              <td><%= purchase_order.vendor_name %></td>
-              <td>
-                  <%= link_to 'Show', purchase_order, class: "btn btn-info btn-xs active" %>
-                    <%= link_to 'Edit', edit_purchase_order_path(purchase_order), class: "btn btn-warning btn-xs active" %>
-                      <%= link_to 'Close', close_purchase_order_path(purchase_order), method: :get, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
-                        <%= link_to 'Delete', purchase_order, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger btn-xs active" %>
-                      </td>
-                  </tr>
-                <% end %>
-            </tbody>
-        </table>
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Search...", autocomplete: :off %>
+      </div>
 
-
-        <%= link_to 'New Purchase order', new_purchase_order_path, class: "btn btn-default active" %>
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:purchase_orders) %>

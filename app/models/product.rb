@@ -77,18 +77,18 @@ class Product < ApplicationRecord
   
   def active_cost_by_po_date(po_date)
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
-    if cost_lists.size == 1
-      cost_list = cost_lists.first
+    #    if cost_lists.size == 1
+    #      cost_list = cost_lists.first
+    #      if po_date >= cost_list.effective_date
+    #        return cost_list
+    #      end
+    #    else
+    cost_lists.each do |cost_list|
       if po_date >= cost_list.effective_date
         return cost_list
       end
-    else
-      cost_lists.each do |cost_list|
-        if po_date >= cost_list.effective_date
-          return cost_list
-        end
-      end
     end
+    #    end
   end
   
   def active_effective_date

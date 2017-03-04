@@ -44,3 +44,7 @@ else{
   //showDeleteMarkedProduct();
 <% end %>
 }
+
+<% @product_costs.each do |key, val| %>
+  $("#product_table_cost_<%= key %>").html("<%= number_to_currency((val), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>");
+<% end %>

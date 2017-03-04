@@ -83,17 +83,17 @@ class PurchaseOrder < ApplicationRecord
                 
                                           def prevent_close_if_article_status_not_partial
                                             if !status_was.eql?("Partial") && status_changed? && persisted? && status.eql?("Closed")
-                                              errors.add(:base, "Sorry, this PO is not closeable")
+                                              errors.add(:base, "Sorry, that PO cannot be closed")
                                             elsif status_was.eql?("Closed") && persisted? && status.eql?("Closed")
-                                              errors.add(:base, "Sorry, this PO already closed")
+                                              errors.add(:base, "Sorry, that PO already closed")
                                             end
                                           end
               
                                           def prevent_delete_if_article_received
                                             if !status_was.eql?("Open") && status_changed? && persisted? && status.eql?("Deleted")
-                                              errors.add(:base, "Sorry, this PO is not deleteable")
+                                              errors.add(:base, "Sorry, that PO cannot be deleted")
                                             elsif status_was.eql?("Deleted") && persisted? && status.eql?("Deleted")
-                                              errors.add(:base, "Sorry, this PO already deleted")
+                                              errors.add(:base, "Sorry, that PO already deleted")
                                             end
                                           end
 
@@ -188,7 +188,7 @@ class PurchaseOrder < ApplicationRecord
                                               break unless is_valid
                                             end
                 
-                                            errors.add(:base, "Please insert at least one column per product!") unless is_valid
+                                            errors.add(:base, "Please insert at least one row of colors per product!") unless is_valid
                                           end
               
                                           def is_product_has_one_color?                

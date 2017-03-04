@@ -1,5 +1,5 @@
 class PurchaseOrderProduct < ApplicationRecord
-  attr_accessor :purchase_order_date, :is_user_adding_new_cost, :vendor_id
+  attr_accessor :purchase_order_date, :is_user_adding_new_cost, :vendor_id, :po_cost
   
   belongs_to :purchase_order
   belongs_to :product
@@ -17,7 +17,7 @@ class PurchaseOrderProduct < ApplicationRecord
       before_save :set_active_cost, unless: proc {|pop| pop.is_user_adding_new_cost}
         after_update :update_total_unit_cost, if: proc {|pop| pop.cost_list_id_changed?}
 
-          accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? and attributes[:id].blank? }
+          accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? && attributes[:id].blank? }
 
           def total_quantity
             purchase_order_details.sum :quantity

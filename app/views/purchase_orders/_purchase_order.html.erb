@@ -1,0 +1,12 @@
+<td><%= object.number %></td>
+<td><%= object.po_type %></td>
+<td id="po-status-<%= object.id %>"><%= object.status %></td>
+<td id="vendor-name-<%= object.id %>"><%= object.vendor_name rescue "" %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
+    <% if user_signed_in? && is_admin? %>
+  <%#= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_purchase_order_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
+      <%= link_to "<i class=\"glyphicon glyphicon-remove\"></i>".html_safe, close_purchase_order_path(object), data: {remote: true, confirmation: 'Are you sure?', placement: :left}, title: "Close" %>
+      <%= link_to_if(true, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+    <% end %>
+</td>

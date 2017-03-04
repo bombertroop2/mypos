@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   devise_for :users, only: :sessions
   get 'welcome/index'
 
-  resources :purchase_orders do
+  resources :purchase_orders, except: [:edit, :update] do
     collection do
       get 'get_product_details'
     end

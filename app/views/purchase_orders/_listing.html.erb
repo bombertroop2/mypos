@@ -1,0 +1,36 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-po-thead">
+        <tr>
+            <th class="col-md-4"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "PO type", "po_type" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Status", "status" %></th>
+            <th class="col-md-4"><%= smart_listing.sortable "Vendor", "vendor_name" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |po| %>
+          <tr class="editable" data-id="<%= po.id %>">
+              <%= smart_listing.render object: po, partial: "purchase_orders/purchase_order", locals: {object: po} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 5, link: new_purchase_order_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-po-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-po-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>
