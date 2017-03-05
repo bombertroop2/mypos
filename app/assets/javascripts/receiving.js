@@ -1,4 +1,3 @@
-var receivingDataTable = null;
 var receivingDataTableDirectPurchase = null;
 
 function autoScrollToBottomOfPage() {
@@ -154,7 +153,7 @@ function selectRow(purchaseOrderId) {
 //
 //});
 
-$(document).on('turbolinks:load', function () {
+$(function () {
     $("#direct_purchase_receiving_date").datepicker({
         dateFormat: "dd/mm/yy"
     });
@@ -190,36 +189,6 @@ $(document).on('turbolinks:load', function () {
         info: false,
         scrollY: "250px",
         scrollCollapse: true
-    });
-
-    receivingDataTable = $('#listing_purchase_order_table').DataTable({
-        order: [0, 'asc'],
-        dom: 'T<"clear">lfrtip',
-        columns: [
-            {data: 'number'},
-            {data: 'status'},
-            {data: 'vendor'},
-            {data: 'warehouse'}
-        ],
-        tableTools: {
-            sRowSelect: 'single',
-            aButtons: []
-        },
-        paging: false,
-        info: false,
-        scrollY: "250px",
-        scrollCollapse: true
-    });
-    $("#generate_receiving_po_form").click(function () {
-        if (receivingDataTable.rows('.selected').data().length == 0)
-            alert('You have not selected a purchase order yet!');
-        else {
-            var purchaseOrderId = receivingDataTable.rows(receivingDataTable.rows('.selected')[0][0]).nodes().to$().attr("id").split("_")[2];
-
-            $.get("/receiving/" + purchaseOrderId + "/get_purchase_order");
-        }
-
-        return false;
     });
 
     $("#generate_dp_detail_form").click(function () {
@@ -268,25 +237,19 @@ $(document).on('turbolinks:load', function () {
         }
     });
 
-    $(".do-radio-button").click(function () {
-        if ($(this).val() == "yes")
-            $(".do-number-field").prop("disabled", false);
-        else {
-            $(".do-number-field").val("");
-            $(".do-number-field").prop("disabled", true);
-        }
-    });
-
-    $(".receiving-po-date").datepicker({
-        dateFormat: "dd/mm/yy"
-    });
-
-    if ($(".do-radio-button:checked").val() == "yes")
-        $(".do-number-field").prop("disabled", false);
-    else {
-        $(".do-number-field").val("");
-        $(".do-number-field").prop("disabled", true);
-    }
+    /*$(".do-radio-button").click(function () {
+     if ($(this).val() == "yes")
+     $(".do-number-field").prop("disabled", false);
+     else {
+     $(".do-number-field").val("");
+     $(".do-number-field").prop("disabled", true);
+     }
+     });
+     
+     $(".receiving-po-date").datepicker({
+     dateFormat: "dd/mm/yy"
+     });
+     */
 
     // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
     $(".direct-purchase-form").submit(function () {

@@ -1,13 +1,26 @@
+include SmartListing::Helper::ControllerExtensions
 class ReceivingController < ApplicationController
+  helper SmartListing::Helper
   before_action :set_purchase_order, only: [:get_purchase_order, :receive_products_from_purchase_order]
   before_action :convert_price_discount_to_numeric, only: :create
   
   def new
-    @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
-    @suppliers = Vendor.select(:id, :name)
-    @warehouses = Warehouse.central.select :id, :code
-    @direct_purchase = DirectPurchase.new
-    @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
+    unless request.xhr?
+      @suppliers = Vendor.select(:id, :name)
+      @warehouses = Warehouse.central.select :id, :code
+      @direct_purchase = DirectPurchase.new
+      @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
+    end
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    po_scope = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+    po_scope = po_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(po_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(po_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @purchase_orders = smart_listing_create(:receiving_purchase_orders, po_scope, partial: 'receiving/listing', default_sort: {number: "ASC"})
   end
   
   def get_purchase_order    
@@ -19,45 +32,13 @@ class ReceivingController < ApplicationController
         received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
       end
     end
-    respond_to { |format| format.js }
   end
   
   def receive_products_from_purchase_order    
-    respond_to do |format|
-      begin
-        if @purchase_order.update(purchase_order_params)
-          format.html { redirect_to new_receiving_url, notice: "#{@purchase_order.received_purchase_orders.select(:delivery_order_number).last.delivery_order_number}'s items were successfully received." }
-          format.json { head :no_content }
-        else        
-          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
-          @suppliers = Vendor.select(:id, :name)
-          @warehouses = Warehouse.select :id, :code
-          @direct_purchase = DirectPurchase.new
-          @direct_purchase.build_received_purchase_order is_using_delivery_order: true
-          received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
-          @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
-            received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
-            received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id if received_purchase_order_product.blank?
-            po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
-              if received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.blank?
-                received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
-              end
-            end
-          end
-          if @purchase_order.errors[:base].present?
-            flash.now[:alert] = @purchase_order.errors[:base].to_sentence
-          elsif @purchase_order.errors[:"received_purchase_orders.base"].present?
-            flash.now[:alert] = @purchase_order.errors[:"received_purchase_orders.base"].to_sentence
-          end        
-          format.html { render action: "new" }
-          format.json { render json: @purchase_order.errors, status: :unprocessable_entity }
-        end
-      rescue ActiveRecord::RecordNotUnique => e
+    begin
+      @do_number_not_unique = false
+      unless @purchase_order.update(purchase_order_params)
         @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
-        @suppliers = Vendor.select(:id, :name)
-        @warehouses = Warehouse.select :id, :code
-        @direct_purchase = DirectPurchase.new
-        @direct_purchase.build_received_purchase_order is_using_delivery_order: true
         received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
         @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
           received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
@@ -68,9 +49,28 @@ class ReceivingController < ApplicationController
             end
           end
         end
-        received_purchase_order.errors.messages[:delivery_order_number] = ["has already been taken"]
-        format.html { render action: "new" }
+        
+        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
+      else        
+        render js: "window.location = '#{new_receiving_url}';" if @purchase_order.reload.status.eql?("Finish")
+        @vendor_name = Vendor.select(:name).find_by(id: @purchase_order.vendor_id).name rescue nil
+        @warehouse_name = Warehouse.select(:name).find_by(id: @purchase_order.warehouse_id).name rescue nil
       end
+    rescue ActiveRecord::RecordNotUnique => e
+      @do_number_not_unique = true
+      @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+      received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
+      @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
+        received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
+        received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id if received_purchase_order_product.blank?
+        po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
+          if received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.blank?
+            received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
+          end
+        end
+      end
+      received_purchase_order.errors.messages[:delivery_order_number] = ["has already been taken"]
     end
   end
   
@@ -181,7 +181,7 @@ class ReceivingController < ApplicationController
   end
   
   def set_purchase_order
-    @purchase_order = PurchaseOrder.where(id: params[:id]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, price_discount").joins(:vendor).first
+    @purchase_order = PurchaseOrder.where(id: params[:id]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, price_discount, vendor_id, warehouse_id").joins(:vendor).first
   end
   
   def convert_price_discount_to_numeric

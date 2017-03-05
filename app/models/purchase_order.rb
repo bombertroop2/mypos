@@ -11,7 +11,7 @@ class PurchaseOrder < ApplicationRecord
   attr_accessor :receiving_po, :deleting_po, :closing_po, :is_user_changing_cost
 
   before_validation :generate_number, :set_type, :set_status, on: :create
-  before_validation :remove_double_discount, if: proc {|po| po.price_discount.present?}, on: :update
+  before_validation :remove_double_discount, if: proc {|po| !po.receiving_po && po.price_discount.present?}, on: :update
   
     before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
       before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
@@ -29,7 +29,7 @@ class PurchaseOrder < ApplicationRecord
                           validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.first_discount.present?}
                             validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
                               validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
-                                validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present? && !po.is_additional_disc_from_net}
+                                validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.second_discount.present? && !po.is_additional_disc_from_net}
                                   validates :first_discount, presence: true, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
                                     validate :prevent_combining_discount, if: proc {|po| !po.is_user_changing_cost && po.first_discount.present? && po.price_discount.present?}
                                       validates :price_discount, numericality: true, if: proc { |po| po.price_discount.present? }

@@ -1,21 +1,3 @@
-$("#purchase_order_form_container").html("<%= j(render(partial: "receiving_purchase_order_form")) %>");
-$(".do-radio-button").click(function () {
-  if ($(this).val() == "yes")
-    $(".do-number-field").prop("disabled", false);
-  else {
-    $(".do-number-field").val("");
-    $(".do-number-field").prop("disabled", true);
-  }
-});
-$(".quantity").numeric({
-  decimal: false,
-  negative: false
-}, function () {
-  alert("Positive integers only");
-  this.value = "";
-  this.focus();
-});
-$(".receiving-po-date").datepicker({
-        dateFormat: "dd/mm/yy"
-    });
-autoScrollToBottomOfPage();
+//$("#purchase_order_form_container").html("<%= j(render(partial: "receiving_purchase_order_form")) %>");
+<%= smart_listing_item :receiving_purchase_orders, :edit, @purchase_order, "receiving/receiving_purchase_order_form" %>
+//autoScrollToBottomOfPage();

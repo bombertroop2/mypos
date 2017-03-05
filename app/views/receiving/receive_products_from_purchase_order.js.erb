@@ -1,0 +1,12 @@
+<% if !@do_number_not_unique %>
+  <%= smart_listing_item :receiving_purchase_orders, :update, @purchase_order, 
+    @purchase_order.valid? ? "receiving/purchase_order" : "receiving/receiving_purchase_order_form" %>
+  <% if @vendor_name.present? %>
+    $("#vendor-name-<%= @purchase_order.id %>").html("<%= @vendor_name %>");
+  <% end %>
+  <% if @warehouse_name.present? %>
+    $("#warehouse-name-<%= @purchase_order.id %>").html("<%= @warehouse_name %>");
+  <% end %>
+<% else %>
+  <%= smart_listing_item :receiving_purchase_orders, :edit, @purchase_order, "receiving/receiving_purchase_order_form" %>
+<% end %>
