@@ -5,7 +5,7 @@ class Warehouse < ApplicationRecord
 
   has_many :purchase_orders, dependent: :restrict_with_error
   has_many :sales_promotion_girls, dependent: :restrict_with_error
-  has_one :stock
+  has_one :stock, dependent: :restrict_with_error
   has_one :po_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
   has_one :spg_relation, -> {select("1 AS one")}, class_name: "SalesPromotionGirl"
 
@@ -42,6 +42,6 @@ class Warehouse < ApplicationRecord
     end
     
     def code_not_changed
-      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (spg_relation.present? || po_relation.present?)
+      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (spg_relation.present? || po_relation.present? || stock.present?)
     end
   end

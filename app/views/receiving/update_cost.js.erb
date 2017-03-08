@@ -1,0 +1,4 @@
+<% @product_costs.each do |key, val| %>
+  $("#dp_product_table_cost_<%= key %>").html("<%= number_to_currency((val), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>");
+  $("#dp-cost-<%= key %>").val("<%= val %>");
+<% end %>

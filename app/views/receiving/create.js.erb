@@ -1,0 +1,7 @@
+<% unless @product_received %>
+  $("#direct_purchase").html("<%= j(render(partial: "direct_purchase_form")) %>");
+<% else %>
+  bootbox.alert({message: "Product has been successfully received.",size: 'small', callback: function(){
+  window.location = "<%= new_receiving_path %>";
+  }});
+<% end %>

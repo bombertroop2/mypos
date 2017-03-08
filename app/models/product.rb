@@ -93,16 +93,16 @@ class Product < ApplicationRecord
   
   def active_effective_date
     cost_lists = self.cost_lists.select(:effective_date)
-    if cost_lists.size == 1
-      return cost_lists.first.effective_date
-    else
+#    if cost_lists.size == 1
+#      return cost_lists.first.effective_date
+#    else
       cost_lists.each do |cost_list|
         if Date.today >= cost_list.effective_date
           return cost_list.effective_date
         end
       end
-      cost_lists.last.effective_date
-    end
+#      cost_lists.last.effective_date
+#    end
   end
   
   def cost_count
