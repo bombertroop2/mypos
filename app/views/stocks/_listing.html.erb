@@ -1,0 +1,31 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-stock-thead">
+        <tr>
+            <th rowspan="2" class="col-md-4" style="vertical-align: middle;text-align: center"><%= smart_listing.sortable "Warehouse", "warehouses.name" %></th>
+            <th colspan="4" class="col-md-8" style="text-align: center">Product</th>
+        </tr>
+        <tr>
+            <th class="col-md-2" style="text-align: center"><%= smart_listing.sortable "Code", "products.code" %></th>
+            <th class="col-md-2" style="text-align: center"><%= smart_listing.sortable "Color", "color_name" %></th>
+            <th class="col-md-2" style="text-align: center"><%= smart_listing.sortable "Size", "size_label" %></th>
+            <th class="col-md-2" style="text-align: center"><%= smart_listing.sortable "Quantity", "quantity" %></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |stock| %>
+          <tr class="editable">
+              <%= smart_listing.render object: stock, partial: "stocks/stock", locals: {object: stock} %>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-stock-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-stock-thead").show();
+      }
+  }, 0);
+</script>
