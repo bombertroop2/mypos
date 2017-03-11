@@ -36,6 +36,7 @@ class Product < ApplicationRecord
   validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
+  validate :check_item, on: :create
   #  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
@@ -93,16 +94,16 @@ class Product < ApplicationRecord
   
   def active_effective_date
     cost_lists = self.cost_lists.select(:effective_date)
-#    if cost_lists.size == 1
-#      return cost_lists.first.effective_date
-#    else
-      cost_lists.each do |cost_list|
-        if Date.today >= cost_list.effective_date
-          return cost_list.effective_date
-        end
+    #    if cost_lists.size == 1
+    #      return cost_lists.first.effective_date
+    #    else
+    cost_lists.each do |cost_list|
+      if Date.today >= cost_list.effective_date
+        return cost_list.effective_date
       end
-#      cost_lists.last.effective_date
-#    end
+    end
+    #      cost_lists.last.effective_date
+    #    end
   end
   
   def cost_count
@@ -256,19 +257,17 @@ class Product < ApplicationRecord
   #        end
         
   def check_item
-    if new_record?
-      valid = if product_details.present?
-        true
-      else
-        false
-      end
-    else    
-      valid = if !size_group_id_changed? || (size_group_id_changed? && product_details.select{|product_detail| product_detail.id.nil?}.present?)
-        true
-      else
-        false
-      end
+    valid = if product_details.present?
+      true
+    else
+      false
     end
+    #    else   
+    #      valid = if !size_group_id_changed? || (size_group_id_changed? && product_details.select{|product_detail| product_detail.id.nil?}.present?)
+    #        true
+    #      else
+    #        false
+    #      end
     errors.add(:base, "Product prices must be filled in!") unless valid
   end
             
