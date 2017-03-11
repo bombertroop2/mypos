@@ -1,10 +1,20 @@
+include SmartListing::Helper::ControllerExtensions
 class PurchaseReturnsController < ApplicationController
+  helper SmartListing::Helper
   before_action :set_purchase_return, only: [:show, :edit, :update, :destroy]
 
   # GET /purchase_returns
   # GET /purchase_returns.json
   def index
-    @purchase_returns = PurchaseReturn.all
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    purchase_returns_scope = PurchaseReturn.joins(purchase_order: :vendor).select("purchase_returns.id, purchase_returns.number, name")
+    purchase_returns_scope = purchase_returns_scope.where(["purchase_returns.number #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(purchase_returns_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @purchase_returns = smart_listing_create(:purchase_returns, purchase_returns_scope, partial: 'purchase_returns/listing', default_sort: {:"purchase_returns.number" => "asc"})
   end
 
   # GET /purchase_returns/1
@@ -15,7 +25,7 @@ class PurchaseReturnsController < ApplicationController
   # GET /purchase_returns/new
   def new
     @purchase_return = PurchaseReturn.new
-    @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'")
+    @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
   end
 
   # GET /purchase_returns/1/edit
@@ -27,29 +37,31 @@ class PurchaseReturnsController < ApplicationController
   def create
     @purchase_return = PurchaseReturn.new(purchase_return_params)
     is_exception_raised = false
-    respond_to do |format|
-      begin
-        if @purchase_return.save
-          format.html { redirect_to @purchase_return, notice: 'Purchase return was successfully created.' }
-          format.json { render :show, status: :created, location: @purchase_return }
-        else
-          @purchase_return.purchase_return_products.each do |prp|
-            prp.purchase_order_product.purchase_order_details.each do |pod|
-              prp.purchase_return_items.build purchase_order_detail_id: pod.id if prp.purchase_return_items.select{|pri| pri.purchase_order_detail.eql?(pod)}.blank?
-            end
+    begin
+      unless @purchase_return.save
+        #            purchase_order = PurchaseOrder.where(id: params[:purchase_order_id]).select(:id).first
+        #    purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
+        #      purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
+        #      pop.purchase_order_details.select(:id).each do |pod|
+        #        purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id
+        #      end
+        #    end
+
+        @purchase_return.purchase_return_products.each do |prp|
+          prp.purchase_order_product.purchase_order_details.select(:id).each do |pod|
+            prp.purchase_return_items.build purchase_order_detail_id: pod.id if prp.purchase_return_items.select{|pri| pri.purchase_order_detail_id.eql?(pod.id)}.blank?
           end
-          @purchase_orders = PurchaseOrder.all
-          if @purchase_return.errors[:base].present?
-            flash.now[:alert] = @purchase_return.errors[:base].to_sentence
-          end
-          format.html { render :new }
-          format.json { render json: @purchase_return.errors, status: :unprocessable_entity }
         end
-        is_exception_raised = false
-      rescue ActiveRecord::RecordNotUnique => e
-        is_exception_raised = true
-      end while is_exception_raised
-    end
+        @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
+        render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
+      else
+        @pr_number = @purchase_return.number
+        @vendor_name = PurchaseOrder.joins(:vendor).where(["purchase_orders.id = ?",@purchase_return.purchase_order_id]).select("vendors.name").first.name
+      end
+      is_exception_raised = false
+    rescue ActiveRecord::RecordNotUnique => e
+      is_exception_raised = true
+    end while is_exception_raised
   end
 
   # PATCH/PUT /purchase_returns/1
@@ -78,10 +90,10 @@ class PurchaseReturnsController < ApplicationController
   
   def get_purchase_order_details
     @purchase_return = PurchaseReturn.new
-    purchase_order = PurchaseOrder.find params[:purchase_order_id]
-    purchase_order.purchase_order_products.each do |pop|
-      purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id
-      pop.purchase_order_details.each do |pod|
+    purchase_order = PurchaseOrder.where(id: params[:purchase_order_id]).select(:id).first
+    purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
+      purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
+      pop.purchase_order_details.select(:id).each do |pod|
         purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id
       end
     end
@@ -97,7 +109,7 @@ class PurchaseReturnsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_return_params
     params.require(:purchase_return).permit(:number, :vendor_id, :purchase_order_id,
-      purchase_return_products_attributes: [:id, :purchase_order_product_id,
+      purchase_return_products_attributes: [:id, :purchase_order_product_id, :product_cost, :product_code, :product_name, :product_id,
         purchase_return_items_attributes: [:quantity, :purchase_order_detail_id, :id]])
   end
 end

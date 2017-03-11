@@ -1,4 +1,6 @@
 class PurchaseReturnProduct < ApplicationRecord
+  attr_accessor :product_cost, :product_code, :product_name, :product_id
+  
   belongs_to :purchase_order_product
   belongs_to :purchase_return
   

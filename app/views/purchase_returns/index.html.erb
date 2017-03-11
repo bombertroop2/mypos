@@ -2,24 +2,15 @@
     <h1>Listing Purchase Returns</h1>
 </div>
 
-<table class="table table-condensed table-responsive table-striped">
-    <thead>
-        <tr>
-            <th>Number</th>
-            <th>Vendor</th>
-            <th></th>
-        </tr>
-    </thead>
+<%= smart_listing_controls_for(:purchase_returns, {class: "form-inline text-right"}) do %>
 
-    <tbody>
-        <% @purchase_returns.each do |purchase_return| %>
-          <tr>
-              <td><%= purchase_return.number %></td>
-              <td><%= purchase_return.purchase_order.vendor.name %></td>
-              <td><%= link_to 'Show', purchase_return, class: "btn btn-info btn-xs active" %></td>
-          </tr>
-        <% end %>
-    </tbody>
-</table>
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Search...", autocomplete: :off %>
+      </div>
 
-<%= link_to 'New Purchase return', new_purchase_return_path, class: "btn btn-default active" %>
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:purchase_returns) %>

@@ -2,13 +2,18 @@ class PurchaseReturn < ApplicationRecord
   has_many :purchase_return_products, dependent: :destroy
   belongs_to :purchase_order
   
-  validate :check_min_return_quantity
+  before_validation :generate_number
+  
+  validate :check_min_return_quantity, :purchase_order_is_returnable, if: proc {|pr| pr.purchase_order_id.present?}
+  validates :purchase_order_id, presence: true
   
   accepts_nested_attributes_for :purchase_return_products
-  
-  before_validation :generate_number
     
   private
+  
+  def purchase_order_is_returnable
+    errors.add(:purchase_order_id, "return is not allowed") if PurchaseOrder.where(["status != 'Open' AND status != 'Deleted' AND id = ?", purchase_order_id]).select("1 AS one").blank?
+  end
   
   def check_min_return_quantity
     valid = false

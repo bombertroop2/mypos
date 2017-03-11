@@ -1,0 +1,34 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-pr-thead">
+        <tr>
+            <th class="col-md-5"><%= smart_listing.sortable "Number", "purchase_returns.number" %></th>
+            <th class="col-md-5"><%= smart_listing.sortable "Vendor", "name" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |pr| %>
+          <tr class="editable" data-id="<%= pr.id %>">
+              <%= smart_listing.render object: pr, partial: "purchase_returns/purchase_return", locals: {object: pr} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 3, link: new_purchase_return_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-pr-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-pr-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

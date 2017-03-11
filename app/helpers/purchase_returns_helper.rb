@@ -1,7 +1,7 @@
 module PurchaseReturnsHelper
-  def create_return_product_array_variable_name(purchase_return_product, product)
+  def create_return_product_array_variable_name(purchase_return_product, product_id)
     if purchase_return_product.new_record?
-      "purchase_return[purchase_return_products_attributes][#{Time.now.to_i.to_s+product.id.to_s}]"
+      "purchase_return[purchase_return_products_attributes][#{Time.now.to_i.to_s+product_id.to_s}]"
     else
       "purchase_return[purchase_return_products_attributes][]"
     end
