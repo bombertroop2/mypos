@@ -19,12 +19,12 @@
                                 <tr>
                                     <td>To</td>
                                     <td>:</td>
-                                    <td><%= @purchase_return.purchase_order.vendor.name if @purchase_return.purchase_order and @purchase_return.purchase_order.vendor %></td>
+                                    <td><%= @purchase_return.purchase_order.vendor.name rescue @purchase_return.direct_purchase.vendor.name %></td>
                                 </tr>
                                 <tr>
                                     <td>Address</td>
                                     <td>:</td>
-                                    <td><%= @purchase_return.purchase_order.vendor.address if @purchase_return.purchase_order and @purchase_return.purchase_order.vendor %></td>
+                                    <td><%= @purchase_return.purchase_order.vendor.address rescue @purchase_return.direct_purchase.vendor.address %></td>
                                 </tr>
                                 <tr>
                                     <td>Created Date</td>
@@ -34,7 +34,7 @@
                                 <tr>
                                     <td>PO Number</td>
                                     <td>:</td>
-                                    <td><%= @purchase_return.purchase_order.number if @purchase_return.purchase_order %></td>
+                                    <td><%= @purchase_return.purchase_order.number rescue "" %></td>
                                 </tr>
                             </table>
                         </td>
@@ -52,10 +52,10 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>1st Discount (<%= @purchase_return.purchase_order.first_discount.to_f %>%)</td>
+                                    <td>1st Discount (<%= @purchase_return.purchase_order.first_discount.to_f rescue @purchase_return.direct_purchase.first_discount.to_f %>%)</td>
                                     <td>:</td>
                                     <td align="right">
-                                      <%= number_to_currency((@purchase_return.purchase_order.first_discount.to_f / 100) * total_return_value(@purchase_return),
+                                      <%= number_to_currency(((@purchase_return.purchase_order.first_discount.to_f rescue @purchase_return.direct_purchase.first_discount.to_f) / 100) * total_return_value(@purchase_return),
                                           :separator => ",",
                                           :delimiter => ".",
                                           :unit => "Rp",
@@ -64,7 +64,7 @@
                                 </tr>
 
                                 <tr>
-                                    <td>2nd Discount (<%= @purchase_return.purchase_order.second_discount.to_f %>%)<% if @purchase_return.purchase_order.is_additional_disc_from_net %> (net)<% elsif @purchase_return.purchase_order.second_discount.present? %> (gross)<% end %></td>
+                                    <td>2nd Discount (<%= (@purchase_return.purchase_order.second_discount.to_f rescue @purchase_return.direct_purchase.second_discount.to_f) %>%)<% if (@purchase_return.purchase_order && @purchase_return.purchase_order.is_additional_disc_from_net) || (@purchase_return.direct_purchase && @purchase_return.direct_purchase.is_additional_disc_from_net) %> (net)<% elsif (@purchase_return.purchase_order && @purchase_return.purchase_order.second_discount.present?) || (@purchase_return.direct_purchase && @purchase_return.direct_purchase.second_discount.present?) %> (gross)<% end %></td>
                                     <td>:</td>
                                     <td align="right">
                                     <%= number_to_currency(get_second_discount_in_money_pr(@purchase_return),
@@ -78,16 +78,28 @@
                                     <td>Discount (Rp)</td>
                                     <td>:</td>
                                     <td align="right">
-                                    <%= number_to_currency(@purchase_return.purchase_order.price_discount.to_f,
+                                    <%= number_to_currency((@purchase_return.purchase_order.price_discount.to_f rescue @purchase_return.direct_purchase.price_discount.to_f),
                                       :separator => ",",
                                       :delimiter => ".",
                                       :unit => "Rp",
                                       :precision => 2) %>
                                     </td>
                                 </tr>
-                            <% if @purchase_return.purchase_order.is_taxable_entrepreneur %>                            
+                            <% if @purchase_return.purchase_order && @purchase_return.purchase_order.is_taxable_entrepreneur %>                            
                                 <tr>
                                     <td>Value Added Tax (<%= @purchase_return.purchase_order.value_added_tax %> 10%)</td>
+                                    <td>:</td>
+                                    <td align="right">
+                                      <%= number_to_currency(get_vat_in_money_pr(@purchase_return),
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %>
+                                    </td>
+                                </tr>
+                            <% elsif @purchase_return.direct_purchase && @purchase_return.direct_purchase.is_taxable_entrepreneur %>
+                                <tr>
+                                    <td>Value Added Tax (<%= @purchase_return.direct_purchase.vat_type %> 10%)</td>
                                     <td>:</td>
                                     <td align="right">
                                       <%= number_to_currency(get_vat_in_money_pr(@purchase_return),
@@ -125,42 +137,67 @@
                                     </tr>
                                 <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
                                     <tr align="center">
-                                        <td style="vertical-align: middle"><%= "#{pr_product.purchase_order_product.product.code} - #{pr_product.purchase_order_product.product.brand.name}" %></td>
-                                        <td style="vertical-align: middle"><%= number_to_currency(pr_product.purchase_order_product.cost_list.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                        <td style="vertical-align: middle"><%= "#{(pr_product.purchase_order_product.product.code rescue pr_product.direct_purchase_product.product.code)} - #{(pr_product.purchase_order_product.product.brand.name rescue pr_product.direct_purchase_product.product.brand.name)}" %></td>
+                                        <td style="vertical-align: middle"><%= number_to_currency((pr_product.purchase_order_product.cost_list.cost rescue pr_product.direct_purchase_product.cost_list.cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                                         <td style="vertical-align: middle;text-align: center">
                                             <table class="table table-condensed table-responsive table-bordered">
                                                 <tbody>
                                                     <tr>
                                                         <td colspan="2" rowspan="2"></td>
-                                                        <td align="center" colspan="<%= pr_product.purchase_order_product.sizes.length %>">Sizes</td>
+                                                        <td align="center" colspan="<%= (pr_product.purchase_order_product.sizes.length rescue pr_product.direct_purchase_product.sizes.length) %>">Sizes</td>
                                                     </tr>
                                                     <tr>
-                                                      <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                        <td align="center"><%= size.size %></td>
+                                                      <% if pr_product.purchase_order_product.present? %>
+                                                        <% pr_product.purchase_order_product.sizes.each do |size| %>
+                                                          <td align="center"><%= size.size %></td>
+                                                        <% end %>
+                                                      <% elsif pr_product.direct_purchase_product.present? %>
+                                                        <% pr_product.direct_purchase_product.sizes.each do |size| %>
+                                                          <td align="center"><%= size.size %></td>
+                                                        <% end %>
                                                       <% end %>
                                                     </tr>
-                                                  <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
-                                                    <tr>
-                                                        <% if idx == 0 %>
-                                                          <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
-                                                        <% end %>
-                                                        <td align="center"><%= color.code %></td>
-                                                        <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                          <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
-                                                          <td>
-                                                              <% if pr_item %>
-                                                                <%= pr_item.quantity %>
-                                                              <% end %>
-                                                          </td>
-                                                        <% end %>
-                                                    </tr>
+                                                  <% if pr_product.purchase_order_product.present? %>
+                                                    <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
+                                                      <tr>
+                                                          <% if idx == 0 %>
+                                                            <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
+                                                          <% end %>
+                                                          <td align="center"><%= color.code %></td>
+                                                          <% pr_product.purchase_order_product.sizes.each do |size| %>
+                                                            <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
+                                                            <td>
+                                                                <% if pr_item %>
+                                                                  <%= pr_item.quantity %>
+                                                                <% end %>
+                                                            </td>
+                                                          <% end %>
+                                                      </tr>
+                                                    <% end %>
+                                                  <% elsif pr_product.direct_purchase_product.present? %>
+                                                    <% pr_product.direct_purchase_product.colors.each_with_index do |color, idx| %>
+                                                      <tr>
+                                                          <% if idx == 0 %>
+                                                            <td style="vertical-align: middle" rowspan="<%= pr_product.direct_purchase_product.colors.length %>">Colors</td>
+                                                          <% end %>
+                                                          <td align="center"><%= color.code %></td>
+                                                          <% pr_product.direct_purchase_product.sizes.each do |size| %>
+                                                            <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.direct_purchase_detail.color.eql?(color) && pri.direct_purchase_detail.size.eql?(size) }.first %>
+                                                            <td>
+                                                                <% if pr_item %>
+                                                                  <%= pr_item.quantity %>
+                                                                <% end %>
+                                                            </td>
+                                                          <% end %>
+                                                      </tr>
+                                                    <% end %>
                                                   <% end %>
                                                 </tbody>
                                             </table>
                                         </td>
                                         <td align="right" style="vertical-align: middle"><%= pr_product.total_quantity %></td>
                                         <td align="right" style="vertical-align: middle">
-                                          <%= number_to_currency(pr_product.return_total_cost,
+                                          <%= number_to_currency(pr_product.return_total_cost(pr_product.purchase_return.direct_purchase.present?),
                                             :separator => ",",
                                             :delimiter => ".",
                                             :unit => "Rp",

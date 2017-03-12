@@ -3,6 +3,7 @@ class PurchaseReturnProduct < ApplicationRecord
   
   belongs_to :purchase_order_product
   belongs_to :purchase_return
+  belongs_to :direct_purchase_product
   
   has_many :purchase_return_items, dependent: :destroy
   
@@ -10,8 +11,12 @@ class PurchaseReturnProduct < ApplicationRecord
   
   before_create :update_total_quantity
   
-  def return_total_cost
-    total_quantity * purchase_order_product.cost_list.cost
+  def return_total_cost(is_it_direct_purchase)
+    unless is_it_direct_purchase
+      total_quantity * purchase_order_product.cost_list.cost
+    else
+      total_quantity * direct_purchase_product.cost_list.cost
+    end
   end
   
   private

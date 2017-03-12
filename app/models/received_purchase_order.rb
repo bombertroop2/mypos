@@ -1,6 +1,7 @@
 class ReceivedPurchaseOrder < ApplicationRecord
   belongs_to :purchase_order
   belongs_to :direct_purchase
+  belongs_to :vendor
   has_many :received_purchase_order_products, dependent: :destroy
   
   
@@ -20,16 +21,8 @@ class ReceivedPurchaseOrder < ApplicationRecord
   
                 private
     
-                def create_auto_do_number
-                  vendor = !is_it_direct_purchasing ? purchase_order.vendor : direct_purchase.vendor
-                  # ambil do number terakhir untuk receiving PO
-                  last_received_po = if !is_it_direct_purchasing
-                    vendor.received_purchase_orders.select(:delivery_order_number).last
-                  else
-                    # ambil do number terakhir untuk direct purchase
-                    vendor.received_direct_purchases.select(:delivery_order_number).last
-                  end
-                  
+                def create_auto_do_number                  
+                  last_received_po = vendor.received_purchase_orders.select(:delivery_order_number).last
                   today = Date.today
                   current_month = today.month.to_s.rjust(2, '0')
                   current_year = today.strftime("%y").rjust(2, '0')

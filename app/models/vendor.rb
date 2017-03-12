@@ -16,8 +16,8 @@ class Vendor < ApplicationRecord
 
       has_many :products, dependent: :restrict_with_error
       has_many :purchase_orders, dependent: :restrict_with_error
-      has_many :received_purchase_orders, -> { order("received_purchase_orders.id ASC").where("received_purchase_orders.is_using_delivery_order = 'no'") }, through: :purchase_orders
-      has_many :received_direct_purchases, -> { order("received_purchase_orders.id ASC").where("received_purchase_orders.is_using_delivery_order = 'no'") }, class_name: "ReceivedPurchaseOrder"
+      has_many :received_purchase_orders, -> { order("received_purchase_orders.id ASC").where("received_purchase_orders.is_using_delivery_order = 'no'") }
+      #      has_many :received_direct_purchases, -> { order("received_purchase_orders.id ASC").where("received_purchase_orders.is_using_delivery_order = 'no'") }, class_name: "ReceivedPurchaseOrder"
       has_one :product_relation, -> {select("1 AS one")}, class_name: "Product"
       has_one :purchase_order_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
 

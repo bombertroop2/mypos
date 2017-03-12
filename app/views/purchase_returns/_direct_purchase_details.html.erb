@@ -1,0 +1,129 @@
+<table class="table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
+    <tbody>
+        <tr>
+            <td style="text-align: center;vertical-align: middle;width: 15% !important"><strong>Article Code</strong></td>
+            <td style="text-align: center;vertical-align: middle;width: 15% !important"><strong>Cost</strong></td>
+            <td style="text-align: center;vertical-align: middle;width: auto !important"><strong>Quantity on Hand</strong></td>
+            <td style="text-align: center;vertical-align: middle;width: auto !important"><strong>Return Quantity</strong></td>
+        </tr>
+        <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
+          <% product = Product.where(id: pr_product.product_id).select(:id).first %>
+          <% direct_purchase_product = DirectPurchaseProduct.where(id: pr_product.direct_purchase_product_id).select(:id).first %>
+          <% direct_purchase_product_colors = direct_purchase_product.colors.select(:id, :code) %>
+          <% direct_purchase_product_sizes = direct_purchase_product.sizes.select(:id, :size) %>
+          <% purchase_return_product_array_index = create_return_product_array_variable_name(pr_product, product.id) %>
+          <%= fields_for purchase_return_product_array_index, pr_product do |purchase_return_product_detail_form| %>
+            <%= purchase_return_product_detail_form.hidden_field :direct_purchase_product_id %>
+            <%= purchase_return_product_detail_form.hidden_field :product_cost %>
+            <%= purchase_return_product_detail_form.hidden_field :product_code %>
+            <%= purchase_return_product_detail_form.hidden_field :product_name %>
+            <%= purchase_return_product_detail_form.hidden_field :product_id %>
+            <tr align="center">
+                <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= "#{purchase_return_product_detail_form.object.product_code} - #{purchase_return_product_detail_form.object.product_name}" %></td>
+                <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= number_to_currency((purchase_return_product_detail_form.object.product_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                <td style="text-align: center;vertical-align: top;width: auto !important">
+                    <div class="table-responsive">
+                        <table class="table table-condensed table-responsive table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" rowspan="2"></td>
+                                    <td align="center" colspan="<%= direct_purchase_product_sizes.length %>">Sizes</td>
+                                </tr>
+                                <tr>
+                                    <% direct_purchase_product_sizes.each do |size| %>
+                                      <td align="center"><%= size.size %></td>
+                                    <% end %>
+                                </tr>
+                                <% direct_purchase_product_colors.each_with_index do |color, idx| %>
+                                  <tr>
+                                      <% if idx == 0 %>
+                                        <td style="vertical-align: middle" rowspan="<%= direct_purchase_product_colors.length %>">Colors</td>
+                                      <% end %>
+                                      <td style="vertical-align: middle"><%= color.code %></td>
+                                      <% direct_purchase_product_sizes.each do |size| %>
+                                        <% pr_item = pr_product.purchase_return_items.select do |pri| %>
+                                          <% direct_purchase_detail = DirectPurchaseDetail.where(id: pri.direct_purchase_detail_id).select(:color_id, :size_id).first %>
+                                          <% direct_purchase_detail.color_id.eql?(color.id) && direct_purchase_detail.size_id.eql?(size.id) %>
+                                        <% end.first %>
+
+                                        <% if quantity = is_having_stock?(pr_item, true) %>
+                                          <td align="center">      
+                                              <%= quantity %>
+                                          </td>
+                                        <% else %>
+                                          <td align="center">      
+                                              0
+                                          </td>
+                                        <% end %>
+
+                                      <% end %>
+                                  </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td style="text-align: center;vertical-align: top;width: auto !important">
+                    <div class="table-responsive">
+                        <table class="table table-condensed table-responsive table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" rowspan="2"></td>
+                                    <td align="center" colspan="<%= direct_purchase_product_sizes.length %>">Sizes</td>
+                                </tr>
+                                <tr>
+                                    <% direct_purchase_product_sizes.each do |size| %>
+                                      <td align="center"><%= size.size %></td>
+                                    <% end %>
+                                </tr>
+                                <% direct_purchase_product_colors.each_with_index do |color, idx| %>
+                                  <tr>
+                                      <% if idx == 0 %>
+                                        <td style="vertical-align: middle" rowspan="<%= direct_purchase_product_colors.length %>">Colors</td>
+                                      <% end %>
+                                      <td style="vertical-align: middle"><%= color.code %></td>
+                                      <% direct_purchase_product_sizes.each do |size| %>
+                                        <% pr_item = pr_product.purchase_return_items.select do |pri| %>
+                                          <% direct_purchase_detail = DirectPurchaseDetail.where(id: pri.direct_purchase_detail_id).select(:color_id, :size_id).first %>
+                                          <% direct_purchase_detail.color_id.eql?(color.id) && direct_purchase_detail.size_id.eql?(size.id) %>
+                                        <% end.first %>
+                                        <td style="vertical-align: middle">
+                                            <% if pr_item %>
+                                              <% purchase_return_item_array_index = create_return_item_array_variable_name(pr_item, pr_item.direct_purchase_detail_id, purchase_return_product_array_index) %>
+                                              <%= fields_for purchase_return_item_array_index, pr_item do |purchase_return_detail_detail_form| %>
+                                                <%= purchase_return_detail_detail_form.hidden_field :direct_purchase_detail_id %>
+                                                <div class="<%= control_group_error(pr_item, :quantity) %>">
+                                                    <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", size: 5 %>
+                                                      <%= error_help_text(pr_item, :quantity) %>
+                                                  </div>
+                                                <% end %>
+                                              <% end %>
+                                          </td>
+                                        <% end %>
+                                    </tr>
+                                  <% end %>
+                              </tbody>
+                          </table>
+                      </div>
+                  </td>
+              </tr>
+            <% end %>
+          <% end %>
+
+      </tbody>
+  </table>
+
+  <script>
+    $(function () {
+        $(".quantity").numeric({
+            decimal: false,
+            negative: false
+        }, function () {
+            alert("Positive integers only");
+            this.value = "";
+            this.focus();
+        });
+
+    });
+  </script>
+

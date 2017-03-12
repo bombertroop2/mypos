@@ -7,6 +7,9 @@ class DirectPurchaseProduct < ApplicationRecord
   
   has_one :received_purchase_order_product, dependent: :destroy
   has_many :direct_purchase_details, dependent: :destroy
+  has_many :sizes, -> { group("sizes.id").order(:size) }, through: :direct_purchase_details
+  has_many :colors, -> { group("common_fields.id").order(:code) }, through: :direct_purchase_details
+
   
   validate :should_has_details, on: :create
   validate :existing_cost, on: :create, if: proc {|pop| pop.receiving_date.present?}

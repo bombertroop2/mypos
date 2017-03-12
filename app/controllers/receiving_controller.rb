@@ -25,7 +25,7 @@ class ReceivingController < ApplicationController
   
   def get_purchase_order    
     @purchase_order.receiving_po = true
-    received_purchase_order = @purchase_order.received_purchase_orders.build
+    received_purchase_order = @purchase_order.received_purchase_orders.build vendor_id: @purchase_order.vendor_id
     @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
       received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id
       po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
@@ -175,7 +175,7 @@ class ReceivingController < ApplicationController
   private
   
   def purchase_order_params
-    params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:receiving_date, :is_using_delivery_order, :delivery_order_number, 
+    params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:vendor_id, :receiving_date, :is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]]).merge(receiving_po: true)
   end
   

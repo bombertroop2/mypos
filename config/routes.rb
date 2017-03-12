@@ -19,6 +19,8 @@ Rails.application.routes.draw do
   resources :purchase_returns, except: [:destroy, :edit, :update] do
     collection do
       get 'get_purchase_order_details'
+      get 'get_direct_purchase_details'
+      post 'create_direct_purchase_return'
     end    
   end
   resources :stocks, only: :index

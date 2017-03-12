@@ -3,6 +3,7 @@
     <%= form_for(@purchase_order, remote: true, url: receive_products_from_purchase_order_receiving_path(@purchase_order.id), method: :post, html: {class: "form-horizontal"}) do |f| %>
         <%= f.fields_for :received_purchase_orders do |received_purchase_order_form| %>
           <% if received_purchase_order_form.object.new_record? %>
+            <%= received_purchase_order_form.hidden_field :vendor_id %>
             <div class="form-group">
                 <label class="col-sm-2 control-label">
                     PO Number

@@ -1,0 +1,7 @@
+<%= smart_listing_item :purchase_returns, :create, @purchase_return, 
+  @purchase_return.valid? ? "purchase_returns/purchase_return" : "purchase_returns/form" %>
+
+<% if @vendor_name.present? %>
+  $("#pr-number-<%= @purchase_return.id %>").html("<%= @pr_number %>");
+  $("#pr-vendor-name-<%= @purchase_return.id %>").html("<%= @vendor_name %>");
+<% end %>
