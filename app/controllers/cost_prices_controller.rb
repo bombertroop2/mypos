@@ -29,7 +29,7 @@ class CostPricesController < ApplicationController
   end
 
   def new
-    @products = Product.select(:id, :code).order :code
+    @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
     @cost = CostList.new
   end
 
@@ -37,7 +37,7 @@ class CostPricesController < ApplicationController
     @product = Product.where(id: params[:product][:id]).select(:id, :code, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, :size_group_id).first
     params[:product].delete :id
     unless @product.update(product_params)
-      @products = Product.select(:id, :code).order :code
+      @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
       @price_codes = PriceCode.select(:id, :code).order :code
       size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
       @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
