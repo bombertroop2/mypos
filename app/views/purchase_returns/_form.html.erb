@@ -15,7 +15,7 @@
                     <div class="form-group<%= control_group_error(@purchase_return, :purchase_order_id) %>">
                         <%= f.label :purchase_order_id, class: "col-sm-2 control-label" %>
                           <div class="col-sm-10">
-                              <%= f.select :purchase_order_id, options_from_collection_for_select(@purchase_orders, :id, :number, @purchase_return.purchase_order_id.to_s), {prompt: true}, {class: "form-control"} %>
+                              <%= f.select :purchase_order_id, options_from_collection_for_select(@purchase_orders, :id, :number, @purchase_return.purchase_order_id.to_s), {include_blank: true}, {class: "form-control chosen-select"} %>
                                 <%= error_help_text(@purchase_return, :purchase_order_id) %>
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                             <div class="form-group<%= control_group_error(@purchase_return, :delivery_order_number) %>">
                                 <%= f.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
                                   <div class="col-sm-10">
-                                      <%= f.select :delivery_order_number, options_from_collection_for_select(@do_numbers, :id, :delivery_order_number, @purchase_return.delivery_order_number.to_s), {prompt: true}, {class: "form-control"} %>
+                                      <%= f.select :delivery_order_number, options_from_collection_for_select(@do_numbers, :id, :delivery_order_number, @purchase_return.delivery_order_number.to_s), {include_blank: true}, {class: "form-control chosen-select"} %>
                                         <%= error_help_text(@purchase_return, :delivery_order_number) %>
                                     </div>
                                 </div>
@@ -94,7 +94,7 @@
                           });
                           return false;
                       });
-                      
+
                       $("#save-btn-return-dp").click(function () {
                           bootbox.confirm({
                               message: "This action cannot be undone</br>Are you sure?",
@@ -128,6 +128,25 @@
                               received_purchase_order_id: $(this).val()
                           });
                       });
+
+                <% if params[:action].eql?("create_direct_purchase_return") %>
+                        $("#purchase_return_delivery_order_number").attr("data-placeholder", "Please select").chosen('destroy').chosen();
+                        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                            var target = $(e.target).attr("href") // activated tab
+                            if (target == "#purchase_order")
+                                $("#purchase_return_purchase_order_id").attr("data-placeholder", "Please select").chosen('destroy').chosen();
+
+                        });
+                <% else %>
+                        $("#purchase_return_purchase_order_id").attr("data-placeholder", "Please select").chosen('destroy').chosen();
+                        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                            var target = $(e.target).attr("href") // activated tab
+                            if (target == "#direct_purchase")
+                                $("#purchase_return_delivery_order_number").attr("data-placeholder", "Please select").chosen('destroy').chosen();
+
+                        });
+                <% end %>
+
 
                   });
                 </script>
