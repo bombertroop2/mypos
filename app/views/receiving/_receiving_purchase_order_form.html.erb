@@ -40,6 +40,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
+                                <a class="btn btn-default active" id="full_receipt_btn" style="float: right;margin-bottom: 10px">Full receipt</a>
                                 <table class="table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
                                     <tbody>
                                         <tr style="text-align: center">
@@ -92,14 +93,14 @@
                                                                                   </thead>       
                                                                                   <thead>
                                                                                       <tr style="text-align: center">
-                                                                                          <td style="vertical-align: middle;"><%= purchase_order_detail.quantity %></td>
-                                                                                          <td style="vertical-align: middle;"><%= purchase_order_detail.receiving_qty.to_i %></td>
+                                                                                          <td style="vertical-align: middle;" class="purchase-order-quantities" id="po_quantity_<%= purchase_order_detail.id %>"><%= purchase_order_detail.quantity %></td>
+                                                                                          <td style="vertical-align: middle;" id="received_quantity_<%= purchase_order_detail.id %>"><%= purchase_order_detail.receiving_qty.to_i %></td>
                                                                                       </tr>
                                                                                   </thead>       
                                                                               </table>                                                                            
                                                                               <%= received_purchase_order_item_form.hidden_field :purchase_order_detail_id %>
                                                                               <div class="<%= control_group_error(received_purchase_order_item, :quantity) %>">
-                                                                                  <%= received_purchase_order_item_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", size: 16 %>
+                                                                                  <%= received_purchase_order_item_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", id: "quantity_#{purchase_order_detail.id}", size: 16 %>
                                                                                     <%= error_help_text(received_purchase_order_item, :quantity) %>
                                                                                 </div>
                                                                               <% end %>
@@ -131,6 +132,15 @@
 
                   <script>
                     $(function () {
+                        $("#full_receipt_btn").click(function () {
+                            $(".purchase-order-quantities").each(function () {
+                                var poQuantity = parseInt($.trim($(this).html()));
+                                var productDetailId = $(this).attr("id").split("_")[2];
+                                var receivedQuantity = parseInt($.trim($("#received_quantity_" + productDetailId).html()));
+                                var remainingQuantity = poQuantity - receivedQuantity;
+                                $("#quantity_" + productDetailId).val(remainingQuantity);
+                            });
+                        });
                         $(".do-radio-button").click(function () {
                             if ($(this).val() == "yes")
                                 $(".do-number-field").prop("disabled", false);
