@@ -42,7 +42,7 @@
                                     <td><%= @purchase_order.request_delivery_date.strftime("%d/%m/%Y") if @purchase_order.request_delivery_date.present? %></td>
                                 </tr>
                                 <tr>
-                                    <td>Tax Basis</td>
+                                    <td>Gross Amount</td>
                                     <td>:</td>
                                     <td align="right">
                                         <%= number_to_currency(@purchase_order.order_value,
@@ -99,7 +99,7 @@
                                 </tr>
                             <% end %>
                                 <tr>
-                                    <td>Total Order Value</td>
+                                    <td>Net Amount</td>
                                     <td>:</td>
                                     <td align="right">
                                     <%= number_to_currency(value_after_ppn(@purchase_order),
