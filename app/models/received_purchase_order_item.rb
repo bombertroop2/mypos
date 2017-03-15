@@ -44,7 +44,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 product = purchase_order_detail.purchase_order_product.product
                 stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
                 stock_product = stock.stock_products.build product_id: product.id unless stock_product
-                stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(purchase_order_detail.size_id) && sd.color_id.eql?(purchase_order_detail.color_id)}.first                
+                stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(purchase_order_detail.size_id) && sd.color_id.eql?(purchase_order_detail.color_id)}.first
                 unless stock_detail
                   stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                   if stock.new_record?
