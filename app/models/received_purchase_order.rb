@@ -26,7 +26,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
                   today = Date.today
                   current_month = today.month.to_s.rjust(2, '0')
                   current_year = today.strftime("%y").rjust(2, '0')
-                  if last_received_po
+                  if last_received_po && last_received_po.delivery_order_number.include?("DUOS#{(vendor.code)}#{current_month}#{current_year}")
                     seq_number = last_received_po.delivery_order_number.split(last_received_po.delivery_order_number.scan(/DUOS#{vendor.code}\d.{3}/).first).last.succ
                     new_do_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}#{seq_number}"
                   else

@@ -46,7 +46,7 @@ class PurchaseReturn < ApplicationRecord
             else
               PurchaseOrder.joins(:warehouse).select(:code).where(["purchase_orders.id = ?", purchase_order_id]).first.code
             end
-            if last_pr
+            if last_pr && last_pr.number.include?("#{warehouse_code}PRR#{current_month}#{current_year}")
               seq_number = last_pr.number.split(last_pr.number.scan(/PRR\d.{3}/).first).last.succ
               new_pr_number = "#{warehouse_code}PRR#{current_month}#{current_year}#{seq_number}"
             else
