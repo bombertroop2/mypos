@@ -1,5 +1,53 @@
-<td><%= object.name %></td>
-<td><%= "#{object.code} - #{object.brand_name}" %></td>
-<td><%= object.color_name %></td>
-<td><%= object.size_label %></td>
-<td><%= object.quantity %> pcs</td>
+<td style="text-align: center"><%= object.keys.first %></td>
+<td>
+    <table class="table table-condensed table-responsive table-bordered">
+        <tbody>
+            <tr style="text-align: center">
+                <td><strong>Article Code</strong></td>
+                <td><strong>Quantity</strong></td>
+                <td><strong>Total Quantity</strong></td>
+            </tr>
+            <% total_products = object[object.keys.first].keys.length %>
+            <% object[object.keys.first].each do |key, color_hash| %>
+              <% product_code = object[object.keys.first][key]["code"] %>
+              <% product = Product.where(["code = ?",product_code]).select(:id).first %>
+              <% product_sizes = product.sizes %>
+              <% product_colors = product.colors %>
+              <% total_quantity = 0 %>
+              <tr align="center">
+                  <td style="vertical-align: middle"><%= key %></td>
+                  <td style="vertical-align: middle">
+                      <table class="table table-condensed table-responsive table-bordered">
+                          <tbody>
+                              <tr>
+                                  <td colspan="2" rowspan="2"></td>
+                                  <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
+                              </tr>
+                              <tr>
+                                  <% product_sizes.each do |size| %>
+                                    <td align="center"><%= size.size %></td>
+                                  <% end %>
+                              </tr>
+                              <% product_colors.each_with_index do |color, idx| %>
+                                <tr align="center">
+                                    <% if idx == 0 %>
+                                      <td style="vertical-align: middle" rowspan="<%= product_colors.length %>">Colors</td>
+                                    <% end %>
+                                    <td align="center"><%= color.code %></td>
+                                    <% product_sizes.each do |size| %>
+                                      <td class="quantity-on-hand">
+                                          <% total_quantity += object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>
+                                          <%= object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>
+                                      </td>
+                                    <% end %>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                  </td>
+                  <td align="right" style="vertical-align: middle"><%= total_quantity %></td>
+              </tr>
+            <% end %>
+        </tbody>
+    </table>
+</td>
