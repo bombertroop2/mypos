@@ -5,7 +5,7 @@
     <div style="padding-top: 20px"></div>
     <table class="table table-condensed table-responsive table-bordered">
         <tr>
-            <td>
+            <td style="padding: 20px">
                 <table width="100%">
                     <tr>
                         <td align="center" colspan="2"><strong>PURCHASE ORDER</strong></td>
@@ -14,7 +14,7 @@
                         <td align="center" colspan="2"><%= @purchase_order.number %></td>
                     </tr>
                     <tr>
-                        <td>
+                        <td style="width: 50%">
                             <table class="table-condensed table-responsive">
                                 <tr>
                                     <td>To</td>
@@ -111,7 +111,7 @@
                                 </tr>
                             </table>
                         </td>
-                        <td valign="top">
+                        <td valign="top" style="width: 50%">
                             <table align="right" class="table-condensed table-responsive">
                                 <tr>
                                     <td>Warehouse</td>
@@ -204,6 +204,14 @@
                                 </tbody>
                             </table>
                         </td>
+                    </tr>
+                    <tr>
+                        <td>Created by</td>
+                        <td style="text-align: right">Approved by</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top: 50px"><%= @purchase_order.creator.name rescue "Admin" %></td>
+                        <td style="text-align: right"></td>
                     </tr>
                 </table>
             </td>

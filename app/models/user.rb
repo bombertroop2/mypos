@@ -14,6 +14,10 @@ class User < ApplicationRecord
   
   after_save :add_user_role
   
+  def name
+    sales_promotion_girl.name    
+  end
+  
   # supaya user bisa update datanya tanpa harus memasukkan password
   def password_required?
     if new_record?

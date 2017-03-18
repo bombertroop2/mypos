@@ -210,7 +210,7 @@ class PurchaseOrdersController < ApplicationController
     params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :price_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
       :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:po_cost, :vendor_id, :cost_list_id, :id, :product_id, :purchase_order_date, :_destroy,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
-        received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
+        received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]]).merge(created_by: current_user.id)
   end
   
   def populate_combobox_list

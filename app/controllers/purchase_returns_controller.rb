@@ -162,6 +162,6 @@ class PurchaseReturnsController < ApplicationController
   def purchase_return_params
     params.require(:purchase_return).permit(:direct_purchase_id, :direct_purchase_return, :delivery_order_number, :number, :vendor_id, :purchase_order_id,
       purchase_return_products_attributes: [:direct_purchase_product_id, :id, :purchase_order_product_id, :product_cost, :product_code, :product_name, :product_id,
-        purchase_return_items_attributes: [:direct_purchase_return, :direct_purchase_detail_id, :quantity, :purchase_order_detail_id, :id]])
+        purchase_return_items_attributes: [:direct_purchase_return, :direct_purchase_detail_id, :quantity, :purchase_order_detail_id, :id]]).merge(created_by: current_user.id)
   end
 end

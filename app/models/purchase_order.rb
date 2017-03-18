@@ -1,6 +1,7 @@
 class PurchaseOrder < ApplicationRecord
   belongs_to :vendor
   belongs_to :warehouse
+  belongs_to :creator, class_name: "User", foreign_key: :created_by
   
   has_many :purchase_order_products, dependent: :destroy
   has_many :purchase_order_details, through: :purchase_order_products
@@ -44,7 +45,7 @@ class PurchaseOrder < ApplicationRecord
 
 
                                           private
-                                          
+                                                                                    
                                           def remove_double_discount
                                             self.first_discount = nil
                                             self.second_discount = nil
@@ -153,9 +154,9 @@ class PurchaseOrder < ApplicationRecord
                                             current_year = today.strftime("%y").rjust(2, '0')
                                             if last_po_number && last_po_number.include?("#{pkp_code}#{(warehouse.code)}POR#{current_month}#{current_year}")
                                               seq_number = last_po_number.split(last_po_number.scan(/POR\d.{3}/).first).last.succ
-                                              new_po_number = "#{pkp_code}#{(warehouse.code)}POR#{current_month}#{current_year}#{seq_number}"
+                                              new_po_number = "#{pkp_code}#{(warehouse.code if warehouse)}POR#{current_month}#{current_year}#{seq_number}"
                                             else
-                                              new_po_number = "#{pkp_code}#{(warehouse.code)}POR#{current_month}#{current_year}0001"
+                                              new_po_number = "#{pkp_code}#{(warehouse.code if warehouse)}POR#{current_month}#{current_year}0001"
                                             end
                                             self.number = new_po_number
                                           end
