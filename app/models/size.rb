@@ -1,7 +1,9 @@
 class Size < ApplicationRecord
   belongs_to :size_group
   has_many :product_details, dependent: :restrict_with_error
+  has_many :stock_details, dependent: :restrict_with_error
   has_one :product_detail_relation, -> {select("1 AS one")}, class_name: "ProductDetail"
+  has_one :stock_detail_relation, -> {select("1 AS one")}, class_name: "StockDetail"
   validates :size, presence: true, uniqueness: {scope: :size_group_id}
   validate :size_not_changed
   
@@ -9,6 +11,6 @@ class Size < ApplicationRecord
   
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def size_not_changed
-    errors.add(:size, "change is not allowed!") if size_changed? && persisted? && product_detail_relation.present?
+    errors.add(:size, "change is not allowed!") if size_changed? && persisted? && (product_detail_relation.present? || stock_detail_relation.present?)
   end
 end
