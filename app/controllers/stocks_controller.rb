@@ -12,12 +12,12 @@ class StocksController < ApplicationController
       "LIKE"
     end
     stocks_scope = StockDetail.joins(:size, :color, stock_product: [{product: :brand}, {stock: :warehouse}]).select("warehouses.name, products.code, brands_products.name AS brand_name, common_fields.name AS color_name, size AS size_label, quantity")
-    stocks_scope = stocks_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(stocks_scope.where(["products.code #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(stocks_scope.where(["brands_products.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(stocks_scope.where(["common_fields.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(stocks_scope.where(["size #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    stocks_scope = stocks_scope.where(["warehouses.id = ?", params[:filter_warehouse_id]]) if params[:filter_warehouse_id].present?
+    stocks_scope = stocks_scope.where(["products.code #{like_command} ?", "%"+params[:filter_product_criteria]+"%"]).
+      or(stocks_scope.where(["brands_products.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
+      or(stocks_scope.where(["common_fields.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
+      or(stocks_scope.where(["size #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
+      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) if params[:filter_product_criteria].present?
     stocks_scope = if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
       stocks_scope.order("#{params[:stocks_smart_listing][:sort].keys.first} #{params[:stocks_smart_listing][:sort][params[:stocks_smart_listing][:sort].keys.first]}")
     else
@@ -66,8 +66,8 @@ class StocksController < ApplicationController
       end
     end
 
-#    stocks.sort!{|hsh1, hsh2| hsh1.keys.first <=> hsh2.keys.first}
     stocks = stocks.reverse if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
+    @warehouses = Warehouse.select(:id, :code).order(:code)
     @stocks = smart_listing_create(:stocks, stocks, partial: 'stocks/listing', array: true)
   end
 

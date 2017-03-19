@@ -1,17 +1,21 @@
 <div class="page-header"><h1>Listing stocks</h1></div>
 
-<%= smart_listing_controls_for(:stocks, {class: "form-inline text-right"}) do %>
-
-    <div class="form-group filter input-append">
-        <%= text_field_tag :filter, '', class: "search form-control", 
-            placeholder: "Search...", autocomplete: :off %>
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <%= select_tag "warehouse_id", options_from_collection_for_select(@warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
       </div>
-
-      <button class="btn btn-primary disabled" type="submit">
-          <span class="glyphicon glyphicon-search"></span>
-      </button>
-    <% end %>
-    <%= smart_listing_render(:stocks) %>    
+      <div class="form-group">
+          <input type="text" id="filter-product-criteria" class="form-control" placeholder="Product code/name/color/size/quantity">
+      </div>
+      <button id="search-stock-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+  </div>
+  <div class="hidden">
+      <%= smart_listing_controls_for(:stocks, {class: "form-inline text-right"}) do %>
+          <%= text_field_tag :filter_warehouse_id, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_product_criteria, '', class: "search form-control", autocomplete: :off %>
+            <% end %>
+        </div>
+        <%= smart_listing_render(:stocks) %>    
 
 
 
