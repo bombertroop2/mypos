@@ -152,11 +152,11 @@ class PurchaseOrder < ApplicationRecord
                                             today = Date.today
                                             current_month = today.month.to_s.rjust(2, '0')
                                             current_year = today.strftime("%y").rjust(2, '0')
-                                            if last_po_number && last_po_number.include?("#{pkp_code}#{(warehouse.code)}POR#{current_month}#{current_year}")
-                                              seq_number = last_po_number.split(last_po_number.scan(/POR\d.{3}/).first).last.succ
-                                              new_po_number = "#{pkp_code}#{(warehouse.code if warehouse)}POR#{current_month}#{current_year}#{seq_number}"
+                                            if last_po_number && last_po_number.include?("#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}")
+                                              seq_number = last_po_number.split(last_po_number.scan(/POR#{vendor.code}\d.{3}/).first).last.succ
+                                              new_po_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}#{seq_number}"
                                             else
-                                              new_po_number = "#{pkp_code}#{(warehouse.code if warehouse)}POR#{current_month}#{current_year}0001"
+                                              new_po_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}0001"
                                             end
                                             self.number = new_po_number
                                           end

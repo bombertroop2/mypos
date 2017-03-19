@@ -42,16 +42,16 @@ class PurchaseReturn < ApplicationRecord
             today = Date.today
             current_month = today.month.to_s.rjust(2, '0')
             current_year = today.strftime("%y").rjust(2, '0')
-            warehouse_code = if direct_purchase_return
-              DirectPurchase.joins(:warehouse).select(:code).where(["direct_purchases.id = ?", direct_purchase_id]).first.code
+            vendor_code = if direct_purchase_return
+              Vendor.joins(:direct_purchases).select(:code).where(["direct_purchases.id = ?", direct_purchase_id]).first.code
             else
-              PurchaseOrder.joins(:warehouse).select(:code).where(["purchase_orders.id = ?", purchase_order_id]).first.code
+              Vendor.joins(:purchase_orders).select(:code).where(["purchase_orders.id = ?", purchase_order_id]).first.code
             end
-            if last_pr && last_pr.number.include?("#{warehouse_code}PRR#{current_month}#{current_year}")
-              seq_number = last_pr.number.split(last_pr.number.scan(/PRR\d.{3}/).first).last.succ
-              new_pr_number = "#{warehouse_code}PRR#{current_month}#{current_year}#{seq_number}"
+            if last_pr && last_pr.number.include?("PRR#{vendor_code}#{current_month}#{current_year}")
+              seq_number = last_pr.number.split(last_pr.number.scan(/PRR#{vendor_code}\d.{3}/).first).last.succ
+              new_pr_number = "PRR#{vendor_code}#{current_month}#{current_year}#{seq_number}"
             else
-              new_pr_number = "#{warehouse_code}PRR#{current_month}#{current_year}0001"
+              new_pr_number = "PRR#{vendor_code}#{current_month}#{current_year}0001"
             end
             self.number = new_pr_number
           end
