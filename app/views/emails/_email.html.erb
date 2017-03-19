@@ -1,0 +1,8 @@
+<td><%= object.address %></td>
+<td><%= object.email_type %></td>
+<td class="actions" style="text-align: right">
+    <% if user_signed_in? && is_admin? %>
+      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_email_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
+        <%= link_to "<i class=\"glyphicon glyphicon-trash\"></i>".html_safe, object, class: "destroy", method: :delete, :data => {remote: true, :confirmation => 'Are you sure?', placement: :left}, title: "Delete" %>
+        <% end %>
+    </td>

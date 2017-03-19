@@ -65,6 +65,7 @@
                           <!--<li class="<%#= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%#= link_to "Costs", cost_lists_path %></li>
                           <li class="<%#= params[:controller].eql?("price_lists") ? "active" : "" %>"><%#= link_to "Prices", price_lists_path %></li>-->
                           <li class="<%= params[:controller].eql?("cost_prices") ? "active" : "" %>"><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
+                          <li class="<%= params[:controller].eql?("emails") ? "active" : "" %>"><%= link_to "Emails", emails_path, method: :get %></li>
                       </ul>
                   </div>
                   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

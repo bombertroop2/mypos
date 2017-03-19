@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :emails
 #  resources :price_lists, except: :show do
 #    collection do
 #      get "generate_price_form"

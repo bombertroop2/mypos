@@ -1,0 +1,34 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-email-thead">
+        <tr>
+            <th class="col-md-5"><%= smart_listing.sortable "Address", "address" %></th>
+            <th class="col-md-5"><%= smart_listing.sortable "Type", "email_type" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |email| %>
+          <tr class="editable" data-id="<%= email.id %>">
+              <%= smart_listing.render object: email, partial: "emails/email", locals: {object: email} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 3, link: new_email_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-email-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-email-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>
