@@ -8,6 +8,6 @@ class CreateAccountPayablePurchases < ActiveRecord::Migration[5.0]
       t.timestamps
     end
     add_index :account_payable_purchases, [:purchase_id, :purchase_type], name: "index_account_payable_purchases_on_purchase_id_and_type"
-    add_index :account_payable_purchases, :account_payable_id
+    add_index :account_payable_purchases, :account_payable_id rescue nil
   end
 end
