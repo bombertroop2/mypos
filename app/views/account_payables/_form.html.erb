@@ -41,7 +41,7 @@
                 <tr id="purchase_order_<%= purchase_order.id %>">
                     <td></td>
                     <td><%= purchase_order.number %></td>
-                    <td><%= purchase_order.name %></td>
+                    <td><%= purchase_order.vendor_name %></td>
                     <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
                     <td><%= latest_receiving_date %></td>
                     <td><%= purchase_order.quantity_received %></td>
