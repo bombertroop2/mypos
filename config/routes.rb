@@ -1,11 +1,16 @@
 Rails.application.routes.draw do
+  resources :account_payables do
+    collection do
+      get 'generate_form'
+    end
+  end
   resources :emails
-#  resources :price_lists, except: :show do
-#    collection do
-#      get "generate_price_form"
-#    end
-#  end
-#  resources :cost_lists, except: :show
+  #  resources :price_lists, except: :show do
+  #    collection do
+  #      get "generate_price_form"
+  #    end
+  #  end
+  #  resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create] do
     collection do
       get "get_product_details"      

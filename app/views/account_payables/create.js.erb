@@ -1,0 +1,6 @@
+<%= smart_listing_item :account_payables, :create, @account_payable, 
+  @account_payable.valid? ? "account_payables/account_payable" : "account_payables/form" %>
+
+<% if @vendor_name.present? %>
+  $("#vendor_name_<%= @account_payable.id %>").html("<%= @vendor_name %>");
+<% end %>

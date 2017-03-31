@@ -80,6 +80,19 @@ module PurchaseOrdersHelper
       gross_order_value = purchase_order.order_value
     end
     gross_order_value
+  end    
+  
+  def get_second_discount_in_money(purchase_order)
+    if purchase_order.is_additional_disc_from_net
+      value_from_first_discount = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
+      value_from_first_discount * (purchase_order.second_discount.to_f / 100)
+    else
+      purchase_order.order_value * (purchase_order.second_discount.to_f / 100)
+    end
+  end
+  
+  def get_vat_in_money(purchase_order)
+    value_after_discount(purchase_order) * 0.1
   end
   
   def value_after_discount(purchase_order)
@@ -100,17 +113,5 @@ module PurchaseOrdersHelper
       value_after_discount(purchase_order)
     end
   end
-  
-  def get_second_discount_in_money(purchase_order)
-    if purchase_order.is_additional_disc_from_net
-      value_from_first_discount = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
-      value_from_first_discount * (purchase_order.second_discount.to_f / 100)
-    else
-      purchase_order.order_value * (purchase_order.second_discount.to_f / 100)
-    end
-  end
-  
-  def get_vat_in_money(purchase_order)
-    value_after_discount(purchase_order) * 0.1
-  end
+      
 end

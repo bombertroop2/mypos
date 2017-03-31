@@ -20,7 +20,7 @@ class PurchaseOrdersController < ApplicationController
         or(po_scope.where(["status #{like_command} ?", "%"+params[:filter]+"%"])).
         or(po_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     else
-      po_scope = po_scope.where(["status = ? AND DATE(request_delivery_date) >= ?", "Open", Date.today])
+      po_scope = po_scope.where("status = 'Open'")
     end
     @purchase_orders = smart_listing_create(:purchase_orders, po_scope, partial: 'purchase_orders/listing', default_sort: {:"DATE(request_delivery_date)" => "ASC"})
   end

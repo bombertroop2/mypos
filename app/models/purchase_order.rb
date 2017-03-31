@@ -7,6 +7,7 @@ class PurchaseOrder < ApplicationRecord
   has_many :purchase_order_details, through: :purchase_order_products
   has_many :products, through: :purchase_order_products
   has_many :received_purchase_orders
+  has_many :account_payable_purchases, as: :purchase
   has_one :purchase_return
 
   attr_accessor :receiving_po, :deleting_po, :closing_po, :is_user_changing_cost
@@ -16,6 +17,7 @@ class PurchaseOrder < ApplicationRecord
   
     before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
       before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
+        before_create :calculate_net_amount
     
         validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
           validates :request_delivery_date, date: {after: proc { Date.today }, message: 'must be after today' }, if: :is_validable
@@ -42,9 +44,40 @@ class PurchaseOrder < ApplicationRecord
                                           def self.open_purchase_order_filter_by_po_date(po_date)
                                             select(:id, :price_discount).where("status = 'Open' AND purchase_order_date >= '#{po_date.strftime("%Y-%m-%d")}'")
                                           end
+                                          
+                                          def quantity_received
+                                            quantity = 0
+                                            purchase_order_products.select(:id).each do |pop|
+                                              quantity += pop.purchase_order_details.sum(:receiving_qty)
+                                            end
+                                            quantity
+                                          end
 
 
                                           private
+                                          
+                                          def get_vat_in_money(purchase_order)
+                                            value_after_discount(purchase_order) * 0.1
+                                          end
+                                          
+                                          def value_after_discount(purchase_order)
+                                            value_after_first_discount = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
+                                            value_after_second_discount = if purchase_order.is_additional_disc_from_net
+                                              value_after_first_discount - value_after_first_discount * (purchase_order.second_discount.to_f / 100)
+                                            elsif purchase_order.second_discount.present?
+                                              purchase_order.order_value - purchase_order.order_value * ((purchase_order.first_discount.to_f + purchase_order.second_discount.to_f) / 100)
+                                            end
+                                            value_after_money_discount = purchase_order.order_value - purchase_order.price_discount rescue nil
+                                            return value_after_money_discount || value_after_second_discount || value_after_first_discount
+                                          end
+                                          
+                                          def calculate_net_amount
+                                            self.net_amount = if value_added_tax.eql?("exclude")
+                                              value_after_discount(self) + get_vat_in_money(self)
+                                            else
+                                              value_after_discount(self)
+                                            end
+                                          end
                                                                                     
                                           def remove_double_discount
                                             self.first_discount = nil
@@ -148,11 +181,11 @@ class PurchaseOrder < ApplicationRecord
                                             self.value_added_tax = vendor.value_added_tax rescue nil
                                             self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur rescue nil
                                             pkp_code = is_taxable_entrepreneur ? "1" : "0"
-                                            last_po_number = PurchaseOrder.where("number LIKE '#{pkp_code}%'").select(:number).limit(1).order("id DESC").first.number rescue nil
                                             today = Date.today
                                             current_month = today.month.to_s.rjust(2, '0')
                                             current_year = today.strftime("%y").rjust(2, '0')
-                                            if last_po_number && last_po_number.include?("#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}")
+                                            last_po_number = PurchaseOrder.where("number LIKE '#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}%'").select(:number).limit(1).order("id DESC").first.number rescue nil
+                                            if last_po_number
                                               seq_number = last_po_number.split(last_po_number.scan(/POR#{vendor.code}\d.{3}/).first).last.succ
                                               new_po_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}#{seq_number}"
                                             else

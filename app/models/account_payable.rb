@@ -1,0 +1,97 @@
+class AccountPayable < ApplicationRecord
+  include AccountPayablesHelper
+  
+  attr_accessor :amount_to_be_paid
+  
+  PAYMENT_STATUSES = [
+    ["Paid", "Paid"],
+    ["Unpaid", ""]
+  ]
+  PAYMENT_METHODS = [
+    ["Cash", "Cash"],
+    ["Giro", "Giro"],
+    ["Transfer", "Transfer"]
+  ]
+  
+  belongs_to :vendor
+  has_many :account_payable_purchases, dependent: :destroy
+  
+  accepts_nested_attributes_for :account_payable_purchases
+  
+  before_validation :calculate_amount_to_be_paid, :set_zero_debt
+
+  validates :payment_date, :payment_method, :amount_paid, :vendor_id, :debt, presence: true
+  validates :giro_number, :giro_date, presence: true, if: proc {|ap| ap.payment_method.eql?("Giro")}
+    validates :giro_date, date: {after_or_equal_to: proc { Date.today }, message: 'must be after or equal to today' }, if: proc {|ap| ap.giro_date.present? && ap.payment_method.eql?("Giro")}
+      validates :payment_date, date: {after_or_equal_to: proc { Date.today }, message: 'must be after or equal to today' }, if: proc {|ap| ap.payment_date.present?}
+        validates :amount_paid, numericality: true, if: proc { |ap| ap.amount_paid.present? }
+          validates :amount_paid, numericality: {greater_than: 0}, if: proc { |ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) }
+            validates :amount_paid, numericality: {less_than_or_equal_to: :amount_to_be_paid}, if: proc { |ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) }, on: :create
+              validates :debt, numericality: true, if: proc { |ap| ap.debt.present? }
+                validates :debt, numericality: {greater_than_or_equal_to: 0}, if: proc { |ap| ap.debt.present? && ap.debt.is_a?(Numeric) }
+                  validate :calculate_amount_paid_and_debt, if: proc{|ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) && ap.debt.present? && ap.debt.is_a?(Numeric) && ap.amount_paid > 0}, on: :create
+            
+                    before_create :generate_number
+                    after_create :mark_purchase_doc_as_paid              
+          
+                    private
+                    
+                    def set_zero_debt
+                      self.debt = 0 if amount_paid == amount_to_be_paid
+                    end
+                    
+                    def calculate_amount_paid_and_debt
+                      if amount_paid + debt != amount_to_be_paid
+                        errors.add(:amount_paid, "is wrong!")
+                        errors.add(:debt, "is wrong!")
+                      end
+                    end
+            
+                    def generate_number
+                      is_taxable_entrepreneur = vendor.is_taxable_entrepreneur rescue nil
+                      pkp_code = is_taxable_entrepreneur ? "1" : "0"
+                      today = Date.today
+                      current_month = today.month.to_s.rjust(2, '0')
+                      current_year = today.strftime("%y").rjust(2, '0')
+                      last_number = AccountPayable.where("number LIKE '#{pkp_code}PY#{vendor.code}#{current_month}#{current_year}%'").select(:number).limit(1).order("id DESC").first.number rescue nil
+                      if last_number
+                        seq_number = last_number.split(last_number.scan(/PY#{vendor.code}\d.{3}/).first).last.succ
+                        new_number = "#{pkp_code}PY#{vendor.code}#{current_month}#{current_year}#{seq_number}"
+                      else
+                        new_number = "#{pkp_code}PY#{vendor.code}#{current_month}#{current_year}0001"
+                      end
+                      self.number = new_number
+                    end
+          
+                    def mark_purchase_doc_as_paid
+                      if amount_paid == amount_to_be_paid
+                        account_payable_purchases.select(:purchase_id, :purchase_type).each do |app|
+                          app.purchase.update_attribute(:payment_status, "Paid")
+                        end
+                      end
+                    end
+          
+                    def calculate_amount_to_be_paid
+                      amount_to_be_paid = 0
+                      account_payable_purchases.each do |account_payable_purchase|
+                        amount_to_be_paid += value_after_ppn_for_ap(account_payable_purchase.purchase)
+                      end
+                      
+                      previous_account_payables = []
+                      account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
+                        account_payables = AccountPayable.select(:id, :amount_paid).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+                        account_payables.each do |account_payable|        
+                          previous_account_payables << account_payable
+                        end
+                      end    
+    
+                      # kalkulasi pembayaran pembayaran sebelumnya
+                      previous_paid = 0
+                      previous_account_payables.uniq.each do |previous_account_payable|
+                        previous_paid += previous_account_payable.amount_paid      
+                      end
+        
+                      self.amount_to_be_paid = amount_to_be_paid - previous_paid
+                    end
+          
+                  end

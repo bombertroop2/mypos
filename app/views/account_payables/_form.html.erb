@@ -1,0 +1,277 @@
+<td colspan="5">
+    <div style="padding-top: 20px"></div>
+
+    <div id="search-form-container" class="form-inline text-right">
+        <div class="form-group">
+            <input type="text" id="filter-vendor" class="form-control" placeholder="Vendor" style="width: 150px">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" readonly="true" id="filter-po-date" placeholder="PO date" style="width: 180px">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" readonly="true" id="filter-receipt-date" placeholder="Receipt date" style="width: 180px">
+        </div>
+        <div class="form-group">
+            <%= select_tag "payment_status", options_for_select(AccountPayable::PAYMENT_STATUSES), {prompt: "Payment status", class: "form-control", style: "width: 150px;"} %>
+          </div>
+          <button id="search-po-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+          <button id="pay-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-credit-card"></span></button>
+      </div>
+      <table id="ap_listing_po_table" class="display">
+          <thead>
+              <tr>
+                  <th></th>
+                  <th>Number</th>
+                  <th>Vendor</th>
+                  <th>PO Date</th>
+                  <th>Rec. Date</th>
+                  <th>Qty</th>
+                  <th>Gross Amount</th>
+                  <th>1st Disc</th>
+                  <th>2nd Disc</th>
+                  <th>Disc (Rp)</th>
+                  <th>Value Added Tax (10%)</th>
+                  <th>Net Amount</th>
+                  <th>Payment Status</th>
+              </tr>
+          </thead>
+          <tbody>
+              <% @purchase_orders.each_with_index do |purchase_order, index| %>
+                <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
+                <tr id="purchase_order_<%= purchase_order.id %>">
+                    <td></td>
+                    <td><%= purchase_order.number %></td>
+                    <td><%= purchase_order.name %></td>
+                    <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
+                    <td><%= latest_receiving_date %></td>
+                    <td><%= purchase_order.quantity_received %></td>
+                    <td><%= number_to_currency(purchase_order.receiving_value,
+                          :separator => ",",
+                          :delimiter => ".",
+                          :unit => "Rp",
+                          :precision => 2) %></td>
+                    <td>
+                        <% if purchase_order.first_discount.present? %>
+                          <%= number_to_currency((purchase_order.first_discount.to_f / 100) * purchase_order.receiving_value,
+                            :separator => ",",
+                            :delimiter => ".",
+                            :unit => "Rp",
+                            :precision => 2) %> (<%= "#{purchase_order.first_discount}%" %>)
+                        <% end %>
+                    </td>
+                    <td>
+                        <% if purchase_order.second_discount.present? %>
+                          <%= number_to_currency(get_second_discount_in_money_for_ap(purchase_order),
+                            :separator => ",",
+                            :delimiter => ".",
+                            :unit => "Rp",
+                            :precision => 2) %> (<%= "#{purchase_order.second_discount}%" %> from <%= purchase_order.is_additional_disc_from_net ? "net" : "gross" %>)
+                        <% end %>
+                    </td>
+                    <td>
+                        <% if purchase_order.price_discount.present? %>
+                          <%= number_to_currency(purchase_order.price_discount.to_f,
+                            :separator => ",",
+                            :delimiter => ".",
+                            :unit => "Rp",
+                            :precision => 2) %>
+                        <% end %>
+                    </td>
+                    <td>
+                        <% if purchase_order.is_taxable_entrepreneur %>
+                          <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
+                            :separator => ",",
+                            :delimiter => ".",
+                            :unit => "Rp",
+                            :precision => 2) %> (<%= purchase_order.value_added_tax %>)
+                        <% end %>
+                    </td>
+                    <td><%= number_to_currency(value_after_ppn_for_ap(purchase_order),
+                          :separator => ",",
+                          :delimiter => ".",
+                          :unit => "Rp",
+                          :precision => 2) %></td>
+                    <td><%= purchase_order.payment_status %></td>
+                </tr>
+              <% end %>
+          </tbody>
+      </table>
+      <div id="form_container">
+          <% if params[:action].eql?("create") %>
+            <%= render "payment_form" %>
+          <% else %>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button class="btn btn-primary disabled" id="btn-save-ap-form">Save</button>
+                    <button class="btn btn-link cancel">Cancel</button>
+                </div>
+            </div>
+          <% end %>
+      </div>      
+  </td>
+
+  <script>
+    $(function () {
+        var aPpOdataTable = $('#ap_listing_po_table').DataTable({
+            order: [],
+            dom: 'T<"clear">lrtip',
+            columns: [
+                {data: null, defaultContent: '', orderable: false},
+                {data: 'number'},
+                {data: 'name'},
+                {data: 'po_date'},
+                {data: 'receiving_date'},
+                {data: 'quantity'},
+                {data: 'gross_amount'},
+                {data: 'first_discount'},
+                {data: 'second_discount'},
+                {data: 'discount_in_rupiah'},
+                {data: 'value_added_tax'},
+                {data: 'net_amount'},
+                {data: 'payment_status'}
+
+            ],
+            tableTools: {
+                sRowSelect: 'os',
+                //sRowSelector: 'td:first-child',
+                aButtons: []
+            },
+            paging: false,
+            info: false,
+            scrollY: "250px",
+            scrollX: true,
+            scrollCollapse: true
+                    /*,
+                     bFilter: false*/
+        });
+
+        $("#search-po-btn").click(function () {
+            aPpOdataTable
+                    .columns(2)
+                    .search($('#filter-vendor').val())
+                    .draw();
+            aPpOdataTable
+                    .columns(12)
+                    .search($('#payment_status').val())
+                    .draw();
+            aPpOdataTable.draw();
+        });
+
+        $('#filter-po-date').daterangepicker(
+                {
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    opens: "left",
+                    autoUpdateInput: false
+                });
+        $('#filter-po-date').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        });
+
+        $('#filter-po-date').on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+        });
+
+        $('#filter-receipt-date').daterangepicker(
+                {
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    opens: "left",
+                    autoUpdateInput: false
+                });
+        $('#filter-receipt-date').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        });
+
+        $('#filter-receipt-date').on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+        });
+
+        $("#pay-btn").click(function () {
+            if (aPpOdataTable.rows('.selected').data().length == 0)
+                bootbox.alert({message: "You have not selected PO yet!", size: 'small'});
+            else {
+                var purchaseOrderIds = [];
+                $.each(aPpOdataTable.rows('.selected')[0], function (index, value) {
+                    purchaseOrderIds.push(aPpOdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                });
+                $.get("/account_payables/generate_form", {
+                    purchase_order_ids: purchaseOrderIds.join(",")
+                });
+            }
+        });
+    });
+
+    $.fn.dataTable.ext.search.push(
+            function (settings, data, dataIndex) {
+                if ($("#filter-po-date").val() != "" && $("#filter-receipt-date").val() != "") {
+                    var poDate = $("#filter-po-date").val();
+                    var splittedPoStartAndEndDate = poDate.split(" - ");
+                    var poStartDate = splittedPoStartAndEndDate[0];
+                    var poEndDate = splittedPoStartAndEndDate[1];
+                    var splittedPoStartDate = poStartDate.split("/");
+                    var splittedPoEndDate = poEndDate.split("/");
+                    var convertedPoStartDate = new Date(splittedPoStartDate[1] + "/" + splittedPoStartDate[0] + "/" + splittedPoStartDate[2]);
+                    var convertedPoEndDate = new Date(splittedPoEndDate[1] + "/" + splittedPoEndDate[0] + "/" + splittedPoEndDate[2]);
+                    var tablePoDate = data[3]; // use data for the po date column
+                    var splittedTablePoDate = tablePoDate.split("/");
+                    var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
+
+                    var receiptDate = $("#filter-receipt-date").val();
+                    var splittedReceiptStartAndEndDate = receiptDate.split(" - ");
+                    var receiptStartDate = splittedReceiptStartAndEndDate[0];
+                    var receiptEndDate = splittedReceiptStartAndEndDate[1];
+                    var splittedReceiptStartDate = receiptStartDate.split("/");
+                    var splittedReceiptEndDate = receiptEndDate.split("/");
+                    var convertedReceiptStartDate = new Date(splittedReceiptStartDate[1] + "/" + splittedReceiptStartDate[0] + "/" + splittedReceiptStartDate[2]);
+                    var convertedReceiptEndDate = new Date(splittedReceiptEndDate[1] + "/" + splittedReceiptEndDate[0] + "/" + splittedReceiptEndDate[2]);
+                    var tableReceiptDate = data[4]; // use data for the receipt date column
+                    var splittedTableReceiptDate = tableReceiptDate.split("/");
+                    var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
+
+                    if (convertedPoStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedPoEndDate && convertedReceiptStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedReceiptEndDate)
+                    {
+                        return true;
+                    }
+                    return false;
+                } else if ($("#filter-po-date").val() != "") {
+                    var poDate = $("#filter-po-date").val();
+                    var splittedStartAndEndDate = poDate.split(" - ");
+                    var startDate = splittedStartAndEndDate[0];
+                    var endDate = splittedStartAndEndDate[1];
+                    var splittedStartDate = startDate.split("/");
+                    var splittedEndDate = endDate.split("/");
+                    var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
+                    var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
+                    var tablePoDate = data[3]; // use data for the po date column
+                    var splittedTablePoDate = tablePoDate.split("/");
+                    var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
+                    if (convertedStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedEndDate)
+                    {
+                        return true;
+                    }
+                    return false;
+                } else if ($("#filter-receipt-date").val() != "") {
+                    var receiptDate = $("#filter-receipt-date").val();
+                    var splittedStartAndEndDate = receiptDate.split(" - ");
+                    var startDate = splittedStartAndEndDate[0];
+                    var endDate = splittedStartAndEndDate[1];
+                    var splittedStartDate = startDate.split("/");
+                    var splittedEndDate = endDate.split("/");
+                    var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
+                    var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
+                    var tableReceiptDate = data[4]; // use data for the receipt date column
+                    var splittedTableReceiptDate = tableReceiptDate.split("/");
+                    var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
+                    if (convertedStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedEndDate)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                return true;
+            }
+    );
+  </script>
