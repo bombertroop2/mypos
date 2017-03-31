@@ -26,7 +26,7 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables/new
   def new
     @account_payable = AccountPayable.new
-    @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").group("purchase_orders.id").order("received_purchase_orders.receiving_date")
+    @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").group("purchase_orders.id, vendors.name").order("received_purchase_orders.receiving_date")
   end
 
   # GET /account_payables/1/edit
@@ -41,7 +41,7 @@ class AccountPayablesController < ApplicationController
     is_exception_raised = false
     begin
       unless @account_payable.save
-        @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("status = 'Finish' OR status = 'Closed'").group("purchase_orders.id").order("received_purchase_orders.receiving_date")
+        @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("status = 'Finish' OR status = 'Closed'").group("purchase_orders.id, vendors.name").order("received_purchase_orders.receiving_date")
         
         previous_account_payables = []
         @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
