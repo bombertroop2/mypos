@@ -2,7 +2,6 @@ include SmartListing::Helper::ControllerExtensions
 class ReceivingController < ApplicationController
   helper SmartListing::Helper
   before_action :set_purchase_order, only: [:get_purchase_order, :receive_products_from_purchase_order]
-  before_action :convert_price_discount_to_numeric, only: :create
   
   def new
     unless request.xhr?
@@ -81,7 +80,7 @@ class ReceivingController < ApplicationController
     splitted_selected_product_ids = selected_product_ids.split(",") - previous_selected_product_ids.split(",")
     @direct_purchase = DirectPurchase.new
     if splitted_selected_product_ids.present?
-#      @colors = Color.select(:id, :code).order :code
+      #      @colors = Color.select(:id, :code).order :code
       @products = Product.where("id IN (#{splitted_selected_product_ids.join(",")})").select(:id, :code)
       @products.each do |product|
         active_cost = product.active_cost_by_po_date(params[:dp_date].to_date).cost rescue 0
@@ -135,7 +134,7 @@ class ReceivingController < ApplicationController
       unless @direct_purchase.save
         @suppliers = Vendor.select(:id, :name)
         @warehouses = Warehouse.central.select :id, :code
-#        @colors = Color.select(:id, :code).order :code
+        #        @colors = Color.select(:id, :code).order :code
         @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)
 
         @direct_purchase.direct_purchase_products.each do |dpp|
@@ -158,7 +157,7 @@ class ReceivingController < ApplicationController
     rescue ActiveRecord::RecordNotUnique => e
       @suppliers = Vendor.select(:id, :name)
       @warehouses = Warehouse.central.select :id, :code
-#      @colors = Color.select(:id, :code).order :code
+      #      @colors = Color.select(:id, :code).order :code
       @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)
 
       @direct_purchase.direct_purchase_products.each do |dpp|
@@ -180,17 +179,13 @@ class ReceivingController < ApplicationController
   end
   
   def direct_purchase_params
-    params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net, :price_discount,
-      received_purchase_order_attributes: [:is_it_direct_purchasing, :is_using_delivery_order, :delivery_order_number, :vendor_id], 
+    params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net, received_purchase_order_attributes: [:is_it_direct_purchasing, :is_using_delivery_order, :delivery_order_number, :vendor_id], 
       direct_purchase_products_attributes: [:dp_cost, :vendor_id, :product_id, :receiving_date,
         direct_purchase_details_attributes: [:size_id, :color_id, :quantity]])
   end
   
   def set_purchase_order
-    @purchase_order = PurchaseOrder.where(id: params[:id]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, price_discount, vendor_id, warehouse_id").joins(:vendor).first
+    @purchase_order = PurchaseOrder.where(id: params[:id]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, vendor_id, warehouse_id").joins(:vendor).first
   end
   
-  def convert_price_discount_to_numeric
-    params[:direct_purchase][:price_discount] = params[:direct_purchase][:price_discount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:direct_purchase][:price_discount].present?
-  end
 end

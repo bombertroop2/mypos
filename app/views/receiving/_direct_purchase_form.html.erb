@@ -40,172 +40,162 @@
                                 &nbsp;&nbsp;&nbsp;&nbsp;<%= f.radio_button :is_additional_disc_from_net, false %> From gross
                             </div>
                         </div>
-                        <div class="form-group<%= control_group_error(@direct_purchase, :price_discount) %>">
-                            <%= f.label :price_discount, "Price discount", class: "col-sm-2 control-label" %>
-                              <div class="col-sm-10">
-                                  <%= f.text_field :price_discount, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
-                                      "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
-                                    <%= error_help_text(@direct_purchase, :price_discount) %>
-                                </div>
-                            </div>
-                            <%= f.fields_for :received_purchase_order do |received_purchase_order_form| %>
-                              <%= received_purchase_order_form.hidden_field :vendor_id %>                              
-                              <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
-                                  <%= received_purchase_order_form.label :is_using_delivery_order, simple_format("Expedition Number<br>(<i>Surat Jalan</i>)"), class: "col-sm-2 control-label" %>
+                        <%= f.fields_for :received_purchase_order do |received_purchase_order_form| %>
+                          <%= received_purchase_order_form.hidden_field :vendor_id %>                              
+                          <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
+                              <%= received_purchase_order_form.label :is_using_delivery_order, simple_format("Expedition Number<br>(<i>Surat Jalan</i>)"), class: "col-sm-2 control-label" %>
+                                <div class="col-sm-10">
+                                    <%= received_purchase_order_form.radio_button :is_using_delivery_order, "yes", checked: true, class: "do-radio-button-direct-purchase" %> Yes
+                                      <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button-direct-purchase" %> No
+                                    </div>
                                     <div class="col-sm-10">
-                                        <%= received_purchase_order_form.radio_button :is_using_delivery_order, "yes", checked: true, class: "do-radio-button-direct-purchase" %> Yes
-                                          <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button-direct-purchase" %> No
-                                        </div>
-                                        <div class="col-sm-10">
-                                            <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
-                                              <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
-                                          </div>
+                                        <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
+                                          <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
                                       </div>
-                                    <% end %>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">Products</label>
-                                        <div class="col-sm-10">
-                                            <table id="listing_product_table_receiving" class="display">
-                                                <thead>
-                                                    <tr>
-                                                        <th></th>
-                                                        <th id="code_th">Code</th>
-                                                        <th>Brand</th>
-                                                    </tr>
-                                                </thead>
+                                  </div>
+                                <% end %>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Products</label>
+                                    <div class="col-sm-10">
+                                        <table id="listing_product_table_receiving" class="display">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th id="code_th">Code</th>
+                                                    <th>Brand</th>
+                                                </tr>
+                                            </thead>
 
-                                                <tbody>
-                                                    <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
-                                                      <tr id="product_<%= product.id %>">
-                                                          <td></td>
-                                                          <td><%= product.code %></td>
-                                                          <td><%= product.name %></td>
-                                                      </tr>
-                                                    <% end %>
-                                                </tbody>
-                                            </table>
-                                            <a class="btn btn-default active" id="generate_dp_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-sm-offset-2 col-sm-10">
-                                            <div id="products_detail">
-                                                <% if params[:action].eql?("create") %>
-                                                  <%= render 'product_quantities' %>
+                                            <tbody>
+                                                <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
+                                                  <tr id="product_<%= product.id %>">
+                                                      <td></td>
+                                                      <td><%= product.code %></td>
+                                                      <td><%= product.name %></td>
+                                                  </tr>
                                                 <% end %>
-                                            </div>
-                                        </div>                                                      
+                                            </tbody>
+                                        </table>
+                                        <a class="btn btn-default active" id="generate_dp_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
                                     </div>
-                                    <div class="form-group">
-                                        <div class="col-sm-offset-2 col-sm-10">
-                                    <%#= f.submit "Save", class: "btn btn-primary", id: "dp-save-btn" %>
-                                            <a class="btn btn-primary" id="dp-save-btn">Save</a>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <div id="products_detail">
+                                            <% if params[:action].eql?("create") %>
+                                              <%= render 'product_quantities' %>
+                                            <% end %>
                                         </div>
+                                    </div>                                                      
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                <%#= f.submit "Save", class: "btn btn-primary", id: "dp-save-btn" %>
+                                        <a class="btn btn-primary" id="dp-save-btn">Save</a>
                                     </div>
-                                  <% end %>
-                                  <script>
-                                    $(function () {
-                                        if ($(".discount-fields").length > 0)
-                                            $(".discount-fields").numeric();
+                                </div>
+                              <% end %>
+                              <script>
+                                $(function () {
+                                    if ($(".discount-fields").length > 0)
+                                        $(".discount-fields").numeric();
 
-                                        $("#direct_purchase_receiving_date").datepicker({
-                                            dateFormat: "dd/mm/yy"
-                                        });
+                                    $("#direct_purchase_receiving_date").datepicker({
+                                        dateFormat: "dd/mm/yy"
+                                    });
 
-                                        var receivingDataTableDirectPurchase = $('#listing_product_table_receiving').DataTable({
-                                            order: [1, 'asc'],
-                                            dom: 'T<"clear">lfrtip',
-                                            columns: [
-                                                {data: null, defaultContent: '', orderable: false},
-                                                {data: 'code'},
-                                                {data: 'brand'}
-                                            ],
-                                            tableTools: {
-                                                sRowSelect: 'os',
-                                                sRowSelector: 'td:first-child',
-                                                aButtons: ['select_all', 'select_none']
-                                            },
-                                            paging: false,
-                                            info: false,
-                                            scrollY: "250px",
-                                            scrollCollapse: true
-                                        });
+                                    var receivingDataTableDirectPurchase = $('#listing_product_table_receiving').DataTable({
+                                        order: [1, 'asc'],
+                                        dom: 'T<"clear">lfrtip',
+                                        columns: [
+                                            {data: null, defaultContent: '', orderable: false},
+                                            {data: 'code'},
+                                            {data: 'brand'}
+                                        ],
+                                        tableTools: {
+                                            sRowSelect: 'os',
+                                            sRowSelector: 'td:first-child',
+                                            aButtons: ['select_all', 'select_none']
+                                        },
+                                        paging: false,
+                                        info: false,
+                                        scrollY: "250px",
+                                        scrollCollapse: true
+                                    });
 
-                                        $("#generate_dp_detail_form").click(function () {
-                                            if (receivingDataTableDirectPurchase.rows('.selected').data().length == 0)
-                                                bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
-                                            else if ($("#direct_purchase_receiving_date").val() == "")
-                                                bootbox.alert({message: "Please fill in receiving date first", size: 'small'});
-                                            else {
-                                                var productIds = [];
-                                                $.each(receivingDataTableDirectPurchase.rows('.selected')[0], function (index, value) {
-                                                    productIds.push(receivingDataTableDirectPurchase.rows(value).nodes().to$().attr("id").split("_")[1]);
-                                                });
+                                    $("#generate_dp_detail_form").click(function () {
+                                        if (receivingDataTableDirectPurchase.rows('.selected').data().length == 0)
+                                            bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+                                        else if ($("#direct_purchase_receiving_date").val() == "")
+                                            bootbox.alert({message: "Please fill in receiving date first", size: 'small'});
+                                        else {
+                                            var productIds = [];
+                                            $.each(receivingDataTableDirectPurchase.rows('.selected')[0], function (index, value) {
+                                                productIds.push(receivingDataTableDirectPurchase.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                            });
 
-                                                $.get("/receiving/get_product_details", {
-                                                    product_ids: productIds.join(","),
-                                                    previous_selected_product_ids: $("#receiving_product_ids").val(),
-                                                    dp_date: $("#direct_purchase_receiving_date").val()
-                                                });
-                                            }
-
-                                            return false;
-                                        });
-
-                                        $('#direct_purchase_first_discount').keypress(function (e) {
-                                            if (e.which == 13) {
-                                                if ($(this).val().trim() != "") {
-                                                    $("#direct_purchase_second_discount").prop("disabled", false);
-                                                    $("#direct_purchase_second_discount").focus();
-                                                    $("#direct_purchase_price_discount").val("");
-                                                }
-                                            }
-                                        });
-                                        $('#direct_purchase_price_discount').autoNumeric('init');
-                                        if ($("#receiving_product_ids").val() != undefined && $("#receiving_product_ids").val() != "") {
-                                            var splittedProductIds = $("#receiving_product_ids").val().split(",");
-                                            $.each(splittedProductIds, function (index, value) {
-                                                var e = jQuery.Event("click");
-                                                e.ctrlKey = true;
-                                                $("#product_" + value).find("td:first-child").trigger(e);
+                                            $.get("/receiving/get_product_details", {
+                                                product_ids: productIds.join(","),
+                                                previous_selected_product_ids: $("#receiving_product_ids").val(),
+                                                dp_date: $("#direct_purchase_receiving_date").val()
                                             });
                                         }
 
-                                        $(".do-radio-button-direct-purchase").click(function () {
-                                            if ($(this).val() == "yes")
-                                                $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", false);
-                                            else {
-                                                $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").val("");
-                                                $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", true);
-                                            }
-                                        });
-
-                                        $("#dp-save-btn").click(function () {
-                                            bootbox.confirm({
-                                                message: "This action cannot be undone<br/>Are you sure?",
-                                                buttons: {
-                                                    confirm: {
-                                                        label: '<i class="fa fa-check"></i> Confirm'
-                                                    },
-                                                    cancel: {
-                                                        label: '<i class="fa fa-times"></i> Cancel'
-                                                    }
-                                                },
-                                                callback: function (result) {
-                                                    if (result) {
-                                                        $("body").css('padding-right', '0px');
-                                                        // untuk kebutuhan auto do number                                                        
-                                                        $("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
-                                                        // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
-                                                        $(".receiving-date").val($("#direct_purchase_receiving_date").val());
-                                                        $(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
-                                                        $("#new_direct_purchase").submit();
-                                                    }
-                                                },
-                                                size: "small"
-                                            });
-                                            return false;
-                                        });
-
+                                        return false;
                                     });
-                                  </script>
+
+                                    $('#direct_purchase_first_discount').keypress(function (e) {
+                                        if (e.which == 13) {
+                                            if ($(this).val().trim() != "") {
+                                                $("#direct_purchase_second_discount").prop("disabled", false);
+                                                $("#direct_purchase_second_discount").focus();
+                                            }
+                                        }
+                                    });
+                                    if ($("#receiving_product_ids").val() != undefined && $("#receiving_product_ids").val() != "") {
+                                        var splittedProductIds = $("#receiving_product_ids").val().split(",");
+                                        $.each(splittedProductIds, function (index, value) {
+                                            var e = jQuery.Event("click");
+                                            e.ctrlKey = true;
+                                            $("#product_" + value).find("td:first-child").trigger(e);
+                                        });
+                                    }
+
+                                    $(".do-radio-button-direct-purchase").click(function () {
+                                        if ($(this).val() == "yes")
+                                            $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", false);
+                                        else {
+                                            $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").val("");
+                                            $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", true);
+                                        }
+                                    });
+
+                                    $("#dp-save-btn").click(function () {
+                                        bootbox.confirm({
+                                            message: "This action cannot be undone<br/>Are you sure?",
+                                            buttons: {
+                                                confirm: {
+                                                    label: '<i class="fa fa-check"></i> Confirm'
+                                                },
+                                                cancel: {
+                                                    label: '<i class="fa fa-times"></i> Cancel'
+                                                }
+                                            },
+                                            callback: function (result) {
+                                                if (result) {
+                                                    $("body").css('padding-right', '0px');
+                                                    // untuk kebutuhan auto do number                                                        
+                                                    $("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
+                                                    // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
+                                                    $(".receiving-date").val($("#direct_purchase_receiving_date").val());
+                                                    $(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
+                                                    $("#new_direct_purchase").submit();
+                                                }
+                                            },
+                                            size: "small"
+                                        });
+                                        return false;
+                                    });
+
+                                });
+                              </script>

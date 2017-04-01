@@ -60,8 +60,7 @@ module PurchaseReturnsHelper
     elsif purchase_return.direct_purchase && purchase_return.direct_purchase.second_discount.present?
       total_return_value - total_return_value * ((purchase_return.direct_purchase.first_discount.to_f + purchase_return.direct_purchase.second_discount.to_f) / 100)
     end
-    value_after_money_discount = total_return_value - (purchase_return.purchase_order.price_discount rescue purchase_return.direct_purchase.price_discount) rescue nil
-    return value_after_money_discount || value_after_second_discount || value_after_first_discount
+    return value_after_second_discount || value_after_first_discount
   end
   
   def get_vat_in_money_pr(purchase_return)

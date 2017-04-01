@@ -49,203 +49,186 @@
                                         &nbsp;&nbsp;&nbsp;&nbsp;<%= f.radio_button :is_additional_disc_from_net, false %> From gross
                                     </div>
                                 </div>
-                                <div class="form-group<%= control_group_error(@purchase_order, :price_discount) %>">
-                                    <%= f.label :price_discount, "Price discount", class: "col-sm-2 control-label" %>
+
+                                <div class="form-group">
+                                    <%= f.label :note, class: "col-sm-2 control-label" %>
                                       <div class="col-sm-10">
-                                          <%= f.text_field :price_discount, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
-                                              "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
-                                            <%= error_help_text(@purchase_order, :price_discount) %>
+                                          <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>                                            
                                         </div>
                                     </div>
-
                                     <div class="form-group">
-                                        <%= f.label :note, class: "col-sm-2 control-label" %>
-                                          <div class="col-sm-10">
-                                              <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>                                            
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">Products</label>
-                                            <div class="col-sm-10">
-                                                <table id="listing_product_table" class="display">
-                                                    <thead>
-                                                        <tr>
-                                                            <th></th>
-                                                            <th>Code</th>
-                                                            <th>Brand</th>
-                                                        </tr>
-                                                    </thead>
+                                        <label class="col-sm-2 control-label">Products</label>
+                                        <div class="col-sm-10">
+                                            <table id="listing_product_table" class="display">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Code</th>
+                                                        <th>Brand</th>
+                                                    </tr>
+                                                </thead>
 
-                                                    <tbody>
-                                                        <% @product_list.each_with_index do |product, index| %>
-                                                          <tr id="product_<%= product.id %>">
-                                                              <td></td>
-                                                              <td><%= product.code %></td>
-                                                              <td><%= product.brand_name %></td>
-                                                          </tr>
-                                                        <% end %>
-                                                    </tbody>
-                                                </table>
-                                    <%#= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
-                                                <a class="btn btn-default active" id="generate_po_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="col-sm-offset-2 col-sm-10">
-                                                <div id="products_detail">
-                                                    <% if @products.present? %>
-                                                      <%= render 'product_quantities' %>
+                                                <tbody>
+                                                    <% @product_list.each_with_index do |product, index| %>
+                                                      <tr id="product_<%= product.id %>">
+                                                          <td></td>
+                                                          <td><%= product.code %></td>
+                                                          <td><%= product.brand_name %></td>
+                                                      </tr>
                                                     <% end %>
-                                                </div>
-                                            </div>                                                      
+                                                </tbody>
+                                            </table>
+                                <%#= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
+                                            <a class="btn btn-default active" id="generate_po_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="col-sm-offset-2 col-sm-10">
-                                    <%#= f.submit "Save", class: "btn btn-primary" %>
-                                                <a class="btn btn-primary" id="save_btn">Save</a>
-                                                <a class="btn btn-link" id="btn-cancel-new-po">Cancel</a>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <div id="products_detail">
+                                                <% if @products.present? %>
+                                                  <%= render 'product_quantities' %>
+                                                <% end %>
                                             </div>
+                                        </div>                                                      
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                <%#= f.submit "Save", class: "btn btn-primary" %>
+                                            <a class="btn btn-primary" id="save_btn">Save</a>
+                                            <a class="btn btn-link" id="btn-cancel-new-po">Cancel</a>
                                         </div>
-                                      <% end %>
-                                  </td>
-                                  <script>
-                                  <% unless @purchase_order.new_record? %>
-                                      var purchaseOrderId = "<%= params[:id] %>";
-                                      $(function () {
-                                    <% if @replaced_ids.present? %>
-                                      <% @replaced_ids.each do |replaced_id| %>
-                                              // jika product sudah ada di database sembunyikan produk dan check remove
-                                              if ($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0) {
-                                                  $("#product_table_<%= replaced_id %>").hide();
-                                                  $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
-                                              }
-                                      <% end %>
-                                    <% end %>
-                                      });
-                                  <% else %>
-                                      var purchaseOrderId = null;
+                                    </div>
                                   <% end %>
+                              </td>
+                              <script>
+                              <% unless @purchase_order.new_record? %>
+                                  var purchaseOrderId = "<%= params[:id] %>";
+                                  $(function () {
+                                <% if @replaced_ids.present? %>
+                                  <% @replaced_ids.each do |replaced_id| %>
+                                          // jika product sudah ada di database sembunyikan produk dan check remove
+                                          if ($("#product_table_<%= replaced_id %>").find("[type='checkbox']").length > 0) {
+                                              $("#product_table_<%= replaced_id %>").hide();
+                                              $("#product_table_<%= replaced_id %>").find("[type='checkbox']").attr("checked", true);
+                                          }
+                                  <% end %>
+                                <% end %>
+                                  });
+                              <% else %>
+                                  var purchaseOrderId = null;
+                              <% end %>
 
-                                    $(function () {
-                                        $("#btn-cancel-new-po").click(function () {
-                                            $(".new-item-placeholder.info").html("");
-                                            $(".new-item-placeholder.info").addClass("hidden");
-                                            $(".new-item-action.info").removeClass("hidden");
-                                        });
-
-
-                                        dataTable = $('#listing_product_table').DataTable({
-                                            order: [1, 'asc'],
-                                            dom: 'T<"clear">lfrtip',
-                                            columns: [
-                                                {data: null, defaultContent: '', orderable: false},
-                                                {data: 'code'},
-                                                {data: 'brand'}
-                                            ],
-                                            tableTools: {
-                                                sRowSelect: 'os',
-                                                sRowSelector: 'td:first-child',
-                                                aButtons: ['select_all', 'select_none']
-                                            },
-                                            paging: false,
-                                            info: false,
-                                            scrollY: "250px",
-                                            scrollCollapse: true
-                                        });
+                                $(function () {
+                                    $("#btn-cancel-new-po").click(function () {
+                                        $(".new-item-placeholder.info").html("");
+                                        $(".new-item-placeholder.info").addClass("hidden");
+                                        $(".new-item-action.info").removeClass("hidden");
+                                    });
 
 
-                                        $("#generate_po_detail_form").click(function () {
-                                            if (dataTable.rows('.selected').data().length == 0)
-                                                bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
-                                            else if ($("#purchase_order_purchase_order_date").val() == "")
-                                                bootbox.alert({message: "Please fill in purchase order date first", size: 'small'});
-                                            else {
-                                                var productIds = [];
-                                                $.each(dataTable.rows('.selected')[0], function (index, value) {
-                                                    productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
-                                                });
-                                                if (typeof purchaseOrderId === 'undefined')
-                                                    $.get("/purchase_orders/get_product_details", {
-                                                        product_ids: productIds.join(","),
-                                                        previous_selected_product_ids: $("#product_ids").val(),
-                                                        po_date: $("#purchase_order_purchase_order_date").val()
-                                                    });
-                                                else
-                                                    $.get("/purchase_orders/get_product_details", {
-                                                        product_ids: productIds.join(","),
-                                                        purchase_order_id: purchaseOrderId,
-                                                        previous_selected_product_ids: $("#product_ids").val(),
-                                                        po_date: $("#purchase_order_purchase_order_date").val()
-                                                    });
-                                            }
+                                    dataTable = $('#listing_product_table').DataTable({
+                                        order: [1, 'asc'],
+                                        dom: 'T<"clear">lfrtip',
+                                        columns: [
+                                            {data: null, defaultContent: '', orderable: false},
+                                            {data: 'code'},
+                                            {data: 'brand'}
+                                        ],
+                                        tableTools: {
+                                            sRowSelect: 'os',
+                                            sRowSelector: 'td:first-child',
+                                            aButtons: ['select_all', 'select_none']
+                                        },
+                                        paging: false,
+                                        info: false,
+                                        scrollY: "250px",
+                                        scrollCollapse: true
+                                    });
 
-                                            return false;
-                                        });
 
-                                        $("#purchase_order_request_delivery_date").datepicker({
-                                            dateFormat: "dd/mm/yy"
-                                        });
-
-                                        $('#purchase_order_purchase_order_date').datepicker({
-                                            dateFormat: "dd/mm/yy"
-                                        });
-
-                                        hideDeleteMarkedProduct();
-
-                                        if ($("#product_ids").val() != undefined && $("#product_ids").val() != "") {
-                                            var splittedProductIds = $("#product_ids").val().split(",");
-                                            $.each(splittedProductIds, function (index, value) {
-                                                var e = jQuery.Event("click");
-                                                e.ctrlKey = true;
-                                                $("#product_" + value).find("td:first-child").trigger(e);
+                                    $("#generate_po_detail_form").click(function () {
+                                        if (dataTable.rows('.selected').data().length == 0)
+                                            bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+                                        else if ($("#purchase_order_purchase_order_date").val() == "")
+                                            bootbox.alert({message: "Please fill in purchase order date first", size: 'small'});
+                                        else {
+                                            var productIds = [];
+                                            $.each(dataTable.rows('.selected')[0], function (index, value) {
+                                                productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
                                             });
+                                            if (typeof purchaseOrderId === 'undefined')
+                                                $.get("/purchase_orders/get_product_details", {
+                                                    product_ids: productIds.join(","),
+                                                    previous_selected_product_ids: $("#product_ids").val(),
+                                                    po_date: $("#purchase_order_purchase_order_date").val()
+                                                });
+                                            else
+                                                $.get("/purchase_orders/get_product_details", {
+                                                    product_ids: productIds.join(","),
+                                                    purchase_order_id: purchaseOrderId,
+                                                    previous_selected_product_ids: $("#product_ids").val(),
+                                                    po_date: $("#purchase_order_purchase_order_date").val()
+                                                });
                                         }
 
-                                        if ($(".discount-fields").length > 0)
-                                            $(".discount-fields").numeric();
-
-                                        $('#purchase_order_price_discount').autoNumeric('init');
-                                        $('#purchase_order_first_discount').keypress(function (e) {
-                                            if (e.which == 13) {
-                                                if ($(this).val().trim() != "") {
-                                                    $("#purchase_order_second_discount").prop("disabled", false);
-                                                    $("#purchase_order_second_discount").focus();
-                                                    $("#purchase_order_price_discount").val("");
-                                                }
-                                            }
-                                        });
-
-                                        $("#purchase_order_price_discount").keyup(function () {
-                                            if ($(this).val().trim() != "" && $(this).val().trim() != "Rp") {
-                                                $('#purchase_order_first_discount').val("");
-                                                $('#purchase_order_second_discount').val("");
-                                                $("#purchase_order_second_discount").prop("disabled", true);
-                                            }
-                                        });
-
-                                        $("#save_btn").click(function () {
-                                            bootbox.confirm({
-                                                title: "Create purchase order?",
-                                                message: "Please check your entries carefully! This document can't be edited.",
-                                                buttons: {
-                                                    confirm: {
-                                                        label: '<i class="fa fa-check"></i> Confirm'
-                                                    },
-                                                    cancel: {
-                                                        label: '<i class="fa fa-times"></i> Cancel'
-                                                    }
-                                                },
-                                                callback: function (result) {
-                                                    if (result) {
-                                                        $("body").css('padding-right', '0px');
-                                                        // ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
-                                                        $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
-                                                        $(".purchase-order-vendor-id").val($("#purchase_order_vendor_id").val());
-                                                        $(".po-form").submit();
-                                                    }
-                                                }
-                                            });
-                                        });
-
+                                        return false;
                                     });
-                                  </script>
+
+                                    $("#purchase_order_request_delivery_date").datepicker({
+                                        dateFormat: "dd/mm/yy"
+                                    });
+
+                                    $('#purchase_order_purchase_order_date').datepicker({
+                                        dateFormat: "dd/mm/yy"
+                                    });
+
+                                    hideDeleteMarkedProduct();
+
+                                    if ($("#product_ids").val() != undefined && $("#product_ids").val() != "") {
+                                        var splittedProductIds = $("#product_ids").val().split(",");
+                                        $.each(splittedProductIds, function (index, value) {
+                                            var e = jQuery.Event("click");
+                                            e.ctrlKey = true;
+                                            $("#product_" + value).find("td:first-child").trigger(e);
+                                        });
+                                    }
+
+                                    if ($(".discount-fields").length > 0)
+                                        $(".discount-fields").numeric();
+
+                                    $('#purchase_order_first_discount').keypress(function (e) {
+                                        if (e.which == 13) {
+                                            if ($(this).val().trim() != "") {
+                                                $("#purchase_order_second_discount").prop("disabled", false);
+                                                $("#purchase_order_second_discount").focus();
+                                            }
+                                        }
+                                    });
+
+
+                                    $("#save_btn").click(function () {
+                                        bootbox.confirm({
+                                            title: "Create purchase order?",
+                                            message: "Please check your entries carefully! This document can't be edited.",
+                                            buttons: {
+                                                confirm: {
+                                                    label: '<i class="fa fa-check"></i> Confirm'
+                                                },
+                                                cancel: {
+                                                    label: '<i class="fa fa-times"></i> Cancel'
+                                                }
+                                            },
+                                            callback: function (result) {
+                                                if (result) {
+                                                    $("body").css('padding-right', '0px');
+                                                    // ini untuk validasi di purchase order product, untuk cek apakah ada cost yang aktif pada tanggal PO
+                                                    $(".purchase-order-date").val($("#purchase_order_purchase_order_date").val());
+                                                    $(".purchase-order-vendor-id").val($("#purchase_order_vendor_id").val());
+                                                    $(".po-form").submit();
+                                                }
+                                            }
+                                        });
+                                    });
+
+                                });
+                              </script>

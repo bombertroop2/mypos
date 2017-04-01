@@ -48,39 +48,39 @@ module PurchaseOrdersHelper
     "purchase_order[purchase_order_products_attributes][#{purchase_order_product.id}][received_purchase_orders_attributes][#{color.id}]"
   end
   
-  def get_net_order_value(purchase_order)
-    if purchase_order.is_taxable_entrepreneur && purchase_order.value_added_tax.eql?("exclude")
-      net_order_value = purchase_order.order_value
-    else
-      #      if purchase_order.first_discount && purchase_order.second_discount.blank?
-      purchase_order.order_value - purchase_order.order_value * 0.10
-    end
-  end
+#  def get_net_order_value(purchase_order)
+#    if purchase_order.is_taxable_entrepreneur && purchase_order.value_added_tax.eql?("exclude")
+#      net_order_value = purchase_order.order_value
+#    else
+#      #      if purchase_order.first_discount && purchase_order.second_discount.blank?
+#      purchase_order.order_value - purchase_order.order_value * 0.10
+#    end
+#  end
   
-  def get_gross_order_value(purchase_order)
-    if purchase_order.is_taxable_entrepreneur && purchase_order.value_added_tax.eql?("exclude")
-      if purchase_order.first_discount && purchase_order.second_discount.blank?
-        net_order_value = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
-        gross_order_value = net_order_value + net_order_value * 0.10
-      elsif purchase_order.first_discount && purchase_order.second_discount
-        if purchase_order.is_additional_disc_from_net
-          net_order_value_from_first_disc = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
-          net_order_value = net_order_value_from_first_disc - net_order_value_from_first_disc * (purchase_order.second_discount.to_f / 100)
-        else
-          net_order_value = purchase_order.order_value - purchase_order.order_value * ((purchase_order.first_discount.to_f + purchase_order.second_discount.to_f) / 100)
-        end        
-        gross_order_value = net_order_value + net_order_value * 0.10
-      elsif purchase_order.price_discount
-        net_order_value = purchase_order.order_value - (purchase_order.order_value - purchase_order.price_discount)
-        gross_order_value = net_order_value + net_order_value * 0.10
-      else
-        gross_order_value = purchase_order.order_value + purchase_order.order_value * 0.10
-      end    
-    else
-      gross_order_value = purchase_order.order_value
-    end
-    gross_order_value
-  end    
+#  def get_gross_order_value(purchase_order)
+#    if purchase_order.is_taxable_entrepreneur && purchase_order.value_added_tax.eql?("exclude")
+#      if purchase_order.first_discount && purchase_order.second_discount.blank?
+#        net_order_value = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
+#        gross_order_value = net_order_value + net_order_value * 0.10
+#      elsif purchase_order.first_discount && purchase_order.second_discount
+#        if purchase_order.is_additional_disc_from_net
+#          net_order_value_from_first_disc = purchase_order.order_value - purchase_order.order_value * (purchase_order.first_discount.to_f / 100)
+#          net_order_value = net_order_value_from_first_disc - net_order_value_from_first_disc * (purchase_order.second_discount.to_f / 100)
+#        else
+#          net_order_value = purchase_order.order_value - purchase_order.order_value * ((purchase_order.first_discount.to_f + purchase_order.second_discount.to_f) / 100)
+#        end        
+#        gross_order_value = net_order_value + net_order_value * 0.10
+#      elsif purchase_order.price_discount
+#        net_order_value = purchase_order.order_value - (purchase_order.order_value - purchase_order.price_discount)
+#        gross_order_value = net_order_value + net_order_value * 0.10
+#      else
+#        gross_order_value = purchase_order.order_value + purchase_order.order_value * 0.10
+#      end    
+#    else
+#      gross_order_value = purchase_order.order_value
+#    end
+#    gross_order_value
+#  end    
   
   def get_second_discount_in_money(purchase_order)
     if purchase_order.is_additional_disc_from_net
@@ -102,8 +102,7 @@ module PurchaseOrdersHelper
     elsif purchase_order.second_discount.present?
       purchase_order.order_value - purchase_order.order_value * ((purchase_order.first_discount.to_f + purchase_order.second_discount.to_f) / 100)
     end
-    value_after_money_discount = purchase_order.order_value - purchase_order.price_discount rescue nil
-    return value_after_money_discount || value_after_second_discount || value_after_first_discount
+    return value_after_second_discount || value_after_first_discount
   end
   
   def value_after_ppn(purchase_order)

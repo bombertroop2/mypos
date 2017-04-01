@@ -3,7 +3,6 @@ class PurchaseOrdersController < ApplicationController
   helper SmartListing::Helper
   before_action :populate_combobox_list, :populate_products, only: [:new, :edit]
   before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :close]
-  before_action :convert_price_discount_to_numeric, only: [:create, :update]
 
   # GET /purchase_orders
   # GET /purchase_orders.json
@@ -202,12 +201,12 @@ class PurchaseOrdersController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_purchase_order
     @purchase_order = PurchaseOrder.joins(:vendor, :warehouse).where(id: params[:id]).
-      select("po_type, note, warehouse_id, vendor_id, status, number, vendors.name AS vendor_name, terms_of_payment, purchase_orders.created_at, purchase_order_date, request_delivery_date, order_value, first_discount, second_discount, is_additional_disc_from_net, price_discount, purchase_orders.value_added_tax, warehouses.code AS warehouse_code, warehouses.address AS warehouse_address, purchase_orders.is_taxable_entrepreneur, purchase_orders.id").first
+      select("po_type, note, warehouse_id, vendor_id, status, number, vendors.name AS vendor_name, terms_of_payment, purchase_orders.created_at, purchase_order_date, request_delivery_date, order_value, first_discount, second_discount, is_additional_disc_from_net, purchase_orders.value_added_tax, warehouses.code AS warehouse_code, warehouses.address AS warehouse_address, purchase_orders.is_taxable_entrepreneur, purchase_orders.id").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
-    params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :price_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
+    params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
       :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:po_cost, :vendor_id, :cost_list_id, :id, :product_id, :purchase_order_date, :_destroy,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]]).merge(created_by: current_user.id)
@@ -216,10 +215,6 @@ class PurchaseOrdersController < ApplicationController
   def populate_combobox_list
     @suppliers = Vendor.select(:id, :name)
     @warehouses = Warehouse.where("warehouse_type = 'central'").select(:id, :code)
-  end
-  
-  def convert_price_discount_to_numeric
-    params[:purchase_order][:price_discount] = params[:purchase_order][:price_discount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:purchase_order][:price_discount].present?
   end
   
   def populate_products
