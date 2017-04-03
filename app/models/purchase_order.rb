@@ -8,7 +8,7 @@ class PurchaseOrder < ApplicationRecord
   has_many :products, through: :purchase_order_products
   has_many :received_purchase_orders
   has_many :account_payable_purchases, as: :purchase
-  has_one :purchase_return
+  has_many :purchase_returns
 
   attr_accessor :receiving_po, :deleting_po, :closing_po, :is_user_changing_cost
 

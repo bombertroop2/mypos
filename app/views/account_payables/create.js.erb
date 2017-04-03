@@ -3,4 +3,6 @@
 
 <% if @vendor_name.present? %>
   $("#vendor_name_<%= @account_payable.id %>").html("<%= @vendor_name %>");
+<% else %>
+  $("#return-item-allocation").removeClass("hidden");
 <% end %>

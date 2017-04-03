@@ -27,7 +27,7 @@ module PurchaseReturnsHelper
   
   def total_return_value(purchase_return)
     total_value = 0
-    purchase_return.purchase_return_products.each do |purchase_return_product|
+    purchase_return.purchase_return_products.select(:total_quantity, :purchase_order_product_id, :direct_purchase_product_id).each do |purchase_return_product|
       total_value += purchase_return_product.return_total_cost(purchase_return.direct_purchase_id.present?)
     end
     return total_value

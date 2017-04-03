@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resources :account_payables do
     collection do
       get 'generate_form'
+      get 'get_purchase_returns'
     end
   end
   resources :emails

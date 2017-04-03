@@ -19,8 +19,7 @@ module AccountPayablesHelper
     elsif purchase_order.second_discount.present?
       purchase_order.receiving_value - purchase_order.receiving_value * ((purchase_order.first_discount.to_f + purchase_order.second_discount.to_f) / 100)
     end
-    value_after_money_discount = purchase_order.receiving_value - purchase_order.price_discount rescue nil
-    return value_after_money_discount || value_after_second_discount || value_after_first_discount
+    return value_after_second_discount || value_after_first_discount
   end
   
   def value_after_ppn_for_ap(purchase_order)

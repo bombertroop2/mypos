@@ -16,6 +16,7 @@
           </div>
           <button id="search-po-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
           <button id="pay-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-credit-card"></span></button>
+          <button id="return-item-allocation" type="submit" class="btn btn-primary hidden"><span class="glyphicon glyphicon-scissors"></span></button>
       </div>
       <table id="ap_listing_po_table" class="display">
           <thead>
@@ -29,7 +30,6 @@
                   <th>Gross Amount</th>
                   <th>1st Disc</th>
                   <th>2nd Disc</th>
-                  <th>Disc (Rp)</th>
                   <th>Value Added Tax (10%)</th>
                   <th>Net Amount</th>
                   <th>Payment Status</th>
@@ -69,15 +69,6 @@
                         <% end %>
                     </td>
                     <td>
-                        <% if purchase_order.price_discount.present? %>
-                          <%= number_to_currency(purchase_order.price_discount.to_f,
-                            :separator => ",",
-                            :delimiter => ".",
-                            :unit => "Rp",
-                            :precision => 2) %>
-                        <% end %>
-                    </td>
-                    <td>
                         <% if purchase_order.is_taxable_entrepreneur %>
                           <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
                             :separator => ",",
@@ -112,6 +103,7 @@
 
   <script>
     $(function () {
+        var aPpRdataTable = null;
         var aPpOdataTable = $('#ap_listing_po_table').DataTable({
             order: [],
             dom: 'T<"clear">lrtip',
@@ -125,7 +117,6 @@
                 {data: 'gross_amount'},
                 {data: 'first_discount'},
                 {data: 'second_discount'},
-                {data: 'discount_in_rupiah'},
                 {data: 'value_added_tax'},
                 {data: 'net_amount'},
                 {data: 'payment_status'}
@@ -201,6 +192,57 @@
                     purchase_order_ids: purchaseOrderIds.join(",")
                 });
             }
+        });
+
+        $("#return-item-allocation").click(function () {
+            // split isi dari action attributnya form untuk ambil id produk
+            $.get("/account_payables/get_purchase_returns", {
+                vendor_id: $("#account_payable_vendor_id").val()
+            }).done(function (data) {
+                bootbox.confirm({
+                    size: "large",
+                    title: "Unallocated Return Items of " + $("#vendor_id").html(),
+                    message: data,
+                    callback: function (result) {
+                        if (result) {
+                            if (aPpRdataTable.rows('.selected').data().length == 0) {
+                                bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
+                                return false;
+                            } else {
+
+                            }
+                        }
+                    }
+                }).on("shown.bs.modal", function () {
+                    aPpRdataTable = $('#ap_listing_pr_table').DataTable({
+                        order: [1, 'asc'],
+                        dom: 'T<"clear">lfrtip',
+                        columns: [
+                            {data: null, defaultContent: '', orderable: false},
+                            {data: 'number'},
+                            {data: 'quantity'},
+                            {data: 'gross_amount'},
+                            {data: 'first_discount'},
+                            {data: 'second_discount'},
+                            {data: 'value_added_tax'},
+                            {data: 'net_amount'}
+
+                        ],
+                        tableTools: {
+                            sRowSelect: 'os',
+                            //sRowSelector: 'td:first-child',
+                            aButtons: ['select_all', 'select_none']
+                        },
+                        paging: false,
+                        info: false,
+                        scrollY: "250px",
+                        scrollX: true,
+                        scrollCollapse: true
+                                /*,
+                                 bFilter: false*/
+                    });
+                });
+            });
         });
     });
 

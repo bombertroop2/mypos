@@ -1,0 +1,68 @@
+<table id="ap_listing_pr_table" class="display">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Number</th>
+            <th>Qty</th>
+            <th>Gross Amount</th>
+            <th>1st Disc</th>
+            <th>2nd Disc</th>
+            <th>Value Added Tax (10%)</th>
+            <th>Net Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% @purchase_returns.each do |purchase_return| %>
+          <tr>
+              <td></td>
+              <td><%= purchase_return.number %></td>
+              <td><%= purchase_return.quantity_returned %></td>
+              <td><%= number_to_currency(total_return_value(purchase_return),
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %></td>
+              <td>
+                  <% if (purchase_return.purchase_order && purchase_return.purchase_order.first_discount.present?) || (purchase_return.direct_purchase && purchase_return.direct_purchase.first_discount.present?) %>
+                    <%= number_to_currency(((purchase_return.purchase_order.first_discount.to_f rescue purchase_return.direct_purchase.first_discount.to_f) / 100) * total_return_value(purchase_return),
+                      :separator => ",",
+                      :delimiter => ".",
+                      :unit => "Rp",
+                      :precision => 2) %> (<%= "#{(purchase_return.purchase_order.first_discount rescue purchase_return.direct_purchase.first_discount)}%" %>)
+                  <% end %>
+              </td>
+              <td>
+                  <% if (purchase_return.purchase_order && purchase_return.purchase_order.second_discount.present?) || (purchase_return.direct_purchase && purchase_return.direct_purchase.second_discount) %>
+                    <%= number_to_currency(get_second_discount_in_money_pr(purchase_return),
+                      :separator => ",",
+                      :delimiter => ".",
+                      :unit => "Rp",
+                      :precision => 2) %> (<%= "#{(purchase_return.purchase_order.second_discount rescue purchase_return.direct_purchase.second_discount)}%" %> from <%= (purchase_return.purchase_order && purchase_return.purchase_order.is_additional_disc_from_net) || (purchase_return.direct_purchase && purchase_return.direct_purchase.is_additional_disc_from_net) ? "net" : "gross" %>)
+                  <% end %>
+              </td>
+              <td>
+                  <% if purchase_return.purchase_order && purchase_return.purchase_order.is_taxable_entrepreneur %>
+                    <%= number_to_currency(get_vat_in_money_pr(purchase_return),
+                      :separator => ",",
+                      :delimiter => ".",
+                      :unit => "Rp",
+                      :precision => 2) %> (<%= purchase_return.purchase_order.value_added_tax %>)
+                  <% elsif purchase_return.direct_purchase && purchase_return.direct_purchase.is_taxable_entrepreneur %>
+                    <%= number_to_currency(get_vat_in_money_pr(purchase_return),
+                      :separator => ",",
+                      :delimiter => ".",
+                      :unit => "Rp",
+                      :precision => 2) %> (<%= purchase_return.direct_purchase.vat_type %>)
+                  <% end %>
+              </td>
+              <td>
+                  <%= number_to_currency(value_after_ppn_pr(purchase_return),
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %>
+              </td>
+          </tr>
+        <% end %>
+    </tbody>
+</table>

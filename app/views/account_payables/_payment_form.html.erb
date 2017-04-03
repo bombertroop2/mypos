@@ -11,7 +11,6 @@
                         <th>Gross Amount</th>
                         <th>1st Disc</th>
                         <th>2nd Disc</th>
-                        <th>Disc (Rp)</th>
                         <th>Value Added Tax (10%)</th>
                         <th>Net Amount</th>
                     </tr>
@@ -49,15 +48,6 @@
                                 <% end %>
                             </td>
                             <td>
-                                <% if purchase_order.price_discount.present? %>
-                                  <%= number_to_currency(purchase_order.price_discount.to_f,
-                                    :separator => ",",
-                                    :delimiter => ".",
-                                    :unit => "Rp",
-                                    :precision => 2) %>
-                                <% end %>
-                            </td>
-                            <td>
                                 <% if purchase_order.is_taxable_entrepreneur %>
                                   <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
                                     :separator => ",",
@@ -77,7 +67,7 @@
                   </tbody>
                   <tfoot>
                       <tr>
-                          <td colspan="7" align="right"><strong>Total Amount Received</strong></td>
+                          <td colspan="6" align="right"><strong>Total Amount Received</strong></td>
                           <td align="right"><strong><%= number_to_currency(total_amount_received,
                                     :separator => ",",
                                     :delimiter => ".",
@@ -85,7 +75,7 @@
                                     :precision => 2) %></strong></td>
                       </tr>
                       <tr>
-                          <td colspan="7" align="right"><strong>Previous Paid</strong></td>
+                          <td colspan="6" align="right"><strong>Previous Paid</strong></td>
                           <td align="right"><strong><%= number_to_currency(@previous_paid,
                                     :separator => ",",
                                     :delimiter => ".",
@@ -94,7 +84,7 @@
                       </tr>
                       <% amount_to_pay = total_amount_received - @previous_paid %>
                       <tr>
-                          <td colspan="7" align="right"><strong>Amount To Pay</strong></td>
+                          <td colspan="6" align="right"><strong>Amount To Pay</strong></td>
                           <td align="right" id="amount-to-pay"><strong><%= number_to_currency(amount_to_pay,
                                     :separator => ",",
                                     :delimiter => ".",
@@ -110,7 +100,7 @@
               Vendor
           </label>
           <div class="col-sm-10">
-              <span class="form-control"><%= @account_payable.vendor.name rescue "" %></span>
+              <span class="form-control" id="vendor_id"><%= @account_payable.vendor.name rescue "" %></span>
           </div>
       </div>
       <div class="form-group<%= control_group_error(@account_payable, :payment_method) %>">

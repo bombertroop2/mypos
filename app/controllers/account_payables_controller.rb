@@ -26,7 +26,7 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables/new
   def new
     @account_payable = AccountPayable.new
-    @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").group("purchase_orders.id, received_purchase_orders.receiving_date, vendors.name").order("received_purchase_orders.receiving_date")
+    @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").group("purchase_orders.id, received_purchase_orders.receiving_date, vendors.name").order("received_purchase_orders.receiving_date")
   end
 
   # GET /account_payables/1/edit
@@ -41,7 +41,7 @@ class AccountPayablesController < ApplicationController
     is_exception_raised = false
     begin
       unless @account_payable.save
-        @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("status = 'Finish' OR status = 'Closed'").group("purchase_orders.id, received_purchase_orders.receiving_date, vendors.name").order("received_purchase_orders.receiving_date")
+        @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("status = 'Finish' OR status = 'Closed'").group("purchase_orders.id, received_purchase_orders.receiving_date, vendors.name").order("received_purchase_orders.receiving_date")
         
         previous_account_payables = []
         @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
@@ -121,13 +121,18 @@ class AccountPayablesController < ApplicationController
       @previous_paid += previous_account_payable.amount_paid      
     end
     
-    selected_purchase_orders = PurchaseOrder.where(id: purchase_order_ids).select(:id, :number, :receiving_value, :first_discount, :second_discount, :price_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(payment_status: "")
+    selected_purchase_orders = PurchaseOrder.where(id: purchase_order_ids).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(payment_status: "")
     selected_purchase_orders.each_with_index do |selected_purchase_order, index|
       @account_payable = AccountPayable.new vendor_id: selected_purchase_order.vendor_id if index == 0
       @account_payable.account_payable_purchases.build purchase_id: selected_purchase_order.id, purchase_type: selected_purchase_order.class.name
     end
     render js: "bootbox.alert({message: \"Please choose one vendor to make a payment\",size: 'small'});" if selected_purchase_orders.pluck(:vendor_id).uniq.length > 1
     render js: "bootbox.alert({message: \"Please select another purchase order\",size: 'small'});" if selected_purchase_orders.length == 0
+  end
+  
+  def get_purchase_returns
+    @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.po_returns
+    render partial: 'show_return_items'
   end
 
   private

@@ -14,6 +14,14 @@ class PurchaseReturn < ApplicationRecord
           before_create :generate_number
   
           accepts_nested_attributes_for :purchase_return_products, reject_if: :quantity_blank
+
+          def quantity_returned
+            quantity = 0
+            purchase_return_products.select(:total_quantity).each do |prp|
+              quantity += prp.total_quantity
+            end
+            quantity
+          end
     
           private
       
@@ -55,5 +63,6 @@ class PurchaseReturn < ApplicationRecord
             end
             self.number = new_pr_number
           end
+          
 
         end
