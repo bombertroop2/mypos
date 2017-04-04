@@ -134,6 +134,14 @@ class AccountPayablesController < ApplicationController
     @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.po_returns
     render partial: 'show_return_items'
   end
+  
+  def select_purchase_return
+    @account_payable = AccountPayable.new
+    params[:purchase_return_ids].split(",").each do |purchase_return_id|
+      purchase_return = PurchaseReturn.where(["vendor_id = ? AND purchase_returns.id = ? AND is_allocated = ? AND purchase_order_id IS NOT NULL", params[:vendor_id], purchase_return_id, false]).joins(purchase_order: :vendor).select("purchase_returns.id").first
+      @account_payable.allocated_return_items.build purchase_return_id: purchase_return.id if purchase_return
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.

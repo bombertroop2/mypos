@@ -13,7 +13,7 @@
     </thead>
     <tbody>
         <% @purchase_returns.each do |purchase_return| %>
-          <tr>
+          <tr id="purchase_return_<%= purchase_return.id %>">
               <td></td>
               <td><%= purchase_return.number %></td>
               <td><%= purchase_return.quantity_returned %></td>

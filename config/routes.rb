@@ -3,6 +3,7 @@ Rails.application.routes.draw do
     collection do
       get 'generate_form'
       get 'get_purchase_returns'
+      get 'select_purchase_return'
     end
   end
   resources :emails

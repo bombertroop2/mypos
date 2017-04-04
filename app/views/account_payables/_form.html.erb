@@ -209,7 +209,14 @@
                                 bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
                                 return false;
                             } else {
-
+                                var purchaseReturnIds = [];
+                                $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
+                                    purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                                });
+                                $.get("/account_payables/select_purchase_return", {
+                                    purchase_return_ids: purchaseReturnIds.join(","),
+                                    vendor_id: $("#account_payable_vendor_id").val()
+                                });
                             }
                         }
                     }
@@ -241,6 +248,27 @@
                                 /*,
                                  bFilter: false*/
                     });
+
+
+                    // ambil kumpulan id PR apabila ada untuk default selected di popup
+                    var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids");
+                    $.each(allocatedPurchaseReturnIds, function (index, value) {
+                        var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids")[index]).val();
+                        if (allocatedPurchaseReturnId != "") {
+                            var e = jQuery.Event("click");
+                            e.ctrlKey = true;
+                            var clickRowProcessId = setInterval(function () {
+                                if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
+                                    $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
+                                } else {
+                                    clearInterval(clickRowProcessId);
+                                }
+                            }, 0);
+
+
+                        }
+                    });
+
                 });
             });
         });
