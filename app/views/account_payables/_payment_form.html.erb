@@ -1,3 +1,4 @@
+<% total_amount_received = 0 %>
 <%= form_for(@account_payable, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
     <%= f.hidden_field :vendor_id %>
     <div class="form-group">
@@ -16,7 +17,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% total_amount_received = 0 %>
                     <%= f.fields_for :account_payable_purchases do |account_payable_purchase_form| %>
                       <%= account_payable_purchase_form.hidden_field :purchase_id, class: "purchase-order-ids" %>
                         <%= account_payable_purchase_form.hidden_field :purchase_type %>
@@ -74,17 +74,33 @@
                                     :unit => "Rp",
                                     :precision => 2) %></strong></td>
                       </tr>
+                  </tfoot>
+              </table>
+          </div>
+      </div>
+      <div id="allocated_return_items"></div>
+      <% amount_to_pay = total_amount_received - @previous_paid %>
+      <div class="form-group">
+          <label class="col-sm-2 control-label">Previous Paid</label>
+          <div class="col-sm-10">              
+              <table class="table">
+                  <tfoot>
                       <tr>
-                          <td colspan="6" align="right"><strong>Previous Paid</strong></td>
                           <td align="right"><strong><%= number_to_currency(@previous_paid,
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
                                     :precision => 2) %></strong></td>
                       </tr>
-                      <% amount_to_pay = total_amount_received - @previous_paid %>
+
+                  </tfoot>
+              </table>
+          </div>
+          <label class="col-sm-2 control-label">Amount To Pay</label>
+          <div class="col-sm-10">              
+              <table class="table">
+                  <tfoot>
                       <tr>
-                          <td colspan="6" align="right"><strong>Amount To Pay</strong></td>
                           <td align="right" id="amount-to-pay"><strong><%= number_to_currency(amount_to_pay,
                                     :separator => ",",
                                     :delimiter => ".",
@@ -95,7 +111,6 @@
               </table>
           </div>
       </div>
-      <div id="allocated_return_items"></div>
       <div class="form-group">
           <label class="col-sm-2 control-label">
               Vendor
@@ -159,6 +174,8 @@
 
                               <script>
                                 $(function () {
+                                    previousPaid = <%= @previous_paid %>;
+                                    totalAmountReceived = <%= total_amount_received %>;
                                     $("#account_payable_payment_method").change(function () {
                                         if ($(this).val() == "Giro") {
                                             $("#giro_number").show();

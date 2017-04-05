@@ -215,7 +215,9 @@
                                 });
                                 $.get("/account_payables/select_purchase_return", {
                                     purchase_return_ids: purchaseReturnIds.join(","),
-                                    vendor_id: $("#account_payable_vendor_id").val()
+                                    vendor_id: $("#account_payable_vendor_id").val(),
+                                    previous_paid: previousPaid,
+                                    total_amount_received: totalAmountReceived
                                 });
                             }
                         }
