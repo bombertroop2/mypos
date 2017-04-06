@@ -47,7 +47,6 @@ class PurchaseReturn < ApplicationRecord
           end
   
           def generate_number
-            last_pr = PurchaseReturn.last
             today = Date.today
             current_month = today.month.to_s.rjust(2, '0')
             current_year = today.strftime("%y").rjust(2, '0')
@@ -56,7 +55,10 @@ class PurchaseReturn < ApplicationRecord
             else
               Vendor.joins(:purchase_orders).select(:code).where(["purchase_orders.id = ?", purchase_order_id]).first.code
             end
-            if last_pr && last_pr.number.include?("PRR#{vendor_code}#{current_month}#{current_year}")
+
+            last_pr = PurchaseReturn.where("number LIKE 'PRR#{vendor_code}#{current_month}#{current_year}%'").select(:number).last
+
+            if last_pr
               seq_number = last_pr.number.split(last_pr.number.scan(/PRR#{vendor_code}\d.{3}/).first).last.succ
               new_pr_number = "PRR#{vendor_code}#{current_month}#{current_year}#{seq_number}"
             else

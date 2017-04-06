@@ -9,3 +9,7 @@
         :unit => "Rp",
         :precision => 2) %></strong>");
 <% end %>
+$("#account_payable_amount_paid").val("");
+$("#account_payable_debt").val("");
+$("#account_payable_amount_paid").trigger("blur");
+$('#account_payable_debt').trigger("blur");

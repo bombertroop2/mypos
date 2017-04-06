@@ -45,7 +45,7 @@ class AccountPayablesController < ApplicationController
         
         previous_account_payables = []
         @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
-          account_payables = AccountPayable.select(:id, :amount_paid).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+          account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
           account_payables.each do |account_payable|        
             previous_account_payables << account_payable
           end
@@ -54,10 +54,16 @@ class AccountPayablesController < ApplicationController
         # kalkulasi pembayaran pembayaran sebelumnya
         @previous_paid = 0
         previous_account_payables.uniq.each do |previous_account_payable|
-          @previous_paid += previous_account_payable.amount_paid      
+          @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
         end
     
-        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});" if @account_payable.errors[:"account_payable_purchases.base"].present?
+        if @account_payable.errors[:"account_payable_purchases.base"].present?
+          render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
+        elsif @account_payable.errors[:base].present?
+          render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
+        elsif @account_payable.errors[:"allocated_return_items.base"].present?
+          render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
+        end
       else
         @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
       end
@@ -111,14 +117,14 @@ class AccountPayablesController < ApplicationController
     # kalkulasi pembayaran pembayaran sebelumnya
     previous_account_payables = []
     purchase_order_ids.each do |purchase_order_id|
-      account_payables = AccountPayable.select(:id, :amount_paid).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+      account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
       account_payables.each do |account_payable|        
         previous_account_payables << account_payable
       end
     end    
     @previous_paid = 0
     previous_account_payables.uniq.each do |previous_account_payable|
-      @previous_paid += previous_account_payable.amount_paid      
+      @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
     end
     
     selected_purchase_orders = PurchaseOrder.where(id: purchase_order_ids).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(payment_status: "")
@@ -151,7 +157,7 @@ class AccountPayablesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
-    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id, :giro_number, :giro_date, :amount_paid, :debt, account_payable_purchases_attributes: [:purchase_id, :purchase_type])
+    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id, :giro_number, :giro_date, :amount_paid, :debt, account_payable_purchases_attributes: [:purchase_id, :purchase_type], allocated_return_items_attributes: [:purchase_return_id, :vendor_id])
   end
   
   def convert_amount_to_numeric

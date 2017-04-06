@@ -1,7 +1,8 @@
 class AccountPayable < ApplicationRecord
   include AccountPayablesHelper
+  include PurchaseReturnsHelper
   
-  attr_accessor :amount_to_be_paid
+  attr_accessor :amount_to_be_paid, :total_amount_returned
   
   PAYMENT_STATUSES = [
     ["Paid", "Paid"],
@@ -32,11 +33,20 @@ class AccountPayable < ApplicationRecord
               validates :debt, numericality: true, if: proc { |ap| ap.debt.present? }
                 validates :debt, numericality: {greater_than_or_equal_to: 0}, if: proc { |ap| ap.debt.present? && ap.debt.is_a?(Numeric) }
                   validate :calculate_amount_paid_and_debt, if: proc{|ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) && ap.debt.present? && ap.debt.is_a?(Numeric) && ap.amount_paid > 0}, on: :create
+                    validate :amount_to_be_paid_should_greater_than_zero, on: :create
             
-                    before_create :generate_number
+                    before_create :generate_number, :set_amount_returned
                     after_create :mark_purchase_doc_as_paid              
           
                     private
+                    
+                    def set_amount_returned
+                      self.amount_returned = total_amount_returned
+                    end
+                    
+                    def amount_to_be_paid_should_greater_than_zero
+                      errors.add(:base, "Amount to pay must be greater than 0") if amount_to_be_paid <= 0
+                    end
                     
                     def set_zero_debt
                       self.debt = 0 if amount_paid == amount_to_be_paid
@@ -81,19 +91,25 @@ class AccountPayable < ApplicationRecord
                       
                       previous_account_payables = []
                       account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
-                        account_payables = AccountPayable.select(:id, :amount_paid).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+                        account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
                         account_payables.each do |account_payable|        
                           previous_account_payables << account_payable
                         end
                       end    
     
+                      # potong dengan PR apabila PR dialokasikan
+                      self.total_amount_returned = 0
+                      allocated_return_items.each do |allocated_return_item|
+                        self.total_amount_returned += value_after_ppn_pr(allocated_return_item.purchase_return)
+                      end
+
                       # kalkulasi pembayaran pembayaran sebelumnya
                       previous_paid = 0
                       previous_account_payables.uniq.each do |previous_account_payable|
-                        previous_paid += previous_account_payable.amount_paid      
+                        previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
                       end
-        
-                      self.amount_to_be_paid = amount_to_be_paid - previous_paid
+                              
+                      self.amount_to_be_paid = amount_to_be_paid - total_amount_returned - previous_paid
                     end
           
                   end

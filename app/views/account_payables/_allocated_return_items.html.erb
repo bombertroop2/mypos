@@ -19,6 +19,7 @@
                   <% purchase_return = ari.purchase_return %>
                   <%= fields_for "account_payable[allocated_return_items_attributes][#{purchase_return.id}]", ari do |ari_form| %>
                     <%= ari_form.hidden_field :purchase_return_id, class: "allocated-purchase-return-ids" %>
+                    <%= ari_form.hidden_field :vendor_id, class: "allocated-return-item-vendor-ids" %>
                       <tr>
                           <td><%= purchase_return.number %></td>
                           <td align="right"><%= purchase_return.quantity_returned %></td>
@@ -69,7 +70,11 @@
                       <% total_amount_returned += value_after_ppn_pr(purchase_return) %>
                     <% end %>
                   <% end %>
-                  <% amount_to_pay = params[:total_amount_received].to_f - total_amount_returned - params[:previous_paid].to_f %>
+                  <% amount_to_pay = unless params[:action].eql?("create")
+                    params[:total_amount_received].to_f - total_amount_returned - params[:previous_paid].to_f
+                    else
+                    total_amount_received - total_amount_returned - previous_paid
+                    end %>
               </tbody>
               <tfoot>
                   <tr>

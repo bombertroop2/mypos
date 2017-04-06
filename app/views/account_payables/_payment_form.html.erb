@@ -78,7 +78,11 @@
               </table>
           </div>
       </div>
-      <div id="allocated_return_items"></div>
+      <div id="allocated_return_items">
+          <% if params[:action].eql?("create") && @account_payable.allocated_return_items.present? %>
+            <%= render partial: "allocated_return_items", locals: {total_amount_received: total_amount_received, previous_paid: @previous_paid} %>
+          <% end %>
+      </div>
       <% amount_to_pay = total_amount_received - @previous_paid %>
       <div class="form-group">
           <label class="col-sm-2 control-label">Previous Paid</label>
@@ -166,7 +170,7 @@
 
                               <div class="form-group">
                                   <div class="col-sm-offset-2 col-sm-10">
-                                      <%= f.submit "Save", class: "btn btn-primary" %>
+                                      <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn" %>
                                         <button class="btn btn-link cancel">Cancel</button>
                                     </div>
                                 </div>
@@ -227,6 +231,12 @@
 
 
                                         }
+                                    });
+
+                                    $("#ap_save_btn").click(function () {
+                                        $(".allocated-return-item-vendor-ids").each(function () {
+                                            $(this).val($("#account_payable_vendor_id").val());
+                                        });
                                     });
 
                                 });
