@@ -41,11 +41,19 @@ class AccountPayablesController < ApplicationController
     is_exception_raised = false
     begin
       unless @account_payable.save
-        @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).where("status = 'Finish' OR status = 'Closed'").group("purchase_orders.id, received_purchase_orders.receiving_date, vendors.name").order("received_purchase_orders.receiving_date")
+        @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date,
+          :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur,
+          :value_added_tax, :is_additional_disc_from_net, :net_amount, :payment_status).
+          select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).
+          where("status = 'Finish' OR status = 'Closed'").
+          group("purchase_orders.id, received_purchase_orders.receiving_date, vendors.name").
+          order("received_purchase_orders.receiving_date")
         
         previous_account_payables = []
         @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
-          account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+          account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
+            joins(:account_payable_purchases).
+            where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
           account_payables.each do |account_payable|        
             previous_account_payables << account_payable
           end
@@ -101,11 +109,13 @@ class AccountPayablesController < ApplicationController
     # ambil seluruh purchase order dari payment sebelumnya
     purchase_order_ids = []
     params[:purchase_order_ids].split(",").each do |purchase_order_id|
-      account_payables = AccountPayable.select(:id, :amount_paid).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+      account_payables = AccountPayable.select(:id, :amount_paid).
+        joins(:account_payable_purchases).
+        where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
       if account_payables.present?
         account_payables.each do |account_payable|        
           account_payable.account_payable_purchases.pluck(:purchase_id).each do |purchase_id|
-            purchase_order_ids << purchase_id
+            purchase_order_ids << purchase_id if PurchaseOrder.select("1 AS one").where(["id = ? AND payment_status <> 'Paid'", purchase_id]).present?
           end
         end
       else
@@ -117,7 +127,9 @@ class AccountPayablesController < ApplicationController
     # kalkulasi pembayaran pembayaran sebelumnya
     previous_account_payables = []
     purchase_order_ids.each do |purchase_order_id|
-      account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+      account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
+        joins(:account_payable_purchases).
+        where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
       account_payables.each do |account_payable|        
         previous_account_payables << account_payable
       end
