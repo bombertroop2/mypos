@@ -11,9 +11,8 @@ class AccountPayablesController < ApplicationController
     else
       "LIKE"
     end
-    account_payables_scope = AccountPayable.select("account_payables.id, number, amount_paid, vendors.name, payment_date").joins(:vendor)
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date").joins(:vendor)
     account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(account_payables_scope.where(["amount_paid #{like_command} ?", "%"+params[:filter]+"%"])).
       or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @account_payables = smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {number: "asc"})
   end

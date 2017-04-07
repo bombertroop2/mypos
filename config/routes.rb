@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :account_payables do
+  resources :account_payables, only: [:new, :create, :index, :destroy, :show] do
     collection do
       get 'generate_form'
       get 'get_purchase_returns'
