@@ -15,6 +15,7 @@ class AccountPayable < ApplicationRecord
   ]
   
   belongs_to :vendor
+  belongs_to :creator, class_name: "User", foreign_key: :created_by
   has_many :account_payable_purchases, dependent: :destroy
   has_many :allocated_return_items, dependent: :destroy
   
@@ -104,9 +105,9 @@ class AccountPayable < ApplicationRecord
                       end
 
                       # kalkulasi pembayaran pembayaran sebelumnya
-                      previous_paid = 0
+                      self.previous_paid = 0
                       previous_account_payables.uniq.each do |previous_account_payable|
-                        previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
+                        self.previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
                       end
                               
                       self.amount_to_be_paid = amount_to_be_paid - total_amount_returned - previous_paid

@@ -168,7 +168,7 @@ class AccountPayablesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
-    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id, :giro_number, :giro_date, :amount_paid, :debt, account_payable_purchases_attributes: [:purchase_id, :purchase_type], allocated_return_items_attributes: [:purchase_return_id, :vendor_id])
+    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id, :giro_number, :giro_date, :amount_paid, :debt, account_payable_purchases_attributes: [:purchase_id, :purchase_type], allocated_return_items_attributes: [:purchase_return_id, :vendor_id]).merge(created_by: current_user.id)
   end
   
   def convert_amount_to_numeric

@@ -184,11 +184,26 @@
                                       </tr>                                    
                                     <% end %>
                                 </tbody>
-                                <% previous_paid = total_amount_received - total_amount_returned - @account_payable.debt %>                                
                                 <tfoot>
                                     <tr>
                                         <td colspan="7" align="right"><strong>Previous Paid</strong></td>
-                                        <td align="right"><strong><%= number_to_currency(previous_paid,
+                                        <td align="right"><strong><%= number_to_currency(@account_payable.previous_paid,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" align="right"><strong>Amount Paid</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(@account_payable.amount_paid,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" align="right"><strong>Remaining Debt</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(@account_payable.debt,
                                                   :separator => ",",
                                                   :delimiter => ".",
                                                   :unit => "Rp",
@@ -197,16 +212,15 @@
                                 </tfoot>
                             </table>
                         </td>
-                    </tr>
-                    <!--
+                    </tr>                    
                     <tr>
                         <td>Created by</td>
                         <td style="text-align: right">Approved by</td>
                     </tr>
                     <tr>
-                        <td style="padding-top: 50px"><%#= @purchase_order.creator.name rescue "Admin" %></td>
+                        <td style="padding-top: 50px"><%= @account_payable.creator.name rescue "Admin" %></td>
                         <td style="text-align: right"></td>
-                    </tr>-->
+                    </tr>
                 </table>
             </td>
         </tr>
