@@ -26,9 +26,9 @@
                     <div class="form-group">
                         <%= select_tag "payment_status", options_for_select(AccountPayable::PAYMENT_STATUSES), {prompt: "Payment status", class: "form-control", style: "width: 150px;"} %>
                       </div>
-                      <button id="search-po-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-                      <button id="pay-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-credit-card"></span></button>
-                      <button id="return-item-allocation" type="submit" class="btn btn-primary hidden"><span class="glyphicon glyphicon-scissors"></span></button>
+                      <button id="search-po-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                      <button id="pay-btn" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
+                      <button id="return-item-allocation" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
                   </div>
                   <table id="ap_listing_po_table" class="display">
                       <thead>
@@ -112,9 +112,9 @@
                       <div class="form-group">
                           <%= select_tag "payment_status", options_for_select(AccountPayable::PAYMENT_STATUSES), {prompt: "Payment status", class: "form-control", style: "width: 150px;", id: :payment_status_dp} %>
                         </div>
-                        <button id="search-dp-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-                        <button id="pay-btn-dp" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-credit-card"></span></button>
-                        <button id="return-item-allocation-dp" type="submit" class="btn btn-primary hidden"><span class="glyphicon glyphicon-scissors"></span></button>
+                        <button id="search-dp-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                        <button id="pay-btn-dp" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
+                        <button id="return-item-allocation-dp" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
                     </div>
                     <table id="ap_listing_dp_table" class="display">
                         <thead>
