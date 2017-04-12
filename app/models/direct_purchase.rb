@@ -4,6 +4,8 @@ class DirectPurchase < ApplicationRecord
   
   has_one :received_purchase_order, dependent: :destroy
   has_many :direct_purchase_products, dependent: :destroy
+  has_many :account_payable_purchases, as: :purchase
+  has_many :purchase_returns
   
   accepts_nested_attributes_for :direct_purchase_products
   accepts_nested_attributes_for :received_purchase_order
@@ -19,6 +21,22 @@ class DirectPurchase < ApplicationRecord
   
               before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net
   
+              def quantity_received
+                quantity = 0
+                direct_purchase_products.select(:id).each do |dpp|
+                  quantity += dpp.direct_purchase_details.sum(:quantity)
+                end
+                quantity
+              end
+              
+              def receiving_value
+                value = 0
+                direct_purchase_products.select(:id).each do |dpp|
+                  value += dpp.direct_purchase_details.sum(:total_unit_price)
+                end
+                value
+              end
+          
               private
                 
               def should_has_products

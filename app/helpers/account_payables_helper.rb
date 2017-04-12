@@ -23,7 +23,8 @@ module AccountPayablesHelper
   end
   
   def value_after_ppn_for_ap(purchase_order)
-    if purchase_order.value_added_tax.eql?("exclude")
+    vat_type = purchase_order.value_added_tax rescue purchase_order.vat_type
+    if vat_type.eql?("exclude")
       value_after_discount_for_ap(purchase_order) + get_vat_in_money_for_ap(purchase_order)
     else
       value_after_discount_for_ap(purchase_order)

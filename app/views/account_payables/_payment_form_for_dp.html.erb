@@ -1,8 +1,8 @@
-<% total_amount_received = 0 %>
-<%= form_for(@account_payable, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
-    <%= f.hidden_field :vendor_id %>
+<% total_amount_received_for_dp = 0 %>
+<%= form_for(@account_payable, url: create_dp_payment_account_payables_path, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
+    <%= f.hidden_field :vendor_id, id: "account_payable_vendor_id_for_dp" %>
     <div class="form-group">
-        <label class="col-sm-2 control-label">Purchase Orders</label>
+        <label class="col-sm-2 control-label">Direct Purchases</label>
         <div class="col-sm-10">              
             <table class="table">
                 <thead>
@@ -18,57 +18,57 @@
                 </thead>
                 <tbody>
                     <%= f.fields_for :account_payable_purchases do |account_payable_purchase_form| %>
-                      <%= account_payable_purchase_form.hidden_field :purchase_id, class: "purchase-order-ids" %>
+                      <%= account_payable_purchase_form.hidden_field :purchase_id, class: "direct-purchase-ids" %>
                         <%= account_payable_purchase_form.hidden_field :purchase_type %>
-                        <% purchase_order = account_payable_purchase_form.object.purchase %>
-                        <tr id="purchase_order_<%= purchase_order.id %>">
-                            <td><%= purchase_order.number %></td>
-                            <td align="right"><%= purchase_order.quantity_received %></td>
-                            <td align="right"><%= number_to_currency(purchase_order.receiving_value,
+                        <% direct_purchase = account_payable_purchase_form.object.purchase %>
+                        <tr id="direct_purchase_<%= direct_purchase.id %>">
+                            <td><%= direct_purchase.received_purchase_order.delivery_order_number %></td>
+                            <td align="right"><%= direct_purchase.quantity_received %></td>
+                            <td align="right"><%= number_to_currency(direct_purchase.receiving_value,
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
                                   :precision => 2) %></td>
                             <td>
-                                <% if purchase_order.first_discount.present? %>
-                                  <%= number_to_currency((purchase_order.first_discount.to_f / 100) * purchase_order.receiving_value,
+                                <% if direct_purchase.first_discount.present? %>
+                                  <%= number_to_currency((direct_purchase.first_discount.to_f / 100) * direct_purchase.receiving_value,
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
-                                    :precision => 2) %> (<%= "#{purchase_order.first_discount}%" %>)
+                                    :precision => 2) %> (<%= "#{direct_purchase.first_discount}%" %>)
                                 <% end %>
                             </td>
                             <td>
-                                <% if purchase_order.second_discount.present? %>
-                                  <%= number_to_currency(get_second_discount_in_money_for_ap(purchase_order),
+                                <% if direct_purchase.second_discount.present? %>
+                                  <%= number_to_currency(get_second_discount_in_money_for_ap(direct_purchase),
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
-                                    :precision => 2) %> (<%= "#{purchase_order.second_discount}%" %> from <%= purchase_order.is_additional_disc_from_net ? "net" : "gross" %>)
+                                    :precision => 2) %> (<%= "#{direct_purchase.second_discount}%" %> from <%= direct_purchase.is_additional_disc_from_net ? "net" : "gross" %>)
                                 <% end %>
                             </td>
                             <td>
-                                <% if purchase_order.is_taxable_entrepreneur %>
-                                  <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
+                                <% if direct_purchase.is_taxable_entrepreneur %>
+                                  <%= number_to_currency(get_vat_in_money_for_ap(direct_purchase),
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
-                                    :precision => 2) %> (<%= purchase_order.value_added_tax %>)
+                                    :precision => 2) %> (<%= direct_purchase.vat_type %>)
                                 <% end %>
                             </td>
-                            <td align="right"><%= number_to_currency(value_after_ppn_for_ap(purchase_order),
+                            <td align="right"><%= number_to_currency(value_after_ppn_for_ap(direct_purchase),
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
                                   :precision => 2) %></td>
                         </tr>
-                        <% total_amount_received += value_after_ppn_for_ap(purchase_order) %>
+                        <% total_amount_received_for_dp += value_after_ppn_for_ap(direct_purchase) %>
                       <% end %>
                   </tbody>
                   <tfoot>
                       <tr>
                           <td colspan="6" align="right"><strong>Total Amount Received</strong></td>
-                          <td align="right"><strong><%= number_to_currency(total_amount_received,
+                          <td align="right"><strong><%= number_to_currency(total_amount_received_for_dp,
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
@@ -78,12 +78,12 @@
               </table>
           </div>
       </div>
-      <div id="allocated_return_items">
-          <% if params[:action].eql?("create") && @account_payable.allocated_return_items.present? %>
-            <%= render partial: "allocated_return_items", locals: {total_amount_received: total_amount_received, previous_paid: @previous_paid} %>
+      <div id="allocated_return_items_for_dp">
+          <% if params[:action].eql?("create_dp_payment") && @account_payable.allocated_return_items.present? %>
+            <%= render partial: "allocated_return_items", locals: {total_amount_received: total_amount_received_for_dp, previous_paid: @previous_paid} %>
           <% end %>
       </div>
-      <% amount_to_pay = total_amount_received - @previous_paid %>
+      <% amount_to_pay = total_amount_received_for_dp - @previous_paid %>
       <div class="form-group">
           <label class="col-sm-2 control-label">Previous Paid</label>
           <div class="col-sm-10">              
@@ -105,7 +105,7 @@
               <table class="table">
                   <tfoot>
                       <tr>
-                          <td align="right" id="amount-to-pay"><strong><%= number_to_currency(amount_to_pay,
+                          <td align="right" id="amount-to-pay-for-dp"><strong><%= number_to_currency(amount_to_pay,
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
@@ -120,34 +120,34 @@
               Vendor
           </label>
           <div class="col-sm-10">
-              <span class="form-control" id="vendor_id"><%= @account_payable.vendor.name rescue "" %></span>
+              <span class="form-control" id="vendor_id_for_dp"><%= @account_payable.vendor.name rescue "" %></span>
           </div>
       </div>
       <div class="form-group<%= control_group_error(@account_payable, :payment_method) %>">
           <%= f.label :payment_method, class: "col-sm-2 control-label" %>
             <div class="col-sm-10">
-                <%= f.select :payment_method, options_for_select(AccountPayable::PAYMENT_METHODS, @account_payable.payment_method), {prompt: true}, {tabindex: "1", class: "form-control"} %>
+                <%= f.select :payment_method, options_for_select(AccountPayable::PAYMENT_METHODS, @account_payable.payment_method), {prompt: true}, {tabindex: "1", class: "form-control", id: "account_payable_payment_method_for_dp"} %>
                   <%= error_help_text(@account_payable, :payment_method) %>
               </div>
           </div>
           <div class="form-group<%= control_group_error(@account_payable, :payment_date) %>">
               <%= f.label :payment_date, class: "col-sm-2 control-label" %>
                 <div class="col-sm-10">
-                    <%= f.text_field :payment_date, size: 10, readonly: true, class: "form-control" %>
+                    <%= f.text_field :payment_date, size: 10, readonly: true, class: "form-control", id: "account_payable_payment_date_for_dp" %>
                       <%= error_help_text(@account_payable, :payment_date) %>
                   </div>
               </div>
-              <div class="form-group<%= control_group_error(@account_payable, :giro_number) %>" id="giro_number" style="display: none">
+              <div class="form-group<%= control_group_error(@account_payable, :giro_number) %>" id="giro_number_for_dp" style="display: none">
                   <%= f.label :giro_number, class: "col-sm-2 control-label" %>
                     <div class="col-sm-10">
                         <%= f.text_field :giro_number, class: "form-control upcase inputs", tabindex: "2" %>
                           <%= error_help_text(@account_payable, :giro_number) %>
                       </div>
                   </div>
-                  <div class="form-group<%= control_group_error(@account_payable, :giro_date) %>" id="giro_date" style="display: none">
+                  <div class="form-group<%= control_group_error(@account_payable, :giro_date) %>" id="giro_date_for_dp" style="display: none">
                       <%= f.label :giro_date, class: "col-sm-2 control-label" %>
                         <div class="col-sm-10">
-                            <%= f.text_field :giro_date, size: 10, readonly: true, class: "form-control" %>
+                            <%= f.text_field :giro_date, size: 10, readonly: true, class: "form-control", id: "account_payable_giro_date_for_dp" %>
                               <%= error_help_text(@account_payable, :giro_date) %>
                           </div>
                       </div>
@@ -155,7 +155,7 @@
                           <%= f.label :amount_paid, "Value", class: "col-sm-2 control-label" %>
                             <div class="col-sm-10">
                                 <%= f.text_field :amount_paid, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
-                                    "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3" %>
+                                    "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "3", id: "account_payable_amount_paid_for_dp" %>
                                   <%= error_help_text(@account_payable, :amount_paid) %>
                               </div>
                           </div>
@@ -163,14 +163,14 @@
                               <%= f.label :debt, class: "col-sm-2 control-label" %>
                                 <div class="col-sm-10">
                                     <%= f.text_field :debt, size: 10, class: "form-control money-fields", "data-a-sep" => ".",
-                                        "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "4", readonly: true %>
+                                        "data-a-dec" => ",", "data-a-sign" => "Rp", tabindex: "4", readonly: true, id: "account_payable_debt_for_dp" %>
                                       <%= error_help_text(@account_payable, :debt) %>
                                   </div>
                               </div>
 
                               <div class="form-group">
                                   <div class="col-sm-offset-2 col-sm-10">
-                                      <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn" %>
+                                      <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn_for_dp" %>
                                         <button class="btn btn-link cancel">Cancel</button>
                                     </div>
                                 </div>
@@ -178,47 +178,47 @@
 
                               <script>
                                 $(function () {
-                                    previousPaid = <%= @previous_paid %>;
-                                    totalAmountReceived = <%= total_amount_received %>;
-                                    $("#account_payable_payment_method").change(function () {
+                                    previousPaidForDPPayment = <%= @previous_paid %>;
+                                    totalAmountReceivedForDPPayment = <%= total_amount_received_for_dp %>;
+                                    $("#account_payable_payment_method_for_dp").change(function () {
                                         if ($(this).val() == "Giro") {
-                                            $("#giro_number").show();
-                                            $("#giro_date").show();
+                                            $("#giro_number_for_dp").show();
+                                            $("#giro_date_for_dp").show();
                                         } else {
-                                            $("#giro_number").hide();
-                                            $("#giro_date").hide();
+                                            $("#giro_number_for_dp").hide();
+                                            $("#giro_date_for_dp").hide();
                                         }
                                     });
 
-                                    $("#account_payable_giro_date").datepicker({
+                                    $("#account_payable_giro_date_for_dp").datepicker({
                                         dateFormat: "dd/mm/yy"
                                     });
 
-                                    $("#account_payable_payment_date").datepicker({
+                                    $("#account_payable_payment_date_for_dp").datepicker({
                                         dateFormat: "dd/mm/yy"
                                     });
 
-                                    $('#account_payable_amount_paid').autoNumeric('init');
-                                    $('#account_payable_debt').autoNumeric('init');
+                                    $('#account_payable_amount_paid_for_dp').autoNumeric('init');
+                                    $('#account_payable_debt_for_dp').autoNumeric('init');
 
-                                    $('#account_payable_amount_paid').keyup(function () {
+                                    $('#account_payable_amount_paid_for_dp').keyup(function () {
                                         var amountPaid = $(this).val().replace("Rp", "").replace(/\./g, "").replace(",", ".");
-                                        var amountToPay = $("#amount-to-pay").html().trim().replace("<strong>", "").replace("</strong>", "").replace("Rp", "").replace(/\./g, "").replace(",", ".");
-                                        $('#account_payable_debt').val(amountToPay - amountPaid);
-                                        $('#account_payable_debt').trigger("blur");
+                                        var amountToPay = $("#amount-to-pay-for-dp").html().trim().replace("<strong>", "").replace("</strong>", "").replace("Rp", "").replace(/\./g, "").replace(",", ".");
+                                        $('#account_payable_debt_for_dp').val(amountToPay - amountPaid);
+                                        $('#account_payable_debt_for_dp').trigger("blur");
                                     });
 
-                                    if ($("#account_payable_payment_method").val() == "Giro") {
-                                        $("#giro_number").show();
-                                        $("#giro_date").show();
+                                    if ($("#account_payable_payment_method_for_dp").val() == "Giro") {
+                                        $("#giro_number_for_dp").show();
+                                        $("#giro_date_for_dp").show();
                                     } else {
-                                        $("#giro_number").hide();
-                                        $("#giro_date").hide();
+                                        $("#giro_number_for_dp").hide();
+                                        $("#giro_date_for_dp").hide();
                                     }
 
-                                    $("#ap_save_btn").click(function () {
-                                        $(".allocated-return-item-vendor-ids").each(function () {
-                                            $(this).val($("#account_payable_vendor_id").val());
+                                    $("#ap_save_btn_for_dp").click(function () {
+                                        $(".allocated-return-item-vendor-ids-for-dp").each(function () {
+                                            $(this).val($("#account_payable_vendor_id_for_dp").val());
                                         });
                                     });
 

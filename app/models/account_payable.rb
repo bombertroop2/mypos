@@ -2,7 +2,7 @@ class AccountPayable < ApplicationRecord
   include AccountPayablesHelper
   include PurchaseReturnsHelper
   
-  attr_accessor :amount_to_be_paid, :total_amount_returned
+  attr_accessor :amount_to_be_paid, :total_amount_returned, :payment_for_dp
   
   PAYMENT_STATUSES = [
     ["Paid", "Paid"],
@@ -38,7 +38,7 @@ class AccountPayable < ApplicationRecord
             
                     before_create :generate_number, :set_amount_returned
                     after_create :mark_purchase_doc_as_paid              
-          
+                                        
                     private
                     
                     def set_amount_returned
@@ -92,7 +92,11 @@ class AccountPayable < ApplicationRecord
                       
                       previous_account_payables = []
                       account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
-                        account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+                        account_payables = if payment_for_dp
+                          AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'DirectPurchase'")
+                        else
+                          AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+                        end
                         account_payables.each do |account_payable|        
                           previous_account_payables << account_payable
                         end

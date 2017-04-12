@@ -2,8 +2,12 @@ Rails.application.routes.draw do
   resources :account_payables, only: [:new, :create, :index, :destroy, :show] do
     collection do
       get 'generate_form'
+      get 'generate_dp_payment_form'
       get 'get_purchase_returns'
+      get 'get_purchase_returns_for_dp'
       get 'select_purchase_return'
+      get 'select_purchase_return_for_dp'
+      post 'create_dp_payment'
     end
   end
   resources :emails

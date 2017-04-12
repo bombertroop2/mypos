@@ -17,6 +17,6 @@ class AccountPayablePurchase < ApplicationRecord
   end
   
   def purchase_is_payable
-    errors.add(:base, "Some purchases are not payable") if !purchase.status.eql?('Finish') && !purchase.status.eql?('Closed')
+    errors.add(:base, "Some purchases are not payable") if purchase_type.eql?("PurchaseOrder") && !purchase.status.eql?('Finish') && !purchase.status.eql?('Closed')
   end
 end

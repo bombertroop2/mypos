@@ -2,7 +2,7 @@ class AllocatedReturnItem < ApplicationRecord
   belongs_to :account_payable
   belongs_to :purchase_return
   
-  attr_accessor :vendor_id
+  attr_accessor :vendor_id, :payment_for_dp
   
   validate :return_item_is_valid
   
@@ -12,7 +12,11 @@ class AllocatedReturnItem < ApplicationRecord
   private
   
   def return_item_is_valid
-    pr = PurchaseReturn.select(:id).joins(purchase_order: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ?", false, vendor_id, purchase_return_id]).first
+    pr = if payment_for_dp.eql?("false")
+      PurchaseReturn.select(:id).joins(purchase_order: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ?", false, vendor_id, purchase_return_id]).first
+    else
+      PurchaseReturn.select(:id).joins(direct_purchase: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ?", false, vendor_id, purchase_return_id]).first
+    end
     errors.add(:base, "Not able to allocate return item #{purchase_return.number}") unless pr
   end
   
