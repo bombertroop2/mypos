@@ -224,7 +224,6 @@
                       /*,
                        bFilter: false*/
           });
-
           $("#search-po-btn").click(function () {
               activeTab = "purchase_order";
               aPpOdataTable
@@ -237,7 +236,6 @@
                       .draw();
               aPpOdataTable.draw();
           });
-
           $("#search-dp-btn").click(function () {
               activeTab = "direct_purchase";
               aPdPdataTable
@@ -250,7 +248,6 @@
                       .draw();
               aPdPdataTable.draw();
           });
-
           $('#filter-po-date').daterangepicker(
                   {
                       locale: {
@@ -262,11 +259,9 @@
           $('#filter-po-date').on('apply.daterangepicker', function (ev, picker) {
               $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
           });
-
           $('#filter-po-date').on('cancel.daterangepicker', function (ev, picker) {
               $(this).val('');
           });
-
           $('#filter-receipt-date').daterangepicker(
                   {
                       locale: {
@@ -278,11 +273,9 @@
           $('#filter-receipt-date').on('apply.daterangepicker', function (ev, picker) {
               $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
           });
-
           $('#filter-receipt-date').on('cancel.daterangepicker', function (ev, picker) {
               $(this).val('');
           });
-
           $('#filter-receipt-date-dp').daterangepicker(
                   {
                       locale: {
@@ -294,11 +287,9 @@
           $('#filter-receipt-date-dp').on('apply.daterangepicker', function (ev, picker) {
               $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
           });
-
           $('#filter-receipt-date-dp').on('cancel.daterangepicker', function (ev, picker) {
               $(this).val('');
           });
-
           $("#pay-btn").click(function () {
               if (aPpOdataTable.rows('.selected').data().length == 0)
                   bootbox.alert({message: "You have not selected PO yet!", size: 'small'});
@@ -312,7 +303,6 @@
                   });
               }
           });
-
           $("#pay-btn-dp").click(function () {
               if (aPdPdataTable.rows('.selected').data().length == 0)
                   bootbox.alert({message: "You have not selected record yet!", size: 'small'});
@@ -326,7 +316,6 @@
                   });
               }
           });
-
           $("#return-item-allocation").click(function () {
               // split isi dari action attributnya form untuk ambil id produk
               $.get("/account_payables/get_purchase_returns", {
@@ -361,7 +350,8 @@
                           dom: 'T<"clear">lfrtip',
                           columns: [
                               {data: null, defaultContent: '', orderable: false},
-                              {data: 'number'},
+                              {data: 'pr_number'},
+                              {data: 'po_do_number'},
                               {data: 'quantity'},
                               {data: 'gross_amount'},
                               {data: 'first_discount'},
@@ -383,8 +373,6 @@
                                   /*,
                                    bFilter: false*/
                       });
-
-
                       // ambil kumpulan id PR apabila ada untuk default selected di popup
                       var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids");
                       $.each(allocatedPurchaseReturnIds, function (index, value) {
@@ -399,15 +387,11 @@
                                       clearInterval(clickRowProcessId);
                                   }
                               }, 0);
-
-
                           }
                       });
-
                   });
               });
           });
-
           $("#return-item-allocation-dp").click(function () {
               // split isi dari action attributnya form untuk ambil id produk
               $.get("/account_payables/get_purchase_returns_for_dp", {
@@ -442,7 +426,8 @@
                           dom: 'T<"clear">lfrtip',
                           columns: [
                               {data: null, defaultContent: '', orderable: false},
-                              {data: 'number'},
+                              {data: 'pr_number'},
+                              {data: 'po_do_number'},
                               {data: 'quantity'},
                               {data: 'gross_amount'},
                               {data: 'first_discount'},
@@ -464,8 +449,6 @@
                                   /*,
                                    bFilter: false*/
                       });
-
-
                       // ambil kumpulan id PR apabila ada untuk default selected di popup
                       var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids-for-dp");
                       $.each(allocatedPurchaseReturnIds, function (index, value) {
@@ -480,19 +463,28 @@
                                       clearInterval(clickRowProcessId);
                                   }
                               }, 0);
-
-
                           }
                       });
-
                   });
               });
           });
-
           $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
               var target = $(e.target).attr("href"); // activated tab
               if (target == "#direct_purchase" && aPdPdataTable == null) {
                   aPdPdataTable = $('#ap_listing_dp_table').DataTable({
+                      "searchCols": [
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          {"search": "", "escapeRegex": false}
+                      ],
                       order: [],
                       dom: 'T<"clear">lrtip',
                       columns: [
@@ -525,7 +517,6 @@
               }
           });
       });
-
       $.fn.dataTable.ext.search.push(
               function (settings, data, dataIndex) {
                   if (activeTab == "purchase_order") {
@@ -541,7 +532,6 @@
                           var tablePoDate = data[3]; // use data for the po date column
                           var splittedTablePoDate = tablePoDate.split("/");
                           var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
-
                           var receiptDate = $("#filter-receipt-date").val();
                           var splittedReceiptStartAndEndDate = receiptDate.split(" - ");
                           var receiptStartDate = splittedReceiptStartAndEndDate[0];
@@ -553,7 +543,6 @@
                           var tableReceiptDate = data[4]; // use data for the receipt date column
                           var splittedTableReceiptDate = tableReceiptDate.split("/");
                           var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
-
                           if (convertedPoStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedPoEndDate && convertedReceiptStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedReceiptEndDate)
                           {
                               return true;
