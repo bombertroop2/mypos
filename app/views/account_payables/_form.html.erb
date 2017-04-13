@@ -194,6 +194,20 @@
           var aPpRdataTable = null;
           var aPdPdataTable = null;
           var aPpOdataTable = $('#ap_listing_po_table').DataTable({
+              "searchCols": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  {"search": "^$", "regex": true, "smart": false}
+              ],
               order: [],
               dom: 'T<"clear">lrtip',
               columns: [
@@ -230,9 +244,17 @@
                       .columns(2)
                       .search($('#filter-vendor').val())
                       .draw();
+              var searchValue = $('#payment_status').val();
+              var useRegex = false;
+              var useSmartSearch = true;
+              if (searchValue == "") {
+                  searchValue = "^$";
+                  useRegex = true;
+                  useSmartSearch = false;
+              }
               aPpOdataTable
                       .columns(11)
-                      .search($('#payment_status').val())
+                      .search(searchValue, useRegex, useSmartSearch)
                       .draw();
               aPpOdataTable.draw();
           });
@@ -242,9 +264,17 @@
                       .columns(2)
                       .search($('#filter-vendor-dp').val())
                       .draw();
+              var searchValue = $('#payment_status_dp').val();
+              var useRegex = false;
+              var useSmartSearch = true;
+              if (searchValue == "") {
+                  searchValue = "^$";
+                  useRegex = true;
+                  useSmartSearch = false;
+              }
               aPdPdataTable
                       .columns(10)
-                      .search($('#payment_status_dp').val())
+                      .search(searchValue, useRegex, useSmartSearch)
                       .draw();
               aPdPdataTable.draw();
           });
@@ -483,7 +513,7 @@
                           null,
                           null,
                           null,
-                          {"search": "", "escapeRegex": false}
+                          {"search": "^$", "regex": true, "smart": false}
                       ],
                       order: [],
                       dom: 'T<"clear">lrtip',
