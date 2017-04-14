@@ -65,6 +65,7 @@ class AccountPayablesController < ApplicationController
           render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
         end
       else
+        SendEmailJob.perform_later(@account_payable)
         @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
       end
       is_exception_raised = false
@@ -105,6 +106,7 @@ class AccountPayablesController < ApplicationController
           render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
         end
       else
+        SendEmailJob.perform_later(@account_payable)
         @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
       end
       is_exception_raised = false

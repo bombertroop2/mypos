@@ -48,6 +48,10 @@ gem 'remotipart', '~> 1.2'
 
 gem 'bootstrap-chosen-rails'
 
+gem 'mailgun-ruby', '~>1.1.4'
+
+gem 'delayed_job_active_record'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

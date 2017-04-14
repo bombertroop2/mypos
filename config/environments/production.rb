@@ -85,4 +85,16 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
   
   config.action_mailer.default_url_options = { host: 'duos.herokuapp.com' }
+  
+  config.action_mailer.delivery_method = :smtp
+  # SMTP settings for gmail
+  config.action_mailer.smtp_settings = {
+    :address              => "smtp.mailgun.org",
+    :domain               => "sandboxc1b2e3edd37b498eaddf847f38e8cbaa.mailgun.org",
+    :port                 => 587,
+    :user_name            => "postmaster@sandboxc1b2e3edd37b498eaddf847f38e8cbaa.mailgun.org",
+    :password             => "db37350a77aba947a2e7601306fa90fc",
+    :authentication       => "plain"
+  }
+  config.active_job.queue_adapter = :delayed_job
 end
