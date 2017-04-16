@@ -24,7 +24,7 @@
                     <%= dpp_form.hidden_field :receiving_date, class: "receiving-date" %>
                       <%= dpp_form.hidden_field :product_id %>
                       <%= dpp_form.hidden_field :dp_cost, id: "dp-cost-#{product.id}" %>
-                      <%= dpp_form.hidden_field :vendor_id, class: "direct-purchase-vendor-id" %>
+                      <%#= dpp_form.hidden_field :vendor_id, class: "direct-purchase-vendor-id" %>
                       <% end %>
 
                       <% sizes = product.sizes.select(:id, :size) %>
@@ -67,6 +67,7 @@
                                         <%= fields_for direct_purchase_detail_array_index, direct_purchase_detail_detail do |direct_purchase_detail_detail_form| %>
                                           <%= direct_purchase_detail_detail_form.hidden_field :size_id %>
                                           <%= direct_purchase_detail_detail_form.hidden_field :color_id %>
+                                          <%= direct_purchase_detail_detail_form.hidden_field :product_id, value: product.id %>
                                           <div class="<%= control_group_error(direct_purchase_detail_detail, :quantity) %>">
                                               <%= direct_purchase_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{product.id}-#{size.size} quantity-#{product.id} quantity form-control quantity-fields", size: 16 %>
                                                 <%= error_help_text(direct_purchase_detail_detail, :quantity) %>

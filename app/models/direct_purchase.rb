@@ -18,6 +18,8 @@ class DirectPurchase < ApplicationRecord
           validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|dp| dp.second_discount.present?}
             validate :should_has_products  
             validates :receiving_date, date: {before_or_equal_to: Proc.new { Date.today }, message: 'must be before or equal to today' }, if: proc {|dp| dp.receiving_date.present?}
+              validate :vendor_exist, if: proc{|dp| dp.vendor_id.present?}
+              validate :warehouse_exist, if: proc{|dp| dp.warehouse_id.present?}
   
               before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net, :calculate_total_quantity, :set_receiving_date_to_receiving_purchase_order
   
@@ -38,6 +40,14 @@ class DirectPurchase < ApplicationRecord
               end
           
               private
+              
+              def vendor_exist
+                errors.add(:vendor_id, "does not exist!") unless Vendor.select("1 AS one").where(id: vendor_id).present?
+              end
+              
+              def warehouse_exist
+                errors.add(:warehouse_id, "does not exist!") unless Warehouse.select("1 AS one").where(id: warehouse_id).present?
+              end
               
               def set_receiving_date_to_receiving_purchase_order
                 received_purchase_order.receiving_date = receiving_date

@@ -183,18 +183,21 @@
                                             },
                                             callback: function (result) {
                                                 if (result) {
-                                                    $("body").css('padding-right', '0px');
-                                                    // untuk kebutuhan auto do number                                                        
-                                                    $("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
-                                                    // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
-                                                    $(".receiving-date").val($("#direct_purchase_receiving_date").val());
-                                                    $(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
                                                     $("#new_direct_purchase").submit();
                                                 }
                                             },
                                             size: "small"
                                         });
                                         return false;
+                                    });
+
+                                    $("#new_direct_purchase").submit(function (event) {
+                                        $("body").css('padding-right', '0px');
+                                        // untuk kebutuhan auto do number                                                        
+                                        $("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
+                                        // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
+                                        $(".receiving-date").val($("#direct_purchase_receiving_date").val());
+                                        //$(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
                                     });
 
                                 });
