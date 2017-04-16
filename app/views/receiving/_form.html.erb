@@ -1,0 +1,73 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#purchase_order" aria-controls="purchase_order" role="tab" data-toggle="tab">Purchase Order</a></li>
+            <li role="presentation"><a href="#direct_purchase" aria-controls="direct_purchase" role="tab" data-toggle="tab">Direct Purchase</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="purchase_order" style="padding-top: 20px">
+                <table id="rec_listing_po_table" class="display" width="100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Number</th>
+                            <th>Status</th>
+                            <th>Vendor</th>
+                            <th>Warehouse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% @purchase_orders.each_with_index do |purchase_order, index| %>
+                          <tr id="purchase_order_<%= purchase_order.id %>">
+                              <td><%= link_to "<i class=\"glyphicon glyphicon-download-alt\"></i>".html_safe, get_purchase_order_receiving_path(purchase_order.id), data: {remote: true}, title: "Receive" %></td>
+                              <td><%= purchase_order.number %></td>
+                              <td><%= purchase_order.status %></td>
+                              <td><%= purchase_order.vendors_name %></td>
+                              <td><%= purchase_order.warehouses_name %></td>
+                          </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+                <div id="form_container"></div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="direct_purchase" style="padding-top: 20px">
+                <div id="form_container_dp">
+                    <%= render "direct_purchase_form" %>
+                </div>
+            </div>
+        </div>
+    </div>                         
+</td>
+
+<script>
+  $(function () {
+      var recPODataTable = $('#rec_listing_po_table').DataTable({
+          order: [1, 'asc'],
+          /*dom: 'T<"clear">lfrtip',*/
+          columns: [
+              {data: 'receiving_btn', orderable: false},
+              {data: 'number'},
+              {data: 'status'},
+              {data: 'vendor_name'},
+              {data: 'warehouse_name'}
+          ],
+          /*
+           tableTools: {
+           sRowSelect: 'os',
+           sRowSelector: 'td:first-child',
+           aButtons: ['select_all', 'select_none']
+           },*/
+          paging: false,
+          info: false,
+          scrollY: "250px",
+          scrollCollapse: true
+      });
+  });
+</script>

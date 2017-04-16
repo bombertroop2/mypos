@@ -59,7 +59,7 @@
                           <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("purchase_orders") ? "active" : "" %>"><%= link_to "Purchase Orders", purchase_orders_path, method: :get %></li>
-                          <li class="<%= params[:controller].eql?("receiving") ? "active" : "" %>"><%= link_to "Receiving", new_receiving_path, method: :get %></li>
+                          <li class="<%= params[:controller].eql?("receiving") ? "active" : "" %>"><%= link_to "Receiving", receiving_index_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stocks", stocks_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("purchase_returns") ? "active" : "" %>"><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
                           <!--<li class="<%#= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%#= link_to "Costs", cost_lists_path %></li>

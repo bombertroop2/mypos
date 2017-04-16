@@ -1,7 +1,0 @@
-<td><%= object.number %></td>
-<td id="po-status-<%= object.id %>"><%= object.status %></td>
-<td id="vendor-name-<%= object.id %>"><%= object.vendors_name rescue "" %></td>
-<td id="warehouse-name-<%= object.id %>"><%= object.warehouses_name rescue "" %></td>
-<td class="actions" style="text-align: right">
-    <%= link_to "<i class=\"glyphicon glyphicon-download-alt\"></i>".html_safe, get_purchase_order_receiving_path(object), data: {remote: true}, title: "Receive" %>
-</td>

@@ -1,1 +1,13 @@
-<%= smart_listing_update(:receiving_purchase_orders) %>
+<%= smart_listing_item :receiving_purchase_orders, :new, @direct_purchase, "receiving/form" %>
+
+$(function () {
+  // funny solution for silly bug
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    var target = $(e.target).attr("href") // activated tab
+    if (target == "#direct_purchase" && ($('#listing_product_table_receiving').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_product_table_receiving').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+      $("#code_th").click();
+      $("#code_th").click();
+    } 
+  });
+});
+

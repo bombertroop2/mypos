@@ -1,7 +1,5 @@
 <% unless @product_received %>
-  $("#direct_purchase").html("<%= j(render(partial: "direct_purchase_form")) %>");
+  $("#form_container_dp").html("<%= j(render(partial: "direct_purchase_form")) %>");
 <% else %>
-  bootbox.alert({message: "Product has been successfully received.",size: 'small', callback: function(){
-  window.location = "<%= new_receiving_path %>";
-  }});
+  <%= smart_listing_item :receiving_purchase_orders, :create, @received_order, "receiving/received_order" %>
 <% end %>

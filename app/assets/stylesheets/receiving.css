@@ -15,3 +15,10 @@
     content: "\f046"; /* fa-check-square-o */
 }
 
+#rec_listing_po_table_filter label {
+    font-weight: normal;
+}
+
+#rec_listing_po_table tr td:first-child {
+    text-align: center;
+}

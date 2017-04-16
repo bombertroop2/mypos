@@ -1,28 +1,37 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
-    <thead id="listing-rpo-thead">
+    <thead id="listing-ro-thead">
         <tr>
-            <th class="col-md-3"><%= smart_listing.sortable "Number", "number" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "Status", "status" %></th>
-            <th class="col-md-3"><%= smart_listing.sortable "Vendor", "vendors_name" %></th>
-            <th class="col-md-3"><%= smart_listing.sortable "Warehouse", "warehouses_name" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "PO Number", "number" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "DO Number", "delivery_order_number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Vendor", "name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Rec. Date", "receiving_date" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Qty", "quantity" %></th>
             <th class="col-md-1"></th>
         </tr>
     </thead>
     <tbody>
-        <% smart_listing.collection.each do |po| %>
-          <tr class="editable" data-id="<%= po.id %>">
-              <%= smart_listing.render object: po, partial: "receiving/purchase_order", locals: {object: po} %>
+        <% smart_listing.collection.each do |ro| %>
+          <tr class="editable" data-id="<%= ro.id %>">
+              <%= smart_listing.render object: ro, partial: "receiving/received_order", locals: {object: ro} %>
           </tr>
         <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_receiving_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>
 <script>
   var processId = setInterval(function () {
-      if ($("#listing-rpo-thead").is(":visible")) {
+      if ($("#listing-ro-thead").is(":visible")) {
           clearInterval(processId);
       } else {
-          $("#listing-rpo-thead").show();
+          $("#listing-ro-thead").show();
       }
   }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
 </script>

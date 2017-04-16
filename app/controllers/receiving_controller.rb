@@ -2,24 +2,43 @@ include SmartListing::Helper::ControllerExtensions
 class ReceivingController < ApplicationController
   helper SmartListing::Helper
   before_action :set_purchase_order, only: [:get_purchase_order, :receive_products_from_purchase_order]
+  before_action :set_received_order, only: :show
   
-  def new
-    unless request.xhr?
-      @suppliers = Vendor.select(:id, :name)
-      @warehouses = Warehouse.central.select :id, :code
-      @direct_purchase = DirectPurchase.new
-      @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
-    end
+  def index
     like_command = if Rails.env.eql?("production")
       "ILIKE"
     else
       "LIKE"
     end
-    po_scope = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
-    po_scope = po_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(po_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(po_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
-    @purchase_orders = smart_listing_create(:receiving_purchase_orders, po_scope, partial: 'receiving/listing', default_sort: {number: "ASC"})
+    if params[:filter_receiving_date].present?
+      splitted_date_range = params[:filter_receiving_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
+    received_orders_scope = ReceivedPurchaseOrder.
+      joins("LEFT JOIN purchase_orders on received_purchase_orders.purchase_order_id = purchase_orders.id").
+      joins(:vendor).
+      select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity)
+    received_orders_scope = received_orders_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
+      or(received_orders_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])).
+      or(received_orders_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"])).
+      or(received_orders_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+    received_orders_scope = received_orders_scope.where(["DATE(receiving_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_receiving_date].present?
+    @received_orders = smart_listing_create(:receiving_purchase_orders, received_orders_scope, partial: 'receiving/listing', default_sort: {receiving_date: "asc"})
+  end
+  
+  def show
+    
+  end
+  
+  def new
+    @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).
+      select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").
+      where("status = 'Open' OR status = 'Partial'")
+    @suppliers = Vendor.select(:id, :name)
+    @warehouses = Warehouse.central.select :id, :code
+    @direct_purchase = DirectPurchase.new
+    @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
   end
   
   def get_purchase_order    
@@ -52,9 +71,14 @@ class ReceivingController < ApplicationController
         render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
         render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
       else        
-        render js: "window.location = '#{new_receiving_url}';" if @purchase_order.reload.status.eql?("Finish")
-        @vendor_name = Vendor.select(:name).find_by(id: @purchase_order.vendor_id).name rescue nil
-        @warehouse_name = Warehouse.select(:name).find_by(id: @purchase_order.warehouse_id).name rescue nil
+        if @purchase_order.reload.status.eql?("Finish")
+          render js: "window.location = '#{receiving_index_url}';"
+        else
+          @received_order = ReceivedPurchaseOrder.
+            joins(:purchase_order, :vendor).
+            select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity).
+            where("purchase_order_id = '#{@purchase_order.id}'").last
+        end
       end
     rescue ActiveRecord::RecordNotUnique => e
       @do_number_not_unique = true
@@ -153,6 +177,10 @@ class ReceivingController < ApplicationController
         end
       else
         @product_received = true
+        @received_order = ReceivedPurchaseOrder.
+            joins(:direct_purchase, :vendor).
+            select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity).
+            where("direct_purchase_id = '#{@direct_purchase.id}'").last
       end
     rescue ActiveRecord::RecordNotUnique => e
       @suppliers = Vendor.select(:id, :name)
@@ -186,6 +214,10 @@ class ReceivingController < ApplicationController
   
   def set_purchase_order
     @purchase_order = PurchaseOrder.where(id: params[:id]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, vendor_id, warehouse_id").joins(:vendor).first
+  end
+  
+  def set_received_order
+    @received_order = ReceivedPurchaseOrder.where(id: params[:id]).select(:id, :delivery_order_number, :purchase_order_id, :direct_purchase_id, :receiving_date, :vendor_id, :quantity).first
   end
   
 end

@@ -19,7 +19,7 @@ class DirectPurchase < ApplicationRecord
             validate :should_has_products  
             validates :receiving_date, date: {before_or_equal_to: Proc.new { Date.today }, message: 'must be before or equal to today' }, if: proc {|dp| dp.receiving_date.present?}
   
-              before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net
+              before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net, :calculate_total_quantity, :set_receiving_date_to_receiving_purchase_order
   
               def quantity_received
                 quantity = 0
@@ -38,6 +38,17 @@ class DirectPurchase < ApplicationRecord
               end
           
               private
+              
+              def set_receiving_date_to_receiving_purchase_order
+                received_purchase_order.receiving_date = receiving_date
+              end
+              
+              def calculate_total_quantity
+                received_purchase_order.quantity = 0
+                direct_purchase_products.each do |direct_purchase_product|
+                  received_purchase_order.quantity += direct_purchase_product.direct_purchase_details.map(&:quantity).sum
+                end
+              end
                 
               def should_has_products
                 errors.add(:base, "Please select at least one product!") if direct_purchase_products.blank?

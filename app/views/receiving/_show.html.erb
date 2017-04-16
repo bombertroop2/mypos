@@ -1,0 +1,114 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <% purchase_order = PurchaseOrder.select(:number).where(id: object.purchase_order_id).first %>
+    <% vendor = Vendor.select(:name).where(id: object.vendor_id).first %>
+
+    <dl class="dl-horizontal">
+        <dt>PO number</dt>
+        <dd><%= purchase_order.number rescue "" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>DO number</dt>
+        <dd><%= object.delivery_order_number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Vendor</dt>
+        <dd><%= vendor.name %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Receiving date</dt>
+        <dd><%= object.receiving_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <% received_order_products = object.received_purchase_order_products.select(:id, :purchase_order_product_id, :direct_purchase_product_id) %>
+
+    <table class="table table-condensed table-responsive table-bordered">
+        <tbody>
+            <tr style="text-align: center">
+                <td><strong>No</strong></td>
+                <td><strong>Article Code</strong></td>
+                <td><strong>Quantity</strong></td>
+                <td><strong>Total Quantity</strong></td>
+            </tr>
+            <% received_order_products.each_with_index do |received_order_product, idx| %>
+              <% total_quantity = 0 %>
+              <% po_product = if received_order_product.purchase_order_product_id.present?
+                PurchaseOrderProduct.select(:id, :product_id, :name).
+                  select("products.code AS product_code").
+                  joins(product: :brand).
+                  where(id: received_order_product.purchase_order_product_id).first
+                elsif received_order_product.direct_purchase_product_id.present?
+                DirectPurchaseProduct.select(:id, :product_id, :name).
+                  select("products.code AS product_code").
+                  joins(product: :brand).
+                  where(id: received_order_product.direct_purchase_product_id).first
+                end %>
+              <% product_sizes = po_product.sizes.select(:id, :size) %>
+              <% product_colors = po_product.colors.select(:id, :code) %>
+  <%# purchase_order_details = po_product.purchase_order_details.select(:size_id, :color_id, :quantity) %>
+              <tr align="center">
+                  <td style="vertical-align: middle"><%= idx.succ %></td>
+                  <td style="vertical-align: middle"><%= "#{po_product.product_code} - #{po_product.name}" %></td>
+                  <td style="vertical-align: middle">
+                      <table class="table table-condensed table-responsive table-bordered">
+                          <tbody>
+                              <tr>
+                                  <td colspan="2" rowspan="2"></td>
+                                  <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
+                              </tr>
+                              <tr>
+                                  <% product_sizes.each do |size| %>
+                                    <td align="center"><%= size.size %></td>
+                                  <% end %>
+                              </tr>
+                              <% product_colors.each_with_index do |color, idx| %>
+                                <tr align="center">
+                                    <% if idx == 0 %>
+                                      <td style="vertical-align: middle" rowspan="<%= product_colors.length %>">Colors</td>
+                                    <% end %>
+                                    <td align="center"><%= color.code %></td>
+                                    <% product_sizes.each do |size| %>
+                                      <% received_order_item = if received_order_product.purchase_order_product_id.present?
+                                        received_order_product.received_purchase_order_items.select(:quantity).
+                                          joins(:purchase_order_detail).
+                                          where("size_id = '#{size.id}' AND color_id = '#{color.id}'").first
+                                        elsif received_order_product.direct_purchase_product_id.present?
+                                        received_order_product.received_purchase_order_items.select(:quantity).
+                                          joins(:direct_purchase_detail).
+                                          where("size_id = '#{size.id}' AND color_id = '#{color.id}'").first
+                                        end %>
+                                      <% if received_order_item %>
+                                        <td>
+                                            <%= received_order_item.quantity %>
+                                            <% total_quantity += received_order_item.quantity %>
+                                        </td>
+                                      <% else %>
+                                        <td></td>
+                                      <% end %>
+                                    <% end %>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                  </td>
+                  <td align="right" style="vertical-align: middle"><%= total_quantity %></td>
+              </tr>
+            <% end %>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" align="right"><strong>Total Quantity</strong></td>
+                <td align="right"><%= object.quantity %></td>
+            </tr>
+        </tfoot>
+    </table>
+
+
+</td>
