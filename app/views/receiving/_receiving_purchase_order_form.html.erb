@@ -50,6 +50,7 @@
                                         </tr>
                                         <%= received_purchase_order_form.fields_for :received_purchase_order_products do |received_purchase_order_product_form| %>
                                           <%= received_purchase_order_product_form.hidden_field :purchase_order_product_id %>
+                                          <%= received_purchase_order_product_form.hidden_field :purchase_order_id, value: @purchase_order.id %>
                                           <% received_purchase_order_product = received_purchase_order_product_form.object %>
                                           <% purchase_order_product = received_purchase_order_product.purchase_order_product %>
                                           <% colors = purchase_order_product.colors.select(:code, :id) rescue [] %>
@@ -99,6 +100,8 @@
                                                                                   </thead>       
                                                                               </table>                                                                            
                                                                               <%= received_purchase_order_item_form.hidden_field :purchase_order_detail_id %>
+                                                                              <%= received_purchase_order_item_form.hidden_field :purchase_order_product_id, value: received_purchase_order_product_form.object.purchase_order_product_id %>
+                                                                              <%= received_purchase_order_item_form.hidden_field :purchase_order_id, value: @purchase_order.id %>
                                                                               <div class="<%= control_group_error(received_purchase_order_item, :quantity) %>">
                                                                                   <%= received_purchase_order_item_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", id: "quantity_#{purchase_order_detail.id}", size: 16 %>
                                                                                     <%= error_help_text(received_purchase_order_item, :quantity) %>

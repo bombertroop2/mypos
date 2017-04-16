@@ -2,9 +2,9 @@ class DirectPurchase < ApplicationRecord
   belongs_to :vendor
   belongs_to :warehouse
   
+  has_many :account_payable_purchases, as: :purchase, dependent: :restrict_with_error
   has_one :received_purchase_order, dependent: :destroy
   has_many :direct_purchase_products, dependent: :destroy
-  has_many :account_payable_purchases, as: :purchase
   has_many :purchase_returns
   
   accepts_nested_attributes_for :direct_purchase_products

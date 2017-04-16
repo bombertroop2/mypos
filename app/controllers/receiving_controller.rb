@@ -68,8 +68,8 @@ class ReceivingController < ApplicationController
           end
         end
         
-        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
-        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
+        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
       else        
         if @purchase_order.reload.status.eql?("Finish")
           render js: "window.location = '#{receiving_index_url}';"
@@ -203,7 +203,7 @@ class ReceivingController < ApplicationController
   
   def purchase_order_params
     params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:vendor_id, :receiving_date, :is_using_delivery_order, :delivery_order_number, 
-        received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]]).merge(receiving_po: true)
+        received_purchase_order_products_attributes: [:purchase_order_id, :purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity, :purchase_order_product_id, :purchase_order_id]]]).merge(receiving_po: true)
   end
   
   def direct_purchase_params

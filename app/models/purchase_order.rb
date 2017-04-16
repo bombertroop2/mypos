@@ -3,11 +3,11 @@ class PurchaseOrder < ApplicationRecord
   belongs_to :warehouse
   belongs_to :creator, class_name: "User", foreign_key: :created_by
   
+  has_many :account_payable_purchases, as: :purchase, dependent: :restrict_with_error
   has_many :purchase_order_products, dependent: :destroy
   has_many :purchase_order_details, through: :purchase_order_products
   has_many :products, through: :purchase_order_products
   has_many :received_purchase_orders
-  has_many :account_payable_purchases, as: :purchase
   has_many :purchase_returns
 
   attr_accessor :receiving_po, :deleting_po, :closing_po, :is_user_changing_cost
