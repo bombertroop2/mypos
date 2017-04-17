@@ -176,7 +176,7 @@ class ReceivingController < ApplicationController
         @product_received = true
         @received_order = ReceivedPurchaseOrder.
           joins(:direct_purchase, :vendor).
-          select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity).
+          select(:id, :delivery_order_number, :name, :receiving_date, :quantity).
           where("direct_purchase_id = '#{@direct_purchase.id}'").last
       end
     rescue ActiveRecord::RecordNotUnique => e
