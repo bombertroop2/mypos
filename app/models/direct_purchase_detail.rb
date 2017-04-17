@@ -18,7 +18,7 @@ class DirectPurchaseDetail < ApplicationRecord
     private
       
     def item_available
-      errors.add(:base, "Not able to receive selected items") unless Product.select("1 AS one").joins(:product_colors, :product_details).where("products.id = '#{product_id}' AND color_id = '#{color_id}' AND size_id = '#{size_id}'").present?
+      errors.add(:base, "Not able to receive selected items") unless Product.select("1 AS one").joins(:product_colors, :product_details).where("products.id = #{product_id} AND product_colors.color_id = #{color_id} AND size_id = #{size_id}").present?
     end
     
     def calculate_total_unit_price
