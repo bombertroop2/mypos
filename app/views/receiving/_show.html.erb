@@ -1,11 +1,16 @@
-<td colspan="6">
+<td colspan="7">
     <button type="button" class="close cancel" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>
 
-    <% purchase_order = PurchaseOrder.select(:number).where(id: object.purchase_order_id).first %>
+    <% purchase_order = PurchaseOrder.select(:number, :status).where(id: object.purchase_order_id).first %>
     <% vendor = Vendor.select(:name).where(id: object.vendor_id).first %>
+
+    <dl class="dl-horizontal">
+        <dt>DO number</dt>
+        <dd><%= object.delivery_order_number %></dd>
+    </dl>
 
     <dl class="dl-horizontal">
         <dt>PO number</dt>
@@ -13,8 +18,8 @@
     </dl>
 
     <dl class="dl-horizontal">
-        <dt>DO number</dt>
-        <dd><%= object.delivery_order_number %></dd>
+        <dt>PO status</dt>
+        <dd><%= purchase_order.status rescue "" %></dd>
     </dl>
 
     <dl class="dl-horizontal">
