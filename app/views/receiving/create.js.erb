@@ -2,4 +2,5 @@
   $("#form_container_dp").html("<%= j(render(partial: "direct_purchase_form")) %>");
 <% else %>
   <%= smart_listing_item :receiving_purchase_orders, :create, @received_order, "receiving/received_order" %>
+  bootbox.alert("Articles <%= @received_order.delivery_order_number %> have been successfully received");
 <% end %>

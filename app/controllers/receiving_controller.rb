@@ -72,14 +72,10 @@ class ReceivingController < ApplicationController
         render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
         render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
       else        
-        if @purchase_order.reload.status.eql?("Finish")
-          render js: "window.location = '#{receiving_index_url}';"
-        else
-          @received_order = ReceivedPurchaseOrder.
-            joins(:purchase_order, :vendor).
-            select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity, :status).
-            where("purchase_order_id = '#{@purchase_order.id}'").last
-        end
+        @received_order = ReceivedPurchaseOrder.
+          joins(:purchase_order, :vendor).
+          select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity, :status).
+          where("purchase_order_id = '#{@purchase_order.id}'").last
       end
     rescue ActiveRecord::RecordNotUnique => e
       @do_number_not_unique = true
@@ -179,9 +175,9 @@ class ReceivingController < ApplicationController
       else
         @product_received = true
         @received_order = ReceivedPurchaseOrder.
-            joins(:direct_purchase, :vendor).
-            select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity).
-            where("direct_purchase_id = '#{@direct_purchase.id}'").last
+          joins(:direct_purchase, :vendor).
+          select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity).
+          where("direct_purchase_id = '#{@direct_purchase.id}'").last
       end
     rescue ActiveRecord::RecordNotUnique => e
       @suppliers = Vendor.select(:id, :name)
