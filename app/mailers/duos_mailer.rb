@@ -1,4 +1,5 @@
 include AccountPayablesHelper
+include PurchaseReturnsHelper
 class DuosMailer < ApplicationMailer
   def payment_email(account_payable, recipient)
     @account_payable = account_payable

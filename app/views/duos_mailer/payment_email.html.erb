@@ -1,7 +1,10 @@
-<table cellspacing="0" border="1">
+<table cellspacing="0" border="1" style="border-color: #DDDDDD;border-style: solid;border-collapse: collapse">
     <tr>
         <td style="padding: 20px">
             <table width="100%">
+                <tr>
+                    <td colspan="2"><%= image_tag image_url("DUOS.jpg", host: "duos.herokuapp.com") %></td>
+                </tr>
                 <tr>
                     <td colspan="2"><strong><%= Company.name %></strong></td>
                 </tr>
@@ -46,10 +49,10 @@
                 </tr>
                 <tr>
                     <td align="center" colspan="2">
-                        <table cellspacing="0" border="1" cellpadding="3">
+                        <table cellspacing="0" border="1" cellpadding="3" style="border-color: white;border-style: solid;border-collapse: collapse">
                             <tbody>
-                                <tr><th colspan="9" style="text-align: center">Items Received</th></tr>
-                                <tr style="text-align: center">
+                                <tr bgcolor="#42B549"><th colspan="9" style="text-align: center;color: white">Items Received</th></tr>
+                                <tr style="text-align: center;color: white" bgcolor="#00FF00">
                                     <td><strong>No</strong></td>
                                     <td colspan="2"><strong>PO/DO Number</strong></td>
                                     <td><strong>Qty</strong></td>
@@ -106,7 +109,7 @@
                                   </tr>
                                   <% total_amount_received += value_after_ppn_for_ap(purchase_order) %>
                                 <% end %>
-                                <tr>
+                                <tr bgcolor="#42B549" style="color: white">
                                     <td colspan="8" align="right"><strong>Total Amount Received</strong></td>
                                     <td align="right"><strong><%= number_to_currency(total_amount_received,
                                               :separator => ",",
@@ -117,8 +120,8 @@
                                 <% total_amount_returned = 0 %>
                                 <% allocated_return_items = @account_payable.allocated_return_items.select(:purchase_return_id) %>
                                 <% if allocated_return_items.size > 0 %>
-                                  <tr><th colspan="9" style="text-align: center">Allocated Return Items</th></tr>
-                                  <tr style="text-align: center">
+                                  <tr bgcolor="#42B549"><th colspan="9" style="text-align: center;color: white">Allocated Return Items</th></tr>
+                                  <tr style="text-align: center;color: white" bgcolor="#00FF00">
                                       <td><strong>No</strong></td>
                                       <td><strong>PR Number</strong></td>
                                       <td><strong>PO/DO Number</strong></td>
@@ -183,7 +186,7 @@
                                     </tr>
                                     <% total_amount_returned += value_after_ppn_pr(ari.purchase_return) %>
                                   <% end %>
-                                  <tr>
+                                    <tr bgcolor="#42B549" style="color: white">
                                       <td colspan="8" align="right"><strong>Total Amount Returned</strong></td>
                                       <td align="right"><strong><%= number_to_currency(total_amount_returned,
                                                 :separator => ",",
@@ -193,7 +196,7 @@
                                   </tr>                                    
                                 <% end %>
                             </tbody>
-                            <tfoot>
+                            <tfoot bgcolor="#42B549" style="color: white">
                                 <tr>
                                     <td colspan="8" align="right"><strong>Previous Paid</strong></td>
                                     <td align="right"><strong><%= number_to_currency(@account_payable.previous_paid,
