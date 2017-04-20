@@ -18,6 +18,7 @@
             <%= purchase_return_product_detail_form.hidden_field :product_code %>
             <%= purchase_return_product_detail_form.hidden_field :product_name %>
             <%= purchase_return_product_detail_form.hidden_field :product_id %>
+            <%= purchase_return_product_detail_form.hidden_field :purchase_order_id %>
             <tr align="center">
                 <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= "#{purchase_return_product_detail_form.object.product_code} - #{purchase_return_product_detail_form.object.product_name}" %></td>
                 <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= number_to_currency((purchase_return_product_detail_form.object.product_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
@@ -92,6 +93,8 @@
                                               <% purchase_return_item_array_index = create_return_item_array_variable_name(pr_item, pr_item.purchase_order_detail_id, purchase_return_product_array_index) %>
                                               <%= fields_for purchase_return_item_array_index, pr_item do |purchase_return_detail_detail_form| %>
                                                 <%= purchase_return_detail_detail_form.hidden_field :purchase_order_detail_id %>
+                                                <%= purchase_return_detail_detail_form.hidden_field :purchase_order_product_id %>
+                                                <%= purchase_return_detail_detail_form.hidden_field :purchase_order_id %>
                                                 <div class="<%= control_group_error(pr_item, :quantity) %>">
                                                     <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "quantity", class: "quantity form-control quantity-fields", size: 5 %>
                                                       <%= error_help_text(pr_item, :quantity) %>

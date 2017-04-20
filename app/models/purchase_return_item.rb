@@ -1,16 +1,23 @@
 class PurchaseReturnItem < ApplicationRecord
-  attr_accessor :direct_purchase_return
+  attr_accessor :direct_purchase_return, :purchase_order_product_id, :purchase_order_id
   
   belongs_to :purchase_order_detail
   belongs_to :direct_purchase_detail
   belongs_to :purchase_return_product
   
+  validate :item_returnable, on: :create
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true, message: "must be greater than or equal to 1"}, if: proc { |pri| pri.quantity.present? }
     validate :less_than_or_equal_to_stock, if: proc {|pri| pri.quantity.present? and pri.quantity > 0}
       
       after_create :update_stock, :update_returning_qty
           
       private
+      
+      def item_returnable
+        errors.add(:base, "Not able to return selected items") unless PurchaseOrderDetail.
+          select("1 AS one").joins(purchase_order_product: :purchase_order).
+          where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND purchase_order_details.id = #{purchase_order_detail_id} AND status != 'Open' AND status != 'Deleted'").present?
+      end
       
       def update_returning_qty
         unless direct_purchase_return
