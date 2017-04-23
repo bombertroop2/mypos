@@ -13,7 +13,7 @@ class PriceList < ApplicationRecord
       #    validates :product_id, :size_id, :price_code_id, presence: true, if: proc {|price_list| price_list.user_is_adding_new_price}
   validates :effective_date, :price, :cost, presence: true        
   validates :product_detail_id, presence: true, if: proc {|price_list| !price_list.user_is_adding_new_price && !price_list.user_is_adding_price_from_cost_prices_page}
-  validates :effective_date, date: {after_or_equal_to: Proc.new { Date.today }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation}
+  validates :effective_date, date: {after_or_equal_to: Proc.new { Time.current.to_date }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation}
   validates :effective_date, uniqueness: {scope: :product_detail_id}, if: proc {|price_list| price_list.effective_date.present?}
   validate :price_greater_or_equal_to_cost, if: proc {|price_list| price_list.price.present? && price_list.cost.present?}
           
