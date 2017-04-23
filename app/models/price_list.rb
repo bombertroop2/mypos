@@ -43,7 +43,7 @@ class PriceList < ApplicationRecord
       self.effective_date = Product.select(:id).where(id: product_id).first.active_cost.effective_date
     else
       # buat dengan tanggal hari ini
-      self.effective_date = Date.today
+      self.effective_date = Time.current.to_date
     end
   end
 
