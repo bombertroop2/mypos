@@ -1,5 +1,5 @@
 class ProductDetail < ApplicationRecord
-  attr_accessor :user_is_adding_new_product
+  attr_accessor :user_is_adding_new_product, :size_group_id
 
   belongs_to :size
   belongs_to :price_code
@@ -11,6 +11,7 @@ class ProductDetail < ApplicationRecord
   validates :barcode, uniqueness: {scope: :price_code_id} 
   validates :size_id, :price_code_id, presence: true
   validates :product_id, presence: true, unless: proc{|product_detail| product_detail.user_is_adding_new_product}
+    validate :size_available, :price_code_available, on: :create
 
     accepts_nested_attributes_for :price_lists#, reject_if: proc {|attributes| attributes[:price].blank?}
 
@@ -39,6 +40,13 @@ class ProductDetail < ApplicationRecord
 
     private            
     
+    def size_available
+      errors.add(:size_id, "does not exist!") if size_id.present? && Size.where("sizes.id = #{size_id} AND size_groups.id = #{size_group_id}").joins(:size_group).select("1 AS one").blank?
+    end
+
+    def price_code_available      
+      errors.add(:price_code_id, "does not exist!") if price_code_id.present? && PriceCode.where(id: price_code_id).select("1 AS one").blank?
+    end
             
     def create_barcode
       product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_id.eql?(product_id)}.first

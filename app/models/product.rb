@@ -39,6 +39,8 @@ class Product < ApplicationRecord
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
   validate :check_item, on: :create
+  validate :brand_available, :sex_available, :vendor_available, :target_available,
+    :model_available, :goods_type_available, :size_group_available
   #  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
@@ -117,6 +119,38 @@ class Product < ApplicationRecord
   end
         
   private
+  
+  def brand_available
+    errors.add(:brand_id, "does not exist!") if brand_id.present? && Brand.where(id: brand_id).select("1 AS one").blank?
+  end
+
+  def vendor_available
+    errors.add(:vendor_id, "does not exist!") if vendor_id.present? && Vendor.where(id: vendor_id).select("1 AS one").blank?
+  end
+
+  def model_available
+    errors.add(:model_id, "does not exist!") if model_id.present? && Model.where(id: model_id).select("1 AS one").blank?
+  end
+
+  def goods_type_available
+    errors.add(:goods_type_id, "does not exist!") if goods_type_id.present? && GoodsType.where(id: goods_type_id).select("1 AS one").blank?
+  end
+
+  def size_group_available
+    errors.add(:size_group_id, "does not exist!") if size_group_id.present? && SizeGroup.where(id: size_group_id).select("1 AS one").blank?
+  end
+
+  def sex_available
+    Product::SEX.select{ |x| x[1] == sex }.first.first
+  rescue
+    errors.add(:sex, "does not exist!") if sex.present?
+  end
+
+  def target_available
+    Product::TARGETS.select{ |x| x[1] == target }.first.first
+  rescue
+    errors.add(:target, "does not exist!") if target.present?
+  end
   
   def color_selected
     if new_record?

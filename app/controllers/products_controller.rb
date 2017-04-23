@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class ProductsController < ApplicationController
   helper SmartListing::Helper
   before_action :set_product, only: [:show, :edit, :update, :destroy]
-  before_action :convert_cost_price_to_numeric, only: [:create, :update]
+  before_action :convert_cost_price_to_numeric, only: :update
 
   # GET /products
   # GET /products.json
@@ -62,6 +62,9 @@ class ProductsController < ApplicationController
   # POST /products
   # POST /products.json
   def create
+    add_additional_params_to_product_details
+    add_additional_params_to_price_lists
+    convert_cost_price_to_numeric
     @product = Product.new(product_params)
     begin
       unless @product.save
@@ -205,7 +208,7 @@ class ProductsController < ApplicationController
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
       :target, :model_id,# :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
-      product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product,
+      product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product, :size_group_id,
         price_lists_attributes: [:id, :price, :user_is_adding_new_price, :cost, :product_id]],
       cost_lists_attributes: [:id, :cost, :is_user_creating_product],
       product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
@@ -222,6 +225,21 @@ class ProductsController < ApplicationController
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:product_id] = @product.id if @product.present? && !@product.new_record?
+      end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
+    end if params[:product][:product_details_attributes].present?
+  end
+  
+  def add_additional_params_to_product_details
+    params[:product][:product_details_attributes].each do |key, value|
+      params[:product][:product_details_attributes][key].merge! size_group_id: params[:product][:size_group_id], user_is_adding_new_product: true
+    end if params[:product][:product_details_attributes].present?
+  end
+   
+  def add_additional_params_to_price_lists
+    params[:product][:product_details_attributes].each do |key, value|
+      params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! user_is_adding_new_price: true
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:cost_lists_attributes]["0"][:cost]
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
   end
