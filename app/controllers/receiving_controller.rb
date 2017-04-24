@@ -54,6 +54,7 @@ class ReceivingController < ApplicationController
   end
   
   def receive_products_from_purchase_order    
+    add_additional_params_to_child
     begin
       @do_number_not_unique = false
       unless @purchase_order.update(purchase_order_params)
@@ -215,6 +216,17 @@ class ReceivingController < ApplicationController
   
   def set_received_order
     @received_order = ReceivedPurchaseOrder.where(id: params[:id]).select(:id, :delivery_order_number, :purchase_order_id, :direct_purchase_id, :receiving_date, :vendor_id, :quantity).first
+  end
+  
+  def add_additional_params_to_child
+    params[:purchase_order][:received_purchase_orders_attributes].each do |key, value|
+      params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes].each do |rpop_key, value|
+        params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes][rpop_key].merge! purchase_order_id: @purchase_order.id
+        params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes][rpop_key][:received_purchase_order_items_attributes].each do |rpoi_key, value|
+          params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes][rpop_key][:received_purchase_order_items_attributes][rpoi_key].merge! purchase_order_product_id: params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes][rpop_key][:purchase_order_product_id], purchase_order_id: @purchase_order.id
+        end if params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes][rpop_key][:received_purchase_order_items_attributes].present?
+      end if params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes].present?
+    end if params[:purchase_order][:received_purchase_orders_attributes].present?
   end
   
 end

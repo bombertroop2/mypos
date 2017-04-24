@@ -10,7 +10,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
       
           before_create :update_receiving_value, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
             before_create :create_stock_and_update_receiving_qty, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
-              before_create :create_stock,  if: proc {|rpoi| rpoi.is_it_direct_purchasing}
+              before_create :create_stock, if: proc {|rpoi| rpoi.is_it_direct_purchasing}
       
                 attr_accessor :is_it_direct_purchasing, :purchase_order_product_id, :purchase_order_id
     

@@ -36,7 +36,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
     
                     def create_auto_do_number                  
                       last_received_po = vendor.received_purchase_orders.select(:delivery_order_number).last
-                      today = Date.today
+                      today = Date.current
                       current_month = today.month.to_s.rjust(2, '0')
                       current_year = today.strftime("%y").rjust(2, '0')
                       if last_received_po && last_received_po.delivery_order_number.include?("DUOS#{(vendor.code)}#{current_month}#{current_year}")
