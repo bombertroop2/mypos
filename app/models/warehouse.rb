@@ -11,7 +11,8 @@ class Warehouse < ApplicationRecord
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
   validates :code, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}
-    validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?
+    validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
+      :area_manager_available, :region_available, :price_code_available, :type_available
     validates :code, uniqueness: true
 
     before_validation :upcase_code
@@ -32,6 +33,24 @@ class Warehouse < ApplicationRecord
 
     private
     
+    def area_manager_available
+      errors.add(:supervisor_id, "does not exist!") if supervisor_id.present? && Supervisor.where(id: supervisor_id).select("1 AS one").blank?      
+    end
+
+    def region_available
+      errors.add(:region_id, "does not exist!") if region_id.present? && Region.where(id: region_id).select("1 AS one").blank?
+    end
+
+    def price_code_available
+      errors.add(:price_code_id, "does not exist!") if price_code_id.present? && PriceCode.where(id: price_code_id).select("1 AS one").blank?
+    end
+    
+    def type_available
+      TYPES.select{ |x| x[1] == warehouse_type }.first.first
+    rescue
+      errors.add(:warehouse_type, "does not exist!") if warehouse_type.present?
+    end
+
     def is_area_manager_valid_to_supervise_this_warehouse?
       warehouse_types = Warehouse.where(supervisor_id: supervisor_id).pluck(:warehouse_type)
       errors.add(:supervisor_id, "should manage the warehouse with type #{warehouse_types.first}") if !warehouse_types.include?(warehouse_type) && warehouse_types.present?
