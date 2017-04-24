@@ -11,7 +11,7 @@ class SalesPromotionGirl < ApplicationRecord
 
   validates :mobile_phone, :address, :name, :province, :warehouse_id, :gender, :role, presence: true
   validates :identifier, uniqueness: true
-  validate :warehouse_has_supervisor?
+  validate :warehouse_has_supervisor?, :gender_available, :warehouse_available, :role_available
   
   accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
   
@@ -27,6 +27,22 @@ class SalesPromotionGirl < ApplicationRecord
   ]
 
   private
+  
+  def gender_available
+    SalesPromotionGirl::GENDERS.select{ |x| x[1] == gender }.first.first
+  rescue
+    errors.add(:gender, "does not exist!") if gender.present?
+  end
+  
+  def warehouse_available
+    errors.add(:warehouse_id, "does not exist!") if warehouse_id.present? && Warehouse.where(id: warehouse_id).where("warehouse_type <> 'central'").select("1 AS one").blank?
+  end
+  
+  def role_available
+    SalesPromotionGirl::ROLES.select{ |x| x[1] == role }.first.first
+  rescue
+    errors.add(:role, "does not exist!") if role.present?
+  end
   
   def warehouse_has_supervisor?
     errors.add(:warehouse_id, "is being supervised by another supervisor") if Warehouse.has_supervisor?(warehouse_id) && warehouse_id_changed? && role.eql?("supervisor")
