@@ -6,7 +6,7 @@ class Vendor < ApplicationRecord
     #  validates :email, uniqueness: true, if: proc {|vendor| vendor.email.present?}
     #    validates :pic_email, uniqueness: true, if: proc {|vendor| vendor.pic_email.present?}
     validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|vendor| vendor.terms_of_payment.present?}
-      validate :code_not_changed
+      validate :code_not_changed, :vat_available
 
       
       VAT = [
@@ -32,6 +32,12 @@ class Vendor < ApplicationRecord
     
 
         private
+        
+        def vat_available
+          Vendor::VAT.select{ |x| x[1] == value_added_tax }.first.first
+        rescue
+          errors.add(:value_added_tax, "does not exist!") if value_added_tax.present?
+        end
     
         def remove_vat
           self.value_added_tax = ""
