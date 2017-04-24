@@ -2,7 +2,6 @@ include SmartListing::Helper::ControllerExtensions
 class ProductsController < ApplicationController
   helper SmartListing::Helper
   before_action :set_product, only: [:show, :edit, :update, :destroy]
-  before_action :convert_cost_price_to_numeric, only: :update
 
   # GET /products
   # GET /products.json
@@ -62,23 +61,16 @@ class ProductsController < ApplicationController
   # POST /products
   # POST /products.json
   def create
-    add_additional_params_to_product_details
-    add_additional_params_to_price_lists
+    add_additional_params_to_product_details(true)
+    add_additional_params_to_price_lists("create")
+    add_additional_param_to_cost_lists(true)
     convert_cost_price_to_numeric
     @product = Product.new(product_params)
     begin
-      unless @product.save
+      unless @product.save       
         size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
         @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
         @price_codes = PriceCode.select(:id, :code).order :code
-        #        @price_codes.each do |price_code|
-        #          @sizes.each do |size|
-        #            product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-        #            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)# if product_detail.blank?
-        #            price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-        #            product_detail.price_lists.build #if price_list.blank?
-        #          end
-        #        end
         @colors = Color.select(:id, :code, :name).order(:code)
         @colors.each do |color|
           @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
@@ -91,21 +83,6 @@ class ProductsController < ApplicationController
         @new_goods_type_name = GoodsType.select(:name).where(id: params[:product][:goods_type_id]).first.name
       end
     rescue ActiveRecord::RecordNotUnique => e
-      #      size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-      #      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
-      #      @price_codes = PriceCode.select(:id, :code).order :code
-      #      @price_codes.each do |price_code|
-      #        @sizes.each do |size|
-      #          product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-      #          product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.blank?
-      #          price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-      #          product_detail.price_lists.build if price_list.blank?
-      #        end
-      #      end
-      #      @colors = Color.select(:id, :code, :name).order(:code)
-      #      @colors.each do |color|
-      #        @product.product_colors.build color_id: color.id, code: color.code, name: color.name unless @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.present?
-      #      end
       flash[:alert] = "That code has already been taken"
       render js: "window.location = '#{products_url}'"
     end
@@ -114,18 +91,14 @@ class ProductsController < ApplicationController
   # PATCH/PUT /products/1
   # PATCH/PUT /products/1.json
   def update
+    add_additional_params_to_product_details(false)
+    add_additional_params_to_price_lists("update")
+    add_additional_param_to_cost_lists(false)
+    convert_cost_price_to_numeric
     begin        
       unless @product.update(product_params)
         @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
         @price_codes = PriceCode.select(:id, :code).order :code
-        #          @price_codes.each do |price_code|
-        #            @sizes.each do |size|
-        #              product_detail = @product.product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(size.id)}.first
-        #              product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id) if product_detail.nil?
-        #              price_list = product_detail.price_lists.select{|pl| pl.price.present?}
-        #              product_detail.price_lists.build if price_list.blank?
-        #            end
-        #          end
         @colors = Color.select(:id, :code, :name).order(:code)
         @colors.each do |color|
           product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
@@ -229,18 +202,39 @@ class ProductsController < ApplicationController
     end if params[:product][:product_details_attributes].present?
   end
   
-  def add_additional_params_to_product_details
+  def add_additional_params_to_product_details(status)
     params[:product][:product_details_attributes].each do |key, value|
-      params[:product][:product_details_attributes][key].merge! size_group_id: params[:product][:size_group_id], user_is_adding_new_product: true
+      params[:product][:product_details_attributes][key].merge! size_group_id: params[:product][:size_group_id], user_is_adding_new_product: status
     end if params[:product][:product_details_attributes].present?
   end
    
-  def add_additional_params_to_price_lists
+  def add_additional_params_to_price_lists(action)
+    # ambil cost
+    cost = ""
+    params[:product][:cost_lists_attributes].each do |key, value|
+      cost = params[:product][:cost_lists_attributes][key][:cost]
+    end if params[:product][:cost_lists_attributes].present?
+    
     params[:product][:product_details_attributes].each do |key, value|
       params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
-        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! user_is_adding_new_price: true
-        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:cost_lists_attributes]["0"][:cost]
+        if action.eql?("create")
+          params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! user_is_adding_new_price: true
+        else
+          if params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:id].present?
+            params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! user_is_adding_new_price: false
+          else
+            params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! user_is_adding_new_price: true
+          end
+        end
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = cost
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:product_id] = params[:id] if action.eql?("update")
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
+  end
+  
+  def add_additional_param_to_cost_lists(status)
+    params[:product][:cost_lists_attributes].each do |key, value|
+      params[:product][:cost_lists_attributes][key].merge! is_user_creating_product: status
+    end if params[:product][:cost_lists_attributes].present?
   end
 end

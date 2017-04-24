@@ -19,26 +19,19 @@ class ProductDetail < ApplicationRecord
   
     def active_price
       price_lists = self.price_lists.select(:id, :price, :effective_date).order("effective_date DESC")
-      #      if price_lists.size == 1
-      #        price_list = price_lists.first
-      #        if Date.today >= price_list.effective_date
-      #          return price_list
-      #        end
-      #      else
       price_lists.each do |price_list|
-        if Date.today >= price_list.effective_date
+        if Time.current.to_date >= price_list.effective_date
           return price_list
         end
       end
       return nil
-      #      end
     end
   
     def price_count
       price_lists.count(:id)
     end
 
-    private            
+    private      
     
     def size_available
       errors.add(:size_id, "does not exist!") if size_id.present? && Size.where("sizes.id = #{size_id} AND size_groups.id = #{size_group_id}").joins(:size_group).select("1 AS one").blank?

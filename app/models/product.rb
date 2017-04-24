@@ -65,49 +65,30 @@ class Product < ApplicationRecord
   
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
-    #    if cost_lists.size == 1
-    #      cost_list = cost_lists.first
-    #      if Date.today >= cost_list.effective_date
-    #        return cost_list
-    #      end
-    #    else
     cost_lists.each do |cost_list|
-      if Date.today >= cost_list.effective_date
+      if Time.current.to_date >= cost_list.effective_date
         return cost_list
       end
     end
     return nil
-    #    end
   end
   
   def active_cost_by_po_date(po_date)
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
-    #    if cost_lists.size == 1
-    #      cost_list = cost_lists.first
-    #      if po_date >= cost_list.effective_date
-    #        return cost_list
-    #      end
-    #    else
     cost_lists.each do |cost_list|
       if po_date >= cost_list.effective_date
         return cost_list
       end
     end
-    #    end
   end
   
   def active_effective_date
     cost_lists = self.cost_lists.select(:effective_date)
-    #    if cost_lists.size == 1
-    #      return cost_lists.first.effective_date
-    #    else
     cost_lists.each do |cost_list|
-      if Date.today >= cost_list.effective_date
+      if Time.current.to_date >= cost_list.effective_date
         return cost_list.effective_date
       end
     end
-    #      cost_lists.last.effective_date
-    #    end
   end
   
   def cost_count
@@ -169,13 +150,6 @@ class Product < ApplicationRecord
     errors.add(:base, "Product must have at least one color!") unless valid
   end
   
-  #  def prevent_delete_if_purchase_order_created
-  #    if purchase_order_relation
-  #      errors.add(:base, "Cannot delete record with purchase order")
-  #      throw :abort
-  #    end
-  #    return true
-  #  end
   
   
   def delete_old_children_if_size_group_changed
@@ -185,97 +159,7 @@ class Product < ApplicationRecord
       end
     end
   end
-    
-  #  def price_blank(attributed)
-  #    attributed[:price_lists_attributes].each do |key, value|
-  #      return false if attributed[:price_lists_attributes][key][:price].present?
-  #    end
-  #      
-  #    return true
-  #  end
-  
-        
-  #        def update_po_active_cost(purchase_order_date)
-  #          cost_lists = self.cost_lists.select(:id, :cost, :effective_date).order("id DESC")
-  #          if cost_lists.size == 1
-  #            return cost_lists.first
-  #          else
-  #            cost_lists.each do |cost_list|
-  #              if purchase_order_date >= cost_list.effective_date
-  #                return cost_list
-  #              end
-  #            end
-  #          end
-  #        end
-        
-  #        def update_purchase_order_cost
-  #          if !effective_date_was.eql?(effective_date) || !cost_was.eql?(cost)
-  #            total_product_value = 0
-  #            open_purchase_orders.each do |open_purchase_order|
-  #              new_po_cost = []
-  #              purchase_order_products = PurchaseOrderProduct.joins(:purchase_order).where("purchase_orders.id = #{open_purchase_order.id}").select("cost_list_id, purchase_order_products.id, product_id")
-  #              purchase_order_products.each_with_index do |purchase_order_product, index|
-  #                if purchase_order_product.product_id.eql?(id)
-  #                  new_po_cost << update_po_active_cost(open_purchase_order.purchase_order_date)
-  #                end
-  #                total_quantity = purchase_order_product.purchase_order_details.sum :quantity
-  #                if purchase_order_product.product_id.eql?(id)
-  #                  total_product_value += new_po_cost[index].cost * total_quantity
-  #                else
-  #                  total_product_value += purchase_order_product.cost_list.cost * total_quantity
-  #                end
-  #              end
-  #              
-  #              unless open_purchase_order.order_value == total_product_value
-  #                if (open_purchase_order.price_discount.present? && open_purchase_order.price_discount <= total_product_value) || open_purchase_order.price_discount.blank?
-  #                  open_purchase_order.changing_po_cost = true
-  #                  open_purchase_order.order_value = total_product_value
-  #                  open_purchase_order.save validate: false
-  #                  purchase_order_products.each_with_index do |purchase_order_product, index|
-  #                    if purchase_order_product.product_id.eql?(id)
-  #                      purchase_order_product.cost_list_id = new_po_cost[index].id
-  #                      if purchase_order_product.save
-  #                        purchase_order_product.purchase_order_details.each do |purchase_order_detail|
-  #                          purchase_order_detail.changing_po_cost = true
-  #                          purchase_order_detail.total_unit_price = purchase_order_detail.quantity * new_po_cost[index].cost
-  #                          purchase_order_detail.save validate: false
-  #                        end
-  #                      end
-  #                    end
-  #                  end
-  #                else
-  #                  errors.add(:effective_date, "change is not allowed! Please decrease the price discount")
-  #                  return false
-  #                end
-  #              end              
-  #            end
-  #          elsif cost_changed?
-  #          end
-  #        end
-                
-        
-  #        def update_cost_list
-  #          if (effective_date_changed? || cost_changed?) && persisted? && !is_user_adding_new_cost
-  #            # ambil cost terakhir dari list
-  #            last_cost = cost_lists.last
-  #            last_cost.effective_date = effective_date
-  #            last_cost.cost = cost
-  #            last_cost.save
-  #          elsif is_user_adding_new_cost
-  #            create_cost_list
-  #          end
-  #        end
-        
-        
-  #        def cost_not_changed
-  #          errors.add(:cost, "change is not allowed!") if cost_changed? && persisted? && (Date.today >= effective_date_was || received_purchase_orders.present? || direct_purchase_product_relation.present?) && !is_user_adding_new_cost
-  #        end
-  #        
-  #        # cegah user mengubah effective date apabila hari ini sama dengan atau lebih besar dari effective date yang lalu
-  #        def effective_date_not_changed          
-  #          errors.add(:effective_date, "change is not allowed!") if effective_date_changed? && persisted? && (Date.today >= effective_date_was || received_purchase_orders.present? || direct_purchase_product_relation.present?) && !is_user_adding_new_cost
-  #        end
-        
+            
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def code_not_changed
     errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present?)
@@ -285,25 +169,12 @@ class Product < ApplicationRecord
     errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1)
   end
         
-  #        def is_all_existed_items_deleted?
-  #          unless product_details.map(&:price).compact.present?
-  #            errors.add(:base, "Product must have at least one item!")
-  #            false
-  #          end
-  #        end
-        
   def check_item
     valid = if product_details.present?
       true
     else
       false
     end
-    #    else   
-    #      valid = if !size_group_id_changed? || (size_group_id_changed? && product_details.select{|product_detail| product_detail.id.nil?}.present?)
-    #        true
-    #      else
-    #        false
-    #      end
     errors.add(:base, "Product prices must be filled in!") unless valid
   end
             
@@ -311,15 +182,4 @@ class Product < ApplicationRecord
     self.code = code.upcase
   end
         
-  #        protected
-  #        
-  #        def is_user_adding_new_cost          
-  #          last_cost = cost_lists.last
-  #          if effective_date > last_cost.effective_date && Date.today >= last_cost.effective_date && cost_changed? && persisted?
-  #            return true
-  #          else
-  #            return false
-  #          end
-  #        end
-    
 end
