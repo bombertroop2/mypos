@@ -57,6 +57,7 @@ class PurchaseOrdersController < ApplicationController
   # POST /purchase_orders
   # POST /purchase_orders.json
   def create
+    add_additional_params_to_purchase_order_products(params[:purchase_order][:purchase_order_date])
     @purchase_order = PurchaseOrder.new(purchase_order_params)
 
     is_exception_raised = false
@@ -207,8 +208,8 @@ class PurchaseOrdersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
     params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
-      :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:po_cost, :vendor_id, :cost_list_id, :id, :product_id, :purchase_order_date, :_destroy,
-        purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
+      :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:po_cost, :product_id, :purchase_order_date,
+        purchase_order_details_attributes: [:size_id, :color_id, :quantity, :product_id]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]]).merge(created_by: current_user.id)
   end
   
@@ -219,5 +220,11 @@ class PurchaseOrdersController < ApplicationController
   
   def populate_products
     @product_list = Product.joins(:brand).select("products.id, products.code, common_fields.name AS brand_name").order(:code)
+  end
+  
+  def add_additional_params_to_purchase_order_products(po_date)
+    params[:purchase_order][:purchase_order_products_attributes].each do |key, value|
+      params[:purchase_order][:purchase_order_products_attributes][key].merge! purchase_order_date: po_date
+    end if params[:purchase_order][:purchase_order_products_attributes].present?
   end
 end
