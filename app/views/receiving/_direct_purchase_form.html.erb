@@ -41,7 +41,6 @@
                             </div>
                         </div>
                         <%= f.fields_for :received_purchase_order do |received_purchase_order_form| %>
-                          <%= received_purchase_order_form.hidden_field :vendor_id %>                              
                           <div class="form-group<%= control_group_error(received_purchase_order_form.object, :delivery_order_number) %>">
                               <%= received_purchase_order_form.label :is_using_delivery_order, simple_format("Expedition Number<br>(<i>Surat Jalan</i>)"), class: "col-sm-2 control-label" %>
                                 <div class="col-sm-10">
@@ -92,11 +91,17 @@
                                     <div class="col-sm-offset-2 col-sm-10">
                                 <%#= f.submit "Save", class: "btn btn-primary", id: "dp-save-btn" %>
                                         <a class="btn btn-primary" id="dp-save-btn">Save</a>
+                                        <a class="btn btn-link cancel" id="dp-cancel-btn">Cancel</a>
                                     </div>
                                 </div>
                               <% end %>
                               <script>
                                 $(function () {
+                                    $("#dp-cancel-btn").click(function () {
+                                        $(".new-item-placeholder.info").html("");
+                                        $(".new-item-placeholder.info").addClass("hidden");
+                                        $(".new-item-action.info").removeClass("hidden");
+                                    });
                                     if ($(".discount-fields").length > 0)
                                         $(".discount-fields").numeric();
 
@@ -194,9 +199,9 @@
                                     $("#new_direct_purchase").submit(function (event) {
                                         $("body").css('padding-right', '0px');
                                         // untuk kebutuhan auto do number                                                        
-                                        $("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
+                                        //$("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
                                         // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
-                                        $(".receiving-date").val($("#direct_purchase_receiving_date").val());
+                                        //$(".receiving-date").val($("#direct_purchase_receiving_date").val());
                                         //$(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
                                     });
 

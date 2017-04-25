@@ -39,7 +39,7 @@ class ReceivingController < ApplicationController
     @suppliers = Vendor.select(:id, :name)
     @warehouses = Warehouse.central.select :id, :code
     @direct_purchase = DirectPurchase.new
-    @direct_purchase.build_received_purchase_order is_using_delivery_order: true, is_it_direct_purchasing: true
+    @direct_purchase.build_received_purchase_order is_using_delivery_order: true
   end
   
   def get_purchase_order    
@@ -150,8 +150,10 @@ class ReceivingController < ApplicationController
   end
   
   def create
+    add_additional_params_to_direct_purchase_products
     @direct_purchase = DirectPurchase.new(direct_purchase_params)
     @direct_purchase.received_purchase_order.is_it_direct_purchasing = true
+    @direct_purchase.received_purchase_order.vendor_id = params[:direct_purchase][:vendor_id]
     begin
       unless @direct_purchase.save
         @suppliers = Vendor.select(:id, :name)
@@ -205,7 +207,8 @@ class ReceivingController < ApplicationController
   end
   
   def direct_purchase_params
-    params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net, received_purchase_order_attributes: [:is_it_direct_purchasing, :is_using_delivery_order, :delivery_order_number, :vendor_id], 
+    params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net,
+      received_purchase_order_attributes: [:is_using_delivery_order, :delivery_order_number], 
       direct_purchase_products_attributes: [:dp_cost, :product_id, :receiving_date,
         direct_purchase_details_attributes: [:size_id, :color_id, :quantity, :product_id]])
   end
@@ -227,6 +230,16 @@ class ReceivingController < ApplicationController
         end if params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes][rpop_key][:received_purchase_order_items_attributes].present?
       end if params[:purchase_order][:received_purchase_orders_attributes][key][:received_purchase_order_products_attributes].present?
     end if params[:purchase_order][:received_purchase_orders_attributes].present?
+  end
+  
+  def add_additional_params_to_direct_purchase_products
+    params[:direct_purchase][:direct_purchase_products_attributes].each do |key, value|
+      params[:direct_purchase][:direct_purchase_products_attributes][key].merge! receiving_date: params[:direct_purchase][:receiving_date]
+      product_id = params[:direct_purchase][:direct_purchase_products_attributes][key][:product_id]
+      params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].each do |dpd_key, value|
+        params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key].merge! product_id: product_id
+      end if params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].present?
+    end if params[:direct_purchase][:direct_purchase_products_attributes].present?
   end
   
 end

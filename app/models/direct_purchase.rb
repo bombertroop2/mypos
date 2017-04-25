@@ -17,7 +17,7 @@ class DirectPurchase < ApplicationRecord
         validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|dp| dp.second_discount.present? && !dp.is_additional_disc_from_net}
           validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|dp| dp.second_discount.present?}
             validate :should_has_products  
-            validates :receiving_date, date: {before_or_equal_to: Proc.new { Date.today }, message: 'must be before or equal to today' }, if: proc {|dp| dp.receiving_date.present?}
+            validates :receiving_date, date: {before_or_equal_to: Proc.new { Date.current }, message: 'must be before or equal to today' }, if: proc {|dp| dp.receiving_date.present?}
               validate :vendor_exist, if: proc{|dp| dp.vendor_id.present?}
               validate :warehouse_exist, if: proc{|dp| dp.warehouse_id.present?}
   
