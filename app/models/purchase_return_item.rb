@@ -1,5 +1,6 @@
 class PurchaseReturnItem < ApplicationRecord
-  attr_accessor :direct_purchase_return, :purchase_order_product_id, :purchase_order_id
+  attr_accessor :direct_purchase_return, :purchase_order_product_id, :purchase_order_id,
+    :direct_purchase_id, :direct_purchase_product_id
   
   belongs_to :purchase_order_detail
   belongs_to :direct_purchase_detail
@@ -14,9 +15,15 @@ class PurchaseReturnItem < ApplicationRecord
       private
       
       def item_returnable
-        errors.add(:base, "Not able to return selected items") unless PurchaseOrderDetail.
-          select("1 AS one").joins(purchase_order_product: :purchase_order).
-          where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND purchase_order_details.id = #{purchase_order_detail_id} AND status != 'Open' AND status != 'Deleted'").present?
+        unless direct_purchase_return
+          errors.add(:base, "Not able to return selected items") unless PurchaseOrderDetail.
+            select("1 AS one").joins(purchase_order_product: :purchase_order).
+            where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND purchase_order_details.id = #{purchase_order_detail_id} AND status != 'Open' AND status != 'Deleted'").present?
+        else
+          errors.add(:base, "Not able to return selected items") unless DirectPurchaseDetail.
+            select("1 AS one").joins(direct_purchase_product: :direct_purchase).
+            where("direct_purchase_details.id = #{direct_purchase_detail_id} AND direct_purchase_products.id = #{direct_purchase_product_id} AND direct_purchases.id = #{direct_purchase_id}").present?
+        end
       end
       
       def update_returning_qty

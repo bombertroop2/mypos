@@ -87,7 +87,7 @@
                                           <% direct_purchase_detail = DirectPurchaseDetail.where(id: pri.direct_purchase_detail_id).select(:color_id, :size_id).first %>
                                           <% direct_purchase_detail.color_id.eql?(color.id) && direct_purchase_detail.size_id.eql?(size.id) %>
                                         <% end.first %>
-                                        <td style="vertical-align: middle">
+                                        <td style="vertical-align: middle" align="center">
                                             <% if pr_item %>
                                               <% purchase_return_item_array_index = create_return_item_array_variable_name(pr_item, pr_item.direct_purchase_detail_id, purchase_return_product_array_index) %>
                                               <%= fields_for purchase_return_item_array_index, pr_item do |purchase_return_detail_detail_form| %>

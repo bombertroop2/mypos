@@ -48,7 +48,7 @@ class PurchaseReturnsController < ApplicationController
           dpp.direct_purchase_details.select(:id).each do |dpd|
             purchase_return_product.purchase_return_items.build direct_purchase_detail_id: dpd.id if purchase_return_product.purchase_return_items.select{|pri| pri.direct_purchase_detail_id.eql?(dpd.id)}.blank?
           end
-        end
+        end if direct_purchase.present?
 
         @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
         @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
@@ -148,8 +148,10 @@ class PurchaseReturnsController < ApplicationController
   
   def merge_new_param_to_item_attributes
     params[:purchase_return][:purchase_return_products_attributes].each do |key, value|
+      params[:purchase_return][:purchase_return_products_attributes][key].merge! returning_direct_purchase: true, direct_purchase_id: params[:purchase_return][:direct_purchase_id]
+      direct_purchase_product_id = params[:purchase_return][:purchase_return_products_attributes][key][:direct_purchase_product_id]
       params[:purchase_return][:purchase_return_products_attributes][key][:purchase_return_items_attributes].each do |purchase_return_items_key, value|
-        params[:purchase_return][:purchase_return_products_attributes][key][:purchase_return_items_attributes][purchase_return_items_key].merge! direct_purchase_return: true
+        params[:purchase_return][:purchase_return_products_attributes][key][:purchase_return_items_attributes][purchase_return_items_key].merge! direct_purchase_return: true, direct_purchase_id: params[:purchase_return][:direct_purchase_id], direct_purchase_product_id: direct_purchase_product_id
       end
     end if params[:purchase_return][:purchase_return_products_attributes].present?
   end
@@ -162,8 +164,8 @@ class PurchaseReturnsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_return_params
     params.require(:purchase_return).permit(:direct_purchase_id, :direct_purchase_return, :delivery_order_number, :number, :vendor_id, :purchase_order_id,
-      purchase_return_products_attributes: [:purchase_order_id, :direct_purchase_product_id, :id, :purchase_order_product_id, :product_cost, :product_code, :product_name, :product_id,
-        purchase_return_items_attributes: [:purchase_order_product_id, :purchase_order_id, :direct_purchase_return, :direct_purchase_detail_id, :quantity, :purchase_order_detail_id, :id]]).merge(created_by: current_user.id)
+      purchase_return_products_attributes: [:direct_purchase_id, :returning_direct_purchase, :purchase_order_id, :direct_purchase_product_id, :id, :purchase_order_product_id, :product_cost, :product_code, :product_name, :product_id,
+        purchase_return_items_attributes: [:direct_purchase_id, :direct_purchase_product_id, :purchase_order_product_id, :purchase_order_id, :direct_purchase_return, :direct_purchase_detail_id, :quantity, :purchase_order_detail_id, :id]]).merge(created_by: current_user.id)
   end
   
   def add_additional_params_to_child
