@@ -66,6 +66,7 @@ class PurchaseReturnsController < ApplicationController
   # POST /purchase_returns
   # POST /purchase_returns.json
   def create
+    add_additional_params_to_child
     @purchase_return = PurchaseReturn.new(purchase_return_params)
     is_exception_raised = false
     begin
@@ -122,9 +123,9 @@ class PurchaseReturnsController < ApplicationController
     @purchase_return = PurchaseReturn.new
     purchase_order = PurchaseOrder.where(id: params[:purchase_order_id]).select(:id).first
     purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
-      purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id, purchase_order_id: purchase_order.id
+      purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
       pop.purchase_order_details.select(:id).each do |pod|
-        purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id, purchase_order_product_id: pop.id, purchase_order_id: purchase_order.id
+        purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id
       end
     end
     respond_to { |format| format.js }
@@ -163,5 +164,15 @@ class PurchaseReturnsController < ApplicationController
     params.require(:purchase_return).permit(:direct_purchase_id, :direct_purchase_return, :delivery_order_number, :number, :vendor_id, :purchase_order_id,
       purchase_return_products_attributes: [:purchase_order_id, :direct_purchase_product_id, :id, :purchase_order_product_id, :product_cost, :product_code, :product_name, :product_id,
         purchase_return_items_attributes: [:purchase_order_product_id, :purchase_order_id, :direct_purchase_return, :direct_purchase_detail_id, :quantity, :purchase_order_detail_id, :id]]).merge(created_by: current_user.id)
+  end
+  
+  def add_additional_params_to_child
+    params[:purchase_return][:purchase_return_products_attributes].each do |key, value|
+      params[:purchase_return][:purchase_return_products_attributes][key].merge! purchase_order_id: params[:purchase_return][:purchase_order_id]
+      purchase_order_product_id = params[:purchase_return][:purchase_return_products_attributes][key][:purchase_order_product_id]
+      params[:purchase_return][:purchase_return_products_attributes][key][:purchase_return_items_attributes].each do |pri_key, value|
+        params[:purchase_return][:purchase_return_products_attributes][key][:purchase_return_items_attributes][pri_key].merge! purchase_order_product_id: purchase_order_product_id, purchase_order_id: params[:purchase_return][:purchase_order_id]
+      end if params[:purchase_return][:purchase_return_products_attributes][key][:purchase_return_items_attributes].present?
+    end if params[:purchase_return][:purchase_return_products_attributes].present?
   end
 end

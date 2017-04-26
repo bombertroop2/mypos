@@ -47,7 +47,7 @@ class PurchaseReturn < ApplicationRecord
           end
   
           def generate_number
-            today = Date.today
+            today = Date.current
             current_month = today.month.to_s.rjust(2, '0')
             current_year = today.strftime("%y").rjust(2, '0')
             vendor_code = if direct_purchase_return
