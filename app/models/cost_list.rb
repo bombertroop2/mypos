@@ -13,7 +13,7 @@ class CostList < ApplicationRecord
     validates :product_id, presence: true, unless: proc{|cost_list| cost_list.is_user_creating_product}
       validates :cost, numericality: true, if: proc { |cost_list| cost_list.cost.present? }
         validates :cost, numericality: {greater_than: 0}, if: proc { |cost_list| cost_list.cost.is_a?(Numeric) }
-          validates :effective_date, date: {after_or_equal_to: Proc.new { Time.current.to_date }, message: 'must be after or equal to today' }, if: proc {|cost_list| cost_list.effective_date.present? && cost_list.effective_date_changed?}
+          validates :effective_date, date: {after_or_equal_to: Proc.new { Date.current }, message: 'must be after or equal to today' }, if: proc {|cost_list| cost_list.effective_date.present? && cost_list.effective_date_changed?}
             validates :effective_date, uniqueness: {scope: :product_id}, if: proc {|cost_list| cost_list.effective_date.present?}
               validate :fields_not_changed
   
@@ -40,7 +40,7 @@ class CostList < ApplicationRecord
                 end
               
                 def set_effective_date
-                  self.effective_date = Time.current.to_date
+                  self.effective_date = Date.current
                 end
   
                 def fields_not_changed

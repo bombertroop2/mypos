@@ -1,5 +1,5 @@
 class ProductDetail < ApplicationRecord
-  attr_accessor :user_is_adding_new_product, :size_group_id
+  attr_accessor :user_is_adding_new_product, :size_group_id, :adding_new_price
 
   belongs_to :size
   belongs_to :price_code
@@ -34,7 +34,11 @@ class ProductDetail < ApplicationRecord
     private      
     
     def size_available
-      errors.add(:size_id, "does not exist!") if size_id.present? && Size.where("sizes.id = #{size_id} AND size_groups.id = #{size_group_id}").joins(:size_group).select("1 AS one").blank?
+      unless adding_new_price
+        errors.add(:size_id, "does not exist!") if size_id.present? && Size.where("sizes.id = #{size_id} AND size_groups.id = #{size_group_id}").joins(:size_group).select("1 AS one").blank?
+      else
+        errors.add(:size_id, "does not exist!") if size_id.present? && Size.joins(size_group: :products).where("sizes.id = #{size_id} AND products.id = #{product_id}").select("1 AS one").blank?
+      end
     end
 
     def price_code_available      

@@ -66,7 +66,7 @@ class Product < ApplicationRecord
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
     cost_lists.each do |cost_list|
-      if Time.current.to_date >= cost_list.effective_date
+      if Date.current >= cost_list.effective_date
         return cost_list
       end
     end

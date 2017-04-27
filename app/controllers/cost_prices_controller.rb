@@ -4,7 +4,7 @@ class CostPricesController < ApplicationController
   #  before_action :set_product, only: [:show, :edit, :update, :destroy, :new_cost, :create_cost, :edit_cost]
   #  before_action :convert_cost_price_to_numeric, only: [:create, :update, :create_cost]
   before_action :set_cost, only: [:show, :destroy]
-  before_action :convert_cost_price_to_numeric, only: [:create, :update]
+  before_action :convert_cost_price_to_numeric, only: :update
 
   def index
     like_command = if Rails.env.eql?("production")
@@ -34,6 +34,8 @@ class CostPricesController < ApplicationController
   end
 
   def create
+    add_additional_params_to_child
+    convert_cost_price_to_numeric
     @product = Product.where(id: params[:product][:id]).select(:id, :code, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, :size_group_id).first
     params[:product].delete :id
     unless @product.update(product_params)
@@ -122,9 +124,9 @@ class CostPricesController < ApplicationController
     params.require(:product).permit(#:code, :description, :brand_id, :sex, :vendor_id,
       #:target, :model_id, :effective_date, :goods_type_id, :image, :image_cache, :remove_image,
       :size_group_id, :id,
-      product_details_attributes: [:id, :size_id, :price_code_id, :product_id,
-        price_lists_attributes: [:editable_record, :turn_off_date_validation, :id, :price, :effective_date, :product_detail_id, :user_is_adding_price_from_cost_prices_page, :cost]],
-      cost_lists_attributes: [:effective_date, :cost, :product_id, :id])
+      product_details_attributes: [:adding_new_price, :id, :size_id, :price_code_id,
+        price_lists_attributes: [:editable_record, :turn_off_date_validation, :id, :price, :effective_date, :user_is_adding_price_from_cost_prices_page, :cost]],
+      cost_lists_attributes: [:effective_date, :cost, :id])
   end
 
   
@@ -142,6 +144,29 @@ class CostPricesController < ApplicationController
         next if params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].length == 2 && params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:id].present? && params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:turn_off_date_validation].present?
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+      end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
+    end if params[:product][:product_details_attributes].present?
+  end
+  
+  def add_additional_params_to_child
+    effective_date = ""
+    cost = ""
+    params[:product][:cost_lists_attributes].each do |key, value|
+      effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
+      cost = params[:product][:cost_lists_attributes][key][:cost]
+    end if params[:product][:cost_lists_attributes].present?
+        
+    params[:product][:product_details_attributes].each do |key, value|
+      # tambahkan apabila membuat price baru
+      unless params[:product][:product_details_attributes][key][:id].present?
+        params[:product][:product_details_attributes][key].merge! adding_new_price: true
+      end
+      
+      params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_list_key, value|
+        # tambahkan apabila membuat price baru
+        unless params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:id].present?
+          params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! effective_date: effective_date, cost: cost, user_is_adding_price_from_cost_prices_page: true
+        end
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
   end

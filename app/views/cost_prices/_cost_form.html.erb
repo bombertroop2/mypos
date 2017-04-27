@@ -11,7 +11,6 @@
       <%= f.fields_for :cost_lists do |cost_list_form| %>
         <%= f.hidden_field :id if cost_list_form.object.new_record? %>
         <% if cost_list_form.object.new_record? || (@cost.present? && cost_list_form.object.id == @cost.id) %>
-          <%= cost_list_form.hidden_field :product_id if cost_list_form.object.new_record? %>
           <% price_effective_date = cost_list_form.object.effective_date = cost_list_form.object.effective_date.strftime("%d/%m/%Y") unless cost_list_form.object.new_record? %>
           <div class="form-group<%= control_group_error(cost_list_form.object, :effective_date) %>">
               <%= cost_list_form.label :effective_date, class: "col-sm-2 control-label" %>
@@ -60,70 +59,50 @@
                                                   <% if product_detail_form.object.new_record? %>
                                                     <%= product_detail_form.hidden_field :size_id %>
                                                     <%= product_detail_form.hidden_field :price_code_id %>
-                                                    <%= product_detail_form.hidden_field :product_id %>
                                                   <% end %>
                                                   <%= product_detail_form.fields_for :price_lists do |price_list_form| %>
                                                     <% if price_list_form.object.new_record? || (params[:action].eql?("edit") && price_effective_date.present? && price_effective_date.eql?(price_list_form.object.effective_date.strftime("%d/%m/%Y"))) || (params[:action].eql?("update") && price_list_form.object.editable_record) %>
                                                       <%= price_list_form.hidden_field :editable_record, value: true unless price_list_form.object.new_record? %>
-                                                      <%= price_list_form.hidden_field :cost, class: "price-cost-value" %>
-                                                        <%= price_list_form.hidden_field :effective_date, class: "price-effective-date" %>
-                                                          <div class="<%= control_group_error(price_list_form.object, :price) %>">
-                                                              <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
-                                                                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
-                                                                <%= error_help_text(price_list_form.object, :price) %>
-                                                            </div>
-                                                          <% end %>
-                                                          <% if price_list_form.object.new_record? %>
-                                                            <%= price_list_form.hidden_field :user_is_adding_price_from_cost_prices_page, value: true %>
-                                                            <%= price_list_form.hidden_field :product_detail_id unless product_detail_form.object.new_record? %>
-                                                          <% end %>
-                                                          <%= price_list_form.hidden_field :turn_off_date_validation, value: true if price_effective_date.present? %>
-                                                        <% end %>
+                                                      <div class="<%= control_group_error(price_list_form.object, :price) %>">
+                                                          <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
+                                                              "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
+                                                            <%= error_help_text(price_list_form.object, :price) %>
+                                                        </div>
                                                       <% end %>
+                                                      <%= price_list_form.hidden_field :turn_off_date_validation, value: true if price_effective_date.present? %>
                                                     <% end %>
-                                                </td>
-                                              <% end %>
-                                          </tr>
-                                        <% end %>
-                                    </table>
-                                </div>
-                            </div>     
-                        </div>
-                      <% end %>
-                      <div class="form-group">
-                          <div class="col-sm-offset-2 col-sm-10">
-                              <%= f.submit "Save", class: "btn btn-primary", id: "submit_cost" %>
-                                <button class="btn btn-link cancel" id="btn-cancel-cost">Cancel</button>
+                                                  <% end %>
+                                                <% end %>
+                                            </td>
+                                          <% end %>
+                                      </tr>
+                                    <% end %>
+                                </table>
                             </div>
+                        </div>     
+                    </div>
+                  <% end %>
+                  <div class="form-group">
+                      <div class="col-sm-offset-2 col-sm-10">
+                          <%= f.submit "Save", class: "btn btn-primary", id: "submit_cost" %>
+                            <button class="btn btn-link cancel" id="btn-cancel-cost">Cancel</button>
                         </div>
-                      <% end %>
-                      <script>
-                        $(function () {
-                            $(".date-field").datepicker({
-                                dateFormat: "dd/mm/yy"
-                            });
-
-                            $('.money').autoNumeric('init');  //autoNumeric with defaults
-
-                            $("#submit_cost").click(function () {
-                                $(".price-effective-date").val($(".date-field").val());
-                                $(".price-cost-value").val($(".costs-cost").val());
-                            });
-
-                      <% @price_codes.each do |price_code| %>
-                              $('#price_<%= price_code.code %>').keyup(function () {
-                                  $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
-                              });
-                      <% end %>
-
-                            /*$("#btn-cancel-cost").click(function () {
-                             $(".new-item-action").each(function () {
-                             if ($(this).hasClass("hidden"))
-                             $(this).removeClass("hidden");
-                             });
-                             $(this).closest(".new-item-placeholder").addClass("hidden");
-                             return false;
-                             });*/
-
+                    </div>
+                  <% end %>
+                  <script>
+                    $(function () {
+                        $(".date-field").datepicker({
+                            dateFormat: "dd/mm/yy"
                         });
-                      </script>
+
+                        $('.money').autoNumeric('init');  //autoNumeric with defaults
+
+
+                  <% @price_codes.each do |price_code| %>
+                          $('#price_<%= price_code.code %>').keyup(function () {
+                              $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
+                          });
+                  <% end %>
+
+                    });
+                  </script>

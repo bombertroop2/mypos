@@ -12,7 +12,7 @@ class PriceList < ApplicationRecord
     validates :price, numericality: {greater_than_or_equal_to: 1}, if: proc { |price_list| price_list.price.is_a?(Numeric) && price_list.price.present? }
       validates :effective_date, :price, :cost, presence: true        
       validates :product_detail_id, presence: true, if: proc {|price_list| !price_list.user_is_adding_new_price && !price_list.user_is_adding_price_from_cost_prices_page}
-        validates :effective_date, date: {after_or_equal_to: Proc.new { Time.current.to_date }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation}
+        validates :effective_date, date: {after_or_equal_to: Proc.new { Date.current }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation}
           validates :effective_date, uniqueness: {scope: :product_detail_id}, if: proc {|price_list| price_list.effective_date.present?}
             validate :price_greater_or_equal_to_cost, if: proc {|price_list| price_list.price.present? && price_list.cost.present?}
           
@@ -35,7 +35,7 @@ class PriceList < ApplicationRecord
                     self.turn_off_date_validation = true
                   else
                     # buat dengan tanggal hari ini
-                    self.effective_date = Time.current.to_date
+                    self.effective_date = Date.current
                   end
                 end
 
