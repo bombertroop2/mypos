@@ -20,7 +20,7 @@ class ProductDetail < ApplicationRecord
     def active_price
       price_lists = self.price_lists.select(:id, :price, :effective_date).order("effective_date DESC")
       price_lists.each do |price_list|
-        if Time.current.to_date >= price_list.effective_date
+        if Date.current >= price_list.effective_date
           return price_list
         end
       end

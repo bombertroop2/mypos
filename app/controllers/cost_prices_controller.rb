@@ -4,7 +4,6 @@ class CostPricesController < ApplicationController
   #  before_action :set_product, only: [:show, :edit, :update, :destroy, :new_cost, :create_cost, :edit_cost]
   #  before_action :convert_cost_price_to_numeric, only: [:create, :update, :create_cost]
   before_action :set_cost, only: [:show, :destroy]
-  before_action :convert_cost_price_to_numeric, only: :update
 
   def index
     like_command = if Rails.env.eql?("production")
@@ -59,16 +58,22 @@ class CostPricesController < ApplicationController
     @price_codes = PriceCode.select(:id, :code).order :code
     @sizes.each do |size|
       @price_codes.each do |price_code|
-        product_detail = @product.product_details.select("1 AS one").find_by(size_id: size.id, price_code_id: price_code.id)
+        product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == price_code.id}.first
         unless product_detail.present?
           product_detail = @product.product_details.build size_id: size.id, price_code_id: price_code.id
           product_detail.price_lists.build effective_date: @cost.effective_date
+        else
+          if product_detail.price_lists.select("1 AS one").where(effective_date: @cost.effective_date).blank?
+            product_detail.price_lists.build effective_date: @cost.effective_date            
+          end
         end
       end 
     end
   end
 
   def update
+    add_additional_params_to_child
+    convert_cost_price_to_numeric
     @cost = CostList.select(:id, :product_id, :cost, :effective_date).where(id: params[:id]).first
     @product = Product.joins(:brand).where(["products.id = ?", @cost.product_id]).select("products.id, products.code, products.brand_id, products.sex, products.vendor_id, products.target, products.model_id, products.goods_type_id, products.size_group_id, name").first
     unless @product.update(product_params)
@@ -142,8 +147,12 @@ class CostPricesController < ApplicationController
       params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_lists_key, value|
         next if params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].length == 1 && params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:id].present?
         next if params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].length == 2 && params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:id].present? && params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:turn_off_date_validation].present?
-        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
-        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+        if params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].present?
+          params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
+        end
+        if params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].present?
+          params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost].gsub("Rp","").gsub(".","").gsub(",",".")
+        end
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
   end
@@ -163,9 +172,12 @@ class CostPricesController < ApplicationController
       end
       
       params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_list_key, value|
-        # tambahkan apabila membuat price baru
-        unless params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:id].present?
-          params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! effective_date: effective_date, cost: cost, user_is_adding_price_from_cost_prices_page: true
+        if params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:price].present?
+          # tambahkan apabila membuat price baru
+          unless params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:id].present?
+            params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! user_is_adding_price_from_cost_prices_page: true
+          end
+          params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! effective_date: effective_date, cost: cost
         end
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
