@@ -19,117 +19,116 @@
                   <% purchase_return = ari.purchase_return %>
                   <%= fields_for "account_payable[allocated_return_items_attributes][#{purchase_return.id}]", ari do |ari_form| %>
                     <%= ari_form.hidden_field :purchase_return_id, class: !@payment_for_dp ? "allocated-purchase-return-ids" : "allocated-purchase-return-ids-for-dp" %>
-                      <%= ari_form.hidden_field :vendor_id, class: !@payment_for_dp ? "allocated-return-item-vendor-ids" : "allocated-return-item-vendor-ids-for-dp" %>
-                        <%= ari_form.hidden_field :payment_for_dp %>
-                        <tr>
-                            <td><%= purchase_return.number %></td>
-                            <td align="right"><%= purchase_return.quantity_returned %></td>
-                            <td align="right"><%= number_to_currency(total_return_value(purchase_return),
+                      <%= ari_form.hidden_field :payment_for_dp %>
+                      <tr>
+                          <td><%= purchase_return.number %></td>
+                          <td align="right"><%= purchase_return.quantity_returned %></td>
+                          <td align="right"><%= number_to_currency(total_return_value(purchase_return),
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                          <td>
+                              <% if (purchase_return.purchase_order && purchase_return.purchase_order.first_discount.present?) || (purchase_return.direct_purchase && purchase_return.direct_purchase.first_discount.present?) %>
+                                <%= number_to_currency(((purchase_return.purchase_order.first_discount.to_f rescue purchase_return.direct_purchase.first_discount.to_f) / 100) * total_return_value(purchase_return),
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
-                                  :precision => 2) %></td>
-                            <td>
-                                <% if (purchase_return.purchase_order && purchase_return.purchase_order.first_discount.present?) || (purchase_return.direct_purchase && purchase_return.direct_purchase.first_discount.present?) %>
-                                  <%= number_to_currency(((purchase_return.purchase_order.first_discount.to_f rescue purchase_return.direct_purchase.first_discount.to_f) / 100) * total_return_value(purchase_return),
-                                    :separator => ",",
-                                    :delimiter => ".",
-                                    :unit => "Rp",
-                                    :precision => 2) %> (<%= "#{(purchase_return.purchase_order.first_discount rescue purchase_return.direct_purchase.first_discount)}%" %>)
-                                <% end %>
-                            </td>
-                            <td>
-                                <% if (purchase_return.purchase_order && purchase_return.purchase_order.second_discount.present?) || (purchase_return.direct_purchase && purchase_return.direct_purchase.second_discount.present?) %>
-                                  <%= number_to_currency(get_second_discount_in_money_pr(purchase_return),
-                                    :separator => ",",
-                                    :delimiter => ".",
-                                    :unit => "Rp",
-                                    :precision => 2) %> (<%= "#{(purchase_return.purchase_order.second_discount rescue purchase_return.direct_purchase.second_discount)}%" %> from <%= (purchase_return.purchase_order && purchase_return.purchase_order.is_additional_disc_from_net) || (purchase_return.direct_purchase && purchase_return.direct_purchase.is_additional_disc_from_net) ? "net" : "gross" %>)
-                                <% end %>
-                            </td>
-                            <td>
-                                <% if purchase_return.purchase_order && purchase_return.purchase_order.is_taxable_entrepreneur %>
-                                  <%= number_to_currency(get_vat_in_money_pr(purchase_return),
-                                    :separator => ",",
-                                    :delimiter => ".",
-                                    :unit => "Rp",
-                                    :precision => 2) %> (<%= purchase_return.purchase_order.value_added_tax %>)
-                                <% elsif purchase_return.direct_purchase && purchase_return.direct_purchase.is_taxable_entrepreneur %>
-                                  <%= number_to_currency(get_vat_in_money_pr(purchase_return),
-                                    :separator => ",",
-                                    :delimiter => ".",
-                                    :unit => "Rp",
-                                    :precision => 2) %> (<%= purchase_return.direct_purchase.vat_type %>)
-                                <% end %>
-                            </td>
-                            <td align="right"><%= number_to_currency(value_after_ppn_pr(purchase_return),
+                                  :precision => 2) %> (<%= "#{(purchase_return.purchase_order.first_discount rescue purchase_return.direct_purchase.first_discount)}%" %>)
+                              <% end %>
+                          </td>
+                          <td>
+                              <% if (purchase_return.purchase_order && purchase_return.purchase_order.second_discount.present?) || (purchase_return.direct_purchase && purchase_return.direct_purchase.second_discount.present?) %>
+                                <%= number_to_currency(get_second_discount_in_money_pr(purchase_return),
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
-                                  :precision => 2) %></td>
-                        </tr>
-                        <% total_amount_returned += value_after_ppn_pr(purchase_return) %>
-                      <% end %>
+                                  :precision => 2) %> (<%= "#{(purchase_return.purchase_order.second_discount rescue purchase_return.direct_purchase.second_discount)}%" %> from <%= (purchase_return.purchase_order && purchase_return.purchase_order.is_additional_disc_from_net) || (purchase_return.direct_purchase && purchase_return.direct_purchase.is_additional_disc_from_net) ? "net" : "gross" %>)
+                              <% end %>
+                          </td>
+                          <td>
+                              <% if purchase_return.purchase_order && purchase_return.purchase_order.is_taxable_entrepreneur %>
+                                <%= number_to_currency(get_vat_in_money_pr(purchase_return),
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %> (<%= purchase_return.purchase_order.value_added_tax %>)
+                              <% elsif purchase_return.direct_purchase && purchase_return.direct_purchase.is_taxable_entrepreneur %>
+                                <%= number_to_currency(get_vat_in_money_pr(purchase_return),
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %> (<%= purchase_return.direct_purchase.vat_type %>)
+                              <% end %>
+                          </td>
+                          <td align="right"><%= number_to_currency(value_after_ppn_pr(purchase_return),
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                      </tr>
+                      <% total_amount_returned += value_after_ppn_pr(purchase_return) %>
                     <% end %>
-                    <% amount_to_pay = if !params[:action].eql?("create") && !params[:action].eql?("create_dp_payment")
-                      params[:total_amount_received].to_f - total_amount_returned - params[:previous_paid].to_f
-                      else
-                      total_amount_received - total_amount_returned - previous_paid
-                      end %>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="6" align="right"><strong>Total Amount Returned</strong></td>
-                        <td align="right"><strong><%= number_to_currency(total_amount_returned,
-                                  :separator => ",",
-                                  :delimiter => ".",
-                                  :unit => "Rp",
-                                  :precision => 2) %></strong></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <div class="col-sm-offset-2 col-sm-10">
-            <% unless @payment_for_dp %>
-              <button class="btn btn-link" type="button" id="cancel_allocation">Cancel Allocation</button>
-            <% else %>
-              <button class="btn btn-link" type="button" id="cancel_allocation_for_dp">Cancel Allocation</button>
-            <% end %>
-        </div>
-    </div>
+                  <% end %>
+                  <% amount_to_pay = if !params[:action].eql?("create") && !params[:action].eql?("create_dp_payment")
+                    params[:total_amount_received].to_f - total_amount_returned - params[:previous_paid].to_f
+                    else
+                    total_amount_received - total_amount_returned - previous_paid
+                    end %>
+              </tbody>
+              <tfoot>
+                  <tr>
+                      <td colspan="6" align="right"><strong>Total Amount Returned</strong></td>
+                      <td align="right"><strong><%= number_to_currency(total_amount_returned,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></strong></td>
+                  </tr>
+              </tfoot>
+          </table>
+      </div>
+      <div class="col-sm-offset-2 col-sm-10">
+          <% unless @payment_for_dp %>
+            <button class="btn btn-link" type="button" id="cancel_allocation">Cancel Allocation</button>
+          <% else %>
+            <button class="btn btn-link" type="button" id="cancel_allocation_for_dp">Cancel Allocation</button>
+          <% end %>
+      </div>
+  </div>
 
-    <script>
-      $(function () {
-    <% unless @payment_for_dp %>
-            $("#amount-to-pay").html("<strong><%= number_to_currency(amount_to_pay,
-        :separator => ",",
-        :delimiter => ".",
-        :unit => "Rp",
-        :precision => 2) %></strong>");
-            $("#cancel_allocation").click(function () {
-                var purchaseReturnIds = [];
-                $.get("/account_payables/select_purchase_return", {
-                    purchase_return_ids: purchaseReturnIds.join(","),
-                    vendor_id: $("#account_payable_vendor_id").val(),
-                    previous_paid: previousPaid,
-                    total_amount_received: totalAmountReceived
-                });
-            });
-    <% else %>
-            $("#amount-to-pay-for-dp").html("<strong><%= number_to_currency(amount_to_pay,
-        :separator => ",",
-        :delimiter => ".",
-        :unit => "Rp",
-        :precision => 2) %></strong>");
-            $("#cancel_allocation_for_dp").click(function () {
-                var purchaseReturnIds = [];
-                $.get("/account_payables/select_purchase_return_for_dp", {
-                    purchase_return_ids: purchaseReturnIds.join(","),
-                    vendor_id: $("#account_payable_vendor_id_for_dp").val(),
-                    previous_paid: previousPaidForDPPayment,
-                    total_amount_received: totalAmountReceivedForDPPayment
-                });
-            });
-    <% end %>
-      });
-    </script>
+  <script>
+    $(function () {
+  <% unless @payment_for_dp %>
+          $("#amount-to-pay").html("<strong><%= number_to_currency(amount_to_pay,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></strong>");
+          $("#cancel_allocation").click(function () {
+              var purchaseReturnIds = [];
+              $.get("/account_payables/select_purchase_return", {
+                  purchase_return_ids: purchaseReturnIds.join(","),
+                  vendor_id: $("#account_payable_vendor_id").val(),
+                  previous_paid: previousPaid,
+                  total_amount_received: totalAmountReceived
+              });
+          });
+  <% else %>
+          $("#amount-to-pay-for-dp").html("<strong><%= number_to_currency(amount_to_pay,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></strong>");
+          $("#cancel_allocation_for_dp").click(function () {
+              var purchaseReturnIds = [];
+              $.get("/account_payables/select_purchase_return_for_dp", {
+                  purchase_return_ids: purchaseReturnIds.join(","),
+                  vendor_id: $("#account_payable_vendor_id_for_dp").val(),
+                  previous_paid: previousPaidForDPPayment,
+                  total_amount_received: totalAmountReceivedForDPPayment
+              });
+          });
+  <% end %>
+    });
+  </script>

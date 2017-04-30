@@ -42,6 +42,7 @@ class AccountPayablesController < ApplicationController
   # POST /account_payables
   # POST /account_payables.json
   def create
+    add_additional_params_to_child
     convert_amount_to_numeric
     @account_payable = AccountPayable.new(account_payable_params)
     is_exception_raised = false
@@ -266,11 +267,25 @@ class AccountPayablesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
-    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id, :giro_number, :giro_date, :amount_paid, :debt, account_payable_purchases_attributes: [:purchase_id, :purchase_type], allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp]).merge(created_by: current_user.id)
+    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id,
+      :giro_number, :giro_date, :amount_paid, :debt,
+      account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id],
+      allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp]).merge(created_by: current_user.id)
   end
   
   def convert_amount_to_numeric
     params[:account_payable][:amount_paid] = params[:account_payable][:amount_paid].gsub("Rp","").gsub(".","").gsub(",",".") if params[:account_payable][:amount_paid].present?
     params[:account_payable][:debt] = params[:account_payable][:debt].gsub("Rp","").gsub(".","").gsub(",",".") if params[:account_payable][:debt].present?
   end
+  
+  def add_additional_params_to_child
+    params[:account_payable][:account_payable_purchases_attributes].each do |key, value|
+      params[:account_payable][:account_payable_purchases_attributes][key].merge! vendor_id: params[:account_payable][:vendor_id]
+    end if params[:account_payable][:account_payable_purchases_attributes].present?
+    
+    params[:account_payable][:allocated_return_items_attributes].each do |key, value|
+      params[:account_payable][:allocated_return_items_attributes][key].merge! vendor_id: params[:account_payable][:vendor_id]
+    end if params[:account_payable][:allocated_return_items_attributes].present?
+  end
+
 end

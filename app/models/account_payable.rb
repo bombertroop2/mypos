@@ -34,12 +34,23 @@ class AccountPayable < ApplicationRecord
               validates :debt, numericality: true, if: proc { |ap| ap.debt.present? }
                 validates :debt, numericality: {greater_than_or_equal_to: 0}, if: proc { |ap| ap.debt.present? && ap.debt.is_a?(Numeric) }
                   validate :calculate_amount_paid_and_debt, if: proc{|ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) && ap.debt.present? && ap.debt.is_a?(Numeric) && ap.amount_paid > 0}, on: :create
-                    validate :amount_to_be_paid_should_greater_than_zero, on: :create
+                    validate :amount_to_be_paid_should_greater_than_zero,
+                      :payment_method_available, :vendor_available, on: :create
             
                     before_create :generate_number, :set_amount_returned
                     after_create :mark_purchase_doc_as_paid              
                                         
                     private
+                    
+                    def vendor_available
+                      errors.add(:vendor_id, "does not exist!") if Vendor.select("1 AS one").where(id: vendor_id).blank?
+                    end
+                    
+                    def payment_method_available
+                      PAYMENT_METHODS.select{ |x| x[1] == payment_method }.first.first
+                    rescue
+                      errors.add(:payment_method, "does not exist!") if payment_method.present?
+                    end
                     
                     def set_amount_returned
                       self.amount_returned = total_amount_returned
