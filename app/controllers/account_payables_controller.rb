@@ -82,6 +82,7 @@ class AccountPayablesController < ApplicationController
   end
   
   def create_dp_payment
+    add_additional_params_to_child
     convert_amount_to_numeric
     @account_payable = AccountPayable.new(account_payable_params)
     @account_payable.payment_for_dp = true
