@@ -26,8 +26,8 @@ class AccountPayable < ApplicationRecord
 
   validates :payment_date, :payment_method, :amount_paid, :vendor_id, :debt, presence: true
   validates :giro_number, :giro_date, presence: true, if: proc {|ap| ap.payment_method.eql?("Giro")}
-    validates :giro_date, date: {after_or_equal_to: proc { Date.today }, message: 'must be after or equal to today' }, if: proc {|ap| ap.giro_date.present? && ap.payment_method.eql?("Giro")}
-      validates :payment_date, date: {after_or_equal_to: proc { Date.today }, message: 'must be after or equal to today' }, if: proc {|ap| ap.payment_date.present?}
+    validates :giro_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|ap| ap.giro_date.present? && ap.payment_method.eql?("Giro")}
+      validates :payment_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|ap| ap.payment_date.present?}
         validates :amount_paid, numericality: true, if: proc { |ap| ap.amount_paid.present? }
           validates :amount_paid, numericality: {greater_than: 0}, if: proc { |ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) }
             validates :amount_paid, numericality: {less_than_or_equal_to: :amount_to_be_paid}, if: proc { |ap| ap.amount_paid.present? && ap.amount_paid.is_a?(Numeric) }, on: :create
@@ -63,7 +63,7 @@ class AccountPayable < ApplicationRecord
                     def generate_number
                       is_taxable_entrepreneur = vendor.is_taxable_entrepreneur rescue nil
                       pkp_code = is_taxable_entrepreneur ? "1" : "0"
-                      today = Date.today
+                      today = Date.current
                       current_month = today.month.to_s.rjust(2, '0')
                       current_year = today.strftime("%y").rjust(2, '0')
                       last_number = AccountPayable.where("number LIKE '#{pkp_code}PY#{vendor.code}#{current_month}#{current_year}%'").select(:number).limit(1).order("id DESC").first.number rescue nil

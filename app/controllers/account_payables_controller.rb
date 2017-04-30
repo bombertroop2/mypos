@@ -11,9 +11,15 @@ class AccountPayablesController < ApplicationController
     else
       "LIKE"
     end
+    if params[:filter_payment_date].present?
+      splitted_date_range = params[:filter_payment_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
     account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date").joins(:vendor)
-    account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
+      or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+    account_payables_scope = account_payables_scope.where(["DATE(payment_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_payment_date].present?
     @account_payables = smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {number: "asc"})
   end
 
