@@ -19,9 +19,9 @@ class PurchaseOrder < ApplicationRecord
       before_create :calculate_net_amount
     
       validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
-        validates :request_delivery_date, date: {after: proc { Time.current.to_date }, message: 'must be after today' }, if: :is_validable
+        validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
           validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: :is_po_date_validable
-            validates :purchase_order_date, date: {after_or_equal_to: proc { Time.current.to_date }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}
+            validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}
               validate :prevent_update_if_article_received, on: :update
               validate :disable_receive_po_if_finish, :disable_receive_po_if_po_deleted, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
                 validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
@@ -165,7 +165,7 @@ class PurchaseOrder < ApplicationRecord
                                   self.value_added_tax = vendor.value_added_tax rescue nil
                                   self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur rescue nil
                                   pkp_code = is_taxable_entrepreneur ? "1" : "0"
-                                  today = Time.current.to_date
+                                  today = Date.current
                                   current_month = today.month.to_s.rjust(2, '0')
                                   current_year = today.strftime("%y").rjust(2, '0')
                                   last_po_number = PurchaseOrder.where("number LIKE '#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}%'").select(:number).limit(1).order("id DESC").first.number rescue nil

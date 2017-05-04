@@ -1,0 +1,12 @@
+<td><%= object.number %></td>
+<td><%= object.plan_date.strftime("%d/%m/%Y") %></td>
+<td id="ori-warehouse-name-<%= object.id %>"><%= object.ow_name rescue "" %></td>
+<td id="dest-warehouse-name-<%= object.id %>"><%= object.dw_name rescue "" %></td>
+<td><%= object.quantity %></td>
+<td><%= object.status %></td>
+<td class="actions" style="text-align: right">
+    <%# if user_signed_in? && is_admin? %>
+      <%#= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_brand_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
+        <%#= link_to_if(!object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <%# end %>
+  </td>

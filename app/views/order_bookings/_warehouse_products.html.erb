@@ -1,0 +1,77 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label">Products</label>
+    <div class="col-sm-9">
+        <table id="listing_product_table" class="display">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Code</th>
+                    <th>Brand</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% @products.each_with_index do |product, index| %>
+                  <tr id="warehouse_product_<%= product.id %>">
+                      <td></td>
+                      <td><%= product.code %></td>
+                      <td><%= product.name %></td>
+                  </tr>
+                <% end %>
+            </tbody>
+        </table>
+        <a class="btn btn-default active" id="generate_warehouse_product_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
+    </div>
+</div>
+
+<script>
+  $(function () {
+      var warehouseProductsDataTable = $('#listing_product_table').DataTable({
+          order: [1, 'asc'],
+          dom: 'T<"clear">lfrtip',
+          columns: [
+              {data: null, defaultContent: '', orderable: false},
+              {data: 'code'},
+              {data: 'brand'}
+          ],
+          tableTools: {
+              sRowSelect: 'os',
+              sRowSelector: 'td:first-child',
+              aButtons: ['select_all', 'select_none']
+          },
+          paging: false,
+          info: false,
+          scrollY: "250px",
+          scrollCollapse: true
+      });
+
+      $("#generate_warehouse_product_detail_form").click(function () {
+          if (warehouseProductsDataTable.rows('.selected').data().length == 0)
+              bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+          else {
+              var productIds = [];
+              $.each(warehouseProductsDataTable.rows('.selected')[0], function (index, value) {
+                  productIds.push(warehouseProductsDataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+              });
+              $.get("/order_bookings/generate_product_item_form", {
+                  origin_warehouse_id: $("#order_booking_origin_warehouse_id").val(),
+                  product_ids: productIds.join(",")
+              });
+          }
+
+          return false;
+      });
+
+<% if params[:action].eql?("create") %>
+        var productIds = "<%= @order_booking.order_booking_products.map(&:product_id).join(",") %>";
+        if (productIds != undefined && productIds != "") {
+            var splittedProductIds = productIds.split(",");
+            $.each(splittedProductIds, function (index, value) {
+                var e = jQuery.Event("click");
+                e.ctrlKey = true;
+                $("#warehouse_product_" + value).find("td:first-child").trigger(e);
+            });
+        }
+<% end %>
+  });
+</script>

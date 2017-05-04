@@ -1,0 +1,71 @@
+<td colspan="7">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@order_booking, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <div class="form-group<%= control_group_error(@order_booking, :plan_date) %>">
+            <%= f.label :plan_date, class: "col-sm-3 control-label" %>
+              <div class="col-sm-9">
+                  <%= f.text_field :plan_date, size: 10, readonly: true, class: "form-control" %>
+                    <%= error_help_text(@order_booking, :plan_date) %>
+                </div>
+            </div>
+
+            <div class="form-group<%= control_group_error(@order_booking, :origin_warehouse_id) %>">
+                <%= f.label :origin_warehouse_id, class: "col-sm-3 control-label" %>            
+                  <div class="col-sm-9">
+                      <%= f.select :origin_warehouse_id, options_from_collection_for_select(@origin_warehouses, 'id', 'code', @order_booking.origin_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                        <%= error_help_text(@order_booking, :origin_warehouse_id) %>
+                    </div>
+                </div>
+
+                <div class="form-group<%= control_group_error(@order_booking, :destination_warehouse_id) %>">
+                    <%= f.label :destination_warehouse_id, class: "col-sm-3 control-label" %>            
+                      <div class="col-sm-9">
+                          <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                            <%= error_help_text(@order_booking, :destination_warehouse_id) %>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <%= f.label :note, class: "col-sm-3 control-label" %>
+                          <div class="col-sm-9">
+                              <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>
+                            </div>
+                        </div>
+
+                        <div id="warehouse_products_container">
+                            <% if params[:action].eql?("create") %>
+                              <%= render "warehouse_products" %>
+                            <% end %>
+                        </div>                                         
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                <div id="warehouse_product_items_form_container">
+                                    <% if params[:action].eql?("create") %>
+                                      <%= render "product_item_form" %>
+                                    <% end %>
+                                </div>                                         
+                            </div>                                                      
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                <%= f.submit "Save", class: "btn btn-primary" %>
+                                  <button class="btn btn-link cancel">Cancel</button>
+                              </div>
+                          </div>
+                        <% end %>
+                    </td>
+
+                    <script>
+                      $(function () {
+                          $("#order_booking_plan_date").datepicker({
+                              dateFormat: "dd/mm/yy"
+                          });
+                          $("#order_booking_origin_warehouse_id").change(function () {
+                              $.get("/order_bookings/get_warehouse_products", {
+                                  origin_warehouse_id: $(this).val()
+                              });
+                          });
+
+                      });
+                    </script>

@@ -1,0 +1,38 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-ob-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Plan date", "plan_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Ori. warehouse", "ow.name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Dest. warehouse", "dw.name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Quantity", "quantity" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Status", "status" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |order_booking| %>
+          <tr class="editable" data-id="<%= order_booking.id %>">
+              <%= smart_listing.render object: order_booking, partial: "order_bookings/order_booking", locals: {object: order_booking} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 7, link: new_order_booking_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-ob-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-ob-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

@@ -1,0 +1,7 @@
+<%= smart_listing_item :order_bookings, :create, @order_booking, 
+  @order_booking.valid? ? "order_bookings/order_booking" : "order_bookings/form" %>
+
+<% if @ori_warehouse_name.present? && @dest_warehouse_name.present? %>
+  $("#ori-warehouse-name-<%= @order_booking.id %>").html("<%= @ori_warehouse_name %>");
+  $("#dest-warehouse-name-<%= @order_booking.id %>").html("<%= @dest_warehouse_name %>");
+<% end %>

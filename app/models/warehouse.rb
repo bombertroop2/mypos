@@ -30,6 +30,10 @@ class Warehouse < ApplicationRecord
     def self.central
       where(warehouse_type: "central")
     end
+    
+    def self.not_central
+      where("warehouse_type <> 'central'")
+    end
 
     private
     

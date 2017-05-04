@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :order_bookings do
+    collection do
+      get "get_warehouse_products"
+      get "generate_product_item_form"
+    end
+  end
   resources :account_payables, only: [:new, :create, :index, :destroy, :show] do
     collection do
       get 'generate_form'

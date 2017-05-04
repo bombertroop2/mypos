@@ -1,0 +1,6 @@
+<% if @stock.present? %>
+  $("#warehouse_products_container").html("<%= j(render(partial: "warehouse_products")) %>");
+<% else %>
+  $("#warehouse_products_container").html("");
+<% end %>
+$("#warehouse_product_items_form_container").html("");

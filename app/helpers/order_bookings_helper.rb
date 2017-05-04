@@ -1,0 +1,2 @@
+module OrderBookingsHelper
+end
