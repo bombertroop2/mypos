@@ -12,13 +12,13 @@ class PurchaseOrder < ApplicationRecord
 
   attr_accessor :receiving_po, :deleting_po, :closing_po, :is_user_changing_cost
 
-  before_validation :generate_number, :set_type, :set_status, on: :create
+  before_validation :set_type, :set_status, on: :create
   
   before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
     before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.deleting_po && !po.closing_po && !po.is_user_changing_cost}
-      before_create :calculate_net_amount
+      before_create :calculate_net_amount, :generate_number
     
-      validates :number, :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
+      validates :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
         validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
           validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: :is_po_date_validable
             validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}

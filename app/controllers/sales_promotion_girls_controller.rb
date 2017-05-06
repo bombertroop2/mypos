@@ -56,19 +56,15 @@ class SalesPromotionGirlsController < ApplicationController
     if user_is_not_cashier
       params[:sales_promotion_girl][:mobile_phone] = params[:sales_promotion_girl][:mobile_phone].gsub("_","")
       @sales_promotion_girl = SalesPromotionGirl.new(sales_promotion_girl_params)
-      is_exception_raised = false
       begin
-        begin
-          unless @sales_promotion_girl.save
-            @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
-          else
-            @new_warehouse_code = Warehouse.select(:code).where(id: params[:sales_promotion_girl][:warehouse_id]).first.code
-          end
-          is_exception_raised = false
-        rescue ActiveRecord::RecordNotUnique => e
-          is_exception_raised = true
+        unless @sales_promotion_girl.save
+          @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
+        else
+          @new_warehouse_code = Warehouse.select(:code).where(id: params[:sales_promotion_girl][:warehouse_id]).first.code
         end
-      end while is_exception_raised
+      rescue ActiveRecord::RecordNotUnique => e
+        render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+      end
     else
       flash[:alert] = "Sorry, you can't access that action!"
       render js: "window.location = '#{sales_promotion_girls_url}'"

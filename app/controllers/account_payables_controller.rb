@@ -56,40 +56,36 @@ class AccountPayablesController < ApplicationController
     add_additional_params_to_child
     convert_amount_to_numeric
     @account_payable = AccountPayable.new(account_payable_params)
-    is_exception_raised = false
-    begin
-      unless @account_payable.save
-        previous_account_payables = []
-        @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
-          account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
-            joins(:account_payable_purchases).
-            where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
-          account_payables.each do |account_payable|        
-            previous_account_payables << account_payable
-          end
-        end    
-    
-        # kalkulasi pembayaran pembayaran sebelumnya
-        @previous_paid = 0
-        previous_account_payables.uniq.each do |previous_account_payable|
-          @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
+    unless @account_payable.save
+      previous_account_payables = []
+      @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
+        account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
+          joins(:account_payable_purchases).
+          where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
+        account_payables.each do |account_payable|        
+          previous_account_payables << account_payable
         end
+      end    
     
-        if @account_payable.errors[:"account_payable_purchases.base"].present?
-          render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
-        elsif @account_payable.errors[:base].present?
-          render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
-        elsif @account_payable.errors[:"allocated_return_items.base"].present?
-          render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
-        end
-      else
-        SendEmailJob.perform_later(@account_payable)
-        @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
+      # kalkulasi pembayaran pembayaran sebelumnya
+      @previous_paid = 0
+      previous_account_payables.uniq.each do |previous_account_payable|
+        @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
       end
-      is_exception_raised = false
-    rescue ActiveRecord::RecordNotUnique => e
-      is_exception_raised = true
-    end while is_exception_raised
+    
+      if @account_payable.errors[:"account_payable_purchases.base"].present?
+        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
+      elsif @account_payable.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @account_payable.errors[:"allocated_return_items.base"].present?
+        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
+      end
+    else
+      SendEmailJob.perform_later(@account_payable)
+      @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
   
   def create_dp_payment
@@ -97,41 +93,37 @@ class AccountPayablesController < ApplicationController
     convert_amount_to_numeric
     @account_payable = AccountPayable.new(account_payable_params)
     @account_payable.payment_for_dp = true
-    is_exception_raised = false
-    begin
-      unless @account_payable.save
-        @payment_for_dp = true
-        previous_account_payables = []
-        @account_payable.account_payable_purchases.map(&:purchase_id).each do |direct_purchase_id|
-          account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
-            joins(:account_payable_purchases).
-            where("purchase_id = '#{direct_purchase_id}' AND purchase_type = 'DirectPurchase'")
-          account_payables.each do |account_payable|        
-            previous_account_payables << account_payable
-          end
-        end    
-    
-        # kalkulasi pembayaran pembayaran sebelumnya
-        @previous_paid = 0
-        previous_account_payables.uniq.each do |previous_account_payable|
-          @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
+    unless @account_payable.save
+      @payment_for_dp = true
+      previous_account_payables = []
+      @account_payable.account_payable_purchases.map(&:purchase_id).each do |direct_purchase_id|
+        account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
+          joins(:account_payable_purchases).
+          where("purchase_id = '#{direct_purchase_id}' AND purchase_type = 'DirectPurchase'")
+        account_payables.each do |account_payable|        
+          previous_account_payables << account_payable
         end
+      end    
     
-        if @account_payable.errors[:"account_payable_purchases.base"].present?
-          render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
-        elsif @account_payable.errors[:base].present?
-          render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
-        elsif @account_payable.errors[:"allocated_return_items.base"].present?
-          render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
-        end
-      else
-        SendEmailJob.perform_later(@account_payable)
-        @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
+      # kalkulasi pembayaran pembayaran sebelumnya
+      @previous_paid = 0
+      previous_account_payables.uniq.each do |previous_account_payable|
+        @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
       end
-      is_exception_raised = false
-    rescue ActiveRecord::RecordNotUnique => e
-      is_exception_raised = true
-    end while is_exception_raised
+    
+      if @account_payable.errors[:"account_payable_purchases.base"].present?
+        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
+      elsif @account_payable.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @account_payable.errors[:"allocated_return_items.base"].present?
+        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
+      end
+    else
+      SendEmailJob.perform_later(@account_payable)
+      @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
 
   # PATCH/PUT /account_payables/1

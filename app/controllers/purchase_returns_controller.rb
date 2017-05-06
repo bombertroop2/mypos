@@ -36,31 +36,27 @@ class PurchaseReturnsController < ApplicationController
   def create_direct_purchase_return
     merge_new_param_to_item_attributes
     @purchase_return = PurchaseReturn.new(purchase_return_params)
-    is_exception_raised = false
-    begin
-      unless @purchase_return.save
-        direct_purchase = DirectPurchase.select(:id).where(id: @purchase_return.direct_purchase_id).first
-        direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |dpp|
-          purchase_return_product = @purchase_return.purchase_return_products.select{|prp| prp.direct_purchase_product_id == dpp.id}.first
-          unless purchase_return_product.present?
-            purchase_return_product = @purchase_return.purchase_return_products.build direct_purchase_product_id: dpp.id, product_cost: dpp.cost, product_code: dpp.code, product_name: dpp.name, product_id: dpp.product_id
-          end
-          dpp.direct_purchase_details.select(:id).each do |dpd|
-            purchase_return_product.purchase_return_items.build direct_purchase_detail_id: dpd.id if purchase_return_product.purchase_return_items.select{|pri| pri.direct_purchase_detail_id.eql?(dpd.id)}.blank?
-          end
-        end if direct_purchase.present?
+    unless @purchase_return.save
+      direct_purchase = DirectPurchase.select(:id).where(id: @purchase_return.direct_purchase_id).first
+      direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |dpp|
+        purchase_return_product = @purchase_return.purchase_return_products.select{|prp| prp.direct_purchase_product_id == dpp.id}.first
+        unless purchase_return_product.present?
+          purchase_return_product = @purchase_return.purchase_return_products.build direct_purchase_product_id: dpp.id, product_cost: dpp.cost, product_code: dpp.code, product_name: dpp.name, product_id: dpp.product_id
+        end
+        dpp.direct_purchase_details.select(:id).each do |dpd|
+          purchase_return_product.purchase_return_items.build direct_purchase_detail_id: dpd.id if purchase_return_product.purchase_return_items.select{|pri| pri.direct_purchase_detail_id.eql?(dpd.id)}.blank?
+        end
+      end if direct_purchase.present?
 
-        @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
-        @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
-        render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
-      else
-        @pr_number = @purchase_return.number
-        @vendor_name = DirectPurchase.joins(:vendor).where(["direct_purchases.id = ?",@purchase_return.direct_purchase_id]).select("vendors.name").first.name
-      end
-      is_exception_raised = false
-    rescue ActiveRecord::RecordNotUnique => e
-      is_exception_raised = true
-    end while is_exception_raised
+      @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
+      @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
+      render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
+    else
+      @pr_number = @purchase_return.number
+      @vendor_name = DirectPurchase.joins(:vendor).where(["direct_purchases.id = ?",@purchase_return.direct_purchase_id]).select("vendors.name").first.name
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
 
   # POST /purchase_returns
@@ -68,31 +64,27 @@ class PurchaseReturnsController < ApplicationController
   def create
     add_additional_params_to_child
     @purchase_return = PurchaseReturn.new(purchase_return_params)
-    is_exception_raised = false
-    begin
-      unless @purchase_return.save
-        purchase_order = PurchaseOrder.where(id: @purchase_return.purchase_order_id).select(:id).first
-        purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
-          purchase_return_product = @purchase_return.purchase_return_products.select{|prp| prp.purchase_order_product_id == pop.id}.first
-          unless purchase_return_product.present?
-            purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
-          end
-          pop.purchase_order_details.select(:id).each do |pod|
-            purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id if purchase_return_product.purchase_return_items.select{|pri| pri.purchase_order_detail_id.eql?(pod.id)}.blank?
-          end
-        end if purchase_order
+    unless @purchase_return.save
+      purchase_order = PurchaseOrder.where(id: @purchase_return.purchase_order_id).select(:id).first
+      purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
+        purchase_return_product = @purchase_return.purchase_return_products.select{|prp| prp.purchase_order_product_id == pop.id}.first
+        unless purchase_return_product.present?
+          purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
+        end
+        pop.purchase_order_details.select(:id).each do |pod|
+          purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id if purchase_return_product.purchase_return_items.select{|pri| pri.purchase_order_detail_id.eql?(pod.id)}.blank?
+        end
+      end if purchase_order
 
-        @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
-        @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
-        render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
-      else
-        @pr_number = @purchase_return.number
-        @vendor_name = PurchaseOrder.joins(:vendor).where(["purchase_orders.id = ?",@purchase_return.purchase_order_id]).select("vendors.name").first.name
-      end
-      is_exception_raised = false
-    rescue ActiveRecord::RecordNotUnique => e
-      is_exception_raised = true
-    end while is_exception_raised
+      @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
+      @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
+      render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
+    else
+      @pr_number = @purchase_return.number
+      @vendor_name = PurchaseOrder.joins(:vendor).where(["purchase_orders.id = ?",@purchase_return.purchase_order_id]).select("vendors.name").first.name
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
 
   # PATCH/PUT /purchase_returns/1

@@ -60,30 +60,26 @@ class PurchaseOrdersController < ApplicationController
     add_additional_params_to_purchase_order_products(params[:purchase_order][:purchase_order_date])
     @purchase_order = PurchaseOrder.new(purchase_order_params)
 
-    is_exception_raised = false
-    begin
-      unless @purchase_order.save
-        populate_combobox_list
-        populate_products
-        @products = Product.where(id: params[:product_ids].split(",")).select(:id)
-        @purchase_order.purchase_order_products.each do |pop|
-          colors = pop.product.colors.select :id
-          sizes = pop.product.sizes.select :id
-          colors.each do |color|
-            sizes.each do |size|
-              pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
-            end
+    unless @purchase_order.save
+      populate_combobox_list
+      populate_products
+      @products = Product.where(id: params[:product_ids].split(",")).select(:id)
+      @purchase_order.purchase_order_products.each do |pop|
+        colors = pop.product.colors.select :id
+        sizes = pop.product.sizes.select :id
+        colors.each do |color|
+          sizes.each do |size|
+            pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
           end
         end
-        
-        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
-      else
-        @vendor_name = Vendor.select(:name).find_by(id: @purchase_order.vendor_id).name rescue nil
       end
-      is_exception_raised = false
-    rescue ActiveRecord::RecordNotUnique => e
-      is_exception_raised = true
-    end while is_exception_raised
+        
+      render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
+    else
+      @vendor_name = Vendor.select(:name).find_by(id: @purchase_order.vendor_id).name rescue nil
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
 
   # PATCH/PUT /purchase_orders/1
