@@ -1,10 +1,11 @@
 class OrderBooking < ApplicationRecord
-  belongs_to :origin_warehouse
-  belongs_to :destination_warehouse
+  belongs_to :origin_warehouse, class_name: "Warehouse", foreign_key: :origin_warehouse_id
+  belongs_to :destination_warehouse, class_name: "Warehouse", foreign_key: :destination_warehouse_id
+  belongs_to :creator, class_name: "User", foreign_key: :created_by
   has_many :order_booking_products, dependent: :destroy
   has_many :order_booking_product_items, through: :order_booking_products
   
-  accepts_nested_attributes_for :order_booking_products
+  accepts_nested_attributes_for :order_booking_products, allow_destroy: true
 
   STATUSES = [
     ["O", "O"],
@@ -12,43 +13,63 @@ class OrderBooking < ApplicationRecord
   ]
   
   validates :plan_date, :origin_warehouse_id, :destination_warehouse_id, presence: true
-  validates :plan_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|po| po.plan_date.present?}
+  validates :plan_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|po| po.plan_date_validable}
     validate :origin_warehouse_available, :destination_warehouse_available, :check_min_quantity_per_product
+    validate :editable, on: :update
     
-    before_create :calculate_quantity, :generate_number, :set_status
+    before_create :generate_number, :set_status
+    before_update :delete_old_products
     
+    before_destroy :deletable
+    
+    def plan_date_validable
+      return false if plan_date.blank?
+      return true if new_record?
+      return true if plan_date_changed? && persisted?
+      return false
+    end
+
     private
     
-    def calculate_quantity
-      quantity = 0
-      order_booking_products.each do |order_booking_product|
-        order_booking_product.order_booking_product_items.each do |order_booking_product_item|
-          quantity += order_booking_product_item.quantity
-        end
+    def delete_old_products
+      if origin_warehouse_id_changed? && persisted?
+        order_booking_products.select(:id, :order_booking_id, :quantity).destroy_all
       end
-      self.quantity = quantity
+    end
+
+    def editable
+      errors.add(:base, "The record cannot be edited") unless status.eql?("O")
     end
     
+    def deletable
+      unless status.eql?("O")
+        errors.add(:base, "The record cannot be deleted")
+        throw :abort
+      end 
+    end
+    
+    
     def check_min_quantity_per_product
-      valid = false
-      order_booking_products.each do |order_booking_product|
-        if order_booking_product.order_booking_product_items.present?
-          valid = true          
-        else
-          valid = false
-          break
+      if new_record?
+        errors.add(:base, "Order booking must have at least one product") if order_booking_products.blank?
+      elsif origin_warehouse_id_changed? && persisted?
+        valid = false
+        order_booking_products.each do |order_booking_product|
+          if order_booking_product.new_record?
+            valid = true
+            break
+          end
         end
-      end      
-      errors.add(:base, "Order booking must have at least one product") if order_booking_products.blank?
-      errors.add(:base, "Order booking must have at least one quantity per product") if !valid && order_booking_products.present?
+        errors.add(:base, "Order booking must have at least one product") unless valid
+      end
     end
     
     def origin_warehouse_available
-      errors.add(:origin_warehouse_id, "does not exist!") if origin_warehouse_id.present? && Warehouse.central.where(id: origin_warehouse_id).select("1 AS one").blank?
+      errors.add(:origin_warehouse_id, "does not exist!") if (new_record? || (origin_warehouse_id_changed? && persisted?)) && origin_warehouse_id.present? && Warehouse.central.where(id: origin_warehouse_id).select("1 AS one").blank?
     end
 
     def destination_warehouse_available
-      errors.add(:destination_warehouse_id, "does not exist!") if destination_warehouse_id.present? && Warehouse.not_central.where(id: destination_warehouse_id).select("1 AS one").blank?
+      errors.add(:destination_warehouse_id, "does not exist!") if (new_record? || (destination_warehouse_id_changed? && persisted?)) && destination_warehouse_id.present? && Warehouse.not_central.where(id: destination_warehouse_id).select("1 AS one").blank?
     end
     
     def generate_number

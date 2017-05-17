@@ -5,8 +5,9 @@
 <td><%= object.quantity %></td>
 <td><%= object.status %></td>
 <td class="actions" style="text-align: right">
-    <%# if user_signed_in? && is_admin? %>
-      <%#= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_brand_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
-        <%#= link_to_if(!object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
-      <%# end %>
-  </td>
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, order_booking_path(object), data: {remote: true}, title: "Show" %>
+    <% if user_signed_in? && is_admin? %>
+      <%= link_to_if(object.status.eql?("O"), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_order_booking_path(object), :remote => true, :class => :edit, method: :get, title: "Edit" ) %>
+      <%= link_to_if(object.status.eql?("O"), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+    <% end %>
+</td>

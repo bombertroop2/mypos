@@ -4,10 +4,10 @@ module ApplicationHelper
   end
   
   def control_group_error(model, field_name)
-    " has-error" unless model.errors[field_name].blank?
+    " has-error" if model && model.errors[field_name].present?
   end
 
   def error_help_text(model, field_name)
-    "<span class='help-block'>#{model.errors[field_name].join(", ")}</span>".html_safe unless model.errors[field_name].blank?
+    "<span class='help-block'>#{model.errors[field_name].join(", ")}</span>".html_safe if model && model.errors[field_name].present?
   end
 end

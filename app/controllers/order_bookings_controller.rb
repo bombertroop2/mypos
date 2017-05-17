@@ -1,7 +1,8 @@
 include SmartListing::Helper::ControllerExtensions
 class OrderBookingsController < ApplicationController
   before_action :set_order_booking, only: [:show, :edit, :update, :destroy]
-  before_action :populate_warehouses, only: :new
+  before_action :populate_warehouses, only: [:new, :edit]
+  before_action :add_additional_params_to_child, only: [:create, :update]
   helper SmartListing::Helper
 
   # GET /order_bookings
@@ -42,45 +43,70 @@ class OrderBookingsController < ApplicationController
 
   # GET /order_bookings/1/edit
   def edit
+    @order_booking.plan_date = @order_booking.plan_date.strftime("%d/%m/%Y")
+    stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
+    @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
+    @selected_products = Product.joins([stock_products: :stock], :brand).
+      where(id: @order_booking.order_booking_products.pluck(:product_id)).
+      where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
+      select(:id).select("products.code, common_fields.name AS brand_name")
   end
 
   # POST /order_bookings
   # POST /order_bookings.json
   def create
-    add_additional_params_to_child
-    @order_booking = OrderBooking.new(order_booking_params)
-    unless @order_booking.save
-      populate_warehouses
-      if @order_booking.errors[:base].present?
-        render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
-      elsif @order_booking.errors[:"order_booking_products.base"].present?
-        render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
+    begin
+      @order_booking = OrderBooking.new(order_booking_params)
+      unless @order_booking.save
+        if @order_booking.errors[:base].present?
+          render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
+        elsif @order_booking.errors[:"order_booking_products.base"].present?
+          render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
+        else
+          populate_warehouses
+          stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
+          @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
+          @selected_products = Product.joins(stock_products: :stock).
+            where(id: @order_booking.order_booking_products.map(&:product_id)).
+            where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
+            select(:id)
+        end
       else
-        stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
-        @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
-        @selected_products = Product.joins(stock_products: :stock).
-          where(id: @order_booking.order_booking_products.map(&:product_id)).
-          where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
-          select(:id)
+        @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
+        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
       end
-    else
-      @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-      @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+    rescue ActiveRecord::RecordNotUnique => e
+      render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
     end
-  rescue ActiveRecord::RecordNotUnique => e
-    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
 
   # PATCH/PUT /order_bookings/1
   # PATCH/PUT /order_bookings/1.json
   def update
-    respond_to do |format|
-      if @order_booking.update(order_booking_params)
-        format.html { redirect_to @order_booking, notice: 'Order booking was successfully updated.' }
-        format.json { render :show, status: :ok, location: @order_booking }
+    if @total_products != 0 && @total_deleted_products != 0 && @total_products == @total_deleted_products
+      render js: "bootbox.alert({message: \"Sorry, you can't delete all records\",size: 'small'});"
+    else
+      unless @order_booking.update(order_booking_params)
+        if @order_booking.errors[:base].present?
+          render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
+        elsif @order_booking.errors[:"order_booking_products.base"].present?
+          render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
+        else
+          populate_warehouses
+          stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
+          @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
+          selected_product_ids = []
+          params[:order_booking][:order_booking_products_attributes].each do |key, value|
+            selected_product_ids << params[:order_booking][:order_booking_products_attributes][key][:product_id]
+          end if params[:order_booking][:order_booking_products_attributes].present?
+          @selected_products = Product.joins(stock_products: :stock).
+            where(id: selected_product_ids).
+            where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
+            select(:id)
+        end
       else
-        format.html { render :edit }
-        format.json { render json: @order_booking.errors, status: :unprocessable_entity }
+        @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
+        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
       end
     end
   end
@@ -89,29 +115,41 @@ class OrderBookingsController < ApplicationController
   # DELETE /order_bookings/1.json
   def destroy
     @order_booking.destroy
-    respond_to do |format|
-      format.html { redirect_to order_bookings_url, notice: 'Order booking was successfully destroyed.' }
-      format.json { head :no_content }
+    if @order_booking.errors.present? && @order_booking.errors.messages[:base].present?
+      render js: "bootbox.alert({message: \"#{@order_booking.errors.messages[:base].join("<br/>")}\",size: 'small'});"
     end
   end
   
   def get_warehouse_products
     @stock = Stock.select(:id).where(warehouse_id: params[:origin_warehouse_id]).first
     @products = @stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if @stock.present?
+    @order_booking_id = params[:order_booking_id]
   end
   
   def generate_product_item_form
     selected_product_ids = params[:product_ids].split(",")
-    @order_booking = OrderBooking.new
+    @order_booking = if params[:order_booking_id].present?
+      OrderBooking.select(:id, :origin_warehouse_id).where(id: params[:order_booking_id]).first
+    else
+      OrderBooking.new
+    end
     @selected_products = Product.joins(stock_products: :stock).joins(:brand).
       where(id: selected_product_ids).
       where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
       select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
     @selected_products.each do |product|
-      obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
+      if (obp = @order_booking.order_booking_products.select{|order_booking_product| order_booking_product.product_id == product.id}.first).blank?
+        obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
+      elsif @order_booking.origin_warehouse_id == params[:origin_warehouse_id].to_i
+        obp.product_code = product.code
+        obp.product_name = product.brand_name
+      else
+        @order_booking = OrderBooking.new
+        obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
+      end
       stock_product = StockProduct.where(id: product.stock_product_id).select(:id).first
       stock_product.stock_details.select("size_id, color_id").each do |stock_detail|
-        obp.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id
+        obp.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id if obp.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
       end
     end
   end
@@ -126,8 +164,8 @@ class OrderBookingsController < ApplicationController
   def order_booking_params
     params.require(:order_booking).permit(:plan_date, :origin_warehouse_id,
       :destination_warehouse_id, :note, order_booking_products_attributes: [:product_id,
-        :product_code, :product_name, :origin_warehouse_id,
-        order_booking_product_items_attributes: [:size_id, :color_id, :quantity,
+        :product_code, :product_name, :origin_warehouse_id, :id, :_destroy,
+        order_booking_product_items_attributes: [:new_product, :id, :size_id, :color_id, :quantity,
           :product_id, :origin_warehouse_id]]).merge(created_by: current_user.id)
   end
   
@@ -137,11 +175,16 @@ class OrderBookingsController < ApplicationController
   end
   
   def add_additional_params_to_child
+    @total_products = 0
+    @total_deleted_products = 0
     params[:order_booking][:order_booking_products_attributes].each do |key, value|
+      @total_products += 1
+      @total_deleted_products += 1 if params[:order_booking][:order_booking_products_attributes][key][:_destroy].eql?("1")
       product_id = params[:order_booking][:order_booking_products_attributes][key][:product_id]
       params[:order_booking][:order_booking_products_attributes][key].merge! origin_warehouse_id: params[:order_booking][:origin_warehouse_id]
       params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes].each do |obpi_key, value|
         params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes][obpi_key].merge! product_id: product_id, origin_warehouse_id: params[:order_booking][:origin_warehouse_id]
+        params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes][obpi_key].merge! new_product: params[:order_booking][:order_booking_products_attributes][key][:id].blank?
       end if params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes].present?
     end if params[:order_booking][:order_booking_products_attributes].present?
   end
