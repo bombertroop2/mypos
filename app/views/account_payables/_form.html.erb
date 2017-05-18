@@ -48,54 +48,58 @@
                           </tr>
                       </thead>
                       <tbody>
+                          <% displayed_pos = [] %>
                           <% @purchase_orders.each_with_index do |purchase_order, index| %>
-                            <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
-                            <tr id="purchase_order_<%= purchase_order.id %>">
-                                <td></td>
-                                <td><%= purchase_order.number %></td>
-                                <td><%= purchase_order.vendor_name %></td>
-                                <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
-                                <td><%= latest_receiving_date %></td>
-                                <td><%= purchase_order.quantity_received %></td>
-                                <td><%= number_to_currency(purchase_order.receiving_value,
-                                      :separator => ",",
-                                      :delimiter => ".",
-                                      :unit => "Rp",
-                                      :precision => 2) %></td>
-                                <td>
-                                    <% if purchase_order.first_discount.present? %>
-                                      <%= number_to_currency((purchase_order.first_discount.to_f / 100) * purchase_order.receiving_value,
+                            <% unless displayed_pos.include?(purchase_order.id) %>
+                              <% displayed_pos << purchase_order.id %>
+                              <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
+                              <tr id="purchase_order_<%= purchase_order.id %>">
+                                  <td></td>
+                                  <td><%= purchase_order.number %></td>
+                                  <td><%= purchase_order.vendor_name %></td>
+                                  <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
+                                  <td><%= latest_receiving_date %></td>
+                                  <td><%= purchase_order.quantity_received %></td>
+                                  <td><%= number_to_currency(purchase_order.receiving_value,
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",
-                                        :precision => 2) %> (<%= "#{purchase_order.first_discount}%" %>)
-                                    <% end %>
-                                </td>
-                                <td>
-                                    <% if purchase_order.second_discount.present? %>
-                                      <%= number_to_currency(get_second_discount_in_money_for_ap(purchase_order),
+                                        :precision => 2) %></td>
+                                  <td>
+                                      <% if purchase_order.first_discount.present? %>
+                                        <%= number_to_currency((purchase_order.first_discount.to_f / 100) * purchase_order.receiving_value,
+                                          :separator => ",",
+                                          :delimiter => ".",
+                                          :unit => "Rp",
+                                          :precision => 2) %> (<%= "#{purchase_order.first_discount}%" %>)
+                                      <% end %>
+                                  </td>
+                                  <td>
+                                      <% if purchase_order.second_discount.present? %>
+                                        <%= number_to_currency(get_second_discount_in_money_for_ap(purchase_order),
+                                          :separator => ",",
+                                          :delimiter => ".",
+                                          :unit => "Rp",
+                                          :precision => 2) %> (<%= "#{purchase_order.second_discount}%" %> from <%= purchase_order.is_additional_disc_from_net ? "net" : "gross" %>)
+                                      <% end %>
+                                  </td>
+                                  <td>
+                                      <% if purchase_order.is_taxable_entrepreneur %>
+                                        <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
+                                          :separator => ",",
+                                          :delimiter => ".",
+                                          :unit => "Rp",
+                                          :precision => 2) %> (<%= purchase_order.value_added_tax %>)
+                                      <% end %>
+                                  </td>
+                                  <td><%= number_to_currency(value_after_ppn_for_ap(purchase_order),
                                         :separator => ",",
                                         :delimiter => ".",
                                         :unit => "Rp",
-                                        :precision => 2) %> (<%= "#{purchase_order.second_discount}%" %> from <%= purchase_order.is_additional_disc_from_net ? "net" : "gross" %>)
-                                    <% end %>
-                                </td>
-                                <td>
-                                    <% if purchase_order.is_taxable_entrepreneur %>
-                                      <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
-                                        :separator => ",",
-                                        :delimiter => ".",
-                                        :unit => "Rp",
-                                        :precision => 2) %> (<%= purchase_order.value_added_tax %>)
-                                    <% end %>
-                                </td>
-                                <td><%= number_to_currency(value_after_ppn_for_ap(purchase_order),
-                                      :separator => ",",
-                                      :delimiter => ".",
-                                      :unit => "Rp",
-                                      :precision => 2) %></td>
-                                <td><%= purchase_order.payment_status %></td>
-                            </tr>
+                                        :precision => 2) %></td>
+                                  <td><%= purchase_order.payment_status %></td>
+                              </tr>
+                            <% end %>
                           <% end %>
                       </tbody>
                   </table>
