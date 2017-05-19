@@ -31,12 +31,11 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables/new
   def new
     @account_payable = AccountPayable.new
-    @purchase_orders = PurchaseOrder.
-      select(:id, :number, :purchase_order_date, :receiving_value, :first_discount,
-      :second_discount, :is_taxable_entrepreneur, :value_added_tax,
-      :is_additional_disc_from_net, :net_amount, :payment_status).
+    @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date,
+      :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur,
+      :value_added_tax,:is_additional_disc_from_net, :net_amount, :payment_status).
       select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).
-      where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").      
+      where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").
       order("received_purchase_orders.receiving_date")
     @direct_purchases = DirectPurchase.
       select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :payment_status).
