@@ -49,11 +49,10 @@
                       </thead>
                       <tbody>
                           <% displayed_pos = [] %>
-                          <% @purchase_orders.each_with_index do |purchase_order, index| %>
-                            <% unless displayed_pos.include?(purchase_order.id) %>
+                          <% @purchase_orders.each do |purchase_order| %>
+                            <% if displayed_pos.blank? || displayed_pos.exclude?(purchase_order.id) %>
                               <% displayed_pos << purchase_order.id %>
                               <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
-                          <% puts "GILAAAAAAAAAAAAAAAAAAAAAAAAAA SEMUANYAAAA" %>
                               <tr id="purchase_order_<%= purchase_order.id %>">
                                   <td></td>
                                   <td><%= purchase_order.number %></td>
@@ -197,7 +196,7 @@
       var activeTab = "";
       $(function () {
           var aPpRdataTable = null;
-          var aPdPdataTable = null;          
+          var aPdPdataTable = null;
           var aPpOdataTable = $('#ap_listing_po_table').DataTable({
               "searchCols": [
                   null,
@@ -232,7 +231,6 @@
               ],
               tableTools: {
                   sRowSelect: 'os',
-                  //sRowSelector: 'td:first-child',
                   aButtons: []
               },
               paging: false,
