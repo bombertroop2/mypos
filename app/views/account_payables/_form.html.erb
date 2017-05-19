@@ -53,8 +53,9 @@
                             <% unless displayed_pos.include?(purchase_order.id) %>
                               <% displayed_pos << purchase_order.id %>
                               <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
+                          <% puts "GILAAAAAAAAAAAAAAAAAAAAAAAAAA SEMUANYAAAA" %>
                               <tr id="purchase_order_<%= purchase_order.id %>">
-                                  <td>EWE</td>
+                                  <td></td>
                                   <td><%= purchase_order.number %></td>
                                   <td><%= purchase_order.vendor_name %></td>
                                   <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
