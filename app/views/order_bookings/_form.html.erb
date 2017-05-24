@@ -10,17 +10,17 @@
             </div>
 
             <div class="form-group<%= control_group_error(@order_booking, :origin_warehouse_id) %>">
-                <%= f.label :origin_warehouse_id, class: "col-sm-3 control-label" %>            
+                <%= f.label :origin_warehouse_id, "Warehouse from", class: "col-sm-3 control-label" %>            
                   <div class="col-sm-9">
-                      <%= f.select :origin_warehouse_id, options_from_collection_for_select(@origin_warehouses, 'id', 'code', @order_booking.origin_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                      <%= f.select :origin_warehouse_id, options_from_collection_for_select(@origin_warehouses, 'id', 'code_and_name', @order_booking.origin_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
                         <%= error_help_text(@order_booking, :origin_warehouse_id) %>
                     </div>
                 </div>
 
                 <div class="form-group<%= control_group_error(@order_booking, :destination_warehouse_id) %>">
-                    <%= f.label :destination_warehouse_id, class: "col-sm-3 control-label" %>            
+                    <%= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-3 control-label" %>            
                       <div class="col-sm-9">
-                          <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                          <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
                             <%= error_help_text(@order_booking, :destination_warehouse_id) %>
                         </div>
                     </div>
@@ -75,5 +75,6 @@
                     <% end %>
 
                           });
+
                       });
                     </script>

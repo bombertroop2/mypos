@@ -13,15 +13,31 @@ class OrderBookingProductItem < ApplicationRecord
       before_save :update_booked_quantity, :update_total_quantity
       after_destroy :update_booked_quantity
       
+      def available_for_booking_quantity=(value)
+        @available_for_booking_quantity = value
+      end
+      
+      def available_for_booking_quantity       
+        unless new_record?
+          unless @stock_item.present?
+            product_id = order_booking_product.product_id
+            stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
+              where(size_id: size_id, color_id: color_id).
+              where("stock_products.product_id = #{product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
+            self.available_for_booking_quantity = stock_item.quantity - (stock_item.booked_quantity - quantity_was)
+          else
+            self.available_for_booking_quantity = @stock_item.quantity - (@stock_item.booked_quantity - quantity_was)
+          end
+        end
+        @available_for_booking_quantity
+      end
+      
 
       private
       
       def quantity_available
         if new_record?
-          @stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
-            where(size_id: size_id, color_id: color_id).
-            where("stock_products.product_id = #{product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
-          available_quantity = @stock_item.quantity - @stock_item.booked_quantity
+          self.available_for_booking_quantity = available_quantity = @stock_item.quantity - @stock_item.booked_quantity
           errors.add(:quantity, "cannot be greater than #{available_quantity}") if quantity > available_quantity
         elsif quantity_changed? && persisted?
           @stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
@@ -34,11 +50,10 @@ class OrderBookingProductItem < ApplicationRecord
 
       def item_available
         if new_record? || ((size_id_changed? || color_id_changed?) && persisted?)
-          errors.add(:base, "Not able to order selected items") if StockDetail.joins(stock_product: :stock).
+          @stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
             where(size_id: size_id, color_id: color_id).
-            where("stock_products.product_id = #{product_id}").
-            where("stocks.warehouse_id = #{origin_warehouse_id}").
-            select("1 AS one").blank?
+            where("stock_products.product_id = #{product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
+          errors.add(:base, "Not able to order selected items") if @stock_item.blank?
         end
       end
     

@@ -23,6 +23,10 @@ class Warehouse < ApplicationRecord
       ["Showroom", "showroom"]
     ]
     
+    def code_and_name
+      "#{code} - #{name}"
+    end
+    
     def self.has_supervisor?(id)
       SalesPromotionGirl.where(["warehouse_id = ? AND role = 'supervisor'", id]).select("1 AS one").present?
     end
