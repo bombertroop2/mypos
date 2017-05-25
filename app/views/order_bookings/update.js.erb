@@ -4,4 +4,5 @@
 <% if @ori_warehouse_name.present? && @dest_warehouse_name.present? %>
   $("#ori-warehouse-name-<%= @order_booking.id %>").html("<%= @ori_warehouse_name %>");
   $("#dest-warehouse-name-<%= @order_booking.id %>").html("<%= @dest_warehouse_name %>");
+  $("#total-quantity-<%= @order_booking.id %>").html("<%= @total_quantity %>");
 <% end %>

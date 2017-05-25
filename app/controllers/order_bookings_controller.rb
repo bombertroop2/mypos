@@ -183,6 +183,7 @@ class OrderBookingsController < ApplicationController
   end
   
   def add_additional_params_to_child
+    @total_quantity = 0
     @total_products = 0
     @total_deleted_products = 0
     params[:order_booking][:order_booking_products_attributes].each do |key, value|
@@ -191,6 +192,7 @@ class OrderBookingsController < ApplicationController
       product_id = params[:order_booking][:order_booking_products_attributes][key][:product_id]
       params[:order_booking][:order_booking_products_attributes][key].merge! origin_warehouse_id: params[:order_booking][:origin_warehouse_id]
       params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes].each do |obpi_key, value|
+        @total_quantity += params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes][obpi_key][:quantity].to_i unless params[:order_booking][:order_booking_products_attributes][key][:_destroy].eql?("1")
         params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes][obpi_key].merge! product_id: product_id, origin_warehouse_id: params[:order_booking][:origin_warehouse_id]
         params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes][obpi_key].merge! new_product: params[:order_booking][:order_booking_products_attributes][key][:id].blank?
       end if params[:order_booking][:order_booking_products_attributes][key][:order_booking_product_items_attributes].present?
