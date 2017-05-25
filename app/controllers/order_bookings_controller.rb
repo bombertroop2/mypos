@@ -45,7 +45,7 @@ class OrderBookingsController < ApplicationController
   def edit
     @order_booking.plan_date = @order_booking.plan_date.strftime("%d/%m/%Y")
     stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
-    @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
+    @products = stock.stock_products.joins([product: :brand], :stock_details).select("products.id, products.code, common_fields.name, SUM(quantity - booked_quantity) AS total_afs").group("products.id") if stock.present?
     @selected_products = Product.joins([stock_products: :stock], :brand).
       where(id: @order_booking.order_booking_products.pluck(:product_id)).
       where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
@@ -65,7 +65,9 @@ class OrderBookingsController < ApplicationController
         else
           populate_warehouses
           stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
-          @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
+          @products = stock.stock_products.joins([product: :brand], :stock_details).
+            select("products.id, products.code, common_fields.name, SUM(quantity - booked_quantity) AS total_afs").
+            group("products.id") if stock.present?
           @selected_products = Product.joins(stock_products: :stock).
             where(id: @order_booking.order_booking_products.map(&:product_id)).
             where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
@@ -102,7 +104,9 @@ class OrderBookingsController < ApplicationController
         else
           populate_warehouses
           stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
-          @products = stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if stock.present?
+          @products = stock.stock_products.joins([product: :brand], :stock_details).
+            select("products.id, products.code, common_fields.name, SUM(quantity - booked_quantity) AS total_afs").
+            group("products.id") if stock.present?
           selected_product_ids = []
           params[:order_booking][:order_booking_products_attributes].each do |key, value|
             selected_product_ids << params[:order_booking][:order_booking_products_attributes][key][:product_id]
@@ -130,7 +134,9 @@ class OrderBookingsController < ApplicationController
   
   def get_warehouse_products
     @stock = Stock.select(:id).where(warehouse_id: params[:origin_warehouse_id]).first
-    @products = @stock.stock_products.joins(product: :brand).select("products.id, products.code, common_fields.name") if @stock.present?
+    @products = @stock.stock_products.joins([product: :brand], :stock_details).
+      select("products.id, products.code, common_fields.name, SUM(quantity - booked_quantity) AS total_afs").
+      group("products.id") if @stock.present?
     @order_booking_id = params[:order_booking_id]
   end
   

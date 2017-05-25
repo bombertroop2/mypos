@@ -7,16 +7,28 @@
                     <th></th>
                     <th>Code</th>
                     <th>Brand</th>
+                    <th>AFS</th>
                 </tr>
             </thead>
 
             <tbody>
                 <% @products.each_with_index do |product, index| %>
-                  <tr id="warehouse_product_<%= product.id %>">
-                      <td></td>
-                      <td><%= product.code %></td>
-                      <td><%= product.name %></td>
-                  </tr>
+                  <% if product.total_afs > 0 %>
+                    <tr id="warehouse_product_<%= product.id %>">
+                        <td></td>
+                        <td><%= product.code %></td>
+                        <td><%= product.name %></td>
+                        <td><%= product.total_afs %></td>
+                    </tr>
+                  <% else %>
+                    <tr id="warehouse_product_<%= product.id %>" class="disabled" style="cursor: not-allowed">
+                        <td></td>
+                        <td><font color="#ff0000"><%= product.code %></font></td>
+                        <td><font color="#ff0000"><%= product.name %></font></td>
+                        <td><font color="#ff0000"><%= product.total_afs %></font></td>
+                    </tr>
+                  <% end %>
+
                 <% end %>
             </tbody>
         </table>
@@ -32,11 +44,12 @@
           columns: [
               {data: null, defaultContent: '', orderable: false},
               {data: 'code'},
-              {data: 'brand'}
+              {data: 'brand'},
+              {data: 'afs'}
           ],
           tableTools: {
               sRowSelect: 'os',
-              sRowSelector: 'td:first-child',
+              //sRowSelector: 'td:first-child',
               aButtons: ['select_all', 'select_none']
           },
           paging: false,
@@ -97,5 +110,9 @@
             });
         }
 <% end %>
+
+      $('#listing_product_table tr.disabled').click(function (e) {
+          e.stopPropagation();
+      });
   });
 </script>
