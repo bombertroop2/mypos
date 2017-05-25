@@ -39,49 +39,13 @@
                       var colorSizes = [];
                     </script>
                     <div class="table-responsive">
-
-                        <table border="1" class="table table-condensed table-responsive table-bordered">
-                            <tr style="text-align: center">
-                                <th colspan="2" rowspan="2"></th>
-                                <td colspan="<%= sizes.length %>" align="center">
-                                    <strong>Sizes</strong>
-                                </td>
-                            </tr>
-
-                            <tr style="text-align: center">
-                                <% sizes.each do |size| %>
-                                  <td align="center">
-                                      <%= size.size %>
-                                  </td>
-                                <% end %>
-                            </tr>
-
-                            <% colors.each_with_index do |color, idx| %>                          
-                              <tr style="text-align: center">
-                                  <% if idx.eql? 0 %>
-                                    <td rowspan="<%= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>
-                                  <% end %>
-                                  <td style="vertical-align: middle"><%= color.code %></td>                            
-                                  <% sizes.each do |size| %>
-                                    <% order_booking_product_item = order_booking_product_items.select{|obpi| obpi.size_id == size.id && obpi.color_id == color.id}.first %>
-                                    <% if order_booking_product_item.present? %>
-                                      <td align="center" style="vertical-align: middle;text-align: center">
-                                          <%= order_booking_product_item.available_for_booking_quantity %>
-                                      </td>
-                                    <% else %>
-                                      <td></td>
-                                    <% end %>
-                                  <% end %>
-                              </tr>
-                            <% end %>              
-                        </table>
                         <table border="1" class="table table-condensed table-responsive table-bordered">
                             <tr style="text-align: center">
                                 <th colspan="2" rowspan="2"></th>
                                 <td colspan="<%= sizes.length %>" align="center">
                                     <strong>Sizes</strong>
                                     <br />
-                                    <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "quantity", size: 16, class: "quantity form-control quantity-fields"} %>
+                                    <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
                                   </td>
                               </tr>
 
@@ -90,7 +54,7 @@
                                     <td align="center">
                                         <%= size.size %>
                                         <br />
-                                        <%= text_field_tag "quantity_#{product.id}_#{size.id}", "", {placeholder: "quantity", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16} %>
+                                        <%= text_field_tag "quantity_#{product.id}_#{size.id}", "", {placeholder: "qty", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %>
                                       </td>
                                     <% end %>
                                 </tr>
@@ -115,7 +79,13 @@
                                             <%= obpi_form.hidden_field :available_for_booking_quantity %>
                                             <%= obpi_form.hidden_field :color_id %>
                                             <div class="<%= control_group_error(obpi_form.object, :quantity) %>">
-                                                <%= obpi_form.text_field :quantity, placeholder: "quantity", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16 %>
+                                                <table cellpadding="0" cellspacing="0">
+                                                    <tr>
+                                                        <td><%= obpi_form.text_field :quantity, placeholder: "qty", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
+                                                          <td>&nbsp;/&nbsp;</td> 
+                                                          <td><%= order_booking_product_item.available_for_booking_quantity %></td> 
+                                                      </tr>
+                                                  </table>                                                
                                                   <%= error_help_text(obpi_form.object, :quantity) %>
                                               </div>
                                               <% if obpi_form.object && !obpi_form.object.new_record? %>
