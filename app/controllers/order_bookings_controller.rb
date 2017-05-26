@@ -57,38 +57,50 @@ class OrderBookingsController < ApplicationController
   # POST /order_bookings
   # POST /order_bookings.json
   def create
-    begin
-      @order_booking = OrderBooking.new(order_booking_params)
-      unless @order_booking.save
-        if @order_booking.errors[:base].present?
-          render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
-        elsif @order_booking.errors[:"order_booking_products.base"].present?
-          render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
-        else
-          populate_warehouses
-          stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
-          @products = stock.stock_products.joins([product: :brand], :stock_details).
-            select("products.id, products.code, common_fields.name, SUM(quantity - booked_quantity) AS total_afs").
-            group("products.id, common_fields.name") if stock.present?
-          @selected_products = Product.joins(stock_products: :stock).
-            where(id: @order_booking.order_booking_products.map(&:product_id)).
-            where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
-            select(:id).select("stock_products.id AS stock_product_id")
-          @order_booking.order_booking_products.each do |order_booking_product|
-            selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
-            StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
-              afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
-              order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+    @order_bookings = []
+    @ori_warehouse_names = []
+    @dest_warehouse_names = []
+    warehouse_to_ids = params[:warehouse_to_ids].split(",")
+    ActiveRecord::Base.transaction do
+      warehouse_to_ids.each do |warehouse_to_id|
+        begin
+          @order_booking = OrderBooking.new(order_booking_params)
+          @order_booking.destination_warehouse_id = warehouse_to_id
+          unless @order_booking.save
+            if @order_booking.errors[:base].present?
+              render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
+            elsif @order_booking.errors[:"order_booking_products.base"].present?
+              render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
+            else
+              populate_warehouses
+              stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
+              @products = stock.stock_products.joins([product: :brand], :stock_details).
+                select("products.id, products.code, common_fields.name, SUM(quantity - booked_quantity) AS total_afs").
+                group("products.id, common_fields.name") if stock.present?
+              @selected_products = Product.joins(stock_products: :stock).
+                where(id: @order_booking.order_booking_products.map(&:product_id)).
+                where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
+                select(:id).select("stock_products.id AS stock_product_id")
+              @order_booking.order_booking_products.each do |order_booking_product|
+                selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
+                StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
+                  afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
+                  order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+                end
+              end
+              @invalid = true
             end
+            raise ActiveRecord::Rollback
+          else
+            @ori_warehouse_names << Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
+            @dest_warehouse_names << Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+            @order_bookings << @order_booking
           end
-          @invalid = true
+        rescue ActiveRecord::RecordNotUnique => e
+          render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+          raise ActiveRecord::Rollback
         end
-      else
-        @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
       end
-    rescue ActiveRecord::RecordNotUnique => e
-      render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
     end
   end
 

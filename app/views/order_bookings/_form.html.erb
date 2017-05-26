@@ -1,6 +1,7 @@
 <td colspan="7">
     <div style="padding-top: 20px"></div>
     <%= form_for(@order_booking, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <%= hidden_field_tag "warehouse_to_ids", params[:warehouse_to_ids] %>
         <div class="form-group<%= control_group_error(@order_booking, :plan_date) %>">
             <%= f.label :plan_date, class: "col-sm-3 control-label" %>
               <div class="col-sm-9">
@@ -17,13 +18,40 @@
                     </div>
                 </div>
 
-                <div class="form-group<%= control_group_error(@order_booking, :destination_warehouse_id) %>">
-                    <%= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-3 control-label" %>            
-                      <div class="col-sm-9">
-                          <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
-                            <%= error_help_text(@order_booking, :destination_warehouse_id) %>
-                        </div>
-                    </div>
+                <% unless @order_booking.new_record? %>
+                  <div class="form-group<%= control_group_error(@order_booking, :destination_warehouse_id) %>">
+                      <%= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-3 control-label" %>            
+                        <div class="col-sm-9">
+                            <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                              <%= error_help_text(@order_booking, :destination_warehouse_id) %>
+                          </div>
+                      </div>
+                    <% else %>
+                      <div class="form-group">
+                          <label class="col-sm-3 control-label">Warehouse to</label>
+                          <div class="col-sm-9">
+                              <table id="listing_warehouse_to_table" class="display">
+                                  <thead>
+                                      <tr>
+                                          <th></th>
+                                          <th>Code</th>
+                                          <th>Name</th>
+                                      </tr>
+                                  </thead>
+
+                                  <tbody>
+                                      <% @destination_warehouses.each do |destination_warehouse| %>
+                                        <tr id="destination_warehouse_<%= destination_warehouse.id %>">
+                                            <td></td>
+                                            <td><%= destination_warehouse.code %></td>
+                                            <td><%= destination_warehouse.name %></td>
+                                        </tr>
+                                      <% end %>
+                                  </tbody>
+                              </table>
+                          </div>
+                      </div>
+                    <% end %>
 
                     <div class="form-group">
                         <%= f.label :note, class: "col-sm-3 control-label" %>
@@ -49,7 +77,7 @@
 
                         <div class="form-group">
                             <div class="col-sm-offset-3 col-sm-9">
-                                <%= f.submit "Save", class: "btn btn-primary" %>
+                                <%= f.submit "Save", class: "btn btn-primary", id: "save-btn" %>
                                   <button class="btn btn-link cancel">Cancel</button>
                               </div>
                           </div>
@@ -75,6 +103,46 @@
                     <% end %>
 
                           });
-
+                    <% if @order_booking.new_record? %>
+                            var warehouseToDataTable = $('#listing_warehouse_to_table').DataTable({
+                                order: [1, 'asc'],
+                                dom: 'T<"clear">lfrtip',
+                                columns: [
+                                    {data: null, defaultContent: '', orderable: false},
+                                    {data: 'code'},
+                                    {data: 'name'}
+                                ],
+                                tableTools: {
+                                    sRowSelect: 'os',
+                                    //sRowSelector: 'td:first-child',
+                                    aButtons: ['select_all', 'select_none']
+                                },
+                                paging: false,
+                                info: false,
+                                scrollY: "250px",
+                                scrollCollapse: true
+                            });
+                            $("#save-btn").click(function () {
+                                if (warehouseToDataTable.rows('.selected').data().length == 0) {
+                                    bootbox.alert({message: "You have not selected warehouse to yet!", size: 'small'});
+                                    return false;
+                                } else {
+                                    var warehouseToIds = [];
+                                    $.each(warehouseToDataTable.rows('.selected')[0], function (index, value) {
+                                        warehouseToIds.push(warehouseToDataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                                    });
+                                    $("#warehouse_to_ids").val(warehouseToIds.join(","));
+                                    return true;
+                                }
+                            });
+                            if ($("#warehouse_to_ids") != undefined && $("#warehouse_to_ids").val() != "") {
+                                var warehouseToIds = $("#warehouse_to_ids").val().split(",");
+                                $.each(warehouseToIds, function (index, value) {
+                                    var e = jQuery.Event("click");
+                                    e.ctrlKey = true;
+                                    $("#destination_warehouse_" + value).find("td:first-child").trigger(e);
+                                });
+                            }
+                    <% end %>
                       });
                     </script>
