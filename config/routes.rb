@@ -4,6 +4,9 @@ Rails.application.routes.draw do
       get "get_warehouse_products"
       get "generate_product_item_form"
     end
+    member do
+      get "picking_note"
+    end
   end
   resources :account_payables, only: [:new, :create, :index, :destroy, :show] do
     collection do

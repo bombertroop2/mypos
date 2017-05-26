@@ -42,7 +42,7 @@ class OrderBooking < ApplicationRecord
     end
     
     def deletable
-      unless status.eql?("O")
+      if !status.eql?("O") && !status.eql?("P")
         errors.add(:base, "The record cannot be deleted")
         throw :abort
       end 

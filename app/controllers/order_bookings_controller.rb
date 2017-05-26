@@ -1,6 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class OrderBookingsController < ApplicationController
-  before_action :set_order_booking, only: [:show, :edit, :update, :destroy]
+  before_action :set_order_booking, only: [:show, :edit, :update, :destroy, :picking_note]
   before_action :populate_warehouses, only: [:new, :edit]
   before_action :add_additional_params_to_child, only: [:create, :update]
   helper SmartListing::Helper
@@ -180,6 +180,12 @@ class OrderBookingsController < ApplicationController
         obp.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if obp.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
       end
     end
+  end
+  
+  def picking_note
+    @order_booking.update_attribute :status, "P"
+    @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
+    @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
   end
 
   private
