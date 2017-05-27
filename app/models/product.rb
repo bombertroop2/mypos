@@ -12,6 +12,7 @@ class Product < ApplicationRecord
   has_many :direct_purchase_products, dependent: :restrict_with_error
   has_many :purchase_order_products, dependent: :restrict_with_error
   has_many :stock_products, dependent: :restrict_with_error
+  has_many :order_booking_products, dependent: :restrict_with_error
   has_many :product_details, dependent: :destroy
   has_many :cost_lists, dependent: :destroy
   has_many :product_colors, dependent: :destroy
@@ -29,6 +30,7 @@ class Product < ApplicationRecord
   has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
   has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
   has_one :stock_product_relation, -> {select("1 AS one")}, class_name: "StockProduct"
+  has_one :order_booking_product_relation, -> {select("1 AS one")}, class_name: "OrderBookingProduct"
   
   
   accepts_nested_attributes_for :product_details#, reject_if: :price_blank
@@ -162,11 +164,11 @@ class Product < ApplicationRecord
             
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def code_not_changed
-    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present?)
+    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present?)
   end
   
   def size_group_not_changed
-    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1)
+    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1)
   end
         
   def check_item

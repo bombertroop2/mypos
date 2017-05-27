@@ -7,7 +7,7 @@ class ProductColor < ApplicationRecord
   validates :color_id, presence: true
   validate :color_available
   
-  before_destroy :prevent_deleting_if_po_is_created, :prevent_deleting_if_direct_purchase_is_created
+  before_destroy :prevent_deleting_if_po_is_created, :prevent_deleting_if_direct_purchase_is_created, :prevent_deleting_if_order_booking_is_created
   
   private
   
@@ -21,5 +21,9 @@ class ProductColor < ApplicationRecord
 
   def prevent_deleting_if_direct_purchase_is_created        
     throw :abort if DirectPurchaseDetail.joins(:direct_purchase_product).select("1 AS one").where(["color_id = ? AND product_id = ?", color_id, product_id]).first.present?
+  end
+  
+  def prevent_deleting_if_order_booking_is_created
+    throw :abort if OrderBookingProduct.joins(:order_booking_product_items).select("1 AS one").where(["color_id = ? AND product_id = ?", color_id, product_id]).first.present?
   end
 end
