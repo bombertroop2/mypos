@@ -1,13 +1,13 @@
 class OrderBookingProductItem < ApplicationRecord
-  attr_accessor :product_id, :new_product
+  attr_accessor :product_id, :new_product, :disable_validation
 
   belongs_to :order_booking_product
   belongs_to :size
   belongs_to :color
 
-  validates :quantity, presence: true
+  validates :quantity, presence: true, unless: proc{|obpi| obpi.disable_validation}
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |dpd| dpd.quantity.present? }
-    validate :item_available
+    validate :item_available, unless: proc{|obpi| obpi.disable_validation}
     validate :quantity_available, if: proc{|obpi| obpi.quantity.present? && obpi.quantity.is_a?(Numeric)}
     
       before_save :update_booked_quantity, :update_total_quantity

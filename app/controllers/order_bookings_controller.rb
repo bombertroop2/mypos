@@ -51,7 +51,15 @@ class OrderBookingsController < ApplicationController
     @selected_products = Product.joins([stock_products: :stock], :brand).
       where(id: @order_booking.order_booking_products.pluck(:product_id)).
       where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
-      select(:id).select("products.code, common_fields.name AS brand_name")
+      select(:id).select("products.code, common_fields.name AS brand_name").
+      select("stock_products.id AS stock_product_id")
+    @order_booking.order_booking_products.each do |order_booking_product|
+      selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
+      StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
+        afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
+        order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+      end
+    end
   end
 
   # POST /order_bookings
@@ -128,7 +136,15 @@ class OrderBookingsController < ApplicationController
           @selected_products = Product.joins(stock_products: :stock).
             where(id: selected_product_ids).
             where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
-            select(:id)
+            select(:id).select("stock_products.id AS stock_product_id")
+          @order_booking.order_booking_products.each do |order_booking_product|
+            selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
+            StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
+              afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
+              order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity, disable_validation: true if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+            end
+          end
+          @invalid = true
         end
       else
         @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
