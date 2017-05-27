@@ -35,6 +35,10 @@ class Warehouse < ApplicationRecord
       where(warehouse_type: "central")
     end
     
+    def self.actived
+      where(is_active: true)
+    end
+    
     def self.not_central
       where("warehouse_type <> 'central'")
     end
