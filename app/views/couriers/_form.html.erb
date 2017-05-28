@@ -1,0 +1,44 @@
+<td colspan="5">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@courier, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <div class="form-group<%= control_group_error(@courier, :code) %>">
+            <%= f.label :code, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1", size: 4 %>
+                    <%= error_help_text(@courier, :code) %>
+                </div>
+
+            </div>
+            <div class="form-group<%= control_group_error(@courier, :name) %>">
+                <%= f.label :name, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :name, class: "form-control inputs", tabindex: "2" %>
+                        <%= error_help_text(@courier, :name) %>
+                    </div>
+
+                </div>
+                <div class="form-group<%= control_group_error(@courier, :via) %>">
+                    <%= f.label :via, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.select :via, options_for_select(Courier::SHIPPING_WAYS, @courier.via), {prompt: true}, {tabindex: "3", class: "form-control"} %>
+                            <%= error_help_text(@courier, :via) %>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group<%= control_group_error(@courier, :unit) %>">
+                        <%= f.label :unit, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.select :unit, options_for_select(Courier::UNITS, @courier.unit), {prompt: true}, {tabindex: "4", class: "form-control"} %>
+                                <%= error_help_text(@courier, :unit) %>
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <%= f.submit "Save", class: "btn btn-primary" %>
+                                  <button class="btn btn-link cancel">Cancel</button>
+                              </div>
+                          </div>
+                        <% end %>
+                    </td>

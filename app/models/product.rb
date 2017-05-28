@@ -37,6 +37,8 @@ class Product < ApplicationRecord
   accepts_nested_attributes_for :product_colors, reject_if: proc { |attributes| attributes['selected_color_id'].blank? }, allow_destroy: true
   accepts_nested_attributes_for :cost_lists
   
+  before_validation :strip_string_values
+  
   validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
@@ -102,6 +104,11 @@ class Product < ApplicationRecord
   end
         
   private
+  
+  def strip_string_values
+    self.code = code.strip
+  end
+
   
   def brand_available
     errors.add(:brand_id, "does not exist!") if brand_id.present? && Brand.where(id: brand_id).select("1 AS one").blank?

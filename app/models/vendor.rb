@@ -1,4 +1,5 @@
 class Vendor < ApplicationRecord
+  before_validation :strip_string_values
 
   validates :code, presence: true, uniqueness: true
   validates :name, :address, :terms_of_payment, presence: true
@@ -32,6 +33,10 @@ class Vendor < ApplicationRecord
     
 
         private
+
+        def strip_string_values
+          self.code = code.strip
+        end
         
         def vat_available
           Vendor::VAT.select{ |x| x[1] == value_added_tax }.first.first

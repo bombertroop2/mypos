@@ -10,9 +10,13 @@ class Supervisor < ApplicationRecord
 
     before_save :convert_email_value_to_nil
 
-    before_validation :titleize_name, :upcase_code, :replace_underline_from_mobile_phone
+    before_validation :titleize_name, :upcase_code, :replace_underline_from_mobile_phone, :strip_string_values
     
     private
+    
+    def strip_string_values
+      self.code = code.strip
+    end
     
     def replace_underline_from_mobile_phone
       self.mobile_phone = mobile_phone.gsub("_", "")

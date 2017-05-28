@@ -1,0 +1,10 @@
+<td><%= object.code %></td>
+<td><%= object.name %></td>
+<td><%= object.via %></td>
+<td><%= object.unit %></td>
+<td class="actions" style="text-align: right">
+    <% if user_signed_in? && is_admin? %>
+      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_courier_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
+        <%= link_to_if(true, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <% end %>
+  </td>

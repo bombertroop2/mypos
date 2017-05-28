@@ -6,10 +6,18 @@ class Size < ApplicationRecord
   has_one :product_detail_relation, -> {select("1 AS one")}, class_name: "ProductDetail"
   has_one :stock_detail_relation, -> {select("1 AS one")}, class_name: "StockDetail"
   has_one :order_booking_product_item_relation, -> {select("1 AS one")}, class_name: "OrderBookingProductItem"
+
+  before_validation :strip_string_values
+  
   validates :size, presence: true, uniqueness: {scope: :size_group_id}
   validate :size_not_changed
   
   private
+  
+  def strip_string_values
+    self.size = size.strip
+  end
+
   
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def size_not_changed

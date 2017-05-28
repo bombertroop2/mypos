@@ -22,7 +22,7 @@ class AccountPayable < ApplicationRecord
   accepts_nested_attributes_for :account_payable_purchases
   accepts_nested_attributes_for :allocated_return_items
   
-  before_validation :calculate_amount_to_be_paid, :set_zero_debt
+  before_validation :calculate_amount_to_be_paid, :set_zero_debt, :strip_string_values
 
   validates :payment_date, :payment_method, :amount_paid, :vendor_id, :debt, presence: true
   validates :giro_number, :giro_date, presence: true, if: proc {|ap| ap.payment_method.eql?("Giro")}
@@ -41,6 +41,12 @@ class AccountPayable < ApplicationRecord
                     after_create :mark_purchase_doc_as_paid              
                                         
                     private
+                    
+                    def strip_string_values
+                      if payment_method.eql?("Giro")
+                        self.giro_number = giro_number.strip
+                      end
+                    end
                     
                     def vendor_available
                       errors.add(:vendor_id, "does not exist!") if Vendor.select("1 AS one").where(id: vendor_id).blank?

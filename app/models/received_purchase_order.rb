@@ -10,6 +10,8 @@ class ReceivedPurchaseOrder < ApplicationRecord
   
       accepts_nested_attributes_for :received_purchase_order_products, reject_if: :child_blank
   
+      before_validation :strip_string_values
+      
       validates :delivery_order_number, presence: true, unless: proc{|rpo| rpo.is_using_delivery_order.eql?("no")}, on: :create
         validate :minimum_receiving_item, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
           validates :receiving_date, presence: true, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
@@ -22,6 +24,10 @@ class ReceivedPurchaseOrder < ApplicationRecord
                     attr_accessor :is_it_direct_purchasing
   
                     private
+                    
+                    def strip_string_values
+                      self.delivery_order_number = delivery_order_number.strip
+                    end
                   
                     def purchase_order_receivable
                       errors.add(:base, "Not able to receive selected PO") unless PurchaseOrder.select("1 AS one").where("(status = 'Open' OR status = 'Partial') AND id = '#{purchase_order_id}' AND vendor_id = '#{vendor_id}'").present?

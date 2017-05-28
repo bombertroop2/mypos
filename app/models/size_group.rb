@@ -7,9 +7,13 @@ class SizeGroup < ApplicationRecord
 
   accepts_nested_attributes_for :sizes, allow_destroy: true
 
-  before_validation :upcase_code
+  before_validation :upcase_code, :strip_string_values
   
   private
+  
+  def strip_string_values
+    self.code = code.strip
+  end
   
   def validate_unique_sizes
     collection = sizes

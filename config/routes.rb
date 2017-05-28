@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :couriers, except: :show
   resources :order_bookings do
     collection do
       get "get_warehouse_products"

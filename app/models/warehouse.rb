@@ -20,7 +20,7 @@ class Warehouse < ApplicationRecord
       :warehouse_type_not_changed
     validates :code, uniqueness: true
 
-    before_validation :upcase_code
+    before_validation :upcase_code, :strip_string_values
 
     TYPES = [
       ["Central", "central"],
@@ -49,6 +49,10 @@ class Warehouse < ApplicationRecord
     end
 
     private
+    
+    def strip_string_values
+      self.code = code.strip
+    end
     
     def area_manager_available
       errors.add(:supervisor_id, "does not exist!") if supervisor_id.present? && Supervisor.where(id: supervisor_id).select("1 AS one").blank?      

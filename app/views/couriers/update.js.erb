@@ -1,0 +1,5 @@
+<% if @invalid %>
+  <%= smart_listing_item :couriers, :update, @courier, "couriers/form" %>
+<% else %>
+  <%= smart_listing_item :couriers, :update, @courier, "couriers/courier" %>
+<% end %>
