@@ -51,13 +51,38 @@ class Shipment < ApplicationRecord
       today = Date.current
       current_month = today.month.to_s.rjust(2, '0')
       current_year = today.strftime("%y").rjust(2, '0')
-      last_number = Shipment.where("delivery_order_number LIKE '#{warehouse_code}SJ#{current_month}#{current_year}%'").select(:delivery_order_number).limit(1).order("id DESC").first.delivery_order_number rescue nil
-      if last_number
-        seq_number = last_number.split(last_number.scan(/#{warehouse_code}SJ\d.{3}/).first).last.succ
-        new_number = "#{warehouse_code}SJ#{current_month}#{current_year}#{seq_number}"
-      else
+      existed_numbers = Shipment.where("delivery_order_number LIKE '#{warehouse_code}SJ#{current_month}#{current_year}%'").select(:delivery_order_number).order(:delivery_order_number)
+      if existed_numbers.blank?
         new_number = "#{warehouse_code}SJ#{current_month}#{current_year}0001"
+      else
+        if existed_numbers.length == 1
+          seq_number = existed_numbers[0].delivery_order_number.split("#{warehouse_code}SJ#{current_month}#{current_year}").last
+          if seq_number.to_i > 1
+            new_number = "#{warehouse_code}SJ#{current_month}#{current_year}0001"
+          else
+            new_number = "#{warehouse_code}SJ#{current_month}#{current_year}#{seq_number.succ}"
+          end
+        else
+          last_seq_number = ""
+          existed_numbers.each_with_index do |existed_number, index|
+            seq_number = existed_number.delivery_order_number.split("#{warehouse_code}SJ#{current_month}#{current_year}").last
+            if seq_number.to_i > 1 && index == 0
+              new_number = "#{warehouse_code}SJ#{current_month}#{current_year}0001"
+              break                              
+            elsif last_seq_number.eql?("")
+              last_seq_number = seq_number
+            elsif (seq_number.to_i - last_seq_number.to_i) > 1
+              new_number = "#{warehouse_code}SJ#{current_month}#{current_year}#{last_seq_number.succ}"
+              break
+            elsif index == existed_numbers.length - 1
+              new_number = "#{warehouse_code}SJ#{current_month}#{current_year}#{seq_number.succ}"
+            else
+              last_seq_number = seq_number
+            end
+          end
+        end                        
       end
+
       self.delivery_order_number = new_number
     end
     

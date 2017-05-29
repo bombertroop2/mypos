@@ -61,15 +61,39 @@ class PurchaseReturn < ApplicationRecord
                 Vendor.joins(:purchase_orders).select(:code).where(["purchase_orders.id = ?", purchase_order_id]).first.code
               end
 
-              last_pr = PurchaseReturn.where("number LIKE 'PRR#{vendor_code}#{current_month}#{current_year}%'").select(:number).last
-
-              if last_pr
-                seq_number = last_pr.number.split(last_pr.number.scan(/PRR#{vendor_code}\d.{3}/).first).last.succ
-                new_pr_number = "PRR#{vendor_code}#{current_month}#{current_year}#{seq_number}"
+              existed_numbers = PurchaseReturn.where("number LIKE 'PRR#{vendor_code}#{current_month}#{current_year}%'").select(:number).order(:number)
+              if existed_numbers.blank?
+                new_number = "PRR#{vendor_code}#{current_month}#{current_year}0001"
               else
-                new_pr_number = "PRR#{vendor_code}#{current_month}#{current_year}0001"
+                if existed_numbers.length == 1
+                  seq_number = existed_numbers[0].number.split("PRR#{vendor_code}#{current_month}#{current_year}").last
+                  if seq_number.to_i > 1
+                    new_number = "PRR#{vendor_code}#{current_month}#{current_year}0001"
+                  else
+                    new_number = "PRR#{vendor_code}#{current_month}#{current_year}#{seq_number.succ}"
+                  end
+                else
+                  last_seq_number = ""
+                  existed_numbers.each_with_index do |existed_number, index|
+                    seq_number = existed_number.number.split("PRR#{vendor_code}#{current_month}#{current_year}").last
+                    if seq_number.to_i > 1 && index == 0
+                      new_number = "PRR#{vendor_code}#{current_month}#{current_year}0001"
+                      break                              
+                    elsif last_seq_number.eql?("")
+                      last_seq_number = seq_number
+                    elsif (seq_number.to_i - last_seq_number.to_i) > 1
+                      new_number = "PRR#{vendor_code}#{current_month}#{current_year}#{last_seq_number.succ}"
+                      break
+                    elsif index == existed_numbers.length - 1
+                      new_number = "PRR#{vendor_code}#{current_month}#{current_year}#{seq_number.succ}"
+                    else
+                      last_seq_number = seq_number
+                    end
+                  end
+                end                        
               end
-              self.number = new_pr_number
+
+              self.number = new_number
             end
           
 

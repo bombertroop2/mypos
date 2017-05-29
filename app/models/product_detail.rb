@@ -46,7 +46,7 @@ class ProductDetail < ApplicationRecord
     end
             
     def create_barcode
-      product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) and pd.product_id.eql?(product_id)}.first
+      product_detail = ProductDetail.select{|pd| pd.size_id.eql?(size_id) && pd.product_id.eql?(product_id)}.first
       if product_detail
         self.barcode = product_detail.barcode
       else

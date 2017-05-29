@@ -81,12 +81,36 @@ class OrderBooking < ApplicationRecord
       today = Date.current
       current_month = today.month.to_s.rjust(2, '0')
       current_year = today.strftime("%y").rjust(2, '0')
-      last_number = OrderBooking.where("number LIKE '#{warehouse_code}OB#{current_month}#{current_year}%'").select(:number).limit(1).order("id DESC").first.number rescue nil
-      if last_number
-        seq_number = last_number.split(last_number.scan(/#{warehouse_code}OB\d.{3}/).first).last.succ
-        new_number = "#{warehouse_code}OB#{current_month}#{current_year}#{seq_number}"
-      else
+      existed_numbers = OrderBooking.where("number LIKE '#{warehouse_code}OB#{current_month}#{current_year}%'").select(:number).order(:number)
+      if existed_numbers.blank?
         new_number = "#{warehouse_code}OB#{current_month}#{current_year}00001"
+      else
+        if existed_numbers.length == 1
+          seq_number = existed_numbers[0].number.split("#{warehouse_code}OB#{current_month}#{current_year}").last
+          if seq_number.to_i > 1
+            new_number = "#{warehouse_code}OB#{current_month}#{current_year}00001"
+          else
+            new_number = "#{warehouse_code}OB#{current_month}#{current_year}#{seq_number.succ}"
+          end
+        else
+          last_seq_number = ""
+          existed_numbers.each_with_index do |existed_number, index|
+            seq_number = existed_number.number.split("#{warehouse_code}OB#{current_month}#{current_year}").last
+            if seq_number.to_i > 1 && index == 0
+              new_number = "#{warehouse_code}OB#{current_month}#{current_year}00001"
+              break                              
+            elsif last_seq_number.eql?("")
+              last_seq_number = seq_number
+            elsif (seq_number.to_i - last_seq_number.to_i) > 1
+              new_number = "#{warehouse_code}OB#{current_month}#{current_year}#{last_seq_number.succ}"
+              break
+            elsif index == existed_numbers.length - 1
+              new_number = "#{warehouse_code}OB#{current_month}#{current_year}#{seq_number.succ}"
+            else
+              last_seq_number = seq_number
+            end
+          end
+        end                        
       end
       self.number = new_number
     end

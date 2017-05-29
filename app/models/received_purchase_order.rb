@@ -10,7 +10,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
   
       accepts_nested_attributes_for :received_purchase_order_products, reject_if: :child_blank
   
-      before_validation :strip_string_values
+      before_validation :strip_string_values, if: proc{|rpo| rpo.is_using_delivery_order.eql?("yes")}, on: :create
       
       validates :delivery_order_number, presence: true, unless: proc{|rpo| rpo.is_using_delivery_order.eql?("no")}, on: :create
         validate :minimum_receiving_item, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
@@ -40,18 +40,43 @@ class ReceivedPurchaseOrder < ApplicationRecord
                       end
                     end
     
-                    def create_auto_do_number                  
-                      last_received_po = vendor.received_purchase_orders.select(:delivery_order_number).last
+                    def create_auto_do_number
                       today = Date.current
                       current_month = today.month.to_s.rjust(2, '0')
                       current_year = today.strftime("%y").rjust(2, '0')
-                      if last_received_po && last_received_po.delivery_order_number.include?("DUOS#{(vendor.code)}#{current_month}#{current_year}")
-                        seq_number = last_received_po.delivery_order_number.split(last_received_po.delivery_order_number.scan(/DUOS#{vendor.code}\d.{3}/).first).last.succ
-                        new_do_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}#{seq_number}"
+                      existed_numbers = ReceivedPurchaseOrder.where("delivery_order_number LIKE 'DUOS#{(vendor.code)}#{current_month}#{current_year}%'").select(:delivery_order_number).order(:delivery_order_number)
+                      if existed_numbers.blank?
+                        new_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}001"
                       else
-                        new_do_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}001"
+                        if existed_numbers.length == 1
+                          seq_number = existed_numbers[0].delivery_order_number.split("DUOS#{(vendor.code)}#{current_month}#{current_year}").last
+                          if seq_number.to_i > 1
+                            new_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}001"
+                          else
+                            new_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}#{seq_number.succ}"
+                          end
+                        else
+                          last_seq_number = ""
+                          existed_numbers.each_with_index do |existed_number, index|
+                            seq_number = existed_number.delivery_order_number.split("DUOS#{(vendor.code)}#{current_month}#{current_year}").last
+                            if seq_number.to_i > 1 && index == 0
+                              new_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}001"
+                              break                              
+                            elsif last_seq_number.eql?("")
+                              last_seq_number = seq_number
+                            elsif (seq_number.to_i - last_seq_number.to_i) > 1
+                              new_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}#{last_seq_number.succ}"
+                              break
+                            elsif index == existed_numbers.length - 1
+                              new_number = "DUOS#{(vendor.code)}#{current_month}#{current_year}#{seq_number.succ}"
+                            else
+                              last_seq_number = seq_number
+                            end
+                          end
+                        end                        
                       end
-                      self.delivery_order_number = new_do_number
+
+                      self.delivery_order_number = new_number
                     end
     
                     def minimum_receiving_item
