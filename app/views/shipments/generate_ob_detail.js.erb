@@ -1,0 +1,5 @@
+<% unless @shipment.nil? %>
+  $("#ob_detail_container").html("<%= j(render(partial: "ob_detail")) %>");
+<% else %>
+  $("#ob_detail_container").html("");
+<% end %>

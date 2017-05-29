@@ -13,6 +13,11 @@ class Courier < ApplicationRecord
     ["Kilogram", "Kilogram"]
   ]
   
+  def code_and_name
+    "#{code} - #{name}"
+  end
+
+  
   private
   
   def strip_string_values

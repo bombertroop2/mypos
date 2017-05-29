@@ -69,6 +69,7 @@
                           <li class="<%= params[:controller].eql?("account_payables") ? "active" : "" %>"><%= link_to "Account Payables", account_payables_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("order_bookings") ? "active" : "" %>"><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
                           <li class="<%= params[:controller].eql?("couriers") ? "active" : "" %>"><%= link_to "Couriers", couriers_path, method: :get %></li>
+                          <li class="<%= params[:controller].eql?("shipments") ? "active" : "" %>"><%= link_to "Shipments", shipments_path, method: :get %></li>
                       </ul>
                   </div>
                   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

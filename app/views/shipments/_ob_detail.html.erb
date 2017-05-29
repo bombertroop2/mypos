@@ -1,0 +1,90 @@
+<table border="1" class="product-table table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
+    <tr style="text-align: center">
+        <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
+        <td style="vertical-align: middle;width: auto !important;"><strong>Size X Color</strong></td>
+    </tr>
+    <% @shipment.shipment_products.each do |shipment_product| %>
+      <% order_booking_product = OrderBookingProduct.joins(product: :brand).select(:id).select("products.code AS prdct_code, common_fields.name AS prdct_name").where(id: shipment_product.order_booking_product_id).first %>
+      <% order_booking_product_items = order_booking_product.order_booking_product_items %>
+      <% sizes = order_booking_product.sizes %>
+      <% colors = order_booking_product.colors %>
+      <% shipment_product_items = shipment_product.shipment_product_items %>
+      <%= fields_for "shipment[shipment_products_attributes][#{shipment_product.order_booking_product_id}]", shipment_product do |shipment_product_fields| %>
+        <%= shipment_product_fields.hidden_field :order_booking_product_id %>
+        <tr style="text-align: center">
+            <td style="vertical-align: middle;width: 20% !important;">
+                <%= "#{order_booking_product.prdct_code} - #{order_booking_product.prdct_name}" %>
+            </td>
+            <td style="width: auto !important;">
+                <div class="table-responsive">
+                    <table border="1" class="table table-condensed table-responsive table-bordered">
+                        <tr style="text-align: center">
+                            <th colspan="2" rowspan="2"></th>
+                            <td colspan="<%= sizes.length %>" align="center">
+                                <strong>Sizes</strong>
+                            </td>
+                        </tr>
+
+                        <tr style="text-align: center">
+                            <% sizes.each do |size| %>
+                              <td align="center">
+                                  <%= size.size %>
+                              </td>
+                            <% end %>
+                        </tr>
+
+                        <% colors.each_with_index do |color, idx| %>                          
+                          <tr style="text-align: center">
+                              <% if idx.eql? 0 %>
+                                <td rowspan="<%= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>
+                              <% end %>
+                              <td style="vertical-align: middle"><%= color.code %></td>                            
+                              <% sizes.each do |size| %>
+                                <% order_booking_product_item = order_booking_product_items.select(:id, :quantity).where(size_id: size.id, color_id: color.id).first %>
+                                <% shipment_product_item = shipment_product_items.select{|spi| spi.order_booking_product_item_id == order_booking_product_item.id}.first %>
+                                <% if shipment_product_item.present? %>
+                                  <td align="center" style="vertical-align: middle">
+                                      <%= fields_for "shipment[shipment_products_attributes][#{shipment_product.order_booking_product_id}][shipment_product_items_attributes][#{shipment_product_item.order_booking_product_item_id}]", shipment_product_item do |spi_form| %>
+                                        <%= spi_form.hidden_field :order_booking_product_item_id %>
+                                        <div class="<%= control_group_error(spi_form.object, :quantity) %>">
+                                            <table cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                    <td><%= spi_form.text_field :quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
+                                                      <td>&nbsp;/&nbsp;</td> 
+                                                      <td><%= order_booking_product_item.quantity %></td> 
+                                                  </tr>
+                                              </table>                                                
+                                              <%= error_help_text(spi_form.object, :quantity) %>
+                                          </div>
+                                          <% if spi_form.object && !spi_form.object.new_record? %>
+                                            <%= spi_form.hidden_field :id %>
+                                          <% end %>
+                                        <% end %>
+                                    </td>
+                                  <% else %>
+                                    <td></td>
+                                  <% end %>
+                                <% end %>
+                            </tr>
+                          <% end %>              
+                      </table>
+                  </div>
+              </td>
+          </tr>
+        <% end %>
+      <% end %>
+  </table>
+
+  <script>
+    $(function () {
+        $(".quantity").numeric({
+            decimal: false,
+            negative: false
+        }, function () {
+            alert("Positive integers only");
+            this.value = "";
+            this.focus();
+        });
+    });
+
+  </script>

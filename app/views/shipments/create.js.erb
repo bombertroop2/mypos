@@ -1,0 +1,12 @@
+<% if @invalid %>
+  <%= smart_listing_item :shipments, :create, @shipment, "shipments/form" %>
+  <% if @shipment.errors[:base].present? %>
+    bootbox.alert({message: "<%= @shipment.errors[:base].join("<br/>") %>",size: 'small'});
+  <% elsif @shipment.errors[:"shipment_products.base"].present? %>
+    bootbox.alert({message: "<%= @shipment.errors[:"shipment_products.base"].join("<br/>") %>",size: 'small'});
+  <% elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present? %>
+    bootbox.alert({message: "<%= @shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>") %>",size: 'small'});
+  <% end %>
+<% else %>
+  <%= smart_listing_item :shipments, :create, @shipment, "shipments/shipment" %>
+<% end %>

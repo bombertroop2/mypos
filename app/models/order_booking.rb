@@ -28,6 +28,10 @@ class OrderBooking < ApplicationRecord
       return true if plan_date_changed? && persisted?
       return false
     end
+    
+    def self.printed
+      where(status: "P")
+    end
 
     private
     

@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :shipments do    
+    collection do
+      get "generate_ob_detail"
+    end
+  end
   resources :couriers, except: :show
   resources :order_bookings do
     collection do
