@@ -18,7 +18,7 @@ class PurchaseReturnItem < ApplicationRecord
         unless direct_purchase_return
           errors.add(:base, "Not able to return selected items") unless PurchaseOrderDetail.
             select("1 AS one").joins(purchase_order_product: :purchase_order).
-            where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND purchase_order_details.id = #{purchase_order_detail_id} AND status != 'Open' AND status != 'Deleted'").present?
+            where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND purchase_order_details.id = #{purchase_order_detail_id} AND status != 'Open'").present?
         else
           errors.add(:base, "Not able to return selected items") unless DirectPurchaseDetail.
             select("1 AS one").joins(direct_purchase_product: :direct_purchase).

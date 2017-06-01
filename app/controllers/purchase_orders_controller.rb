@@ -36,21 +36,17 @@ class PurchaseOrdersController < ApplicationController
 
   # GET /purchase_orders/1/edit
   def edit
-    unless @purchase_order.status.eql?("Deleted")
-      @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
-      @purchase_order.purchase_order_date = @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date
-      @products = @purchase_order.products.select :id
-      @purchase_order.purchase_order_products.each do |pop|
-        colors = pop.product.colors.select :id
-        sizes = pop.product.sizes.select :id
-        colors.each do |color|
-          sizes.each do |size|
-            pop.purchase_order_details.build size_id: size.id, color_id: color.id             
-          end
+    @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
+    @purchase_order.purchase_order_date = @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date
+    @products = @purchase_order.products.select :id
+    @purchase_order.purchase_order_products.each do |pop|
+      colors = pop.product.colors.select :id
+      sizes = pop.product.sizes.select :id
+      colors.each do |color|
+        sizes.each do |size|
+          pop.purchase_order_details.build size_id: size.id, color_id: color.id             
         end
       end
-    else
-      redirect_to purchase_orders_url, alert: "Sorry, this PO is not editable"
     end
   end
 
@@ -181,11 +177,8 @@ class PurchaseOrdersController < ApplicationController
 
   # DELETE /purchase_orders/1
   # DELETE /purchase_orders/1.json
-  def destroy    
-    @old_status = @purchase_order.status
-    @purchase_order.deleting_po = true
-    @valid = @purchase_order.update(status: "Deleted")
-
+  def destroy
+    @purchase_order.destroy
   end
     
   def close

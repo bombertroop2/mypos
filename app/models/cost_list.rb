@@ -3,8 +3,8 @@ class CostList < ApplicationRecord
 
   has_many :purchase_order_products#, dependent: :restrict_with_error
   has_many :direct_purchase_products
-  has_one :created_purchase_order, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
-  has_one :received_purchase_order, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted' AND purchase_orders.status <> 'Open'")}, class_name: "PurchaseOrderProduct"
+  has_one :created_purchase_order, -> {select("1 AS one").joins(:purchase_order)}, class_name: "PurchaseOrderProduct"
+  has_one :received_purchase_order, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Open'")}, class_name: "PurchaseOrderProduct"
   has_one :direct_purchase_product, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
   
   before_validation :set_effective_date, if: proc{|cost_list| cost_list.is_user_creating_product}

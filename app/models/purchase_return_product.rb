@@ -25,7 +25,7 @@ class PurchaseReturnProduct < ApplicationRecord
   private
   
   def product_returnable
-    errors.add(:base, "Not able to return selected products") if !returning_direct_purchase && PurchaseOrderProduct.select("1 AS one").joins(:purchase_order).where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND status != 'Open' AND status != 'Deleted'").blank?
+    errors.add(:base, "Not able to return selected products") if !returning_direct_purchase && PurchaseOrderProduct.select("1 AS one").joins(:purchase_order).where("purchase_order_products.id = #{purchase_order_product_id} AND purchase_orders.id = #{purchase_order_id} AND status != 'Open'").blank?
     errors.add(:base, "Not able to return selected products") if returning_direct_purchase && DirectPurchaseProduct.where(["id = ? AND direct_purchase_id = ?", direct_purchase_product_id, direct_purchase_id]).select("1 AS one").blank?
   end
   

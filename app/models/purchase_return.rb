@@ -33,7 +33,7 @@ class PurchaseReturn < ApplicationRecord
             end
   
             def purchase_order_is_returnable
-              errors.add(:purchase_order_id, "does not exist!") if PurchaseOrder.where(["status != 'Open' AND status != 'Deleted' AND id = ?", purchase_order_id]).select("1 AS one").blank?
+              errors.add(:purchase_order_id, "does not exist!") if PurchaseOrder.where(["status != 'Open' AND id = ?", purchase_order_id]).select("1 AS one").blank?
             end
 
             def direct_purchase_is_returnable

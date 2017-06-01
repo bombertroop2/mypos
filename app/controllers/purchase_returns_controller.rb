@@ -25,7 +25,7 @@ class PurchaseReturnsController < ApplicationController
   # GET /purchase_returns/new
   def new
     @purchase_return = PurchaseReturn.new direct_purchase_return: true
-    @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
+    @purchase_orders = PurchaseOrder.where("status != 'Open'").select :id, :number
     @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
   end
 
@@ -48,7 +48,7 @@ class PurchaseReturnsController < ApplicationController
         end
       end if direct_purchase.present?
 
-      @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
+      @purchase_orders = PurchaseOrder.where("status != 'Open'").select :id, :number
       @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
       render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
     else
@@ -76,7 +76,7 @@ class PurchaseReturnsController < ApplicationController
         end
       end if purchase_order
 
-      @purchase_orders = PurchaseOrder.where("status != 'Open' AND status != 'Deleted'").select :id, :number
+      @purchase_orders = PurchaseOrder.where("status != 'Open'").select :id, :number
       @do_numbers = ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
       render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
     else

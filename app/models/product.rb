@@ -22,13 +22,13 @@ class Product < ApplicationRecord
   has_many :sizes, -> {group("sizes.id").order(:size).select(:id, :size)}, through: :product_details
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode, size").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
-  has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open' AND purchase_orders.status <> 'Deleted'")}, through: :purchase_order_products, source: :purchase_order
+  has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :open_purchase_orders, -> {select("purchase_orders.id, purchase_order_date, purchase_orders.order_value").where("purchase_orders.status = 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :color_codes, -> {select(:code)}, through: :product_colors, source: :color
   has_many :colors, -> {select(:id, :code, :name).order(:code)}, through: :product_colors, source: :color
   has_many :prices, -> {select(:price).order(:price)}, through: :product_details, source: :price_lists
   has_one :direct_purchase_product_relation, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
-  has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Deleted'")}, class_name: "PurchaseOrderProduct"
+  has_one :purchase_order_relation, -> {select("1 AS one").joins(:purchase_order)}, class_name: "PurchaseOrderProduct"
   has_one :stock_product_relation, -> {select("1 AS one")}, class_name: "StockProduct"
   has_one :order_booking_product_relation, -> {select("1 AS one")}, class_name: "OrderBookingProduct"
   

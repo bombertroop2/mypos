@@ -1,5 +1,8 @@
-<%= smart_listing_item :purchase_orders, :update, @purchase_order, "purchase_orders/purchase_order" %>
-<% unless @valid %>
-  $("#po-status-<%= @purchase_order.id %>").html("<%= @old_status %>");
-  bootbox.alert({message: "<%= @purchase_order.errors[:base].join("\\n") %>",size: 'small'});
+<% if @purchase_order.destroyed? %>
+  <%= smart_listing_item :purchase_orders, :destroy, @purchase_order %>
+<% else %>
+  <% if @purchase_order.errors.present? && @purchase_order.errors.messages[:base].present? %>
+    bootbox.alert({message: "<%= @purchase_order.errors.messages[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+  <%= smart_listing_item :purchase_orders, :update, @purchase_order, "purchase_orders/purchase_order" %>
 <% end %>

@@ -6,17 +6,24 @@ class ProductColor < ApplicationRecord
   
   validates :color_id, presence: true
   validate :color_available
+  validate :color_not_added, on: :create
   
   before_destroy :prevent_deleting_if_po_is_created, :prevent_deleting_if_direct_purchase_is_created, :prevent_deleting_if_order_booking_is_created
   
   private
+  
+  # apabila sudah ada relasi dengan table lain maka tidak dapat tambah color
+  def color_not_added
+    errors.add(:base, "Color addition is not allowed!") if new_record? && product && (product.order_booking_product_relation.present? || product.stock_product_relation.present? || product.purchase_order_relation.present? || product.direct_purchase_product_relation.present? || product.cost_lists.select(:id).count > 1)
+  end
+
   
   def color_available
     errors.add(:color_id, "does not exist!") if color_id.present? && Color.where(id: color_id).select("1 AS one").blank?
   end
   
   def prevent_deleting_if_po_is_created    
-    throw :abort if PurchaseOrderDetail.joins(purchase_order_product: :purchase_order).select("1 AS one").where(["color_id = ? AND purchase_order_products.product_id = ? AND purchase_orders.status <> 'Deleted'", color_id, product_id]).first.present?
+    throw :abort if PurchaseOrderDetail.joins(purchase_order_product: :purchase_order).select("1 AS one").where(["color_id = ? AND purchase_order_products.product_id = ?", color_id, product_id]).first.present?
   end
 
   def prevent_deleting_if_direct_purchase_is_created        
