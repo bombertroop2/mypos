@@ -11,6 +11,7 @@ class Size < ApplicationRecord
   
   validates :size, presence: true, uniqueness: {scope: :size_group_id}
   validate :size_not_changed
+  validate :size_not_added, on: :create
   
   private
   
@@ -22,5 +23,10 @@ class Size < ApplicationRecord
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def size_not_changed
     errors.add(:size, "change is not allowed!") if size_changed? && persisted? && (order_booking_product_item_relation.present? || product_detail_relation.present? || stock_detail_relation.present?)
+  end
+
+  # apabila sudah ada relasi dengan table lain maka tidak dapat tambah size
+  def size_not_added
+    errors.add(:size, "addition is not allowed!") if new_record? && size_group && size_group.product_relation.present?
   end
 end

@@ -4,20 +4,23 @@
 
 <div id="search-form-container" class="form-inline text-right">
     <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-plan-date" placeholder="Plan date">
+        <input type="text" class="form-control" readonly="true" id="filter-delivery-date" placeholder="Delivery date">
     </div>
     <div class="form-group">
-        <input type="text" id="filter-string" class="form-control" placeholder="Search...">
+        <input type="text" class="form-control" readonly="true" id="filter-received-date" placeholder="Received date">
     </div>
-    <button id="search-ob-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    <div class="form-group">
+        <input type="text" id="filter-string" class="form-control" placeholder="DO number/quantity">
+    </div>
+    <button id="search-shipment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
 </div>
 
 
 <div class="hidden">
     <%= smart_listing_controls_for(:shipments, {class: "form-inline text-right"}) do %>
-        <%= text_field_tag :filter_plan_date, '', class: "search form-control", autocomplete: :off %>
-          <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-            <%= text_field_tag :filter_status, '', class: "search form-control", autocomplete: :off %>
+        <%= text_field_tag :filter_delivery_date, '', class: "search form-control", autocomplete: :off %>
+          <%= text_field_tag :filter_received_date, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
             <% end %>
         </div>
         <%= smart_listing_render(:shipments) %>
@@ -25,10 +28,10 @@
 
         <script>
           $(function () {
-              $("#search-ob-btn").click(function () {
-                  $("#filter_plan_date").val($("#filter-plan-date").val());
+              $("#search-shipment-btn").click(function () {
+                  $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                  $("#filter_received_date").val($("#filter-received-date").val());
                   $("#filter_string").val($("#filter-string").val());
-                  $("#filter_status").val($("#filter-status").val());
                   $(".smart-listing-controls").submit();
               });
           });

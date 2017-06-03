@@ -49,42 +49,48 @@
                                         <div class="<%= control_group_error(spi_form.object, :quantity) %>">
                                             <table cellpadding="0" cellspacing="0">
                                                 <tr>
-                                                    <td><%= spi_form.text_field :quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
-                                                      <td>&nbsp;/&nbsp;</td> 
-                                                      <td><%= order_booking_product_item.quantity %></td> 
-                                                  </tr>
-                                              </table>                                                
-                                              <%= error_help_text(spi_form.object, :quantity) %>
-                                          </div>
-                                          <% if spi_form.object && !spi_form.object.new_record? %>
-                                            <%= spi_form.hidden_field :id %>
+                                                    <td>
+                                                        <% if params[:action].eql?("create") %>
+                                                          <%= spi_form.text_field :quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                                          <% else %>
+                                                            <%= spi_form.text_field :quantity, value: order_booking_product_item.quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                                            <% end %>
+                                                        </td>
+                                                        <td>&nbsp;/&nbsp;</td> 
+                                                        <td><%= order_booking_product_item.quantity %></td> 
+                                                    </tr>
+                                                </table>                                                
+                                                <%= error_help_text(spi_form.object, :quantity) %>
+                                            </div>
+                                            <% if spi_form.object && !spi_form.object.new_record? %>
+                                              <%= spi_form.hidden_field :id %>
+                                            <% end %>
                                           <% end %>
-                                        <% end %>
-                                    </td>
-                                  <% else %>
-                                    <td></td>
+                                      </td>
+                                    <% else %>
+                                      <td></td>
+                                    <% end %>
                                   <% end %>
-                                <% end %>
-                            </tr>
-                          <% end %>              
-                      </table>
-                  </div>
-              </td>
-          </tr>
+                              </tr>
+                            <% end %>              
+                        </table>
+                    </div>
+                </td>
+            </tr>
+          <% end %>
         <% end %>
-      <% end %>
-  </table>
+    </table>
 
-  <script>
-    $(function () {
-        $(".quantity").numeric({
-            decimal: false,
-            negative: false
-        }, function () {
-            alert("Positive integers only");
-            this.value = "";
-            this.focus();
-        });
-    });
+    <script>
+      $(function () {
+          $(".quantity").numeric({
+              decimal: false,
+              negative: false
+          }, function () {
+              alert("Positive integers only");
+              this.value = "";
+              this.focus();
+          });
+      });
 
-  </script>
+    </script>

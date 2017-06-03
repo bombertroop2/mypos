@@ -38,26 +38,48 @@
 
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-9">
-                            <%= f.submit "Save", class: "btn btn-primary", id: "save-btn" %>
-                              <button class="btn btn-link cancel">Cancel</button>
-                          </div>
-                      </div>
-                    <% end %>
-                </td>
+                            <a class="btn btn-primary" id="save-btn">Save</a>
+                            <button class="btn btn-link cancel">Cancel</button>
+                        </div>
+                    </div>
+                  <% end %>
+              </td>
 
-                <script>
-                  $(function () {
-                      $("#shipment_delivery_date").datepicker({
-                          dateFormat: "dd/mm/yy"
-                      });
-                      $("#shipment_received_date").datepicker({
-                          dateFormat: "dd/mm/yy"
-                      });
-                      $("#shipment_order_booking_id").change(function () {
-                          $.get("/shipments/generate_ob_detail", {
-                              order_booking_id: $(this).val()
-                          });
-                      });
+              <script>
+                $(function () {
+                    $("#shipment_delivery_date").datepicker({
+                        dateFormat: "dd/mm/yy"
+                    });
+                    $("#shipment_received_date").datepicker({
+                        dateFormat: "dd/mm/yy"
+                    });
+                    $("#shipment_order_booking_id").change(function () {
+                        $.get("/shipments/generate_ob_detail", {
+                            order_booking_id: $(this).val()
+                        });
+                    });
 
-                  });
-                </script>
+                    $("#save-btn").click(function () {
+                        bootbox.confirm({
+                            title: "Create a shipment?",
+                            message: "Please check your entries carefully! This document can't be edited.",
+                            buttons: {
+                                confirm: {
+                                    label: '<i class="fa fa-check"></i> Confirm'
+                                },
+                                cancel: {
+                                    label: '<i class="fa fa-times"></i> Cancel'
+                                }
+                            },
+                            callback: function (result) {
+                                if (result) {
+                                    $("body").css('padding-right', '0px');
+                                    $("#new_shipment").submit();
+                                }
+                            }
+                        });
+                    });
+
+
+                });
+              </script>

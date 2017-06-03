@@ -97,18 +97,22 @@ class ProductsController < ApplicationController
     convert_cost_price_to_numeric
     begin        
       unless @product.update(product_params)
-        @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
-        @price_codes = PriceCode.select(:id, :code).order :code
-        @colors = Color.select(:id, :code, :name).order(:code)
-        @colors.each do |color|
-          product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
-          if product_color
-            product_color.selected_color_id = color.id
-            product_color.code = color.code
-            product_color.name = color.name
-          else
-            @product.product_colors.build color_id: color.id, code: color.code, name: color.name
-          end      
+        if @product.errors[:"product_colors.base"].present?
+          render js: "bootbox.alert({message: \"#{@product.errors[:"product_colors.base"].join("<br/>")}\",size: 'small'});"
+        else
+          @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+          @price_codes = PriceCode.select(:id, :code).order :code
+          @colors = Color.select(:id, :code, :name).order(:code)
+          @colors.each do |color|
+            product_color = @product.product_colors.select{|product_color| product_color.color_id.eql?(color.id)}.first
+            if product_color
+              product_color.selected_color_id = color.id
+              product_color.code = color.code
+              product_color.name = color.name
+            else
+              @product.product_colors.build color_id: color.id, code: color.code, name: color.name
+            end      
+          end
         end
       else
         @new_brand_name = Brand.select(:name).where(id: params[:product][:brand_id]).first.name

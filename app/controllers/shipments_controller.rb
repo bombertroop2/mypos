@@ -12,15 +12,21 @@ class ShipmentsController < ApplicationController
     else
       "LIKE"
     end
-    if params[:filter_plan_date].present?
-      splitted_date_range = params[:filter_plan_date].split("-")
-      start_date = splitted_date_range[0].strip.to_date
-      end_date = splitted_date_range[1].strip.to_date
+    if params[:filter_delivery_date].present?
+      splitted_delivery_date_range = params[:filter_delivery_date].split("-")
+      start_delivery_date = splitted_delivery_date_range[0].strip.to_date
+      end_delivery_date = splitted_delivery_date_range[1].strip.to_date
+    end
+    if params[:filter_received_date].present?
+      splitted_received_date_range = params[:filter_received_date].split("-")
+      start_received_date = splitted_received_date_range[0].strip.to_date
+      end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity)
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(shipments_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
-    shipments_scope = shipments_scope.where(["DATE(plan_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_plan_date].present?
+    shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
+    shipments_scope = shipments_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
     @shipments = smart_listing_create(:shipments, shipments_scope, partial: 'shipments/listing', default_sort: {delivery_order_number: "asc"})
   end
 
@@ -78,11 +84,11 @@ class ShipmentsController < ApplicationController
   # DELETE /shipments/1
   # DELETE /shipments/1.json
   def destroy
-    @shipment.destroy
-    respond_to do |format|
-      format.html { redirect_to shipments_url, notice: 'Shipment was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    unless @shipment.destroy
+      @deleted = false
+    else
+      @deleted = true
+    end  
   end
   
   def generate_ob_detail

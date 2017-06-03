@@ -1,1 +1,8 @@
-<%= smart_listing_item :brands, :destroy, @brand %>
+<% if @deleted %>
+  <%= smart_listing_item :shipments, :destroy, @shipment %>
+<% else %>
+  <% if @shipment.errors[:base].present? %>
+    bootbox.alert({message: "<%= @shipment.errors[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+  <%= smart_listing_item :shipments, :update, @shipment, "shipments/shipment" %>
+<% end %>

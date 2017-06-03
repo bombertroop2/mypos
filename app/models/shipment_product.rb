@@ -4,7 +4,7 @@ class ShipmentProduct < ApplicationRecord
 
   has_many :shipment_product_items, dependent: :destroy
 
-  accepts_nested_attributes_for :shipment_product_items, reject_if: proc { |attributes| attributes[:quantity].blank? }
+  accepts_nested_attributes_for :shipment_product_items#, reject_if: proc { |attributes| attributes[:quantity].blank? }
   
   validate :product_available
   

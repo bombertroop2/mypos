@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :shipments do    
+  resources :shipments, except: [:edit, :update] do    
     collection do
       get "generate_ob_detail"
     end

@@ -16,6 +16,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
         validate :minimum_receiving_item, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
           validates :receiving_date, presence: true, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
             validates :receiving_date, date: {after: proc {|rpo| rpo.purchase_order.purchase_order_date}, message: 'must be greater than purchase order date' }, on: :create, if: proc {|rpo| !rpo.is_it_direct_purchasing && rpo.receiving_date.present?}
+            validates :receiving_date, date: {before_or_equal_to: proc { Date.current }, message: 'must be before or equal to today' }, on: :create, if: proc {|rpo| !rpo.is_it_direct_purchasing && rpo.receiving_date.present?}
               validates :purchase_order_id, presence: true, unless: proc {|rpo| rpo.is_it_direct_purchasing}
                 validate :purchase_order_receivable, unless: proc{|rpo| rpo.is_it_direct_purchasing}
                   validates :vendor_id, presence: true, if: proc{|rpo| rpo.is_it_direct_purchasing}, on: :create
