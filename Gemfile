@@ -52,6 +52,10 @@ gem 'mailgun-ruby', '~>1.1.4'
 
 gem 'delayed_job_active_record'
 
+gem 'barby'
+
+gem 'chunky_png'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
