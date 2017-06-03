@@ -17,20 +17,25 @@ File.open(full_path, 'wb') { |f| f.write blob }
             <td style="padding: 20px">
                 <table width="100%">
                     <tr>
-                        <td colspan="2"><strong><%= Company.name %></strong></td>
+                        <td colspan="3"><strong><%= Company.name %></strong></td>
                     </tr>
                     <tr>
-                        <td align="center" colspan="2"><strong>DELIVERY ORDER</strong></td>
+                        <td align="center" colspan="3"><strong>DELIVERY ORDER</strong></td>
                     </tr>
                     <tr>
-                        <td align="center" colspan="2"><%= @shipment.delivery_order_number %></td>
+                        <td align="center" colspan="3"><%= @shipment.delivery_order_number %></td>
                     </tr>
                     <tr>
-                        <td align="center" colspan="2"><%= image_tag "/barcode.png" %></td>
+                        <td align="center" colspan="3"><%= image_tag "/barcode.png", height: "100px" %></td>
                     </tr>
                     <tr>
-                        <td>
+                        <td colspan="3">
                             <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td>To</td>
+                                    <td>:</td>
+                                    <td><%= @shipment.order_booking.destination_warehouse.name %></td>
+                                </tr>
                                 <tr>
                                     <td>Delivery Date</td>
                                     <td>:</td>
@@ -45,7 +50,7 @@ File.open(full_path, 'wb') { |f| f.write blob }
                         </td>
                     </tr>
                     <tr>
-                        <td align="center" colspan="2">
+                        <td align="center" colspan="3">
                             <table class="table table-condensed table-responsive table-bordered">
                                 <tbody>
                                     <tr style="text-align: center">
@@ -107,10 +112,12 @@ File.open(full_path, 'wb') { |f| f.write blob }
                     </tr>
                     <tr>
                         <td>Created by</td>
-                        <td style="text-align: right">Driver</td>
+                        <td style="text-align: center">Driver</td>
+                        <td style="text-align: right">Recipient</td>
                     </tr>
                     <tr>
                         <td style="padding-top: 50px"><%= @shipment.creator.name rescue "Admin" %></td>
+                        <td style="text-align: center"></td>
                         <td style="text-align: right"></td>
                     </tr>
                 </table>

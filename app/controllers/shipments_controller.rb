@@ -22,11 +22,12 @@ class ShipmentsController < ApplicationController
       start_received_date = splitted_received_date_range[0].strip.to_date
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
-    shipments_scope = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity)
+    shipments_scope = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking)
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(shipments_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
     shipments_scope = shipments_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
+    shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
     @shipments = smart_listing_create(:shipments, shipments_scope, partial: 'shipments/listing', default_sort: {delivery_order_number: "asc"})
   end
 

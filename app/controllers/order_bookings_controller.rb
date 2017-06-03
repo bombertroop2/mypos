@@ -24,10 +24,10 @@ class OrderBookingsController < ApplicationController
       joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id")
     order_bookings_scope = order_bookings_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])).
-      or(order_bookings_scope.where(["dw.name #{like_command} ?", "%"+params[:filter_string]+"%"])).
       or(order_bookings_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     order_bookings_scope = order_bookings_scope.where(["DATE(plan_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_plan_date].present?
     order_bookings_scope = order_bookings_scope.where(["status = ?", params[:filter_status]]) if params[:filter_status].present?
+    order_bookings_scope = order_bookings_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
     @order_bookings = smart_listing_create(:order_bookings, order_bookings_scope, partial: 'order_bookings/listing', default_sort: {number: "asc"})
   end
 

@@ -4,35 +4,40 @@
 
 <div id="search-form-container" class="form-inline text-right">
     <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-delivery-date" placeholder="Delivery date">
-    </div>
-    <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-received-date" placeholder="Received date">
-    </div>
-    <div class="form-group">
-        <input type="text" id="filter-string" class="form-control" placeholder="DO number/quantity">
-    </div>
-    <button id="search-shipment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-</div>
+        <%= select_tag "destination_warehouse", options_from_collection_for_select(Warehouse.not_central.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Warehouse to", class: "form-control", id: "filter-destination-warehouse"} %>
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-delivery-date" placeholder="Delivery date">
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-received-date" placeholder="Received date">
+      </div>
+      <div class="form-group">
+          <input type="text" id="filter-string" class="form-control" placeholder="DO number/quantity">
+      </div>
+      <button id="search-shipment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+  </div>
 
 
-<div class="hidden">
-    <%= smart_listing_controls_for(:shipments, {class: "form-inline text-right"}) do %>
-        <%= text_field_tag :filter_delivery_date, '', class: "search form-control", autocomplete: :off %>
-          <%= text_field_tag :filter_received_date, '', class: "search form-control", autocomplete: :off %>
-            <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-            <% end %>
-        </div>
-        <%= smart_listing_render(:shipments) %>
+  <div class="hidden">
+      <%= smart_listing_controls_for(:shipments, {class: "form-inline text-right"}) do %>
+          <%= text_field_tag :filter_delivery_date, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_received_date, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_destination_warehouse, '', class: "search form-control", autocomplete: :off %>
+                <% end %>
+            </div>
+            <%= smart_listing_render(:shipments) %>
 
 
-        <script>
-          $(function () {
-              $("#search-shipment-btn").click(function () {
-                  $("#filter_delivery_date").val($("#filter-delivery-date").val());
-                  $("#filter_received_date").val($("#filter-received-date").val());
-                  $("#filter_string").val($("#filter-string").val());
-                  $(".smart-listing-controls").submit();
+            <script>
+              $(function () {
+                  $("#search-shipment-btn").click(function () {
+                      $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                      $("#filter_received_date").val($("#filter-received-date").val());
+                      $("#filter_string").val($("#filter-string").val());
+                      $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                      $(".smart-listing-controls").submit();
+                  });
               });
-          });
-        </script>
+            </script>

@@ -6,6 +6,9 @@
     <div class="form-group">
         <%= select_tag "status", options_for_select(OrderBooking::STATUSES), {prompt: "Status", class: "form-control", id: "filter-status"} %>
       </div>
+    <div class="form-group">
+        <%= select_tag "destination_warehouse", options_from_collection_for_select(Warehouse.not_central.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Warehouse to", class: "form-control", id: "filter-destination-warehouse"} %>
+      </div>
       <div class="form-group">
           <input type="text" class="form-control" readonly="true" id="filter-plan-date" placeholder="Plan date">
       </div>
@@ -21,6 +24,7 @@
           <%= text_field_tag :filter_plan_date, '', class: "search form-control", autocomplete: :off %>
             <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
               <%= text_field_tag :filter_status, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_destination_warehouse, '', class: "search form-control", autocomplete: :off %>
               <% end %>
           </div>
           <%= smart_listing_render(:order_bookings) %>
@@ -31,6 +35,7 @@
                     $("#filter_plan_date").val($("#filter-plan-date").val());
                     $("#filter_string").val($("#filter-string").val());
                     $("#filter_status").val($("#filter-status").val());
+                    $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
                     $(".smart-listing-controls").submit();
                 });
             });
