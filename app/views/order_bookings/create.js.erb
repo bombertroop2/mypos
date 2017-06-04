@@ -1,12 +1,19 @@
 <% if @invalid %>
   <%= smart_listing_item :order_bookings, :create, @order_booking, "order_bookings/form" %>
 <% else %>
+  <% ob_numbers = [] %>
   <% @order_bookings.each_with_index do |order_booking, index| %>
+    <% ob_numbers << order_booking.number %>
     <%= smart_listing_item :order_bookings, :create, order_booking, "order_bookings/order_booking" %>
     <% if @ori_warehouse_names[index].present? && @dest_warehouse_names[index].present? %>
       $("#ori-warehouse-name-<%= order_booking.id %>").html("<%= @ori_warehouse_names[index] %>");
       $("#dest-warehouse-name-<%= order_booking.id %>").html("<%= @dest_warehouse_names[index] %>");
       $("#total-quantity-<%= order_booking.id %>").html("<%= @total_quantity %>");
     <% end %>
+  <% end %>
+  <% if ob_numbers.length == 1 %>
+    bootbox.alert("Order Booking <%= ob_numbers.to_sentence %> has been successfully created");
+  <% else %>
+    bootbox.alert("Order Booking <%= ob_numbers.to_sentence %> have been successfully created");
   <% end %>
 <% end %>
