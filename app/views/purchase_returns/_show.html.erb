@@ -62,53 +62,65 @@
                                           <td style="vertical-align: middle;text-align: center">
                                               <table class="table table-condensed table-responsive table-bordered">
                                                   <tbody>
+                                                      <!--
                                                       <tr>
                                                           <td colspan="2" rowspan="2"></td>
-                                                          <td align="center" colspan="<%= (pr_product.purchase_order_product.sizes.length rescue pr_product.direct_purchase_product.sizes.length) %>">Sizes</td>
-                                                      </tr>
+                                                          <td align="center" colspan="<%#= (pr_product.purchase_order_product.sizes.length rescue pr_product.direct_purchase_product.sizes.length) %>">Sizes</td>
+                                                      </tr>-->
                                                       <tr>
+                                                          <td></td>
                                                           <% if pr_product.purchase_order_product.present? %>
                                                             <% pr_product.purchase_order_product.sizes.each do |size| %>
-                                                              <td align="center"><%= size.size %></td>
+                                                              <td align="center" style="vertical-align: middle"><%= size.size %></td>
                                                             <% end %>
                                                           <% elsif pr_product.direct_purchase_product.present? %>
                                                             <% pr_product.direct_purchase_product.sizes.each do |size| %>
-                                                              <td align="center"><%= size.size %></td>
+                                                              <td align="center" style="vertical-align: middle"><%= size.size %></td>
                                                             <% end %>
                                                           <% end %>
+                                                          <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
                                                       </tr>
                                                       <% if pr_product.purchase_order_product.present? %>
                                                         <% pr_product.purchase_order_product.colors.each_with_index do |color, idx| %>
                                                           <tr>
-                                                              <% if idx == 0 %>
-                                                                <td style="vertical-align: middle" rowspan="<%= pr_product.purchase_order_product.colors.length %>">Colors</td>
-                                                              <% end %>
-                                                              <td align="center"><%= color.code %></td>
+                                                              <!--
+      <%# if idx == 0 %>
+                                                                <td style="vertical-align: middle" rowspan="<%#= pr_product.purchase_order_product.colors.length %>">Colors</td>
+      <%# end %>-->
+                                                              <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                                              <% qty_per_color = 0 %>
                                                               <% pr_product.purchase_order_product.sizes.each do |size| %>
                                                                 <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.purchase_order_detail.color.eql?(color) && pri.purchase_order_detail.size.eql?(size) }.first %>
-                                                                <td>
+                                                                <td align="center" style="vertical-align: middle">
                                                                     <% if pr_item %>
+                                                                      <% qty_per_color += pr_item.quantity %>
                                                                       <%= pr_item.quantity %>
                                                                     <% end %>
                                                                 </td>
                                                               <% end %>
+                                                              <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
                                                           </tr>
                                                         <% end %>
                                                       <% elsif pr_product.direct_purchase_product.present? %>
                                                         <% pr_product.direct_purchase_product.colors.each_with_index do |color, idx| %>
                                                           <tr>
-                                                              <% if idx == 0 %>
-                                                                <td style="vertical-align: middle" rowspan="<%= pr_product.direct_purchase_product.colors.length %>">Colors</td>
-                                                              <% end %>
-                                                              <td align="center"><%= color.code %></td>
+      <%# if idx == 0 %>
+                                                                <!--<td style="vertical-align: middle" rowspan="<%#= pr_product.direct_purchase_product.colors.length %>">Colors</td>-->
+      <%# end %>
+                                                              <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                                              <% qty_per_color = 0 %>
                                                               <% pr_product.direct_purchase_product.sizes.each do |size| %>
                                                                 <% pr_item = pr_product.purchase_return_items.select{ |pri| pri.direct_purchase_detail.color.eql?(color) && pri.direct_purchase_detail.size.eql?(size) }.first %>
-                                                                <td>
+                                                                <td align="center" style="vertical-align: middle">
                                                                     <% if pr_item %>
+                                                                      <% qty_per_color += pr_item.quantity %>
                                                                       <%= pr_item.quantity %>
                                                                     <% end %>
                                                                 </td>
                                                               <% end %>
+                                                              <td align="center" style="vertical-align: middle">
+                                                                  <%= qty_per_color %>
+                                                              </td>
                                                           </tr>
                                                         <% end %>
                                                       <% end %>

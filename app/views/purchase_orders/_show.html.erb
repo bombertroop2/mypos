@@ -81,7 +81,7 @@
                                     <% @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).select("name, cost, purchase_order_products.id, products.code AS product_code").each_with_index do |po_product, idx| %>
                                       <% total_quantity = 0 %>
                                       <% product_sizes = po_product.sizes.select(:id, :size) %>
-                                      <% product_colors = po_product.colors.select(:id, :code) %>
+                                      <% product_colors = po_product.colors.select(:id, :code, :name) %>
                                       <% purchase_order_details = po_product.purchase_order_details.select(:size_id, :color_id, :quantity) %>
                                       <tr align="center">
                                           <td style="vertical-align: middle"><%= idx.succ %></td>
@@ -90,29 +90,32 @@
                                               <table class="table table-condensed table-responsive table-bordered">
                                                   <tbody>
                                                       <tr>
-                                                          <td colspan="2" rowspan="2"></td>
-                                                          <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
-                                                      </tr>
-                                                      <tr>
+                                                          <td colspan="2"></td>
                                                           <% product_sizes.each do |size| %>
-                                                            <td align="center"><%= size.size %></td>
+                                                            <td style="text-align: center;vertical-align: middle"><%= size.size %></td>
                                                           <% end %>
+                                                          <td style="text-align: center;vertical-align: middle"><strong>Qty / Color</strong></td>
                                                       </tr>
                                                       <% product_colors.each_with_index do |color, idx| %>
                                                         <tr align="center">
-                                                            <% if idx == 0 %>
-                                                              <td style="vertical-align: middle" rowspan="<%= product_colors.length %>">Colors</td>
-                                                            <% end %>
-                                                            <td align="center"><%= color.code %></td>
+    <%# if idx == 0 %>
+                                                              <!--<td style="vertical-align: middle" rowspan="<%#= product_colors.length %>">Colors</td>-->
+    <%# end %>
+                                                            <td align="center" colspan="2"><%= "#{color.code} - #{color.name}" %></td>
+                                                            <% qty_per_color = 0 %>
                                                             <% product_sizes.each do |size| %>
                                                               <% po_detail = purchase_order_details.select{|pod| pod.color_id.eql?(color.id) && pod.size_id.eql?(size.id)}.first %>
-                                                              <td>
+                                                              <td style="text-align: center;vertical-align: middle">
                                                                   <% if po_detail %>
                                                                     <%= po_detail.quantity %>
                                                                     <% total_quantity += po_detail.quantity %>
+                                                                    <% qty_per_color += po_detail.quantity %>
                                                                   <% end %>
                                                               </td>
                                                             <% end %>
+                                                            <td style="text-align: center;vertical-align: middle">
+                                                                <%= qty_per_color %>
+                                                            </td>
                                                         </tr>
                                                       <% end %>
                                                   </tbody>

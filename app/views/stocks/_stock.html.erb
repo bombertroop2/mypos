@@ -19,27 +19,34 @@
                   <td style="vertical-align: middle">
                       <table class="table table-condensed table-responsive table-bordered">
                           <tbody>
+                              <!--
                               <tr>
                                   <td colspan="2" rowspan="2"></td>
                                   <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
                               </tr>
+                              -->
                               <tr>
+                                  <td></td>
                                   <% product_sizes.each do |size| %>
-                                    <td align="center"><%= size.size %></td>
+                                    <td align="center" style="vertical-align: middle"><%= size.size %></td>
                                   <% end %>
+                                  <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
                               </tr>
                               <% product_colors.each_with_index do |color, idx| %>
                                 <tr align="center">
-                                    <% if idx == 0 %>
-                                      <td style="vertical-align: middle" rowspan="<%= product_colors.length %>">Colors</td>
-                                    <% end %>
-                                    <td align="center"><%= color.code %></td>
+    <%# if idx == 0 %>
+                                      <!--<td style="vertical-align: middle" rowspan="<%#= product_colors.length %>">Colors</td>-->
+    <%# end %>
+                                    <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                    <% qty_per_color = 0 %>
                                     <% product_sizes.each do |size| %>
-                                      <td class="quantity-on-hand">
+                                      <td class="quantity-on-hand" align="center" style="vertical-align: middle">
                                           <% total_quantity += object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>
+                                          <% qty_per_color += object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>                                 
                                           <%= object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>
                                       </td>
                                     <% end %>
+                                    <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
                                 </tr>
                               <% end %>
                           </tbody>

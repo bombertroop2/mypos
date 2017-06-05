@@ -52,7 +52,7 @@
                                           <%= received_purchase_order_product_form.hidden_field :purchase_order_product_id %>
                                           <% received_purchase_order_product = received_purchase_order_product_form.object %>
                                           <% purchase_order_product = received_purchase_order_product.purchase_order_product %>
-                                          <% colors = purchase_order_product.colors.select(:code, :id) rescue [] %>
+                                          <% colors = purchase_order_product.colors.select(:code, :id, :name) rescue [] %>
                                           <% sizes = purchase_order_product.sizes.select(:size, :id) rescue [] %>
                                           <tr align="center">
                                               <td style="vertical-align: middle;width: 20% !important;"><%= "#{purchase_order_product.product.code} - #{purchase_order_product.product.brand.name}" %></td>
@@ -61,22 +61,25 @@
                                                   <div class="table-responsive">
                                                       <table class="table table-condensed table-responsive table-bordered">
                                                           <tbody>
+                                                              <!--
                                                               <tr>
                                                                   <td colspan="2" rowspan="2"></td>
-                                                                  <td align="center" colspan="<%= sizes.length %>">Sizes</td>
-                                                              </tr>
+                                                                  <td align="center" colspan="<%#= sizes.length %>">Sizes</td>
+                                                              </tr>-->
                                                               <tr>
+                                                                  <td></td>
                                                                   <% sizes.each do |size| %>
                                                                     <td align="center"><%= size.size %></td>
                                                                   <% end %>
                                                               </tr>                                            
                                                               <% colors.each_with_index do |color, idx| %>
                                                                 <tr style="text-align: center">
-                                                                    <% if idx == 0 %>
-                                                                      <td style="vertical-align: middle" rowspan="<%= colors.length %>">Colors</td>
-                                                                    <% end %>
+                                                                    <%# if idx == 0 %>
+                                                                    <!--
+                                                                      <td style="vertical-align: middle" rowspan="<%#= colors.length %>">Colors</td>-->
+                                                                    <%# end %>
                                                                     <td style="vertical-align: middle">
-                                                                        <%= color.code %>
+                                                                        <%= "#{color.code} - #{color.name}" %>
                                                                     </td>
                                                                     <% sizes.each do |size| %>              
                                                                       <td style="vertical-align: middle;" align="center">
