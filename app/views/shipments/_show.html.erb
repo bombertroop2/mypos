@@ -29,12 +29,22 @@ File.open(full_path, 'wb') { |f| f.write blob }
                         <td align="center" colspan="3"><%= image_tag "/barcode.png", height: "100px" %></td>
                     </tr>
                     <tr>
-                        <td colspan="3">
+                        <td style="width: 50%" valign="top">
                             <table class="table-condensed table-responsive">
                                 <tr>
-                                    <td>To</td>
+                                    <td>Warehouse From</td>
                                     <td>:</td>
-                                    <td><%= @shipment.order_booking.destination_warehouse.name %></td>
+                                    <td><%= "#{@shipment.order_booking.origin_warehouse.code} - #{@shipment.order_booking.origin_warehouse.name}" %></td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top">Address</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td><%= @shipment.order_booking.origin_warehouse.address %></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                                 <tr>
                                     <td>Delivery Date</td>
@@ -45,6 +55,21 @@ File.open(full_path, 'wb') { |f| f.write blob }
                                     <td>Courier</td>
                                     <td>:</td>
                                     <td><%= @shipment.courier.code %> - <%= @shipment.courier.name %></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td></td>
+                        <td style="width: 50%" valign="top" align="right">
+                            <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td>Warehouse To</td>
+                                    <td>:</td>
+                                    <td><%= "#{@shipment.order_booking.destination_warehouse.code} - #{@shipment.order_booking.destination_warehouse.name}" %></td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top">Address</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td><%= @shipment.order_booking.destination_warehouse.address %></td>
                                 </tr>
                             </table>
                         </td>

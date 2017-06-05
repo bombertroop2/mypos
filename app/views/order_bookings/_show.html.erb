@@ -17,22 +17,27 @@
                         <td align="center" colspan="2"><%= @order_booking.number %></td>
                     </tr>
                     <tr>
-                        <td>
+                        <td style="width: 50%" valign="top">
                             <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td>Warehouse From</td>
+                                    <td>:</td>
+                                    <td><%= "#{@order_booking.origin_warehouse.code} - #{@order_booking.origin_warehouse.name}" %></td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top">Address</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td><%= @order_booking.origin_warehouse.address %></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
                                 <tr>
                                     <td>Plan Date</td>
                                     <td>:</td>
                                     <td><%= @order_booking.plan_date.strftime("%d/%m/%Y") %></td>
-                                </tr>
-                                <tr>
-                                    <td>Warehouse From</td>
-                                    <td>:</td>
-                                    <td><%= @order_booking.origin_warehouse.name %></td>
-                                </tr>
-                                <tr>
-                                    <td>Warehouse To</td>
-                                    <td>:</td>
-                                    <td><%= @order_booking.destination_warehouse.name %></td>
                                 </tr>
                                 <tr>
                                     <td>Printed Date</td>
@@ -45,9 +50,23 @@
                                     <td><%= @order_booking.status %></td>
                                 </tr>
                                 <tr>
-                                    <td>Note</td>
-                                    <td>:</td>
+                                    <td style="vertical-align: top">Note</td>
+                                    <td style="vertical-align: top">:</td>
                                     <td><%= @order_booking.note %></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width: 50%" valign="top" align="right">
+                            <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td>Warehouse To</td>
+                                    <td>:</td>
+                                    <td><%= "#{@order_booking.destination_warehouse.code} - #{@order_booking.destination_warehouse.name}" %></td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top">Address</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td><%= @order_booking.destination_warehouse.address %></td>
                                 </tr>
                             </table>
                         </td>

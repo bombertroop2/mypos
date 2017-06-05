@@ -191,7 +191,7 @@ class PurchaseOrdersController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_purchase_order
     @purchase_order = PurchaseOrder.joins(:vendor, :warehouse).where(id: params[:id]).
-      select("po_type, note, warehouse_id, vendor_id, status, number, vendors.name AS vendor_name, terms_of_payment, purchase_orders.created_at, purchase_order_date, request_delivery_date, order_value, first_discount, second_discount, is_additional_disc_from_net, purchase_orders.value_added_tax, warehouses.code AS warehouse_code, warehouses.address AS warehouse_address, purchase_orders.is_taxable_entrepreneur, purchase_orders.id").first
+      select("po_type, note, warehouse_id, vendor_id, status, number, vendors.name AS vendor_name, terms_of_payment, purchase_orders.created_at, purchase_order_date, request_delivery_date, order_value, first_discount, second_discount, is_additional_disc_from_net, purchase_orders.value_added_tax, warehouses.code AS warehouse_code, warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, purchase_orders.is_taxable_entrepreneur, purchase_orders.id").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
