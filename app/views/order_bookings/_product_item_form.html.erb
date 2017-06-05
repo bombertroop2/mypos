@@ -1,7 +1,7 @@
 <table border="1" class="product-table table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
     <tr style="text-align: center">
         <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
-        <td style="vertical-align: middle;width: auto !important;"><strong>Size X Color</strong></td>
+        <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
     </tr>
     <% @order_booking.order_booking_products.each do |order_booking_product| %>
       <%= fields_for "order_booking[order_booking_products_attributes][#{order_booking_product.product_id}]", order_booking_product do |order_booking_product_fields| %>
@@ -43,8 +43,8 @@
                             <tr style="text-align: center">
                                 <th colspan="2" rowspan="2"></th>
                                 <td colspan="<%= sizes.length %>" align="center">
-                                    <strong>Sizes</strong>
-                                    <br />
+                                    <!--<strong>Sizes</strong>
+                                    <br />-->
                                     <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
                                   </td>
                               </tr>
@@ -61,10 +61,10 @@
 
                                 <% colors.each_with_index do |color, idx| %>                          
                                   <tr style="text-align: center">
-                                      <% if idx.eql? 0 %>
-                                        <td rowspan="<%= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>
-                                      <% end %>
-                                      <td style="vertical-align: middle"><%= color.code %></td>                            
+                                      <%# if idx.eql? 0 %>
+                                        <!--<td rowspan="<%#= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>-->
+                                      <%# end %>
+                                      <td style="vertical-align: middle" colspan="2"><%= "#{color.code} - #{color.name}" %></td>                            
                                       <% sizes.each do |size| %>
                                         <% if idx == 0 %>
                                       <script>

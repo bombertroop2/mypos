@@ -7,7 +7,7 @@ class OrderBookingProduct < ApplicationRecord
   
   has_many :order_booking_product_items, dependent: :destroy
   has_many :sizes, -> {group(:id).select(:id, :size)}, through: :order_booking_product_items
-  has_many :colors, -> {group(:id).select(:id, :code)}, through: :order_booking_product_items
+  has_many :colors, -> {group(:id).select(:id, :code, :name)}, through: :order_booking_product_items
   
   accepts_nested_attributes_for :order_booking_product_items, reject_if: proc {|attributes| attributes[:quantity].blank? && attributes[:id].blank?}
   

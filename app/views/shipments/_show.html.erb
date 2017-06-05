@@ -69,29 +69,35 @@ File.open(full_path, 'wb') { |f| f.write blob }
                                           <td style="vertical-align: middle">
                                               <table class="table table-condensed table-responsive table-bordered">
                                                   <tbody>
+                                                      <!--
                                                       <tr>
                                                           <td colspan="2" rowspan="2"></td>
-                                                          <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
-                                                      </tr>
+                                                          <td align="center" colspan="<%#= product_sizes.length %>">Sizes</td>
+                                                      </tr>-->
                                                       <tr>
+                                                          <td></td>
                                                           <% product_sizes.each do |size| %>
-                                                            <td align="center"><%= size.size %></td>
+                                                            <td align="center" style="vertical-align: middle"><%= size.size %></td>
                                                           <% end %>
+                                                          <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
                                                       </tr>
                                                       <% product_colors.each_with_index do |color, idx| %>
                                                         <tr align="center">
-                                                            <% if idx == 0 %>
-                                                              <td style="vertical-align: middle" rowspan="<%= product_colors.length %>">Colors</td>
-                                                            <% end %>
-                                                            <td align="center"><%= color.code %></td>
+    <%# if idx == 0 %>
+                                                              <!--<td style="vertical-align: middle" rowspan="<%#= product_colors.length %>">Colors</td>-->
+    <%# end %>
+                                                            <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                                            <% qty_per_color = 0 %>
                                                             <% product_sizes.each do |size| %>
                                                               <% shipment_product_item = shipment_product.shipment_product_items.joins(:order_booking_product_item).select(:quantity).where("order_booking_product_items.size_id = #{size.id} AND order_booking_product_items.color_id = #{color.id}").first %>
-                                                              <td>
+                                                              <td align="center" style="vertical-align: middle">
                                                                   <% if shipment_product_item %>
+                                                                    <% qty_per_color += shipment_product_item.quantity %>
                                                                     <%= shipment_product_item.quantity %>
                                                                   <% end %>
                                                               </td>
                                                             <% end %>
+                                                            <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
                                                         </tr>
                                                       <% end %>
                                                   </tbody>
