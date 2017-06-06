@@ -1,85 +1,99 @@
 <td colspan="5">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
     <div style="padding-top: 20px"></div>
-    <%= form_for(@shipment, remote: true, html: {class: "form-horizontal"}) do |f| %>
-
-        <div class="form-group<%= control_group_error(@shipment, :delivery_date) %>">
-            <%= f.label :delivery_date, class: "col-sm-2 control-label" %>
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Delivery date</label>
+            <div class="col-sm-10">
+                <%= text_field_tag :delivery_date, "", size: 10, readonly: true, class: "form-control" %>
+              </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">Courier</label>
               <div class="col-sm-10">
-                  <%= f.text_field :delivery_date, size: 10, readonly: true, class: "form-control" %>
-                    <%= error_help_text(@shipment, :delivery_date) %>
+                  <%= select_tag "courier_id", options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name'), {prompt: "Select", class: "form-control"} %>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Order bookings</label>
+                <div class="col-sm-10">
+                    <table id="listing_order_bookings_table" class="display">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Number</th>
+                            </tr>
+                        </thead>
 
-            <div class="form-group<%= control_group_error(@shipment, :courier_id) %>">
-                <%= f.label :courier_id, class: "col-sm-2 control-label" %>            
-                  <div class="col-sm-10">
-                      <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', @shipment.courier_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
-                        <%= error_help_text(@shipment, :courier_id) %>
-                    </div>
+                        <tbody>
+                            <% OrderBooking.printed.select(:id, :number).order(:number).each do |order_booking| %>
+                              <tr id="order_booking_<%= order_booking.id %>_<%= order_booking.number %>">
+                                  <td></td>
+                                  <td><%= order_booking.number %></td>
+                              </tr>
+                            <% end %>
+                        </tbody>
+                    </table>
+                    <a class="btn btn-default active" id="generate_shipment_article_form" style="float: right;margin-top: 10px;">Generate form</a>
                 </div>
+            </div>
+            <div id="forms_container"></div>
+        </div>
 
-                <div class="form-group<%= control_group_error(@shipment, :order_booking_id) %>">
-                    <%= f.label :order_booking_id, class: "col-sm-2 control-label" %>            
-                      <div class="col-sm-10">
-                          <%= f.select :order_booking_id, options_from_collection_for_select(OrderBooking.printed.select(:id, :number).order(:number), 'id', 'number', @shipment.order_booking_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
-                            <%= error_help_text(@shipment, :order_booking_id) %>
-                        </div>
-                    </div>
+    </td>
 
-                    <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
-                            <div id="ob_detail_container">
-                                <% if params[:action].eql?("create") && @order_booking.present? %>
-                                  <%= render "ob_detail" %>
-                                <% end %>
-                            </div>
-                        </div>
-                    </div>
+    <script>
+      $(function () {
 
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-sm-9">
-                            <a class="btn btn-primary" id="save-btn">Save</a>
-                            <button class="btn btn-link cancel">Cancel</button>
-                        </div>
-                    </div>
-                  <% end %>
-              </td>
+          var orderBookingDataTable = $('#listing_order_bookings_table').DataTable({
+              order: [1, 'asc'],
+              dom: 'T<"clear">lfrtip',
+              columns: [
+                  {data: null, defaultContent: '', orderable: false},
+                  {data: 'number'}
+              ],
+              tableTools: {
+                  sRowSelect: 'os',
+                  //sRowSelector: 'td:first-child',
+                  aButtons: ['select_all', 'select_none']
+              },
+              paging: false,
+              info: false,
+              scrollY: "250px",
+              scrollCollapse: true
+          });
 
-              <script>
-                $(function () {
-                    $("#shipment_delivery_date").datepicker({
-                        dateFormat: "dd/mm/yy"
-                    });
-                    $("#shipment_received_date").datepicker({
-                        dateFormat: "dd/mm/yy"
-                    });
-                    $("#shipment_order_booking_id").change(function () {
-                        $.get("/shipments/generate_ob_detail", {
-                            order_booking_id: $(this).val()
-                        });
-                    });
+          $("#generate_shipment_article_form").click(function () {
+              if ($("#delivery_date").val().trim() == "")
+                  bootbox.alert({message: "Please fill in delivery date first!", size: 'small'});
+              else if ($("#courier_id").val().trim() == "")
+                  bootbox.alert({message: "Please select courier first!", size: 'small'});
+              else if (orderBookingDataTable.rows('.selected').data().length == 0)
+                  bootbox.alert({message: "You have not selected an order booking yet!", size: 'small'});
+              else {
+                  var orderBookingIds = [];
+                  var orderBookingNumbers = [];
+                  $.each(orderBookingDataTable.rows('.selected')[0], function (index, value) {
+                      orderBookingIds.push(orderBookingDataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                      orderBookingNumbers.push(orderBookingDataTable.rows(value).nodes().to$().attr("id").split("_")[3]);
+                  });
+                  $.get("/shipments/generate_ob_detail", {
+                      order_booking_ids: orderBookingIds.join(","),
+                      order_booking_numbers: orderBookingNumbers.join(","),
+                      delivery_date: $("#delivery_date").val().trim(),
+                      courier_id: $("#courier_id").val().trim()
+                  });
+              }
 
-                    $("#save-btn").click(function () {
-                        bootbox.confirm({
-                            title: "Create a shipment?",
-                            message: "Once you've created the document, you'll not be able to change it",
-                            buttons: {
-                                confirm: {
-                                    label: '<i class="fa fa-check"></i> Confirm'
-                                },
-                                cancel: {
-                                    label: '<i class="fa fa-times"></i> Cancel'
-                                }
-                            },
-                            callback: function (result) {
-                                if (result) {
-                                    $("body").css('padding-right', '0px');
-                                    $("#new_shipment").submit();
-                                }
-                            }
-                        });
-                    });
+              return false;
+          });
+
+          $("#delivery_date").datepicker({
+              dateFormat: "dd/mm/yy"
+          });
 
 
-                });
-              </script>
+      });
+    </script>

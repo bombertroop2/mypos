@@ -1,4 +1,6 @@
 class Shipment < ApplicationRecord
+  attr_accessor :order_booking_number
+  
   belongs_to :order_booking
   belongs_to :courier
   

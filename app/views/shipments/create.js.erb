@@ -1,12 +1,15 @@
 <% if @invalid %>
-  <%= smart_listing_item :shipments, :create, @shipment, "shipments/form" %>
-  <% if @shipment.errors[:base].present? %>
-    bootbox.alert({message: "<%= @shipment.errors[:base].join("<br/>") %>",size: 'small'});
-  <% elsif @shipment.errors[:"shipment_products.base"].present? %>
-    bootbox.alert({message: "<%= @shipment.errors[:"shipment_products.base"].join("<br/>") %>",size: 'small'});
-  <% elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present? %>
-    bootbox.alert({message: "<%= @shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>") %>",size: 'small'});
-  <% end %>
+  $("#forms_container").html("<%= j(render(partial: "ob_detail")) %>");  
 <% else %>
-  <%= smart_listing_item :shipments, :create, @shipment, "shipments/shipment" %>
+  <% do_numbers = [] %>
+  <% @shipments.each do |shipment| %>
+    <% do_numbers << shipment.delivery_order_number %>
+    <%= smart_listing_item :shipments, :create, shipment, "shipments/shipment" %>
+  <% end %>
+  <% if do_numbers.length == 1 %>
+    bootbox.alert("Delivery Order <%= do_numbers.to_sentence %> has been successfully created");
+  <% else %>
+    bootbox.alert("Delivery Order <%= do_numbers.to_sentence %> have been successfully created");
+  <% end %>
+
 <% end %>
