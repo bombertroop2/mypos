@@ -1,11 +1,11 @@
 include SmartListing::Helper::ControllerExtensions
 class SalesPromotionGirlsController < ApplicationController
   before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
-  before_action :retain_cashier_role, only: :update
-  before_action :set_role_to_spg, only: :create
-  skip_before_action :is_user_can_cud?
+#  before_action :retain_cashier_role, only: :update
+#  before_action :set_role_to_spg, only: :create
+#  skip_before_action :is_user_can_cud?
   helper SmartListing::Helper
-  helper_method :user_is_not_cashier, :user_can_edit
+#  helper_method :user_is_not_cashier, :user_can_edit
 
   # GET /sales_promotion_girls
   # GET /sales_promotion_girls.json
@@ -31,60 +31,60 @@ class SalesPromotionGirlsController < ApplicationController
 
   # GET /sales_promotion_girls/new
   def new
-    if user_is_not_cashier
+#    if user_is_not_cashier
       @sales_promotion_girl = SalesPromotionGirl.new
-      @sales_promotion_girl.build_user
-    else
-      flash[:alert] = "Sorry, you can't access that action!"
-      render js: "window.location = '#{sales_promotion_girls_url}'"
-    end
+#      @sales_promotion_girl.build_user
+#    else
+#      flash[:alert] = "Sorry, you can't access that action!"
+#      render js: "window.location = '#{sales_promotion_girls_url}'"
+#    end
   end
 
   # GET /sales_promotion_girls/1/edit
   def edit
-    if user_can_edit
-      @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
-    else
-      flash[:alert] = "Sorry, you can't access that action!"
-      render js: "window.location = '#{sales_promotion_girls_url}'"
-    end
+#    if user_can_edit
+#      @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
+#    else
+#      flash[:alert] = "Sorry, you can't access that action!"
+#      render js: "window.location = '#{sales_promotion_girls_url}'"
+#    end
   end
 
   # POST /sales_promotion_girls
   # POST /sales_promotion_girls.json
   def create    
-    if user_is_not_cashier
+#    if user_is_not_cashier
       params[:sales_promotion_girl][:mobile_phone] = params[:sales_promotion_girl][:mobile_phone].gsub("_","")
       @sales_promotion_girl = SalesPromotionGirl.new(sales_promotion_girl_params)
       begin
-        unless @sales_promotion_girl.save
-          @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
-        else
+        if @sales_promotion_girl.save
+#          @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
+#        else
           @new_warehouse_code = Warehouse.select(:code).where(id: params[:sales_promotion_girl][:warehouse_id]).first.code
         end
       rescue ActiveRecord::RecordNotUnique => e
         render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
       end
-    else
-      flash[:alert] = "Sorry, you can't access that action!"
-      render js: "window.location = '#{sales_promotion_girls_url}'"
-    end
+#    else
+#      flash[:alert] = "Sorry, you can't access that action!"
+#      render js: "window.location = '#{sales_promotion_girls_url}'"
+#    end
   end
 
   # PATCH/PUT /sales_promotion_girls/1
   # PATCH/PUT /sales_promotion_girls/1.json
   def update
-    if user_can_edit
+#    if user_can_edit
       params[:sales_promotion_girl][:mobile_phone] = params[:sales_promotion_girl][:mobile_phone].gsub("_","")
       if @sales_promotion_girl.update(sales_promotion_girl_params)
         @new_warehouse_code = Warehouse.select(:code).where(id: params[:sales_promotion_girl][:warehouse_id]).first.code
-      else
-        @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
+#      else
+#        @sales_promotion_girl.build_user if @sales_promotion_girl.user.nil?
       end
-    else
-      flash[:alert] = "Sorry, you can't access that action!"
-      render js: "window.location = '#{sales_promotion_girls_url}'"
-    end
+#    else
+#      flash[:alert] = "Sorry, you can't access that action!"
+#      render js: "window.location = '#{sales_promotion_girls_url}'"
+#    end
   end
 
   # DELETE /sales_promotion_girls/1

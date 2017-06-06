@@ -1,19 +1,19 @@
 class SalesPromotionGirl < ApplicationRecord
-  resourcify
+#  resourcify
   
   belongs_to :warehouse
-  has_one :user, dependent: :destroy
+#  has_one :user, dependent: :destroy
 
   before_save :titleize_name
   before_create :create_identifier
   
-  after_update :unlink_from_user_if_role_downgraded
+#  after_update :unlink_from_user_if_role_downgraded
 
   validates :mobile_phone, :address, :name, :province, :warehouse_id, :gender, :role, presence: true
   validates :identifier, uniqueness: true
   validate :warehouse_has_supervisor?, :gender_available, :warehouse_available, :role_available
   
-  accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
+#  accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
   
   GENDERS = [
     ["Male", "male"],
@@ -45,12 +45,12 @@ class SalesPromotionGirl < ApplicationRecord
   end
   
   def warehouse_has_supervisor?
-    errors.add(:warehouse_id, "is being supervised by another supervisor") if Warehouse.has_supervisor?(warehouse_id) && warehouse_id_changed? && role.eql?("supervisor")
+    errors.add(:warehouse_id, "is being supervised by another supervisor") if Warehouse.has_supervisor?(warehouse_id) && (warehouse_id_changed? || (role_changed? && persisted?)) && role.eql?("supervisor")
   end
   
-  def unlink_from_user_if_role_downgraded
-    user.destroy if role_was.eql?("cashier") and role.eql?("spg")
-  end
+#  def unlink_from_user_if_role_downgraded
+#    user.destroy if role_was.eql?("cashier") and role.eql?("spg")
+#  end
 
   def titleize_name
     self.name = name.titleize

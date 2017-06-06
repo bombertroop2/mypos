@@ -28,7 +28,8 @@
           $("#listing-spg-thead").show();
       }
   }, 0);
-<% unless user_is_not_cashier %>
+<%# unless user_is_not_cashier %>
+<% if !user_signed_in? || !is_admin? %>
     $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
     $('#new-item-btn').unbind("click");
     $('#new-item-btn').click(function (e) {
