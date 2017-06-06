@@ -6,7 +6,7 @@ class Shipment < ApplicationRecord
   
   has_many :shipment_products, dependent: :destroy
 
-  accepts_nested_attributes_for :shipment_products, allow_destroy: true, reject_if: :child_blank
+  accepts_nested_attributes_for :shipment_products, allow_destroy: true#, reject_if: :child_blank
   
   validates :delivery_date, :courier_id, :order_booking_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc {|shpmnt| shpmnt.order_booking.created_at.to_date}, message: 'must be after or equal to creation date of order booking' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.order_booking_id.present?}
