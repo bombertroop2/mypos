@@ -1,0 +1,8 @@
+<% if @invalid %>
+  <%= smart_listing_item :users, :create, @user, "users/form" %>
+<% else %>
+  <%= smart_listing_item :users, :create, @user, "users/user" %>
+  <% if @role_name.present? %>
+    $("#role-name-<%= @user.id %>").html('<%= @role_name %>');
+  <% end %>
+<% end %>

@@ -52,6 +52,8 @@ Rails.application.routes.draw do
   end
   resources :stocks, only: :index
   devise_for :users, only: :sessions
+  resources :users    
+  
   get 'welcome/index'
 
   resources :purchase_orders, except: [:edit, :update] do

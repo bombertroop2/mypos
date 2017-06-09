@@ -1,0 +1,36 @@
+<div class="page-header">
+    <h1>Users</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <%= select_tag "gender", options_for_select(User::GENDERS), {prompt: "Gender", class: "form-control", id: "filter-gender"} %>
+      </div>
+      <div class="form-group">
+          <%= select_tag "role", options_for_select(User::ROLES), {prompt: "Role", class: "form-control", id: "filter-role"} %>
+        </div>
+        <div class="form-group">
+            <input type="text" id="filter-string" class="form-control" placeholder="Name">
+        </div>
+        <button id="search-user-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:users, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_gender, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_role, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+                <% end %>
+            </div>
+            <%= smart_listing_render(:users) %>
+
+            <script>
+              $(function () {
+                  $("#search-user-btn").click(function () {
+                      $("#filter_gender").val($("#filter-gender").val());
+                      $("#filter_role").val($("#filter-role").val());
+                      $("#filter_string").val($("#filter-string").val());
+                      $(".smart-listing-controls").submit();
+                  });
+              });
+            </script>

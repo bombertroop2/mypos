@@ -1,0 +1,100 @@
+<td colspan="4">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@user, remote: true, html: {class: "form-horizontal", id: "new_user_form"}) do |f| %>
+        <div class="form-group<%= control_group_error(@user, :name) %>">
+            <%= f.label :name, class: "col-sm-3 control-label" %>
+              <div class="col-sm-9">
+                  <%= f.text_field :name, class: "form-control capitalize inputs" %>
+                    <%= error_help_text(@user, :name) %>
+                </div>
+            </div>
+            <div class="form-group<%= control_group_error(@user, :address) %>">
+                <%= f.label :address, class: "col-sm-3 control-label" %>
+                  <div class="col-sm-9">
+                      <%= f.text_area :address, rows: 6, class: "form-control" %>
+                        <%= error_help_text(@user, :address) %>
+                    </div>
+                </div>
+                <div class="form-group<%= control_group_error(@user, :gender) %>">
+                    <%= f.label :gender, class: "col-sm-3 control-label" %>
+                      <div class="col-sm-9">
+                          <%= f.select :gender, options_for_select(User::GENDERS, @user.gender), {prompt: true}, {class: "inputs form-control"} %>
+                            <%= error_help_text(@user, :gender) %>
+                        </div>
+                    </div>
+                    <div class="form-group<%= control_group_error(@user, :phone) %>">
+                        <%= f.label :phone, class: "col-sm-3 control-label" %>
+                          <div class="col-sm-9">
+                              <%= f.telephone_field :phone, size: 10, class: "form-control inputs" %>
+                                <%= error_help_text(@user, :phone) %>
+                            </div>
+                        </div>
+                        <div class="form-group<%= control_group_error(@user, :mobile_phone) %>">
+                            <%= f.label :mobile_phone, class: "col-sm-3 control-label" %>
+                              <div class="col-sm-9">
+                                  <%= f.telephone_field :mobile_phone, size: 12, class: "form-control inputs" %>
+                                    <%= error_help_text(@user, :mobile_phone) %>
+                                </div>
+                            </div>
+
+                            <div class="form-group<%= control_group_error(@user, :role) %>">
+                                <%= f.label :role, class: "col-sm-3 control-label" %>
+                                  <div class="col-sm-9">
+                                      <%= f.select :role, options_for_select(User::ROLES, @user.role), {prompt: true}, {class: "inputs form-control" } %>
+                                        <%= error_help_text(@user, :role) %>
+                                    </div>
+                                </div>
+                                <div class="form-group<%= control_group_error(@user, :email) %>">
+                                    <%= f.label :email, class: "col-sm-3 control-label" %>
+                                      <div class="col-sm-9">
+                                          <%= f.email_field :email, class: "form-control inputs" %>
+                                            <%= error_help_text(@user, :email) %>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group<%= control_group_error(@user, :username) %>">
+                                        <%= f.label :username, class: "col-sm-3 control-label" %>
+                                          <div class="col-sm-9">
+                                              <%= f.text_field :username, class: "form-control inputs" %>
+                                                <%= error_help_text(@user, :username) %>
+                                            </div>
+                                        </div>          
+                                        <div class="form-group<%= control_group_error(@user, :password) %>">
+                                            <%= f.label :password, class: "col-sm-3 control-label" %>
+                                              <div class="col-sm-9">
+                                                  <%= f.password_field :password, autocomplete: "off", class: "form-control inputs" %>
+                                                    <%= error_help_text(@user, :password) %>
+                                                </div>
+                                            </div>
+                                            <div class="form-group<%= control_group_error(@user, :password_confirmation) %>">
+                                                <%= f.label :password_confirmation, class: "col-sm-3 control-label" %>
+                                                  <div class="col-sm-9">
+                                                      <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control inputs" %>
+                                                        <%= error_help_text(@user, :password_confirmation) %>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-sm-offset-3 col-sm-9">
+                                                        <%= f.submit "Save", class: "btn btn-primary" %>
+                                                          <button class="btn btn-link cancel">Cancel</button>
+                                                      </div>
+                                                  </div>
+                                                <% end %>
+                                            </td>
+
+                                            <script>
+                                              $(function () {
+                                                  MaskedInput({
+                                                      elm: document.getElementById('user_phone'),
+                                                      format: '____-_______',
+                                                      separator: '-'
+                                                  });
+                                                  MaskedInput({
+                                                      elm: document.getElementById('user_mobile_phone'),
+                                                      format: '____________'
+                                                  });
+
+                                              });
+
+                                            </script>

@@ -1,0 +1,37 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-users-thead">
+        <tr>
+            <th class="col-md-4"><%= smart_listing.sortable "Name", "users.name" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Gender", "gender" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Role", "roles.name" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |user| %>
+          <% unless user.has_role? :admin %>
+            <tr class="editable" data-id="<%= user.id %>">
+                <%= smart_listing.render object: user, partial: "users/user", locals: {object: user} %>
+            </tr>
+          <% end %>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_user_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-users-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-users-thead").show();
+      }
+  }, 0);
+<% if !user_signed_in? || !is_admin? %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>

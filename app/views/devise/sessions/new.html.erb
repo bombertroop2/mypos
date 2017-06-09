@@ -3,19 +3,20 @@
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
   <h2 class="form-signin-heading">Please sign in</h2>
-  <%= f.label :email, class: "sr-only" %>
-    <%= f.email_field :email, autofocus: true, class: "form-control", placeholder: "Email address" %>
+  <%= f.label :login, class: "sr-only" %>
+    <%= f.text_field :login, autofocus: true, class: "form-control", placeholder: "Email or Username" %>
 
       <%= f.label :password, class: "sr-only" %>
         <%= f.password_field :password, autocomplete: "off", class: "form-control", placeholder: "Password" %>
 
+  <!--
           <% if devise_mapping.rememberable? -%>
             <div class="checkbox">
                 <label
                     <%= f.check_box :remember_me %> Remember me
             </label>
             </div>
-          <% end -%>
+          <% end -%>-->
 
           <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         <% end %>
