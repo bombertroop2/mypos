@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class ColorsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_color, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
 

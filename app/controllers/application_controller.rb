@@ -4,9 +4,19 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception, prepend: true
   
   before_action :authenticate_user!, except: [:show, :index]
-  before_action :is_user_can_cud?, except: [:show, :index]
+  #  before_action :is_user_can_cud?, except: [:show, :index]
   before_action :configure_permitted_parameters, if: :devise_controller?
     helper_method :is_admin?
+    
+    rescue_from CanCan::AccessDenied do |exception|
+#      flash[:alert] = exception.message
+      flash[:alert] = "You are not authorized to perform this action."
+      unless request.xhr?
+        redirect_to root_path
+      else
+        render js: "window.location = '#{root_url}'"
+      end
+    end
   
   
     def after_sign_in_path_for(resource)

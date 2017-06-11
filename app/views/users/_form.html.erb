@@ -40,7 +40,7 @@
                             <div class="form-group<%= control_group_error(@user, :role) %>">
                                 <%= f.label :role, class: "col-sm-3 control-label" %>
                                   <div class="col-sm-9">
-                                      <%= f.select :role, options_for_select(User::ROLES, @user.role), {prompt: true}, {class: "inputs form-control" } %>
+                                      <%= f.select :role, options_for_select(User::ROLES, (@user.role_name rescue nil)), {prompt: @user.new_record?}, {class: "inputs form-control" } %>
                                         <%= error_help_text(@user, :role) %>
                                     </div>
                                 </div>
@@ -51,7 +51,7 @@
                                             <%= error_help_text(@user, :email) %>
                                         </div>
 
-                                    </div>
+                                    </div>                                   
                                     <div class="form-group<%= control_group_error(@user, :username) %>">
                                         <%= f.label :username, class: "col-sm-3 control-label" %>
                                           <div class="col-sm-9">
@@ -73,28 +73,77 @@
                                                         <%= error_help_text(@user, :password_confirmation) %>
                                                     </div>
                                                 </div>
+                                                <div class="form-group<%= control_group_error(@user, :active) %>">
+                                                    <div class="col-sm-3"></div>
+                                                    <div class="col-sm-9">
+                                                        <%= f.check_box :active, checked: (!@user.new_record? || params[:action].eql?("create") ? @user.active : @user.new_record?) %> Active
+                                                    </div>
+
+                                                </div>
 
                                                 <div class="form-group">
-                                                    <div class="col-sm-offset-3 col-sm-9">
-                                                        <%= f.submit "Save", class: "btn btn-primary" %>
-                                                          <button class="btn btn-link cancel">Cancel</button>
+                                                    <label class="col-sm-3 control-label">Authorization</label>
+                                                    <div class="col-sm-9">
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Name</th>
+                                                                    <th>Ability</th>
+                                                                </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                                <%= f.fields_for :user_menus do |user_menu_field| %>
+                                                                  <%= user_menu_field.hidden_field :name %>
+                                                                  <tr>
+                                                                      <td style="vertical-align: middle"><%= user_menu_field.object.name %></td>
+                                                                      <td style="vertical-align: middle"><%= user_menu_field.select :ability, options_for_select(User::ABILITIES, user_menu_field.object.ability.to_s), {prompt: true}, {class: "form-control"} %></td>
+                                                                    </tr>
+                                                                  <% end %>
+                                                              </tbody>
+                                                          </table>
                                                       </div>
                                                   </div>
-                                                <% end %>
-                                            </td>
 
-                                            <script>
-                                              $(function () {
-                                                  MaskedInput({
-                                                      elm: document.getElementById('user_phone'),
-                                                      format: '____-_______',
-                                                      separator: '-'
-                                                  });
-                                                  MaskedInput({
-                                                      elm: document.getElementById('user_mobile_phone'),
-                                                      format: '____________'
-                                                  });
+                                                  <div class="form-group">
+                                                      <div class="col-sm-offset-3 col-sm-9">
+                                                          <%= f.submit "Save", class: "btn btn-primary" %>
+                                                            <button class="btn btn-link cancel">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                  <% end %>
+                                              </td>
 
-                                              });
+                                              <script>
+                                                $(function () {
+                                                    MaskedInput({
+                                                        elm: document.getElementById('user_phone'),
+                                                        format: '____-_______',
+                                                        separator: '-'
+                                                    });
+                                                    MaskedInput({
+                                                        elm: document.getElementById('user_mobile_phone'),
+                                                        format: '____________'
+                                                    });
 
-                                            </script>
+                                                    var abilitiesDataTable = $('.listing-abilities-tables').DataTable({
+                                                        order: [],
+                                                        dom: 'T<"clear">lfrtip',
+                                                        columns: [
+                                                            {data: null, defaultContent: '', orderable: false},
+                                                            {data: 'name', orderable: false}
+                                                        ],
+                                                        tableTools: {
+                                                            sRowSelect: 'os',
+                                              //sRowSelector: 'td:first-child',
+                                                            aButtons: []
+                                                        },
+                                                        paging: false,
+                                                        info: false,
+                                                        searching: false,
+                                                        scrollCollapse: true
+                                                    });
+
+                                                });
+
+                                              </script>

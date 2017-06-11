@@ -1,0 +1,5 @@
+<% if @invalid %>
+  <%= smart_listing_item :users, :update, @user, "users/form" %>
+<% else %>
+  <%= smart_listing_item :users, :update, @user, "users/user" %>
+<% end %>

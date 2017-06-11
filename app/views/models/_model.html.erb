@@ -2,8 +2,6 @@
 <td><%= object.name %></td>
 <td><%= object.description %></td>
 <td class="actions" style="text-align: right">
-    <% if user_signed_in? && is_admin? %>
-      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_model_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
-        <%= link_to_if(!object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
-      <% end %>
+    <%= link_to_if(can?(:manage, Model), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_model_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
+      <%= link_to_if(can?(:manage, Model) && !object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
   </td>

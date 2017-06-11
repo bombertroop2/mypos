@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class ReceivingController < ApplicationController
+  load_and_authorize_resource class: ReceivedPurchaseOrder
   helper SmartListing::Helper
   before_action :set_purchase_order, only: [:get_purchase_order, :receive_products_from_purchase_order]
   before_action :set_received_order, only: :show

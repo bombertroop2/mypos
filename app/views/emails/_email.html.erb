@@ -1,8 +1,6 @@
 <td><%= object.address %></td>
 <td><%= object.email_type %></td>
 <td class="actions" style="text-align: right">
-    <% if user_signed_in? && is_admin? %>
-      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_email_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
-        <%= link_to "<i class=\"glyphicon glyphicon-trash\"></i>".html_safe, object, class: "destroy", method: :delete, :data => {remote: true, :confirmation => 'Are you sure?', placement: :left}, title: "Delete" %>
-        <% end %>
-    </td>
+    <%= link_to_if(can?(:manage, Email), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_email_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
+      <%= link_to_if(can?(:manage, Email), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+  </td>

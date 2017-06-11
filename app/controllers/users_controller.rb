@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class UsersController < ApplicationController
+  load_and_authorize_resource
   before_action :set_user, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
   
@@ -21,12 +22,18 @@ class UsersController < ApplicationController
 
   def new
     @user = User.new
+    User::MENUS.each do |menu|
+      @user.user_menus.build name: menu
+    end
   end
 
   def create
     @user = User.new(user_params)
     unless @user.save
       @invalid = true
+      User::MENUS.each do |menu|
+        @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+      end
     else
       @invalid = false
       @role_name = UsersRole.joins(:role).where(user_id: @user.id).select(:name).first.name.titleize
@@ -34,24 +41,34 @@ class UsersController < ApplicationController
   end
 
   def edit
+    User::MENUS.each do |menu|
+      @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+    end
   end
 
   def update
+    unless @user.update(user_params)
+      @invalid = true
+    else
+      @invalid = false
+    end
   end
 
   def destroy
+    @user.destroy
   end
   
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_user
     @user = User.joins(users_roles: :role).where(id: params[:id]).
-      select(:id, :email, :name, :address, :phone, :mobile_phone, :gender).
+      select(:id, :email, :name, :address, :phone, :mobile_phone, :gender, :username, :active).
       select("roles.name AS role_name").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params[:user].permit(:name, :address, :gender, :phone, :mobile_phone, :role, :email, :password, :password_confirmation, :username)
+    params[:user].permit(:name, :address, :gender, :phone, :mobile_phone, :role, :email, :password, :password_confirmation, :username, :active,
+      user_menus_attributes: [:id, :name, :ability])
   end
 end

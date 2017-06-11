@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class CostPricesController < ApplicationController
+  load_and_authorize_resource class: CostList
   helper SmartListing::Helper
   #  before_action :set_product, only: [:show, :edit, :update, :destroy, :new_cost, :create_cost, :edit_cost]
   #  before_action :convert_cost_price_to_numeric, only: [:create, :update, :create_cost]

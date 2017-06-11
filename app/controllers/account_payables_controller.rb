@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class AccountPayablesController < ApplicationController
+  load_and_authorize_resource
   before_action :set_account_payable, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
 

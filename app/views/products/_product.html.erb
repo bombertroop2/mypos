@@ -5,8 +5,6 @@
 <td id="product-goods-type-name-<%= object.id %>"><%= object.goods_type_name rescue nil %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, product_path(object), data: {remote: true}, title: "Show" %>
-    <% if user_signed_in? && is_admin? %>
-      <%= link_to "<i class=\"glyphicon glyphicon-pencil\"></i>".html_safe, edit_product_path(object), data: {remote: true}, class: :edit, title: "Edit" %>
-        <%= link_to_if(!object.purchase_order_relation.present? && !object.direct_purchase_product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
-      <% end %>
+    <%= link_to_if(can?(:manage, Product), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_product_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
+      <%= link_to_if(can?(:manage, Product) && !object.purchase_order_relation.present? && !object.direct_purchase_product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
   </td>

@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class StocksController < ApplicationController
+  load_and_authorize_resource
   helper SmartListing::Helper
   before_action :set_stock, only: [:show, :edit, :update, :destroy]
 

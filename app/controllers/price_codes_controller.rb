@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class PriceCodesController < ApplicationController
+  load_and_authorize_resource
   before_action :set_price_code, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
 

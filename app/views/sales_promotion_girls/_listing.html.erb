@@ -15,7 +15,7 @@
               <%= smart_listing.render object: spg, partial: "sales_promotion_girls/sales_promotion_girl", locals: {object: spg} %>
           </tr>
         <% end %>
-          <%= smart_listing.item_new colspan: 6, link: new_sales_promotion_girl_path %>
+        <%= smart_listing.item_new colspan: 6, link: new_sales_promotion_girl_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>
@@ -29,7 +29,7 @@
       }
   }, 0);
 <%# unless user_is_not_cashier %>
-<% if !user_signed_in? || !is_admin? %>
+<% if cannot? :manage, SalesPromotionGirl %>
     $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
     $('#new-item-btn').unbind("click");
     $('#new-item-btn').click(function (e) {

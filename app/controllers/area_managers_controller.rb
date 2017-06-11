@@ -1,6 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class AreaManagersController < ApplicationController
-  skip_before_action :authenticate_user!, :is_user_can_cud?, only: :get_warehouses
+  load_and_authorize_resource class: Supervisor
+  #  skip_before_action :authenticate_user!, :is_user_can_cud?, only: :get_warehouses
   before_action :set_area_manager, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
 

@@ -9,13 +9,17 @@ class User < ApplicationRecord
   attr_accessor :role, :login#:spg_role
        
   #  belongs_to :sales_promotion_girl
+  has_many :user_menus, dependent: :destroy
+
+  accepts_nested_attributes_for :user_menus, reject_if: proc{|attributes| attributes[:ability].blank?}
   
   #  before_validation :prevent_system_creating_user
-  validates :mobile_phone, :address, :name, :gender, :role, :username, presence: true
+  validates :address, :name, :gender, :role, :username, presence: true
   validates :username, uniqueness: {case_sensitive: false}
   # Only allow letter, number, underscore and punctuation.
   validates_format_of :username, with: /^[a-zA-Z0-9_\.]*$/, multiline: true
   validate :gender_available, :role_available
+  validates_confirmation_of :password, on: :update
 
   after_save :add_user_role, if: proc{|user| user.role.present?}
   
@@ -28,8 +32,17 @@ class User < ApplicationRecord
       ["Staff", "staff"],
       ["Manager", "manager"]
     ]
+    
+    ABILITIES = [
+      ["Manage", 1],
+      ["Read", 2]
+    ]
+    
+    MENUS = ["Brand", "Color", "Model", "Goods Type", "Region", "Price Code", "Vendor", "Product",
+      "Size Group", "Sales Promotion Girl", "Area Manager", "Warehouse", "Purchase Order",
+      "Receiving", "Stock Balance", "Purchase Return", "Cost & Price", "Email", "Account Payable",
+      "Order Booking", "Courier", "Shipment"]
 
-  
     #  def name
     #    sales_promotion_girl.name    
     #  end

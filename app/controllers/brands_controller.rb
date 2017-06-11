@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class BrandsController < ApplicationController  
+  load_and_authorize_resource
   before_action :set_brand, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
   # GET /brands

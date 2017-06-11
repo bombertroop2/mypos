@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class SalesPromotionGirlsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
 #  before_action :retain_cashier_role, only: :update
 #  before_action :set_role_to_spg, only: :create
@@ -129,16 +130,16 @@ class SalesPromotionGirlsController < ApplicationController
   end
   
   def user_is_not_cashier
-    return false unless user_signed_in?
-    unless current_user.has_role?(:admin)
-      unless current_user.sales_promotion_girl.role.eql? "supervisor"
-        return false
-      else
-        if @sales_promotion_girl and !@sales_promotion_girl.new_record? and @sales_promotion_girl.role.eql?("supervisor")
-          return false
-        end
-      end
-    end
+#    return false unless user_signed_in?
+#    unless current_user.has_role?(:admin)
+#      unless current_user.sales_promotion_girl.role.eql? "supervisor"
+#        return false
+#      else
+#        if @sales_promotion_girl and !@sales_promotion_girl.new_record? and @sales_promotion_girl.role.eql?("supervisor")
+#          return false
+#        end
+#      end
+#    end
     
     return true
   end

@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class PurchaseOrdersController < ApplicationController
+  load_and_authorize_resource
   helper SmartListing::Helper
   before_action :populate_combobox_list, :populate_products, only: [:new, :edit]
   before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :close]

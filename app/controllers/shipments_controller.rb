@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
+  load_and_authorize_resource except: :create
   helper SmartListing::Helper
   before_action :set_shipment, only: [:show, :edit, :update, :destroy]
   before_action :add_additional_params, only: :create  
@@ -54,6 +55,7 @@ class ShipmentsController < ApplicationController
       params[:shipments].each do |shipment_index|
         begin
           shipment = Shipment.new(shipment_params(params[:shipments][shipment_index]))
+          authorize! :manage, shipment
           unless shipment.save
             if shipment.errors[:base].present?
               render js: "bootbox.alert({message: \"#{shipment.errors[:base].join("<br/>")}\",size: 'small'});"
