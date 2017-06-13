@@ -11,10 +11,10 @@ class User < ApplicationRecord
   #  belongs_to :sales_promotion_girl
   has_many :user_menus, dependent: :destroy
 
-  accepts_nested_attributes_for :user_menus, reject_if: proc{|attributes| attributes[:ability].blank?}
+  accepts_nested_attributes_for :user_menus, reject_if: proc{|attributes| attributes[:ability].blank? || attributes[:name].blank?}
   
   #  before_validation :prevent_system_creating_user
-  validates :address, :name, :gender, :role, :username, presence: true
+  validates :name, :gender, :role, :username, presence: true
   validates :username, uniqueness: {case_sensitive: false}
   # Only allow letter, number, underscore and punctuation.
   validates_format_of :username, with: /^[a-zA-Z0-9_\.]*$/, multiline: true
@@ -30,12 +30,16 @@ class User < ApplicationRecord
   
     ROLES = [
       ["Staff", "staff"],
-      ["Manager", "manager"]
+      ["Manager", "manager"],
+      ["SPG", "spg"],
+      ["Cashier", "cashier"],
+      ["Supervisor", "supervisor"],
     ]
     
     ABILITIES = [
       ["Manage", 1],
-      ["Read", 2]
+      ["Read", 2],
+      ["None", 0]
     ]
     
     MENUS = ["Brand", "Color", "Model", "Goods Type", "Region", "Price Code", "Vendor", "Product",
@@ -74,7 +78,7 @@ class User < ApplicationRecord
     def self.find_for_database_authentication warden_conditions
       conditions = warden_conditions.dup
       login = conditions.delete(:login)
-      where(conditions).where(["lower(username) = :value OR lower(email) = :value", {value: login.strip.downcase}]).first
+      where(conditions).where(["(lower(username) = :value OR lower(email) = :value) AND active = :active_value", {value: login.strip.downcase, active_value: true}]).first
     end
   
     # method ini untuk membatalkan user object dari proses creating,

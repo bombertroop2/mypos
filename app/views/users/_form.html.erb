@@ -4,146 +4,125 @@
         <div class="form-group<%= control_group_error(@user, :name) %>">
             <%= f.label :name, class: "col-sm-3 control-label" %>
               <div class="col-sm-9">
-                  <%= f.text_field :name, class: "form-control capitalize inputs" %>
+                  <%= f.text_field :name, class: "form-control inputs" %>
                     <%= error_help_text(@user, :name) %>
                 </div>
             </div>
-            <div class="form-group<%= control_group_error(@user, :address) %>">
-                <%= f.label :address, class: "col-sm-3 control-label" %>
+            <div class="form-group<%= control_group_error(@user, :gender) %>">
+                <%= f.label :gender, class: "col-sm-3 control-label" %>
                   <div class="col-sm-9">
-                      <%= f.text_area :address, rows: 6, class: "form-control" %>
-                        <%= error_help_text(@user, :address) %>
+                      <%= f.select :gender, options_for_select(User::GENDERS, @user.gender), {prompt: true}, {class: "inputs form-control"} %>
+                        <%= error_help_text(@user, :gender) %>
                     </div>
                 </div>
-                <div class="form-group<%= control_group_error(@user, :gender) %>">
-                    <%= f.label :gender, class: "col-sm-3 control-label" %>
+                <div class="form-group<%= control_group_error(@user, :mobile_phone) %>">
+                    <%= f.label :mobile_phone, class: "col-sm-3 control-label" %>
                       <div class="col-sm-9">
-                          <%= f.select :gender, options_for_select(User::GENDERS, @user.gender), {prompt: true}, {class: "inputs form-control"} %>
-                            <%= error_help_text(@user, :gender) %>
+                          <%= f.telephone_field :mobile_phone, size: 12, class: "form-control inputs" %>
+                            <%= error_help_text(@user, :mobile_phone) %>
                         </div>
                     </div>
-                    <div class="form-group<%= control_group_error(@user, :phone) %>">
-                        <%= f.label :phone, class: "col-sm-3 control-label" %>
+
+                    <div class="form-group<%= control_group_error(@user, :role) %>">
+                        <%= f.label :role, class: "col-sm-3 control-label" %>
                           <div class="col-sm-9">
-                              <%= f.telephone_field :phone, size: 10, class: "form-control inputs" %>
-                                <%= error_help_text(@user, :phone) %>
+                              <%= f.select :role, options_for_select(User::ROLES, (@user.role_name rescue nil)), {prompt: @user.new_record?}, {class: "inputs form-control" } %>
+                                <%= error_help_text(@user, :role) %>
                             </div>
                         </div>
-                        <div class="form-group<%= control_group_error(@user, :mobile_phone) %>">
-                            <%= f.label :mobile_phone, class: "col-sm-3 control-label" %>
+                        <div class="form-group<%= control_group_error(@user, :email) %>">
+                            <%= f.label :email, class: "col-sm-3 control-label" %>
                               <div class="col-sm-9">
-                                  <%= f.telephone_field :mobile_phone, size: 12, class: "form-control inputs" %>
-                                    <%= error_help_text(@user, :mobile_phone) %>
+                                  <%= f.email_field :email, class: "form-control inputs" %>
+                                    <%= error_help_text(@user, :email) %>
                                 </div>
-                            </div>
 
-                            <div class="form-group<%= control_group_error(@user, :role) %>">
-                                <%= f.label :role, class: "col-sm-3 control-label" %>
+                            </div>                                   
+                            <div class="form-group<%= control_group_error(@user, :username) %>">
+                                <%= f.label :username, class: "col-sm-3 control-label" %>
                                   <div class="col-sm-9">
-                                      <%= f.select :role, options_for_select(User::ROLES, (@user.role_name rescue nil)), {prompt: @user.new_record?}, {class: "inputs form-control" } %>
-                                        <%= error_help_text(@user, :role) %>
+                                      <%= f.text_field :username, class: "form-control inputs" %>
+                                        <%= error_help_text(@user, :username) %>
                                     </div>
-                                </div>
-                                <div class="form-group<%= control_group_error(@user, :email) %>">
-                                    <%= f.label :email, class: "col-sm-3 control-label" %>
+                                </div>          
+                                <div class="form-group<%= control_group_error(@user, :password) %>">
+                                    <%= f.label :password, class: "col-sm-3 control-label" %>
                                       <div class="col-sm-9">
-                                          <%= f.email_field :email, class: "form-control inputs" %>
-                                            <%= error_help_text(@user, :email) %>
+                                          <%= f.password_field :password, autocomplete: "off", class: "form-control inputs" %>
+                                            <%= error_help_text(@user, :password) %>
+                                        </div>
+                                    </div>
+                                    <div class="form-group<%= control_group_error(@user, :password_confirmation) %>">
+                                        <%= f.label :password_confirmation, class: "col-sm-3 control-label" %>
+                                          <div class="col-sm-9">
+                                              <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control inputs" %>
+                                                <%= error_help_text(@user, :password_confirmation) %>
+                                            </div>
+                                        </div>
+                                        <div class="form-group<%= control_group_error(@user, :active) %>">
+                                            <div class="col-sm-3"></div>
+                                            <div class="col-sm-9">
+                                                <%= f.check_box :active, checked: (!@user.new_record? || params[:action].eql?("create") ? @user.active : @user.new_record?) %> Active
+                                            </div>
+
                                         </div>
 
-                                    </div>                                   
-                                    <div class="form-group<%= control_group_error(@user, :username) %>">
-                                        <%= f.label :username, class: "col-sm-3 control-label" %>
-                                          <div class="col-sm-9">
-                                              <%= f.text_field :username, class: "form-control inputs" %>
-                                                <%= error_help_text(@user, :username) %>
-                                            </div>
-                                        </div>          
-                                        <div class="form-group<%= control_group_error(@user, :password) %>">
-                                            <%= f.label :password, class: "col-sm-3 control-label" %>
-                                              <div class="col-sm-9">
-                                                  <%= f.password_field :password, autocomplete: "off", class: "form-control inputs" %>
-                                                    <%= error_help_text(@user, :password) %>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">Authorization</label>
+                                            <div class="col-sm-9">
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Ability</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <%= f.fields_for :user_menus do |user_menu_field| %>
+                                                          <%= user_menu_field.hidden_field :name %>
+                                                          <tr>
+                                                              <td style="vertical-align: middle">
+                                                                  <div class="<%= control_group_error(user_menu_field.object, :name) %>">
+                                                                      <%= user_menu_field.object.name %>
+                                                                      <%= error_help_text(user_menu_field.object, :name) %>
+                                                                  </div>
+                                                              </td>
+                                                              <td style="vertical-align: middle">
+                                                                  <div class="<%= control_group_error(user_menu_field.object, :ability) %>">
+                                                                      <%= user_menu_field.select :ability, options_for_select(User::ABILITIES, user_menu_field.object.ability.to_s), {prompt: true}, {class: "form-control"} %>
+                                                                        <%= error_help_text(user_menu_field.object, :ability) %>
+                                                                    </div>                                                                          
+                                                                </td>
+                                                            </tr>
+                                                          <% end %>
+                                                      </tbody>
+                                                  </table>
+                                              </div>
+                                          </div>
+
+                                          <div class="form-group">
+                                              <div class="col-sm-offset-3 col-sm-9">
+                                                  <%= f.submit "Save", class: "btn btn-primary" %>
+                                                    <button class="btn btn-link cancel">Cancel</button>
                                                 </div>
                                             </div>
-                                            <div class="form-group<%= control_group_error(@user, :password_confirmation) %>">
-                                                <%= f.label :password_confirmation, class: "col-sm-3 control-label" %>
-                                                  <div class="col-sm-9">
-                                                      <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control inputs" %>
-                                                        <%= error_help_text(@user, :password_confirmation) %>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group<%= control_group_error(@user, :active) %>">
-                                                    <div class="col-sm-3"></div>
-                                                    <div class="col-sm-9">
-                                                        <%= f.check_box :active, checked: (!@user.new_record? || params[:action].eql?("create") ? @user.active : @user.new_record?) %> Active
-                                                    </div>
+                                          <% end %>
+                                      </td>
 
-                                                </div>
+                                      <script>
+                                        $(function () {
+                                            MaskedInput({
+                                                elm: document.getElementById('user_phone'),
+                                                format: '____-_______',
+                                                separator: '-'
+                                            });
+                                            MaskedInput({
+                                                elm: document.getElementById('user_mobile_phone'),
+                                                format: '____________'
+                                            });
 
-                                                <div class="form-group">
-                                                    <label class="col-sm-3 control-label">Authorization</label>
-                                                    <div class="col-sm-9">
-                                                        <table class="table table-striped">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Name</th>
-                                                                    <th>Ability</th>
-                                                                </tr>
-                                                            </thead>
 
-                                                            <tbody>
-                                                                <%= f.fields_for :user_menus do |user_menu_field| %>
-                                                                  <%= user_menu_field.hidden_field :name %>
-                                                                  <tr>
-                                                                      <td style="vertical-align: middle"><%= user_menu_field.object.name %></td>
-                                                                      <td style="vertical-align: middle"><%= user_menu_field.select :ability, options_for_select(User::ABILITIES, user_menu_field.object.ability.to_s), {prompt: true}, {class: "form-control"} %></td>
-                                                                    </tr>
-                                                                  <% end %>
-                                                              </tbody>
-                                                          </table>
-                                                      </div>
-                                                  </div>
+                                        });
 
-                                                  <div class="form-group">
-                                                      <div class="col-sm-offset-3 col-sm-9">
-                                                          <%= f.submit "Save", class: "btn btn-primary" %>
-                                                            <button class="btn btn-link cancel">Cancel</button>
-                                                        </div>
-                                                    </div>
-                                                  <% end %>
-                                              </td>
-
-                                              <script>
-                                                $(function () {
-                                                    MaskedInput({
-                                                        elm: document.getElementById('user_phone'),
-                                                        format: '____-_______',
-                                                        separator: '-'
-                                                    });
-                                                    MaskedInput({
-                                                        elm: document.getElementById('user_mobile_phone'),
-                                                        format: '____________'
-                                                    });
-
-                                                    var abilitiesDataTable = $('.listing-abilities-tables').DataTable({
-                                                        order: [],
-                                                        dom: 'T<"clear">lfrtip',
-                                                        columns: [
-                                                            {data: null, defaultContent: '', orderable: false},
-                                                            {data: 'name', orderable: false}
-                                                        ],
-                                                        tableTools: {
-                                                            sRowSelect: 'os',
-                                              //sRowSelector: 'td:first-child',
-                                                            aButtons: []
-                                                        },
-                                                        paging: false,
-                                                        info: false,
-                                                        searching: false,
-                                                        scrollCollapse: true
-                                                    });
-
-                                                });
-
-                                              </script>
+                                      </script>

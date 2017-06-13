@@ -49,6 +49,9 @@ class UsersController < ApplicationController
   def update
     unless @user.update(user_params)
       @invalid = true
+      User::MENUS.each do |menu|
+        @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+      end
     else
       @invalid = false
     end
@@ -68,7 +71,7 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params[:user].permit(:name, :address, :gender, :phone, :mobile_phone, :role, :email, :password, :password_confirmation, :username, :active,
+    params[:user].permit(:name, :gender, :mobile_phone, :role, :email, :password, :password_confirmation, :username, :active,
       user_menus_attributes: [:id, :name, :ability])
   end
 end

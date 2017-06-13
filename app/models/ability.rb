@@ -9,23 +9,25 @@ class Ability
       can :manage, :all
     else
       user.user_menus.each do |user_menu|
-        ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
-        class_name = if user_menu.name.eql?("Area Manager")
-          "Supervisor"
-        elsif user_menu.name.eql?("Stock Balance")
-          "Stock"
-        elsif user_menu.name.eql?("Cost & Price")
-          "CostList"
-        elsif user_menu.name.eql?("Receiving")
-          "ReceivedPurchaseOrder"
-        else
-          user_menu.name
-        end
-        if ability && class_name.eql?("Supervisor")
-          can ability, class_name.gsub(/\s+/, "").constantize
-          can :get_warehouses, class_name.gsub(/\s+/, "").constantize
-        elsif ability
-          can ability, class_name.gsub(/\s+/, "").constantize
+        if user_menu.ability != 0
+          ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
+          class_name = if user_menu.name.eql?("Area Manager")
+            "Supervisor"
+          elsif user_menu.name.eql?("Stock Balance")
+            "Stock"
+          elsif user_menu.name.eql?("Cost & Price")
+            "CostList"
+          elsif user_menu.name.eql?("Receiving")
+            "ReceivedPurchaseOrder"
+          else
+            user_menu.name
+          end
+          if ability && class_name.eql?("Supervisor")
+            can ability, class_name.gsub(/\s+/, "").constantize
+            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+          elsif ability
+            can ability, class_name.gsub(/\s+/, "").constantize
+          end        
         end        
       end
     end
