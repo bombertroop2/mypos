@@ -1,4 +1,5 @@
 class Vendor < ApplicationRecord
+  audited on: [:create, :update]
   before_validation :strip_string_values
 
   validates :code, presence: true, uniqueness: true
@@ -30,9 +31,13 @@ class Vendor < ApplicationRecord
 
       before_validation :upcase_code
       before_save :remove_vat, if: proc {|vendor| !vendor.value_added_tax_was.eql?("") && vendor.persisted? && !vendor.is_taxable_entrepreneur}
-    
+        before_destroy :delete_tracks
 
         private
+
+        def delete_tracks
+          audits.destroy_all
+        end
 
         def strip_string_values
           self.code = code.strip

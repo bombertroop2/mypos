@@ -1,4 +1,5 @@
 class Region < CommonField
+  audited on: [:create, :update]
   has_many :warehouses, dependent: :restrict_with_error
   has_many :sales_promotion_girls, through: :warehouses
   has_many :supervisors, through: :warehouses
@@ -9,7 +10,13 @@ class Region < CommonField
   validates :code, uniqueness: true
   validate :code_not_changed
 
+  before_destroy :delete_tracks
+
   private
+
+  def delete_tracks
+    audits.destroy_all
+  end
 
   def upcase_code
     self.code = code.upcase

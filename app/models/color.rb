@@ -1,4 +1,5 @@
 class Color < CommonField
+  audited on: [:create, :update]
   has_many :purchase_order_details#, dependent: :restrict_with_error
   #  has_many :received_purchase_orders
   has_many :products, -> {group "products.id"}, through: :product_details
@@ -14,7 +15,13 @@ class Color < CommonField
   validates :code, uniqueness: true 
   validate :code_not_changed
   
+  before_destroy :delete_tracks
+
   private
+
+  def delete_tracks
+    audits.destroy_all
+  end
 
   def upcase_code
     self.code = code.upcase

@@ -58,6 +58,8 @@ gem 'chunky_png'
 
 gem 'cancancan', '~> 1.10'
 
+gem "audited", "~> 4.5"
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
