@@ -1,4 +1,5 @@
 class Supervisor < ApplicationRecord
+  audited on: [:create, :update]
   has_many :sales_promotion_girls, through: :warehouses
   has_many :warehouses, dependent: :restrict_with_error
   has_one :warehouse_relation, -> {select("1 AS one")}, class_name: "Warehouse"
@@ -12,8 +13,14 @@ class Supervisor < ApplicationRecord
 
     before_validation :titleize_name, :upcase_code, :replace_underline_from_mobile_phone, :strip_string_values
     
+    before_destroy :delete_tracks
+
     private
     
+    def delete_tracks
+      audits.destroy_all
+    end
+
     def strip_string_values
       self.code = code.strip
     end

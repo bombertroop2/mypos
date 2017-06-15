@@ -1,5 +1,8 @@
 class ProductDetail < ApplicationRecord
   attr_accessor :user_is_adding_new_product, :size_group_id, :adding_new_price
+  
+  audited associated_with: :product, on: [:create, :update]
+  has_associated_audits
 
   belongs_to :size
   belongs_to :price_code
@@ -16,6 +19,7 @@ class ProductDetail < ApplicationRecord
     accepts_nested_attributes_for :price_lists#, reject_if: proc {|attributes| attributes[:price].blank?}
 
     before_create :create_barcode
+    before_destroy :delete_tracks
   
     def active_price
       price_lists = self.price_lists.select(:id, :price, :effective_date).order("effective_date DESC")
@@ -33,6 +37,10 @@ class ProductDetail < ApplicationRecord
 
     private      
     
+    def delete_tracks
+      audits.destroy_all
+    end
+
     def size_available
       unless adding_new_price
         errors.add(:size_id, "does not exist!") if size_id.present? && Size.where("sizes.id = #{size_id} AND size_groups.id = #{size_group_id}").joins(:size_group).select("1 AS one").blank?

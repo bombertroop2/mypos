@@ -1,4 +1,5 @@
 class Warehouse < ApplicationRecord
+  audited on: [:create, :update]
   belongs_to :supervisor
   belongs_to :region
   belongs_to :price_code
@@ -21,6 +22,8 @@ class Warehouse < ApplicationRecord
     validates :code, uniqueness: true
 
     before_validation :upcase_code, :strip_string_values
+
+    before_destroy :delete_tracks
 
     TYPES = [
       ["Central", "central"],
@@ -50,6 +53,10 @@ class Warehouse < ApplicationRecord
 
     private
     
+    def delete_tracks
+      audits.destroy_all
+    end
+
     def strip_string_values
       self.code = code.strip
     end

@@ -1,4 +1,6 @@
 class Courier < ApplicationRecord
+  audited on: [:create, :update]
+
   has_many :shipments, dependent: :restrict_with_error
   has_one :shipment_relation, -> {select("1 AS one")}, class_name: "Shipment"
   
@@ -6,6 +8,8 @@ class Courier < ApplicationRecord
   validates :code, :name, :via, :unit, presence: true
   validates :code, uniqueness: true
   validate :code_not_changed, :via_not_changed, :unit_not_changed
+
+  before_destroy :delete_tracks
   
   SHIPPING_WAYS = [
     ["Land", "Land"],
@@ -23,6 +27,10 @@ class Courier < ApplicationRecord
 
   
   private
+  
+  def delete_tracks
+    audits.destroy_all
+  end
   
   def code_not_changed
     errors.add(:code, "change is not allowed!") if code_changed? && persisted? && shipment_relation.present?

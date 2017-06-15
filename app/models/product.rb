@@ -1,4 +1,6 @@
 class Product < ApplicationRecord
+  audited on: [:create, :update]
+  has_associated_audits
   #  attr_accessor :effective_date
   
   belongs_to :brand
@@ -50,6 +52,7 @@ class Product < ApplicationRecord
   
   before_validation :upcase_code
   before_update :delete_old_children_if_size_group_changed
+  before_destroy :delete_tracks
   #  before_destroy :prevent_delete_if_purchase_order_created
 
   
@@ -105,6 +108,10 @@ class Product < ApplicationRecord
         
   private
   
+  def delete_tracks
+    audits.destroy_all
+  end
+
   def strip_string_values
     self.code = code.strip
   end

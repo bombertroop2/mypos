@@ -1,4 +1,5 @@
 class Size < ApplicationRecord
+  audited associated_with: :size_group, on: [:create, :update]
   belongs_to :size_group
   has_many :product_details, dependent: :restrict_with_error
   has_many :stock_details, dependent: :restrict_with_error
@@ -13,8 +14,14 @@ class Size < ApplicationRecord
   validate :size_not_changed
   validate :size_not_added, on: :create
   
+  before_destroy :delete_tracks
+
   private
   
+  def delete_tracks
+    audits.destroy_all
+  end
+
   def strip_string_values
     self.size = size.strip
   end

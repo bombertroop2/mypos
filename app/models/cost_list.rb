@@ -1,4 +1,6 @@
 class CostList < ApplicationRecord
+  audited associated_with: :product, on: [:create, :update]
+
   belongs_to :product
 
   has_many :purchase_order_products#, dependent: :restrict_with_error
@@ -20,7 +22,7 @@ class CostList < ApplicationRecord
               attr_accessor :is_user_creating_product, :user_is_deleting_from_child
           
               before_destroy :prevent_user_delete_last_record, if: proc {|cost_list| cost_list.user_is_deleting_from_child}
-                before_destroy :prevent_delete_if_purchase_order_created, :prevent_delete_if_direct_purchase_created
+                before_destroy :prevent_delete_if_purchase_order_created, :prevent_delete_if_direct_purchase_created, :delete_tracks
                 #            before_update :update_total_unit_cost_of_purchase_order, if: proc {|cost_list| cost_list.cost_changed?}
                 #              after_create :update_purchase_order_cost              
                 after_destroy :delete_prices
@@ -29,6 +31,10 @@ class CostList < ApplicationRecord
           
                 private
   
+                def delete_tracks
+                  audits.destroy_all
+                end
+
                 def delete_prices
                   product_details = product.product_details.select(:id)
                   product_details.each do |product_detail|

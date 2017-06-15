@@ -1,9 +1,12 @@
 class PriceList < ApplicationRecord
-  belongs_to :product_detail
-  
   attr_accessor :product_id, :size_id, :price_code_id, :user_is_adding_new_price,
     :user_is_updating_price, :user_is_deleting_from_child,
     :user_is_adding_price_from_cost_prices_page, :turn_off_date_validation, :editable_record
+
+  audited associated_with: :product_detail, on: [:create, :update], only: [:effective_date, :price, :product_detail_id]
+
+  belongs_to :product_detail
+  
     
   attr_reader :cost
   
@@ -19,6 +22,7 @@ class PriceList < ApplicationRecord
               #            before_create :create_product_detail, if: proc {|price_list| price_list.product_detail_is_not_existed_yet && price_list.user_is_adding_new_price}
               #  before_destroy :get_parent
               before_destroy :prevent_user_delete_last_record, if: proc {|price_list| price_list.user_is_deleting_from_child}
+                before_destroy :delete_tracks
                 #  after_destroy :delete_parent
                 
                 def cost=(value)
@@ -27,6 +31,10 @@ class PriceList < ApplicationRecord
                 end
           
                 private
+
+                def delete_tracks
+                  audits.destroy_all
+                end
 
                 def set_effective_date
                   # ambil dari effective date produk yang sudah ada

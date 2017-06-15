@@ -1,4 +1,6 @@
 class ProductColor < ApplicationRecord
+  audited associated_with: :product, on: [:create, :update]
+
   belongs_to :product
   belongs_to :color
   
@@ -8,10 +10,16 @@ class ProductColor < ApplicationRecord
   validate :color_available
   validate :color_not_added, on: :create
   
-  before_destroy :prevent_deleting_if_po_is_created, :prevent_deleting_if_direct_purchase_is_created, :prevent_deleting_if_order_booking_is_created
+  before_destroy :prevent_deleting_if_po_is_created,
+    :prevent_deleting_if_direct_purchase_is_created,
+    :prevent_deleting_if_order_booking_is_created, :delete_tracks
   
   private
   
+  def delete_tracks
+    audits.destroy_all
+  end
+
   # apabila sudah ada relasi dengan table lain maka tidak dapat tambah color
   def color_not_added
     errors.add(:base, "Color addition is not allowed!") if new_record? && product && (product.order_booking_product_relation.present? || product.stock_product_relation.present? || product.purchase_order_relation.present? || product.direct_purchase_product_relation.present? || product.cost_lists.select(:id).count > 1)

@@ -1,4 +1,6 @@
 class SizeGroup < ApplicationRecord
+  audited on: [:create, :update]
+  has_associated_audits
   has_many :products, dependent: :restrict_with_error
   has_many :sizes, dependent: :destroy
   has_one :product_relation, -> {select("1 AS one")}, class_name: "Product"
@@ -9,8 +11,14 @@ class SizeGroup < ApplicationRecord
 
   before_validation :upcase_code, :strip_string_values
   
+  before_destroy :delete_tracks
+
   private
   
+  def delete_tracks
+    audits.destroy_all
+  end
+
   def strip_string_values
     self.code = code.strip
   end
