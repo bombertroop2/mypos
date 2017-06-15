@@ -1,4 +1,6 @@
 class DirectPurchase < ApplicationRecord
+  audited on: :create
+
   belongs_to :vendor
   belongs_to :warehouse
   

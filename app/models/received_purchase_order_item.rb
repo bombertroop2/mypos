@@ -30,7 +30,9 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   else
                     "Finish"
                   end
-                  purchase_order.save validate: false
+                  purchase_order.without_auditing do
+                    purchase_order.save validate: false
+                  end
                 end
     
                 def less_than_or_equal_to_order

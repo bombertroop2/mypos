@@ -5,7 +5,6 @@ class PurchaseReturn < ApplicationRecord
   has_many :purchase_return_products, dependent: :destroy
   belongs_to :purchase_order
   belongs_to :direct_purchase
-  belongs_to :creator, class_name: "User", foreign_key: :created_by
   
   validate :purchase_order_is_returnable, if: proc {|pr| pr.purchase_order_id.present? && !pr.direct_purchase_return}
     validate :direct_purchase_is_returnable, if: proc {|pr| pr.direct_purchase_id.present? && pr.direct_purchase_return}

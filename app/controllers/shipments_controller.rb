@@ -156,7 +156,7 @@ class ShipmentsController < ApplicationController
     params.permit(:order_booking_number, :quantity, :delivery_date, :order_booking_id, :courier_id,
       shipment_products_attributes: [:order_booking_product_id, :order_booking_id, :quantity,
         shipment_product_items_attributes: [:order_booking_product_item_id, :quantity,
-          :order_booking_product_id, :order_booking_id]]).merge(created_by: current_user.id)
+          :order_booking_product_id, :order_booking_id]])
   end
   
   def add_additional_params

@@ -217,7 +217,7 @@ class OrderBookingsController < ApplicationController
       :destination_warehouse_id, :note, order_booking_products_attributes: [:product_id,
         :product_code, :product_name, :origin_warehouse_id, :id, :_destroy,
         order_booking_product_items_attributes: [:new_product, :id, :size_id, :color_id, :quantity,
-          :available_for_booking_quantity, :product_id, :origin_warehouse_id]]).merge(created_by: current_user.id)
+          :available_for_booking_quantity, :product_id, :origin_warehouse_id]])
   end
   
   def populate_warehouses

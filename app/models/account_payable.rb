@@ -15,7 +15,6 @@ class AccountPayable < ApplicationRecord
   ]
   
   belongs_to :vendor
-  belongs_to :creator, class_name: "User", foreign_key: :created_by
   has_many :account_payable_purchases, dependent: :destroy
   has_many :allocated_return_items, dependent: :destroy
   

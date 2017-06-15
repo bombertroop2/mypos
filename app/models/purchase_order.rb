@@ -1,7 +1,9 @@
 class PurchaseOrder < ApplicationRecord
+  audited on: [:create, :update], except: [:receiving_value, :payment_status]
+  has_associated_audits
+
   belongs_to :vendor
   belongs_to :warehouse
-  belongs_to :creator, class_name: "User", foreign_key: :created_by
   
   has_many :account_payable_purchases, as: :purchase, dependent: :restrict_with_error
   has_many :purchase_order_products, dependent: :destroy
@@ -13,27 +15,27 @@ class PurchaseOrder < ApplicationRecord
   attr_accessor :receiving_po, :closing_po, :is_user_changing_cost
 
   before_validation :set_type, :set_status, on: :create
-  
-  before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
-    before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
-      before_create :calculate_net_amount, :generate_number
-      before_destroy :prevent_delete_if_article_received
-    
-      validates :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
-        validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
-          validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: :is_po_date_validable
-            validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}
-              validate :prevent_update_if_article_received, on: :update
-              validate :disable_receive_po_if_finish, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
-                validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}                  
-                  validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
-                    validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.first_discount.present?}
-                      validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
-                        validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
-                          validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.second_discount.present? && !po.is_additional_disc_from_net}
-                            validates :first_discount, presence: true, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
-                              validate :vendor_available, :warehouse_available
+      
+  validates :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
+    validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
+      validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: :is_po_date_validable
+        validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}
+          validate :prevent_update_if_article_received, on: :update
+          validate :disable_receive_po_if_finish, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
+            validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}                  
+              validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
+                validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.first_discount.present?}
+                  validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
+                    validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
+                      validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.second_discount.present? && !po.is_additional_disc_from_net}
+                        validates :first_discount, presence: true, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
+                          validate :vendor_available, :warehouse_available
                                   
+                          before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
+                            before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
+                              before_create :calculate_net_amount, :generate_number
+                              before_destroy :prevent_delete_if_article_received, :delete_tracks
+
                               accepts_nested_attributes_for :purchase_order_products, allow_destroy: true
                               accepts_nested_attributes_for :received_purchase_orders
                                           
@@ -48,6 +50,10 @@ class PurchaseOrder < ApplicationRecord
 
                               private
                                   
+                              def delete_tracks
+                                audits.destroy_all
+                              end
+
                               def vendor_available
                                 errors.add(:vendor_id, "does not exist!") if vendor_id.present? && Vendor.where(id: vendor_id).select("1 AS one").blank?
                               end

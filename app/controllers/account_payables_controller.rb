@@ -273,7 +273,7 @@ class AccountPayablesController < ApplicationController
     params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id,
       :giro_number, :giro_date, :amount_paid, :debt,
       account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id],
-      allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp]).merge(created_by: current_user.id)
+      allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp])
   end
   
   def convert_amount_to_numeric
