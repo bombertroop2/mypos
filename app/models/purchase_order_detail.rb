@@ -2,7 +2,7 @@ class PurchaseOrderDetail < ApplicationRecord
   attr_accessor :is_updating_receiving_quantity, :is_updating_returning_quantity,
     :is_user_changing_cost, :is_user_changing_po_date, :product_id
 
-  audited associated_with: :purchase_order_product, on: [:create, :update], except: :receiving_qty
+  audited associated_with: :purchase_order_product, on: [:create, :update], except: [:receiving_qty, :returning_qty]
 
   belongs_to :purchase_order_product
   belongs_to :color

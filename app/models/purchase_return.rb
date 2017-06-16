@@ -1,6 +1,8 @@
 class PurchaseReturn < ApplicationRecord
   attr_accessor :delivery_order_number, :direct_purchase_return
   
+  audited on: :create
+
   has_many :allocated_return_items, dependent: :restrict_with_error
   has_many :purchase_return_products, dependent: :destroy
   belongs_to :purchase_order
