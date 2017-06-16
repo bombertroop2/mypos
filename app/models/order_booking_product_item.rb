@@ -2,6 +2,8 @@ class OrderBookingProductItem < ApplicationRecord
   attr_accessor :product_id, :new_product, :disable_validation, :old_available_quantity,
     :shipping, :cancel_shipment
 
+  audited associated_with: :order_booking_product, on: [:create, :update], except: :available_quantity
+
   belongs_to :order_booking_product
   belongs_to :size
   belongs_to :color
@@ -12,6 +14,7 @@ class OrderBookingProductItem < ApplicationRecord
         validate :quantity_available, if: proc{|obpi| obpi.quantity.present? && obpi.quantity.is_a?(Numeric)}
     
           before_save :update_booked_quantity, :update_total_quantity
+          before_destroy :delete_tracks
           after_destroy :update_booked_quantity
           after_update :update_stock_and_booked_quantity, if: proc{|spi| spi.shipping || spi.cancel_shipment}
       
@@ -36,6 +39,10 @@ class OrderBookingProductItem < ApplicationRecord
       
 
             private
+            
+            def delete_tracks
+              audits.destroy_all
+            end
             
             def update_stock_and_booked_quantity
               stock_item = StockDetail.joins(stock_product: :stock).select(:id, :booked_quantity, :quantity).
@@ -97,21 +104,29 @@ class OrderBookingProductItem < ApplicationRecord
                 if new_record?
                   last_obp_quantity = order_booking_product.quantity
                   new_obp_quantity = last_obp_quantity + quantity
-                  order_booking_product.update_attribute :quantity, new_obp_quantity
+                  order_booking_product.without_auditing do
+                    order_booking_product.update_attribute :quantity, new_obp_quantity
+                  end
 
                   order_booking = order_booking_product.order_booking
                   last_ob_quantity = order_booking.quantity
                   new_ob_quantity = last_ob_quantity + quantity
-                  order_booking.update_attribute :quantity, new_ob_quantity
+                  order_booking.without_auditing do
+                    order_booking.update_attribute :quantity, new_ob_quantity
+                  end
                 elsif quantity_changed? && persisted?
                   last_obp_quantity = order_booking_product.quantity
                   new_obp_quantity = (last_obp_quantity - quantity_was) + quantity
-                  order_booking_product.update_attribute :quantity, new_obp_quantity
+                  order_booking_product.without_auditing do
+                    order_booking_product.update_attribute :quantity, new_obp_quantity
+                  end
 
                   order_booking = order_booking_product.order_booking
                   last_ob_quantity = order_booking.quantity
                   new_ob_quantity = (last_ob_quantity - quantity_was) + quantity
-                  order_booking.update_attribute :quantity, new_ob_quantity
+                  order_booking.without_auditing do
+                    order_booking.update_attribute :quantity, new_ob_quantity
+                  end
                 end
               end
             end

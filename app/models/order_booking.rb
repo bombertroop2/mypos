@@ -1,4 +1,7 @@
 class OrderBooking < ApplicationRecord
+  audited on: [:create, :update]
+  has_associated_audits
+
   belongs_to :origin_warehouse, class_name: "Warehouse", foreign_key: :origin_warehouse_id
   belongs_to :destination_warehouse, class_name: "Warehouse", foreign_key: :destination_warehouse_id
   has_many :order_booking_products, dependent: :destroy
@@ -17,9 +20,9 @@ class OrderBooking < ApplicationRecord
     validate :editable, on: :update
     
     before_create :generate_number, :set_status
-    before_update :delete_old_products
-    
-    before_destroy :deletable
+    before_update :delete_old_products    
+    before_destroy :deletable, :delete_tracks
+
     
     def plan_date_validable
       return false if plan_date.blank?
@@ -33,6 +36,10 @@ class OrderBooking < ApplicationRecord
     end
 
     private
+    
+    def delete_tracks
+      audits.destroy_all
+    end
     
     def delete_old_products
       if origin_warehouse_id_changed? && persisted?

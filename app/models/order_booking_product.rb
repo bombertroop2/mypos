@@ -2,6 +2,9 @@ class OrderBookingProduct < ApplicationRecord
   attr_accessor :product_code, :product_name
   attr_reader :origin_warehouse_id
   
+  audited associated_with: :order_booking, on: :create
+  has_associated_audits
+
   belongs_to :order_booking
   belongs_to :product
   
@@ -16,6 +19,7 @@ class OrderBookingProduct < ApplicationRecord
     validate :check_min_product_quantity
     
     before_create :calculate_quantity, :update_order_booking_quantity
+    before_destroy :delete_tracks
     after_destroy :update_order_booking_quantity
     
     def origin_warehouse_id=(value)
@@ -25,6 +29,10 @@ class OrderBookingProduct < ApplicationRecord
   
     private
     
+    def delete_tracks
+      audits.destroy_all
+    end
+    
     def check_min_product_quantity
       if new_record?
         errors.add(:base, "Order booking must have at least one quantity per product") if order_booking_product_items.blank?
@@ -33,10 +41,12 @@ class OrderBookingProduct < ApplicationRecord
     
     def update_order_booking_quantity
       last_quantity = order_booking.quantity
-      if destroyed?
-        order_booking.update_attribute :quantity, last_quantity - quantity
-      else
-        order_booking.update_attribute :quantity, quantity + last_quantity.to_i
+      order_booking.without_auditing do
+        if destroyed?
+          order_booking.update_attribute :quantity, last_quantity - quantity
+        else
+          order_booking.update_attribute :quantity, quantity + last_quantity.to_i
+        end
       end
     end
       

@@ -2,6 +2,8 @@ class AccountPayable < ApplicationRecord
   include AccountPayablesHelper
   include PurchaseReturnsHelper
   
+  audited on: :create
+
   attr_accessor :amount_to_be_paid, :total_amount_returned, :payment_for_dp
   
   PAYMENT_STATUSES = [
@@ -38,9 +40,14 @@ class AccountPayable < ApplicationRecord
             
                     before_create :generate_number, :set_amount_returned
                     after_create :mark_purchase_doc_as_paid              
+                    before_destroy :delete_tracks
                                         
                     private
                     
+                    def delete_tracks
+                      audits.destroy_all
+                    end
+  
                     def strip_string_values
                       if payment_method.eql?("Giro")
                         self.giro_number = giro_number.strip
