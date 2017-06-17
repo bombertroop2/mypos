@@ -27,7 +27,7 @@
           $("#listing-users-thead").show();
       }
   }, 0);
-<% if !user_signed_in? || !is_admin? %>
+<% if cannot? :manage, User %>
     $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
     $('#new-item-btn').unbind("click");
     $('#new-item-btn').click(function (e) {

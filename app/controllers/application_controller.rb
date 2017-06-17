@@ -4,12 +4,10 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception, prepend: true
   
   before_action :authenticate_user!, except: [:show, :index]
-  #  before_action :is_user_can_cud?, except: [:show, :index]
   before_action :configure_permitted_parameters, if: :devise_controller?
-    helper_method :is_admin?
     
     rescue_from CanCan::AccessDenied do |exception|
-#      flash[:alert] = exception.message
+      #      flash[:alert] = exception.message
       flash[:alert] = "You are not authorized to perform this action."
       unless request.xhr?
         redirect_to root_path
@@ -38,19 +36,7 @@ class ApplicationController < ActionController::Base
   
     private
   
-    def is_admin?
-      current_user.has_role? :admin
-    end
-  
-  
     def is_request_from_auth_system?
       controller_name.eql?("sessions")
-    end
-  
-    def is_user_can_cud?
-      if user_signed_in? and !is_admin? and !is_request_from_auth_system?
-        flash[:alert] = "Sorry, you can't access this request!"
-        redirect_to :back rescue redirect_to root_url
-      end
     end
   end

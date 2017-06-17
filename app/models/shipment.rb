@@ -1,4 +1,5 @@
 class Shipment < ApplicationRecord
+  audited on: :create
   attr_accessor :order_booking_number
   
   belongs_to :order_booking
@@ -15,14 +16,20 @@ class Shipment < ApplicationRecord
 
       before_create :generate_do_number
       after_create :finish_ob
-      before_destroy :deletable
+      before_destroy :deletable, :delete_tracks
       after_destroy :set_ob_status_to_p
 
 
       private
       
+      def delete_tracks
+        audits.destroy_all
+      end
+  
       def set_ob_status_to_p
-        order_booking.update_attribute :status, "P"
+        order_booking.without_auditing do
+          order_booking.update_attribute :status, "P"
+        end
       end
       
       def deletable
@@ -95,6 +102,8 @@ class Shipment < ApplicationRecord
       end
     
       def finish_ob
-        order_booking.update_attribute :status, "F"
+        order_booking.without_auditing do
+          order_booking.update_attribute :status, "F"
+        end
       end
     end

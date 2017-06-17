@@ -5,10 +5,6 @@
 <td><%= remove_empty_space_from_phone_number(object.mobile_phone) %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
-<%# if user_can_edit %>
     <%= link_to_if(can?(:manage, SalesPromotionGirl), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_sales_promotion_girl_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
-  <%# end %>
-  <%# if user_is_not_cashier %>
       <%= link_to_if(can?(:manage, SalesPromotionGirl), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
-  <%# end %>
   </td>

@@ -2,4 +2,7 @@
   <%= smart_listing_item :users, :update, @user, "users/form" %>
 <% else %>
   <%= smart_listing_item :users, :update, @user, "users/user" %>
+  <% if @role_name.present? %>
+    $("#role-name-<%= @user.id %>").html('<%= @role_name %>');
+  <% end %>
 <% end %>

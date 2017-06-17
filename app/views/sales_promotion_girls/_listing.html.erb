@@ -28,7 +28,6 @@
           $("#listing-spg-thead").show();
       }
   }, 0);
-<%# unless user_is_not_cashier %>
 <% if cannot? :manage, SalesPromotionGirl %>
     $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
     $('#new-item-btn').unbind("click");

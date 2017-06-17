@@ -8,6 +8,9 @@ class User < ApplicationRecord
   
   attr_accessor :role, :login#:spg_role
        
+  audited on: [:create, :update]
+  has_associated_audits
+
   #  belongs_to :sales_promotion_girl
   has_many :user_menus, dependent: :destroy
 
@@ -22,6 +25,7 @@ class User < ApplicationRecord
   validates_confirmation_of :password, on: :update
 
   after_save :add_user_role, if: proc{|user| user.role.present?}
+    before_destroy :delete_tracks
   
     GENDERS = [
       ["Male", "male"],
@@ -75,6 +79,10 @@ class User < ApplicationRecord
 
     private
     
+    def delete_tracks
+      audits.destroy_all
+    end
+  
     def self.find_for_database_authentication warden_conditions
       conditions = warden_conditions.dup
       login = conditions.delete(:login)

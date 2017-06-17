@@ -54,6 +54,7 @@ class UsersController < ApplicationController
       end
     else
       @invalid = false
+      @role_name = UsersRole.joins(:role).where(user_id: @user.id).select(:name).first.name.titleize
     end
   end
 
