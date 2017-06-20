@@ -1,8 +1,12 @@
 <% if @invalid %>
-  <%= smart_listing_item :users, :create, @user, "users/form" %>
+  <% if params[:user][:sales_promotion_girl_id].blank? %>
+    $("#non_spg_form_container").html('<%= j(render(partial: "non_spg_form")) %>');
+  <% else %>
+    $("#spg_form_container").html('<%= j(render(partial: "spg_form")) %>');
+  <% end %>
 <% else %>
   <%= smart_listing_item :users, :create, @user, "users/user" %>
   <% if @role_name.present? %>
-    $("#role-name-<%= @user.id %>").html('<%= @role_name %>');
+    $("#role-name-<%= @user.id %>").html('<%= @role_name.eql?("spg") ? @role_name.upcase : @role_name.titleize %>');
   <% end %>
 <% end %>

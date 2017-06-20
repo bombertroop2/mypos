@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :available_menus
   resources :shipments, except: [:edit, :update] do    
     collection do
       get "generate_ob_detail"
@@ -52,7 +53,11 @@ Rails.application.routes.draw do
   end
   resources :stocks, only: :index
   devise_for :users, only: :sessions
-  resources :users    
+  resources :users do
+    collection do
+      get "generate_spg_user_form"
+    end
+  end    
   
   get 'welcome/index'
 

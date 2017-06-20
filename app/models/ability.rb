@@ -5,8 +5,23 @@ class Ability
     # Define abilities for the passed in user here. For example:
     #
     user ||= User.new # guest user (not logged in)
-    if user.has_role? :admin
+    if user.has_role? :superadmin
       can :manage, :all
+    elsif user.has_role? :administrator
+      (User::MENUS.clone << "User").each do |user_menu|
+        class_name = if user_menu.eql?("Area Manager")
+          "Supervisor"
+        elsif user_menu.eql?("Stock Balance")
+          "Stock"
+        elsif user_menu.eql?("Cost & Price")
+          "CostList"
+        elsif user_menu.eql?("Receiving")
+          "ReceivedPurchaseOrder"
+        else
+          user_menu
+        end
+        can :manage, class_name.gsub(/\s+/, "").constantize
+      end
     else
       user.user_menus.each do |user_menu|
         if user_menu.ability != 0

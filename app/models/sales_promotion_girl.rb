@@ -3,7 +3,7 @@ class SalesPromotionGirl < ApplicationRecord
   #  resourcify
   
   belongs_to :warehouse
-  #  has_one :user, dependent: :destroy
+  has_one :user, dependent: :restrict_with_error
 
   before_save :titleize_name
   before_create :create_identifier

@@ -1,128 +1,121 @@
 <td colspan="4">
     <div style="padding-top: 20px"></div>
-    <%= form_for(@user, remote: true, html: {class: "form-horizontal", id: "new_user_form"}) do |f| %>
-        <div class="form-group<%= control_group_error(@user, :name) %>">
-            <%= f.label :name, class: "col-sm-3 control-label" %>
-              <div class="col-sm-9">
-                  <%= f.text_field :name, class: "form-control inputs" %>
-                    <%= error_help_text(@user, :name) %>
-                </div>
-            </div>
-            <div class="form-group<%= control_group_error(@user, :gender) %>">
-                <%= f.label :gender, class: "col-sm-3 control-label" %>
-                  <div class="col-sm-9">
-                      <%= f.select :gender, options_for_select(User::GENDERS, @user.gender), {prompt: true}, {class: "inputs form-control"} %>
-                        <%= error_help_text(@user, :gender) %>
-                    </div>
-                </div>
-                <div class="form-group<%= control_group_error(@user, :mobile_phone) %>">
-                    <%= f.label :mobile_phone, class: "col-sm-3 control-label" %>
-                      <div class="col-sm-9">
-                          <%= f.telephone_field :mobile_phone, size: 12, class: "form-control inputs" %>
-                            <%= error_help_text(@user, :mobile_phone) %>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <% if !@user.new_record? && User::NON_SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
+          <li role="presentation" class="active"><a href="#non_spg_tab" aria-controls="non_spg_tab" role="tab" data-toggle="tab">Non-SPG</a></li>
+        <% elsif !@user.new_record? %>
+          <li role="presentation"><a href="#spg_tab" aria-controls="spg_tab" role="tab" data-toggle="tab">SPG</a></li>
+        <% else %>
+          <li role="presentation" class="active"><a href="#non_spg_tab" aria-controls="non_spg_tab" role="tab" data-toggle="tab">Non-SPG</a></li>
+          <li role="presentation"><a href="#spg_tab" aria-controls="spg_tab" role="tab" data-toggle="tab">SPG</a></li>
+        <% end %>
+    </ul>
+    <!-- tab panes -->
+    <div class="tab-content">
+        <% if !@user.new_record? && User::NON_SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
+          <div role="tabpanel" class="tab-pane fade in active" id="non_spg_tab" style="padding-top: 20px">
+              <div id="non_spg_form_container">
+                  <%= render "non_spg_form" %>
+              </div>
+          </div>
+        <% elsif !@user.new_record? %>
+          <div role="tabpanel" class="tab-pane fade" id="spg_tab" style="padding-top: 20px">
+              <div id="spg_form_container">
+                  <%= render "spg_form" %>
+              </div>
+          </div>
+        <% else %>
+          <div role="tabpanel" class="tab-pane fade in active" id="non_spg_tab" style="padding-top: 20px">
+              <div id="non_spg_form_container">
+                  <%= render "non_spg_form" %>
+              </div>
+          </div>
+          <div role="tabpanel" class="tab-pane fade" id="spg_tab" style="padding-top: 20px">
+              <div class="form-horizontal">
+                  <div class="form-group">
+                      <%= label_tag "select_spg", "Select SPG", class: "col-sm-3 control-label" %>
+                        <div class="col-sm-9">
+                            <table id="listing_spg_table" class="display" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Identifier</th>
+                                        <th>Name</th>
+                                        <th>Warehouse</th>
+                                        <th>Role</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <% @sales_promotion_girls.each do |sales_promotion_girl| %>
+                                      <% if sales_promotion_girl.user.blank? %>
+                                        <tr id="spg_<%= sales_promotion_girl.id %>">
+                                            <td><%= sales_promotion_girl.identifier %></td>
+                                            <td><%= sales_promotion_girl.name %></td>
+                                            <td><%= sales_promotion_girl.warehouse_code %></td>
+                                            <td><%= sales_promotion_girl.role %></td>
+                                        </tr>
+                                      <% end %>
+                                    <% end %>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-
-                    <div class="form-group<%= control_group_error(@user, :role) %>">
-                        <%= f.label :role, class: "col-sm-3 control-label" %>
-                          <div class="col-sm-9">
-                              <%= f.select :role, options_for_select(User::ROLES, (@user.role_name rescue nil)), {prompt: @user.new_record?}, {class: "inputs form-control" } %>
-                                <%= error_help_text(@user, :role) %>
+                    <div id="spg_form_container">
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                <button class="btn btn-primary disabled" id="btn-save-cost-form">Save</button>
+                                <button class="btn btn-link cancel">Cancel</button>
                             </div>
                         </div>
-                        <div class="form-group<%= control_group_error(@user, :email) %>">
-                            <%= f.label :email, class: "col-sm-3 control-label" %>
-                              <div class="col-sm-9">
-                                  <%= f.email_field :email, class: "form-control inputs" %>
-                                    <%= error_help_text(@user, :email) %>
-                                </div>
+                    </div>
+                </div>
+            </div>
+          <% end %>
+      </div>
 
-                            </div>                                   
-                            <div class="form-group<%= control_group_error(@user, :username) %>">
-                                <%= f.label :username, class: "col-sm-3 control-label" %>
-                                  <div class="col-sm-9">
-                                      <%= f.text_field :username, class: "form-control inputs" %>
-                                        <%= error_help_text(@user, :username) %>
-                                    </div>
-                                </div>          
-                                <div class="form-group<%= control_group_error(@user, :password) %>">
-                                    <%= f.label :password, class: "col-sm-3 control-label" %>
-                                      <div class="col-sm-9">
-                                          <%= f.password_field :password, autocomplete: "off", class: "form-control inputs" %>
-                                            <%= error_help_text(@user, :password) %>
-                                        </div>
-                                    </div>
-                                    <div class="form-group<%= control_group_error(@user, :password_confirmation) %>">
-                                        <%= f.label :password_confirmation, class: "col-sm-3 control-label" %>
-                                          <div class="col-sm-9">
-                                              <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control inputs" %>
-                                                <%= error_help_text(@user, :password_confirmation) %>
-                                            </div>
-                                        </div>
-                                        <div class="form-group<%= control_group_error(@user, :active) %>">
-                                            <div class="col-sm-3"></div>
-                                            <div class="col-sm-9">
-                                                <%= f.check_box :active, checked: (!@user.new_record? || params[:action].eql?("create") ? @user.active : @user.new_record?) %> Active
-                                            </div>
+  </td>
 
-                                        </div>
+  <script>
+    $(function () {
+  <% if !@user.new_record? && User::NON_SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
+          $('.nav-tabs a[href="#non_spg_tab"]').tab('show');
+  <% elsif !@user.new_record? %>
+          $('.nav-tabs a[href="#spg_tab"]').tab('show');
+  <% else %>
+          var spgDataTable = null
 
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label">Authorization</label>
-                                            <div class="col-sm-9">
-                                                <table class="table table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Name</th>
-                                                            <th>Ability</th>
-                                                        </tr>
-                                                    </thead>
+          $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+              var target = $(e.target).attr("href"); // activated tab
+              if (target == "#spg_tab" && spgDataTable == null) {
+                  spgDataTable = $('#listing_spg_table').DataTable({
+                      order: [0, 'asc'],
+                      columns: [
+                          {data: 'identifier'},
+                          {data: 'name'},
+                          {data: 'warehouse'},
+                          {data: 'role'}
+                      ],
+                      paging: false,
+                      info: false,
+                      scrollY: "250px",
+                      scrollCollapse: true
+                  });
+              }
+          });
 
-                                                    <tbody>
-                                                        <%= f.fields_for :user_menus do |user_menu_field| %>
-                                                          <%= user_menu_field.hidden_field :name %>
-                                                          <tr>
-                                                              <td style="vertical-align: middle">
-                                                                  <div class="<%= control_group_error(user_menu_field.object, :name) %>">
-                                                                      <%= user_menu_field.object.name %>
-                                                                      <%= error_help_text(user_menu_field.object, :name) %>
-                                                                  </div>
-                                                              </td>
-                                                              <td style="vertical-align: middle">
-                                                                  <div class="<%= control_group_error(user_menu_field.object, :ability) %>">
-                                                                      <%= user_menu_field.select :ability, options_for_select(User::ABILITIES, user_menu_field.object.ability.to_s), {prompt: true}, {class: "form-control"} %>
-                                                                        <%= error_help_text(user_menu_field.object, :ability) %>
-                                                                    </div>                                                                          
-                                                                </td>
-                                                            </tr>
-                                                          <% end %>
-                                                      </tbody>
-                                                  </table>
-                                              </div>
-                                          </div>
+          $('#listing_spg_table tbody').on('dblclick', 'tr', function () {
+              if (!$(this).hasClass('selected')) {
+                  spgDataTable.$('tr.selected').removeClass('selected');
+                  $(this).addClass('selected');
 
-                                          <div class="form-group">
-                                              <div class="col-sm-offset-3 col-sm-9">
-                                                  <%= f.submit "Save", class: "btn btn-primary" %>
-                                                    <button class="btn btn-link cancel">Cancel</button>
-                                                </div>
-                                            </div>
-                                          <% end %>
-                                      </td>
+                  var spgId = $(this).attr("id").split("_")[1];
+                  $.get("/users/generate_spg_user_form", {
+                      spg_id: spgId
+                  });
 
-                                      <script>
-                                        $(function () {
-                                            MaskedInput({
-                                                elm: document.getElementById('user_phone'),
-                                                format: '____-_______',
-                                                separator: '-'
-                                            });
-                                            MaskedInput({
-                                                elm: document.getElementById('user_mobile_phone'),
-                                                format: '____________'
-                                            });
-
-
-                                        });
-
-                                      </script>
+              }
+          });
+  <% end %>
+    });
+  </script>

@@ -1,0 +1,105 @@
+<%= form_for(@user, remote: true, html: {class: "form-horizontal", id: "new_user_form"}) do |f| %>
+    <%= f.hidden_field :sales_promotion_girl_id %>
+    <div class="form-group">
+        <%= label_tag "name", "Name", class: "col-sm-3 control-label" %>
+          <div class="col-sm-9">
+              <span class="form-control"><%= f.object.name %></span>
+          </div>
+      </div>
+      <div class="form-group">
+          <%= label_tag "gender", "Gender", class: "col-sm-3 control-label" %>
+            <div class="col-sm-9">
+                <span class="form-control"><%= f.object.gender.titleize %></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <%= label_tag "mobile_phone", "Mobile phone", class: "col-sm-3 control-label" %>
+              <div class="col-sm-9">
+                  <span class="form-control"><%= f.object.mobile_phone %></span>
+              </div>
+          </div>
+          <div class="form-group">
+              <%= label_tag "role", "Role", class: "col-sm-3 control-label" %>
+                <div class="col-sm-9">
+                    <span class="form-control"><%= f.object.role.eql?("spg") ? f.object.role.upcase : f.object.role.titleize %></span>
+                </div>
+            </div>
+            <div class="form-group<%= control_group_error(@user, :email) %>">
+                <%= f.label :email, class: "col-sm-3 control-label" %>
+                  <div class="col-sm-9">
+                      <%= f.email_field :email, class: "form-control inputs" %>
+                        <%= error_help_text(@user, :email) %>
+                    </div>
+
+                </div>                                   
+                <div class="form-group<%= control_group_error(@user, :username) %>">
+                    <%= f.label :username, class: "col-sm-3 control-label" %>
+                      <div class="col-sm-9">
+                          <%= f.text_field :username, class: "form-control inputs" %>
+                            <%= error_help_text(@user, :username) %>
+                        </div>
+                    </div>          
+                    <div class="form-group<%= control_group_error(@user, :password) %>">
+                        <%= f.label :password, class: "col-sm-3 control-label" %>
+                          <div class="col-sm-9">
+                              <%= f.password_field :password, autocomplete: "off", class: "form-control inputs" %>
+                                <%= error_help_text(@user, :password) %>
+                            </div>
+                        </div>
+                        <div class="form-group<%= control_group_error(@user, :password_confirmation) %>">
+                            <%= f.label :password_confirmation, class: "col-sm-3 control-label" %>
+                              <div class="col-sm-9">
+                                  <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control inputs" %>
+                                    <%= error_help_text(@user, :password_confirmation) %>
+                                </div>
+                            </div>
+                            <div class="form-group<%= control_group_error(@user, :active) %>">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-9">
+                                    <%= f.check_box :active, checked: (!@user.new_record? || params[:action].eql?("create") ? @user.active : @user.new_record?) %> Active
+                                </div>
+
+                            </div>
+
+                            <div class="form-group" id="authorization-fields">
+                                <label class="col-sm-3 control-label">Authorization</label>
+                                <div class="col-sm-9">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Ability</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <%= f.fields_for :user_menus do |user_menu_field| %>
+                                              <%= user_menu_field.hidden_field :name %>
+                                              <tr>
+                                                  <td style="vertical-align: middle">
+                                                      <div class="<%= control_group_error(user_menu_field.object, :name) %>">
+                                                          <%= user_menu_field.object.name %>
+                                                          <%= error_help_text(user_menu_field.object, :name) %>
+                                                      </div>
+                                                  </td>
+                                                  <td style="vertical-align: middle">
+                                                      <div class="<%= control_group_error(user_menu_field.object, :ability) %>">
+                                                          <%= user_menu_field.select :ability, options_for_select(User::ABILITIES, user_menu_field.object.ability.to_s), {prompt: true}, {class: "form-control"} %>
+                                                            <%= error_help_text(user_menu_field.object, :ability) %>
+                                                        </div>                                                                          
+                                                    </td>
+                                                </tr>
+                                              <% end %>
+                                          </tbody>
+                                      </table>
+                                  </div>
+                              </div>
+
+                              <div class="form-group">
+                                  <div class="col-sm-offset-3 col-sm-9">
+                                      <%= f.submit "Save", class: "btn btn-primary" %>
+                                        <button class="btn btn-link cancel">Cancel</button>
+                                    </div>
+                                </div>
+                              <% end %>
+

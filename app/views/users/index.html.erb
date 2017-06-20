@@ -7,7 +7,9 @@
         <%= select_tag "gender", options_for_select(User::GENDERS), {prompt: "Gender", class: "form-control", id: "filter-gender"} %>
       </div>
       <div class="form-group">
-          <%= select_tag "role", options_for_select(User::ROLES), {prompt: "Role", class: "form-control", id: "filter-role"} %>
+          <% non_spg_roles = User::NON_SPG_ROLES.clone %>
+          <% non_spg_roles.shift unless current_user.has_role?(:superadmin) %>
+          <%= select_tag "role", options_for_select(non_spg_roles + User::SPG_ROLES), {prompt: "Role", class: "form-control", id: "filter-role"} %>
         </div>
         <div class="form-group">
             <input type="text" id="filter-string" class="form-control" placeholder="Name">
