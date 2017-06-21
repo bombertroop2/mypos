@@ -7,10 +7,12 @@
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
 
-if User.with_any_role(:admin).blank?
-  user = User.new email: "rizkinoorlaksana@gmail.com", password: "admin123", name: "Admin",
-    username: "admin", active: true, role: "admin"
-  user.save validate: false
+if User.with_any_role(:superadmin).blank?
+  user = User.new email: "rizkinoorlaksana@gmail.com", password: "admin123", name: "Superadmin",
+    username: "superadmin", active: true, role: "superadmin"
+  user.without_auditing do
+    user.save validate: false
+  end
 end
 
 #if Brand.count < 1
