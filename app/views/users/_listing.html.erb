@@ -9,7 +9,7 @@
     </thead>
     <tbody>
         <% smart_listing.collection.each do |user| %>
-          <% unless user.has_role? :superadmin %>
+          <% if (current_user.has_role?(:superadmin) && !user.has_role?(:superadmin)) || (current_user.has_role?(:administrator) && !user.has_role?(:administrator) && !user.has_role?(:superadmin)) %>
             <tr class="editable" data-id="<%= user.id %>">
                 <%= smart_listing.render object: user, partial: "users/user", locals: {object: user} %>
             </tr>

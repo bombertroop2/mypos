@@ -76,6 +76,8 @@ class UsersController < ApplicationController
   def edit
     if @user.has_role?(:superadmin)
       render js: "bootbox.alert({message: \"Sorry, you can't edit super administrator\",size: 'small'});"
+    elsif current_user.has_role?(:administrator) && @user.has_role?(:administrator)
+      render js: "bootbox.alert({message: \"Sorry, you can't edit administrator\",size: 'small'});"
     else
       User::MENUS.each do |menu|
         @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
@@ -87,6 +89,10 @@ class UsersController < ApplicationController
   def update
     if @user.has_role?(:superadmin)
       render js: "bootbox.alert({message: \"Sorry, you can't edit super administrator\",size: 'small'});"
+    elsif current_user.has_role?(:administrator) && @user.has_role?(:administrator)
+      render js: "bootbox.alert({message: \"Sorry, you can't edit administrator\",size: 'small'});"
+    elsif (params[:user][:role].present? && current_user.has_role?(params[:user][:role].to_sym)) || (current_user.has_role?(:administrator) && params[:user][:role].eql?("superadmin"))
+      render js: "bootbox.alert({message: \"Sorry, you can't change user's role from #{@user.roles.first.name} to #{params[:user][:role]}\",size: 'small'});"
     else
       @user.updating_spg_user = params[:user][:sales_promotion_girl_id].present?
       unless @user.update(user_params)
