@@ -65,7 +65,7 @@ class SalesPromotionGirlsController < ApplicationController
   # DELETE /sales_promotion_girls/1
   # DELETE /sales_promotion_girls/1.json
   def destroy
-    @sales_promotion_girl.destroy    
+    @destroyed = @sales_promotion_girl.destroy
   end
 
   private

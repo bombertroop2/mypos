@@ -22,6 +22,31 @@ class Ability
         end
         can :manage, class_name.gsub(/\s+/, "").constantize
       end
+    elsif user.roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user.roles.first.name)}.present?
+      user.user_menus.each do |user_menu|
+        if user_menu.ability != 0
+          ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
+          class_name = if user_menu.name.eql?("Area Manager")
+            "Supervisor"
+          elsif user_menu.name.eql?("Stock Balance")
+            "Stock"
+          elsif user_menu.name.eql?("Cost & Price")
+            "CostList"
+          elsif user_menu.name.eql?("Receiving")
+            "ReceivedPurchaseOrder"
+          else
+            user_menu.name
+          end
+          if ability && class_name.eql?("Supervisor")
+            can ability, class_name.gsub(/\s+/, "").constantize
+            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+          elsif ability && class_name.eql?("Sales Promotion Girl")
+            can :read, class_name.gsub(/\s+/, "").constantize
+          elsif ability
+            can ability, class_name.gsub(/\s+/, "").constantize
+          end        
+        end        
+      end
     else
       user.user_menus.each do |user_menu|
         if user_menu.ability != 0

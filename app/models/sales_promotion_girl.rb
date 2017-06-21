@@ -3,10 +3,8 @@ class SalesPromotionGirl < ApplicationRecord
   #  resourcify
   
   belongs_to :warehouse
-  has_one :user, dependent: :restrict_with_error
+  has_one :user, dependent: :destroy
 
-  before_save :titleize_name
-  before_create :create_identifier
   
   #  after_update :unlink_from_user_if_role_downgraded
 
@@ -16,7 +14,10 @@ class SalesPromotionGirl < ApplicationRecord
   
   #  accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
   
+  before_save :titleize_name
+  before_create :create_identifier
   before_destroy :delete_tracks
+  after_save :update_user_columns, on: :update
 
   GENDERS = [
     ["Male", "male"],
@@ -30,6 +31,16 @@ class SalesPromotionGirl < ApplicationRecord
   ]
 
   private
+  
+  def update_user_columns
+    if user.present?
+      user.name = name
+      user.mobile_phone = mobile_phone
+      user.gender = gender
+      user.role = role
+      user.save validate: false
+    end
+  end
   
   def delete_tracks
     audits.destroy_all
@@ -46,7 +57,7 @@ class SalesPromotionGirl < ApplicationRecord
   end
   
   def role_available
-    SalesPromotionGirl::ROLES.select{ |x| x[1] == role }.first.first
+    ROLES.select{ |x| x[1] == role }.first.first
   rescue
     errors.add(:role, "does not exist!") if role.present?
   end
