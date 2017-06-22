@@ -20,7 +20,7 @@ class UserMenu < ApplicationRecord
   end
 
   def name_available
-    errors.add(:name, "does not exist!") unless User::MENUS.include? name
+    errors.add(:name, "does not exist!") unless AvailableMenu.select("1 AS one").where(active: true, name: name).present?
   end
 
   

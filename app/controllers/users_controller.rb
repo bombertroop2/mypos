@@ -22,8 +22,8 @@ class UsersController < ApplicationController
 
   def new
     @user = User.new
-    User::MENUS.each do |menu|
-      @user.user_menus.build name: menu
+    AvailableMenu.select(:name).where(active: true).each do |menu|
+      @user.user_menus.build name: menu.name
     end
     @sales_promotion_girls = SalesPromotionGirl.joins(:warehouse).
       select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, warehouses.code AS warehouse_code, role").order("identifier")
@@ -37,8 +37,8 @@ class UsersController < ApplicationController
         @user = User.new(user_params)
         if !@user.save
           @invalid = true
-          User::MENUS.each do |menu|
-            @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+          AvailableMenu.select(:name).where(active: true).each do |menu|
+            @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
           end
         else
           @invalid = false
@@ -59,8 +59,8 @@ class UsersController < ApplicationController
             render js: "bootbox.alert({message: \"#{@user.errors.messages[:base].join("<br/>")}\",size: 'small'});"
           else
             @invalid = true
-            User::MENUS.each do |menu|
-              @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+            AvailableMenu.select(:name).where(active: true).each do |menu|
+              @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
             end
           end
         else
@@ -79,8 +79,8 @@ class UsersController < ApplicationController
     elsif current_user.has_role?(:administrator) && @user.has_role?(:administrator)
       render js: "bootbox.alert({message: \"Sorry, you can't edit administrator\",size: 'small'});"
     else
-      User::MENUS.each do |menu|
-        @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+      AvailableMenu.select(:name).where(active: true).each do |menu|
+        @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
       end
       @user.role = @user.roles.first.name if User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present?
     end
@@ -100,8 +100,8 @@ class UsersController < ApplicationController
           render js: "bootbox.alert({message: \"#{@user.errors.messages[:base].join("<br/>")}\",size: 'small'});"
         else
           @invalid = true
-          User::MENUS.each do |menu|
-            @user.user_menus.build name: menu if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+          AvailableMenu.select(:name).where(active: true).each do |menu|
+            @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
           end
           @user.role = @user.roles.first.name if User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present?
         end
@@ -128,8 +128,8 @@ class UsersController < ApplicationController
       @user = User.new name: sales_promotion_girl.name, gender: sales_promotion_girl.gender,
         mobile_phone: sales_promotion_girl.mobile_phone, role: sales_promotion_girl.role,
         sales_promotion_girl_id: sales_promotion_girl.id
-      User::MENUS.each do |menu|
-        @user.user_menus.build name: menu
+      AvailableMenu.select(:name).where(active: true).each do |menu|
+        @user.user_menus.build name: menu.name
       end
     else
       render js: "bootbox.alert({message: \"Sorry, user with name #{sales_promotion_girl.name} already exists\",size: 'small'});"

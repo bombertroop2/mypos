@@ -117,6 +117,9 @@
                           <% if can? :read, User %>
                             <li class="<%= params[:controller].eql?("users") ? "active" : "" %>"><%= link_to "Users", users_path, method: :get %></li>
                           <% end %>
+                          <% if can? :manage, AvailableMenu %>
+                            <li class="<%= params[:controller].eql?("available_menus") ? "active" : "" %>"><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
+                          <% end %>
                       </ul>
                   </div>
                   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

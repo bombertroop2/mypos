@@ -1,0 +1,39 @@
+<%= form_tag(available_menus_path) do %>
+  <div class="form-group">
+      <table class="table table-striped">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Active</th>
+              </tr>
+          </thead>
+
+          <tbody>
+              <% @available_menus.each_with_index do |available_menu, index| %>
+                <%= fields_for "available_menus[#{index}]", available_menu do |p| %>
+                  <%= p.hidden_field :name %>
+                  <tr>
+                      <td style="vertical-align: middle">
+                          <div class="<%= control_group_error(p.object, :name) %>">
+                              <%= p.object.name %>
+                              <%= error_help_text(p.object, :name) %>
+                          </div>
+                      </td>
+                      <td style="vertical-align: middle">
+                          <div class="<%= control_group_error(p.object, :active) %>">
+                              <%= p.check_box :active %>
+                              <%= error_help_text(p.object, :active) %>
+                          </div>                                                                          
+                      </td>
+                  </tr>
+                <% end %>
+              <% end %>
+          </tbody>
+      </table>
+  </div>
+
+  <div class="form-group">
+      <!--<a class="btn btn-primary" id="save-btn">Save</a>-->
+      <%= submit_tag "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>

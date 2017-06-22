@@ -9,22 +9,24 @@ class Ability
       can :manage, :all
     elsif user.has_role? :administrator
       (User::MENUS.clone << "User").each do |user_menu|
-        class_name = if user_menu.eql?("Area Manager")
-          "Supervisor"
-        elsif user_menu.eql?("Stock Balance")
-          "Stock"
-        elsif user_menu.eql?("Cost & Price")
-          "CostList"
-        elsif user_menu.eql?("Receiving")
-          "ReceivedPurchaseOrder"
-        else
-          user_menu
+        if user_menu.eql?("User") || AvailableMenu.select("1 AS one").where(active: true, name: user_menu).present?
+          class_name = if user_menu.eql?("Area Manager")
+            "Supervisor"
+          elsif user_menu.eql?("Stock Balance")
+            "Stock"
+          elsif user_menu.eql?("Cost & Price")
+            "CostList"
+          elsif user_menu.eql?("Receiving")
+            "ReceivedPurchaseOrder"
+          else
+            user_menu
+          end
+          can :manage, class_name.gsub(/\s+/, "").constantize
         end
-        can :manage, class_name.gsub(/\s+/, "").constantize
       end
     elsif user.roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user.roles.first.name)}.present?
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0
+        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present?
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -49,7 +51,7 @@ class Ability
       end
     else
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0
+        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present?
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"

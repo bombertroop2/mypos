@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Available Menus</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @available_menus.each do |available_menu| %>
+      <tr>
+        <td><%= link_to 'Show', available_menu %></td>
+        <td><%= link_to 'Edit', edit_available_menu_path(available_menu) %></td>
+        <td><%= link_to 'Destroy', available_menu, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Available Menu', new_available_menu_path %>

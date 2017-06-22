@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :available_menus
+  resources :available_menus, only: [:new, :create]
   resources :shipments, except: [:edit, :update] do    
     collection do
       get "generate_ob_detail"
