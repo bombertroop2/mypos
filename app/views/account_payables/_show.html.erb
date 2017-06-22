@@ -232,7 +232,7 @@
                         <td style="text-align: right">Approved by</td>
                     </tr>
                     <tr>
-                        <td style="padding-top: 50px"><%= @account_payable.creator.name rescue "Admin" %></td>
+                        <td style="padding-top: 50px"><%= @account_payable.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
                         <td style="text-align: right"></td>
                     </tr>
                 </table>

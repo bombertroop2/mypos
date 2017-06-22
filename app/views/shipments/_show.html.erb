@@ -147,7 +147,7 @@ File.open(full_path, 'wb') { |f| f.write blob }
                         <td style="text-align: right">Recipient</td>
                     </tr>
                     <tr>
-                        <td style="padding-top: 50px"><%= @shipment.creator.name rescue "Admin" %></td>
+                        <td style="padding-top: 50px"><%= @shipment.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
                         <td style="text-align: center"></td>
                         <td style="text-align: right"></td>
                     </tr>

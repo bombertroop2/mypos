@@ -11,7 +11,7 @@ class Supervisor < ApplicationRecord
 
     before_save :convert_email_value_to_nil
 
-    before_validation :titleize_name, :upcase_code, :replace_underline_from_mobile_phone, :strip_string_values
+    before_validation :upcase_code, :replace_underline_from_mobile_phone, :strip_string_values
     
     before_destroy :delete_tracks
 
@@ -37,9 +37,9 @@ class Supervisor < ApplicationRecord
       self.email = nil unless email.present?
     end
 
-    def titleize_name
-      self.name = name.titleize
-    end
+    #    def titleize_name
+    #      self.name = name.titleize
+    #    end
 
     def upcase_code
       self.code = code.upcase

@@ -14,7 +14,7 @@ class SalesPromotionGirl < ApplicationRecord
   
   #  accepts_nested_attributes_for :user, reject_if: proc {|attributes| attributes[:spg_role].eql?("spg") or attributes[:spg_role].blank?}
   
-  before_save :titleize_name
+  #  before_save :titleize_name
   before_create :create_identifier
   before_destroy :delete_tracks
   after_save :update_user_columns, on: :update
@@ -70,9 +70,9 @@ class SalesPromotionGirl < ApplicationRecord
   #    user.destroy if role_was.eql?("cashier") and role.eql?("spg")
   #  end
 
-  def titleize_name
-    self.name = name.titleize
-  end
+  #  def titleize_name
+  #    self.name = name.titleize
+  #  end
 
   def create_identifier
     spg_collections = warehouse.sales_promotion_girls
