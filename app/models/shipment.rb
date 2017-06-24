@@ -15,12 +15,16 @@ class Shipment < ApplicationRecord
       validate :courier_available, :order_booking_available, :check_min_quantity
 
       before_create :generate_do_number
-      after_create :finish_ob
+      after_create :finish_ob, :notify_store
       before_destroy :deletable, :delete_tracks
       after_destroy :set_ob_status_to_p
 
 
       private
+      
+      def notify_store
+        Notification.create(event: "New Notification")
+      end
       
       def delete_tracks
         audits.destroy_all

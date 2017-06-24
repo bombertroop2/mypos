@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   
   before_action :authenticate_user!, except: [:show, :index]
   before_action :configure_permitted_parameters, if: :devise_controller?
+    before_action :get_notifications, if: :user_signed_in?
     
     rescue_from CanCan::AccessDenied do |exception|
       #      flash[:alert] = exception.message
@@ -35,6 +36,10 @@ class ApplicationController < ActionController::Base
     end
   
     private
+    
+    def get_notifications
+      @notifications = Notification.all.reverse
+    end
   
     def is_request_from_auth_system?
       controller_name.eql?("sessions")

@@ -21,6 +21,7 @@
 //= require jquery.remotipart
 //= require moment.min
 //= require daterangepicker
+//= require jquery.transit.min
 //= require_tree .
 
 
@@ -45,10 +46,45 @@ $(document).on('turbolinks:load', function () {
             return false;
         }
     });
-
     if ($("#taxable_entrepreneur").length == 0) {
         $(document).off("keydown");
     }
+
+// open notification center on click
+    $("#open_notification").click(function () {
+        $("#notificationContainer").fadeToggle(300);
+        $("#notification_count").fadeOut("fast");
+        return false;
+    });
+    // hide notification center on click
+    $(document).click(function () {
+        $("#notificationContainer").hide();
+    });
+    $("#notificationContainer").click(function () {
+        return false;
+    });
+    App.notifications = App.cable.subscriptions.create("NotificationsChannel", {
+        connected: function () {
+// Called when the subscription is ready for use on the server
+        },
+        disconnected: function () {
+            // Called when the subscription has been terminated by the server
+        },
+        received: function (data) {
+            // Called when there's incoming data on the websocket for this channel
+            this.update_counter(data.counter);
+        },
+        update_counter: function (counter) {
+            var counterContainer = $('#notification-counter');
+            var val = parseInt(counterContainer.text());
+            val++;
+            counterContainer
+                    .css({opacity: 0})
+                    .text(val)
+                    .css({top: '-10px'})
+                    .transition({top: '-2px', opacity: 1});
+        }
+    });
 }).ajaxStart(function () {
     $("#json-overlay").show();
 }).ajaxStop(function () {
