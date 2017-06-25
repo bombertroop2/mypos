@@ -36,9 +36,13 @@ class ProductsController < ApplicationController
     @colors.each do |color|
       @product.product_colors.build color_id: color.id, code: color.code, name: color.name
     end
-    render js: "bootbox.alert({message: \"Please create color first\",size: 'small'});" if @colors.size == 0
-    render js: "bootbox.alert({message: \"Please create price code first\",size: 'small'});" if PriceCode.count(:id) == 0
-    render js: "bootbox.alert({message: \"Please create size group first\",size: 'small'});" if SizeGroup.count(:id) == 0
+    if @colors.size == 0
+      render js: "bootbox.alert({message: \"Please create color first\",size: 'small'});"
+    elsif PriceCode.count(:id) == 0
+      render js: "bootbox.alert({message: \"Please create price code first\",size: 'small'});"
+    elsif SizeGroup.count(:id) == 0
+      render js: "bootbox.alert({message: \"Please create size group first\",size: 'small'});"
+    end
   end
 
   # GET /products/1/edit
