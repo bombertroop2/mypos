@@ -2,3 +2,18 @@
     <%= "#{notification.event} (#{notification.body})" %>
     <div><%= notification.created_at.strftime("%d %b. %Y") %></div>
 </li>
+
+<script>
+  $(function () {
+      $("#notification_<%= notification.id %>").click(function () {
+          $("#notificationContainer").fadeToggle(300);
+          $(this).css("background-color", "transparent");
+          $.get("/notifications/<%= notification.id %>").done(function (data) {
+              bootbox.alert({
+                  title: "Notification",
+                  message: data
+              });
+          });
+      });
+  });
+</script>

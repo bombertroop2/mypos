@@ -39,7 +39,7 @@ class ApplicationController < ActionController::Base
     
     def get_notifications
       @unnotified_notification_count = Notification.joins(:recipients).where(["recipients.user_id = ? AND notified = ?", current_user.id, false]).count("notifications.id")
-      @notifications = Notification.joins(:recipients).select("notifications.*, recipients.notified").where("recipients.user_id = #{current_user.id}").order("notifications.created_at DESC")
+      @notifications = Notification.joins(:recipients).select("notifications.*, recipients.notified").where(["recipients.user_id = ? AND read = ?", current_user.id, false]).order("notifications.created_at DESC")
     end
   
     def is_request_from_auth_system?

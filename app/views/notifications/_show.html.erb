@@ -1,0 +1,14 @@
+<dl class="dl-horizontal">
+    <dt style="width: 100px">Event</dt>
+    <dd style="margin-left: 120px"><%= @notification.event %></dd>
+</dl>
+
+<dl class="dl-horizontal">
+    <dt style="width: 100px">Body</dt>
+    <dd style="margin-left: 120px"><%= @notification.body %></dd>
+</dl>
+
+<dl class="dl-horizontal">
+    <dt style="width: 100px">Created at</dt>
+    <dd style="margin-left: 120px"><%= @notification.created_at.strftime("%d %b. %Y") %></dd>
+</dl>

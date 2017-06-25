@@ -1,0 +1,6 @@
+<td><%= object.event %></td>
+<td><%= object.body %></td>
+<td><%= object.created_at.strftime("%d %b. %Y") %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to_if(can?(:manage, Notification), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+</td>

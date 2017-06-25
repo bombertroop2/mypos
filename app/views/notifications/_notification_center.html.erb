@@ -9,6 +9,6 @@
                 <%= render notifications %>
             </ul>
         </div>
-        <div id="notificationFooter">See All</div>
+        <div id="notificationFooter"><%= link_to "See All", notifications_path, method: :get %></div>
     </div>
 </ul>

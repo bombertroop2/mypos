@@ -25,7 +25,7 @@ class Shipment < ApplicationRecord
       def notify_store
         notification = Notification.new(event: "New Notification", body: "Shipment #{delivery_order_number} will arrive soon")
         order_booking.destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
-          notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false
+          notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
         end
         notification.save
       end

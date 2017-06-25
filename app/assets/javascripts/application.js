@@ -74,7 +74,13 @@ $(document).on('turbolinks:load', function () {
     $(document).click(function () {
         $("#notificationContainer").hide();
     });
-    $("#notificationContainer").click(function () {
+//    $("#notificationContainer").click(function () {
+//        return false;
+//    });
+    $("#notificationTitle").click(function () {
+        return false;
+    });
+    $("#notificationsBody").click(function () {
         return false;
     });
     App.notifications = App.cable.subscriptions.create("NotificationsChannel", {

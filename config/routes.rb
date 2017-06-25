@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :notifications, only: :notify_user do 
+  resources :notifications, only: [:index, :show, :destroy, :notify_user] do 
     collection do
       get "notify_user"
     end
