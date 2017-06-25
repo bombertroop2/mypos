@@ -14,6 +14,7 @@ class User < ApplicationRecord
   belongs_to :sales_promotion_girl
   has_many :created_audits, dependent: :restrict_with_error, class_name: "Audit"
   has_many :user_menus, dependent: :destroy
+  has_many :recipients, dependent: :destroy
 
   accepts_nested_attributes_for :user_menus, reject_if: proc{|attributes| attributes[:ability].blank? || attributes[:name].blank?}
   

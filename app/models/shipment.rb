@@ -23,7 +23,11 @@ class Shipment < ApplicationRecord
       private
       
       def notify_store
-        Notification.create(event: "New Notification")
+        notification = Notification.new(event: "New Notification", body: "Shipment #{delivery_order_number} will arrive soon")
+        order_booking.destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+          notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false
+        end
+        notification.save
       end
       
       def delete_tracks

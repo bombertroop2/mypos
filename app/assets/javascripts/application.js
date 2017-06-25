@@ -39,6 +39,7 @@
 //    }
 //});
 
+var openingNotification = false;
 $(document).on('turbolinks:load', function () {
     $('.inputs').bind('keypress', function (event) {
         if (event.which === 13) {
@@ -52,8 +53,21 @@ $(document).on('turbolinks:load', function () {
 
 // open notification center on click
     $("#open_notification").click(function () {
+        if (!$("#notificationContainer").is(":visible") && $("#notification-counter").text() != "0") {
+            openingNotification = true;
+            $("#notification-counter").text("0");
+            var notificationIds = [];
+            $(".notification-rows").each(function () {
+                notificationIds.push($(this).attr("id").split("_")[1]);
+            });
+            $.get("/notifications/notify_user", {
+                notification_ids: notificationIds.join(",")
+            }, function (data) {
+                openingNotification = false;
+            });
+        }
         $("#notificationContainer").fadeToggle(300);
-        $("#notification_count").fadeOut("fast");
+        //$("#notification_count").fadeOut("fast");
         return false;
     });
     // hide notification center on click
@@ -72,6 +86,7 @@ $(document).on('turbolinks:load', function () {
         },
         received: function (data) {
             // Called when there's incoming data on the websocket for this channel
+            $('#notificationList').prepend(data.notification);
             this.update_counter(data.counter);
         },
         update_counter: function (counter) {
@@ -86,9 +101,11 @@ $(document).on('turbolinks:load', function () {
         }
     });
 }).ajaxStart(function () {
-    $("#json-overlay").show();
+    if (!openingNotification)
+        $("#json-overlay").show();
 }).ajaxStop(function () {
-    $("#json-overlay").hide();
+    if (!openingNotification)
+        $("#json-overlay").hide();
 }).ajaxComplete(function (event, jqxhr, settings, thrownError) {
     if (jqxhr.status == 401) {
         window.location.replace('/users/sign_in');

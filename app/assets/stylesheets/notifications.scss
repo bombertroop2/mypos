@@ -33,8 +33,10 @@ ul #notificationList
     {
         position:relative;
         border-bottom: #dddddd 1px solid;
+        padding-left: 20px;
+        padding-right: 20px;
     }
-    span
+    div
     {
         color: #989494;
         font-size: 8px;
@@ -90,7 +92,7 @@ ul #notificationList
 
 #notificationsBody
 {
-    padding: 33px 33px 33px 33px !important;
+    padding: 33px 0px 33px 0px !important;
     min-height:300px;
     max-height:300px;
     overflow: auto;

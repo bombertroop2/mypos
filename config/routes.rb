@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :notifications, only: :notify_user do 
+    collection do
+      get "notify_user"
+    end
+  end
   resources :available_menus, only: [:new, :create]
   resources :shipments, except: [:edit, :update] do    
     collection do

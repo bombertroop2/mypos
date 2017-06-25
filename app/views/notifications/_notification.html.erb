@@ -1,4 +1,4 @@
-<li>
-    <%= notification.event %>
-    <span> <%= notification.created_at.strftime("%d %b. %Y") %></span>
+<li style="background-color: #E2E7F0; cursor: pointer" id="notification_<%= notification.id %>" class="notification-rows">
+    <%= "#{notification.event} (#{notification.body})" %>
+    <div><%= notification.created_at.strftime("%d %b. %Y") %></div>
 </li>

@@ -24,6 +24,7 @@ class Ability
           can :manage, class_name.gsub(/\s+/, "").constantize
         end
       end
+      can :manage, Notification
     elsif user.roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user.roles.first.name)}.present?
       user.user_menus.each do |user_menu|
         if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present?
@@ -49,6 +50,7 @@ class Ability
           end        
         end        
       end
+      can :manage, Notification
     else
       user.user_menus.each do |user_menu|
         if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present?
@@ -72,6 +74,7 @@ class Ability
           end        
         end        
       end
+      can :manage, Notification unless user.new_record?
     end
     #
     # The first argument to `can` is the action you are giving the user

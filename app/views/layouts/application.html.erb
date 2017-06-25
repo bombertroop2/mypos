@@ -25,13 +25,13 @@
                         <span class="icon-bar"></span>
                     </button>
                     -->
-                    <%= link_to "DUOS (Distribution & Sales)", root_path, class: "navbar-brand" %>
+                    <%= link_to "DUOS (Distribution & Sales)", root_path, class: "navbar-brand", method: :get %>
                   </div>
                   <div id="navbar" class="navbar-collapse collapse">
                       <ul class="nav navbar-nav navbar-right">
                           <% if user_signed_in? %>
                             <li>
-                                <%= render "notifications/notification_center", notifications: @notifications %>
+                                <%= render "notifications/notification_center", {notifications: @notifications, unnotified_notification_count: @unnotified_notification_count} %>
                             </li>
                           <% end %>
                           <li>
