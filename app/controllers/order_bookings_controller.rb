@@ -200,9 +200,12 @@ class OrderBookingsController < ApplicationController
   end
   
   def picking_note
-    @order_booking.update_attribute :status, "P"
-    @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-    @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+    if @order_booking.update status: "P", print_date: Time.current, picking_note: true
+      @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
+      @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+    elsif @order_booking.errors.present? && @order_booking.errors.messages[:base].present?
+      render js: "bootbox.alert({message: \"#{@order_booking.errors.messages[:base].join("<br/>")}\",size: 'small'});"
+    end
   end
 
   private
