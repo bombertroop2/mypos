@@ -98,7 +98,7 @@ Rails.application.configure do
   }
   config.active_job.queue_adapter = :delayed_job
   
-  config.web_socket_server_url = "http://duos.herokuapp.com/cable"
+  #  config.web_socket_server_url = "wss://duos.herokuapp.com/cable"
 
   config.action_cable.allowed_request_origins = [ 'https://duos.herokuapp.com', 'http://duos.herokuapp.com' ]
 end
