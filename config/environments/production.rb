@@ -97,4 +97,8 @@ Rails.application.configure do
     :authentication       => "plain"
   }
   config.active_job.queue_adapter = :delayed_job
+  
+  config.web_socket_server_url = "wss://duos.herokuapp.com/cable"
+
+  #config.action_cable.allowed_request_origins = [ 'https://notificator-rails5.herokuapp.com', /http://notificator-rails5.herokuapp.com.*/ ]
 end
