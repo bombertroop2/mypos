@@ -38,18 +38,20 @@ class PurchaseReturnItem < ApplicationRecord
       end
       
       def update_stock
-        stock = get_stock
-        stock.quantity -= quantity
-        stock.save
+        #        stock = get_stock
+        @warehouse_stock.quantity -= quantity
+        @warehouse_stock.save
       end
     
-      def less_than_or_equal_to_stock
+      def less_than_or_equal_to_stock                
+        @warehouse_stock = get_stock
+        warehouse_available_quantity = @warehouse_stock.quantity - @warehouse_stock.booked_quantity
         unless direct_purchase_return
           stock = purchase_order_detail.receiving_qty.to_i - purchase_order_detail.returning_qty.to_i
         else
           stock = direct_purchase_detail.quantity.to_i - direct_purchase_detail.returning_qty.to_i
         end
-        errors.add(:quantity, "must be less than or equal to quantity on hand.") if quantity > stock
+        errors.add(:quantity, "must be less than or equal to quantity on hand.") if quantity > stock || quantity > warehouse_available_quantity
       end
       
       def get_stock
@@ -62,9 +64,9 @@ class PurchaseReturnItem < ApplicationRecord
           color = purchase_order_detail.color
           return stock_product.stock_details.select{|sd| sd.size_id.eql?(size.id) && sd.color_id.eql?(color.id)}.first
         else
-          #          purchase_order_product = purchase_order_detail.purchase_order_product rescue nil
-          product = purchase_return_product.direct_purchase_product.product
-          warehouse = purchase_return_product.direct_purchase_product.direct_purchase.warehouse
+          direct_purchase_product = direct_purchase_detail.direct_purchase_product
+          product = direct_purchase_product.product
+          warehouse = direct_purchase_product.direct_purchase.warehouse
           stock_product = warehouse.stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
           size = direct_purchase_detail.size
           color = direct_purchase_detail.color

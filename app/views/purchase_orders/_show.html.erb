@@ -196,7 +196,7 @@
                         <td style="text-align: right">Approved by</td>
                     </tr>
                     <tr>
-                        <td style="padding-top: 50px"><%= @purchase_order.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+                        <td style="padding-top: 50px"><%= @purchase_order.audits.where(action: "create").select(:user_id, :user_type).first.user.name rescue "" %></td>
                         <td style="text-align: right"></td>
                     </tr>
                 </table>
