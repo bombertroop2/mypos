@@ -42,10 +42,6 @@ class ShipmentsController < ApplicationController
     @shipment = Shipment.new
   end
 
-  # GET /shipments/1/edit
-  def edit
-  end
-
   # POST /shipments
   # POST /shipments.json
   def create
@@ -55,7 +51,7 @@ class ShipmentsController < ApplicationController
       params[:shipments].each do |shipment_index|
         begin
           shipment = Shipment.new(shipment_params(params[:shipments][shipment_index]))
-          authorize! :manage, shipment
+          authorize! :undelete_action, shipment
           unless shipment.save
             if shipment.errors[:base].present?
               render js: "bootbox.alert({message: \"#{shipment.errors[:base].join("<br/>")}\",size: 'small'});"
@@ -89,20 +85,6 @@ class ShipmentsController < ApplicationController
         end
       end
       raise ActiveRecord::Rollback if @invalid
-    end
-  end
-
-  # PATCH/PUT /shipments/1
-  # PATCH/PUT /shipments/1.json
-  def update
-    respond_to do |format|
-      if @shipment.update(shipment_params)
-        format.html { redirect_to @shipment, notice: 'Shipment was successfully updated.' }
-        format.json { render :show, status: :ok, location: @shipment }
-      else
-        format.html { render :edit }
-        format.json { render json: @shipment.errors, status: :unprocessable_entity }
-      end
     end
   end
 

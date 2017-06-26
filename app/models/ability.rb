@@ -45,6 +45,10 @@ class Ability
             can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif ability && class_name.eql?("Sales Promotion Girl")
             can :read, class_name.gsub(/\s+/, "").constantize
+          elsif ability.eql?(:manage) && class_name.eql?("Shipment")
+            # cegah non manager keatas untuk menghapus shipment
+            alias_action :new, :create, :generate_ob_detail, to: :undelete_action
+            can [:read, :undelete_action], class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
           end        
@@ -69,6 +73,10 @@ class Ability
           if ability && class_name.eql?("Supervisor")
             can ability, class_name.gsub(/\s+/, "").constantize
             can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+          elsif ability.eql?(:manage) && class_name.eql?("Shipment") && user.roles.first.name.eql?("staff")
+            # cegah non manager keatas untuk menghapus shipment
+            alias_action :new, :create, :generate_ob_detail, to: :undelete_action
+            can [:read, :undelete_action], class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
           end        
