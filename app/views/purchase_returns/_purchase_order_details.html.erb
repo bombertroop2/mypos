@@ -2,7 +2,9 @@
     <tbody>
         <tr>
             <td style="text-align: center;vertical-align: middle;width: 15% !important"><strong>Article Code</strong></td>
-            <td style="text-align: center;vertical-align: middle;width: 15% !important"><strong>Cost</strong></td>
+            <% if current_user.has_managerial_role? %>
+              <td style="text-align: center;vertical-align: middle;width: 15% !important"><strong>Cost</strong></td>
+            <% end %>
             <td style="text-align: center;vertical-align: middle;width: auto !important"><strong>Available Quantity In PO</strong></td>
             <td style="text-align: center;vertical-align: middle;width: auto !important"><strong>Return Quantity</strong></td>
         </tr>
@@ -14,13 +16,15 @@
           <% purchase_return_product_array_index = create_return_product_array_variable_name(pr_product, product.id) %>
           <%= fields_for purchase_return_product_array_index, pr_product do |purchase_return_product_detail_form| %>
             <%= purchase_return_product_detail_form.hidden_field :purchase_order_product_id %>
-            <%= purchase_return_product_detail_form.hidden_field :product_cost %>
+            <%= purchase_return_product_detail_form.hidden_field :product_cost if current_user.has_managerial_role? %>
             <%= purchase_return_product_detail_form.hidden_field :product_code %>
             <%= purchase_return_product_detail_form.hidden_field :product_name %>
             <%= purchase_return_product_detail_form.hidden_field :product_id %>
             <tr align="center">
                 <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= "#{purchase_return_product_detail_form.object.product_code} - #{purchase_return_product_detail_form.object.product_name}" %></td>
-                <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= number_to_currency((purchase_return_product_detail_form.object.product_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                <% if current_user.has_managerial_role? %>
+                  <td style="text-align: center;vertical-align: middle;width: 15% !important"><%= number_to_currency((purchase_return_product_detail_form.object.product_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                <% end %>
                 <td style="text-align: center;vertical-align: top;width: auto !important">
                     <div class="table-responsive">
                         <table class="table table-condensed table-responsive table-bordered">
@@ -86,9 +90,9 @@
                                 </tr>
                                 <% purchase_order_product_colors.each_with_index do |color, idx| %>
                                   <tr>
-                                      <%# if idx == 0 %>
+      <%# if idx == 0 %>
                                         <!--<td style="vertical-align: middle" rowspan="<%#= purchase_order_product_colors.length %>">Colors</td>-->
-                                      <%# end %>
+      <%# end %>
                                       <td style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
                                       <% purchase_order_product_sizes.each do |size| %>
                                         <% pr_item = pr_product.purchase_return_items.select do |pri| %>
