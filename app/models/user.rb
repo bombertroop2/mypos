@@ -55,7 +55,7 @@ class User < ApplicationRecord
               ["None", 0]
             ]
     
-            MENUS = ["Brand", "Color", "Model", "Goods Type", "Region", "Price Code", "Vendor", "Product",
+            MENUS = ["Brand", "Color", "Model", "Goods Type", "Region", "Vendor", "Product",
               "Size Group", "Sales Promotion Girl", "Area Manager", "Warehouse", "Purchase Order",
               "Receiving", "Stock Balance", "Purchase Return", "Cost & Price", "Email", "Account Payable",
               "Order Booking", "Courier", "Shipment"]
