@@ -38,7 +38,7 @@ class UsersController < ApplicationController
         if !@user.save
           @invalid = true
           AvailableMenu.select(:name).where(active: true).each do |menu|
-            @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+            @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu.name)}.blank?
           end
         else
           @invalid = false
@@ -60,7 +60,7 @@ class UsersController < ApplicationController
           else
             @invalid = true
             AvailableMenu.select(:name).where(active: true).each do |menu|
-              @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+              @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu.name)}.blank?
             end
           end
         else
@@ -80,7 +80,7 @@ class UsersController < ApplicationController
       render js: "bootbox.alert({message: \"Sorry, you can't edit administrator\",size: 'small'});"
     else
       AvailableMenu.select(:name).where(active: true).each do |menu|
-        @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+        @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu.name)}.blank?
       end
       @user.role = @user.roles.first.name if User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present?
     end
@@ -101,7 +101,7 @@ class UsersController < ApplicationController
         else
           @invalid = true
           AvailableMenu.select(:name).where(active: true).each do |menu|
-            @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu)}.blank?
+            @user.user_menus.build name: menu.name if @user.user_menus.select{|um| um.name.eql?(menu.name)}.blank?
           end
           @user.role = @user.roles.first.name if User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present?
         end

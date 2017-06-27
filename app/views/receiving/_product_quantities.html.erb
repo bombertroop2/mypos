@@ -7,22 +7,26 @@
   <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= dpp.product_id %>" style="table-layout: fixed;width: 100%">
       <tr style="text-align: center">
           <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
-          <td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>
+          <% if current_user.has_managerial_role? %>
+            <td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>
+          <% end %>
           <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
       </tr>    
       <tr style="text-align: center">
           <td style="vertical-align: middle;width: 20% !important;">
               <%= "#{product.code} - #{product.brand.name}" %>
           </td>
-          <td style="vertical-align: middle;width: 20% !important;" id="dp_product_table_cost_<%= product.id %>">
-              <%= number_to_currency((dpp.dp_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
-          </td>
+          <% if current_user.has_managerial_role? %>
+            <td style="vertical-align: middle;width: 20% !important;" id="dp_product_table_cost_<%= product.id %>">
+                <%= number_to_currency((dpp.dp_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+            </td>
+          <% end %>
           <td style="vertical-align: middle;width: auto !important;">
               <div class="table-responsive">
                   <% direct_purchase_product_array_index = create_direct_purchase_product_array_variable_name(product) %>
                   <%= fields_for direct_purchase_product_array_index, dpp do |dpp_form| %>
                     <%= dpp_form.hidden_field :product_id %>
-                    <%= dpp_form.hidden_field :dp_cost, id: "dp-cost-#{product.id}" %>
+                    <%= dpp_form.hidden_field :dp_cost, id: "dp-cost-#{product.id}" if current_user.has_managerial_role? %>
                   <% end %>
 
                   <% sizes = product.sizes.select(:id, :size) %>
@@ -42,16 +46,16 @@
                           <tr style="text-align: center">
       <%# @colors.each do |color| %>
                               <% sizes.each do |size| %>
-                                      <!--<td align="center"><%#= color.code %><br /><%#= text_field_tag "quantity_#{product.id}_#{color.code}", "", {placeholder: "quantity", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16} %></td>-->
+                                          <!--<td align="center"><%#= color.code %><br /><%#= text_field_tag "quantity_#{product.id}_#{color.code}", "", {placeholder: "quantity", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16} %></td>-->
                                 <td align="center"><%= size.size %><br /><%= text_field_tag "quantity_#{product.id}_#{size.size}", "", {placeholder: "qty", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %></td>
                                 <% end %>
                             </tr>
 
                             <% product.colors.each_with_index do |color, idx| %>                          
                               <tr style="text-align: center">
-                                  <%# if idx.eql? 0 %>
+          <%# if idx.eql? 0 %>
                                     <!--<td rowspan="<%#= product.colors.size %>" style="vertical-align: middle"><strong>Colors</strong></td>-->
-                                  <%# end %>
+          <%# end %>
                                   <td style="vertical-align: middle" colspan="2"><%= "#{color.code} - #{color.name}" %></td>                            
                                   <% sizes.each do |size| %>
                                     <% if idx == 0 %>
