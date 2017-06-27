@@ -73,8 +73,12 @@ class User < ApplicationRecord
               end
             end
   
+            def has_managerial_role?
+              has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) 
+            end
+
             private
-          
+                      
             def spg_not_changed
               errors.add(:base, "Sorry, you can't change existing SPG") if sales_promotion_girl_id_changed?
             end

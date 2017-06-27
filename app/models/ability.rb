@@ -49,6 +49,9 @@ class Ability
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, to: :undelete_action
             can [:read, :undelete_action], class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("Product")
+            # cegah spg user untuk manage product
+            can :read, class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
           end        
@@ -77,6 +80,9 @@ class Ability
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, to: :undelete_action
             can [:read, :undelete_action], class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("Product") && !user.has_managerial_role?
+            # cegah spg user untuk manage product
+            can :read, class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
           end        
