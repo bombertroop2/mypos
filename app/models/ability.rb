@@ -52,6 +52,9 @@ class Ability
           elsif class_name.eql?("Product") || class_name.eql?("Purchase Order")
             # cegah spg user untuk manage product
             can :read, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("CostList")
+            # cegah spg user untuk manage Cost dan Price
+            can :read, class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
           end        
@@ -81,7 +84,10 @@ class Ability
             alias_action :new, :create, :generate_ob_detail, to: :undelete_action
             can [:read, :undelete_action], class_name.gsub(/\s+/, "").constantize
           elsif (class_name.eql?("Product") || class_name.eql?("Purchase Order")) && !user.has_managerial_role?
-            # cegah spg user untuk manage product
+            # cegah staff untuk manage product
+            can :read, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("CostList") && !user.has_managerial_role?
+            # cegah staff untuk manage Cost dan Price
             can :read, class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
