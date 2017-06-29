@@ -58,7 +58,7 @@ class User < ApplicationRecord
             MENUS = ["Brand", "Color", "Model", "Goods Type", "Region", "Vendor", "Product",
               "Size Group", "Sales Promotion Girl", "Area Manager", "Warehouse", "Purchase Order",
               "Receiving", "Stock Balance", "Purchase Return", "Cost & Price", "Email", "Account Payable",
-              "Order Booking", "Courier", "Shipment"]
+              "Order Booking", "Courier", "Shipment", "Shipment Receipt"]
 
             #  def name
             #    sales_promotion_girl.name    
@@ -75,6 +75,10 @@ class User < ApplicationRecord
   
             def has_managerial_role?
               has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) 
+            end
+            
+            def has_non_spg_role?
+              has_role?(:staff) || has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) 
             end
 
             private

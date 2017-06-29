@@ -1,0 +1,78 @@
+<td colspan="4">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>DO Number</dt>
+        <dd><%= @shipment_receipt.shipment.delivery_order_number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>OB Number</dt>
+        <dd><%= @shipment_receipt.shipment.order_booking.number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Received Date</dt>
+        <dd><%= @shipment_receipt.received_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <table class="table table-condensed table-responsive table-bordered">
+        <tbody>
+            <tr style="text-align: center">
+                <td><strong>No</strong></td>
+                <td><strong>Article Code</strong></td>
+                <td><strong>Quantity</strong></td>
+                <td><strong>Quantity Per Article</strong></td>
+            </tr>
+            <% @shipment_receipt.shipment_receipt_products.select(:id, :shipment_receipt_id, :quantity, :shipment_product_id).each_with_index do |shipment_receipt_product, idx| %>
+              <% shipment_product = ShipmentProduct.select(:id, :order_booking_product_id, :quantity).where(id: shipment_receipt_product.shipment_product_id).first %>
+              <% order_booking_product = OrderBookingProduct.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code").where(id: shipment_product.order_booking_product_id).first %>
+              <% product_sizes = order_booking_product.sizes %>
+              <% product_colors = order_booking_product.colors %>
+              <tr align="center">
+                  <td style="vertical-align: middle"><%= idx.succ %></td>
+                  <td style="vertical-align: middle"><%= "#{order_booking_product.prdct_code} - #{order_booking_product.name}" %></td>
+                  <td style="vertical-align: middle">
+                      <table class="table table-condensed table-responsive table-bordered">
+                          <tbody>
+                              <tr>
+                                  <td></td>
+                                  <% product_sizes.each do |size| %>
+                                    <td align="center" style="vertical-align: middle"><%= size.size %></td>
+                                  <% end %>
+                                  <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
+                              </tr>
+                              <% product_colors.each_with_index do |color, idx| %>
+                                <tr align="center">
+                                    <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                    <% qty_per_color = 0 %>
+                                    <% product_sizes.each do |size| %>
+                                      <% shipment_product_item = shipment_product.shipment_product_items.joins(:order_booking_product_item).select(:quantity).where("order_booking_product_items.size_id = #{size.id} AND order_booking_product_items.color_id = #{color.id}").first %>
+                                      <td align="center" style="vertical-align: middle">
+                                          <% if shipment_product_item %>
+                                            <% qty_per_color += shipment_product_item.quantity %>
+                                            <%= shipment_product_item.quantity %>
+                                          <% end %>
+                                      </td>
+                                    <% end %>
+                                    <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                  </td>
+                  <td align="right" style="vertical-align: middle"><%= shipment_product.quantity %></td>
+              </tr>
+            <% end %>
+        <tfoot>
+            <tr>
+                <td colspan="3" align="right"><strong>Total Quantity</strong></td>
+                <td align="right"><%= @shipment_receipt.quantity %></td>
+            </tr>
+        </tfoot>
+    </tbody>
+</table>
+</td>

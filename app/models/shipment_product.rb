@@ -1,6 +1,7 @@
 class ShipmentProduct < ApplicationRecord
   attr_accessor :order_booking_id
   belongs_to :order_booking_product
+  belongs_to :shipment
 
   has_many :shipment_product_items, dependent: :destroy
 

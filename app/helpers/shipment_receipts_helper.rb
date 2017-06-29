@@ -1,0 +1,2 @@
+module ShipmentReceiptsHelper
+end

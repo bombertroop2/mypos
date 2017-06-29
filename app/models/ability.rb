@@ -89,6 +89,9 @@ class Ability
           elsif class_name.eql?("CostList") && !user.has_managerial_role?
             # cegah staff untuk manage Cost dan Price
             can :read, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("Shipment Receipt")
+            # cegah staff dan manager untuk manage shipment receipt
+            can :read, class_name.gsub(/\s+/, "").constantize
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
           end        

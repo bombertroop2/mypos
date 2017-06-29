@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :shipment_receipts, except: [:edit, :update, :destroy] do
+    collection do
+      get "generate_form"
+    end
+  end
   resources :notifications, only: [:index, :show, :destroy, :notify_user] do 
     collection do
       get "notify_user"

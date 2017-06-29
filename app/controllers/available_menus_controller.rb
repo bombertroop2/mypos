@@ -5,7 +5,7 @@ class AvailableMenusController < ApplicationController
   def new
     @available_menus = []
     AvailableMenu::MENUS.each do |menu|
-      available_menu = AvailableMenu.new name: menu, active: (AvailableMenu.select(:active).where(name: menu).first.active rescue true)
+      available_menu = AvailableMenu.new name: menu, active: (AvailableMenu.select(:active).where(name: menu).first.active rescue false)
       @available_menus << available_menu
     end
   end

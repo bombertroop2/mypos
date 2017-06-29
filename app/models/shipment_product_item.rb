@@ -1,6 +1,7 @@
 class ShipmentProductItem < ApplicationRecord
   attr_accessor :order_booking_id, :order_booking_product_id
   belongs_to :order_booking_product_item
+  belongs_to :shipment_product
   validates :quantity, presence: true
   validates :quantity, numericality: {greater_than_or_equal_to: 0, only_integer: true}, if: proc { |spi| spi.quantity.present? }
     validate :item_available
