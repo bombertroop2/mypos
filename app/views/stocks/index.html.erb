@@ -1,9 +1,11 @@
 <div class="page-header"><h1>Stock Balance</h1></div>
 
 <div id="search-form-container" class="form-inline text-right">
-    <div class="form-group">
-        <%= select_tag "warehouse_id", options_from_collection_for_select(@warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
-      </div>
+    <% if @warehouses.present? %>
+      <div class="form-group">
+          <%= select_tag "warehouse_id", options_from_collection_for_select(@warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
+        </div>
+      <% end %>
       <div class="form-group">
           <input type="text" id="filter-product-criteria" class="form-control" placeholder="Product code/name/color/size/quantity">
       </div>
@@ -11,7 +13,9 @@
   </div>
   <div class="hidden">
       <%= smart_listing_controls_for(:stocks, {class: "form-inline text-right"}) do %>
-          <%= text_field_tag :filter_warehouse_id, '', class: "search form-control", autocomplete: :off %>
+          <% if @warehouses.present? %>
+            <%= text_field_tag :filter_warehouse_id, '', class: "search form-control", autocomplete: :off %>
+            <% end %>
             <%= text_field_tag :filter_product_criteria, '', class: "search form-control", autocomplete: :off %>
             <% end %>
         </div>
