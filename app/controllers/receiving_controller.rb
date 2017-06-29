@@ -95,6 +95,8 @@ class ReceivingController < ApplicationController
           end
         end
         received_purchase_order.errors.messages[:delivery_order_number] = ["has already been taken"]
+      rescue RuntimeError => e
+        render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
       end
     end
   

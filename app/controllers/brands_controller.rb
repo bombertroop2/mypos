@@ -49,11 +49,7 @@ class BrandsController < ApplicationController
   # PATCH/PUT /brands/1.json
   def update
     begin
-      @brand.with_lock do
-        puts "REQUESTTTTTTTTT"
-        @brand.update(brand_params)
-        sleep 30
-      end
+      @brand.update(brand_params)
     rescue ActiveRecord::RecordNotUnique => e   
       flash[:alert] = "That code has already been taken"
       render js: "window.location = '#{brands_url}'"

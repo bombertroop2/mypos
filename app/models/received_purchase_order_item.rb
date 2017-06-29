@@ -22,17 +22,31 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
       
       
                 def update_receiving_value
+                  raise_error = false
                   purchase_order = received_purchase_order_product.received_purchase_order.purchase_order
-                  purchase_order.receiving_po = true
-                  purchase_order.receiving_value = purchase_order.receiving_value.to_f + received_purchase_order_product.purchase_order_product.cost_list.cost * quantity
-                  purchase_order.status = if purchase_order.receiving_value != purchase_order.order_value
-                    "Partial"
-                  else
-                    "Finish"
+                  purchase_order.with_lock do
+                    if purchase_order.receiving_value.nil? || purchase_order.receiving_value < purchase_order.order_value
+                      purchase_order.receiving_po = true
+                      purchase_order.receiving_value = purchase_order.receiving_value.to_f + received_purchase_order_product.purchase_order_product.cost_list.cost * quantity
+                      if purchase_order.receiving_value < purchase_order.order_value
+                        purchase_order.status = "Partial"
+                        purchase_order.without_auditing do
+                          purchase_order.save validate: false
+                        end                      
+                      elsif purchase_order.receiving_value == purchase_order.order_value
+                        purchase_order.status = "Finish"
+                        purchase_order.without_auditing do
+                          purchase_order.save validate: false
+                        end                      
+                      else
+                        raise_error = true
+                      end
+                    else
+                      raise_error = true                      
+                    end
                   end
-                  purchase_order.without_auditing do
-                    purchase_order.save validate: false
-                  end
+                  
+                  raise "Sorry, purchase order #{purchase_order.number} has already been finished" if raise_error
                 end
     
                 def less_than_or_equal_to_order
@@ -41,48 +55,48 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 end
       
                 def create_stock_and_update_receiving_qty
-                  purchase_order_detail.is_updating_receiving_quantity = true
-                  purchase_order_detail.receiving_qty = purchase_order_detail.receiving_qty.to_i + quantity
-                  purchase_order_detail.save
+                  raise_error = false
+                  purchase_order_detail.with_lock do
+                    remains_quantity = purchase_order_detail.quantity - purchase_order_detail.receiving_qty.to_i
+                    if quantity <= remains_quantity
+                      purchase_order_detail.is_updating_receiving_quantity = true
+                      purchase_order_detail.receiving_qty = purchase_order_detail.receiving_qty.to_i + quantity
+                      purchase_order_detail.save
+                    else
+                      raise_error = true
+                    end
+                  end
+                  raise "Quantity must be less than or equal to remaining ordered quantity." if raise_error
+
                   purchase_order = purchase_order_detail.purchase_order_product.purchase_order
                   warehouse = purchase_order.warehouse
-                  stock = warehouse.stock
-                  stock = Stock.new warehouse_id: warehouse.id unless stock
+                  
+                  stock = Stock.new warehouse_id: warehouse.id
                   product = purchase_order_detail.purchase_order_product.product
-                  stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
-                  stock_product = stock.stock_products.build product_id: product.id unless stock_product
-                  stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(purchase_order_detail.size_id) && sd.color_id.eql?(purchase_order_detail.color_id)}.first
-                  unless stock_detail
+                  stock_product = stock.stock_products.build product_id: product.id
+                  stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
+                  begin
+                    stock.save
+                  rescue ActiveRecord::RecordNotUnique => e
+                    stock = warehouse.stock
+                    stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
-                    if stock.new_record?
+                    begin
+                      stock_product.save
+                    rescue ActiveRecord::RecordNotUnique => e
+                      stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
+                      stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                       begin
-                        stock.save
+                        stock_detail.save
                       rescue ActiveRecord::RecordNotUnique => e
-                        stock = warehouse.stock.reload
-                        stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
-                        stock_product = stock.stock_products.build product_id: product.id unless stock_product
                         stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(purchase_order_detail.size_id) && sd.color_id.eql?(purchase_order_detail.color_id)}.first
-                        unless stock_detail
-                          stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
-                          if stock_product.new_record?
-                            stock_product.save
-                          elsif stock_detail.new_record?
-                            stock_detail.save
-                          end
-                        else
+                        stock_detail.with_lock do
                           stock_detail.quantity += quantity
                           stock_detail.save
                         end
                       end
-                    elsif stock_product.new_record?
-                      stock_product.save
-                    elsif stock_detail.new_record?
-                      stock_detail.save
                     end
-                  else
-                    stock_detail.quantity += quantity
-                    stock_detail.save
-                  end                  
+                  end
                 end
       
                 def create_stock
