@@ -7,6 +7,6 @@ class CreateStockMutationProducts < ActiveRecord::Migration[5.0]
 
       t.timestamps
     end
-    add_index :stock_mutation_products, [:stock_mutation_id, :product_id], unique: true
+    add_index :stock_mutation_products, [:stock_mutation_id, :product_id], unique: true, name: "index_smp_on_stock_mutation_id_and_product_id"
   end
 end
