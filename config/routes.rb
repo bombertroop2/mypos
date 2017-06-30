@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :stock_mutations, except: [:edit, :update, :destroy] do
+    collection do
+      get "get_products"
+      get "generate_form"
+    end
+  end
   resources :shipment_receipts, except: [:edit, :update, :destroy] do
     collection do
       get "generate_form"

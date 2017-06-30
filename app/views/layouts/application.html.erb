@@ -128,6 +128,9 @@
                           <% if can? :read, ShipmentReceipt %>
                             <li class="<%= params[:controller].eql?("shipment_receipts") ? "active" : "" %>"><%= link_to "Shipment Receipts", shipment_receipts_path, method: :get %></li>
                           <% end %>
+                          <% if can? :read, StockMutation %>
+                            <li class="<%= params[:controller].eql?("stock_mutations") ? "active" : "" %>"><%= link_to "Stock Mutations", stock_mutations_path, method: :get %></li>
+                          <% end %>
                       </ul>
                   </div>
                   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

@@ -1,0 +1,66 @@
+<div class="form-group">
+    <label class="col-sm-2 control-label">Products</label>
+    <div class="col-sm-10">
+        <table id="listing_sm_products_table" class="display">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Code</th>
+                    <th>Brand</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% @products.each do |product| %>
+                  <tr id="product_<%= product.id %>_<%= params[:warehouse_id] %>">
+                      <td></td>
+                      <td><%= product.code %></td>
+                      <td><%= product.name %></td>
+                  </tr>
+                <% end %>
+            </tbody>
+        </table>
+        <a class="btn btn-default active" id="generate_stock_mutation_form" style="float: right;margin-top: 10px;">Generate form</a>
+    </div>
+</div>
+
+<script>
+  $(function () {
+      var smProductsDataTable = $('#listing_sm_products_table').DataTable({
+          order: [1, 'asc'],
+          dom: 'T<"clear">lfrtip',
+          columns: [
+              {data: null, defaultContent: '', orderable: false},
+              {data: 'code'},
+              {data: 'brand'}
+          ],
+          tableTools: {
+              sRowSelect: 'os',
+              /*sRowSelector: 'td:first-child',*/
+              aButtons: ['select_all', 'select_none']
+          },
+          paging: false,
+          info: false,
+          scrollY: "250px",
+          scrollCollapse: true
+      });
+      $("#generate_stock_mutation_form").click(function () {
+          if (smProductsDataTable.rows('.selected').data().length == 0)
+              bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+          else {
+              var productIds = [];
+              var warehouseId = "0";
+              $.each(smProductsDataTable.rows('.selected')[0], function (index, value) {
+                  productIds.push(smProductsDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                  warehouseId = smProductsDataTable.rows(value).nodes().to$().attr("id").split("_")[2];
+              });
+              $.get("/stock_mutations/generate_form", {
+                  product_ids: productIds.join(","),
+                  warehouse_id: warehouseId
+              });
+          }
+
+          return false;
+      });
+  });
+</script>

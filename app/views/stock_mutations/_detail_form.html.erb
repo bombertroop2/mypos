@@ -1,0 +1,143 @@
+<%= form_for(@stock_mutation, remote: true) do |f| %>
+  <%= f.hidden_field :origin_warehouse_id %>
+  <div class="form-group<%= control_group_error(@stock_mutation, :origin_warehouse_id) %>">
+      <label class="col-sm-2 control-label">From</label>
+      <div class="col-sm-10">
+          <span class="form-control"><%= Warehouse.select(:code).where(id: f.object.origin_warehouse_id).first.code %></span>
+          <%= error_help_text(@stock_mutation, :origin_warehouse_id) %>
+      </div>
+  </div>
+
+  <div class="form-group<%= control_group_error(@stock_mutation, :destination_warehouse_id) %>">
+      <%= f.label :destination_warehouse_id, "To", class: "col-sm-2 control-label" %>
+        <div class="col-sm-10">
+            <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destintation_warehouses, 'id', 'code', @stock_mutation.destination_warehouse_id.to_s), {include_blank: true}, {class: "form-control"} %>
+              <%= error_help_text(@stock_mutation, :destination_warehouse_id) %>
+          </div>
+      </div>
+
+      <div class="form-group<%= control_group_error(@stock_mutation, :delivery_date) %>">
+          <%= f.label :delivery_date, class: "col-sm-2 control-label" %>
+            <div class="col-sm-10">
+                <%= f.text_field :delivery_date, size: 10, readonly: true, class: "form-control" %>
+                  <%= error_help_text(@stock_mutation, :delivery_date) %>
+              </div>
+          </div>
+
+          <div class="form-group<%= control_group_error(@stock_mutation, :courier_id) %>">
+              <%= f.label :courier_id, class: "col-sm-2 control-label" %>            
+                <div class="col-sm-10">
+                    <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', @stock_mutation.courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                      <%= error_help_text(@stock_mutation, :courier_id) %>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="col-sm-offset-2 col-sm-10">
+                      <table border="1" class="product-table table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
+                          <tr style="text-align: center">
+                              <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
+                              <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
+                          </tr>
+                          <%= f.fields_for :stock_mutation_products do |stock_mutation_product_fields| %>
+                            <% stock_mutation_product_items = stock_mutation_product_fields.object.stock_mutation_product_items %>
+                            <%= stock_mutation_product_fields.hidden_field :product_id %>
+                            <tr style="text-align: center">
+                                <td style="vertical-align: middle;width: 20% !important;">
+                                    <%= "#{stock_mutation_product_fields.object.product.code} - #{stock_mutation_product_fields.object.product.brand.name}" %>
+                                </td>
+                                <td style="width: auto !important;">
+                                    <div class="table-responsive">
+                                        <table border="1" class="table table-condensed table-responsive table-bordered">
+
+                                            <tr style="text-align: center">
+                                                <td></td>
+                                                <% @sizes[stock_mutation_product_fields.object.product.id].each do |size| %>
+                                                  <td align="center" style="vertical-align: middle">
+                                                      <%= size.size %>
+                                                  </td>
+                                                <% end %>
+                                            </tr>
+
+                                            <% @colors[stock_mutation_product_fields.object.product.id].each_with_index do |color, idx| %>                          
+                                              <tr style="text-align: center">
+                                                  <td style="vertical-align: middle" align="center"><%= "#{color.code} - #{color.name}" %></td>
+                                                  <% @sizes[stock_mutation_product_fields.object.product.id].each do |size| %>
+                                                    <% stock_mutation_product_item = stock_mutation_product_items.select{|smpi| smpi.color_id == color.id && smpi.size_id == size.id}.first %>
+                                                    <% if stock_mutation_product_item.present? %>
+                                                      <td align="center" style="vertical-align: middle">
+                                                          <%= stock_mutation_product_fields.fields_for :stock_mutation_product_items, stock_mutation_product_item do |spi_form| %>
+                                                            <%= spi_form.hidden_field :color_id %>
+                                                            <%= spi_form.hidden_field :size_id %>
+                                                            <div class="<%= control_group_error(spi_form.object, :quantity) %>">
+                                                                <table cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td>
+                                                                            <%= spi_form.text_field :quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                                                          </td>
+                                                                      </tr>
+                                                                  </table>                                                
+                                                                  <%= error_help_text(spi_form.object, :quantity) %>
+                                                              </div>
+                                                            <% end %>
+                                                        </td>
+                                                      <% else %>
+                                                        <td></td>
+                                                      <% end %>
+                                                    <% end %>
+                                                </tr>
+                                              <% end %>              
+                                          </table>
+                                      </div>
+                                  </td>
+                              </tr>
+                            <% end %>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <a class="btn btn-primary" id="save-btn">Save</a>
+                        <button class="btn btn-link cancel">Cancel</button>
+                    </div>
+                </div>
+              <% end %>
+
+              <script>
+                $(function () {
+                    $("#stock_mutation_destination_warehouse_id").attr("data-placeholder", "Select").chosen();
+                    $("#stock_mutation_courier_id").attr("data-placeholder", "Select").chosen();
+                    $("#stock_mutation_delivery_date").datepicker({
+                        dateFormat: "dd/mm/yy"
+                    });
+                    $(".quantity").numeric({
+                        decimal: false,
+                        negative: false
+                    }, function () {
+                        alert("Positive integers only");
+                        this.value = "";
+                        this.focus();
+                    });
+                    $("#save-btn").click(function () {
+                        bootbox.confirm({
+                            title: "Roll a stock?",
+                            message: "Be careful! Once you've created the document, you'll not be able to change or delete it",
+                            buttons: {
+                                confirm: {
+                                    label: '<i class="fa fa-check"></i> Confirm'
+                                },
+                                cancel: {
+                                    label: '<i class="fa fa-times"></i> Cancel'
+                                }
+                            },
+                            callback: function (result) {
+                                if (result) {
+                                    $("body").css('padding-right', '0px');
+                                    $("#new_stock_mutation").submit();
+                                }
+                            }
+                        });
+                    });
+                });
+              </script>
