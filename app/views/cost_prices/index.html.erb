@@ -22,17 +22,3 @@
             <% end %>
         </div>
         <%= smart_listing_render(:costs) %>
-
-        <script>
-          $(function () {
-              $("#search-cost-btn").click(function () {
-                  $("#filter_effective_date").val($("#filter-effective-date").val());
-                  $("#filter_product_code").val($("#filter-product-code").val());
-        <% if current_user.has_managerial_role? %>
-                    $("#filter_cost").val($("#search-cost").val());
-        <% end %>
-                  //$(".smart-listing-controls").html($("#search-form-container").html());
-                  $(".smart-listing-controls").submit();
-              });
-          });
-        </script>

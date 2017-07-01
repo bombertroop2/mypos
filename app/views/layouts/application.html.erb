@@ -66,14 +66,14 @@
                                                   <% end %>
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-tag"></i> Price Control <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <li><a href="form.html">General Form</a></li>
-                                                  <li><a href="form_advanced.html">Advanced Components</a></li>
-                                                  <li><a href="form_validation.html">Form Validation</a></li>
-                                                  <li><a href="form_wizards.html">Form Wizard</a></li>
-                                                  <li><a href="form_upload.html">Form Upload</a></li>
-                                                  <li><a href="form_buttons.html">Form Buttons</a></li>
+                                                  <% if can? :read, PriceCode %>
+                                                    <li><%= link_to "Price Codes", price_codes_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, CostList %>
+                                                    <li><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
+                                                  <% end %>
                                               </ul>
                                           </li>
                                           <li><a><i class="fa fa-desktop"></i> UI Elements <span class="fa fa-chevron-down"></span></a>
@@ -251,6 +251,16 @@
                           $("#filter_received_date").val($("#filter-received-date").val());
                           $("#filter_string").val($("#filter-string").val());
                           $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif controller_name.eql?("cost_prices") %>
+                      $("#search-cost-btn").click(function () {
+                          $("#filter_effective_date").val($("#filter-effective-date").val());
+                          $("#filter_product_code").val($("#filter-product-code").val());
+        <% if current_user.has_managerial_role? %>
+                            $("#filter_cost").val($("#search-cost").val());
+        <% end %>
+                          //$(".smart-listing-controls").html($("#search-form-container").html());
                           $(".smart-listing-controls").submit();
                       });
       <% end %>
