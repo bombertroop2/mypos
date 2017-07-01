@@ -21,13 +21,3 @@
       </div>
       <%= smart_listing_render(:shipment_receipts) %>
 
-
-      <script>
-        $(function () {
-            $("#search-shipment-receipt-btn").click(function () {
-                $("#filter_received_date").val($("#filter-received-date").val());
-                $("#filter_string").val($("#filter-string").val());
-                $(".smart-listing-controls").submit();
-            });
-        });
-      </script>

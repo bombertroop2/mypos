@@ -42,9 +42,9 @@
                               <!-- sidebar menu -->
                               <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
                                   <div class="menu_section">
-                                      <h3>General</h3>
+                                      <!--<h3>General</h3>-->
                                       <ul class="nav side-menu">
-                                          <li><a><i class="fa fa-dropbox"></i> Product Master <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-cubes"></i> Product Master <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
                                                   <% if can? :read, Brand %>
                                                     <li><%= link_to "Brands", brands_path, method: :get %></li>
@@ -76,7 +76,7 @@
                                                   <% end %>
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-home"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-industry"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
                                                   <% if can? :read, SalesPromotionGirl %>
                                                     <li><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
@@ -92,30 +92,78 @@
                                                   <% end %>
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-table"></i> Tables <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-exchange"></i> Transactions <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <li><a href="tables.html">Tables</a></li>
-                                                  <li><a href="tables_dynamic.html">Table Dynamic</a></li>
+                                                  <% if can? :read, Vendor %>
+                                                    <li><%= link_to "Vendors", vendors_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, PurchaseOrder %>
+                                                    <li><%= link_to "Purchase Orders", purchase_orders_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, ReceivedPurchaseOrder %>
+                                                    <li><%= link_to "Receiving", receiving_index_path, method: :get %></li>
+                                                  <% end %>                      
+                                                  <% if can? :read, PurchaseReturn %>
+                                                    <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
+                                                  <% end %>                          
+                                                  <% if can? :read, AccountPayable %>
+                                                    <li><%= link_to "Account Payables", account_payables_path, method: :get %></li>
+                                                  <% end %>                          
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-bar-chart-o"></i> Data Presentation <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-dropbox"></i> Booking Control <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <li><a href="chartjs.html">Chart JS</a></li>
-                                                  <li><a href="chartjs2.html">Chart JS2</a></li>
-                                                  <li><a href="morisjs.html">Moris JS</a></li>
-                                                  <li><a href="echarts.html">ECharts</a></li>
-                                                  <li><a href="other_charts.html">Other Charts</a></li>
+                                                  <% if can? :read, OrderBooking %>
+                                                    <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
+                                                  <% end %>                          
+                                                  <% if can? :read, Shipment %>
+                                                    <li><%= link_to "Shipments", shipments_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Courier %>
+                                                    <li><%= link_to "Couriers", couriers_path, method: :get %></li>
+                                                  <% end %>                          
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-clone"></i>Layouts <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <li><a href="fixed_sidebar.html">Fixed Sidebar</a></li>
-                                                  <li><a href="fixed_footer.html">Fixed Footer</a></li>
+                                                  <% if can? :read, Stock %>
+                                                    <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
+                                                  <% end %>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-download"></i> Shipment Receipts <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <% if can? :read, ShipmentReceipt %>
+                                                    <li><%= link_to "Warehouse to Store", shipment_receipts_path, method: :get %></li>
+                                                  <% end %>
+                                                  <li><a>Store to Store</a></li>
+                                                  <li><a>Store to Warehouse</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <% if can? :read, StockMutation %>
+                                                    <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
+                                                  <% end %>
+                                                  <li><a>Store to Warehouse</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <% if can? :read, Email %>
+                                                    <li><%= link_to "Emails", emails_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, User %>
+                                                    <li><%= link_to "Users", users_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :manage, AvailableMenu %>
+                                                    <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
+                                                  <% end %>
                                               </ul>
                                           </li>
                                       </ul>
                                   </div>
-                                  <div class="menu_section">
+                                  <!--<div class="menu_section">
                                       <h3>Live On</h3>
                                       <ul class="nav side-menu">
                                           <li><a><i class="fa fa-bug"></i> Additional Pages <span class="fa fa-chevron-down"></span></a>
@@ -156,7 +204,7 @@
                                           </li>                  
                                           <li><a href="javascript:void(0)"><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a></li>
                                       </ul>
-                                  </div>
+                                  </div>-->
 
                               </div>
                               <!-- /sidebar menu -->
@@ -264,6 +312,39 @@
                             $("#filter_cost").val($("#search-cost").val());
         <% end %>
                           //$(".smart-listing-controls").html($("#search-form-container").html());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif controller_name.eql?("receiving") %>
+                      $("#search-ro-btn").click(function () {
+                          $("#filter_receiving_date").val($("#filter-receiving-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif controller_name.eql?("account_payables") %>
+                      $("#search-ap-btn").click(function () {
+                          $("#filter_payment_date").val($("#filter-payment-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif controller_name.eql?("users") %>
+                      $("#search-user-btn").click(function () {
+                          $("#filter_gender").val($("#filter-gender").val());
+                          $("#filter_role").val($("#filter-role").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif controller_name.eql?("shipment_receipts") %>
+                      $("#search-shipment-receipt-btn").click(function () {
+                          $("#filter_received_date").val($("#filter-received-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif controller_name.eql?("stock_mutations") %>
+                      $("#search-stock-mutation-btn").click(function () {
+                          $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                          $("#filter_received_date").val($("#filter-received-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
                           $(".smart-listing-controls").submit();
                       });
       <% end %>

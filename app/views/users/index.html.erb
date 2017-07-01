@@ -25,14 +25,3 @@
                 <% end %>
             </div>
             <%= smart_listing_render(:users) %>
-
-            <script>
-              $(function () {
-                  $("#search-user-btn").click(function () {
-                      $("#filter_gender").val($("#filter-gender").val());
-                      $("#filter_role").val($("#filter-role").val());
-                      $("#filter_string").val($("#filter-string").val());
-                      $(".smart-listing-controls").submit();
-                  });
-              });
-            </script>

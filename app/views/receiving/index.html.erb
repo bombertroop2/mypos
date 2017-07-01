@@ -19,13 +19,3 @@
           <% end %>
       </div>
       <%= smart_listing_render(:receiving_purchase_orders) %>
-
-      <script>
-        $(function () {
-            $("#search-ro-btn").click(function () {
-                $("#filter_receiving_date").val($("#filter-receiving-date").val());
-                $("#filter_string").val($("#filter-string").val());
-                $(".smart-listing-controls").submit();
-            });
-        });
-      </script>

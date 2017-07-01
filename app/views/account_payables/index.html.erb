@@ -19,13 +19,3 @@
           <% end %>
       </div>
       <%= smart_listing_render(:account_payables) %>
-
-      <script>
-        $(function () {
-            $("#search-ap-btn").click(function () {
-                $("#filter_payment_date").val($("#filter-payment-date").val());
-                $("#filter_string").val($("#filter-string").val());
-                $(".smart-listing-controls").submit();
-            });
-        });
-      </script>

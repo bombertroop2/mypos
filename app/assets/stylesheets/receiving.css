@@ -22,3 +22,7 @@
 #rec_listing_po_table tr td:first-child {
     text-align: center;
 }
+
+#listing_product_table_receiving_wrapper .DTTT_container {
+    position: absolute;
+}

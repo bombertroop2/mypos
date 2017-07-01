@@ -63,29 +63,32 @@
                           <% if can? :read, GoodsType %>
                             <li class="<%= params[:controller].eql?("goods_types") ? "active" : "" %>"><%= link_to "Goods Types", goods_types_path, method: :get %></li>
                           <% end %>
-                          <% if can? :read, Region %>
-                            <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, PriceCode %>
-                            <li class="<%= params[:controller].eql?("price_codes") ? "active" : "" %>"><%= link_to "Price Codes", price_codes_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Vendor %>
-                            <li class="<%= params[:controller].eql?("vendors") ? "active" : "" %>"><%= link_to "Vendors", vendors_path, method: :get %></li>
-                          <% end %>
                           <% if can? :read, Product %>
                             <li class="<%= params[:controller].eql?("products") ? "active" : "" %>"><%= link_to "Products", products_path, method: :get %></li>
                           <% end %>
                           <% if can? :read, SizeGroup %>
                             <li class="<%= params[:controller].eql?("size_groups") ? "active" : "" %>"><%= link_to "Size Groups", size_groups_path, method: :get %></li>
                           <% end %>
+                          <% if can? :read, PriceCode %>
+                            <li class="<%= params[:controller].eql?("price_codes") ? "active" : "" %>"><%= link_to "Price Codes", price_codes_path, method: :get %></li>
+                          <% end %>
+                          <% if can? :read, CostList %>
+                            <li class="<%= params[:controller].eql?("cost_prices") ? "active" : "" %>"><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
+                          <% end %>
                           <% if can? :read, SalesPromotionGirl %>
                             <li class="<%= params[:controller].eql?("sales_promotion_girls") ? "active" : "" %>"><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
-                          <% end %>                          
+                          <% end %>  
                           <% if can? :read, Supervisor %>
                             <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
                           <% end %>
                           <% if can? :read, Warehouse %>
                             <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
+                          <% end %>
+                          <% if can? :read, Region %>
+                            <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
+                          <% end %>
+                          <% if can? :read, Vendor %>
+                            <li class="<%= params[:controller].eql?("vendors") ? "active" : "" %>"><%= link_to "Vendors", vendors_path, method: :get %></li>
                           <% end %>
                           <% if can? :read, PurchaseOrder %>
                             <li class="<%= params[:controller].eql?("purchase_orders") ? "active" : "" %>"><%= link_to "Purchase Orders", purchase_orders_path, method: :get %></li>
@@ -93,32 +96,27 @@
                           <% if can? :read, ReceivedPurchaseOrder %>
                             <li class="<%= params[:controller].eql?("receiving") ? "active" : "" %>"><%= link_to "Receiving", receiving_index_path, method: :get %></li>
                           <% end %>                      
-                          <% if can? :read, Stock %>
-                            <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stock Balance", stocks_path, method: :get %></li>
-                          <% end %>
                           <% if can? :read, PurchaseReturn %>
                             <li class="<%= params[:controller].eql?("purchase_returns") ? "active" : "" %>"><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
                           <% end %>                          
-  <!--<li class="<%#= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%#= link_to "Costs", cost_lists_path %></li>
-  <li class="<%#= params[:controller].eql?("price_lists") ? "active" : "" %>"><%#= link_to "Prices", price_lists_path %></li>-->
-                          <% if can? :read, CostList %>
-                            <li class="<%= params[:controller].eql?("cost_prices") ? "active" : "" %>"><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Email %>
-                            <li class="<%= params[:controller].eql?("emails") ? "active" : "" %>"><%= link_to "Emails", emails_path, method: :get %></li>
-                          <% end %>
                           <% if can? :read, AccountPayable %>
                             <li class="<%= params[:controller].eql?("account_payables") ? "active" : "" %>"><%= link_to "Account Payables", account_payables_path, method: :get %></li>
                           <% end %>                          
                           <% if can? :read, OrderBooking %>
                             <li class="<%= params[:controller].eql?("order_bookings") ? "active" : "" %>"><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
                           <% end %>                          
-                          <% if can? :read, Courier %>
-                            <li class="<%= params[:controller].eql?("couriers") ? "active" : "" %>"><%= link_to "Couriers", couriers_path, method: :get %></li>
-                          <% end %>                          
                           <% if can? :read, Shipment %>
                             <li class="<%= params[:controller].eql?("shipments") ? "active" : "" %>"><%= link_to "Shipments", shipments_path, method: :get %></li>
                           <% end %>                          
+                          <% if can? :read, Stock %>
+                            <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stock Balance", stocks_path, method: :get %></li>
+                          <% end %>
+                          <% if can? :read, Courier %>
+                            <li class="<%= params[:controller].eql?("couriers") ? "active" : "" %>"><%= link_to "Couriers", couriers_path, method: :get %></li>
+                          <% end %>                          
+                          <% if can? :read, Email %>
+                            <li class="<%= params[:controller].eql?("emails") ? "active" : "" %>"><%= link_to "Emails", emails_path, method: :get %></li>
+                          <% end %>
                           <% if can? :read, User %>
                             <li class="<%= params[:controller].eql?("users") ? "active" : "" %>"><%= link_to "Users", users_path, method: :get %></li>
                           <% end %>
@@ -131,6 +129,8 @@
                           <% if can? :read, StockMutation %>
                             <li class="<%= params[:controller].eql?("stock_mutations") ? "active" : "" %>"><%= link_to "Stock Mutations", stock_mutations_path, method: :get %></li>
                           <% end %>
+  <!--<li class="<%#= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%#= link_to "Costs", cost_lists_path %></li>
+  <li class="<%#= params[:controller].eql?("price_lists") ? "active" : "" %>"><%#= link_to "Prices", price_lists_path %></li>-->
                       </ul>
                   </div>
                   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

@@ -5,14 +5,8 @@
     <div style="padding-top: 20px"></div>
     <div class="form-horizontal">
         <div class="form-group">
-            <label class="col-sm-2 control-label">
-                <% if current_user.has_role?(:administrator) || current_user.has_role?(:superadmin) %>
-                  From
-                <% else %>  
-                  Order bookings
-                <% end %>
-            </label>
-            <div class="col-sm-10">
+            <label class="col-sm-2 control-label">From</label>
+            <div class="col-sm-10" style="width: 0% !important">
                 <% if current_user.has_role?(:administrator) || current_user.has_role?(:superadmin) %>
                   <%= select_tag "warehouse_id", options_from_collection_for_select(@origin_warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
                   <% else %>
