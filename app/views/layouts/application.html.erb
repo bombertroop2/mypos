@@ -76,17 +76,20 @@
                                                   <% end %>
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-desktop"></i> UI Elements <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-home"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <li><a href="general_elements.html">General Elements</a></li>
-                                                  <li><a href="media_gallery.html">Media Gallery</a></li>
-                                                  <li><a href="typography.html">Typography</a></li>
-                                                  <li><a href="icons.html">Icons</a></li>
-                                                  <li><a href="glyphicons.html">Glyphicons</a></li>
-                                                  <li><a href="widgets.html">Widgets</a></li>
-                                                  <li><a href="invoice.html">Invoice</a></li>
-                                                  <li><a href="inbox.html">Inbox</a></li>
-                                                  <li><a href="calendar.html">Calendar</a></li>
+                                                  <% if can? :read, SalesPromotionGirl %>
+                                                    <li><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Supervisor %>
+                                                    <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Warehouse %>
+                                                    <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Region %>
+                                                    <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
+                                                  <% end %>
                                               </ul>
                                           </li>
                                           <li><a><i class="fa fa-table"></i> Tables <span class="fa fa-chevron-down"></span></a>
