@@ -1,24 +1,62 @@
+<!--<form>
+                                <h1>Login Form</h1>
+                                <div>
+                                    <input type="text" class="form-control" placeholder="Username" required="" />
+                                </div>
+                                <div>
+                                    <input type="password" class="form-control" placeholder="Password" required="" />
+                                </div>
+                                <div>
+                                    <a class="btn btn-default submit" href="index.html">Log in</a>
+                                    <a class="reset_pass" href="#">Lost your password?</a>
+                                </div>
 
+                                <div class="clearfix"></div>
+
+                                <div class="separator">
+                                    <p class="change_link">New to site?
+                                        <a href="#signup" class="to_register"> Create Account </a>
+                                    </p>
+
+                                    <div class="clearfix"></div>
+                                    <br />
+
+                                    <div>
+                                        <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
+                                        <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and Terms</p>
+                                    </div>
+                                </div>
+                            </form>-->
 
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-  <h2 class="form-signin-heading">Please sign in</h2>
+  <h1>Login Form</h1>
   <%= f.label :login, class: "sr-only" %>
     <%= f.text_field :login, autofocus: true, class: "form-control", placeholder: "Email or Username" %>
 
       <%= f.label :password, class: "sr-only" %>
         <%= f.password_field :password, autocomplete: "off", class: "form-control", placeholder: "Password" %>
 
-  <!--
+          <!--
           <% if devise_mapping.rememberable? -%>
-            <div class="checkbox">
-                <label
-                    <%= f.check_box :remember_me %> Remember me
-            </label>
-            </div>
+                            <div class="checkbox">
+                                <label
+            <%= f.check_box :remember_me %> Remember me
+                            </label>
+                            </div>
           <% end -%>-->
 
           <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+          <div class="clearfix"></div>
+          <div class="separator">
+              <div class="clearfix"></div>
+              <br />
+
+              <div>
+                  <%= image_tag image_url("duos_app.jpg"), size: 360 %>
+                  <p>©2017 All Rights Reserved.</p>
+              </div>
+          </div>
         <% end %>
 
         <%= render "devise/shared/links" %>

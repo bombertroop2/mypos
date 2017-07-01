@@ -13,7 +13,6 @@
 //= require jquery
 //= require jquery_ujs
 //= require turbolinks
-//= require bootstrap-sprockets
 //= require cocoon
 //= require smart_listing
 //= require vendors
@@ -22,6 +21,10 @@
 //= require moment.min
 //= require daterangepicker
 //= require jquery.transit.min
+//= require bootstrap.min
+//= require fastclick
+//= require bootstrap-progressbar.min
+//= require custom.min
 //= require_tree .
 
 
@@ -53,7 +56,7 @@ $(document).on('turbolinks:load', function () {
 
 // open notification center on click
     $("#open_notification").click(function () {
-        if (!$("#notificationContainer").is(":visible") && $("#notification-counter").text() != "0") {
+        if (!$(this).hasClass("open") && $("#notification-counter").text() != "0") {
             openingNotification = true;
             $("#notification-counter").text("0");
             var notificationIds = [];
@@ -66,22 +69,6 @@ $(document).on('turbolinks:load', function () {
                 openingNotification = false;
             });
         }
-        $("#notificationContainer").fadeToggle(300);
-        //$("#notification_count").fadeOut("fast");
-        return false;
-    });
-    // hide notification center on click
-    $(document).click(function () {
-        $("#notificationContainer").hide();
-    });
-//    $("#notificationContainer").click(function () {
-//        return false;
-//    });
-    $("#notificationTitle").click(function () {
-        return false;
-    });
-    $("#notificationsBody").click(function () {
-        return false;
     });
     App.notifications = App.cable.subscriptions.create("NotificationsChannel", {
         connected: function () {
@@ -92,7 +79,7 @@ $(document).on('turbolinks:load', function () {
         },
         received: function (data) {
             // Called when there's incoming data on the websocket for this channel
-            $('#notificationList').prepend(data.notification);
+            $('#menu1').prepend(data.notification);
             this.update_counter(data.counter);
         },
         update_counter: function (counter) {
@@ -102,8 +89,8 @@ $(document).on('turbolinks:load', function () {
             counterContainer
                     .css({opacity: 0})
                     .text(val)
-                    .css({top: '-10px'})
-                    .transition({top: '-2px', opacity: 1});
+                    .css({top: '-5px'})
+                    .transition({top: '8px', opacity: 1});
         }
     });
 }).ajaxStart(function () {

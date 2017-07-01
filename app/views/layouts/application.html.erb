@@ -9,148 +9,307 @@
             <% end %>
         </title>
         <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-        <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+<%#= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
         <%= csrf_meta_tags %>
     </head>
-    <body>
-        <div id="json-overlay" style="display: none"></div>
-        <nav class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <!--
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    -->
-                    <%= link_to "DUOS (Distribution & Sales)", root_path, class: "navbar-brand", method: :get %>
+    <body class="<%= controller_name != 'sessions' ? "nav-md" : "login" %>">
+        <% if controller_name != 'sessions' %>
+          <div id="json-overlay" style="display: none"></div>
+          <div class="container body">
+              <div class="main_container">
+                  <div class="col-md-3 left_col">
+                      <div class="left_col scroll-view">
+                          <div class="navbar nav_title" style="border: 0;">
+                              <%= link_to raw("<i class=\"fa fa-paw\"></i> <span>DUOS</span>"), root_path, class: "site_title", method: :get %>
+                            </div>
+
+                            <div class="clearfix"></div>
+
+                            <!-- menu profile quick info -->
+                            <div class="profile clearfix">
+                                <div class="profile_pic">
+                                    <%= image_tag(image_url("img.jpg"), class: "img-circle profile_img") %>
+                                  </div>
+                                  <div class="profile_info">
+                                      <span>Welcome,</span>
+                                      <h2><%= current_user.name %></h2>
+                                  </div>
+                              </div>
+                              <!-- /menu profile quick info -->
+
+                              <br />
+
+                              <!-- sidebar menu -->
+                              <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                                  <div class="menu_section">
+                                      <h3>General</h3>
+                                      <ul class="nav side-menu">
+                                          <li><a><i class="fa fa-dropbox"></i> Product Master <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <% if can? :read, Brand %>
+                                                    <li><%= link_to "Brands", brands_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Model %>
+                                                    <li><%= link_to "Models", models_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, GoodsType %>
+                                                    <li><%= link_to "Goods Types", goods_types_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Color %>
+                                                    <li><%= link_to "Colors", colors_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, SizeGroup %>
+                                                    <li><%= link_to "Size Groups", size_groups_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Product %>
+                                                    <li><%= link_to "Products", products_path, method: :get %></li>
+                                                  <% end %>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="form.html">General Form</a></li>
+                                                  <li><a href="form_advanced.html">Advanced Components</a></li>
+                                                  <li><a href="form_validation.html">Form Validation</a></li>
+                                                  <li><a href="form_wizards.html">Form Wizard</a></li>
+                                                  <li><a href="form_upload.html">Form Upload</a></li>
+                                                  <li><a href="form_buttons.html">Form Buttons</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-desktop"></i> UI Elements <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="general_elements.html">General Elements</a></li>
+                                                  <li><a href="media_gallery.html">Media Gallery</a></li>
+                                                  <li><a href="typography.html">Typography</a></li>
+                                                  <li><a href="icons.html">Icons</a></li>
+                                                  <li><a href="glyphicons.html">Glyphicons</a></li>
+                                                  <li><a href="widgets.html">Widgets</a></li>
+                                                  <li><a href="invoice.html">Invoice</a></li>
+                                                  <li><a href="inbox.html">Inbox</a></li>
+                                                  <li><a href="calendar.html">Calendar</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-table"></i> Tables <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="tables.html">Tables</a></li>
+                                                  <li><a href="tables_dynamic.html">Table Dynamic</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-bar-chart-o"></i> Data Presentation <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="chartjs.html">Chart JS</a></li>
+                                                  <li><a href="chartjs2.html">Chart JS2</a></li>
+                                                  <li><a href="morisjs.html">Moris JS</a></li>
+                                                  <li><a href="echarts.html">ECharts</a></li>
+                                                  <li><a href="other_charts.html">Other Charts</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-clone"></i>Layouts <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="fixed_sidebar.html">Fixed Sidebar</a></li>
+                                                  <li><a href="fixed_footer.html">Fixed Footer</a></li>
+                                              </ul>
+                                          </li>
+                                      </ul>
+                                  </div>
+                                  <div class="menu_section">
+                                      <h3>Live On</h3>
+                                      <ul class="nav side-menu">
+                                          <li><a><i class="fa fa-bug"></i> Additional Pages <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="e_commerce.html">E-commerce</a></li>
+                                                  <li><a href="projects.html">Projects</a></li>
+                                                  <li><a href="project_detail.html">Project Detail</a></li>
+                                                  <li><a href="contacts.html">Contacts</a></li>
+                                                  <li><a href="profile.html">Profile</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-windows"></i> Extras <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="page_403.html">403 Error</a></li>
+                                                  <li><a href="page_404.html">404 Error</a></li>
+                                                  <li><a href="page_500.html">500 Error</a></li>
+                                                  <li><a href="plain_page.html">Plain Page</a></li>
+                                                  <li><a href="login.html">Login Page</a></li>
+                                                  <li><a href="pricing_tables.html">Pricing Tables</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-sitemap"></i> Multilevel Menu <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="#level1_1">Level One</a>
+                                                  <li><a>Level One<span class="fa fa-chevron-down"></span></a>
+                                                      <ul class="nav child_menu">
+                                                          <li class="sub_menu"><a href="level2.html">Level Two</a>
+                                                          </li>
+                                                          <li><a href="#level2_1">Level Two</a>
+                                                          </li>
+                                                          <li><a href="#level2_2">Level Two</a>
+                                                          </li>
+                                                      </ul>
+                                                  </li>
+                                                  <li><a href="#level1_2">Level One</a>
+                                                  </li>
+                                              </ul>
+                                          </li>                  
+                                          <li><a href="javascript:void(0)"><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a></li>
+                                      </ul>
+                                  </div>
+
+                              </div>
+                              <!-- /sidebar menu -->
+
+                              <!-- /menu footer buttons -->
+                              <div class="sidebar-footer hidden-small">
+                                  <a data-toggle="tooltip" data-placement="top" title="Settings">
+                                      <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                  </a>
+                                  <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                                      <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+                                  </a>
+                                  <a data-toggle="tooltip" data-placement="top" title="Lock">
+                                      <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                                  </a>
+                                  <!--
+                                  <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+                                      <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                                  </a>-->
+                                  <%= link_to(raw("<span class=\"glyphicon glyphicon-off\" aria-hidden=\"true\"></span>"), destroy_user_session_path, :method => :delete, title: "Logout", :"data-toggle" => "tooltip", :"data-placement" => "top") %>
+                              </div>
+                              <!-- /menu footer buttons -->
+                          </div>
+                      </div>
+
+                      <!-- top navigation -->
+                      <div class="top_nav">
+                          <div class="nav_menu">
+                              <nav>
+                                  <div class="nav toggle">
+                                      <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                                  </div>
+
+                                  <ul class="nav navbar-nav navbar-right">
+                                      <li class="">
+                                          <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                              <%= image_tag(image_url("img.jpg")) %><%= current_user.name %>
+                                              <span class=" fa fa-angle-down"></span>
+                                          </a>
+                                          <ul class="dropdown-menu dropdown-usermenu pull-right">
+                                              <!--<li><a href="javascript:;"> Profile</a></li>
+                                              <li>
+                                                  <a href="javascript:;">
+                                                      <span class="badge bg-red pull-right">50%</span>
+                                                      <span>Settings</span>
+                                                  </a>
+                                              </li>
+                                              <li><a href="javascript:;">Help</a></li>-->
+                                              <li><%= link_to(raw("<i class=\"fa fa-sign-out pull-right\"></i> Log Out"), destroy_user_session_path, :method => :delete) %></li>
+                                          </ul>
+                                      </li>
+
+                                      <%= render "notifications/notification_center", {notifications: @notifications, unnotified_notification_count: @unnotified_notification_count} %>
+
+                                  </ul>
+                              </nav>
+                          </div>
+                      </div>
+                      <!-- /top navigation -->
+
+                      <!-- page content -->
+                      <div class="right_col" role="main">
+                          <%= yield %>
+                      </div>
+                      <!-- /page content -->
+
+                      <!-- footer content -->
+                      <footer>
+                          <div class="pull-right">
+                              Gentelella - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
+                          </div>
+                          <div class="clearfix"></div>
+                      </footer>
+                      <!-- /footer content -->
                   </div>
-                  <div id="navbar" class="navbar-collapse collapse">
-                      <ul class="nav navbar-nav navbar-right">
-                          <% if user_signed_in? %>
-                            <li>
-                                <%= render "notifications/notification_center", {notifications: @notifications, unnotified_notification_count: @unnotified_notification_count} %>
-                            </li>
-                          <% end %>
-                          <li>
-                              <% if user_signed_in? %>
-                                <%= link_to('Logout', destroy_user_session_path, :method => :delete) %>
-                              <% else %>
-                                <%= link_to('Login', new_user_session_path)  %>  
+              </div>
+
+              <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+
+              <script>
+                $(function () {
+      <% @notifications.each do |notification| %>
+                      $("#notification_<%= notification.id %>").click(function () {
+                          $.get("/notifications/<%= notification.id %>").done(function (data) {
+                              bootbox.alert({
+                                  title: "Notification",
+                                  message: data
+                              });
+                          });
+                      });
+      <% end %>
+      <% if controller_name.eql?("shipments") %>
+                      $("#search-shipment-btn").click(function () {
+                          $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                          $("#filter_received_date").val($("#filter-received-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% end %>
+                });
+              </script>
+            <% else %>
+              <div>
+                  <!--<a class="hiddenanchor" id="signup"></a>-->
+                  <!--<a class="hiddenanchor" id="signin"></a>-->
+
+                  <div class="login_wrapper">
+                      <div class="animate form login_form">
+                          <section class="login_content">
+                              <% if alert && alert.include?("Invalid") %>
+                                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                    <%= alert %>
+                                </div>                            
                               <% end %>
-                          </li>
-                      </ul>
+                              <%= yield %>
+                          </section>
+                      </div>
+
+                      <!--<div id="register" class="animate form registration_form">
+                          <section class="login_content">
+                              <form>
+                                  <h1>Create Account</h1>
+                                  <div>
+                                      <input type="text" class="form-control" placeholder="Username" required="" />
+                                  </div>
+                                  <div>
+                                      <input type="email" class="form-control" placeholder="Email" required="" />
+                                  </div>
+                                  <div>
+                                      <input type="password" class="form-control" placeholder="Password" required="" />
+                                  </div>
+                                  <div>
+                                      <a class="btn btn-default submit" href="index.html">Submit</a>
+                                  </div>
+
+                                  <div class="clearfix"></div>
+
+                                  <div class="separator">
+                                      <p class="change_link">Already a member ?
+                                          <a href="#signin" class="to_register"> Log in </a>
+                                      </p>
+
+                                      <div class="clearfix"></div>
+                                      <br />
+
+                                      <div>
+                                          <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
+                                          <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and Terms</p>
+                                      </div>
+                                  </div>
+                              </form>
+                          </section>
+                      </div>-->
                   </div>
               </div>
-          </nav>
-
-
-          <div class="container-fluid">
-              <div class="row">
-                  <div class="col-sm-3 col-md-2 sidebar">
-                      <ul class="nav nav-sidebar">
-                          <% if can? :read, Brand %>
-                            <li class="<%= params[:controller].eql?("brands") ? "active" : "" %>"><%= link_to "Brands", brands_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Color %>
-                            <li class="<%= params[:controller].eql?("colors") ? "active" : "" %>"><%= link_to "Colors", colors_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Model %>
-                            <li class="<%= params[:controller].eql?("models") ? "active" : "" %>"><%= link_to "Models", models_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, GoodsType %>
-                            <li class="<%= params[:controller].eql?("goods_types") ? "active" : "" %>"><%= link_to "Goods Types", goods_types_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Region %>
-                            <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, PriceCode %>
-                            <li class="<%= params[:controller].eql?("price_codes") ? "active" : "" %>"><%= link_to "Price Codes", price_codes_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Vendor %>
-                            <li class="<%= params[:controller].eql?("vendors") ? "active" : "" %>"><%= link_to "Vendors", vendors_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Product %>
-                            <li class="<%= params[:controller].eql?("products") ? "active" : "" %>"><%= link_to "Products", products_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, SizeGroup %>
-                            <li class="<%= params[:controller].eql?("size_groups") ? "active" : "" %>"><%= link_to "Size Groups", size_groups_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, SalesPromotionGirl %>
-                            <li class="<%= params[:controller].eql?("sales_promotion_girls") ? "active" : "" %>"><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
-                          <% end %>                          
-                          <% if can? :read, Supervisor %>
-                            <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Warehouse %>
-                            <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, PurchaseOrder %>
-                            <li class="<%= params[:controller].eql?("purchase_orders") ? "active" : "" %>"><%= link_to "Purchase Orders", purchase_orders_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, ReceivedPurchaseOrder %>
-                            <li class="<%= params[:controller].eql?("receiving") ? "active" : "" %>"><%= link_to "Receiving", receiving_index_path, method: :get %></li>
-                          <% end %>                      
-                          <% if can? :read, Stock %>
-                            <li class="<%= params[:controller].eql?("stocks") ? "active" : "" %>"><%= link_to "Stock Balance", stocks_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, PurchaseReturn %>
-                            <li class="<%= params[:controller].eql?("purchase_returns") ? "active" : "" %>"><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
-                          <% end %>                          
-  <!--<li class="<%#= params[:controller].eql?("cost_lists") ? "active" : "" %>"><%#= link_to "Costs", cost_lists_path %></li>
-  <li class="<%#= params[:controller].eql?("price_lists") ? "active" : "" %>"><%#= link_to "Prices", price_lists_path %></li>-->
-                          <% if can? :read, CostList %>
-                            <li class="<%= params[:controller].eql?("cost_prices") ? "active" : "" %>"><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
-                          <% end %>
-                          <% if can? :read, Email %>
-                            <li class="<%= params[:controller].eql?("emails") ? "active" : "" %>"><%= link_to "Emails", emails_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, AccountPayable %>
-                            <li class="<%= params[:controller].eql?("account_payables") ? "active" : "" %>"><%= link_to "Account Payables", account_payables_path, method: :get %></li>
-                          <% end %>                          
-                          <% if can? :read, OrderBooking %>
-                            <li class="<%= params[:controller].eql?("order_bookings") ? "active" : "" %>"><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
-                          <% end %>                          
-                          <% if can? :read, Courier %>
-                            <li class="<%= params[:controller].eql?("couriers") ? "active" : "" %>"><%= link_to "Couriers", couriers_path, method: :get %></li>
-                          <% end %>                          
-                          <% if can? :read, Shipment %>
-                            <li class="<%= params[:controller].eql?("shipments") ? "active" : "" %>"><%= link_to "Shipments", shipments_path, method: :get %></li>
-                          <% end %>                          
-                          <% if can? :read, User %>
-                            <li class="<%= params[:controller].eql?("users") ? "active" : "" %>"><%= link_to "Users", users_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :manage, AvailableMenu %>
-                            <li class="<%= params[:controller].eql?("available_menus") ? "active" : "" %>"><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, ShipmentReceipt %>
-                            <li class="<%= params[:controller].eql?("shipment_receipts") ? "active" : "" %>"><%= link_to "Shipment Receipts", shipment_receipts_path, method: :get %></li>
-                          <% end %>
-                          <% if can? :read, StockMutation %>
-                            <li class="<%= params[:controller].eql?("stock_mutations") ? "active" : "" %>"><%= link_to "Stock Mutations", stock_mutations_path, method: :get %></li>
-                          <% end %>
-                      </ul>
-                  </div>
-                  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-
-                      <% if notice %>
-                        <div class="alert alert-info"><%= notice %></div>
-                      <% end %>
-
-                      <% if alert %>
-                        <div class="alert alert-danger"><%= alert %></div>
-                      <% end %>
-
-
-                      <%= yield %>
-                  </div>
-              </div>
-
-
-          </div>
-
-
-      </body>
-  </html>
+            <% end %>
+        </body>
+    </html>

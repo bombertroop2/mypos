@@ -1,19 +1,12 @@
-<li style="background-color: #E2E7F0; cursor: pointer" id="notification_<%= notification.id %>" class="notification-rows">
-    <%= "#{notification.event} (#{notification.body})" %>
-    <div><%= notification.created_at.strftime("%d %b. %Y") %></div>
+<li>
+    <a id="notification_<%= notification.id %>" class="notification-rows">
+        <!--<span class="image"><%#= image_tag(image_url("img.jpg"), alt: "Profile Image") %></span>-->
+        <span>
+            <span><%= notification.event %></span>
+            <span class="time"><%= notification.created_at.strftime("%d %b. %Y") %></span>
+        </span>
+        <span class="message">
+            <%= notification.body %>
+        </span>
+    </a>
 </li>
-
-<script>
-  $(function () {
-      $("#notification_<%= notification.id %>").click(function () {
-          $("#notificationContainer").fadeToggle(300);
-          $(this).css("background-color", "transparent");
-          $.get("/notifications/<%= notification.id %>").done(function (data) {
-              bootbox.alert({
-                  title: "Notification",
-                  message: data
-              });
-          });
-      });
-  });
-</script>

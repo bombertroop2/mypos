@@ -1,14 +1,29 @@
-<ul class="notificator">
+<!--<ul class="notificator">
     <a href="#" id="open_notification">
-        <%= render 'notifications/counter', counter: unnotified_notification_count %>
+<%#= render 'notifications/counter', counter: unnotified_notification_count %>
     </a>
     <div id="notificationContainer">
         <div id="notificationTitle">Notifications</div>
         <div id="notificationsBody" class="notifications">
             <ul id="notificationList">
-                <%= render notifications %>
+<%#= render notifications %>
             </ul>
         </div>
-        <div id="notificationFooter"><%= link_to "See All", notifications_path, method: :get %></div>
+        <div id="notificationFooter"><%#= link_to "See All", notifications_path, method: :get %></div>
     </div>
-</ul>
+</ul>-->
+
+<li role="presentation" class="dropdown" id="open_notification">
+    <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-envelope-o"></i>
+        <span class="badge bg-green" id="notification-counter"><%= render 'notifications/counter', counter: unnotified_notification_count %></span>
+    </a>
+    <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
+        <%= render notifications %>        
+        <li>
+            <div class="text-center">
+                <%= link_to raw("<strong>See All Alerts</strong> <i class=\"fa fa-angle-right\"></i>"), notifications_path, method: :get %>
+            </div>
+        </li>
+    </ul>
+</li>

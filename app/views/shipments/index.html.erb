@@ -28,16 +28,3 @@
                 <% end %>
             </div>
             <%= smart_listing_render(:shipments) %>
-
-
-            <script>
-              $(function () {
-                  $("#search-shipment-btn").click(function () {
-                      $("#filter_delivery_date").val($("#filter-delivery-date").val());
-                      $("#filter_received_date").val($("#filter-received-date").val());
-                      $("#filter_string").val($("#filter-string").val());
-                      $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                      $(".smart-listing-controls").submit();
-                  });
-              });
-            </script>
