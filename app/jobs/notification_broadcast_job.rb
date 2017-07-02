@@ -5,7 +5,7 @@ class NotificationBroadcastJob < ApplicationJob
     # Do something later
     notification.recipients.each do |recipient|
       unnotified_notification_count = Notification.joins(:recipients).where(["recipients.user_id = ? AND notified = ?", recipient.user_id, false]).count("notifications.id")
-      ActionCable.server.broadcast "notification_channel_#{recipient.user_id}", counter: render_counter(unnotified_notification_count), notification: render_notification(notification)
+      ActionCable.server.broadcast "notification_channel_#{recipient.user_id}", notification_id: notification.id, notification: render_notification(notification)
     end
   end
   

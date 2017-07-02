@@ -57,11 +57,14 @@ class Ability
             can :read, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Stock Mutation")
             if ability.eql?(:read)
-              alias_action :index_store_mutation, :show_store_mutation, to: :read_store_mutations
-              can :read_store_mutations, class_name.gsub(/\s+/, "").constantize
+              alias_action :index, :show, to: :read_store_to_store_mutations
+              alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize
             else
-              alias_action :index, :show, :new, :create, :get_products, :generate_form, to: :manage_warehouse_stock
-              can :manage_warehouse_stock, class_name.gsub(/\s+/, "").constantize              
+              alias_action :index, :show, to: :read_store_to_store_mutations
+              alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
+              alias_action :new_store_to_warehouse_mutation, :create_store_to_warehouse_mutation, :generate_form, to: :manage_store_to_warehouse_mutation
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :manage_store_to_warehouse_mutation], class_name.gsub(/\s+/, "").constantize              
             end
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
@@ -102,14 +105,14 @@ class Ability
             can :read, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Stock Mutation")
             if ability.eql?(:read)
-              alias_action :index, :show, to: :read_warehouse_mutations
-              alias_action :index_store_mutation, :show_store_mutation, to: :read_store_mutations
-              can [:read_warehouse_mutations, :read_store_mutations], class_name.gsub(/\s+/, "").constantize
+              alias_action :index, :show, to: :read_store_to_store_mutations
+              alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize
             else
-              alias_action :index, :show, to: :read_warehouse_mutations
-              alias_action :index_store_mutation, :show_store_mutation, to: :read_store_mutations
-              alias_action :new, :create, :get_products, :generate_form, to: :manage_warehouse_stock
-              can [:read_warehouse_mutations, :manage_warehouse_stock, :read_store_mutations], class_name.gsub(/\s+/, "").constantize              
+              alias_action :index, :show, to: :read_store_to_store_mutations
+              alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
+              alias_action :new, :create, :get_products, :generate_form, to: :manage_store_to_store_mutation
+              can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize              
             end
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize

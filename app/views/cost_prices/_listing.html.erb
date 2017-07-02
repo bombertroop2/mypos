@@ -31,11 +31,5 @@
           $("#listing-cost-thead").show();
       }
   }, 0);
-<% if cannot? :manage, CostList %>
-    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-    $('#new-item-btn').unbind("click");
-    $('#new-item-btn').click(function (e) {
-        return false;
-    });
-<% end %>
+
 </script>

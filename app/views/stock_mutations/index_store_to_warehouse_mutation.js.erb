@@ -1,1 +1,9 @@
 <%= smart_listing_update(:stock_mutations) %>
+
+<% if cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
+  $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+  $('#new-item-btn').unbind("click");
+  $('#new-item-btn').click(function (e) {
+  return false;
+  });
+<% end %>

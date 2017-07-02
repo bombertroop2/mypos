@@ -82,9 +82,17 @@ $(document).on('turbolinks:load', function () {
                 $($(".notification-rows").last().parent()).remove();
             // Called when there's incoming data on the websocket for this channel
             $('#menu1').prepend(data.notification);
-            this.update_counter(data.counter);
+            $("#notification_" + data.notification_id).click(function () {
+                $.get("/notifications/" + data.notification_id).done(function (data) {
+                    bootbox.alert({
+                        title: "Notification",
+                        message: data
+                    });
+                });
+            });
+            this.update_counter();
         },
-        update_counter: function (counter) {
+        update_counter: function () {
             var counterContainer = $('#notification-counter');
             var val = parseInt(counterContainer.text());
             val++;

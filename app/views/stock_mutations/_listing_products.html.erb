@@ -12,7 +12,7 @@
 
             <tbody>
                 <% @products.each do |product| %>
-                  <tr id="product_<%= product.id %>_<%= params[:warehouse_id] %>">
+                  <tr id="product_<%= product.id %>_<%= current_user.has_non_spg_role? ? params[:warehouse_id] : current_user.sales_promotion_girl.warehouse_id %>">
                       <td></td>
                       <td><%= product.code %></td>
                       <td><%= product.name %></td>
@@ -56,7 +56,8 @@
               });
               $.get("/stock_mutations/generate_form", {
                   product_ids: productIds.join(","),
-                  warehouse_id: warehouseId
+                  warehouse_id: warehouseId,
+                  mutation_type: "<%= @mutation_type %>"
               });
           }
 

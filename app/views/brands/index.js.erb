@@ -1,1 +1,9 @@
 <%= smart_listing_update(:brands) %>
+
+<% if cannot?(:manage, Brand) %>
+  $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+  $('#new-item-btn').unbind("click");
+  $('#new-item-btn').click(function (e) {
+  return false;
+  });
+<% end %>

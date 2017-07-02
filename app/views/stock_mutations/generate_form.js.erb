@@ -1,1 +1,5 @@
-$("#form_container").html("<%= j(render(partial: "detail_form")) %>");
+<% unless params[:mutation_type].eql?("store to warehouse") %>
+  $("#form_container").html("<%= j(render(partial: "detail_form")) %>");
+<% else %>
+  $("#form_container").html("<%= j(render(partial: "detail_form_store_to_warehouse")) %>");
+<% end %>

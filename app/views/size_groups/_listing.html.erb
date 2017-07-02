@@ -25,11 +25,5 @@
           $("#listing-size-group-thead").show();
       }
   }, 0);
-  <% if cannot? :manage, SizeGroup %>
-    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-    $('#new-item-btn').unbind("click");
-    $('#new-item-btn').click(function (e) {
-        return false;
-    });
-<% end %>
+  
 </script>

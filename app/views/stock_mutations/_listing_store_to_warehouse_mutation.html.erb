@@ -14,7 +14,7 @@
               <%= smart_listing.render object: stock_mutation, partial: "stock_mutations/stock_mutation", locals: {object: stock_mutation} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 5, link: new_stock_mutation_path %>
+        <%= smart_listing.item_new colspan: 5, link: new_store_to_warehouse_mutation_stock_mutations_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>
@@ -26,11 +26,4 @@
           $("#listing-stock-mutation-thead").show();
       }
   }, 0);
-<% if cannot?(:manage_warehouse_stock, StockMutation) %>
-    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-    $('#new-item-btn').unbind("click");
-    $('#new-item-btn').click(function (e) {
-        return false;
-    });
-<% end %>
 </script>

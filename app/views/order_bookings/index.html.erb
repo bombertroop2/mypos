@@ -28,15 +28,3 @@
               <% end %>
           </div>
           <%= smart_listing_render(:order_bookings) %>
-
-          <script>
-            $(function () {
-                $("#search-ob-btn").click(function () {
-                    $("#filter_plan_date").val($("#filter-plan-date").val());
-                    $("#filter_string").val($("#filter-string").val());
-                    $("#filter_status").val($("#filter-status").val());
-                    $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                    $(".smart-listing-controls").submit();
-                });
-            });
-          </script>

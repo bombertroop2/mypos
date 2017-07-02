@@ -49,11 +49,11 @@
                                                   <% if can? :read, Brand %>
                                                     <li><%= link_to "Brands", brands_path, method: :get %></li>
                                                   <% end %>
-                                                  <% if can? :read, Model %>
-                                                    <li><%= link_to "Models", models_path, method: :get %></li>
-                                                  <% end %>
                                                   <% if can? :read, GoodsType %>
                                                     <li><%= link_to "Goods Types", goods_types_path, method: :get %></li>
+                                                  <% end %>
+                                                  <% if can? :read, Model %>
+                                                    <li><%= link_to "Models", models_path, method: :get %></li>
                                                   <% end %>
                                                   <% if can? :read, Color %>
                                                     <li><%= link_to "Colors", colors_path, method: :get %></li>
@@ -92,13 +92,13 @@
                                                   <% end %>
                                               </ul>
                                           </li>
-                                          <li><a><i class="fa fa-exchange"></i> Transactions <span class="fa fa-chevron-down"></span></a>
+                                          <li><a><i class="fa fa-exchange"></i> Purchase Order <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
                                                   <% if can? :read, Vendor %>
                                                     <li><%= link_to "Vendors", vendors_path, method: :get %></li>
                                                   <% end %>
                                                   <% if can? :read, PurchaseOrder %>
-                                                    <li><%= link_to "Purchase Orders", purchase_orders_path, method: :get %></li>
+                                                    <li><%= link_to "Purchase Order Entry", purchase_orders_path, method: :get %></li>
                                                   <% end %>
                                                   <% if can? :read, ReceivedPurchaseOrder %>
                                                     <li><%= link_to "Receiving", receiving_index_path, method: :get %></li>
@@ -123,15 +123,8 @@
                                                     <li><%= link_to "Couriers", couriers_path, method: :get %></li>
                                                   <% end %>                          
                                               </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, Stock %>
-                                                    <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
-                                                  <% end %>
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-download"></i> Shipment Receipts <span class="fa fa-chevron-down"></span></a>
+                                          </li>                                          
+                                          <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
                                                   <% if can? :read, ShipmentReceipt %>
                                                     <li><%= link_to "Warehouse to Store", shipment_receipts_path, method: :get %></li>
@@ -142,12 +135,19 @@
                                           </li>
                                           <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <% if can? :read_warehouse_mutations, StockMutation %>
+                                                  <% if can? :read_store_to_store_mutations, StockMutation %>
                                                     <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
                                                   <% end %>
-                                                  <% if can? :read_store_mutations, StockMutation %>
-                                                    <li><a>Store to Warehouse</a></li>
+                                                  <% if can? :read_store_to_warehouse_mutations, StockMutation %>
+                                                    <li><%= link_to "Store to Warehouse", index_store_to_warehouse_mutation_stock_mutations_path, method: :get %></li>                                                    
                                                   <% end %>                                                  
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <% if can? :read, Stock %>
+                                                    <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
+                                                  <% end %>
                                               </ul>
                                           </li>
                                           <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
@@ -349,6 +349,194 @@
                           //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
                           $(".smart-listing-controls").submit();
                       });
+        <% if !action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_store_mutation, StockMutation) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% elsif action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("brands") %>
+        <% if cannot?(:manage, Brand) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("goods_types") %>
+        <% if cannot? :manage, GoodsType %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("models") %>
+        <% if cannot? :manage, Model %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("colors") %>
+        <% if cannot?(:manage, Color) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("size_groups") %>
+        <% if cannot? :manage, SizeGroup %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("products") %>
+        <% if cannot? :manage, Product %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("cost_prices") %>
+        <% if cannot? :manage, CostList %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("sales_promotion_girls") %>
+        <% if cannot? :manage, SalesPromotionGirl %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("area_managers") %>
+        <% if cannot? :manage, Supervisor %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("warehouses") %>
+        <% if cannot? :manage, Warehouse %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("regions") %>
+        <% if cannot? :manage, Region %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("vendors") %>
+        <% if cannot? :manage, Vendor %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("purchase_orders") %>
+        <% if cannot? :manage, PurchaseOrder %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("receiving") %>
+        <% if cannot? :manage, ReceivedPurchaseOrder %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("purchase_returns") %>
+        <% if cannot? :manage, PurchaseReturn %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("account_payables") %>
+        <% if cannot? :manage, AccountPayable %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("order_bookings") %>
+                      $("#search-ob-btn").click(function () {
+                          $("#filter_plan_date").val($("#filter-plan-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $("#filter_status").val($("#filter-status").val());
+                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                          $(".smart-listing-controls").submit();
+                      });
+        <% if cannot? :manage, OrderBooking %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("shipments") %>
+        <% if cannot?(:undelete_action, Shipment) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("couriers") %>
+        <% if cannot? :manage, Courier %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("shipment_receipts") %>
+        <% if cannot?(:manage, ShipmentReceipt) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("emails") %>
+        <% if cannot? :manage, Email %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% end %>
                 });
               </script>

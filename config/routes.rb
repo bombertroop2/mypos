@@ -3,6 +3,10 @@ Rails.application.routes.draw do
     collection do
       get "get_products"
       get "generate_form"
+      get "index_store_to_warehouse_mutation"
+      get "show_store_to_warehouse_mutation"
+      get "new_store_to_warehouse_mutation"
+      post "create_store_to_warehouse_mutation"
     end
   end
   resources :shipment_receipts, except: [:edit, :update, :destroy] do
