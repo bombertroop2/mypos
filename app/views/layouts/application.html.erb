@@ -142,10 +142,12 @@
                                           </li>
                                           <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
                                               <ul class="nav child_menu">
-                                                  <% if can? :read, StockMutation %>
+                                                  <% if can? :read_warehouse_mutations, StockMutation %>
                                                     <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
                                                   <% end %>
-                                                  <li><a>Store to Warehouse</a></li>
+                                                  <% if can? :read_store_mutations, StockMutation %>
+                                                    <li><a>Store to Warehouse</a></li>
+                                                  <% end %>                                                  
                                               </ul>
                                           </li>
                                           <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>

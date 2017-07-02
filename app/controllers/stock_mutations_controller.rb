@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class StockMutationsController < ApplicationController
   load_and_authorize_resource
   helper SmartListing::Helper
-  before_action :set_stock_mutation, only: [:show, :edit, :update, :destroy]
+  before_action :set_stock_mutation, only: [:show, :show_store_mutation]
 
   # GET /stock_mutations
   # GET /stock_mutations.json
@@ -31,18 +31,22 @@ class StockMutationsController < ApplicationController
     @stock_mutations = smart_listing_create(:stock_mutations, stock_mutations_scope, partial: 'stock_mutations/listing', default_sort: {number: "asc"})
   end
 
+  def index_store_mutation
+  end
+
   # GET /stock_mutations/1
   # GET /stock_mutations/1.json
   def show
   end
 
+  # GET /stock_mutations/1
+  # GET /stock_mutations/1.json
+  def show_store_mutation
+  end
+
   # GET /stock_mutations/new
   def new
     @origin_warehouses = Warehouse.not_central.select(:id, :code)
-  end
-
-  # GET /stock_mutations/1/edit
-  def edit
   end
 
   # POST /stock_mutations
@@ -78,35 +82,69 @@ class StockMutationsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /stock_mutations/1
-  # PATCH/PUT /stock_mutations/1.json
-  def update
-    respond_to do |format|
-      if @stock_mutation.update(stock_mutation_params)
-        format.html { redirect_to @stock_mutation, notice: 'Stock mutation was successfully updated.' }
-        format.json { render :show, status: :ok, location: @stock_mutation }
-      else
-        format.html { render :edit }
-        format.json { render json: @stock_mutation.errors, status: :unprocessable_entity }
+  # GET /stock_mutations/new
+  def new_store_mutation
+    @origin_warehouses = Warehouse.not_central.select(:id, :code)
+  end
+
+  # POST /stock_mutations
+  # POST /stock_mutations.json
+  def create_store_mutation
+    add_additional_params
+    @stock_mutation = StockMutation.new(stock_mutation_params)
+    @stock_mutation.quantity = @total_stock_mutation_quantity
+    begin
+      unless @saved = @stock_mutation.save
+        if @stock_mutation.errors[:"stock_mutation_products.base"].present?
+          render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
+        elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
+          render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
+        else
+          @destintation_warehouses = Warehouse.not_central.where(["id <> ?", params[:stock_mutation][:origin_warehouse_id]]).select(:id, :code)
+          @colors = []
+          @sizes = []
+          @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+            stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", params[:stock_mutation][:origin_warehouse_id]]).first
+            @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+            @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+            @colors[stock_mutation_product.product_id].each do |color|
+              @sizes[stock_mutation_product.product_id].each do |size|
+                stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.select{|smpi| smpi.color_id == color.id && smpi.size_id == size.id}.blank?
+              end
+            end        
+          end
+        end
       end
+    rescue ActiveRecord::RecordNotUnique => e
+      render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
     end
   end
 
-  # DELETE /stock_mutations/1
-  # DELETE /stock_mutations/1.json
-  def destroy
-    @stock_mutation.destroy
-    respond_to do |format|
-      format.html { redirect_to stock_mutations_url, notice: 'Stock mutation was successfully destroyed.' }
-      format.json { head :no_content }
-    end
-  end
-  
   def get_products
     @products = Product.joins(:brand).joins(stock_products: :stock).where(["warehouse_id = ?", params[:warehouse_id]]).select(:id, :code, :name).order(:code)
   end
 
   def generate_form
+    selected_product_ids = params[:product_ids]
+    @destintation_warehouses = Warehouse.not_central.where(["id <> ?", params[:warehouse_id]]).select(:id, :code)
+    @stock_mutation = StockMutation.new origin_warehouse_id: params[:warehouse_id]
+    products = Product.where(id: params[:product_ids].split(",")).select(:id)
+    @colors = []
+    @sizes = []
+    products.each do |product|
+      stock_mutation_product = @stock_mutation.stock_mutation_products.build product_id: product.id
+      stock_product = StockProduct.joins(:stock).where(product_id: product.id).where(["warehouse_id = ?", params[:warehouse_id]]).first
+      @colors[product.id] = stock_product.colors.select(:id, :code, :name)
+      @sizes[product.id] = stock_product.sizes.select(:id, :size)
+      @colors[product.id].each do |color|
+        @sizes[product.id].each do |size|
+          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id
+        end
+      end        
+    end
+  end
+
+  def generate_store_mutation_form
     selected_product_ids = params[:product_ids]
     @destintation_warehouses = Warehouse.not_central.where(["id <> ?", params[:warehouse_id]]).select(:id, :code)
     @stock_mutation = StockMutation.new origin_warehouse_id: params[:warehouse_id]
