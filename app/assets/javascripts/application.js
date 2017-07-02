@@ -78,6 +78,8 @@ $(document).on('turbolinks:load', function () {
             // Called when the subscription has been terminated by the server
         },
         received: function (data) {
+            if ($(".notification-rows").length > 3)
+                $($(".notification-rows").last().parent()).remove();
             // Called when there's incoming data on the websocket for this channel
             $('#menu1').prepend(data.notification);
             this.update_counter(data.counter);

@@ -14,12 +14,20 @@ class StockMutation < ApplicationRecord
 
     before_create :generate_number
     before_destroy :delete_tracks
-    after_create :notify_store
+    after_create :notify_origin_store, :notify_destination_store
     
     private
   
-    def notify_store
-      notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon")
+    def notify_origin_store
+      notification = Notification.new(event: "New Notification", body: "Please send #{destination_warehouse.name} a stock mutation #{number}", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
+      origin_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+        notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
+      end
+      notification.save
+    end
+
+    def notify_destination_store
+      notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
       destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
         notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
       end
