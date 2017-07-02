@@ -140,7 +140,7 @@ class UsersController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_user
     @user = User.joins(users_roles: :role).where(id: params[:id]).
-      select(:id, :email, :name, :address, :phone, :mobile_phone, :gender, :username, :active, :sales_promotion_girl_id).
+      select(:id, :email, :name, :mobile_phone, :gender, :username, :active, :sales_promotion_girl_id).
       select("roles.name AS role_name").first
   end
 

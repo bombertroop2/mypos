@@ -1,0 +1,36 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-stock-mutation-thead">
+        <tr>
+            <th class="col-md-4"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Delivery Date", "delivery_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Received Date", "received_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Quantity", "quantity" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |stock_mutation| %>
+          <tr class="editable" data-id="<%= stock_mutation.id %>">
+              <%= smart_listing.render object: stock_mutation, partial: "stock_mutations/stock_mutation", locals: {object: stock_mutation} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 5, link: new_stock_mutation_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-stock-mutation-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-stock-mutation-thead").show();
+      }
+  }, 0);
+<% if cannot?(:manage_warehouse_stock, StockMutation) %>
+    $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+    $('#new-item-btn').unbind("click");
+    $('#new-item-btn').click(function (e) {
+        return false;
+    });
+<% end %>
+</script>
