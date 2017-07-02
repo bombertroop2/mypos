@@ -4,9 +4,11 @@ class Size < ApplicationRecord
   has_many :product_details, dependent: :restrict_with_error
   has_many :stock_details, dependent: :restrict_with_error
   has_many :order_booking_product_items, dependent: :restrict_with_error
+  has_many :stock_mutation_product_items, dependent: :restrict_with_error
   has_one :product_detail_relation, -> {select("1 AS one")}, class_name: "ProductDetail"
   has_one :stock_detail_relation, -> {select("1 AS one")}, class_name: "StockDetail"
   has_one :order_booking_product_item_relation, -> {select("1 AS one")}, class_name: "OrderBookingProductItem"
+  has_one :stock_mutation_product_item_relation, -> {select("1 AS one")}, class_name: "StockMutationProductItem"
 
   before_validation :strip_string_values
   
@@ -29,7 +31,7 @@ class Size < ApplicationRecord
   
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def size_not_changed
-    errors.add(:size, "change is not allowed!") if size_changed? && persisted? && (order_booking_product_item_relation.present? || product_detail_relation.present? || stock_detail_relation.present?)
+    errors.add(:size, "change is not allowed!") if size_changed? && persisted? && (order_booking_product_item_relation.present? || product_detail_relation.present? || stock_detail_relation.present? || stock_mutation_product_item_relation.present?)
   end
 
   # apabila sudah ada relasi dengan table lain maka tidak dapat tambah size

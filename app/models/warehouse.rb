@@ -8,11 +8,15 @@ class Warehouse < ApplicationRecord
   has_many :sales_promotion_girls, dependent: :restrict_with_error
   has_many :origin_warehouse_order_bookings, class_name: "OrderBooking", foreign_key: :origin_warehouse_id, dependent: :restrict_with_error
   has_many :destination_warehouse_order_bookings, class_name: "OrderBooking", foreign_key: :destination_warehouse_id, dependent: :restrict_with_error
+  has_many :origin_warehouse_stock_mutations, class_name: "StockMutation", foreign_key: :origin_warehouse_id, dependent: :restrict_with_error
+  has_many :destination_warehouse_stock_mutations, class_name: "StockMutation", foreign_key: :destination_warehouse_id, dependent: :restrict_with_error
   has_one :stock, dependent: :restrict_with_error
   has_one :po_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
   has_one :spg_relation, -> {select("1 AS one")}, class_name: "SalesPromotionGirl"
   has_one :origin_warehouse_order_booking_relation, -> {select("1 AS one")}, class_name: "OrderBooking", foreign_key: :origin_warehouse_id
   has_one :destination_warehouse_order_booking_relation, -> {select("1 AS one")}, class_name: "OrderBooking", foreign_key: :destination_warehouse_id
+  has_one :origin_warehouse_stock_mutation_relation, -> {select("1 AS one")}, class_name: "StockMutation", foreign_key: :origin_warehouse_id
+  has_one :destination_warehouse_stock_mutation_relation, -> {select("1 AS one")}, class_name: "StockMutation", foreign_key: :destination_warehouse_id
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
   validates :code, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}
@@ -89,10 +93,10 @@ class Warehouse < ApplicationRecord
     end
     
     def code_not_changed
-      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present?)
+      errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present?)
     end
 
     def warehouse_type_not_changed
-      errors.add(:warehouse_type, "change is not allowed!") if warehouse_type_changed? && persisted? && (destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || po_relation.present? || spg_relation.present?)
+      errors.add(:warehouse_type, "change is not allowed!") if warehouse_type_changed? && persisted? && (destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || po_relation.present? || spg_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present?)
     end
   end

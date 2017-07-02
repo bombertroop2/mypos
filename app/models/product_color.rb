@@ -12,7 +12,8 @@ class ProductColor < ApplicationRecord
   
   before_destroy :prevent_deleting_if_po_is_created,
     :prevent_deleting_if_direct_purchase_is_created,
-    :prevent_deleting_if_order_booking_is_created, :delete_tracks
+    :prevent_deleting_if_order_booking_is_created, :delete_tracks,
+    :prevent_deleting_if_stock_mutation_is_created
   
   private
   
@@ -22,7 +23,7 @@ class ProductColor < ApplicationRecord
 
   # apabila sudah ada relasi dengan table lain maka tidak dapat tambah color
   def color_not_added
-    errors.add(:base, "Color addition is not allowed!") if new_record? && product && (product.order_booking_product_relation.present? || product.stock_product_relation.present? || product.purchase_order_relation.present? || product.direct_purchase_product_relation.present? || product.cost_lists.select(:id).count > 1)
+    errors.add(:base, "Color addition is not allowed!") if new_record? && product && (product.order_booking_product_relation.present? || product.stock_product_relation.present? || product.purchase_order_relation.present? || product.direct_purchase_product_relation.present? || product.cost_lists.select(:id).count > 1 || product.stock_mutation_product_relation.present?)
   end
 
   
@@ -40,5 +41,9 @@ class ProductColor < ApplicationRecord
   
   def prevent_deleting_if_order_booking_is_created
     throw :abort if OrderBookingProduct.joins(:order_booking_product_items).select("1 AS one").where(["color_id = ? AND product_id = ?", color_id, product_id]).first.present?
+  end
+
+  def prevent_deleting_if_stock_mutation_is_created
+    throw :abort if product.stock_mutation_product_relation.present?
   end
 end
