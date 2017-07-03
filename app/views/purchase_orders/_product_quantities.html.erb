@@ -1,6 +1,6 @@
 <% @purchase_order.purchase_order_products.each do |pop| %>
-  <% if (params[:purchase_order_id].present? and !@purchase_order.new_record? and pop.new_record?) or !params[:purchase_order_id].present? %>
-    <% product = pop.product %>
+  <% product = pop.product %>
+  <% if pop.new_record? || action_name.eql?("edit") || (action_name.eql?("update") && !pop._destroy) %>
     <% if pop.errors and pop.errors.messages[:base] %>
       <span class='help-block'><%= pop.errors.messages[:base][0] %></span>
     <% end %>
@@ -22,9 +22,10 @@
                 <%= fields_for pop_field_name, pop do |pop_form| %>
                   <%= pop_form.hidden_field :po_cost %>
                   <%= pop_form.hidden_field :product_id %>
+                  <%= pop_form.hidden_field :id unless pop_form.object.new_record? %>
                 <% end %>
 
-                <% sizes = product.sizes.select(:id, :size) %>
+                <% sizes = @sizes[product.id] %>
                 <% index = 0 %>
 
                 <script>
@@ -35,9 +36,6 @@
                         <tr style="text-align: center">
                             <th colspan="2" rowspan="2"></th>
                             <td colspan="<%= sizes.length %>" align="center">
-                                <!--
-                                <strong>Sizes</strong>
-                                <br />-->
                                 <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
                               </td>
                           </tr>
@@ -52,12 +50,9 @@
                                 <% end %>
                             </tr>
 
-                            <% product_colors = product.colors %>
+                            <% product_colors = @colors[product.id] %>
                             <% product_colors.each_with_index do |color, idx| %>                          
                               <tr style="text-align: center">
-          <%# if idx.eql? 0 %>
-                                    <!--<td rowspan="<%#= product_colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>-->
-          <%# end %>
                                   <td colspan="2" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>                            
                                   <% sizes.each do |size| %>
                                     <% if idx == 0 %>
@@ -66,13 +61,13 @@
                                   </script>
                                 <% end %>
                                 <% pod = pop.purchase_order_details.select { |pod| pod.size_id.eql?(size.id) and pod.color_id.eql?(color.id) }.first %>
-            <%# if pod.present? %>                
                                 <% pod_field_name = create_product_detail_array_variable_name(pod, index, pop_field_name) %>
                                 <td align="center" style="vertical-align: middle">
                                     <%= fields_for pod_field_name, pod do |pod_form| %>
                                       <%= pod_form.hidden_field :size_id %>
                                       <%= pod_form.hidden_field :color_id %>
                                       <%= pod_form.hidden_field :product_id, value: product.id %>
+                                      <%= pod_form.hidden_field :id unless pod_form.object.new_record? %>
                                       <div class="<%= control_group_error(pod, :quantity) %>">
                                           <%= pod_form.text_field :quantity, placeholder: "qty", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
                                             <%= error_help_text(pod, :quantity) %>
@@ -81,9 +76,6 @@
 
                                   </td>
                                   <% index += 1 %>
-              <%# else %>
-                                  <!--<td></td>-->
-              <%# end %>
                                 <% end %>
                                 </tr>
                               <% end %>              
@@ -102,6 +94,12 @@
                 });
               </script>
           </table>
+        <% else %>
+          <% pop_field_name = create_product_array_variable_name(pop, product.id) %>
+          <%= fields_for pop_field_name, pop do |pop_form| %>
+            <%= pop_form.hidden_field :_destroy, value: true %>
+            <%= pop_form.hidden_field :id %>
+          <% end %>
         <% end %>
       <% end %>
 

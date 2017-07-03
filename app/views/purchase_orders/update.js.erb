@@ -1,0 +1,5 @@
+<% if @valid %>
+  <%= smart_listing_item :purchase_orders, :update, @purchase_order, "purchase_orders/purchase_order" %>
+<% else %>
+  <%= smart_listing_item :purchase_orders, :edit, @purchase_order, "purchase_orders/form" %>
+<% end %>

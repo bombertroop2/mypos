@@ -81,7 +81,7 @@ Rails.application.routes.draw do
   
   get 'welcome/index'
 
-  resources :purchase_orders, except: [:edit, :update] do
+  resources :purchase_orders do
     collection do
       get 'get_product_details'
     end
