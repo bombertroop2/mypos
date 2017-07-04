@@ -1,5 +1,5 @@
 <% if !@do_number_not_unique %>
-  <% unless @purchase_order.valid? %>
+  <% unless @valid %>
     $("#form_container").html("<%= j(render(partial: "receiving_purchase_order_form")) %>");
   <% else %>
     <%= smart_listing_item :receiving_purchase_orders, :create, @received_order, "receiving/received_order" %>

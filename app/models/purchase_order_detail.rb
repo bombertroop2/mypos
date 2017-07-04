@@ -12,34 +12,34 @@ class PurchaseOrderDetail < ApplicationRecord
 
   validates :quantity, presence: true#, on: :create
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |pod| pod.quantity.present? && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity }
-    validate :size_available, :color_available#, on: :create
+    validate :size_available, :color_available, if: proc { |pod| !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity}
 
-    #      before_validation :delete_record, if: proc {|pod| !pod.is_user_changing_po_date && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity && !pod.is_user_changing_cost}
-    before_destroy :delete_tracks
+      #      before_validation :delete_record, if: proc {|pod| !pod.is_user_changing_po_date && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity && !pod.is_user_changing_cost}
+      before_destroy :delete_tracks
 
-    private
+      private
 
-    def delete_tracks
-      audits.destroy_all
-    end
+      def delete_tracks
+        audits.destroy_all
+      end
 
-    def size_available
-      errors.add(:size_id, "does not exist!") if Size.joins(product_details: :product).where(id: size_id).where("products.id = #{product_id}").select("1 AS one").blank?
-    end
+      def size_available
+        errors.add(:size_id, "does not exist!") if Size.joins(product_details: :product).where(id: size_id).where("products.id = #{product_id}").select("1 AS one").blank?
+      end
 
-    def color_available
-      errors.add(:color_id, "does not exist!") if Color.joins(product_colors: :product).where(id: color_id).where("products.id = #{product_id}").select("1 AS one").blank?
-    end
+      def color_available
+        errors.add(:color_id, "does not exist!") if Color.joins(product_colors: :product).where(id: color_id).where("products.id = #{product_id}").select("1 AS one").blank?
+      end
         
-    #        def prevent_system_creating_detail
-    #          throw :abort if quantity.blank?
-    #        end
+      #        def prevent_system_creating_detail
+      #          throw :abort if quantity.blank?
+      #        end
     
-    #        def delete_record
-    #          unless new_record?
-    #            destroy if quantity.blank?
-    #          end
-    #        end
+      #        def delete_record
+      #          unless new_record?
+      #            destroy if quantity.blank?
+      #          end
+      #        end
 
 
-  end
+    end

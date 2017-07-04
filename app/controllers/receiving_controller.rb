@@ -60,6 +60,7 @@ class ReceivingController < ApplicationController
       authorize! :manage, ReceivedPurchaseOrder
       begin
         @do_number_not_unique = false
+        @valid = false
         unless @purchase_order.update(purchase_order_params)
           @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
           received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
@@ -76,6 +77,7 @@ class ReceivingController < ApplicationController
           render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
           render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
         else        
+          @valid = true
           @received_order = ReceivedPurchaseOrder.
             joins(:purchase_order, :vendor).
             select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity, :status).
