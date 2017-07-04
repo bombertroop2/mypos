@@ -133,7 +133,7 @@ class PurchaseOrder < ApplicationRecord
                                 end
 
                                 def prevent_update_if_article_received
-                                  errors.add(:base, "Sorry, this PO is not updateable") if !receiving_po && !closing_po && !is_user_changing_cost && !status.eql?("Open")
+                                  errors.add(:base, "Sorry, PO #{number} cannot be changed") if !receiving_po && !closing_po && !is_user_changing_cost && !status.eql?("Open")
                                 end
 
 
