@@ -1,6 +1,9 @@
 class StockMutationProduct < ApplicationRecord
   attr_accessor :origin_warehouse_id
   
+  audited associated_with: :stock_mutation, on: [:create, :update]
+  has_associated_audits
+
   belongs_to :stock_mutation
   belongs_to :product
   has_many :stock_mutation_product_items, dependent: :destroy
@@ -10,9 +13,16 @@ class StockMutationProduct < ApplicationRecord
   accepts_nested_attributes_for :stock_mutation_product_items, reject_if: proc { |attributes| attributes[:quantity].blank? }
 
   validates :product_id, presence: true
-  validate :should_has_details, :product_available
+  validate :should_has_details
+  validate :product_available, on: :create
+
+  before_destroy :delete_tracks
 
   private
+  
+  def delete_tracks
+    audits.destroy_all
+  end
   
   def should_has_details
     errors.add(:base, "Please insert at least one piece per product!") if stock_mutation_product_items.blank?

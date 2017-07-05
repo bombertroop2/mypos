@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class StockMutationsController < ApplicationController
   load_and_authorize_resource
   helper SmartListing::Helper
-  before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation]
+  before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit, :update, :destroy]
 
   # GET /stock_mutations
   # GET /stock_mutations.json
@@ -192,6 +192,59 @@ class StockMutationsController < ApplicationController
       end        
     end
   end
+  
+  def edit
+    @destintation_warehouses = Warehouse.not_central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
+    @stock_mutation.delivery_date = @stock_mutation.delivery_date.strftime("%d/%m/%Y")
+    @colors = []
+    @sizes = []
+    @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+      stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
+      @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+      @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+      @colors[stock_mutation_product.product_id].each do |color|
+        @sizes[stock_mutation_product.product_id].each do |size|
+          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
+        end
+      end        
+    end
+  end
+  
+  def update
+    add_additional_params_for_edit
+    @stock_mutation.quantity = @total_stock_mutation_quantity
+    unless @saved = @stock_mutation.update(stock_mutation_params)
+      if @stock_mutation.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @stock_mutation.errors[:"stock_mutation_products.base"].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
+      elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
+      else        
+        @destintation_warehouses = Warehouse.not_central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
+        @colors = []
+        @sizes = []
+        @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+          stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
+          @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+          @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+          @colors[stock_mutation_product.product_id].each do |color|
+            @sizes[stock_mutation_product.product_id].each do |size|
+              stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
+            end
+          end        
+        end
+      end
+    end
+  end
+  
+  def destroy
+    unless @stock_mutation.destroy
+      @deleted = false
+    else
+      @deleted = true
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -207,7 +260,7 @@ class StockMutationsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def stock_mutation_params
     params.require(:stock_mutation).permit(:delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id,
-      stock_mutation_products_attributes: [:quantity, :origin_warehouse_id, :product_id, stock_mutation_product_items_attributes: [:color_id, :size_id, :quantity, :origin_warehouse_id, :product_id]])
+      stock_mutation_products_attributes: [:id, :quantity, :origin_warehouse_id, :product_id, stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity, :origin_warehouse_id, :product_id]])
   end
   
   def add_additional_params
@@ -223,4 +276,17 @@ class StockMutationsController < ApplicationController
       params[:stock_mutation][:stock_mutation_products_attributes][key][:quantity] = total_stock_mutation_product_quantity
     end if params[:stock_mutation][:stock_mutation_products_attributes].present?
   end
+  
+  def add_additional_params_for_edit
+    @total_stock_mutation_quantity = 0
+    params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
+      total_stock_mutation_product_quantity = 0
+      params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].each do |smpi_key, smpi_value|
+        @total_stock_mutation_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
+        total_stock_mutation_product_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
+      end if params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].present?
+      params[:stock_mutation][:stock_mutation_products_attributes][key][:quantity] = total_stock_mutation_product_quantity
+    end if params[:stock_mutation][:stock_mutation_products_attributes].present?
+  end
+
 end

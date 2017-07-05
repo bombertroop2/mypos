@@ -1,5 +1,8 @@
 class ShipmentProductItem < ApplicationRecord
   attr_accessor :order_booking_id, :order_booking_product_id
+
+  audited associated_with: :shipment_product, on: [:create, :update]
+
   belongs_to :order_booking_product_item
   belongs_to :shipment_product
   validates :quantity, presence: true
@@ -7,11 +10,16 @@ class ShipmentProductItem < ApplicationRecord
     validate :item_available
     validate :quantity_available, if: proc{|spi| spi.quantity.present? && spi.quantity.is_a?(Numeric)}
   
+      before_destroy :delete_tracks
       after_create :update_available_quantity
       after_destroy :update_available_quantity
       
       private
         
+      def delete_tracks
+        audits.destroy_all
+      end
+  
       def item_available
         @order_booking_product_item = if new_record?
           OrderBookingProductItem.joins(order_booking_product: :order_booking).

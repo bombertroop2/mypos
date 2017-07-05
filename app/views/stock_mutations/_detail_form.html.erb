@@ -99,7 +99,7 @@
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <a class="btn btn-primary" id="save-btn">Save</a>
-                        <button class="btn btn-link cancel">Cancel</button>
+                        <a class="btn btn-link cancel" id="btn-cancel-new-po">Cancel</a>
                     </div>
                 </div>
               <% end %>
@@ -120,24 +120,10 @@
                         this.focus();
                     });
                     $("#save-btn").click(function () {
-                        bootbox.confirm({
-                            title: "Roll a stock?",
-                            message: "Be careful! Once you've created the document, you'll not be able to change or delete it",
-                            buttons: {
-                                confirm: {
-                                    label: '<i class="fa fa-check"></i> Confirm'
-                                },
-                                cancel: {
-                                    label: '<i class="fa fa-times"></i> Cancel'
-                                }
-                            },
-                            callback: function (result) {
-                                if (result) {
-                                    $("body").css('padding-right', '0px');
-                                    $("#new_stock_mutation").submit();
-                                }
-                            }
-                        });
+                        $("#new_stock_mutation").submit();
+                    });
+                    $("#btn-cancel-new-po").click(function () {
+                        $("#x_button").click();
                     });
                 });
               </script>

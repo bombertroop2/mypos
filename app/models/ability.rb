@@ -111,7 +111,7 @@ class Ability
             else
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
-              alias_action :new, :create, :get_products, :generate_form, to: :manage_store_to_store_mutation
+              alias_action :new, :create, :get_products, :generate_form, :edit, :update, :destroy, to: :manage_store_to_store_mutation
               can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize              
             end
           elsif ability

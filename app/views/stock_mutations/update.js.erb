@@ -1,0 +1,5 @@
+<% if @saved %>
+  <%= smart_listing_item :stock_mutations, :update, @stock_mutation, "stock_mutations/stock_mutation" %>
+<% else %>
+  <%= smart_listing_item :stock_mutations, :edit, @stock_mutation, "stock_mutations/edit_form" %>
+<% end %>

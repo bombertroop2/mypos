@@ -1,5 +1,8 @@
 class ShipmentProduct < ApplicationRecord
   attr_accessor :order_booking_id
+  audited associated_with: :shipment, on: [:create, :update]
+  has_associated_audits
+
   belongs_to :order_booking_product
   belongs_to :shipment
 
@@ -9,7 +12,13 @@ class ShipmentProduct < ApplicationRecord
   
   validate :product_available
   
+  before_destroy :delete_tracks
+
   private
+  
+  def delete_tracks
+    audits.destroy_all
+  end
   
   def product_available
     if new_record? && OrderBookingProduct.joins(:order_booking).

@@ -130,24 +130,7 @@
                   });
 
                   $("#save-btn").click(function () {
-                      bootbox.confirm({
-                          title: "Create a shipment?",
-                          message: "Once you've created the document, you'll not be able to change it",
-                          buttons: {
-                              confirm: {
-                                  label: '<i class="fa fa-check"></i> Confirm'
-                              },
-                              cancel: {
-                                  label: '<i class="fa fa-times"></i> Cancel'
-                              }
-                          },
-                          callback: function (result) {
-                              if (result) {
-                                  $("body").css('padding-right', '0px');
-                                  $("#new_shipment").submit();
-                              }
-                          }
-                      });
+                      $("#new_shipment").submit();
                   });
               });
 

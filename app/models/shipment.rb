@@ -1,5 +1,7 @@
 class Shipment < ApplicationRecord
-  audited on: :create
+  audited on: [:create, :update]
+  has_associated_audits
+
   attr_accessor :order_booking_number
   
   belongs_to :order_booking
