@@ -36,6 +36,10 @@ class OrderBooking < ApplicationRecord
         def self.printed
           where(status: "P")
         end
+        
+        def self.unshipped_ob(id)
+          where("status = 'P' OR id = #{id}")
+        end
 
         private
     
@@ -54,7 +58,7 @@ class OrderBooking < ApplicationRecord
         end
 
         def editable
-          errors.add(:base, "The record cannot be edited") unless status.eql?("O")
+          errors.add(:base, "The record cannot be edited") if !status.eql?("O") && !status.eql?("P")
         end
     
         def deletable

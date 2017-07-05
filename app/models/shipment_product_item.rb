@@ -13,11 +13,19 @@ class ShipmentProductItem < ApplicationRecord
       private
         
       def item_available
-        @order_booking_product_item = OrderBookingProductItem.joins(order_booking_product: :order_booking).
-          where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
-          where(:"order_bookings.status" => "P").
-          where(:"order_bookings.id" => order_booking_id).
-          select(:quantity).first
+        @order_booking_product_item = if new_record?
+          OrderBookingProductItem.joins(order_booking_product: :order_booking).
+            where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
+            where(:"order_bookings.status" => "P").
+            where(:"order_bookings.id" => order_booking_id).
+            select(:quantity).first
+        else
+          OrderBookingProductItem.joins(order_booking_product: :order_booking).
+            where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
+            where(:"order_bookings.status" => "F").
+            where(:"order_bookings.id" => order_booking_id).
+            select(:quantity).first
+        end
         errors.add(:base, "Not able to deliver selected items") if @order_booking_product_item.blank?
       end
       

@@ -12,9 +12,16 @@ class ShipmentProduct < ApplicationRecord
   private
   
   def product_available
-    errors.add(:base, "Some products do not exist!") if OrderBookingProduct.joins(:order_booking).
-      where(id: order_booking_product_id, order_booking_id: order_booking_id).
-      where(:"order_bookings.status" => "P").
-      select("1 AS one").blank?
+    if new_record? && OrderBookingProduct.joins(:order_booking).
+        where(id: order_booking_product_id, order_booking_id: order_booking_id).
+        where(:"order_bookings.status" => "P").
+        select("1 AS one").blank?
+      errors.add(:base, "Some products do not exist!")
+    elsif !new_record? && OrderBookingProduct.joins(:order_booking).
+        where(id: order_booking_product_id, order_booking_id: order_booking_id).
+        where(:"order_bookings.status" => "F").
+        select("1 AS one").blank?
+      errors.add(:base, "Some products do not exist!")
+    end
   end
 end

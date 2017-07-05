@@ -1,0 +1,5 @@
+<% if @valid %>
+  <%= smart_listing_item :shipments, :update, @shipment, "shipments/shipment" %>
+<% else %>
+  <%= smart_listing_item :shipments, :edit, @shipment, "shipments/edit_form" %>
+<% end %>

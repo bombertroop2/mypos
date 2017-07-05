@@ -20,7 +20,7 @@ Rails.application.routes.draw do
     end
   end
   resources :available_menus, only: [:new, :create]
-  resources :shipments, except: [:edit, :update] do    
+  resources :shipments do    
     collection do
       get "generate_ob_detail"
     end

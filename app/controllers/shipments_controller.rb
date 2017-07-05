@@ -3,7 +3,6 @@ class ShipmentsController < ApplicationController
   load_and_authorize_resource except: :create
   helper SmartListing::Helper
   before_action :set_shipment, only: [:show, :edit, :update, :destroy]
-  before_action :add_additional_params, only: :create  
 
   # GET /shipments
   # GET /shipments.json
@@ -45,6 +44,7 @@ class ShipmentsController < ApplicationController
   # POST /shipments
   # POST /shipments.json
   def create
+    add_additional_params
     @invalid = false
     ActiveRecord::Base.transaction do
       @shipments = []
@@ -85,6 +85,22 @@ class ShipmentsController < ApplicationController
         end
       end
       raise ActiveRecord::Rollback if @invalid
+    end
+  end
+  
+  def edit
+    @shipment.delivery_date = @shipment.delivery_date.strftime("%d/%m/%Y")
+  end
+  
+  def update
+    add_additional_params_for_edit
+    @valid = @shipment.update(edit_shipment_params)
+    if @shipment.errors[:base].present?
+      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
+    elsif @shipment.errors[:"shipment_products.base"].present?
+      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.base"].join("<br/>")}\",size: 'small'});"
+    elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present?
+      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>")}\",size: 'small'});"
     end
   end
 
@@ -139,6 +155,29 @@ class ShipmentsController < ApplicationController
       shipment_products_attributes: [:order_booking_product_id, :order_booking_id, :quantity,
         shipment_product_items_attributes: [:order_booking_product_item_id, :quantity,
           :order_booking_product_id, :order_booking_id]])
+  end
+  
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def edit_shipment_params
+    params[:shipment].permit(:order_booking_number, :quantity, :delivery_date, :order_booking_id, :courier_id,
+      shipment_products_attributes: [:id, :order_booking_product_id, :order_booking_id, :quantity,
+        shipment_product_items_attributes: [:id, :order_booking_product_item_id, :quantity,
+          :order_booking_product_id, :order_booking_id]])
+  end
+  
+  def add_additional_params_for_edit
+    total_quantity_shipment = 0
+    params[:shipment][:shipment_products_attributes].each do |key, value|
+      total_quantity_shipment_product = 0
+      params[:shipment][:shipment_products_attributes][key].merge! order_booking_id: params[:shipment][:order_booking_id]
+      params[:shipment][:shipment_products_attributes][key][:shipment_product_items_attributes].each do |spi_key, value|
+        total_quantity_shipment += params[:shipment][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key][:quantity].to_i
+        total_quantity_shipment_product += params[:shipment][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key][:quantity].to_i
+        params[:shipment][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key].merge! order_booking_product_id: params[:shipment][:shipment_products_attributes][key][:order_booking_product_id], order_booking_id: params[:shipment][:order_booking_id]
+      end if params[:shipment][:shipment_products_attributes][key][:shipment_product_items_attributes].present?
+      params[:shipment][:shipment_products_attributes][key].merge! quantity: total_quantity_shipment_product
+    end if params[:shipment][:shipment_products_attributes].present?
+    params[:shipment].merge! quantity: total_quantity_shipment
   end
   
   def add_additional_params

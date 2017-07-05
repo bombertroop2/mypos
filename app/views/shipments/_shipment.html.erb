@@ -4,5 +4,6 @@
 <td id="total-quantity-<%= object.id %>"><%= object.quantity %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, shipment_path(object), data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_shipment_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
     <%= link_to_if(can?(:manage, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
 </td>
