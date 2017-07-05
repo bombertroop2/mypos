@@ -8,6 +8,11 @@ Rails.application.routes.draw do
       get "new_store_to_warehouse_mutation"
       post "create_store_to_warehouse_mutation"
     end
+    member do
+      get "edit_store_to_warehouse"
+      patch "update_store_to_warehouse"
+      delete "delete_store_to_warehouse"
+    end
   end
   resources :shipment_receipts, except: [:edit, :update, :destroy] do
     collection do

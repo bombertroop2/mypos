@@ -2,7 +2,8 @@ include SmartListing::Helper::ControllerExtensions
 class StockMutationsController < ApplicationController
   load_and_authorize_resource
   helper SmartListing::Helper
-  before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit, :update, :destroy]
+  before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit,
+    :update, :destroy, :edit_store_to_warehouse, :update_store_to_warehouse, :delete_store_to_warehouse]
 
   # GET /stock_mutations
   # GET /stock_mutations.json
@@ -24,11 +25,11 @@ class StockMutationsController < ApplicationController
     end
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity).
+        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
         where("warehouse_type <> 'central'")
     else
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity).
+        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
         where("warehouse_type <> 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -57,11 +58,11 @@ class StockMutationsController < ApplicationController
     end
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity).
+        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
         where("warehouse_type = 'central'")
     else
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity).
+        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
         where("warehouse_type = 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -209,6 +210,23 @@ class StockMutationsController < ApplicationController
       end        
     end
   end
+
+  def edit_store_to_warehouse
+    @destintation_warehouses = Warehouse.central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
+    @stock_mutation.delivery_date = @stock_mutation.delivery_date.strftime("%d/%m/%Y")
+    @colors = []
+    @sizes = []
+    @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+      stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
+      @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+      @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+      @colors[stock_mutation_product.product_id].each do |color|
+        @sizes[stock_mutation_product.product_id].each do |size|
+          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
+        end
+      end        
+    end
+  end
   
   def update
     add_additional_params_for_edit
@@ -238,7 +256,44 @@ class StockMutationsController < ApplicationController
     end
   end
   
+  def update_store_to_warehouse
+    add_additional_params_for_edit
+    @stock_mutation.quantity = @total_stock_mutation_quantity
+    @stock_mutation.mutation_type = "store to warehouse"
+    unless @saved = @stock_mutation.update(stock_mutation_params)
+      if @stock_mutation.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @stock_mutation.errors[:"stock_mutation_products.base"].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
+      elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
+      else        
+        @destintation_warehouses = Warehouse.central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
+        @colors = []
+        @sizes = []
+        @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+          stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
+          @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+          @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+          @colors[stock_mutation_product.product_id].each do |color|
+            @sizes[stock_mutation_product.product_id].each do |size|
+              stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
+            end
+          end        
+        end
+      end
+    end
+  end
+  
   def destroy
+    unless @stock_mutation.destroy
+      @deleted = false
+    else
+      @deleted = true
+    end
+  end
+
+  def delete_store_to_warehouse
     unless @stock_mutation.destroy
       @deleted = false
     else

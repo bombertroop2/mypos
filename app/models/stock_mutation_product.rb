@@ -10,7 +10,7 @@ class StockMutationProduct < ApplicationRecord
   has_many :sizes, -> { group("sizes.id").order(:size) }, through: :stock_mutation_product_items
   has_many :colors, -> { group("common_fields.id").order(:code) }, through: :stock_mutation_product_items
   
-  accepts_nested_attributes_for :stock_mutation_product_items, reject_if: proc { |attributes| attributes[:quantity].blank? }
+  accepts_nested_attributes_for :stock_mutation_product_items, reject_if: proc { |attributes| attributes[:quantity].blank? && attributes[:id].blank? }
 
   validates :product_id, presence: true
   validate :should_has_details

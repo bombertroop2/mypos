@@ -35,6 +35,6 @@ class StockMutationProductItem < ApplicationRecord
     end
   
     def quantity_valid
-      errors.add(:quantity, "cannot be greater than #{@stock.quantity}") if quantity > @stock.quantity
+      errors.add(:quantity, "cannot be greater than #{@stock.quantity}") if quantity.to_i > @stock.quantity
     end
   end
