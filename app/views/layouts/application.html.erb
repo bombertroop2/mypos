@@ -44,125 +44,143 @@
                                   <div class="menu_section">
                                       <!--<h3>General</h3>-->
                                       <ul class="nav side-menu">
-                                          <li><a><i class="fa fa-cubes"></i> Product Master <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, Brand %>
-                                                    <li><%= link_to "Brands", brands_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, GoodsType %>
-                                                    <li><%= link_to "Goods Types", goods_types_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Model %>
-                                                    <li><%= link_to "Models", models_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Color %>
-                                                    <li><%= link_to "Colors", colors_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, SizeGroup %>
-                                                    <li><%= link_to "Size Groups", size_groups_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Product %>
-                                                    <li><%= link_to "Products", products_path, method: :get %></li>
-                                                  <% end %>
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-tag"></i> Price Control <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, PriceCode %>
-                                                    <li><%= link_to "Price Codes", price_codes_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, CostList %>
-                                                    <li><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
-                                                  <% end %>
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-industry"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, SalesPromotionGirl %>
-                                                    <li><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Supervisor %>
-                                                    <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Warehouse %>
-                                                    <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Region %>
-                                                    <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
-                                                  <% end %>
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-exchange"></i> Purchase Order <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, Vendor %>
-                                                    <li><%= link_to "Vendors", vendors_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, PurchaseOrder %>
-                                                    <li><%= link_to "Purchase Order Entry", purchase_orders_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, ReceivedPurchaseOrder %>
-                                                    <li><%= link_to "Receiving", receiving_index_path, method: :get %></li>
-                                                  <% end %>                      
-                                                  <% if can? :read, PurchaseReturn %>
-                                                    <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
-                                                  <% end %>                          
-                                                  <% if can? :read, AccountPayable %>
-                                                    <li><%= link_to "AP Invoice", account_payables_path, method: :get %></li>
-                                                  <% end %>                          
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-dropbox"></i> Booking Control <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, OrderBooking %>
-                                                    <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
-                                                  <% end %>                          
-                                                  <% if can? :read, Shipment %>
-                                                    <li><%= link_to "Shipments", shipments_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, Courier %>
-                                                    <li><%= link_to "Couriers", couriers_path, method: :get %></li>
-                                                  <% end %>                          
-                                              </ul>
-                                          </li>                                          
-                                          <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, ShipmentReceipt %>
-                                                    <li><%= link_to "Warehouse to Store", shipment_receipts_path, method: :get %></li>
-                                                  <% end %>
-                                                  <li><a>Store to Store</a></li>
-                                                  <li><a>Store to Warehouse</a></li>
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read_store_to_store_mutations, StockMutation %>
-                                                    <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read_store_to_warehouse_mutations, StockMutation %>
-                                                    <li><%= link_to "Store to Warehouse", index_store_to_warehouse_mutation_stock_mutations_path, method: :get %></li>                                                    
-                                                  <% end %>                                                  
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, Stock %>
-                                                    <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
-                                                  <% end %>
-                                              </ul>
-                                          </li>
-                                          <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
-                                              <ul class="nav child_menu">
-                                                  <% if can? :read, Email %>
-                                                    <li><%= link_to "Emails", emails_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :read, User %>
-                                                    <li><%= link_to "Users", users_path, method: :get %></li>
-                                                  <% end %>
-                                                  <% if can? :manage, AvailableMenu %>
-                                                    <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
-                                                  <% end %>
-                                              </ul>
-                                          </li>
+                                          <% if product_menu_active? %>
+                                            <li><a><i class="fa fa-cubes"></i> Product Master <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Brand %>
+                                                      <li><%= link_to "Brands", brands_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, GoodsType %>
+                                                      <li><%= link_to "Goods Types", goods_types_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Model %>
+                                                      <li><%= link_to "Models", models_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Color %>
+                                                      <li><%= link_to "Colors", colors_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, SizeGroup %>
+                                                      <li><%= link_to "Size Groups", size_groups_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Product %>
+                                                      <li><%= link_to "Products", products_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if price_control_menu_active? %>
+                                            <li><a><i class="fa fa-tag"></i> Price Control <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, PriceCode %>
+                                                      <li><%= link_to "Price Codes", price_codes_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, CostList %>
+                                                      <li><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if warehouse_control_menu_active? %>
+                                            <li><a><i class="fa fa-industry"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, SalesPromotionGirl %>
+                                                      <li><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Supervisor %>
+                                                      <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Warehouse %>
+                                                      <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Region %>
+                                                      <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if purchase_order_menu_active? %>
+                                            <li><a><i class="fa fa-exchange"></i> Purchase Order <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Vendor %>
+                                                      <li><%= link_to "Vendors", vendors_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, PurchaseOrder %>
+                                                      <li><%= link_to "Purchase Order Entry", purchase_orders_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, ReceivedPurchaseOrder %>
+                                                      <li><%= link_to "Receiving", receiving_index_path, method: :get %></li>
+                                                    <% end %>                      
+                                                    <% if can? :read, PurchaseReturn %>
+                                                      <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
+                                                    <% end %>                          
+                                                    <% if can? :read, AccountPayable %>
+                                                      <li><%= link_to "AP Invoice", account_payables_path, method: :get %></li>
+                                                    <% end %>                          
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if booking_control_menu_active? %>
+                                            <li><a><i class="fa fa-dropbox"></i> Booking Control <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, OrderBooking %>
+                                                      <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
+                                                    <% end %>                          
+                                                    <% if can? :read, Shipment %>
+                                                      <li><%= link_to "Shipments", shipments_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Courier %>
+                                                      <li><%= link_to "Couriers", couriers_path, method: :get %></li>
+                                                    <% end %>                          
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if inventory_receipt_menu_active? %>
+                                            <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, ShipmentReceipt %>
+                                                      <li><%= link_to "Warehouse to Store", shipment_receipts_path, method: :get %></li>
+                                                    <% end %>
+                                                    <li><a>Store to Store</a></li>
+                                                    <li><a>Store to Warehouse</a></li>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if stock_mutation_menu_active? %>
+                                            <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read_store_to_store_mutations, StockMutation %>
+                                                      <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read_store_to_warehouse_mutations, StockMutation %>
+                                                      <li><%= link_to "Store to Warehouse", index_store_to_warehouse_mutation_stock_mutations_path, method: :get %></li>                                                    
+                                                    <% end %>                                                  
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if report_menu_active? %>
+                                            <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Stock %>
+                                                      <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if setting_menu_active? %>
+                                            <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Email %>
+                                                      <li><%= link_to "Emails", emails_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, User %>
+                                                      <li><%= link_to "Users", users_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, AvailableMenu %>
+                                                      <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
                                       </ul>
                                   </div>
                                   <!--<div class="menu_section">
