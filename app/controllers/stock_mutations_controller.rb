@@ -3,7 +3,8 @@ class StockMutationsController < ApplicationController
   load_and_authorize_resource
   helper SmartListing::Helper
   before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit,
-    :update, :destroy, :edit_store_to_warehouse, :update_store_to_warehouse, :delete_store_to_warehouse]
+    :update, :destroy, :edit_store_to_warehouse, :update_store_to_warehouse,
+    :delete_store_to_warehouse, :approve_shipment]
 
   # GET /stock_mutations
   # GET /stock_mutations.json
@@ -91,7 +92,7 @@ class StockMutationsController < ApplicationController
   # POST /stock_mutations
   # POST /stock_mutations.json
   def create
-    add_additional_params
+    add_additional_params("store to store")
     @stock_mutation = StockMutation.new(stock_mutation_params)
     @stock_mutation.quantity = @total_stock_mutation_quantity
     begin
@@ -134,7 +135,7 @@ class StockMutationsController < ApplicationController
   # POST /stock_mutations
   # POST /stock_mutations.json
   def create_store_to_warehouse_mutation
-    add_additional_params
+    add_additional_params("store to warehouse")
     @stock_mutation = StockMutation.new(stock_mutation_params)
     @stock_mutation.quantity = @total_stock_mutation_quantity
     @stock_mutation.mutation_type = "store to warehouse"
@@ -229,7 +230,7 @@ class StockMutationsController < ApplicationController
   end
   
   def update
-    add_additional_params_for_edit
+    add_additional_params_for_edit("store to store")
     @stock_mutation.quantity = @total_stock_mutation_quantity
     unless @saved = @stock_mutation.update(stock_mutation_params)
       if @stock_mutation.errors[:base].present?
@@ -257,7 +258,7 @@ class StockMutationsController < ApplicationController
   end
   
   def update_store_to_warehouse
-    add_additional_params_for_edit
+    add_additional_params_for_edit("store to warehouse")
     @stock_mutation.quantity = @total_stock_mutation_quantity
     @stock_mutation.mutation_type = "store to warehouse"
     unless @saved = @stock_mutation.update(stock_mutation_params)
@@ -300,6 +301,10 @@ class StockMutationsController < ApplicationController
       @deleted = true
     end
   end
+  
+  def approve_shipment
+    
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -315,10 +320,12 @@ class StockMutationsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def stock_mutation_params
     params.require(:stock_mutation).permit(:delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id,
-      stock_mutation_products_attributes: [:id, :quantity, :origin_warehouse_id, :product_id, stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity, :origin_warehouse_id, :product_id]])
+      stock_mutation_products_attributes: [:id, :quantity, :origin_warehouse_id, :product_id,
+        stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
+          :origin_warehouse_id, :product_id, :mutation_type]])
   end
   
-  def add_additional_params
+  def add_additional_params(type)
     @total_stock_mutation_quantity = 0
     params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
       total_stock_mutation_product_quantity = 0
@@ -327,18 +334,20 @@ class StockMutationsController < ApplicationController
         @total_stock_mutation_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
         total_stock_mutation_product_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
         params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key].merge! origin_warehouse_id: params[:stock_mutation][:origin_warehouse_id], product_id: params[:stock_mutation][:stock_mutation_products_attributes][key][:product_id]
+        params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key].merge! mutation_type: type
       end if params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].present?
       params[:stock_mutation][:stock_mutation_products_attributes][key][:quantity] = total_stock_mutation_product_quantity
     end if params[:stock_mutation][:stock_mutation_products_attributes].present?
   end
   
-  def add_additional_params_for_edit
+  def add_additional_params_for_edit(type)
     @total_stock_mutation_quantity = 0
     params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
       total_stock_mutation_product_quantity = 0
       params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].each do |smpi_key, smpi_value|
         @total_stock_mutation_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
         total_stock_mutation_product_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
+        params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key].merge! mutation_type: type
       end if params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].present?
       params[:stock_mutation][:stock_mutation_products_attributes][key][:quantity] = total_stock_mutation_product_quantity
     end if params[:stock_mutation][:stock_mutation_products_attributes].present?
