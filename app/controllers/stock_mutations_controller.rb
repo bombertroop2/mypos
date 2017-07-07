@@ -4,7 +4,7 @@ class StockMutationsController < ApplicationController
   helper SmartListing::Helper
   before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit,
     :update, :destroy, :edit_store_to_warehouse, :update_store_to_warehouse,
-    :delete_store_to_warehouse, :approve_shipment]
+    :delete_store_to_warehouse, :approve]
 
   # GET /stock_mutations
   # GET /stock_mutations.json
@@ -19,6 +19,11 @@ class StockMutationsController < ApplicationController
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
       end_delivery_date = splitted_delivery_date_range[1].strip.to_date
     end
+    if params[:filter_approved_date].present?
+      splitted_approved_date_range = params[:filter_approved_date].split("-")
+      start_approved_date = splitted_approved_date_range[0].strip.to_date
+      end_approved_date = splitted_approved_date_range[1].strip.to_date
+    end
     if params[:filter_received_date].present?
       splitted_received_date_range = params[:filter_received_date].split("-")
       start_received_date = splitted_received_date_range[0].strip.to_date
@@ -26,17 +31,20 @@ class StockMutationsController < ApplicationController
     end
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
+        select(:id, :number, :delivery_date, :received_date, :quantity,
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type <> 'central'")
     else
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
+        select(:id, :number, :delivery_date, :received_date, :quantity,
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type <> 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(stock_mutations_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     stock_mutations_scope = stock_mutations_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
     stock_mutations_scope = stock_mutations_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
+    stock_mutations_scope = stock_mutations_scope.where(["DATE(approved_date) BETWEEN ? AND ?", start_approved_date, end_approved_date]) if params[:filter_approved_date].present?
     #    shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
     @stock_mutations = smart_listing_create(:stock_mutations, stock_mutations_scope, partial: 'stock_mutations/listing', default_sort: {number: "asc"})
   end
@@ -59,11 +67,13 @@ class StockMutationsController < ApplicationController
     end
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
+        select(:id, :number, :delivery_date, :received_date, :quantity,
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type = 'central'")
     else
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :received_date, :quantity, :destination_warehouse_id).
+        select(:id, :number, :delivery_date, :received_date, :quantity,
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type = 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -163,6 +173,8 @@ class StockMutationsController < ApplicationController
       end
     rescue ActiveRecord::RecordNotUnique => e
       render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+    rescue RuntimeError => e
+      render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
     end
   end
 
@@ -302,8 +314,15 @@ class StockMutationsController < ApplicationController
     end
   end
   
-  def approve_shipment
-    
+  def approve
+    if current_user.has_non_spg_role? || current_user.sales_promotion_girl.warehouse_id == @stock_mutation.origin_warehouse_id
+      begin      
+        @valid = @stock_mutation.update(approved_date: Date.current, approving_mutation: true)
+        @stock_mutation.approved_date = nil unless @valid
+      rescue RuntimeError => e
+        @runtime_error = e.message
+      end
+    end
   end
 
   private

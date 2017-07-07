@@ -360,13 +360,24 @@
                           $(".smart-listing-controls").submit();
                       });
       <% elsif controller_name.eql?("stock_mutations") %>
-                      $("#search-stock-mutation-btn").click(function () {
-                          $("#filter_delivery_date").val($("#filter-delivery-date").val());
-                          $("#filter_received_date").val($("#filter-received-date").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                          $(".smart-listing-controls").submit();
-                      });
+        <% if !action_name.eql?("index_store_to_warehouse_mutation") %>
+                        $("#search-stock-mutation-btn").click(function () {
+                            $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                            $("#filter_approved_date").val($("#filter-approved-date").val());
+                            $("#filter_received_date").val($("#filter-received-date").val());
+                            $("#filter_string").val($("#filter-string").val());
+                            //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                            $(".smart-listing-controls").submit();
+                        });
+        <% elsif action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
+                        $("#search-stock-mutation-btn").click(function () {
+                            $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                            $("#filter_received_date").val($("#filter-received-date").val());
+                            $("#filter_string").val($("#filter-string").val());
+                            //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                            $(".smart-listing-controls").submit();
+                        });
+        <% end %>
         <% if !action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_store_mutation, StockMutation) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");

@@ -1,0 +1,8 @@
+<%= smart_listing_item :stock_mutations, :update, @stock_mutation, "stock_mutations/stock_mutation" %>
+<% if !@valid %>
+  <% if @runtime_error.present? %>
+    bootbox.alert({message: "<%= @runtime_error %>",size: 'small'});
+  <% else %>
+    bootbox.alert({message: "<%= @stock_mutation.errors[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+<% end %>

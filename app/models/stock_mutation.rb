@@ -1,5 +1,5 @@
 class StockMutation < ApplicationRecord
-  attr_accessor :mutation_type
+  attr_accessor :mutation_type, :approving_mutation
   
   audited on: [:create, :update]
   has_associated_audits
@@ -14,141 +14,171 @@ class StockMutation < ApplicationRecord
   validates :delivery_date, :courier_id, :origin_warehouse_id, :destination_warehouse_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present?}
     validate :courier_available, :origin_warehouse_available, :destination_warehouse_available
-    validate :editable, on: :update
+    validate :editable, on: :update, unless: proc{|sm| sm.approving_mutation}
+      validate :approvable, if: proc{|sm| sm.approving_mutation}
 
-    before_create :generate_number
-    before_destroy :prevent_delete_if_article_received, :delete_tracks
-    before_update :apologize_to_previous_destination_store, if: proc{|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
-      after_create :notify_origin_store, :notify_destination_store, unless: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
-        after_create :notify_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
-          after_update :notify_new_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
-            after_update :notify_new_destination_store, if: proc {|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
+        before_create :generate_number
+        before_destroy :prevent_delete_if_mutation_approved, :delete_tracks
+        before_update :apologize_to_previous_destination_store, if: proc{|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
+          after_create :notify_origin_store, :notify_destination_store, unless: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
+            after_create :notify_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
+              after_update :notify_new_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
+                after_update :notify_new_destination_store, if: proc {|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
+                  after_update :update_stock, if: proc {|sm| sm.approving_mutation}
         
-              private
-            
-              def prevent_delete_if_article_received
-                if received_date.present?
-                  errors.add(:base, "Sorry, stock mutation #{number} cannot be deleted")                                  
-                  throw :abort
-                end
-              end
-            
-              def editable
-                errors.add(:base, "The record cannot be edited") if received_date.present?
-              end
-          
-              def apologize_to_previous_destination_store
-                notification = Notification.new(event: "New Notification", body: "Sorry, stock mutation #{number} has been cancelled", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
-                destination_warehouse = Warehouse.where(id: destination_warehouse_id_was).select(:id).first
-                destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
-                  notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
-                end
-                notification.save
-              end
-  
-              def notify_origin_store
-                notification = Notification.new(event: "New Notification", body: "Please send #{destination_warehouse.name} a stock mutation #{number}", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
-                origin_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
-                  notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
-                end
-                notification.save
-              end
-
-              def notify_destination_store
-                notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
-                destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
-                  notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
-                end
-                notification.save
-              end
-
-              def notify_new_destination_store
-                notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
-                destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
-                  notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
-                end
-                notification.save
-              end
-
-              def notify_warehouse
-                notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
-                User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager'").select(:id).each do |user|
-                  notification.recipients.build user_id: user.id, notified: false, read: false
-                end
-                notification.save
-              end
-              
-              def notify_new_warehouse
-                notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
-                User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager'").select(:id).each do |user|
-                  notification.recipients.build user_id: user.id, notified: false, read: false
-                end
-                notification.save
-              end
-    
-              def delete_tracks
-                audits.destroy_all
-              end
-    
-              def courier_available
-                errors.add(:courier_id, "does not exist!") if courier_id.present? && Courier.where(id: courier_id).select("1 AS one").blank?
-              end
-
-              def origin_warehouse_available
-                errors.add(:origin_warehouse_id, "does not exist!") if (origin_warehouse_id.present? && Warehouse.not_central.where(id: origin_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
-              end
-
-              def destination_warehouse_available
-                if (!mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && Warehouse.not_central.where(id: destination_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
-                  errors.add(:destination_warehouse_id, "does not exist!")
-                elsif (mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && Warehouse.central.where(id: destination_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
-                  errors.add(:destination_warehouse_id, "does not exist!")
-                end
-              end
-    
-              def generate_number
-                number_id = if mutation_type.eql?("store to warehouse")
-                  "RW"
-                else
-                  "RGO"
-                end
-          
-                warehouse_code = Warehouse.select(:code).where(id: origin_warehouse_id).first.code
-                today = Date.current
-                current_month = today.month.to_s.rjust(2, '0')
-                current_year = today.strftime("%y").rjust(2, '0')
-                existed_numbers = StockMutation.where("number LIKE '#{warehouse_code}#{number_id}#{current_month}#{current_year}%'").select(:number).order(:number)
-                if existed_numbers.blank?
-                  new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
-                else
-                  if existed_numbers.length == 1
-                    seq_number = existed_numbers[0].number.split("#{warehouse_code}#{number_id}#{current_month}#{current_year}").last
-                    if seq_number.to_i > 1
-                      new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
-                    else
-                      new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}#{seq_number.succ}"
-                    end
-                  else
-                    last_seq_number = ""
-                    existed_numbers.each_with_index do |existed_number, index|
-                      seq_number = existed_number.number.split("#{warehouse_code}#{number_id}#{current_month}#{current_year}").last
-                      if seq_number.to_i > 1 && index == 0
-                        new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
-                        break                              
-                      elsif last_seq_number.eql?("")
-                        last_seq_number = seq_number
-                      elsif (seq_number.to_i - last_seq_number.to_i) > 1
-                        new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}#{last_seq_number.succ}"
-                        break
-                      elsif index == existed_numbers.length - 1
-                        new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}#{seq_number.succ}"
-                      else
-                        last_seq_number = seq_number
+                    private
+                  
+                    def update_stock
+                      raise_error = false
+                      stock_mutation_products.select(:id, :product_id).each do |stock_mutation_product|
+                        stock_mutation_product.stock_mutation_product_items.select(:quantity, :size_id, :color_id).each do |stock_mutation_product_item|
+                          stock = StockDetail.joins(stock_product: :stock).
+                            where(["warehouse_id = ? AND size_id = ? AND color_id = ? AND stock_products.product_id = ?", origin_warehouse_id, stock_mutation_product_item.size_id, stock_mutation_product_item.color_id, stock_mutation_product.product_id]).
+                            select(:id, :quantity).first
+                          stock.with_lock do
+                            if stock_mutation_product_item.quantity > stock.quantity
+                              raise_error = true
+                            else
+                              stock.quantity -= stock_mutation_product_item.quantity
+                              stock.save
+                            end
+                          end
+                          raise "Return quantity must be less than or equal to quantity on hand." if raise_error
+                        end
                       end
                     end
-                  end                        
-                end
+              
+                    def approvable
+                      if approved_date_was.present?
+                        errors.add(:base, "Sorry, stock mutation #{number} is already approved")
+                      elsif destination_warehouse.warehouse_type.eql?("central")
+                        errors.add(:base, "Sorry, stock mutation #{number} is not approvable")
+                      end
+                    end
+            
+                    def prevent_delete_if_mutation_approved
+                      if approved_date.present?
+                        errors.add(:base, "Sorry, stock mutation #{number} cannot be deleted")                                  
+                        throw :abort
+                      end
+                    end
+            
+                    def editable
+                      errors.add(:base, "The record cannot be edited") if approved_date.present?
+                    end
+          
+                    def apologize_to_previous_destination_store
+                      notification = Notification.new(event: "New Notification", body: "Sorry, stock mutation #{number} has been cancelled", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
+                      destination_warehouse = Warehouse.where(id: destination_warehouse_id_was).select(:id).first
+                      destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+                        notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
+                      end
+                      notification.save
+                    end
+  
+                    def notify_origin_store
+                      notification = Notification.new(event: "New Notification", body: "Please send #{destination_warehouse.name} a stock mutation #{number}", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
+                      origin_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+                        notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
+                      end
+                      notification.save
+                    end
 
-                self.number = new_number
-              end
-            end
+                    def notify_destination_store
+                      notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
+                      destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+                        notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
+                      end
+                      notification.save
+                    end
+
+                    def notify_new_destination_store
+                      notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
+                      destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+                        notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
+                      end
+                      notification.save
+                    end
+
+                    def notify_warehouse
+                      notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
+                      User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager'").select(:id).each do |user|
+                        notification.recipients.build user_id: user.id, notified: false, read: false
+                      end
+                      notification.save
+                    end
+              
+                    def notify_new_warehouse
+                      notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
+                      User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager'").select(:id).each do |user|
+                        notification.recipients.build user_id: user.id, notified: false, read: false
+                      end
+                      notification.save
+                    end
+    
+                    def delete_tracks
+                      audits.destroy_all
+                    end
+    
+                    def courier_available
+                      errors.add(:courier_id, "does not exist!") if courier_id.present? && Courier.where(id: courier_id).select("1 AS one").blank?
+                    end
+
+                    def origin_warehouse_available
+                      errors.add(:origin_warehouse_id, "does not exist!") if (origin_warehouse_id.present? && Warehouse.not_central.where(id: origin_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
+                    end
+
+                    def destination_warehouse_available
+                      if (!mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && Warehouse.not_central.where(id: destination_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
+                        errors.add(:destination_warehouse_id, "does not exist!")
+                      elsif (mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && Warehouse.central.where(id: destination_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
+                        errors.add(:destination_warehouse_id, "does not exist!")
+                      end
+                    end
+    
+                    def generate_number
+                      number_id = if mutation_type.eql?("store to warehouse")
+                        "RW"
+                      else
+                        "RGO"
+                      end
+          
+                      warehouse_code = Warehouse.select(:code).where(id: origin_warehouse_id).first.code
+                      today = Date.current
+                      current_month = today.month.to_s.rjust(2, '0')
+                      current_year = today.strftime("%y").rjust(2, '0')
+                      existed_numbers = StockMutation.where("number LIKE '#{warehouse_code}#{number_id}#{current_month}#{current_year}%'").select(:number).order(:number)
+                      if existed_numbers.blank?
+                        new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
+                      else
+                        if existed_numbers.length == 1
+                          seq_number = existed_numbers[0].number.split("#{warehouse_code}#{number_id}#{current_month}#{current_year}").last
+                          if seq_number.to_i > 1
+                            new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
+                          else
+                            new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}#{seq_number.succ}"
+                          end
+                        else
+                          last_seq_number = ""
+                          existed_numbers.each_with_index do |existed_number, index|
+                            seq_number = existed_number.number.split("#{warehouse_code}#{number_id}#{current_month}#{current_year}").last
+                            if seq_number.to_i > 1 && index == 0
+                              new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
+                              break                              
+                            elsif last_seq_number.eql?("")
+                              last_seq_number = seq_number
+                            elsif (seq_number.to_i - last_seq_number.to_i) > 1
+                              new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}#{last_seq_number.succ}"
+                              break
+                            elsif index == existed_numbers.length - 1
+                              new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}#{seq_number.succ}"
+                            else
+                              last_seq_number = seq_number
+                            end
+                          end
+                        end                        
+                      end
+
+                      self.number = new_number
+                    end
+                  end

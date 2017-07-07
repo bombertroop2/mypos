@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :stock_mutation_receipts
   resources :stock_mutations do
     collection do
       get "get_products"
@@ -9,6 +10,7 @@ Rails.application.routes.draw do
       post "create_store_to_warehouse_mutation"
     end
     member do
+      get "approve"
       get "edit_store_to_warehouse"
       patch "update_store_to_warehouse"
       delete "delete_store_to_warehouse"

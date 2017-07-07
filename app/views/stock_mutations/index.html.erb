@@ -11,7 +11,10 @@
         <input type="text" class="form-control" readonly="true" id="filter-delivery-date" placeholder="Delivery date">
     </div>
     <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-received-date" placeholder="Received date">
+        <input type="text" class="form-control" readonly="true" id="filter-approved-date" placeholder="Approved at">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-received-date" placeholder="Received at">
     </div>
     <div class="form-group">
         <input type="text" id="filter-string" class="form-control" placeholder="Number/quantity">
@@ -23,9 +26,10 @@
 <div class="hidden">
     <%= smart_listing_controls_for(:stock_mutations, {class: "form-inline text-right"}) do %>
         <%= text_field_tag :filter_delivery_date, '', class: "search form-control", autocomplete: :off %>
-          <%= text_field_tag :filter_received_date, '', class: "search form-control", autocomplete: :off %>
-            <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-              <%#= text_field_tag :filter_destination_warehouse, '', class: "search form-control", autocomplete: :off %>
+          <%= text_field_tag :filter_approved_date, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_received_date, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+            <%#= text_field_tag :filter_destination_warehouse, '', class: "search form-control", autocomplete: :off %>
               <% end %>
           </div>
           <%= smart_listing_render(:stock_mutations) %>
