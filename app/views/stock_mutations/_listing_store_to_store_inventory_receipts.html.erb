@@ -1,0 +1,29 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-store-to-store-receipt-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Delivery Date", "delivery_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Approved At", "approved_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Received At", "received_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Quantity", "quantity" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |stock_mutation| %>
+          <tr class="editable" data-id="<%= stock_mutation.id %>">
+              <%= smart_listing.render object: stock_mutation, partial: "stock_mutations/stock_mutation_store_receipt", locals: {object: stock_mutation} %>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-store-to-store-receipt-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-store-to-store-receipt-thead").show();
+      }
+  }, 0);
+</script>

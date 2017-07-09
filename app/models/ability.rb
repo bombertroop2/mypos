@@ -59,15 +59,16 @@ class Ability
             if ability.eql?(:read)
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
-              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize
+              alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
             else
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
               alias_action :new_store_to_warehouse_mutation,
                 :create_store_to_warehouse_mutation, :generate_form, :edit_store_to_warehouse,
                 :update_store_to_warehouse, :delete_store_to_warehouse, to: :manage_store_to_warehouse_mutation
-              can :approve, class_name.gsub(/\s+/, "").constantize
-              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :manage_store_to_warehouse_mutation], class_name.gsub(/\s+/, "").constantize
+              alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :manage_store_to_warehouse_mutation, :approve, :receive, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
             end
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize
@@ -117,12 +118,14 @@ class Ability
             if ability.eql?(:read)
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
-              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize
+              alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
             else
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
               alias_action :new, :create, :get_products, :generate_form, :edit, :update, :destroy, to: :manage_store_to_store_mutation
-              can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations], class_name.gsub(/\s+/, "").constantize              
+              alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
+              can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
             end
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize

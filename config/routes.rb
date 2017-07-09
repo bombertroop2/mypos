@@ -7,11 +7,14 @@ Rails.application.routes.draw do
       get "index_store_to_warehouse_mutation"
       get "show_store_to_warehouse_mutation"
       get "new_store_to_warehouse_mutation"
+      get "store_to_store_inventory_receipts"
       post "create_store_to_warehouse_mutation"
     end
     member do
       get "approve"
       get "edit_store_to_warehouse"
+      get "show_store_to_store_receipt"
+      get "receive"
       patch "update_store_to_warehouse"
       delete "delete_store_to_warehouse"
     end

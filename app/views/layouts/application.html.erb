@@ -149,9 +149,9 @@
                                                     <% if can? :read_action, Shipment %>
                                                       <li><%= link_to "Warehouse to Store", inventory_receipts_shipments_path, method: :get %></li>
                                                     <% end %>
-        <%# if can? :read, StockMutationReceipt %>
-                                                    <li><%#= link_to "Store to Store", stock_mutation_receipts_path, method: :get %></li>
-        <%# end %>
+                                                    <% if can? :read_store_to_store_inventory_receipts, StockMutation %>
+                                                      <li><%= link_to "Store to Store", store_to_store_inventory_receipts_stock_mutations_path, method: :get %></li>
+                                                    <% end %>
                                                     <li><a>Store to Warehouse</a></li>
                                                 </ul>
                                             </li>
