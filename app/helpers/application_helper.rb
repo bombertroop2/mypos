@@ -49,6 +49,7 @@ module ApplicationHelper
   def inventory_receipt_menu_active?
     return true if can? :read_action, Shipment
     return true if can? :read_store_to_store_inventory_receipts, StockMutation
+    return true if can? :read_store_to_warehouse_inventory_receipts, StockMutation
   end
   
   def stock_mutation_menu_active?

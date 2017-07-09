@@ -5,9 +5,17 @@
             <% if !params[:controller].eql?("welcome") && !params[:controller].eql?("devise/sessions") %>
               <% if params[:controller].eql?("stocks") %>
                 <% opened_menu_name = "Stock Balance" %>
-              <% elsif params[:controller].eql?("stock_mutation_receipts") %>
-                <% opened_menu_name = "Inventory Receipts (store to store)" %>
-              <% elsif params[:controller].eql?("shipment_receipts") %>
+              <% elsif params[:controller].eql?("stock_mutations") %>
+                <% if action_name.eql?("index") %>
+                  <% opened_menu_name = "Stock Mutations (store to store)" %>
+                <% elsif action_name.eql?("store_to_store_inventory_receipts") %>
+                  <% opened_menu_name = "Inventory Receipts (store to store)" %>
+                <% elsif action_name.eql?("store_to_warehouse_inventory_receipts") %>
+                  <% opened_menu_name = "Inventory Receipts (store to warehouse)" %>
+                <% else %>
+                  <% opened_menu_name = "Stock Mutations (warehouse to store)" %>
+                <% end %>
+              <% elsif params[:controller].eql?("shipments") && action_name.eql?("inventory_receipts") %>
                 <% opened_menu_name = "Inventory Receipts (warehouse to store)" %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
@@ -152,7 +160,9 @@
                                                     <% if can? :read_store_to_store_inventory_receipts, StockMutation %>
                                                       <li><%= link_to "Store to Store", store_to_store_inventory_receipts_stock_mutations_path, method: :get %></li>
                                                     <% end %>
-                                                    <li><a>Store to Warehouse</a></li>
+                                                    <% if can? :read_store_to_warehouse_inventory_receipts, StockMutation %>
+                                                      <li><%= link_to "Store to Warehouse", store_to_warehouse_inventory_receipts_stock_mutations_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -353,28 +363,44 @@
                           //$(".smart-listing-controls").html($("#search-form-container").html());
                           $(".smart-listing-controls").submit();
                       });
+
+        <% if cannot? :manage, CostList %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% elsif controller_name.eql?("receiving") %>
                       $("#search-ro-btn").click(function () {
                           $("#filter_receiving_date").val($("#filter-receiving-date").val());
                           $("#filter_string").val($("#filter-string").val());
                           $(".smart-listing-controls").submit();
                       });
+        <% if cannot? :manage, ReceivedPurchaseOrder %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% elsif controller_name.eql?("account_payables") %>
                       $("#search-ap-btn").click(function () {
                           $("#filter_payment_date").val($("#filter-payment-date").val());
                           $("#filter_string").val($("#filter-string").val());
                           $(".smart-listing-controls").submit();
                       });
+        <% if cannot? :manage, AccountPayable %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% elsif controller_name.eql?("users") %>
                       $("#search-user-btn").click(function () {
                           $("#filter_gender").val($("#filter-gender").val());
                           $("#filter_role").val($("#filter-role").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-      <% elsif controller_name.eql?("shipment_receipts") %>
-                      $("#search-shipment-receipt-btn").click(function () {
-                          $("#filter_received_date").val($("#filter-received-date").val());
                           $("#filter_string").val($("#filter-string").val());
                           $(".smart-listing-controls").submit();
                       });
@@ -458,14 +484,6 @@
                             return false;
                         });
         <% end %>
-      <% elsif controller_name.eql?("cost_prices") %>
-        <% if cannot? :manage, CostList %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
       <% elsif controller_name.eql?("sales_promotion_girls") %>
         <% if cannot? :manage, SalesPromotionGirl %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
@@ -514,24 +532,8 @@
                             return false;
                         });
         <% end %>
-      <% elsif controller_name.eql?("receiving") %>
-        <% if cannot? :manage, ReceivedPurchaseOrder %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
       <% elsif controller_name.eql?("purchase_returns") %>
         <% if cannot? :manage, PurchaseReturn %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("account_payables") %>
-        <% if cannot? :manage, AccountPayable %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {
@@ -561,24 +563,8 @@
                             return false;
                         });
         <% end %>
-      <% elsif controller_name.eql?("shipment_receipts") %>
-        <% if cannot?(:manage, ShipmentReceipt) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
       <% elsif controller_name.eql?("emails") %>
         <% if cannot? :manage, Email %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("stock_mutation_receipts") %>
-        <% if cannot? :manage, StockMutationReceipt %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {

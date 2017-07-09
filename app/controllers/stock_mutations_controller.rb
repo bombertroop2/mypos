@@ -89,6 +89,34 @@ class StockMutationsController < ApplicationController
     #    shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
     @stock_mutations = smart_listing_create(:stock_mutations, stock_mutations_scope, partial: 'stock_mutations/listing_store_to_store_inventory_receipts', default_sort: {number: "asc"})
   end
+  
+  def store_to_warehouse_inventory_receipts
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    if params[:filter_delivery_date].present?
+      splitted_delivery_date_range = params[:filter_delivery_date].split("-")
+      start_delivery_date = splitted_delivery_date_range[0].strip.to_date
+      end_delivery_date = splitted_delivery_date_range[1].strip.to_date
+    end
+    if params[:filter_received_date].present?
+      splitted_received_date_range = params[:filter_received_date].split("-")
+      start_received_date = splitted_received_date_range[0].strip.to_date
+      end_received_date = splitted_received_date_range[1].strip.to_date
+    end
+    stock_mutations_scope = StockMutation.joins(:destination_warehouse).
+      select(:id, :number, :delivery_date, :received_date, :quantity,
+      :destination_warehouse_id).
+      where("warehouse_type = 'central'")
+    stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
+      or(stock_mutations_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+    stock_mutations_scope = stock_mutations_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
+    stock_mutations_scope = stock_mutations_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
+    #    shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
+    @stock_mutations = smart_listing_create(:stock_mutations, stock_mutations_scope, partial: 'stock_mutations/listing_store_to_warehouse_inventory_receipts', default_sort: {number: "asc"})
+  end
 
   def index_store_to_warehouse_mutation
     like_command = if Rails.env.eql?("production")
@@ -141,6 +169,12 @@ class StockMutationsController < ApplicationController
         where("warehouse_type <> 'central' AND destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
         where(id: params[:id]).first
     end
+  end
+
+  def show_store_to_warehouse_receipt
+    @stock_mutation = StockMutation.joins(:destination_warehouse).
+      select("stock_mutations.*").
+      where("warehouse_type = 'central'").where(id: params[:id]).first
   end
 
   # GET /stock_mutations/1
@@ -392,6 +426,20 @@ class StockMutationsController < ApplicationController
     end
     @stock_mutation.with_lock do
       @stock_mutation.update(received_date: params[:receive_date], receiving_inventory_to_store: true)      
+    end
+    if @stock_mutation.errors[:base].present?
+      render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
+    elsif @stock_mutation.errors[:received_date].present?
+      render js: "bootbox.alert({message: \"Receive date #{@stock_mutation.errors[:received_date].join}\",size: 'small'});"
+    end
+  end
+
+  def receive_to_warehouse
+    @stock_mutation = StockMutation.joins(:destination_warehouse).
+      select("stock_mutations.*").
+      where("warehouse_type = 'central'").where(id: params[:id]).first
+    @stock_mutation.with_lock do
+      @stock_mutation.update(received_date: params[:receive_date], receiving_inventory_to_warehouse: true)
     end
     if @stock_mutation.errors[:base].present?
       render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"

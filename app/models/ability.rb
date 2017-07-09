@@ -119,13 +119,15 @@ class Ability
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
               alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
-              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
+              alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts], class_name.gsub(/\s+/, "").constantize
             else
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
               alias_action :new, :create, :get_products, :generate_form, :edit, :update, :destroy, to: :manage_store_to_store_mutation
               alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
-              can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
+              alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
+              can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts, :receive_to_warehouse], class_name.gsub(/\s+/, "").constantize
             end
           elsif ability
             can ability, class_name.gsub(/\s+/, "").constantize

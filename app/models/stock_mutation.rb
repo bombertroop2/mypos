@@ -1,5 +1,5 @@
 class StockMutation < ApplicationRecord
-  attr_accessor :mutation_type, :approving_mutation, :receiving_inventory_to_store
+  attr_accessor :mutation_type, :approving_mutation, :receiving_inventory_to_store, :receiving_inventory_to_warehouse
   
   audited on: [:create, :update]
   has_associated_audits
@@ -12,14 +12,16 @@ class StockMutation < ApplicationRecord
   accepts_nested_attributes_for :stock_mutation_products
 
   validates :delivery_date, :courier_id, :origin_warehouse_id, :destination_warehouse_id, presence: true
-  validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && !shpmnt.receiving_inventory_to_store}
-    validate :courier_available, :origin_warehouse_available, :destination_warehouse_available
-    validate :editable, on: :update, if: proc{|sm| !sm.approving_mutation && !sm.receiving_inventory_to_store}
+  validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && !shpmnt.receiving_inventory_to_store && !shpmnt.receiving_inventory_to_warehouse}
+    validate :courier_available, :origin_warehouse_available
+    validate :destination_warehouse_available, unless: proc {|sm| sm.receiving_inventory_to_warehouse}
+    validate :editable, on: :update, if: proc{|sm| !sm.approving_mutation && !sm.receiving_inventory_to_store && !sm.receiving_inventory_to_warehouse}
       validate :approvable, if: proc{|sm| sm.approving_mutation}
-        validates :received_date, presence: true, if: proc{|sm| sm.receiving_inventory_to_store}
-          validates :received_date, date: {before_or_equal_to: Proc.new { Date.current }, message: 'must be before or equal to today' }, if: proc {|sm| sm.received_date.present? && sm.receiving_inventory_to_store}
+        validates :received_date, presence: true, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
+          validates :received_date, date: {before_or_equal_to: Proc.new { Date.current }, message: 'must be before or equal to today' }, if: proc {|sm| sm.received_date.present? && (sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse)}
             validates :received_date, date: {after_or_equal_to: proc {|sm| sm.approved_date}, message: 'must be after or equal to approved date' }, if: proc {|sm| sm.received_date.present? && sm.receiving_inventory_to_store}
-              validate :shipment_receivable, if: proc{|sm| sm.receiving_inventory_to_store}
+            validates :received_date, date: {after_or_equal_to: proc {|sm| sm.delivery_date}, message: 'must be after or equal to delivery date' }, if: proc {|sm| sm.received_date.present? && sm.receiving_inventory_to_warehouse}
+              validate :shipment_receivable, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
 
                 before_create :generate_number
                 before_destroy :prevent_delete_if_mutation_approved, :delete_tracks
@@ -29,7 +31,7 @@ class StockMutation < ApplicationRecord
                       after_update :notify_new_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                         after_update :notify_new_destination_store, if: proc {|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                           after_update :update_stock, if: proc {|sm| sm.approving_mutation}
-                            after_update :load_goods_to_destination_warehouse, if: proc{|sm| sm.receiving_inventory_to_store}
+                            after_update :load_goods_to_destination_warehouse, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
 
                               private
                               
@@ -118,14 +120,14 @@ class StockMutation < ApplicationRecord
                               end
             
                               def prevent_delete_if_mutation_approved
-                                if approved_date.present?
+                                if approved_date.present? || received_date.present?
                                   errors.add(:base, "Sorry, stock mutation #{number} cannot be deleted")                                  
                                   throw :abort
                                 end
                               end
             
                               def editable
-                                errors.add(:base, "The record cannot be edited") if approved_date.present?
+                                errors.add(:base, "The record cannot be edited") if approved_date.present? || received_date.present?
                               end
           
                               def apologize_to_previous_destination_store
