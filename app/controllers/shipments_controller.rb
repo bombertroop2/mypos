@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
   load_and_authorize_resource except: :create
   helper SmartListing::Helper
-  before_action :set_shipment, only: [:show, :edit, :update, :destroy]
+  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive]
 
   # GET /shipments
   # GET /shipments.json
@@ -22,13 +22,48 @@ class ShipmentsController < ApplicationController
       start_received_date = splitted_received_date_range[0].strip.to_date
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
-    shipments_scope = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking)
+    shipments_scope = if current_user.has_non_spg_role?
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking)
+    else
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+    end
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
-      or(shipments_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+      or(shipments_scope.where(["shipments.quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
     shipments_scope = shipments_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
     shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
     @shipments = smart_listing_create(:shipments, shipments_scope, partial: 'shipments/listing', default_sort: {delivery_order_number: "asc"})
+  end
+
+  # GET /shipments
+  # GET /shipments.json
+  def inventory_receipts
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    if params[:filter_delivery_date].present?
+      splitted_delivery_date_range = params[:filter_delivery_date].split("-")
+      start_delivery_date = splitted_delivery_date_range[0].strip.to_date
+      end_delivery_date = splitted_delivery_date_range[1].strip.to_date
+    end
+    if params[:filter_received_date].present?
+      splitted_received_date_range = params[:filter_received_date].split("-")
+      start_received_date = splitted_received_date_range[0].strip.to_date
+      end_received_date = splitted_received_date_range[1].strip.to_date
+    end
+    shipments_scope = if current_user.has_non_spg_role?
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking)
+    else
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+    end
+    shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
+      or(shipments_scope.where(["shipments.quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+    shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
+    shipments_scope = shipments_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
+    shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
+    @shipments = smart_listing_create(:shipments, shipments_scope, partial: 'shipments/listing_inventory_receipt', default_sort: {delivery_order_number: "asc"})
   end
 
   # GET /shipments/1
@@ -142,11 +177,28 @@ class ShipmentsController < ApplicationController
       end
     end
   end
+  
+  def receive
+    @shipment.with_lock do
+      @shipment.update(received_date: params[:receive_date], receiving_inventory: true)
+    end
+    if @shipment.errors[:base].present?
+      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
+    elsif @shipment.errors[:received_date].present?
+      render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join}\",size: 'small'});"
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_shipment
-    @shipment = Shipment.find(params[:id])
+    @shipment = if current_user.has_non_spg_role?
+      Shipment.find(params[:id])
+    else
+      Shipment.joins(:order_booking).where(id: params[:id]).
+        where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
+        select("shipments.*").first
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

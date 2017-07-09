@@ -32,3 +32,45 @@ $(function () {
     });
 
 });
+
+
+function BootboxContent() {
+    var frm_str = '<div class="form-group">'
+            + '<label for="popup-receive-date">Be careful! This cannot be canceled</label>'
+            + '<input readonly="true" id="popup-receive-date" class="form-control input-sm" size="10" placeholder="Receive Date" type="text">'
+            + '</div>';
+
+    var object = $('<div/>').html(frm_str).contents();
+
+    object.find('#popup-receive-date').datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
+    return object;
+}
+
+function receiveInventory(shipmentId) {
+//Show the datepicker in the bootbox
+    bootbox.confirm({
+        message: BootboxContent,
+        title: "Receive inventory?",
+        buttons: {
+            cancel: {
+                label: '<i class="fa fa-times"></i> Cancel'
+            },
+            confirm: {
+                label: '<i class="fa fa-check"></i> Confirm'
+            }
+        },
+        callback: function (result) {
+            if (result && !$("#popup-receive-date").val() == "") {
+                $("body").css('padding-right', '0px');
+                $.get("/shipments/" + shipmentId + "/receive", {
+                    receive_date: $("#popup-receive-date").val()
+                });
+            } else if (result && $("#popup-receive-date").val() == "")
+                return false;
+        },
+        size: "small"
+    });
+}

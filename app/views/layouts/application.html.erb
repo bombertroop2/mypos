@@ -2,8 +2,17 @@
 <html>
     <head>
         <title>
-            <% unless params[:controller].eql?("welcome") %>
-              DUOS - <%= !params[:controller].eql?("stocks") ? params[:controller].humanize.titleize : "Stock Balance" %>
+            <% if !params[:controller].eql?("welcome") && !params[:controller].eql?("devise/sessions") %>
+              <% if params[:controller].eql?("stocks") %>
+                <% opened_menu_name = "Stock Balance" %>
+              <% elsif params[:controller].eql?("stock_mutation_receipts") %>
+                <% opened_menu_name = "Inventory Receipts (store to store)" %>
+              <% elsif params[:controller].eql?("shipment_receipts") %>
+                <% opened_menu_name = "Inventory Receipts (warehouse to store)" %>
+              <% else %>
+                <% opened_menu_name = params[:controller].humanize.titleize %>
+              <% end %>
+              DUOS - <%= opened_menu_name %>
             <% else %>
               DUOS
             <% end %>
@@ -69,7 +78,7 @@
                                             </li>
                                           <% end %>
                                           <% if price_control_menu_active? %>
-                                            <li><a><i class="fa fa-tag"></i> Price Control <span class="fa fa-chevron-down"></span></a>
+                                            <li><a><i class="fa fa-money"></i> Price Control <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :read, PriceCode %>
                                                       <li><%= link_to "Price Codes", price_codes_path, method: :get %></li>
@@ -125,7 +134,7 @@
                                                     <% if can? :read, OrderBooking %>
                                                       <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
                                                     <% end %>                          
-                                                    <% if can? :read, Shipment %>
+                                                    <% if can? :read_action, Shipment %>
                                                       <li><%= link_to "Shipments", shipments_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, Courier %>
@@ -137,10 +146,12 @@
                                           <% if inventory_receipt_menu_active? %>
                                             <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
-                                                    <% if can? :read, ShipmentReceipt %>
-                                                      <li><%= link_to "Warehouse to Store", shipment_receipts_path, method: :get %></li>
+                                                    <% if can? :read_action, Shipment %>
+                                                      <li><%= link_to "Warehouse to Store", inventory_receipts_shipments_path, method: :get %></li>
                                                     <% end %>
-                                                    <li><a>Store to Store</a></li>
+        <%# if can? :read, StockMutationReceipt %>
+                                                    <li><%#= link_to "Store to Store", stock_mutation_receipts_path, method: :get %></li>
+        <%# end %>
                                                     <li><a>Store to Warehouse</a></li>
                                                 </ul>
                                             </li>
@@ -324,6 +335,14 @@
                           $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
                           $(".smart-listing-controls").submit();
                       });
+
+        <% if cannot?(:undelete_action, Shipment) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% elsif controller_name.eql?("cost_prices") %>
                       $("#search-cost-btn").click(function () {
                           $("#filter_effective_date").val($("#filter-effective-date").val());
@@ -534,14 +553,6 @@
                             return false;
                         });
         <% end %>
-      <% elsif controller_name.eql?("shipments") %>
-        <% if cannot?(:undelete_action, Shipment) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
       <% elsif controller_name.eql?("couriers") %>
         <% if cannot? :manage, Courier %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
@@ -560,6 +571,14 @@
         <% end %>
       <% elsif controller_name.eql?("emails") %>
         <% if cannot? :manage, Email %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("stock_mutation_receipts") %>
+        <% if cannot? :manage, StockMutationReceipt %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {

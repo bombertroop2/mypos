@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :stock_mutation_receipts
+  #  resources :stock_mutation_receipts
   resources :stock_mutations do
     collection do
       get "get_products"
@@ -16,11 +16,11 @@ Rails.application.routes.draw do
       delete "delete_store_to_warehouse"
     end
   end
-  resources :shipment_receipts, except: [:edit, :update, :destroy] do
-    collection do
-      get "generate_form"
-    end
-  end
+  #  resources :shipment_receipts, except: [:edit, :update, :destroy] do
+  #    collection do
+  #      get "generate_form"
+  #    end
+  #  end
   resources :notifications, only: [:index, :show, :destroy, :notify_user] do 
     collection do
       get "notify_user"
@@ -30,6 +30,10 @@ Rails.application.routes.draw do
   resources :shipments do    
     collection do
       get "generate_ob_detail"
+      get "inventory_receipts"
+    end
+    member do
+      get "receive"      
     end
   end
   resources :couriers, except: :show

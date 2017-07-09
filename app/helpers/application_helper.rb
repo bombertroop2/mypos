@@ -42,12 +42,13 @@ module ApplicationHelper
   
   def booking_control_menu_active?
     return true if can? :read, OrderBooking
-    return true if can? :read, Shipment
+    return true if can? :read_action, Shipment
     return true if can? :read, Courier
   end
   
   def inventory_receipt_menu_active?
-    return true if can? :read, ShipmentReceipt
+    return true if can? :read_action, Shipment
+    #    return true if can? :read, StockMutationReceipt
   end
   
   def stock_mutation_menu_active?
