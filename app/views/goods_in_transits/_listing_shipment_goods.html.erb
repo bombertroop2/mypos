@@ -1,0 +1,28 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-shipment-goods-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "DO Number", "delivery_order_number" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Delivery Date", "delivery_date" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Quantity", "shipments.quantity" %></th>
+            <th class="col-md-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |shipment| %>
+          <tr class="editable" data-id="<%= shipment.id %>">
+              <%= smart_listing.render object: shipment, partial: "goods_in_transits/shipment_item", locals: {object: shipment} %>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-shipment-goods-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-shipment-goods-thead").show();
+      }
+  }, 0);
+
+</script>

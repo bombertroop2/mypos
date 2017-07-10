@@ -1,0 +1,9 @@
+<%= smart_listing_update(:shipments) %>
+
+<% if cannot?(:undelete_action, Shipment) %>
+  $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+  $('#new-item-btn').unbind("click");
+  $('#new-item-btn').click(function (e) {
+  return false;
+  });
+<% end %>

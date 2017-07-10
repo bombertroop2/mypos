@@ -1,4 +1,15 @@
 Rails.application.routes.draw do
+  resources :goods_in_transits, only: [:shipment_goods, :mutation_goods, :returned_goods] do    
+    collection do
+      get "shipment_goods"
+      get "mutation_goods"
+      get "returned_goods"
+    end
+    member do
+      get "show_shipment_goods"
+    end
+  end
+
   #  resources :stock_mutation_receipts
   resources :stock_mutations do
     collection do

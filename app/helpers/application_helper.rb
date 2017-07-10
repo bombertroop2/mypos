@@ -66,4 +66,9 @@ module ApplicationHelper
     return true if can? :read, User
     return true if can? :manage, AvailableMenu
   end
+
+  def goods_in_transit_active?
+    return true if can? :read_shipment_goods, Shipment
+    return true if can? :read_mutation_goods, StockMutation
+  end
 end
