@@ -60,9 +60,8 @@ class GoodsInTransitsController < ApplicationController
         where("warehouse_type <> 'central' AND approved_date IS NOT NULL AND received_date IS NULL")
     else
       StockMutation.joins(:destination_warehouse).
-        select(:id, :number, :delivery_date, :quantity,
-        :destination_warehouse_id).
-        where("warehouse_type <> 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+        select(:id, :number, :delivery_date, :quantity).
+        where("warehouse_type <> 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND approved_date IS NOT NULL AND received_date IS NULL")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(stock_mutations_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -76,9 +75,8 @@ class GoodsInTransitsController < ApplicationController
       StockMutation.joins(:destination_warehouse).where(id: params[:id]).
         where("warehouse_type <> 'central' AND approved_date IS NOT NULL AND received_date IS NULL").first
     else
-      Shipment.joins(:order_booking).where(id: params[:id]).
-        where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NULL").
-        select("shipments.*").first
+      StockMutation.joins(:destination_warehouse).where(id: params[:id]).
+        where("warehouse_type <> 'central' AND approved_date IS NOT NULL AND received_date IS NULL AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").first
     end
     authorize! :read_mutation_goods, @stock_mutation
   end
