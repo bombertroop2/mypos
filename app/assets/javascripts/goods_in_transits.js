@@ -31,4 +31,20 @@ $(function () {
         $(this).val('');
     });
 
+    $('#filter-delivery-date-returned-goods').daterangepicker(
+            {
+                locale: {
+                    format: 'DD/MM/YYYY'
+                },
+                opens: "left",
+                autoUpdateInput: false
+            });
+    $('#filter-delivery-date-returned-goods').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+    });
+
+    $('#filter-delivery-date-returned-goods').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+    });
+
 });

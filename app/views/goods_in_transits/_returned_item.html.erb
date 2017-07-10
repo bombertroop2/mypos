@@ -1,0 +1,6 @@
+<td><%= object.number %></td>
+<td><%= object.delivery_date.strftime("%d/%m/%Y") %></td>
+<td><%= object.quantity %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, show_returned_goods_goods_in_transit_path(id: object.id), data: {remote: true}, title: "Show" %>
+</td>

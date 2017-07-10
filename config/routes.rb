@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     member do
       get "show_shipment_goods"
       get "show_mutation_goods"
+      get "show_returned_goods"
     end
   end
 

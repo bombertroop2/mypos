@@ -1,2 +1,28 @@
-<h1>GoodsInTransits#returned_goods</h1>
-<p>Find me in app/views/goods_in_transits/returned_goods.html.erb</p>
+<div class="page-header">
+    <h1>Goods In Transit <small>returned goods</small></h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <!--
+    <div class="form-group">
+<%#= select_tag "destination_warehouse", options_from_collection_for_select(Warehouse.not_central.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Warehouse to", class: "form-control", id: "filter-destination-warehouse"} %>
+      </div>-->
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-delivery-date-returned-goods" placeholder="Delivery date">
+    </div>
+    <div class="form-group">
+        <input type="text" id="filter-string" class="form-control" placeholder="Number/quantity">
+    </div>
+    <button id="search-stock-mutation-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+</div>
+
+
+<div class="hidden">
+    <%= smart_listing_controls_for(:stock_mutations, {class: "form-inline text-right"}) do %>
+        <%= text_field_tag :filter_delivery_date, '', class: "search form-control", autocomplete: :off %>
+          <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+        <%#= text_field_tag :filter_destination_warehouse, '', class: "search form-control", autocomplete: :off %>
+          <% end %>
+      </div>
+      <%= smart_listing_render(:stock_mutations) %>
+
