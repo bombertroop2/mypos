@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     end
     member do
       get "show_shipment_goods"
+      get "show_mutation_goods"
     end
   end
 

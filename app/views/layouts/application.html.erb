@@ -189,7 +189,7 @@
                                                       <li><a>Goods In Transit<span class="fa fa-chevron-down"></span></a>
                                                           <ul class="nav child_menu">
                                                               <li><%= link_to "Delivery Orders", shipment_goods_goods_in_transits_path, method: :get %></li>
-                                                              <li><%#= link_to "Rolling Goods", goods_in_transits_mutation_goods_path, method: :get %></li>
+                                                              <li><%= link_to "Rolling Goods", mutation_goods_goods_in_transits_path, method: :get %></li>
                                                               <li><%#= link_to "Returned Goods", goods_in_transits_returned_goods_path, method: :get %></li>
                                                           </ul>
                                                       </li>
@@ -566,12 +566,20 @@
                         });
         <% end %>
       <% elsif controller_name.eql?("goods_in_transits") %>
-                      $("#search-shipment-btn").click(function () {
-                          $("#filter_delivery_date").val($("#filter-delivery-date-git").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                          $(".smart-listing-controls").submit();
-                      });
+        <% if action_name.eql?("shipment_goods") %>
+                        $("#search-shipment-btn").click(function () {
+                            $("#filter_delivery_date").val($("#filter-delivery-date-git").val());
+                            $("#filter_string").val($("#filter-string").val());
+                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                            $(".smart-listing-controls").submit();
+                        });
+        <% else %>
+                        $("#search-stock-mutation-btn").click(function () {
+                            $("#filter_delivery_date").val($("#filter-delivery-date-rolling-goods").val());
+                            $("#filter_string").val($("#filter-string").val());
+                            $(".smart-listing-controls").submit();
+                        });
+        <% end %>
       <% end %>
                 });
               </script>

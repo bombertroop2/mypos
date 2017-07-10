@@ -77,7 +77,7 @@ class Ability
             end
           elsif class_name.eql?("Goods In Transit")
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods
-            alias_action :mutation_goods, :returned_goods, to: :read_mutation_goods
+            alias_action :mutation_goods, :returned_goods, :show_mutation_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
           elsif ability
@@ -141,7 +141,7 @@ class Ability
             end
           elsif class_name.eql?("Goods In Transit")
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods
-            alias_action :mutation_goods, :returned_goods, to: :read_mutation_goods
+            alias_action :mutation_goods, :returned_goods, :show_mutation_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
           elsif ability

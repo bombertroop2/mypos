@@ -1,0 +1,27 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-mutation-goods-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Delivery Date", "delivery_date" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Quantity", "quantity" %></th>
+            <th class="col-md-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |stock_mutation| %>
+          <tr class="editable" data-id="<%= stock_mutation.id %>">
+              <%= smart_listing.render object: stock_mutation, partial: "goods_in_transits/mutation_item", locals: {object: stock_mutation} %>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-mutation-goods-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-mutation-goods-thead").show();
+      }
+  }, 0);
+</script>
