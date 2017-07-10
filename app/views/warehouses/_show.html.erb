@@ -44,5 +44,31 @@
         <dt>Type</dt>
         <dd><%= object.warehouse_type.titleize %></dd>
     </dl>
+    <% if @warehouse.warehouse_type.eql?("showroom") %>
+      <dl class="dl-horizontal">
+          <dt>First message</dt>
+          <dd><%= object.first_message %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Second message</dt>
+          <dd><%= object.second_message %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Third message</dt>
+          <dd><%= object.third_message %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Fourth message</dt>
+          <dd><%= object.fourth_message %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Fifth message</dt>
+          <dd><%= object.fifth_message %></dd>
+      </dl>
+    <% end %>
 
 </td>
