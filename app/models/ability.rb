@@ -45,21 +45,13 @@ class Ability
           else
             user_menu.name
           end
-          if ability && class_name.eql?("Supervisor")
-            can ability, class_name.gsub(/\s+/, "").constantize
-            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
-          elsif ability && class_name.eql?("Sales Promotion Girl")
+          if class_name.eql?("Supervisor")
             can :read, class_name.gsub(/\s+/, "").constantize
+            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :index, :inventory_receipts, :show, to: :read_action
             can [:read_action, :receive], class_name.gsub(/\s+/, "").constantize
-          elsif class_name.eql?("Product") || class_name.eql?("Purchase Order")
-            # cegah spg user untuk manage product
-            can :read, class_name.gsub(/\s+/, "").constantize
-          elsif class_name.eql?("CostList")
-            # cegah spg user untuk manage Cost dan Price
-            can :read, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Stock Mutation")
             if ability.eql?(:read)
               alias_action :index, :show, to: :read_store_to_store_mutations
@@ -80,8 +72,8 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif ability
-            can ability, class_name.gsub(/\s+/, "").constantize
+          else
+            can :read, class_name.gsub(/\s+/, "").constantize
           end        
         end        
       end

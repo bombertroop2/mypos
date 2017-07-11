@@ -12,7 +12,11 @@ class SalesPromotionGirlsController < ApplicationController
     else
       "LIKE"
     end
-    spg_scope = SalesPromotionGirl.joins(:warehouse).select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, phone, warehouses.code AS warehouse_code, mobile_phone")
+    spg_scope = if current_user.has_non_spg_role?
+      SalesPromotionGirl.joins(:warehouse).select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, phone, warehouses.code AS warehouse_code, mobile_phone")
+    else
+      SalesPromotionGirl.joins(:warehouse).select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, phone, warehouses.code AS warehouse_code, mobile_phone").where(warehouse_id: current_user.sales_promotion_girl.warehouse_id)
+    end
     spg_scope = spg_scope.where(["identifier #{like_command} ?", "%"+params[:filter]+"%"]).
       or(spg_scope.where(["sales_promotion_girls.name #{like_command} ?", "%"+params[:filter]+"%"])).
       or(spg_scope.where(["phone #{like_command} ?", "%"+params[:filter]+"%"])).
@@ -71,8 +75,14 @@ class SalesPromotionGirlsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_sales_promotion_girl
-    @sales_promotion_girl = SalesPromotionGirl.joins(:warehouse).where(id: params[:id]).
-      select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, sales_promotion_girls.address, gender, phone, province, warehouses.code AS warehouse_code, mobile_phone, warehouse_id, role").first
+    @sales_promotion_girl = if current_user.has_non_spg_role?
+      SalesPromotionGirl.joins(:warehouse).where(id: params[:id]).
+        select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, sales_promotion_girls.address, gender, phone, province, warehouses.code AS warehouse_code, mobile_phone, warehouse_id, role").first
+    else
+      SalesPromotionGirl.joins(:warehouse).where(id: params[:id]).
+        select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, sales_promotion_girls.address, gender, phone, province, warehouses.code AS warehouse_code, mobile_phone, warehouse_id, role").
+        where(warehouse_id: current_user.sales_promotion_girl.warehouse_id).first
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

@@ -19,10 +19,18 @@ class OrderBookingsController < ApplicationController
       start_date = splitted_date_range[0].strip.to_date
       end_date = splitted_date_range[1].strip.to_date
     end
-    order_bookings_scope = OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
-      select("ow.name AS ow_name, dw.name AS dw_name").
-      joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
-      joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id")
+    order_bookings_scope = if current_user.has_non_spg_role?
+      OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
+        select("ow.name AS ow_name, dw.name AS dw_name").
+        joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
+        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id")
+    else
+      OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
+        select("ow.name AS ow_name, dw.name AS dw_name").
+        joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
+        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
+        where(destination_warehouse_id: current_user.sales_promotion_girl.warehouse_id)
+    end
     order_bookings_scope = order_bookings_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])).
       or(order_bookings_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -211,7 +219,15 @@ class OrderBookingsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_order_booking
-    @order_booking = OrderBooking.find(params[:id])
+    @order_booking = if current_user.has_non_spg_role?
+      OrderBooking.find(params[:id])
+    else
+      OrderBooking.
+        joins(:origin_warehouse).
+        joins(:destination_warehouse).
+        where(id: params[:id], destination_warehouse_id: current_user.sales_promotion_girl.warehouse_id).
+        first
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
