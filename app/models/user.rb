@@ -40,7 +40,8 @@ class User < ApplicationRecord
             NON_SPG_ROLES = [
               ["Administrator", "administrator"],
               ["Staff", "staff"],
-              ["Manager", "manager"]
+              ["Manager", "manager"],
+              ["Accountant", "accountant"]
             ]
     
             SPG_ROLES = [
@@ -78,7 +79,7 @@ class User < ApplicationRecord
             end
             
             def has_non_spg_role?
-              has_role?(:staff) || has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) 
+              has_role?(:staff) || has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) || has_role?(:accountant)
             end
 
             private

@@ -32,7 +32,7 @@ class Ability
       can :manage, Notification
     elsif user.roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user.roles.first.name)}.present?
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present?
+        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present? && !user_menu.name.eql?("Account Payable")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -94,8 +94,13 @@ class Ability
             user_menu.name
           end
           if ability && class_name.eql?("Supervisor")
-            can ability, class_name.gsub(/\s+/, "").constantize
-            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+            unless user.has_role?(:accountant)
+              can ability, class_name.gsub(/\s+/, "").constantize
+              can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+              can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+            end
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, to: :undelete_action
@@ -103,7 +108,7 @@ class Ability
             alias_action :edit, :update, :destroy, to: :edit_action
             if ability.eql?(:manage) && user.roles.first.name.eql?("staff")
               can [:read_action, :undelete_action], class_name.gsub(/\s+/, "").constantize
-            elsif user.roles.first.name.eql?("staff")
+            elsif user.roles.first.name.eql?("staff") || user.has_role?(:accountant)
               can :read_action, class_name.gsub(/\s+/, "").constantize
             elsif ability.eql?(:read) && user.roles.first.name.eql?("manager")
               can :read_action, class_name.gsub(/\s+/, "").constantize
@@ -117,7 +122,7 @@ class Ability
             # cegah staff untuk manage Cost dan Price
             can :read, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Stock Mutation")
-            if ability.eql?(:read)
+            if ability.eql?(:read) || user.has_role?(:accountant)
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
               alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
@@ -136,8 +141,14 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif ability
+          elsif class_name.eql?("Account Payable") && user.has_role?(:staff)
+            can :read, AccountPayable
+          elsif class_name.eql?("Account Payable")
+            can ability, AccountPayable
+          elsif ability && !user.has_role?(:accountant)
             can ability, class_name.gsub(/\s+/, "").constantize
+          elsif ability && user.has_role?(:accountant)
+            can :read, class_name.gsub(/\s+/, "").constantize
           end        
         end        
       end

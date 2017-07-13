@@ -165,7 +165,7 @@ class StockMutation < ApplicationRecord
 
                               def notify_warehouse
                                 notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
-                                User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager'").select(:id).each do |user|
+                                User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager' OR roles.name = 'accountant'").select(:id).each do |user|
                                   notification.recipients.build user_id: user.id, notified: false, read: false
                                 end
                                 notification.save
@@ -173,7 +173,7 @@ class StockMutation < ApplicationRecord
               
                               def notify_new_warehouse
                                 notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
-                                User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager'").select(:id).each do |user|
+                                User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager' OR roles.name = 'accountant'").select(:id).each do |user|
                                   notification.recipients.build user_id: user.id, notified: false, read: false
                                 end
                                 notification.save
