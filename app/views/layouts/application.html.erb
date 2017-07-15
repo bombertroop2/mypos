@@ -9,14 +9,14 @@
                 <% if action_name.eql?("index") %>
                   <% opened_menu_name = "Stock Mutations (store to store)" %>
                 <% elsif action_name.eql?("store_to_store_inventory_receipts") %>
-                  <% opened_menu_name = "Inventory Receipts (store to store)" %>
+                  <% opened_menu_name = "Rolling Receipts" %>
                 <% elsif action_name.eql?("store_to_warehouse_inventory_receipts") %>
-                  <% opened_menu_name = "Inventory Receipts (store to warehouse)" %>
+                  <% opened_menu_name = "Return Receipts" %>
                 <% else %>
                   <% opened_menu_name = "Stock Mutations (warehouse to store)" %>
                 <% end %>
               <% elsif params[:controller].eql?("shipments") && action_name.eql?("inventory_receipts") %>
-                <% opened_menu_name = "Inventory Receipts (warehouse to store)" %>
+                <% opened_menu_name = "Delivery Order Receipts" %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -155,13 +155,13 @@
                                             <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :read_action, Shipment %>
-                                                      <li><%= link_to "Warehouse to Store", inventory_receipts_shipments_path, method: :get %></li>
+                                                      <li><%= link_to "Delivery Order Receipts", inventory_receipts_shipments_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read_store_to_store_inventory_receipts, StockMutation %>
-                                                      <li><%= link_to "Store to Store", store_to_store_inventory_receipts_stock_mutations_path, method: :get %></li>
+                                                      <li><%= link_to "Rolling Receipts", store_to_store_inventory_receipts_stock_mutations_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read_store_to_warehouse_inventory_receipts, StockMutation %>
-                                                      <li><%= link_to "Store to Warehouse", store_to_warehouse_inventory_receipts_stock_mutations_path, method: :get %></li>
+                                                      <li><%= link_to "Return Receipts", store_to_warehouse_inventory_receipts_stock_mutations_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
@@ -210,6 +210,9 @@
                                                     <% if can? :manage, AvailableMenu %>
                                                       <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
                                                     <% end %>
+                                                    <%# if can? :manage, FiscalYear %>
+                                                      <!--<li><%#= link_to "Fiscal Closing", fiscal_years_path, method: :get %></li>-->
+                                                    <%# end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -587,6 +590,14 @@
                             $(".smart-listing-controls").submit();
                         });
         <% end %>
+      <%# elsif controller_name.eql?("fiscal_years") %>
+        <%# if cannot?(:manage, FiscalYear) %>
+                        /*$('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });*/
+        <%# end %>
       <% end %>
                 });
               </script>
