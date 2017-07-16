@@ -1,6 +1,0 @@
-<td id="delivery-order-number-<%= object.id %>"><%= object.delivery_order_number rescue "" %></td>
-<td><%= object.received_date.strftime("%d/%m/%Y") %></td>
-<td><%= object.quantity %></td>
-<td class="actions" style="text-align: right">
-    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, shipment_receipt_path(object), data: {remote: true}, title: "Show" %>
-</td>

@@ -1,6 +1,0 @@
-<% unless @saved %>
-  $("#shipment_receipt_form_container").html("<%= j(render(partial: "detail_form")) %>");  
-<% else %>
-  <%= smart_listing_item :shipment_receipts, :create, @shipment_receipt, "shipment_receipts/shipment_receipt" %>
-  $("#delivery-order-number-<%= @shipment_receipt.id %>").html("<%= @do_number %>");
-<% end %>
