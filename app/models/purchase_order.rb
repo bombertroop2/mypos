@@ -18,8 +18,8 @@ class PurchaseOrder < ApplicationRecord
       
   validates :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po && !po.is_user_changing_cost }
     validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
-      validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: :is_po_date_validable
-        validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, on: :create, if: proc {|po| po.purchase_order_date.present?}
+      validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: proc{|po| po.is_po_date_validable && po.request_delivery_date.present?}
+        validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|po| po.is_po_date_validable}
           validate :prevent_update_if_article_received, on: :update
           validate :disable_receive_po_if_finish, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
             validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}                  
@@ -50,12 +50,20 @@ class PurchaseOrder < ApplicationRecord
                                 end
 
 
+                                protected
+                                
+                                def is_po_date_validable
+                                  return false if receiving_po || closing_po || is_user_changing_cost
+                                  return false if purchase_order_date.blank?
+                                  return true
+                                end
+
                                 private
                               
                                 def update_product_cost
                                   purchase_order_products.select(:id, :cost_list_id, :product_id, :purchase_order_id).each do |purchase_order_product|
-#                                    product = purchase_order_product.product
-#                                    purchase_order_product.cost_list_id = product.active_cost_by_po_date(purchase_order_date).id
+                                    #                                    product = purchase_order_product.product
+                                    #                                    purchase_order_product.cost_list_id = product.active_cost_by_po_date(purchase_order_date).id
                                     purchase_order_product.purchase_order_date = purchase_order_date
                                     purchase_order_product.save
                                   end
@@ -140,19 +148,14 @@ class PurchaseOrder < ApplicationRecord
                                 def is_validable
                                   return false if receiving_po || closing_po || is_user_changing_cost
                                   return true if request_delivery_date.present?
-                                  unless request_delivery_date.eql?(request_delivery_date_was)
-                                    return true if request_delivery_date_was.blank?
-                                    return false if Time.current.to_date >= request_delivery_date_was
-                                    return true if Time.current.to_date < request_delivery_date_was
-                                  end
+                                  #                                  unless request_delivery_date.eql?(request_delivery_date_was)
+                                  #                                    return true if request_delivery_date_was.blank?
+                                  #                                    return false if Time.current.to_date >= request_delivery_date_was
+                                  #                                    return true if Time.current.to_date < request_delivery_date_was
+                                  #                                  end
                                   return false
                                 end
                   
-                                def is_po_date_validable
-                                  return false if receiving_po || closing_po || is_user_changing_cost
-                                  return false if request_delivery_date.blank? || purchase_order_date.blank?
-                                  return true
-                                end
 
                                 def calculate_order_value
                                   total_product_value = 0                                            
