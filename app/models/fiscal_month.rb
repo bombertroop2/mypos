@@ -1,4 +1,6 @@
 class FiscalMonth < ApplicationRecord
+  attr_accessor :year
+  
   audited associated_with: :fiscal_year, on: :update
 
   belongs_to :fiscal_year
@@ -25,11 +27,15 @@ class FiscalMonth < ApplicationRecord
 
   validates :month, presence: true, uniqueness: {scope: :fiscal_year_id}
   validates :status, presence: true
-  validate :month_available, :status_available
+  validate :month_available, :status_available, :current_and_next_month_should_be_opened
 
   before_destroy :delete_tracks
   
   private
+  
+  def current_and_next_month_should_be_opened
+    errors.add(:month, "cannot be closed") if month.present? && Date::MONTHNAMES.index(month) >= Date.current.month && status.eql?("Close") && year.to_i >= Date.current.year
+  end
   
   def delete_tracks
     audits.destroy_all

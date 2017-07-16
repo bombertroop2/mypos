@@ -3,6 +3,7 @@ class FiscalYearsController < ApplicationController
   load_and_authorize_resource
   helper SmartListing::Helper
   before_action :set_fiscal_year, only: [:show, :edit, :update, :destroy]
+  before_action :add_year_to_child, only: [:create, :update]
 
   # GET /fiscal_years
   # GET /fiscal_years.json
@@ -61,6 +62,12 @@ class FiscalYearsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def fiscal_year_params
-    params.require(:fiscal_year).permit(:year, fiscal_months_attributes: [:month, :status, :id])
+    params.require(:fiscal_year).permit(:year, fiscal_months_attributes: [:month, :status, :id, :year])
+  end
+  
+  def add_year_to_child
+    params[:fiscal_year][:fiscal_months_attributes].each do |key, value|
+      params[:fiscal_year][:fiscal_months_attributes][key].merge! year: params[:fiscal_year][:year]
+    end if params[:fiscal_year][:fiscal_months_attributes].present?
   end
 end
