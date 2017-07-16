@@ -65,6 +65,7 @@ module ApplicationHelper
     return true if can? :read, Email
     return true if can? :read, User
     return true if can? :manage, AvailableMenu
+    return true if can? :read, FiscalYear
   end
 
   def goods_in_transit_active?

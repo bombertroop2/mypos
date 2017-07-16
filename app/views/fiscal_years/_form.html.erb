@@ -1,0 +1,54 @@
+<td colspan="2">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@fiscal_year, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <div class="form-group<%= control_group_error(@fiscal_year, :year) %>">
+            <%= f.label :year, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <% years = (Date.current.year - 10)..Date.current.year %>
+                  <% years = f.object.year..Date.current.year if !f.object.new_record? && !years.include?(f.object.year) %>
+                  <%= f.select :year, options_for_select(years, f.object.year.to_s), {prompt: true}, {class: "form-control"} %>
+                    <%= error_help_text(@fiscal_year, :year) %>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Months</label>
+                <div class="col-sm-10">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <%= f.fields_for :fiscal_months do |fiscal_month_field| %>
+                              <%= fiscal_month_field.hidden_field :month %>
+                              <tr>
+                                  <td style="vertical-align: middle">
+                                      <div class="<%= control_group_error(fiscal_month_field.object, :month) %>">
+                                          <%= fiscal_month_field.object.month %>
+                                          <%= error_help_text(fiscal_month_field.object, :month) %>
+                                      </div>
+                                  </td>
+                                  <td style="vertical-align: middle">
+                                      <div class="<%= control_group_error(fiscal_month_field.object, :status) %>">
+                                          <%= fiscal_month_field.select :status, options_for_select(FiscalMonth::STATUSES, fiscal_month_field.object.status.to_s), {prompt: true}, {class: "form-control"} %>
+                                            <%= error_help_text(fiscal_month_field.object, :status) %>
+                                        </div>                                                                          
+                                    </td>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <div class="col-sm-offset-2 col-sm-10">
+                      <%= f.submit "Save", class: "btn btn-primary" %>
+                        <button class="btn btn-link cancel">Cancel</button>
+                    </div>
+                </div>
+              <% end %>
+          </td>

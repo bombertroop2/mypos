@@ -1,0 +1,39 @@
+<td colspan="2">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Year</dt>
+        <dd><%= object.year %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Months</dt>
+        <dd>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% object.fiscal_months.select(:month, :status).each do |fiscal_month| %>
+                      <tr>
+                          <td style="vertical-align: middle">
+                              <%= fiscal_month.month %>
+                          </td>
+                          <td style="vertical-align: middle">
+                              <%= fiscal_month.status %>
+                          </td>
+                      </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </dd>
+    </dl>
+
+</td>

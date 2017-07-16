@@ -1,0 +1,5 @@
+<% if @valid %>
+  <%= smart_listing_item :fiscal_years, :update, @fiscal_year, "fiscal_years/fiscal_year" %>
+<% else %>
+  <%= smart_listing_item :fiscal_years, :update, @fiscal_year, "fiscal_years/form" %>
+<% end %>

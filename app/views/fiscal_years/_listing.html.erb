@@ -1,0 +1,26 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-fiscal-thead">
+        <tr>
+            <th class="col-md-11"><%= smart_listing.sortable "Year", "year" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |fiscal_year| %>
+          <tr class="editable" data-id="<%= fiscal_year.id %>">
+              <%= smart_listing.render object: fiscal_year, partial: "fiscal_years/fiscal_year", locals: {object: fiscal_year} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 2, link: new_fiscal_year_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-fiscal-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-fiscal-thead").show();
+      }
+  }, 0);
+</script>

@@ -18,6 +18,8 @@ class Ability
             "CostList"
           elsif user_menu.eql?("Receiving")
             "ReceivedPurchaseOrder"
+          elsif user_menu.eql?("Fiscal Reopening/Closing")
+            "FiscalYear"
           else
             user_menu
           end
@@ -32,7 +34,7 @@ class Ability
       can :manage, Notification
     elsif user.roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user.roles.first.name)}.present?
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present? && !user_menu.name.eql?("Account Payable")
+        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present? && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -90,6 +92,8 @@ class Ability
             "CostList"
           elsif user_menu.name.eql?("Receiving")
             "ReceivedPurchaseOrder"
+          elsif user_menu.name.eql?("Fiscal Reopening/Closing")
+            "FiscalYear"
           else
             user_menu.name
           end
@@ -145,6 +149,12 @@ class Ability
             can :read, AccountPayable
           elsif class_name.eql?("Account Payable")
             can ability, AccountPayable
+          elsif class_name.eql?("FiscalYear")
+            if user.has_role?(:staff)
+              can :read, FiscalYear
+            else
+              can ability, FiscalYear
+            end
           elsif ability && !user.has_role?(:accountant)
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user.has_role?(:accountant)

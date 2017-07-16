@@ -17,6 +17,8 @@
                 <% end %>
               <% elsif params[:controller].eql?("shipments") && action_name.eql?("inventory_receipts") %>
                 <% opened_menu_name = "Delivery Order Receipts" %>
+              <% elsif params[:controller].eql?("fiscal_years") %>
+                <% opened_menu_name = "Fiscal Reopening/Closing" %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -210,9 +212,9 @@
                                                     <% if can? :manage, AvailableMenu %>
                                                       <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
                                                     <% end %>
-                                                    <%# if can? :manage, FiscalYear %>
-                                                      <!--<li><%#= link_to "Fiscal Closing", fiscal_years_path, method: :get %></li>-->
-                                                    <%# end %>
+                                                    <% if can? :read, FiscalYear %>
+                                                      <li><%= link_to "Fiscal Reopening/Closing", fiscal_years_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -590,14 +592,14 @@
                             $(".smart-listing-controls").submit();
                         });
         <% end %>
-      <%# elsif controller_name.eql?("fiscal_years") %>
-        <%# if cannot?(:manage, FiscalYear) %>
-                        /*$('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+      <% elsif controller_name.eql?("fiscal_years") %>
+        <% if cannot?(:manage, FiscalYear) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {
                             return false;
-                        });*/
-        <%# end %>
+                        });
+        <% end %>
       <% end %>
                 });
               </script>
