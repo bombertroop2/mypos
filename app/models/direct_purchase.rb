@@ -21,67 +21,72 @@ class DirectPurchase < ApplicationRecord
             validate :should_has_products  
             validates :receiving_date, date: {before_or_equal_to: Proc.new { Date.current }, message: 'must be before or equal to today' }, if: proc {|dp| dp.receiving_date.present?}
               validate :vendor_exist, if: proc{|dp| dp.vendor_id.present?}
-              validate :warehouse_exist, if: proc{|dp| dp.warehouse_id.present?}
+                validate :warehouse_exist, if: proc{|dp| dp.warehouse_id.present?}
+                  validate :transaction_open, if: proc{|dp| dp.receiving_date.present?}
+
+                    before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net, :calculate_total_quantity, :set_receiving_date_to_receiving_purchase_order
   
-              before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net, :calculate_total_quantity, :set_receiving_date_to_receiving_purchase_order
-  
-              def quantity_received
-                quantity = 0
-                direct_purchase_products.select(:id).each do |dpp|
-                  quantity += dpp.direct_purchase_details.sum(:quantity)
-                end
-                quantity
-              end
+                    def quantity_received
+                      quantity = 0
+                      direct_purchase_products.select(:id).each do |dpp|
+                        quantity += dpp.direct_purchase_details.sum(:quantity)
+                      end
+                      quantity
+                    end
               
-              def receiving_value
-                value = 0
-                direct_purchase_products.select(:id).each do |dpp|
-                  value += dpp.direct_purchase_details.sum(:total_unit_price)
-                end
-                value
-              end
+                    def receiving_value
+                      value = 0
+                      direct_purchase_products.select(:id).each do |dpp|
+                        value += dpp.direct_purchase_details.sum(:total_unit_price)
+                      end
+                      value
+                    end
           
-              private
+                    private
+                    
+                    def transaction_open                            
+                      errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: receiving_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[receiving_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                    end
               
-              def vendor_exist
-                errors.add(:vendor_id, "does not exist!") unless Vendor.select("1 AS one").where(id: vendor_id).present?
-              end
+                    def vendor_exist
+                      errors.add(:vendor_id, "does not exist!") unless Vendor.select("1 AS one").where(id: vendor_id).present?
+                    end
               
-              def warehouse_exist
-                errors.add(:warehouse_id, "does not exist!") unless Warehouse.select("1 AS one").where(id: warehouse_id).present?
-              end
+                    def warehouse_exist
+                      errors.add(:warehouse_id, "does not exist!") unless Warehouse.select("1 AS one").where(id: warehouse_id).present?
+                    end
               
-              def set_receiving_date_to_receiving_purchase_order
-                received_purchase_order.receiving_date = receiving_date
-              end
+                    def set_receiving_date_to_receiving_purchase_order
+                      received_purchase_order.receiving_date = receiving_date
+                    end
               
-              def calculate_total_quantity
-                received_purchase_order.quantity = 0
-                direct_purchase_products.each do |direct_purchase_product|
-                  received_purchase_order.quantity += direct_purchase_product.direct_purchase_details.map(&:quantity).sum
-                end
-              end
+                    def calculate_total_quantity
+                      received_purchase_order.quantity = 0
+                      direct_purchase_products.each do |direct_purchase_product|
+                        received_purchase_order.quantity += direct_purchase_product.direct_purchase_details.map(&:quantity).sum
+                      end
+                    end
                 
-              def should_has_products
-                errors.add(:base, "Please select at least one product!") if direct_purchase_products.blank?
-              end
+                    def should_has_products
+                      errors.add(:base, "Please select at least one product!") if direct_purchase_products.blank?
+                    end
                 
               
-              def set_nil_to_is_additional_disc_from_net                                        
-                self.is_additional_disc_from_net = nil if second_discount.blank?
-              end
+                    def set_nil_to_is_additional_disc_from_net                                        
+                      self.is_additional_disc_from_net = nil if second_discount.blank?
+                    end
           
-              def prevent_adding_second_discount_if_total_discount_greater_than_100
-                errors.add(:second_discount, "can't be added, because total discount (1st discount + 2nd discount) is greater than 100%") if (first_discount + second_discount) > 100 && second_discount <= 100
-              end
+                    def prevent_adding_second_discount_if_total_discount_greater_than_100
+                      errors.add(:second_discount, "can't be added, because total discount (1st discount + 2nd discount) is greater than 100%") if (first_discount + second_discount) > 100 && second_discount <= 100
+                    end
                                   
-              def prevent_adding_second_discount_if_first_discount_is_100
-                errors.add(:second_discount, "can't be added, because first discount is already 100%") if first_discount == 100
-              end
+                    def prevent_adding_second_discount_if_first_discount_is_100
+                      errors.add(:second_discount, "can't be added, because first discount is already 100%") if first_discount == 100
+                    end
   
-              def set_vat_and_entrepreneur_status
-                self.vat_type = vendor.value_added_tax
-                self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur
-                return true
-              end
-            end
+                    def set_vat_and_entrepreneur_status
+                      self.vat_type = vendor.value_added_tax
+                      self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur
+                      return true
+                    end
+                  end
