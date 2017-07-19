@@ -1,26 +1,25 @@
-<%= smart_listing_item :size_groups, :update, @size_group, 
-                       @size_group.valid? ? "size_groups/size_group" : "size_groups/form" %>
-
-<% unless @size_group.valid? %>
-    $("#total_size_btn").click(function () {
-        var totalSize = $("#total_size").val();
-        if (!isNaN(totalSize)) {
-            var totalSizeInt = parseInt(totalSize);
-            if (totalSizeInt > 0) {
-                $(".remove_fields").each(function(){
-                  $(this).click();
-                });
-                for (var i = 0; i < totalSizeInt; i++)
-                    $(".add_fields").click();
-            }
-        }
-        return false;
-    });
-<% else %>
+<% if @valid %>
+  <%= smart_listing_item :size_groups, :update, @size_group, "size_groups/size_group" %>
   <% if @new_sizes.present? %>
     <% if @size_group.product_relation.present? %>
       $("#size-group-delete-link-<%= @size_group.id %>").replaceWith($("#size-group-delete-link-<%= @size_group.id %>").html());
     <% end %>
     $("#size-group-sizes-<%= @size_group.id %>").html("<%= @new_sizes.sort.to_sentence words_connector: ", ", last_word_connector: ", ", two_words_connector: ", " %>");
   <% end %>
+<% else %>
+  <%= smart_listing_item :size_groups, :update, @size_group, "size_groups/form" %>
+  $("#total_size_btn").click(function () {
+  var totalSize = $("#total_size").val();
+  if (!isNaN(totalSize)) {
+  var totalSizeInt = parseInt(totalSize);
+  if (totalSizeInt > 0) {
+  $(".remove_fields").each(function(){
+  $(this).click();
+  });
+  for (var i = 0; i < totalSizeInt; i++)
+  $(".add_fields").click();
+  }
+  }
+  return false;
+  });
 <% end %>

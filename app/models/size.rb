@@ -13,6 +13,8 @@ class Size < ApplicationRecord
   before_validation :strip_string_values
   
   validates :size, presence: true, uniqueness: {scope: :size_group_id}
+  validates :size_order, presence: true
+  validates :size_order, numericality: {only_integer: true}, if: proc { |dpd| dpd.size_order.present? }
   validate :size_not_changed
   validate :size_not_added, on: :create
   

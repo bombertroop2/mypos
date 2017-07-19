@@ -42,7 +42,7 @@ class CostPricesController < ApplicationController
       @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
       @price_codes = PriceCode.select(:id, :code).order :code
       size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
     else
       effective_date = nil
       params[:product][:cost_lists_attributes].each do |key, value|
@@ -55,7 +55,7 @@ class CostPricesController < ApplicationController
   def edit
     @cost = CostList.select(:id, :product_id, :effective_date).where(id: params[:id]).first
     @product = Product.joins(:brand).where(["products.id = ?", @cost.product_id]).select("products.id, size_group_id, products.code, name").first
-    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
     @price_codes = PriceCode.select(:id, :code).order :code
     @sizes.each do |size|
       @price_codes.each do |price_code|
@@ -80,7 +80,7 @@ class CostPricesController < ApplicationController
     unless @product.update(product_params)
       @price_codes = PriceCode.select(:id, :code).order :code
       size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+      @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
     else
       effective_date = nil
       params[:product][:cost_lists_attributes].each do |key, value|
@@ -94,7 +94,7 @@ class CostPricesController < ApplicationController
     #    @prices = Product.select(:id).where(id: @cost.product_id).first.prices.where(effective_date: @cost.effective_date)
     @price_codes = PriceCode.select(:id, :code).order :code
     @product = Product.select(:id, :size_group_id).where(id: @cost.product_id).first
-    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
   end
 
   def destroy
@@ -109,7 +109,7 @@ class CostPricesController < ApplicationController
   def generate_form
     @product = Product.where(id: params[:product_id]).
       select("id, size_group_id").first
-    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
     @price_codes = PriceCode.select(:id, :code).order :code
     @product.cost_lists.build
     @sizes.each do |size|

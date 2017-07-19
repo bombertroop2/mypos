@@ -87,38 +87,38 @@ class SizeGroupsController < ApplicationController
   def create
     @size_group = SizeGroup.new(size_group_params)
 
-    begin
-      @size_group.save
-      render js: "alert('#{@size_group.errors[:base].first}')" if !@size_group.valid? && @size_group.errors[:base].present?
-      if @size_group.valid?
+    begin      
+      if @valid = @size_group.save
         @new_sizes = []
         params[:size_group][:sizes_attributes].each do |key, value|
           @new_sizes << params[:size_group][:sizes_attributes][key][:size]
         end if params[:size_group][:sizes_attributes].present?
+      else
+        render js: "bootbox.alert('#{@size_group.errors[:base].first}')" if @size_group.errors[:base].present?
       end
     rescue ActiveRecord::RecordNotUnique => e
-      flash[:alert] = if $!.message.include? "size_group_id"
+      error_message = if $!.message.include? "size_group_id"
         "Size should be unique!"
       else
         "That code has already been taken"
       end        
-      render js: "window.location = '#{size_groups_url}'"
+      render js: "bootbox.alert({message: '#{error_message}', size: 'small'})"
     end
   end
 
   # PATCH/PUT /size_groups/1
   # PATCH/PUT /size_groups/1.json
   def update
-    begin        
-      @size_group.update(size_group_params)
-      render js: "alert('#{@size_group.errors[:base].first}')" if !@size_group.valid? && @size_group.errors[:base].present?
-      if @size_group.valid?
+    begin              
+      if @valid = @size_group.update(size_group_params)
         @new_sizes = []
         params[:size_group][:sizes_attributes].each do |key, value|
           if !params[:size_group][:sizes_attributes][key][:_destroy].eql?("1") && !params[:size_group][:sizes_attributes][key][:_destroy].eql?("true")
             @new_sizes << params[:size_group][:sizes_attributes][key][:size]
           end
         end if params[:size_group][:sizes_attributes].present?
+      else
+        render js: "alert('#{@size_group.errors[:base].first}')" if @size_group.errors[:base].present?
       end
     rescue ActiveRecord::RecordNotUnique => e   
       flash[:alert] = "That code has already been taken"
@@ -152,6 +152,6 @@ class SizeGroupsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def size_group_params
-    params.require(:size_group).permit(:code, :description, sizes_attributes: [:id, :size, :_destroy])
+    params.require(:size_group).permit(:code, :description, sizes_attributes: [:id, :size, :_destroy, :size_order])
   end
 end

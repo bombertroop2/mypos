@@ -48,7 +48,7 @@ class ProductsController < ApplicationController
   # GET /products/1/edit
   def edit
     #    @product.effective_date = @product.active_effective_date.strftime("%d/%m/%Y")
-    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+    @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
     @price_codes = PriceCode.select(:id, :code).order :code
     @colors = Color.select(:id, :code, :name).order(:code)
     @colors.each do |color|
@@ -74,7 +74,7 @@ class ProductsController < ApplicationController
     begin
       unless @product.save       
         size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-        @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size) : []
+        @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
         @price_codes = PriceCode.select(:id, :code).order :code
         @colors = Color.select(:id, :code, :name).order(:code)
         @colors.each do |color|
@@ -105,7 +105,7 @@ class ProductsController < ApplicationController
         if @product.errors[:"product_colors.base"].present?
           render js: "bootbox.alert({message: \"#{@product.errors[:"product_colors.base"].join("<br/>")}\",size: 'small'});"
         else
-          @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+          @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
           @price_codes = PriceCode.select(:id, :code).order :code
           @colors = Color.select(:id, :code, :name).order(:code)
           @colors.each do |color|
@@ -150,7 +150,7 @@ class ProductsController < ApplicationController
     unless params[:product_id].present?
       @product = Product.new
       sg = SizeGroup.where(id: params[:id]).select(:id).first
-      @sizes = sg.sizes.select(:id, :size).order(:size) if sg
+      @sizes = sg.sizes.select(:id, :size).order(:size_order) if sg
       @price_codes.each do |price_code|
         @sizes.each do |size|
           product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
@@ -161,10 +161,10 @@ class ProductsController < ApplicationController
       @product = Product.where(id: params[:product_id]).select(:id, :size_group_id).first
       @product.size_group_id = params[:id]
       unless @product.size_group_id_changed?
-        @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size) : []
+        @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
       else        
         sg = SizeGroup.where(id: params[:id]).select(:id).first
-        @sizes = sg.sizes.select(:id, :size).order(:size) if sg
+        @sizes = sg.sizes.select(:id, :size).order(:size_order) if sg
         #        @price_codes.each do |price_code|
         #          @sizes.each do |size|
         #            product_detail = @product.product_details.build(price_code_id: price_code.id, size_id: size.id)
