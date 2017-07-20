@@ -25,7 +25,7 @@ class StockMutation < ApplicationRecord
                     validate :transaction_open, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse || sm.approving_mutation}
 
                       before_create :generate_number
-                      before_destroy :prevent_delete_if_mutation_approved, :delete_tracks
+                      before_destroy :transaction_open, :prevent_delete_if_mutation_approved, :delete_tracks
                       before_update :apologize_to_previous_destination_store, if: proc{|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                         after_create :notify_origin_store, :notify_destination_store, unless: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
                           after_create :notify_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
@@ -37,10 +37,15 @@ class StockMutation < ApplicationRecord
                                     private
                                     
                                     def transaction_open
-                                      unless approving_mutation
+                                      if receiving_inventory_to_store || receiving_inventory_to_warehouse                                      
                                         errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: received_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[received_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
-                                      else
+                                      elsif approving_mutation
                                         errors.add(:base, "Sorry, you can't perform this transaction") if approved_date.present? && FiscalYear.joins(:fiscal_months).where(year: approved_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[approved_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                                      else
+                                        if FiscalYear.joins(:fiscal_months).where(year: delivery_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[delivery_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                                          errors.add(:base, "Sorry, you can't perform this transaction")
+                                          throw :abort
+                                        end
                                       end
                                     end
                               
