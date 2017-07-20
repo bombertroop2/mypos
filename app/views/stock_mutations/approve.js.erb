@@ -3,6 +3,7 @@
   <% if @runtime_error.present? %>
     bootbox.alert({message: "<%= @runtime_error %>",size: 'small'});
   <% else %>
+    $("#stock-mutation-approved-date-<%= @stock_mutation.id %>").html("");
     bootbox.alert({message: "<%= @stock_mutation.errors[:base].join("<br/>") %>",size: 'small'});
   <% end %>
 <% end %>

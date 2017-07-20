@@ -22,7 +22,7 @@ class StockMutation < ApplicationRecord
               validates :received_date, date: {after_or_equal_to: proc {|sm| sm.approved_date}, message: 'must be after or equal to approved date' }, if: proc {|sm| sm.received_date.present? && sm.receiving_inventory_to_store}
                 validates :received_date, date: {after_or_equal_to: proc {|sm| sm.delivery_date}, message: 'must be after or equal to delivery date' }, if: proc {|sm| sm.received_date.present? && sm.receiving_inventory_to_warehouse}
                   validate :shipment_receivable, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
-                    validate :transaction_open, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
+                    validate :transaction_open, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse || sm.approving_mutation}
 
                       before_create :generate_number
                       before_destroy :prevent_delete_if_mutation_approved, :delete_tracks
@@ -37,7 +37,11 @@ class StockMutation < ApplicationRecord
                                     private
                                     
                                     def transaction_open
-                                      errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: received_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[received_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                                      unless approving_mutation
+                                        errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: received_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[received_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                                      else
+                                        errors.add(:base, "Sorry, you can't perform this transaction") if approved_date.present? && FiscalYear.joins(:fiscal_months).where(year: approved_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[approved_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                                      end
                                     end
                               
                                     def load_goods_to_destination_warehouse

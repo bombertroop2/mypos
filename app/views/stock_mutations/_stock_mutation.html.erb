@@ -1,7 +1,7 @@
 <td><%= object.number %></td>
 <td><%= object.delivery_date.strftime("%d/%m/%Y") %></td>
 <% unless object.destination_warehouse.warehouse_type.eql?("central") %>
-  <td><%= object.approved_date.strftime("%d/%m/%Y") if object.approved_date.present? %></td>
+  <td id="stock-mutation-approved-date-<%= object.id %>"><%= object.approved_date.strftime("%d/%m/%Y") if object.approved_date.present? %></td>
 <% end %>
 <td><%= object.received_date.strftime("%d/%m/%Y") if object.received_date.present? %></td>
 <td id="total-sm-quantity-<%= object.id %>"><%= object.quantity %></td>

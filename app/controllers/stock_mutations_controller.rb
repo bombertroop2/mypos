@@ -406,7 +406,6 @@ class StockMutationsController < ApplicationController
     if current_user.has_non_spg_role? || current_user.sales_promotion_girl.warehouse_id == @stock_mutation.origin_warehouse_id
       begin      
         @valid = @stock_mutation.update(approved_date: Date.current, approving_mutation: true)
-        @stock_mutation.approved_date = nil unless @valid
       rescue RuntimeError => e
         @runtime_error = e.message
       end
