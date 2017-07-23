@@ -180,32 +180,32 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   end
                   raise "Quantity must be less than or equal to remaining ordered quantity." if raise_error
 
-                  stock = Stock.new warehouse_id: warehouse_id
+                  stock = Stock.where(warehouse_id: warehouse_id).select(:id).first
+                  stock = Stock.new warehouse_id: warehouse_id if stock.blank?
                   product = purchase_order_detail.purchase_order_product.product
-                  stock_product = stock.stock_products.build product_id: product.id
-                  stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
-                  begin
-                    stock.save
-                  rescue ActiveRecord::RecordNotUnique => e                    
-                    stock = Stock.select(:id).where(["warehouse_id = ?", warehouse_id]).order(:id).limit(1).first
+                  if stock.new_record?
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
-                    begin
-                      stock_product.save
-                    rescue ActiveRecord::RecordNotUnique => e
-                      stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
+                    stock.save
+                  else
+                    stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
+                    stock_product = stock.stock_products.build product_id: product.id if stock_product.blank?
+                    if stock_product.new_record?                      
                       stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
-                      begin
+                      stock_product.save
+                    else
+                      stock_detail = stock_product.stock_details.select{|stock_detail| stock_detail.size_id == purchase_order_detail.size_id && stock_detail.color_id == purchase_order_detail.color_id}.first
+                      stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity if stock_detail.blank?
+                      if stock_detail.new_record?
                         stock_detail.save
-                      rescue ActiveRecord::RecordNotUnique => e
-                        stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(purchase_order_detail.size_id) && sd.color_id.eql?(purchase_order_detail.color_id)}.first
+                      else
                         stock_detail.with_lock do
                           stock_detail.quantity += quantity
                           stock_detail.save
                         end
                       end
                     end
-                  end
+                  end                  
                 end
       
                 def create_stock
