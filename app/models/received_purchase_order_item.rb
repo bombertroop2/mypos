@@ -187,7 +187,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   begin
                     stock.save
                   rescue ActiveRecord::RecordNotUnique => e                    
-                    stock = Stock.select(:id).where(["warehouse_id = ?", warehouse_id]).first
+                    stock = Stock.where(["warehouse_id = ?", warehouse_id]).first
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                     begin
