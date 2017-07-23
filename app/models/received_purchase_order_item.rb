@@ -212,25 +212,25 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 def create_stock
                   direct_purchase_product = direct_purchase_detail.direct_purchase_product
                   warehouse = direct_purchase_product.direct_purchase.warehouse                  
-                  stock = Stock.new warehouse_id: warehouse.id
+                  stock = Stock.select(:id).where(warehouse_id: warehouse.id).first
+                  stock = Stock.new warehouse_id: warehouse.id if stock.blank?
                   product = direct_purchase_product.product
-                  stock_product = stock.stock_products.build product_id: product.id
-                  stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
-                  begin
-                    stock.save
-                  rescue ActiveRecord::RecordNotUnique => e
-                    stock = warehouse.stock
+                  if stock.new_record?                    
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
-                    begin
-                      stock_product.save
-                    rescue ActiveRecord::RecordNotUnique => e
-                      stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
+                    stock.save
+                  else
+                    stock_product = stock.stock_products.select{|stock_product| stock_product.product_id == product.id}.first
+                    stock_product = stock.stock_products.build product_id: product.id if stock_product.blank?
+                    if stock_product.new_record?                      
                       stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
-                      begin
+                      stock_product.save
+                    else
+                      stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(direct_purchase_detail.size_id) && sd.color_id.eql?(direct_purchase_detail.color_id)}.first
+                      stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
+                      if stock_detail.new_record?
                         stock_detail.save
-                      rescue ActiveRecord::RecordNotUnique => e
-                        stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(direct_purchase_detail.size_id) && sd.color_id.eql?(direct_purchase_detail.color_id)}.first
+                      else
                         stock_detail.with_lock do
                           stock_detail.quantity += quantity
                           stock_detail.save
