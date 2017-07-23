@@ -2,7 +2,7 @@ class CreateStockMovementProductDetails < ActiveRecord::Migration[5.0]
   def change
     create_table :stock_movement_product_details do |t|
       t.integer :stock_movement_product_id
-      t.references :color, foreign_key: true
+      t.references :color, index: true
       t.references :size, foreign_key: true
       t.integer :beginning_stock
       t.integer :purchase_order_quantity_received
@@ -17,5 +17,6 @@ class CreateStockMovementProductDetails < ActiveRecord::Migration[5.0]
       t.timestamps
     end
     add_foreign_key :stock_movement_product_details, :stock_movement_products, column: :stock_movement_product_id
+    add_foreign_key :stock_movement_product_details, :common_fields, column: :color_id
   end
 end
