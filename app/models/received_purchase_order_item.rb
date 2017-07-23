@@ -11,7 +11,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
           before_create :update_receiving_value, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
             before_create :create_stock_and_update_receiving_qty, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
               before_create :create_stock, if: proc {|rpoi| rpoi.is_it_direct_purchasing}
-#                before_create :create_stock_movement
+                #                before_create :create_stock_movement
       
                 attr_accessor :is_it_direct_purchasing, :purchase_order_product_id,
                   :purchase_order_id, :receiving_date, :warehouse_id, :product_id
@@ -138,17 +138,14 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   end
                   raise "Quantity must be less than or equal to remaining ordered quantity." if raise_error
 
-                  purchase_order = PurchaseOrder.where(id: purchase_order_id).select(:id, :warehouse_id).first
-                  warehouse = purchase_order.warehouse
-                  
-                  stock = Stock.new warehouse_id: warehouse.id
+                  stock = Stock.new warehouse_id: warehouse_id
                   product = purchase_order_detail.purchase_order_product.product
                   stock_product = stock.stock_products.build product_id: product.id
                   stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                   begin
                     stock.save
                   rescue ActiveRecord::RecordNotUnique => e
-                    stock = warehouse.reload.stock
+                    stock = Stock.where(warehouse_id: warehouse_id).select(:id).first
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                     begin
