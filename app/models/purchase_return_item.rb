@@ -33,41 +33,26 @@ class PurchaseReturnItem < ApplicationRecord
           StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND last_transaction_date <= ?", product_id, direct_purchase_detail.color_id, direct_purchase_detail.size_id, warehouse_id, current_date.prev_month.end_of_month]).order("last_transaction_date DESC, stock_movement_product_details.id DESC").select(:ending_stock).first
         end
         ending_stock = (last_movement.ending_stock rescue 0) - quantity
-        stock_movement = StockMovement.new year: current_date.year
-        stock_movement_month = stock_movement.stock_movement_months.build month: current_date.month
-        stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
-        stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
-        stock_movement_product_detail = unless direct_purchase_return
-          stock_movement_product.stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-            size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
-            ending_stock: ending_stock, last_transaction_date: current_date
-        else
-          stock_movement_product.stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
-            size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
-            ending_stock: ending_stock, last_transaction_date: current_date
-        end
-        begin
-          stock_movement.save
-        rescue ActiveRecord::RecordNotUnique => e
-          stock_movement = StockMovement.where(year: current_date.year).select(:id).first
+        stock_movement = StockMovement.select(:id).where(year: current_date.year).first
+        stock_movement = StockMovement.new year: current_date.year if stock_movement.blank?
+        if stock_movement.new_record?          
           stock_movement_month = stock_movement.stock_movement_months.build month: current_date.month
           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
           stock_movement_product_detail = unless direct_purchase_return
-            stock_movement_product.
-              stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+            stock_movement_product.stock_movement_product_details.build color_id: purchase_order_detail.color_id,
               size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
               ending_stock: ending_stock, last_transaction_date: current_date
           else
-            stock_movement_product.
-              stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
+            stock_movement_product.stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
               size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
               ending_stock: ending_stock, last_transaction_date: current_date
           end
-          begin
-            stock_movement_month.save
-          rescue ActiveRecord::RecordNotUnique => e
-            stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == current_date.month}.first
+          stock_movement.save
+        else
+          stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == current_date.month}.first
+          stock_movement_month = stock_movement.stock_movement_months.build month: current_date.month if stock_movement_month.blank?
+          if stock_movement_month.new_record?
             stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
             stock_movement_product_detail = unless direct_purchase_return
@@ -81,10 +66,11 @@ class PurchaseReturnItem < ApplicationRecord
                 size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
                 ending_stock: ending_stock, last_transaction_date: current_date
             end
-            begin
-              stock_movement_warehouse.save
-            rescue ActiveRecord::RecordNotUnique => e
-              stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
+            stock_movement_month.save
+          else
+            stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
+            stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
+            if stock_movement_warehouse.new_record?              
               stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
               stock_movement_product_detail = unless direct_purchase_return
                 stock_movement_product.
@@ -97,10 +83,11 @@ class PurchaseReturnItem < ApplicationRecord
                   size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
                   ending_stock: ending_stock, last_transaction_date: current_date
               end
-              begin
-                stock_movement_product.save
-              rescue ActiveRecord::RecordNotUnique => e
-                stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
+              stock_movement_warehouse.save
+            else
+              stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
+              stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
+              if stock_movement_product.new_record?                
                 stock_movement_product_detail = unless direct_purchase_return
                   stock_movement_product.
                     stock_movement_product_details.build color_id: purchase_order_detail.color_id,
@@ -112,16 +99,29 @@ class PurchaseReturnItem < ApplicationRecord
                     size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
                     ending_stock: ending_stock, last_transaction_date: current_date
                 end
-                begin
-                  stock_movement_product_detail.save
-                rescue ActiveRecord::RecordNotUnique => e
+                stock_movement_product.save
+              else
+                stock_movement_product_detail = unless direct_purchase_return
+                  stock_movement_product.stock_movement_product_details.
+                    select{|stock_movement_product_detail| stock_movement_product_detail.color_id == purchase_order_detail.color_id && stock_movement_product_detail.size_id == purchase_order_detail.size_id}.first
+                else
+                  stock_movement_product.stock_movement_product_details.
+                    select{|stock_movement_product_detail| stock_movement_product_detail.color_id == direct_purchase_detail.color_id && stock_movement_product_detail.size_id == direct_purchase_detail.size_id}.first
+                end
+                if stock_movement_product_detail.blank?
                   stock_movement_product_detail = unless direct_purchase_return
-                    stock_movement_product.stock_movement_product_details.
-                      select{|stock_movement_product_detail| stock_movement_product_detail.color_id == purchase_order_detail.color_id && stock_movement_product_detail.size_id == purchase_order_detail.size_id}.first
+                    stock_movement_product.
+                      stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+                      size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
+                      ending_stock: ending_stock, last_transaction_date: current_date
                   else
-                    stock_movement_product.stock_movement_product_details.
-                      select{|stock_movement_product_detail| stock_movement_product_detail.color_id == direct_purchase_detail.color_id && stock_movement_product_detail.size_id == direct_purchase_detail.size_id}.first
+                    stock_movement_product.
+                      stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
+                      size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_return_quantity_returned: quantity,
+                      ending_stock: ending_stock, last_transaction_date: current_date
                   end
+                  stock_movement_product_detail.save
+                else
                   stock_movement_product_detail.with_lock do
                     stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0
                     stock_movement_product_detail.purchase_return_quantity_returned = stock_movement_product_detail.purchase_return_quantity_returned.to_i + quantity
@@ -129,11 +129,11 @@ class PurchaseReturnItem < ApplicationRecord
                     stock_movement_product_detail.last_transaction_date = current_date
                     stock_movement_product_detail.save
                   end
-                end                        
+                end
               end
             end
           end
-        end 
+        end                        
       end
       
       def item_returnable
