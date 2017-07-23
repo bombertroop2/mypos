@@ -210,7 +210,8 @@ class ReceivingController < ApplicationController
   
     def purchase_order_params
       params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:vendor_id, :receiving_date, :is_using_delivery_order, :delivery_order_number, 
-          received_purchase_order_products_attributes: [:purchase_order_id, :purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity, :purchase_order_product_id, :purchase_order_id]]]).merge(receiving_po: true)
+          received_purchase_order_products_attributes: [:purchase_order_id, :purchase_order_product_id,
+            received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity, :purchase_order_product_id, :purchase_order_id, :receiving_date, :warehouse_id, :product_id]]]).merge(receiving_po: true)
     end
   
     def direct_purchase_params
