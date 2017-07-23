@@ -16,6 +16,6 @@ class CreateStockMovementProductDetails < ActiveRecord::Migration[5.0]
 
       t.timestamps
     end
-    add_foreign_key :stock_movement_product_details, :stock_movement_products, column: :stock_movement_product_id unless foreign_key_exists?(:stock_movement_product_details, :stock_movement_products)
+    add_foreign_key :stock_movement_product_details, :stock_movement_products, column: :stock_movement_product_id
   end
 end
