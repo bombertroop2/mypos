@@ -138,7 +138,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   end
                   raise "Quantity must be less than or equal to remaining ordered quantity." if raise_error
 
-                  purchase_order = purchase_order_detail.purchase_order_product.purchase_order
+                  purchase_order = PurchaseOrder.where(id: purchase_order_id).select(:id).first
                   warehouse = purchase_order.warehouse
                   
                   stock = Stock.new warehouse_id: warehouse.id
@@ -148,8 +148,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   begin
                     stock.save
                   rescue ActiveRecord::RecordNotUnique => e
-                    purchase_order.reload
-                    stock = warehouse.reload.stock
+                    stock = warehouse.stock
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                     begin
