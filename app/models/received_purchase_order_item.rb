@@ -11,10 +11,80 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
           before_create :update_receiving_value, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
             before_create :create_stock_and_update_receiving_qty, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
               before_create :create_stock, if: proc {|rpoi| rpoi.is_it_direct_purchasing}
+#                before_create :create_stock_movement
       
-                attr_accessor :is_it_direct_purchasing, :purchase_order_product_id, :purchase_order_id
+                attr_accessor :is_it_direct_purchasing, :purchase_order_product_id,
+                  :purchase_order_id, :receiving_date, :warehouse_id, :product_id
     
                 private
+                
+                def create_stock_movement
+                  last_movement = StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where("stock_movement_products.product_id = #{product_id} AND stock_movement_product_details.color_id = #{purchase_order_detail.color_id} AND stock_movement_product_details.size_id = #{purchase_order_detail.size_id} AND stock_movement_warehouses.warehouse_id = #{warehouse_id}").order("created_at DESC").select(:ending_stock).first
+                  ending_stock = (last_movement.ending_stock rescue 0) + quantity
+                  stock_movement = StockMovement.new year: receiving_date.year
+                  stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.month
+                  stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+                  stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                  stock_movement_product_detail = stock_movement_product.
+                    stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+                    size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
+                    purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
+                    stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
+                    ending_stock: ending_stock
+                  begin
+                    stock_movement.save
+                  rescue ActiveRecord::RecordNotUnique => e
+                    stock_movement = StockMovement.where(year: receiving_date.year).select(:id).first
+                    stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.month
+                    stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+                    stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                    last_movement = StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where("stock_movement_products.product_id = #{product_id} AND stock_movement_product_details.color_id = #{purchase_order_detail.color_id} AND stock_movement_product_details.size_id = #{purchase_order_detail.size_id} AND stock_movement_warehouses.warehouse_id = #{warehouse_id}").order("created_at DESC").select(:ending_stock).first
+                    ending_stock = (last_movement.ending_stock rescue 0) + quantity
+                    stock_movement_product_detail = stock_movement_product.
+                      stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+                      size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
+                      purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
+                      stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
+                      ending_stock: ending_stock
+                    begin
+                      stock_movement_month.save
+                    rescue ActiveRecord::RecordNotUnique => e
+                      stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == receiving_date.month}.first
+                      stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+                      stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                      stock_movement_product_detail = stock_movement_product.
+                        stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+                        size_id: purchase_order_detail.size_id
+                      begin
+                        stock_movement_warehouse.save
+                      rescue ActiveRecord::RecordNotUnique => e
+                        stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
+                        stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                        stock_movement_product_detail = stock_movement_product.
+                          stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+                          size_id: purchase_order_detail.size_id
+                        begin
+                          stock_movement_product.save
+                        rescue ActiveRecord::RecordNotUnique => e
+                          stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
+                          stock_movement_product_detail = stock_movement_product.
+                            stock_movement_product_details.build color_id: purchase_order_detail.color_id,
+                            size_id: purchase_order_detail.size_id
+                          begin
+                            stock_movement_product_detail.save
+                          rescue ActiveRecord::RecordNotUnique => e
+                            stock_movement_product_detail = stock_movement_product.
+                              stock_movement_product_details.select{|stock_movement_product_detail| stock_movement_product_detail.color_id == purchase_order_detail.color_id && stock_movement_product_detail.size_id == purchase_order_detail.size_id}.first
+                            stock_movement_product_detail.with_lock do
+                              stock_movement_product_detail.quantity += quantity
+                              stock_movement_product_detail.save
+                            end
+                          end                        
+                        end
+                      end
+                    end
+                  end 
+                end
                 
                 def purchase_order_detail_receivable
                   errors.add(:base, "Not able to receive selected items") unless PurchaseOrderDetail.select("1 AS one").joins(purchase_order_product: :purchase_order).where("(status = 'Open' OR status = 'Partial') AND purchase_orders.id = '#{purchase_order_id}' AND purchase_order_products.id = '#{purchase_order_product_id}' AND purchase_order_details.id = '#{purchase_order_detail_id}'").present?
@@ -78,7 +148,8 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   begin
                     stock.save
                   rescue ActiveRecord::RecordNotUnique => e
-                    stock = warehouse.stock
+                    puts "TAAAAIAIIIIIIIIIIII ===>>> #{warehouse.inspect}"
+                    stock = warehouse.stock                    
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: purchase_order_detail.size_id, color_id: purchase_order_detail.color_id, quantity: quantity
                     begin
@@ -101,44 +172,33 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
       
                 def create_stock
                   direct_purchase_product = direct_purchase_detail.direct_purchase_product
-                  warehouse = direct_purchase_product.direct_purchase.warehouse
-                  stock = warehouse.stock
-                  stock = Stock.new warehouse_id: warehouse.id unless stock
+                  warehouse = direct_purchase_product.direct_purchase.warehouse                  
+                  stock = Stock.new warehouse_id: warehouse.id
                   product = direct_purchase_product.product
-                  stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
-                  stock_product = stock.stock_products.build product_id: product.id unless stock_product
-                  stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(direct_purchase_detail.size_id) && sd.color_id.eql?(direct_purchase_detail.color_id)}.first                
-                  unless stock_detail
+                  stock_product = stock.stock_products.build product_id: product.id
+                  stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
+                  begin
+                    stock.save
+                  rescue ActiveRecord::RecordNotUnique => e
+                    stock = warehouse.stock
+                    stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
-                    if stock.new_record?
+                    begin
+                      stock_product.save
+                    rescue ActiveRecord::RecordNotUnique => e
+                      stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
+                      stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
                       begin
-                        stock.save
+                        stock_detail.save
                       rescue ActiveRecord::RecordNotUnique => e
-                        stock = warehouse.stock.reload
-                        stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product.id)}.first
-                        stock_product = stock.stock_products.build product_id: product.id unless stock_product
                         stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(direct_purchase_detail.size_id) && sd.color_id.eql?(direct_purchase_detail.color_id)}.first
-                        unless stock_detail
-                          stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
-                          if stock_product.new_record?
-                            stock_product.save
-                          elsif stock_detail.new_record?
-                            stock_detail.save
-                          end
-                        else
-                          stock_detail.quantity += direct_purchase_detail.quantity
+                        stock_detail.with_lock do
+                          stock_detail.quantity += quantity
                           stock_detail.save
                         end
                       end
-                    elsif stock_product.new_record?
-                      stock_product.save
-                    elsif stock_detail.new_record?
-                      stock_detail.save
                     end
-                  else
-                    stock_detail.quantity += direct_purchase_detail.quantity
-                    stock_detail.save
-                  end                  
+                  end
                 end
 
               end
