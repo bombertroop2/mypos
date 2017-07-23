@@ -11,7 +11,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
           before_create :update_receiving_value, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
             before_create :create_stock_and_update_receiving_qty, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
               before_create :create_stock, if: proc {|rpoi| rpoi.is_it_direct_purchasing}
-                #                before_create :create_stock_movement
+                before_create :create_stock_movement
       
                 attr_accessor :is_it_direct_purchasing, :purchase_order_product_id,
                   :purchase_order_id, :receiving_date, :warehouse_id, :product_id
@@ -19,10 +19,10 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 private
                 
                 def create_stock_movement
-                  last_movement = StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where("stock_movement_products.product_id = #{product_id} AND stock_movement_product_details.color_id = #{purchase_order_detail.color_id} AND stock_movement_product_details.size_id = #{purchase_order_detail.size_id} AND stock_movement_warehouses.warehouse_id = #{warehouse_id}").order("created_at DESC").select(:ending_stock).first
+                  last_movement = StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND last_po_received_date <= ?", product_id, purchase_order_detail.color_id, purchase_order_detail.size_id, warehouse_id, receiving_date.to_date.prev_month.end_of_month]).order("last_po_received_date DESC").select(:ending_stock).first
                   ending_stock = (last_movement.ending_stock rescue 0) + quantity
-                  stock_movement = StockMovement.new year: receiving_date.year
-                  stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.month
+                  stock_movement = StockMovement.new year: receiving_date.to_date.year
+                  stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.to_date.month
                   stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                   stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                   stock_movement_product_detail = stock_movement_product.
@@ -30,31 +30,32 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                     size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
                     purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
                     stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
-                    ending_stock: ending_stock
+                    ending_stock: ending_stock, last_po_received_date: receiving_date.to_date
                   begin
                     stock_movement.save
                   rescue ActiveRecord::RecordNotUnique => e
-                    stock_movement = StockMovement.where(year: receiving_date.year).select(:id).first
-                    stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.month
+                    stock_movement = StockMovement.where(year: receiving_date.to_date.year).select(:id).first
+                    stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.to_date.month
                     stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                     stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
-                    last_movement = StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where("stock_movement_products.product_id = #{product_id} AND stock_movement_product_details.color_id = #{purchase_order_detail.color_id} AND stock_movement_product_details.size_id = #{purchase_order_detail.size_id} AND stock_movement_warehouses.warehouse_id = #{warehouse_id}").order("created_at DESC").select(:ending_stock).first
-                    ending_stock = (last_movement.ending_stock rescue 0) + quantity
                     stock_movement_product_detail = stock_movement_product.
                       stock_movement_product_details.build color_id: purchase_order_detail.color_id,
                       size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
                       purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
                       stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
-                      ending_stock: ending_stock
+                      ending_stock: ending_stock, last_po_received_date: receiving_date.to_date
                     begin
                       stock_movement_month.save
                     rescue ActiveRecord::RecordNotUnique => e
-                      stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == receiving_date.month}.first
+                      stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == receiving_date.to_date.month}.first
                       stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                       stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                       stock_movement_product_detail = stock_movement_product.
                         stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                        size_id: purchase_order_detail.size_id
+                        size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
+                        purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
+                        stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
+                        ending_stock: ending_stock, last_po_received_date: receiving_date.to_date
                       begin
                         stock_movement_warehouse.save
                       rescue ActiveRecord::RecordNotUnique => e
@@ -62,21 +63,30 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                         stock_movement_product_detail = stock_movement_product.
                           stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                          size_id: purchase_order_detail.size_id
+                          size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
+                          purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
+                          stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
+                          ending_stock: ending_stock, last_po_received_date: receiving_date.to_date
                         begin
                           stock_movement_product.save
                         rescue ActiveRecord::RecordNotUnique => e
                           stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
                           stock_movement_product_detail = stock_movement_product.
                             stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                            size_id: purchase_order_detail.size_id
+                            size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), purchase_order_quantity_received: quantity,
+                            purchase_return_quantity_returned: 0, delivery_order_quantity_received: 0, delivery_order_quantity_delivered: 0,
+                            stock_return_quantity_returned: 0, stock_transfer_quantity_received: 0, stock_transfer_quantity_delivered: 0,
+                            ending_stock: ending_stock, last_po_received_date: receiving_date.to_date
                           begin
                             stock_movement_product_detail.save
                           rescue ActiveRecord::RecordNotUnique => e
                             stock_movement_product_detail = stock_movement_product.
                               stock_movement_product_details.select{|stock_movement_product_detail| stock_movement_product_detail.color_id == purchase_order_detail.color_id && stock_movement_product_detail.size_id == purchase_order_detail.size_id}.first
                             stock_movement_product_detail.with_lock do
-                              stock_movement_product_detail.quantity += quantity
+                              stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0
+                              stock_movement_product_detail.purchase_order_quantity_received += quantity
+                              stock_movement_product_detail.ending_stock += quantity
+                              stock_movement_product_detail.last_po_received_date = receiving_date.to_date
                               stock_movement_product_detail.save
                             end
                           end                        

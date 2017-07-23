@@ -1,0 +1,22 @@
+<%= form_for(stock_movement) do |f| %>
+  <% if stock_movement.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(stock_movement.errors.count, "error") %> prohibited this stock_movement from being saved:</h2>
+
+      <ul>
+      <% stock_movement.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :year %>
+    <%= f.number_field :year %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
