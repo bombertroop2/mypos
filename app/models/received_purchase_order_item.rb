@@ -117,7 +117,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                           else
                             stock_movement_product_detail.with_lock do
                               stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0
-                              stock_movement_product_detail.purchase_order_quantity_received = stock_movement_product_detail.purchase_order_quantity_received + quantity
+                              stock_movement_product_detail.purchase_order_quantity_received = stock_movement_product_detail.purchase_order_quantity_received.to_i + quantity
                               stock_movement_product_detail.ending_stock += quantity
                               stock_movement_product_detail.last_transaction_date = receiving_date.to_date
                               stock_movement_product_detail.save
