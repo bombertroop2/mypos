@@ -1,5 +1,5 @@
 class DirectPurchaseDetail < ApplicationRecord
-  attr_accessor :product_id
+  attr_accessor :product_id, :warehouse_id, :receiving_date
 
   belongs_to :direct_purchase_product
   belongs_to :size
@@ -30,7 +30,10 @@ class DirectPurchaseDetail < ApplicationRecord
           received_purchase_order_product_id: direct_purchase_product.received_purchase_order_product.id,
           quantity: quantity,
           direct_purchase_detail_id: id,
-          is_it_direct_purchasing: true
+          is_it_direct_purchasing: true,
+          product_id: product_id,
+          warehouse_id: warehouse_id,
+          receiving_date: receiving_date
         })
     end
 

@@ -218,7 +218,7 @@ class ReceivingController < ApplicationController
       params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net,
         received_purchase_order_attributes: [:is_using_delivery_order, :delivery_order_number], 
         direct_purchase_products_attributes: [:dp_cost, :product_id, :receiving_date,
-          direct_purchase_details_attributes: [:size_id, :color_id, :quantity, :product_id]])
+          direct_purchase_details_attributes: [:size_id, :color_id, :quantity, :product_id, :warehouse_id, :receiving_date]])
     end
   
     def set_purchase_order
@@ -247,7 +247,7 @@ class ReceivingController < ApplicationController
         params[:direct_purchase][:direct_purchase_products_attributes][key].merge! receiving_date: params[:direct_purchase][:receiving_date]
         product_id = params[:direct_purchase][:direct_purchase_products_attributes][key][:product_id]
         params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].each do |dpd_key, value|
-          params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key].merge! product_id: product_id
+          params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key].merge! product_id: product_id, warehouse_id: params[:direct_purchase][:warehouse_id], receiving_date: params[:direct_purchase][:receiving_date]
         end if params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].present?
       end if params[:direct_purchase][:direct_purchase_products_attributes].present?
     end
