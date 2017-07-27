@@ -11,7 +11,7 @@ class ShipmentProductItem < ApplicationRecord
     validate :quantity_available, if: proc{|spi| spi.quantity.present? && spi.quantity.is_a?(Numeric)}
   
       before_destroy :delete_tracks
-      after_create :update_available_quantity
+      before_save :update_available_quantity
       after_destroy :update_available_quantity
       
       private
@@ -43,12 +43,92 @@ class ShipmentProductItem < ApplicationRecord
       
       def update_available_quantity
         unless destroyed?
-          order_booking_product_item.shipping = true
-          order_booking_product_item.update_attribute :available_quantity, quantity
+          if new_record?
+            order_booking_product_item.shipping = true
+            order_booking_product_item.update_attribute :available_quantity, quantity
+            create_stock_movement if quantity > 0
+          else
+            order_booking_product_item.edit_shipping = true
+            order_booking_product_item.old_available_quantity = order_booking_product_item.available_quantity
+            order_booking_product_item.update_attribute :available_quantity, quantity
+          end
         else
           order_booking_product_item.cancel_shipment = true
           order_booking_product_item.old_available_quantity = order_booking_product_item.available_quantity
           order_booking_product_item.update_attribute :available_quantity, nil
         end
-      end      
+      end
+
+      def create_stock_movement
+        product_id = OrderBookingProduct.select(:product_id).where(id: order_booking_product_id).first.product_id
+        order_booking_product_item = OrderBookingProductItem.select(:size_id, :color_id).where(id: order_booking_product_item_id).first
+        color_id = order_booking_product_item.color_id
+        size_id = order_booking_product_item.size_id
+        warehouse_id = OrderBooking.select(:origin_warehouse_id).where(id: order_booking_id).first.origin_warehouse_id
+        transaction_date = shipment_product.shipment.delivery_date
+        last_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date <= ?", product_id, color_id, size_id, warehouse_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC, stock_movement_transactions.id DESC").select("stock_movement_product_details.ending_stock").first
+        ending_stock = (last_movement.ending_stock rescue 0) - quantity
+        stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
+        stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
+        if stock_movement.new_record?                    
+          stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
+          stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+          stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+          stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+            size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
+            ending_stock: ending_stock
+          stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+          stock_movement.save
+        else
+          stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == transaction_date.month}.first
+          stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month if stock_movement_month.blank?
+          if stock_movement_month.new_record?                      
+            stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+            stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+            stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+              size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
+              ending_stock: ending_stock
+            stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+            stock_movement_month.save
+          else
+            stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
+            stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
+            if stock_movement_warehouse.new_record?                        
+              stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
+                ending_stock: ending_stock
+              stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+              stock_movement_warehouse.save
+            else
+              stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
+              stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
+              if stock_movement_product.new_record?                          
+                stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                  size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
+                  ending_stock: ending_stock
+                stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+                stock_movement_product.save
+              else
+                stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
+                  select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
+                if stock_movement_product_detail.blank?
+                  stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                    size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
+                    ending_stock: ending_stock
+                  stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+                  stock_movement_product_detail.save
+                else
+                  stock_movement_product_detail.with_lock do
+                    stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0                                                  
+                    stock_movement_product_detail.ending_stock -= quantity
+                    stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+                    stock_movement_product_detail.save
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
     end

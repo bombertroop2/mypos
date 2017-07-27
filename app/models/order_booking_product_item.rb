@@ -1,6 +1,6 @@
 class OrderBookingProductItem < ApplicationRecord
   attr_accessor :product_id, :new_product, :disable_validation, :old_available_quantity,
-    :shipping, :cancel_shipment
+    :shipping, :cancel_shipment, :edit_shipping
 
   audited associated_with: :order_booking_product, on: [:create, :update], except: :available_quantity
 
@@ -16,7 +16,7 @@ class OrderBookingProductItem < ApplicationRecord
           before_save :update_booked_quantity, :update_total_quantity
           before_destroy :delete_tracks
           after_destroy :update_booked_quantity
-          after_update :update_stock_and_booked_quantity, if: proc{|spi| spi.shipping || spi.cancel_shipment}
+          after_update :update_stock_and_booked_quantity, if: proc{|spi| spi.shipping || spi.cancel_shipment || spi.edit_shipping}
       
             def available_for_booking_quantity=(value)
               @available_for_booking_quantity = value
@@ -49,14 +49,15 @@ class OrderBookingProductItem < ApplicationRecord
                 where(size_id: size_id, color_id: color_id).where("stock_products.product_id = #{order_booking_product.product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
               if shipping
                 booked_quantity = stock_item.booked_quantity - quantity
-                stock_item.update_attribute :booked_quantity, booked_quantity
                 last_quantity = stock_item.quantity - available_quantity
-                stock_item.update_attribute :quantity, last_quantity
+                stock_item.update({booked_quantity: booked_quantity, quantity: last_quantity})
+              elsif edit_shipping
+                last_quantity = (stock_item.quantity + old_available_quantity) - available_quantity
+                stock_item.update({quantity: last_quantity})
               else
                 booked_quantity = stock_item.booked_quantity + quantity
-                stock_item.update_attribute :booked_quantity, booked_quantity
                 last_quantity = stock_item.quantity + old_available_quantity
-                stock_item.update_attribute :quantity, last_quantity
+                stock_item.update({booked_quantity: booked_quantity, quantity: last_quantity})
               end
             end
       

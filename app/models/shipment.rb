@@ -122,7 +122,7 @@ class Shipment < ApplicationRecord
                                         stock_movement_product_detail.delivery_order_quantity_received = stock_movement_product_detail.delivery_order_quantity_received.to_i + quantity
                                         stock_movement_product_detail.ending_stock += quantity
                                       else
-                                        stock_movement_product_detail.delivery_order_quantity_delivered = stock_movement_product_detail.delivery_order_quantity_delivered.to_i - quantity
+                                        stock_movement_product_detail.delivery_order_quantity_delivered = stock_movement_product_detail.delivery_order_quantity_delivered.to_i + quantity
                                         stock_movement_product_detail.ending_stock -= quantity
                                       end
                                       stock_movement_product_detail.last_transaction_date = transaction_date
@@ -160,8 +160,7 @@ class Shipment < ApplicationRecord
                                 size_id = shipment_product_item.order_booking_product_item.size_id
                                 color_id = shipment_product_item.order_booking_product_item.color_id
                                 stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-                                create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
-                                create_stock_movement(product_id, color_id, size_id, order_booking.origin_warehouse_id, received_date, "central", shipment_product_item.quantity)
+#                                create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                               end
                             end
                           end
@@ -177,8 +176,7 @@ class Shipment < ApplicationRecord
                                   size_id = shipment_product_item.order_booking_product_item.size_id
                                   color_id = shipment_product_item.order_booking_product_item.color_id
                                   stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-                                  create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
-                                  create_stock_movement(product_id, color_id, size_id, order_booking.origin_warehouse_id, received_date, "central", shipment_product_item.quantity)
+#                                  create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                                 end
                               end
                               begin
@@ -190,8 +188,7 @@ class Shipment < ApplicationRecord
                                     size_id = shipment_product_item.order_booking_product_item.size_id
                                     color_id = shipment_product_item.order_booking_product_item.color_id
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-                                    create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
-                                    create_stock_movement(product_id, color_id, size_id, order_booking.origin_warehouse_id, received_date, "central", shipment_product_item.quantity)
+#                                    create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                                     begin
                                       stock_detail.save
                                     rescue ActiveRecord::RecordNotUnique => e
@@ -200,8 +197,7 @@ class Shipment < ApplicationRecord
                                         stock_detail.quantity += shipment_product_item.quantity
                                         stock_detail.save
                                       end
-                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
-                                      create_stock_movement(product_id, color_id, size_id, order_booking.origin_warehouse_id, received_date, "central", shipment_product_item.quantity)
+#                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                                     end
                                   end
                                 end
