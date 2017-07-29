@@ -48,7 +48,7 @@ Rails.application.routes.draw do
     end
   end
   resources :available_menus, only: [:new, :create]
-  resources :shipments do    
+  resources :shipments, except: [:edit, :update] do    
     collection do
       get "generate_ob_detail"
       get "inventory_receipts"

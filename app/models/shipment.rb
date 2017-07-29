@@ -34,12 +34,6 @@ class Shipment < ApplicationRecord
                         private
                         
                         def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, warehouse_type, quantity)
-                          last_movement = StockMovementProductDetail.joins(stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND last_transaction_date <= ?", product_id, color_id, size_id, warehouse_id, transaction_date.prev_month.end_of_month]).order("last_transaction_date DESC, stock_movement_product_details.id DESC").select(:ending_stock).first
-                          ending_stock = if warehouse_type.eql?("store")
-                            (last_movement.ending_stock rescue 0) + quantity
-                          else
-                            (last_movement.ending_stock rescue 0) - quantity
-                          end
                           stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                           stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
                           if stock_movement.new_record?                    
@@ -48,12 +42,10 @@ class Shipment < ApplicationRecord
                             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                             stock_movement_product_detail = if warehouse_type.eql?("store")
                               stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_received: quantity,
-                                ending_stock: ending_stock, last_transaction_date: transaction_date
+                                size_id: size_id, delivery_order_quantity_received: quantity, last_transaction_date: transaction_date
                             else
                               stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_delivered: quantity,
-                                ending_stock: ending_stock, last_transaction_date: transaction_date
+                                size_id: size_id, delivery_order_quantity_delivered: quantity, last_transaction_date: transaction_date
                             end
                             stock_movement.save
                           else
@@ -64,12 +56,10 @@ class Shipment < ApplicationRecord
                               stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                               stock_movement_product_detail = if warehouse_type.eql?("store")
                                 stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                  size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_received: quantity,
-                                  ending_stock: ending_stock, last_transaction_date: transaction_date
+                                  size_id: size_id, delivery_order_quantity_received: quantity, last_transaction_date: transaction_date
                               else
                                 stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                  size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_delivered: quantity,
-                                  ending_stock: ending_stock, last_transaction_date: transaction_date
+                                  size_id: size_id, delivery_order_quantity_delivered: quantity, last_transaction_date: transaction_date
                               end
                               stock_movement_month.save
                             else
@@ -79,12 +69,10 @@ class Shipment < ApplicationRecord
                                 stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                 stock_movement_product_detail = if warehouse_type.eql?("store")
                                   stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                    size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_received: quantity,
-                                    ending_stock: ending_stock, last_transaction_date: transaction_date
+                                    size_id: size_id, delivery_order_quantity_received: quantity, last_transaction_date: transaction_date
                                 else
                                   stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                    size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_delivered: quantity,
-                                    ending_stock: ending_stock, last_transaction_date: transaction_date
+                                    size_id: size_id, delivery_order_quantity_delivered: quantity, last_transaction_date: transaction_date
                                 end
                                 stock_movement_warehouse.save
                               else
@@ -93,12 +81,10 @@ class Shipment < ApplicationRecord
                                 if stock_movement_product.new_record?                          
                                   stock_movement_product_detail = if warehouse_type.eql?("store")
                                     stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                      size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_received: quantity,
-                                      ending_stock: ending_stock, last_transaction_date: transaction_date
+                                      size_id: size_id, delivery_order_quantity_received: quantity, last_transaction_date: transaction_date
                                   else
                                     stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                      size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_delivered: quantity,
-                                      ending_stock: ending_stock, last_transaction_date: transaction_date
+                                      size_id: size_id, delivery_order_quantity_delivered: quantity, last_transaction_date: transaction_date
                                   end
                                   stock_movement_product.save
                                 else
@@ -107,23 +93,18 @@ class Shipment < ApplicationRecord
                                   if stock_movement_product_detail.blank?
                                     stock_movement_product_detail = if warehouse_type.eql?("store")
                                       stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                        size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_received: quantity,
-                                        ending_stock: ending_stock, last_transaction_date: transaction_date
+                                        size_id: size_id, delivery_order_quantity_received: quantity, last_transaction_date: transaction_date
                                     else
                                       stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                        size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0), delivery_order_quantity_delivered: quantity,
-                                        ending_stock: ending_stock, last_transaction_date: transaction_date
+                                        size_id: size_id, delivery_order_quantity_delivered: quantity, last_transaction_date: transaction_date
                                     end
                                     stock_movement_product_detail.save
                                   else
                                     stock_movement_product_detail.with_lock do
-                                      stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0
                                       if warehouse_type.eql?("store")
                                         stock_movement_product_detail.delivery_order_quantity_received = stock_movement_product_detail.delivery_order_quantity_received.to_i + quantity
-                                        stock_movement_product_detail.ending_stock += quantity
                                       else
                                         stock_movement_product_detail.delivery_order_quantity_delivered = stock_movement_product_detail.delivery_order_quantity_delivered.to_i + quantity
-                                        stock_movement_product_detail.ending_stock -= quantity
                                       end
                                       stock_movement_product_detail.last_transaction_date = transaction_date
                                       stock_movement_product_detail.save
@@ -160,7 +141,7 @@ class Shipment < ApplicationRecord
                                 size_id = shipment_product_item.order_booking_product_item.size_id
                                 color_id = shipment_product_item.order_booking_product_item.color_id
                                 stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-#                                create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
+                                #                                create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                               end
                             end
                           end
@@ -176,7 +157,7 @@ class Shipment < ApplicationRecord
                                   size_id = shipment_product_item.order_booking_product_item.size_id
                                   color_id = shipment_product_item.order_booking_product_item.color_id
                                   stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-#                                  create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
+                                  #                                  create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                                 end
                               end
                               begin
@@ -188,7 +169,7 @@ class Shipment < ApplicationRecord
                                     size_id = shipment_product_item.order_booking_product_item.size_id
                                     color_id = shipment_product_item.order_booking_product_item.color_id
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-#                                    create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
+                                    #                                    create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                                     begin
                                       stock_detail.save
                                     rescue ActiveRecord::RecordNotUnique => e
@@ -197,7 +178,7 @@ class Shipment < ApplicationRecord
                                         stock_detail.quantity += shipment_product_item.quantity
                                         stock_detail.save
                                       end
-#                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
+                                      #                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, "store", shipment_product_item.quantity)
                                     end
                                   end
                                 end

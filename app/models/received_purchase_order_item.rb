@@ -19,13 +19,6 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 private
                 
                 def create_stock_movement
-                  last_movement = unless is_it_direct_purchasing
-                    StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date <= ?", product_id, purchase_order_detail.color_id, purchase_order_detail.size_id, warehouse_id, receiving_date.to_date.prev_month.end_of_month]).order("transaction_date DESC, stock_movement_transactions.id DESC").select("stock_movement_product_details.ending_stock").first
-                  else
-                    StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date <= ?", product_id, direct_purchase_detail.color_id, direct_purchase_detail.size_id, warehouse_id, receiving_date.to_date.prev_month.end_of_month]).order("transaction_date DESC, stock_movement_transactions.id DESC").select("stock_movement_product_details.ending_stock").first
-                  end
-                  ending_stock = (last_movement.ending_stock rescue 0) + quantity
-                  
                   stock_movement = StockMovement.select(:id).where(year: receiving_date.to_date.year).first
                   stock_movement = StockMovement.new year: receiving_date.to_date.year if stock_movement.blank?
                   if stock_movement.new_record?                    
@@ -34,10 +27,10 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                     stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                     stock_movement_product_detail = unless is_it_direct_purchasing
                       stock_movement_product.stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                        size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), ending_stock: ending_stock
+                        size_id: purchase_order_detail.size_id
                     else
                       stock_movement_product.stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
-                        size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0), ending_stock: ending_stock
+                        size_id: direct_purchase_detail.size_id
                     end
                     stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                     stock_movement.save
@@ -50,13 +43,11 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                       stock_movement_product_detail = unless is_it_direct_purchasing
                         stock_movement_product.
                           stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                          size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                          ending_stock: ending_stock
+                          size_id: purchase_order_detail.size_id
                       else
                         stock_movement_product.
                           stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
-                          size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                          ending_stock: ending_stock
+                          size_id: direct_purchase_detail.size_id
                       end
                       stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                       stock_movement_month.save
@@ -68,13 +59,11 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                         stock_movement_product_detail = unless is_it_direct_purchasing
                           stock_movement_product.
                             stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                            size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                            ending_stock: ending_stock
+                            size_id: purchase_order_detail.size_id
                         else
                           stock_movement_product.
                             stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
-                            size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                            ending_stock: ending_stock
+                            size_id: direct_purchase_detail.size_id
                         end
                         stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                         stock_movement_warehouse.save
@@ -85,13 +74,11 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                           stock_movement_product_detail = unless is_it_direct_purchasing
                             stock_movement_product.
                               stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                              size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                              ending_stock: ending_stock
+                              size_id: purchase_order_detail.size_id
                           else
                             stock_movement_product.
                               stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
-                              size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                              ending_stock: ending_stock
+                              size_id: direct_purchase_detail.size_id
                           end
                           stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                           stock_movement_product.save
@@ -107,23 +94,17 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                             stock_movement_product_detail = unless is_it_direct_purchasing
                               stock_movement_product.
                                 stock_movement_product_details.build color_id: purchase_order_detail.color_id,
-                                size_id: purchase_order_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                                ending_stock: ending_stock
+                                size_id: purchase_order_detail.size_id
                             else
                               stock_movement_product.
                                 stock_movement_product_details.build color_id: direct_purchase_detail.color_id,
-                                size_id: direct_purchase_detail.size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                                ending_stock: ending_stock
+                                size_id: direct_purchase_detail.size_id
                             end
                             stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                             stock_movement_product_detail.save
                           else
-                            stock_movement_product_detail.with_lock do
-                              stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0
-                              stock_movement_product_detail.ending_stock += quantity
-                              stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
-                              stock_movement_product_detail.save
-                            end
+                            stock_movement_transaction = stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
+                            stock_movement_transaction.save
                           end
                         end
                       end

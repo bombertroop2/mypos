@@ -10,11 +10,25 @@ class ShipmentProductItem < ApplicationRecord
     validate :item_available
     validate :quantity_available, if: proc{|spi| spi.quantity.present? && spi.quantity.is_a?(Numeric)}
   
-      before_destroy :delete_tracks
-      before_save :update_available_quantity
+      before_destroy :delete_tracks, :delete_stock_movement
+      before_create :update_available_quantity
       after_destroy :update_available_quantity
       
       private
+      
+      def delete_stock_movement
+        order_booking_product_item = OrderBookingProductItem.select(:size_id, :color_id, :order_booking_product_id).where(id: order_booking_product_item_id).first
+        order_booking_product = OrderBookingProduct.select(:order_booking_id, :product_id).where(id: order_booking_product_item.order_booking_product_id).first
+        product_id = order_booking_product.product_id
+        color_id = order_booking_product_item.color_id
+        size_id = order_booking_product_item.size_id
+        warehouse_id = OrderBooking.select(:origin_warehouse_id).where(id: order_booking_product.order_booking_id).first.origin_warehouse_id
+        shipment_product = ShipmentProduct.select(:shipment_id).where(id: shipment_product_id).first
+        shipment = Shipment.select(:delivery_date).where(id: shipment_product.shipment_id).first
+        transaction_date = shipment.delivery_date
+        created_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date = ? AND delivery_order_quantity_delivered = ?", product_id, color_id, size_id, warehouse_id, transaction_date, quantity]).select(:id).first
+        created_movement.destroy 
+      end
         
       def delete_tracks
         audits.destroy_all
@@ -43,15 +57,9 @@ class ShipmentProductItem < ApplicationRecord
       
       def update_available_quantity
         unless destroyed?
-          if new_record?
-            order_booking_product_item.shipping = true
-            order_booking_product_item.update_attribute :available_quantity, quantity
-            create_stock_movement if quantity > 0
-          else
-            order_booking_product_item.edit_shipping = true
-            order_booking_product_item.old_available_quantity = order_booking_product_item.available_quantity
-            order_booking_product_item.update_attribute :available_quantity, quantity
-          end
+          order_booking_product_item.shipping = true
+          order_booking_product_item.update_attribute :available_quantity, quantity
+          create_stock_movement if quantity > 0
         else
           order_booking_product_item.cancel_shipment = true
           order_booking_product_item.old_available_quantity = order_booking_product_item.available_quantity
@@ -66,8 +74,6 @@ class ShipmentProductItem < ApplicationRecord
         size_id = order_booking_product_item.size_id
         warehouse_id = OrderBooking.select(:origin_warehouse_id).where(id: order_booking_id).first.origin_warehouse_id
         transaction_date = shipment_product.shipment.delivery_date
-        last_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date <= ?", product_id, color_id, size_id, warehouse_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC, stock_movement_transactions.id DESC").select("stock_movement_product_details.ending_stock").first
-        ending_stock = (last_movement.ending_stock rescue 0) - quantity
         stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
         stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
         if stock_movement.new_record?                    
@@ -75,8 +81,7 @@ class ShipmentProductItem < ApplicationRecord
           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
           stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-            size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-            ending_stock: ending_stock
+            size_id: size_id
           stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
           stock_movement.save
         else
@@ -86,8 +91,7 @@ class ShipmentProductItem < ApplicationRecord
             stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
             stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-              size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-              ending_stock: ending_stock
+              size_id: size_id
             stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
             stock_movement_month.save
           else
@@ -96,8 +100,7 @@ class ShipmentProductItem < ApplicationRecord
             if stock_movement_warehouse.new_record?                        
               stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
               stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                ending_stock: ending_stock
+                size_id: size_id
               stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
               stock_movement_warehouse.save
             else
@@ -105,8 +108,7 @@ class ShipmentProductItem < ApplicationRecord
               stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
               if stock_movement_product.new_record?                          
                 stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                  size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                  ending_stock: ending_stock
+                  size_id: size_id
                 stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
                 stock_movement_product.save
               else
@@ -114,17 +116,12 @@ class ShipmentProductItem < ApplicationRecord
                   select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
                 if stock_movement_product_detail.blank?
                   stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                    size_id: size_id, beginning_stock: (last_movement.ending_stock rescue 0),
-                    ending_stock: ending_stock
+                    size_id: size_id
                   stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
                   stock_movement_product_detail.save
                 else
-                  stock_movement_product_detail.with_lock do
-                    stock_movement_product_detail.beginning_stock = last_movement.ending_stock rescue 0                                                  
-                    stock_movement_product_detail.ending_stock -= quantity
-                    stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
-                    stock_movement_product_detail.save
-                  end
+                  stock_movement_transaction = stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_delivered: quantity, transaction_date: transaction_date
+                  stock_movement_transaction.save
                 end
               end
             end

@@ -123,21 +123,21 @@ class ShipmentsController < ApplicationController
     end
   end
   
-  def edit
-    @shipment.delivery_date = @shipment.delivery_date.strftime("%d/%m/%Y")
-  end
-  
-  def update
-    add_additional_params_for_edit
-    @valid = @shipment.update(edit_shipment_params)
-    if @shipment.errors[:base].present?
-      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
-    elsif @shipment.errors[:"shipment_products.base"].present?
-      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.base"].join("<br/>")}\",size: 'small'});"
-    elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present?
-      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>")}\",size: 'small'});"
-    end
-  end
+#  def edit
+#    @shipment.delivery_date = @shipment.delivery_date.strftime("%d/%m/%Y")
+#  end
+#  
+#  def update
+#    add_additional_params_for_edit
+#    @valid = @shipment.update(edit_shipment_params)
+#    if @shipment.errors[:base].present?
+#      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
+#    elsif @shipment.errors[:"shipment_products.base"].present?
+#      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.base"].join("<br/>")}\",size: 'small'});"
+#    elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present?
+#      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>")}\",size: 'small'});"
+#    end
+#  end
 
   # DELETE /shipments/1
   # DELETE /shipments/1.json
