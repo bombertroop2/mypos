@@ -105,23 +105,9 @@ class Shipment < ApplicationRecord
                         end
                     
                         def load_goods_to_destination_warehouse
-                          stock = Stock.new warehouse_id: order_booking.destination_warehouse_id
-                          shipment_products.select(:id, :order_booking_product_id).each do |shipment_product|
-                            product_id = shipment_product.order_booking_product.product_id
-                            stock_product = stock.stock_products.build product_id: product_id
-                            shipment_product.shipment_product_items.select(:order_booking_product_item_id, :quantity).each do |shipment_product_item|
-                              if shipment_product_item.quantity > 0
-                                size_id = shipment_product_item.order_booking_product_item.size_id
-                                color_id = shipment_product_item.order_booking_product_item.color_id
-                                stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-                                create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
-                              end
-                            end
-                          end
-                          begin
-                            stock.save
-                          rescue ActiveRecord::RecordNotUnique => e
-                            stock = order_booking.destination_warehouse.stock
+                          stock = Stock.select(:id).where(warehouse_id: order_booking.destination_warehouse_id).first
+                          stock = Stock.new warehouse_id: order_booking.destination_warehouse_id if stock.blank?
+                          if stock.new_record?
                             shipment_products.select(:id, :order_booking_product_id).each do |shipment_product|
                               product_id = shipment_product.order_booking_product.product_id
                               stock_product = stock.stock_products.build product_id: product_id
@@ -133,20 +119,34 @@ class Shipment < ApplicationRecord
                                   create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
                                 end
                               end
-                              begin
-                                stock_product.save
-                              rescue ActiveRecord::RecordNotUnique => e
-                                stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product_id)}.first
+                            end
+                            stock.save
+                          else
+                            shipment_products.select(:id, :order_booking_product_id).each do |shipment_product|
+                              product_id = shipment_product.order_booking_product.product_id
+                              stock_product = stock.stock_products.select{|stock_product| stock_product.product_id == product_id}.first
+                              stock_product = stock.stock_products.build product_id: product_id if stock_product.blank?
+                              if stock_product.new_record?
                                 shipment_product.shipment_product_items.select(:order_booking_product_item_id, :quantity).each do |shipment_product_item|
                                   if shipment_product_item.quantity > 0
                                     size_id = shipment_product_item.order_booking_product_item.size_id
                                     color_id = shipment_product_item.order_booking_product_item.color_id
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
                                     create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
-                                    begin
+                                  end
+                                end
+                                stock_product.save
+                              else
+                                shipment_product.shipment_product_items.select(:order_booking_product_item_id, :quantity).each do |shipment_product_item|
+                                  if shipment_product_item.quantity > 0
+                                    size_id = shipment_product_item.order_booking_product_item.size_id
+                                    color_id = shipment_product_item.order_booking_product_item.color_id
+                                    stock_detail = stock_product.stock_details.select{|stock_detail| stock_detail.size_id == size_id && stock_detail.color_id == color_id}.first
+                                    stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity if stock_detail.blank?
+                                    if stock_detail.new_record?                                      
+                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
                                       stock_detail.save
-                                    rescue ActiveRecord::RecordNotUnique => e
-                                      stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(size_id) && sd.color_id.eql?(color_id)}.first
+                                    else
                                       stock_detail.with_lock do
                                         stock_detail.quantity += shipment_product_item.quantity
                                         stock_detail.save
@@ -157,7 +157,7 @@ class Shipment < ApplicationRecord
                                 end
                               end
                             end
-                          end                        
+                          end
                         end
                   
                         def empty_in_transit_warehouse

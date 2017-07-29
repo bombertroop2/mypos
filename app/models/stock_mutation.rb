@@ -36,6 +36,62 @@ class StockMutation < ApplicationRecord
 
                                     private
                                     
+                                    def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity)
+                                      stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
+                                      stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
+                                      if stock_movement.new_record?                    
+                                        stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
+                                        stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+                                        stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                                        stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                          size_id: size_id
+                                        stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                        stock_movement.save
+                                      else
+                                        stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == transaction_date.month}.first
+                                        stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month if stock_movement_month.blank?
+                                        if stock_movement_month.new_record?                      
+                                          stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
+                                          stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                                          stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                            size_id: size_id
+                                          stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                          stock_movement_month.save
+                                        else
+                                          stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
+                                          stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
+                                          if stock_movement_warehouse.new_record?                        
+                                            stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
+                                            stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                              size_id: size_id
+                                            stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                            stock_movement_warehouse.save
+                                          else
+                                            stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
+                                            stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
+                                            if stock_movement_product.new_record?                          
+                                              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                size_id: size_id
+                                              stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                              stock_movement_product.save
+                                            else
+                                              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
+                                                select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
+                                              if stock_movement_product_detail.blank?
+                                                stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                  size_id: size_id
+                                                stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                stock_movement_product_detail.save
+                                              else
+                                                stock_movement_transaction = stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                stock_movement_transaction.save
+                                              end
+                                            end
+                                          end
+                                        end
+                                      end
+                                    end
+                                    
                                     def transaction_open
                                       if receiving_inventory_to_store || receiving_inventory_to_warehouse                                      
                                         errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: received_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[received_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
@@ -50,22 +106,9 @@ class StockMutation < ApplicationRecord
                                     end
                               
                                     def load_goods_to_destination_warehouse
-                                      stock = Stock.new warehouse_id: destination_warehouse_id
-                                      stock_mutation_products.select(:id, :product_id).each do |stock_mutation_product|
-                                        product_id = stock_mutation_product.product_id
-                                        stock_product = stock.stock_products.build product_id: product_id
-                                        stock_mutation_product.stock_mutation_product_items.select(:size_id, :color_id, :quantity).each do |stock_mutation_product_item|
-                                          if stock_mutation_product_item.quantity > 0
-                                            size_id = stock_mutation_product_item.size_id
-                                            color_id = stock_mutation_product_item.color_id
-                                            stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity
-                                          end
-                                        end
-                                      end
-                                      begin
-                                        stock.save
-                                      rescue ActiveRecord::RecordNotUnique => e
-                                        stock = destination_warehouse.stock
+                                      stock = Stock.select(:id).where(warehouse_id: destination_warehouse_id).first
+                                      stock = Stock.new warehouse_id: destination_warehouse_id if stock.blank?
+                                      if stock.new_record?
                                         stock_mutation_products.select(:id, :product_id).each do |stock_mutation_product|
                                           product_id = stock_mutation_product.product_id
                                           stock_product = stock.stock_products.build product_id: product_id
@@ -74,31 +117,48 @@ class StockMutation < ApplicationRecord
                                               size_id = stock_mutation_product_item.size_id
                                               color_id = stock_mutation_product_item.color_id
                                               stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity
+                                              create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                             end
                                           end
-                                          begin
-                                            stock_product.save
-                                          rescue ActiveRecord::RecordNotUnique => e
-                                            stock_product = stock.stock_products.select{|sp| sp.product_id.eql?(product_id)}.first
+                                        end
+                                        stock.save
+                                      else
+                                        stock_mutation_products.select(:id, :product_id).each do |stock_mutation_product|
+                                          product_id = stock_mutation_product.product_id
+                                          stock_product = stock.stock_products.select{|stock_product| stock_product.product_id == product_id}.first
+                                          stock_product = stock.stock_products.build product_id: product_id if stock_product.blank?
+                                          if stock_product.new_record?
                                             stock_mutation_product.stock_mutation_product_items.select(:size_id, :color_id, :quantity).each do |stock_mutation_product_item|
                                               if stock_mutation_product_item.quantity > 0
                                                 size_id = stock_mutation_product_item.size_id
                                                 color_id = stock_mutation_product_item.color_id
                                                 stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity
-                                                begin
+                                                create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                              end
+                                            end
+                                            stock_product.save
+                                          else
+                                            stock_mutation_product.stock_mutation_product_items.select(:size_id, :color_id, :quantity).each do |stock_mutation_product_item|
+                                              if stock_mutation_product_item.quantity > 0
+                                                size_id = stock_mutation_product_item.size_id
+                                                color_id = stock_mutation_product_item.color_id
+                                                stock_detail = stock_product.stock_details.select{|stock_detail| stock_detail.size_id == size_id && stock_detail.color_id == color_id}.first
+                                                stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity if stock_detail.blank?
+                                                if stock_detail.new_record?
+                                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                                   stock_detail.save
-                                                rescue ActiveRecord::RecordNotUnique => e
-                                                  stock_detail = stock_product.stock_details.select{|sd| sd.size_id.eql?(size_id) && sd.color_id.eql?(color_id)}.first
+                                                else
                                                   stock_detail.with_lock do
                                                     stock_detail.quantity += stock_mutation_product_item.quantity
                                                     stock_detail.save
                                                   end
+                                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                                 end
                                               end
                                             end
                                           end
                                         end
-                                      end                        
+                                      end
                                     end
                             
                                     def shipment_receivable
