@@ -120,7 +120,25 @@
                         this.focus();
                     });
                     $("#save-btn").click(function () {
-                        $("#new_stock_mutation").submit();
+                        bootbox.confirm({
+                            message: "Once you return product, you'll not be able to change it</br>Are you sure?",
+                            buttons: {
+                                confirm: {
+                                    label: '<i class="fa fa-check"></i> Confirm'
+                                },
+                                cancel: {
+                                    label: '<i class="fa fa-times"></i> Cancel'
+                                }
+                            },
+                            callback: function (result) {
+                                if (result) {
+                                    $("body").css('padding-right', '0px');
+                                    $("#new_stock_mutation").submit();
+                                }
+                            },
+                            size: "small"
+                        });
+                        return false;
                     });
                 });
               </script>

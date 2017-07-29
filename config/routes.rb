@@ -28,12 +28,12 @@ Rails.application.routes.draw do
     end
     member do
       get "approve"
-      get "edit_store_to_warehouse"
+      #      get "edit_store_to_warehouse"
       get "show_store_to_store_receipt"
       get "show_store_to_warehouse_receipt"
       get "receive"
       get "receive_to_warehouse"
-      patch "update_store_to_warehouse"
+      #      patch "update_store_to_warehouse"
       delete "delete_store_to_warehouse"
     end
   end

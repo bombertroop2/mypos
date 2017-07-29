@@ -13,12 +13,84 @@ class StockMutationProductItem < ApplicationRecord
     validate :item_available
     validate :quantity_valid
     
-    before_destroy :return_goods_to_warehouse, if: proc{|smpi| smpi.stock_mutation_product.stock_mutation.destination_warehouse.warehouse_type.eql?("central")}
+    before_destroy :return_goods_to_warehouse, :delete_stock_movement, if: proc{|smpi| smpi.stock_mutation_product.stock_mutation.destination_warehouse.warehouse_type.eql?("central")}
       before_destroy :delete_tracks
       before_update :update_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
-        before_create :update_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
+        before_create :update_stock, :create_stock_movement, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
   
           private
+          
+          def delete_stock_movement
+            stock_mutation_product = StockMutationProduct.select(:stock_mutation_id, :product_id).where(id: stock_mutation_product_id).first
+            stock_mutation = StockMutation.select(:delivery_date, :origin_warehouse_id).where(id: stock_mutation_product.stock_mutation_id).first
+            product_id = stock_mutation_product.product_id
+            warehouse_id = stock_mutation.origin_warehouse_id            
+            transaction_date = stock_mutation.delivery_date
+            created_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date = ? AND stock_return_quantity_returned = ?", product_id, color_id, size_id, warehouse_id, transaction_date, quantity]).select(:id).first
+            created_movement.destroy 
+          end
+          
+          def create_stock_movement
+            stock_mutation_product = StockMutationProduct.select(:stock_mutation_id, :product_id).where(id: stock_mutation_product_id).first
+            stock_mutation = StockMutation.select(:delivery_date, :origin_warehouse_id).where(id: stock_mutation_product.stock_mutation_id).first
+            stock_movement = StockMovement.select(:id).where(year: stock_mutation.delivery_date.year).first
+            stock_movement = StockMovement.new year: stock_mutation.delivery_date.year if stock_movement.blank?
+            if stock_movement.new_record?                    
+              stock_movement_month = stock_movement.stock_movement_months.build month: stock_mutation.delivery_date.month
+              stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: stock_mutation.origin_warehouse_id
+              stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: stock_mutation_product.product_id
+              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                size_id: size_id
+              stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
+              stock_movement.save
+            else
+              stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == stock_mutation.delivery_date.month}.first
+              stock_movement_month = stock_movement.stock_movement_months.build month: stock_mutation.delivery_date.month if stock_movement_month.blank?
+              if stock_movement_month.new_record?                      
+                stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: stock_mutation.origin_warehouse_id
+                stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: stock_mutation_product.product_id
+                stock_movement_product_detail = stock_movement_product.
+                  stock_movement_product_details.build color_id: color_id,
+                  size_id: size_id
+                stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
+                stock_movement_month.save
+              else
+                stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == stock_mutation.origin_warehouse_id}.first
+                stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: stock_mutation.origin_warehouse_id if stock_movement_warehouse.blank?
+                if stock_movement_warehouse.new_record?                        
+                  stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: stock_mutation_product.product_id
+                  stock_movement_product_detail = stock_movement_product.
+                    stock_movement_product_details.build color_id: color_id,
+                    size_id: size_id
+                  stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
+                  stock_movement_warehouse.save
+                else
+                  stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == stock_mutation_product.product_id}.first
+                  stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: stock_mutation_product.product_id if stock_movement_product.blank?
+                  if stock_movement_product.new_record?                          
+                    stock_movement_product_detail = stock_movement_product.
+                      stock_movement_product_details.build color_id: color_id,
+                      size_id: size_id
+                    stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
+                    stock_movement_product.save
+                  else
+                    stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
+                      select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
+                    if stock_movement_product_detail.blank?
+                      stock_movement_product_detail = stock_movement_product.
+                        stock_movement_product_details.build color_id: color_id,
+                        size_id: size_id
+                      stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
+                      stock_movement_product_detail.save
+                    else
+                      stock_movement_transaction = stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
+                      stock_movement_transaction.save
+                    end
+                  end
+                end
+              end
+            end
+          end
     
           def delete_tracks
             audits.destroy_all

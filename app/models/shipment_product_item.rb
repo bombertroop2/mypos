@@ -27,7 +27,7 @@ class ShipmentProductItem < ApplicationRecord
         shipment = Shipment.select(:delivery_date).where(id: shipment_product.shipment_id).first
         transaction_date = shipment.delivery_date
         created_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date = ? AND delivery_order_quantity_delivered = ?", product_id, color_id, size_id, warehouse_id, transaction_date, quantity]).select(:id).first
-        created_movement.destroy 
+        created_movement.destroy if created_movement
       end
         
       def delete_tracks

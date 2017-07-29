@@ -312,22 +312,22 @@ class StockMutationsController < ApplicationController
     end
   end
 
-  def edit_store_to_warehouse
-    @destintation_warehouses = Warehouse.central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
-    @stock_mutation.delivery_date = @stock_mutation.delivery_date.strftime("%d/%m/%Y")
-    @colors = []
-    @sizes = []
-    @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
-      stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
-      @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
-      @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
-      @colors[stock_mutation_product.product_id].each do |color|
-        @sizes[stock_mutation_product.product_id].each do |size|
-          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
-        end
-      end        
-    end
-  end
+#  def edit_store_to_warehouse
+#    @destintation_warehouses = Warehouse.central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
+#    @stock_mutation.delivery_date = @stock_mutation.delivery_date.strftime("%d/%m/%Y")
+#    @colors = []
+#    @sizes = []
+#    @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+#      stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
+#      @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+#      @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+#      @colors[stock_mutation_product.product_id].each do |color|
+#        @sizes[stock_mutation_product.product_id].each do |size|
+#          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
+#        end
+#      end        
+#    end
+#  end
   
   def update
     add_additional_params_for_edit("store to store")
@@ -357,34 +357,34 @@ class StockMutationsController < ApplicationController
     end
   end
   
-  def update_store_to_warehouse
-    add_additional_params_for_edit("store to warehouse")
-    @stock_mutation.quantity = @total_stock_mutation_quantity
-    @stock_mutation.mutation_type = "store to warehouse"
-    unless @saved = @stock_mutation.update(stock_mutation_params)
-      if @stock_mutation.errors[:base].present?
-        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
-      elsif @stock_mutation.errors[:"stock_mutation_products.base"].present?
-        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
-      elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
-        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
-      else        
-        @destintation_warehouses = Warehouse.central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
-        @colors = []
-        @sizes = []
-        @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
-          stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
-          @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
-          @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
-          @colors[stock_mutation_product.product_id].each do |color|
-            @sizes[stock_mutation_product.product_id].each do |size|
-              stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
-            end
-          end        
-        end
-      end
-    end
-  end
+#  def update_store_to_warehouse
+#    add_additional_params_for_edit("store to warehouse")
+#    @stock_mutation.quantity = @total_stock_mutation_quantity
+#    @stock_mutation.mutation_type = "store to warehouse"
+#    unless @saved = @stock_mutation.update(stock_mutation_params)
+#      if @stock_mutation.errors[:base].present?
+#        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
+#      elsif @stock_mutation.errors[:"stock_mutation_products.base"].present?
+#        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
+#      elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
+#        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
+#      else        
+#        @destintation_warehouses = Warehouse.central.where(["id <> ?", @stock_mutation.origin_warehouse_id]).select(:id, :code)
+#        @colors = []
+#        @sizes = []
+#        @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+#          stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).first
+#          @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+#          @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+#          @colors[stock_mutation_product.product_id].each do |color|
+#            @sizes[stock_mutation_product.product_id].each do |size|
+#              stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.where(size_id: size.id, color_id: color.id).select("1 AS one").blank?
+#            end
+#          end        
+#        end
+#      end
+#    end
+#  end
   
   def destroy
     unless @stock_mutation.destroy
