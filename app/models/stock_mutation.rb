@@ -36,7 +36,7 @@ class StockMutation < ApplicationRecord
 
                                     private
                                     
-                                    def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity)
+                                    def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, transaction_type = "return to warehouse")
                                       stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                       stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
                                       if stock_movement.new_record?                    
@@ -45,7 +45,13 @@ class StockMutation < ApplicationRecord
                                         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                         stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                           size_id: size_id
-                                        stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                        if transaction_type.eql?("stock transfer")
+                                          stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                        elsif transaction_type.eql?("receiving stock transfer")
+                                          stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                        else
+                                          stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                        end
                                         stock_movement.save
                                       else
                                         stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == transaction_date.month}.first
@@ -55,7 +61,13 @@ class StockMutation < ApplicationRecord
                                           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                           stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                             size_id: size_id
-                                          stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                          if transaction_type.eql?("stock transfer")
+                                            stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                          elsif transaction_type.eql?("receiving stock transfer")
+                                            stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                          else
+                                            stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                          end
                                           stock_movement_month.save
                                         else
                                           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
@@ -64,7 +76,13 @@ class StockMutation < ApplicationRecord
                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                             stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                               size_id: size_id
-                                            stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                            if transaction_type.eql?("stock transfer")
+                                              stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                            elsif transaction_type.eql?("receiving stock transfer")
+                                              stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                            else
+                                              stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                            end
                                             stock_movement_warehouse.save
                                           else
                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
@@ -72,7 +90,13 @@ class StockMutation < ApplicationRecord
                                             if stock_movement_product.new_record?                          
                                               stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                 size_id: size_id
-                                              stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                              if transaction_type.eql?("stock transfer")
+                                                stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                              elsif transaction_type.eql?("receiving stock transfer")
+                                                stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                              else
+                                                stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                              end
                                               stock_movement_product.save
                                             else
                                               stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
@@ -80,10 +104,22 @@ class StockMutation < ApplicationRecord
                                               if stock_movement_product_detail.blank?
                                                 stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                   size_id: size_id
-                                                stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                if transaction_type.eql?("stock transfer")
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                                elsif transaction_type.eql?("receiving stock transfer")
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                                else
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                end
                                                 stock_movement_product_detail.save
                                               else
-                                                stock_movement_transaction = stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                stock_movement_transaction = if transaction_type.eql?("stock transfer")
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                                elsif transaction_type.eql?("receiving stock transfer")
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                                else
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                end
                                                 stock_movement_transaction.save
                                               end
                                             end
@@ -117,7 +153,11 @@ class StockMutation < ApplicationRecord
                                               size_id = stock_mutation_product_item.size_id
                                               color_id = stock_mutation_product_item.color_id
                                               stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity
-                                              create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                              if receiving_inventory_to_store
+                                                create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity, "receiving stock transfer")
+                                              else
+                                                create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                              end                                              
                                             end
                                           end
                                         end
@@ -133,7 +173,11 @@ class StockMutation < ApplicationRecord
                                                 size_id = stock_mutation_product_item.size_id
                                                 color_id = stock_mutation_product_item.color_id
                                                 stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity
-                                                create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                                if receiving_inventory_to_store
+                                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity, "receiving stock transfer")
+                                                else
+                                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                                end                                              
                                               end
                                             end
                                             stock_product.save
@@ -145,14 +189,22 @@ class StockMutation < ApplicationRecord
                                                 stock_detail = stock_product.stock_details.select{|stock_detail| stock_detail.size_id == size_id && stock_detail.color_id == color_id}.first
                                                 stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: stock_mutation_product_item.quantity if stock_detail.blank?
                                                 if stock_detail.new_record?
-                                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                                  if receiving_inventory_to_store
+                                                    create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity, "receiving stock transfer")
+                                                  else
+                                                    create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                                  end                                              
                                                   stock_detail.save
                                                 else
                                                   stock_detail.with_lock do
                                                     stock_detail.quantity += stock_mutation_product_item.quantity
                                                     stock_detail.save
                                                   end
-                                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                                  if receiving_inventory_to_store
+                                                    create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity, "receiving stock transfer")
+                                                  else
+                                                    create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
+                                                  end                                              
                                                 end
                                               end
                                             end
@@ -180,7 +232,11 @@ class StockMutation < ApplicationRecord
                                               stock.save
                                             end
                                           end
-                                          raise "Return quantity must be less than or equal to quantity on hand." if raise_error
+                                          if raise_error
+                                            raise "Return quantity must be less than or equal to quantity on hand."
+                                          else
+                                            create_stock_movement(stock_mutation_product.product_id, stock_mutation_product_item.color_id, stock_mutation_product_item.size_id, origin_warehouse_id, approved_date, stock_mutation_product_item.quantity, "stock transfer")
+                                          end
                                         end
                                       end
                                     end
