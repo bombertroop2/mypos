@@ -197,6 +197,9 @@
                                                       </li>
                                                     <% end %>
 
+                                                    <% if can? :read, StockMovement %>
+                                                      <li><%= link_to "Stock Movement", stock_movements_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>

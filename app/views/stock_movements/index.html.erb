@@ -1,27 +1,116 @@
-<p id="notice"><%= notice %></p>
+<div class="page-header">
+    <h1>Stock Movement</h1>
+</div>
 
-<h1>Stock Movements</h1>
-
-<table>
-  <thead>
-    <tr>
-      <th>Year</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @stock_movements.each do |stock_movement| %>
-      <tr>
-        <td><%= stock_movement.year %></td>
-        <td><%= link_to 'Show', stock_movement %></td>
-        <td><%= link_to 'Edit', edit_stock_movement_path(stock_movement) %></td>
-        <td><%= link_to 'Destroy', stock_movement, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
-
-<%= link_to 'New Stock Movement', new_stock_movement_path %>
+<div class="table-responsive">
+    <table class="table table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th colspan="64" class="text-center">2017</th>
+            </tr>
+            <tr>
+                <th class="text-center" colspan="32">January</th>
+                <th class="text-center" colspan="32">February</th>
+            </tr>
+            <tr>
+                <th class="text-center" colspan="16">BIP</th>
+                <th class="text-center" colspan="16">TSM</th>
+                <th class="text-center" colspan="16">GDG</th>
+                <th class="text-center" colspan="16">GDP</th>
+            </tr>
+            <tr>
+                <th class="text-center" colspan="8">Adidas</th>
+                <th class="text-center" colspan="8">Nike</th>
+                <th class="text-center" colspan="8">Reebok</th>
+                <th class="text-center" colspan="8">Puma</th>
+                <th class="text-center" colspan="8">Nike</th>
+                <th class="text-center" colspan="8">Adidas</th>
+                <th class="text-center" colspan="8">Puma</th>
+                <th class="text-center" colspan="8">Reebok</th>
+            </tr>
+            <tr>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Rolling</th>
+                <th class="text-center">Sales</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Rolling</th>
+                <th class="text-center">Sales</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Rolling</th>
+                <th class="text-center">Sales</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Rolling</th>
+                <th class="text-center">Sales</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">Rec. PO</th>
+                <th class="text-center">Ret. PO</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">Rec. PO</th>
+                <th class="text-center">Ret. PO</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">Rec. PO</th>
+                <th class="text-center">Ret. PO</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Ending Stock</th>
+                <th class="text-center">Size</th>
+                <th class="text-center">Color</th>
+                <th class="text-center">Beginning Stock</th>
+                <th class="text-center">Rec. PO</th>
+                <th class="text-center">Ret. PO</th>
+                <th class="text-center">DO</th>
+                <th class="text-center">RW</th>
+                <th class="text-center">Ending Stock</th>
+            </tr>
+        </thead>
+        <!--<tbody>
+            <tr>
+                <td>John</td>
+                <td>Doe</td>
+                <td>john@example.com</td>
+            </tr>
+            <tr>
+                <td>Mary</td>
+                <td>Moe</td>
+                <td>mary@example.com</td>
+            </tr>
+            <tr>
+                <td>July</td>
+                <td>Dooley</td>
+                <td>july@example.com</td>
+            </tr>
+        </tbody>-->
+    </table>
+</div>
