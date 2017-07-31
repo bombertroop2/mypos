@@ -2,57 +2,70 @@
     <h1>Stock Movement</h1>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-condensed">
-        <thead>
-            <tr>
-                <th colspan="22" class="text-center">2017 - BIP, Bandung Indah Plaza</th>
-            </tr>
-            <tr>
-                <th class="text-center" colspan="11">January</th>
-                <th class="text-center" colspan="11">February</th>
-            </tr>
-            <tr>                
-                <th class="text-center">Article</th>
-                <th class="text-center">Size</th>
-                <th class="text-center">Color</th>
-                <th class="text-center">Beginning Stock</th>
-                <th class="text-center">Rec. PO</th>
-                <th class="text-center">Ret. PO</th>
-                <th class="text-center">DO</th>
-                <th class="text-center">RW</th>
-                <th class="text-center">Rolling</th>
-                <th class="text-center">Sales</th>
-                <th class="text-center">Ending Stock</th>
-                <th class="text-center">Article</th>
-                <th class="text-center">Size</th>
-                <th class="text-center">Color</th>
-                <th class="text-center">Beginning Stock</th>
-                <th class="text-center">Rec. PO</th>
-                <th class="text-center">Ret. PO</th>
-                <th class="text-center">DO</th>
-                <th class="text-center">RW</th>
-                <th class="text-center">Rolling</th>
-                <th class="text-center">Sales</th>
-                <th class="text-center">Ending Stock</th>
-            </tr>
-        </thead>
-        <!--<tbody>
-            <tr>
-                <td>John</td>
-                <td>Doe</td>
-                <td>john@example.com</td>
-            </tr>
-            <tr>
-                <td>Mary</td>
-                <td>Moe</td>
-                <td>mary@example.com</td>
-            </tr>
-            <tr>
-                <td>July</td>
-                <td>Dooley</td>
-                <td>july@example.com</td>
-            </tr>
-        </tbody>-->
-    </table>
-</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Search Movement</h2>
+                <!--<ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Settings 1</a>
+                            </li>
+                            <li><a href="#">Settings 2</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                </ul>-->
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <br>
+                <div class="form-horizontal">
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="year">Year <span class="required">*</span></label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <%= select_tag "year", options_for_select((Date.current.year-3)..Date.current.year), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label class="control-label col-md-3 col-sm-3 col-xs-12" for="month">Month <span class="required">*</span></label>
+                          <div class="col-md-6 col-sm-6 col-xs-12">
+                              <%= select_tag "month", options_for_select(StockMovement::MONTHS), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="warehouse" class="control-label col-md-3 col-sm-3 col-xs-12">Warehouse <span class="required">*</span></label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <%= select_tag "warehouse", options_from_collection_for_select(Warehouse.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <label for="product" class="control-label col-md-3 col-sm-3 col-xs-12">Product</label>
+                              <div class="col-md-6 col-sm-6 col-xs-12">
+                                  <%= select_tag "product", options_from_collection_for_select(Product.joins(:brand).select("products.id, products.code, common_fields.name AS brand_name").order(:code), :id, "code_and_brand"), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+                                </div>
+                            </div>
+                            <div class="ln_solid"></div>
+                            <div class="form-group">
+                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                    <button type="submit" class="btn btn-success" id="search-btn">Search</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="stock-movement-table">
+
+        </div>
+

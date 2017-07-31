@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :stock_movements
+  resources :stock_movements, only: :index
   resources :fiscal_years
   resources :goods_in_transits, only: [:shipment_goods, :mutation_goods, :returned_goods] do    
     collection do

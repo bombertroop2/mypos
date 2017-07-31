@@ -70,6 +70,10 @@ class Product < ApplicationRecord
     ["Special Price", "special price"],
     ["Sale", "sale"]
   ]
+  
+  def code_and_brand
+    "#{code} - #{brand_name}"
+  end
     
   
   def active_cost
