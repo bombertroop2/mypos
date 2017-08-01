@@ -40,12 +40,14 @@
                               <%= select_tag "month", options_for_select(StockMovement::MONTHS), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="warehouse" class="control-label col-md-3 col-sm-3 col-xs-12">Warehouse <span class="required">*</span></label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <%= select_tag "warehouse", options_from_collection_for_select(Warehouse.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
-                              </div>
-                          </div>
+                        <% if current_user.has_non_spg_role? %>
+                          <div class="form-group">
+                              <label for="warehouse" class="control-label col-md-3 col-sm-3 col-xs-12">Warehouse <span class="required">*</span></label>
+                              <div class="col-md-6 col-sm-6 col-xs-12">
+                                  <%= select_tag "warehouse", options_from_collection_for_select(Warehouse.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+                                </div>
+                            </div>
+                          <% end %>
                           <div class="form-group">
                               <label for="product" class="control-label col-md-3 col-sm-3 col-xs-12">Product</label>
                               <div class="col-md-6 col-sm-6 col-xs-12">

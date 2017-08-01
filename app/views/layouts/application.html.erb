@@ -608,12 +608,20 @@
                           if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
                               bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
                           else {
-                              $.get("/stock_movements", {
-                                  year: $("#year").val(),
-                                  month: $("#month").val(),
-                                  warehouse_id: $("#warehouse").val(),
-                                  product_id: $("#product").val()
-                              });
+        <% if current_user.has_non_spg_role? %>
+                                $.get("/stock_movements", {
+                                    year: $("#year").val(),
+                                    month: $("#month").val(),
+                                    warehouse_id: $("#warehouse").val(),
+                                    product_id: $("#product").val()
+                                });
+        <% else %>
+                                $.get("/stock_movements", {
+                                    year: $("#year").val(),
+                                    month: $("#month").val(),
+                                    product_id: $("#product").val()
+                                });
+        <% end %>
                           }
                       });
       <% end %>
