@@ -39,7 +39,6 @@ class StockMovementsController < ApplicationController
           StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [:stock_movement_warehouse, :product]]).select("SUM(delivery_order_quantity_received) AS total_do_quantity_received, SUM(stock_return_quantity_returned) AS total_stock_return_quantity_returned, SUM(stock_transfer_quantity_received) AS total_stock_transfer_quantity_received, SUM(stock_transfer_quantity_delivered) AS total_stock_transfer_quantity_delivered, stock_movement_product_detail_id").where(["warehouse_id = ? AND transaction_date <= ? AND code #{like_command} ?", @warehouse.id, @selected_date.prev_month.end_of_month, "%"+params[:product_code]+"%"]).group(:stock_movement_product_detail_id)
         end
       end
-      byebug
       respond_to do |format|
         format.js
       end
