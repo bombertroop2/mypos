@@ -49,9 +49,9 @@
                             </div>
                           <% end %>
                           <div class="form-group">
-                              <label for="product" class="control-label col-md-3 col-sm-3 col-xs-12">Product</label>
+                              <label for="product" class="control-label col-md-3 col-sm-3 col-xs-12">Product Code</label>
                               <div class="col-md-6 col-sm-6 col-xs-12">
-                                  <%= select_tag "product", options_from_collection_for_select(Product.joins(:brand).select("products.id, products.code, common_fields.name AS brand_name").order(:code), :id, "code_and_brand"), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+                                  <%= text_field_tag :product_code, '', class: "form-control col-md-7 col-xs-12" %>
                                 </div>
                             </div>
                             <div class="ln_solid"></div>

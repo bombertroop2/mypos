@@ -613,13 +613,13 @@
                                     year: $("#year").val(),
                                     month: $("#month").val(),
                                     warehouse_id: $("#warehouse").val(),
-                                    product_id: $("#product").val()
+                                    product_code: $("#product_code").val()
                                 });
         <% else %>
                                 $.get("/stock_movements", {
                                     year: $("#year").val(),
                                     month: $("#month").val(),
-                                    product_id: $("#product").val()
+                                    product_code: $("#product_code").val()
                                 });
         <% end %>
                           }
