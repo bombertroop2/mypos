@@ -28,8 +28,9 @@
             <% @stock_movement_transactions.each do |stock_movement_transaction| %>
               <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
                 <% total_product = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code)}.length %>
+                <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
               <% end %>
-              <% unless last_color_code.eql?(stock_movement_transaction.color_code) %>
+              <% if last_product_code.eql?(stock_movement_transaction.product_code) && !last_color_code.eql?(stock_movement_transaction.color_code) %>
                 <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
               <% end %>
               <tr>
