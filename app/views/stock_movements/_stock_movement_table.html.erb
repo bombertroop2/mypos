@@ -23,10 +23,22 @@
             </tr>
         </thead>
         <tbody>
+            <% last_product_code = "" %>
+            <% last_color_code = "" %>
             <% @stock_movement_transactions.each do |stock_movement_transaction| %>
+              <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
+                <% total_product = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code)}.length %>
+              <% end %>
+              <% unless last_color_code.eql?(stock_movement_transaction.color_code) %>
+                <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
+              <% end %>
               <tr>
-                  <td><%= "#{stock_movement_transaction.product_code} - #{stock_movement_transaction.product_name}" %></td>
-                  <td><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
+                  <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
+                    <td rowspan="<%= total_product %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.product_code} - #{stock_movement_transaction.product_name}" %></td>
+                  <% end %>
+                  <% unless last_color_code.eql?(stock_movement_transaction.color_code) %>
+                    <td rowspan="<%= total_product_color %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
+                  <% end %>
                   <td class="text-right"><%= stock_movement_transaction.product_size %></td>
                   <td class="text-right">
                       <% previous_stock_movement_transaction = @previous_stock_movement_transactions.select {|psmt| psmt.product_code.eql?(stock_movement_transaction.product_code) && psmt.color_code.eql?(stock_movement_transaction.color_code) && psmt.product_size.eql?(stock_movement_transaction.product_size)}.first %>
@@ -68,6 +80,8 @@
                   <td class="text-right">0</td>
                   <td class="text-right"><%= ending_stock %></td>
               </tr>
+              <% last_product_code = stock_movement_transaction.product_code %>
+              <% last_color_code = stock_movement_transaction.color_code %>
             <% end %>
         </tbody>
     </table>
