@@ -37,7 +37,7 @@
                   <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
                     <td rowspan="<%= total_product %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.product_code} - #{stock_movement_transaction.product_name}" %></td>
                   <% end %>
-                  <% unless last_color_code.eql?(stock_movement_transaction.color_code) %>
+                  <% if !last_product_code.eql?(stock_movement_transaction.product_code) || (last_product_code.eql?(stock_movement_transaction.product_code) && !last_color_code.eql?(stock_movement_transaction.color_code)) %>
                     <td rowspan="<%= total_product_color %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
                   <% end %>
                   <td class="text-right"><%= stock_movement_transaction.product_size %></td>
