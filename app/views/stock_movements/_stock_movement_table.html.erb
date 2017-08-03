@@ -24,16 +24,12 @@
         </thead>
         <tbody>
             <% @stock_movement_transactions.each do |stock_movement_transaction| %>
-              <% stock_movement_product_detail = StockMovementProductDetail.joins(:color, :size, :stock_movement_product).select(:color_id, :size_id).select("product_id, common_fields.code AS color_code, common_fields.name AS color_name, size AS product_size").where(id: stock_movement_transaction.stock_movement_product_detail_id).first %>
               <tr>
                   <td><%= "#{stock_movement_transaction.product_code} - #{stock_movement_transaction.product_name}" %></td>
-                  <td><%= "#{stock_movement_product_detail.color_code} - #{stock_movement_product_detail.color_name}" %></td>
-                  <td class="text-right"><%= stock_movement_product_detail.product_size %></td>
+                  <td><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
+                  <td class="text-right"><%= stock_movement_transaction.product_size %></td>
                   <td class="text-right">
-                      <% previous_stock_movement_transaction = @previous_stock_movement_transactions.select do |psmt|
-                        previous_stock_movement_product_detail = StockMovementProductDetail.joins(:stock_movement_product).select(:color_id, :size_id).select("product_id").where(id: psmt.stock_movement_product_detail_id).first
-                        previous_stock_movement_product_detail.product_id == stock_movement_product_detail.product_id && previous_stock_movement_product_detail.color_id == stock_movement_product_detail.color_id && previous_stock_movement_product_detail.size_id == stock_movement_product_detail.size_id
-                        end.first %>
+                      <% previous_stock_movement_transaction = @previous_stock_movement_transactions.select {|psmt| psmt.product_code.eql?(stock_movement_transaction.product_code) && psmt.color_code.eql?(stock_movement_transaction.color_code) && psmt.product_size.eql?(stock_movement_transaction.product_size)}.first %>
                       <% if previous_stock_movement_transaction.present? %>
                         <% if @warehouse.warehouse_type.eql?("central") %>                                             
                           <%= beginning_stock = previous_stock_movement_transaction.total_po_quantity_received - previous_stock_movement_transaction.total_pr_quantity_returned - previous_stock_movement_transaction.total_do_quantity_delivered + previous_stock_movement_transaction.total_stock_return_quantity_received %>
