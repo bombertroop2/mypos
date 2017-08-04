@@ -2,6 +2,9 @@
     <table class="table table-bordered table-condensed">
         <thead>
             <tr>
+                <th class="text-center" colspan="12">Stock Movement Report</th>
+            </tr>
+            <tr>
                 <th class="text-center" colspan="12"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
             </tr>
             <tr>
@@ -41,25 +44,7 @@
                     <td rowspan="<%= total_product_color %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
                   <% end %>
                   <td class="text-right"><%= stock_movement_transaction.product_size %></td>
-                  <td class="text-right">
-                      <% previous_stock_movement_transaction = @previous_stock_movement_transactions.select {|psmt| psmt.product_code.eql?(stock_movement_transaction.product_code) && psmt.color_code.eql?(stock_movement_transaction.color_code) && psmt.product_size.eql?(stock_movement_transaction.product_size)}.first %>
-                      <% if previous_stock_movement_transaction.present? %>
-                        <% if @warehouse.warehouse_type.eql?("central") %>                                             
-                          <%= beginning_stock = previous_stock_movement_transaction.total_po_quantity_received - previous_stock_movement_transaction.total_pr_quantity_returned - previous_stock_movement_transaction.total_do_quantity_delivered + previous_stock_movement_transaction.total_stock_return_quantity_received %>
-                          <% ending_stock = beginning_stock + stock_movement_transaction.total_po_quantity_received - stock_movement_transaction.total_pr_quantity_returned - stock_movement_transaction.total_do_quantity_delivered + stock_movement_transaction.total_stock_return_quantity_received %>
-                        <% else %>
-                          <%= beginning_stock = previous_stock_movement_transaction.total_do_quantity_received - previous_stock_movement_transaction.total_stock_return_quantity_returned + previous_stock_movement_transaction.total_stock_transfer_quantity_received - previous_stock_movement_transaction.total_stock_transfer_quantity_delivered %>
-                          <% ending_stock = beginning_stock + stock_movement_transaction.total_do_quantity_received - stock_movement_transaction.total_stock_return_quantity_returned + stock_movement_transaction.total_stock_transfer_quantity_received - stock_movement_transaction.total_stock_transfer_quantity_delivered %>
-                        <% end %>
-                      <% else %>
-                        0
-                        <% if @warehouse.warehouse_type.eql?("central") %>                                             
-                          <% ending_stock = stock_movement_transaction.total_po_quantity_received - stock_movement_transaction.total_pr_quantity_returned - stock_movement_transaction.total_do_quantity_delivered + stock_movement_transaction.total_stock_return_quantity_received %>
-                        <% else %>
-                          <% ending_stock = stock_movement_transaction.total_do_quantity_received - stock_movement_transaction.total_stock_return_quantity_returned + stock_movement_transaction.total_stock_transfer_quantity_received - stock_movement_transaction.total_stock_transfer_quantity_delivered %>
-                        <% end %>
-                      <% end %>
-                  </td>
+                  <td class="text-right"><%= stock_movement_transaction.beginning_stock %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_po_quantity_received rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_pr_quantity_returned rescue 0 %></th>
                   <td class="text-right">
@@ -79,7 +64,7 @@
                   <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_received rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_delivered rescue 0 %></td>
                   <td class="text-right">0</td>
-                  <td class="text-right"><%= ending_stock %></td>
+                  <td class="text-right"><%= stock_movement_transaction.ending_stock %></td>
               </tr>
               <% last_product_code = stock_movement_transaction.product_code %>
               <% last_color_code = stock_movement_transaction.color_code %>
