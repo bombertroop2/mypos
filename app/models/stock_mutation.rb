@@ -36,21 +36,54 @@ class StockMutation < ApplicationRecord
 
                                     private
                                     
-                                    def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, transaction_type = "return to warehouse")
+                                    def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, transaction_type = "return to warehouse")                                      
+                                      next_month_movements = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:id, :beginning_stock, :ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date >= ?", warehouse_id, product_id, color_id, size_id, transaction_date.next_month.beginning_of_month]).group(:id, :beginning_stock, :ending_stock).order("transaction_date")
+                                      next_month_movements.each do |next_month_movement|
+                                        next_month_movement.with_lock do
+                                          if transaction_type.eql?("return to warehouse") || transaction_type.eql?("receiving stock transfer")
+                                            next_month_movement.beginning_stock += quantity
+                                            next_month_movement.ending_stock += quantity
+                                          elsif transaction_type.eql?("stock transfer")
+                                            next_month_movement.beginning_stock -= quantity
+                                            next_month_movement.ending_stock -= quantity
+                                          end
+                                          next_month_movement.save
+                                        end            
+                                      end            
+                                      
                                       stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                       stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
                                       if stock_movement.new_record?                    
                                         stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
                                         stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
-                                        stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                          size_id: size_id
                                         if transaction_type.eql?("stock transfer")
-                                          stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
-                                        elsif transaction_type.eql?("receiving stock transfer")
-                                          stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                          beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                          beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity if beginning_stock.nil?
+                                          if beginning_stock < 1
+                                            throw :abort
+                                          end
+                                          stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                            size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock - quantity)
+                                          stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date                                        
                                         else
-                                          stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                          beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                          beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
+                                          if beginning_stock.nil?                        
+                                            beginning_stock_year_and_month = BeginningStockMonth.joins(:beginning_stock).select(:year, :month).first
+                                            if (transaction_date.year == beginning_stock_year_and_month.year && transaction_date.month >= beginning_stock_year_and_month.month) || transaction_date.year > beginning_stock_year_and_month.year
+                                              beginning_stock = 0
+                                            else
+                                              throw :abort
+                                            end
+                                          end
+                                          stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                            size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
+                                          if transaction_type.eql?("receiving stock transfer")
+                                            stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                          else
+                                            stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                          end
                                         end
                                         stock_movement.save
                                       else
@@ -59,14 +92,33 @@ class StockMutation < ApplicationRecord
                                         if stock_movement_month.new_record?                      
                                           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
-                                          stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                            size_id: size_id
                                           if transaction_type.eql?("stock transfer")
+                                            beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                            beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity if beginning_stock.nil?
+                                            if beginning_stock < 1
+                                              throw :abort
+                                            end
+                                            stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                              size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock - quantity)
                                             stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
-                                          elsif transaction_type.eql?("receiving stock transfer")
-                                            stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
                                           else
-                                            stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                            beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                            beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
+                                            if beginning_stock.nil?                        
+                                              beginning_stock_year_and_month = BeginningStockMonth.joins(:beginning_stock).select(:year, :month).first
+                                              if (transaction_date.year == beginning_stock_year_and_month.year && transaction_date.month >= beginning_stock_year_and_month.month) || transaction_date.year > beginning_stock_year_and_month.year
+                                                beginning_stock = 0
+                                              else
+                                                throw :abort
+                                              end
+                                            end
+                                            stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                              size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
+                                            if transaction_type.eql?("receiving stock transfer")
+                                              stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                            else
+                                              stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                            end
                                           end
                                           stock_movement_month.save
                                         else
@@ -74,53 +126,115 @@ class StockMutation < ApplicationRecord
                                           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
                                           if stock_movement_warehouse.new_record?                        
                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
-                                            stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                              size_id: size_id
                                             if transaction_type.eql?("stock transfer")
+                                              beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                              beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity if beginning_stock.nil?
+                                              if beginning_stock < 1
+                                                throw :abort
+                                              end
+                                              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock - quantity)
                                               stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
-                                            elsif transaction_type.eql?("receiving stock transfer")
-                                              stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
                                             else
-                                              stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                              beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                              beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
+                                              if beginning_stock.nil?                        
+                                                beginning_stock_year_and_month = BeginningStockMonth.joins(:beginning_stock).select(:year, :month).first
+                                                if (transaction_date.year == beginning_stock_year_and_month.year && transaction_date.month >= beginning_stock_year_and_month.month) || transaction_date.year > beginning_stock_year_and_month.year
+                                                  beginning_stock = 0
+                                                else
+                                                  throw :abort
+                                                end
+                                              end
+                                              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
+                                              if transaction_type.eql?("receiving stock transfer")
+                                                stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                              else
+                                                stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                              end
                                             end
                                             stock_movement_warehouse.save
                                           else
                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
                                             if stock_movement_product.new_record?                          
-                                              stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                                size_id: size_id
                                               if transaction_type.eql?("stock transfer")
+                                                beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                                beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity if beginning_stock.nil?
+                                                if beginning_stock < 1
+                                                  throw :abort
+                                                end
+                                                stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                  size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock - quantity)
                                                 stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
-                                              elsif transaction_type.eql?("receiving stock transfer")
-                                                stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
                                               else
-                                                stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                                beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
+                                                if beginning_stock.nil?                        
+                                                  beginning_stock_year_and_month = BeginningStockMonth.joins(:beginning_stock).select(:year, :month).first
+                                                  if (transaction_date.year == beginning_stock_year_and_month.year && transaction_date.month >= beginning_stock_year_and_month.month) || transaction_date.year > beginning_stock_year_and_month.year
+                                                    beginning_stock = 0
+                                                  else
+                                                    throw :abort
+                                                  end
+                                                end
+                                                stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                  size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
+                                                if transaction_type.eql?("receiving stock transfer")
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                                else
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                end
                                               end
                                               stock_movement_product.save
                                             else
                                               stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
                                                 select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
                                               if stock_movement_product_detail.blank?
-                                                stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
-                                                  size_id: size_id
                                                 if transaction_type.eql?("stock transfer")
+                                                  beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                                  beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity if beginning_stock.nil?
+                                                  if beginning_stock < 1
+                                                    throw :abort
+                                                  end
+                                                  stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                    size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock - quantity)
                                                   stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
-                                                elsif transaction_type.eql?("receiving stock transfer")
-                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
                                                 else
-                                                  stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                  beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
+                                                  beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
+                                                  if beginning_stock.nil?                        
+                                                    beginning_stock_year_and_month = BeginningStockMonth.joins(:beginning_stock).select(:year, :month).first
+                                                    if (transaction_date.year == beginning_stock_year_and_month.year && transaction_date.month >= beginning_stock_year_and_month.month) || transaction_date.year > beginning_stock_year_and_month.year
+                                                      beginning_stock = 0
+                                                    else
+                                                      throw :abort
+                                                    end
+                                                  end
+                                                  stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
+                                                    size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
+                                                  if transaction_type.eql?("receiving stock transfer")
+                                                    stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                                  else
+                                                    stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                  end
                                                 end
                                                 stock_movement_product_detail.save
                                               else
-                                                stock_movement_transaction = if transaction_type.eql?("stock transfer")
-                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
-                                                elsif transaction_type.eql?("receiving stock transfer")
-                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
-                                                else
-                                                  stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                stock_movement_product_detail.with_lock do
+                                                  if transaction_type.eql?("stock transfer")
+                                                    stock_movement_product_detail.ending_stock -= quantity                                                    
+                                                    stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
+                                                  elsif transaction_type.eql?("receiving stock transfer")
+                                                    stock_movement_product_detail.ending_stock += quantity                                                    
+                                                    stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
+                                                  else
+                                                    stock_movement_product_detail.ending_stock += quantity                                                    
+                                                    stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
+                                                  end
+                                                  stock_movement_product_detail.save
                                                 end
-                                                stock_movement_transaction.save
                                               end
                                             end
                                           end
