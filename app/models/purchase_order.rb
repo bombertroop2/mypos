@@ -35,7 +35,7 @@ class PurchaseOrder < ApplicationRecord
                             #                            before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
                             before_update :calculate_net_amount, if: proc{|po| po.edit_document}
                               before_create :calculate_net_amount, :generate_number
-#                              before_destroy :prevent_delete_if_article_received, :delete_tracks
+                              before_destroy :prevent_delete_if_article_received, :delete_tracks
                               after_update :update_product_cost, if: proc{|po| po.purchase_order_date_changed?}
 
                                 accepts_nested_attributes_for :purchase_order_products, allow_destroy: true
