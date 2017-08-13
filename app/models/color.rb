@@ -3,6 +3,7 @@ class Color < CommonField
   has_many :purchase_order_details#, dependent: :restrict_with_error
   #  has_many :received_purchase_orders
   has_many :products, -> {group "products.id"}, through: :product_details
+  has_many :listing_stock_product_details, dependent: :restrict_with_error
   has_many :product_colors, dependent: :restrict_with_error
   has_many :stock_details, dependent: :restrict_with_error
   has_many :order_booking_product_items, dependent: :restrict_with_error

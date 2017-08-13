@@ -33,6 +33,27 @@ class Shipment < ApplicationRecord
 
                         private
                         
+                        def create_listing_stock(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, shipment_product, shipment_product_item)
+                          transaction = Shipment.select(:delivery_order_number).where(id: shipment_product.shipment_id).first
+                          listing_stock = ListingStock.select(:id).where(warehouse_id: warehouse_id, product_id: product_id).first
+                          listing_stock = ListingStock.new warehouse_id: warehouse_id, product_id: product_id if listing_stock.blank?
+                          if listing_stock.new_record?                    
+                            listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id
+                            listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: shipment_product_item.id, transactionable_type: shipment_product_item.class.name, quantity: quantity
+                            listing_stock.save
+                          else
+                            listing_stock_product_detail = listing_stock.listing_stock_product_details.where(color_id: color_id, size_id: size_id).select(:id).first
+                            listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id if listing_stock_product_detail.blank?
+                            if listing_stock_product_detail.new_record?
+                              listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: shipment_product_item.id, transactionable_type: shipment_product_item.class.name, quantity: quantity
+                              listing_stock_product_detail.save
+                            else
+                              listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: shipment_product_item.id, transactionable_type: shipment_product_item.class.name, quantity: quantity
+                              listing_stock_transaction.save
+                            end
+                          end
+                        end
+                        
                         def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity)
                           next_month_movements = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:id, :beginning_stock, :ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date >= ?", warehouse_id, product_id, color_id, size_id, transaction_date.next_month.beginning_of_month]).group(:id, :beginning_stock, :ending_stock).order("transaction_date")
                           next_month_movements.each do |next_month_movement|
@@ -64,7 +85,7 @@ class Shipment < ApplicationRecord
                             stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
                             stock_movement.save
                           else
-                            stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == transaction_date.month}.first
+                            stock_movement_month = stock_movement.stock_movement_months.select(:id).where(month: transaction_date.month).first
                             stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month if stock_movement_month.blank?
                             if stock_movement_month.new_record?                      
                               beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
@@ -84,7 +105,7 @@ class Shipment < ApplicationRecord
                               stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
                               stock_movement_month.save
                             else
-                              stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id}.first
+                              stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select(:id).where(warehouse_id: warehouse_id).first
                               stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
                               if stock_movement_warehouse.new_record?                        
                                 beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
@@ -103,7 +124,7 @@ class Shipment < ApplicationRecord
                                 stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
                                 stock_movement_warehouse.save
                               else
-                                stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id}.first
+                                stock_movement_product = stock_movement_warehouse.stock_movement_products.select(:id).where(product_id: product_id).first
                                 stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
                                 if stock_movement_product.new_record?                          
                                   beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
@@ -121,8 +142,8 @@ class Shipment < ApplicationRecord
                                   stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
                                   stock_movement_product.save
                                 else
-                                  stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
-                                    select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
+                                  stock_movement_product_detail = stock_movement_product.stock_movement_product_details.select(:id, :ending_stock).
+                                    where(color_id: color_id, size_id: size_id).first
                                   if stock_movement_product_detail.blank?
                                     beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                     beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
@@ -170,36 +191,38 @@ class Shipment < ApplicationRecord
                           stock = Stock.select(:id).where(warehouse_id: order_booking.destination_warehouse_id).first
                           stock = Stock.new warehouse_id: order_booking.destination_warehouse_id if stock.blank?
                           if stock.new_record?
-                            shipment_products.select(:id, :order_booking_product_id).each do |shipment_product|
+                            shipment_products.select(:id, :order_booking_product_id, :shipment_id).each do |shipment_product|
                               product_id = shipment_product.order_booking_product.product_id
                               stock_product = stock.stock_products.build product_id: product_id
-                              shipment_product.shipment_product_items.select(:order_booking_product_item_id, :quantity).each do |shipment_product_item|
+                              shipment_product.shipment_product_items.select(:id, :order_booking_product_item_id, :quantity).each do |shipment_product_item|
                                 if shipment_product_item.quantity > 0
                                   size_id = shipment_product_item.order_booking_product_item.size_id
                                   color_id = shipment_product_item.order_booking_product_item.color_id
                                   stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
                                   create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                  create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                 end
                               end
                             end
                             stock.save
                           else
-                            shipment_products.select(:id, :order_booking_product_id).each do |shipment_product|
+                            shipment_products.select(:id, :order_booking_product_id, :shipment_id).each do |shipment_product|
                               product_id = shipment_product.order_booking_product.product_id
                               stock_product = stock.stock_products.select{|stock_product| stock_product.product_id == product_id}.first
                               stock_product = stock.stock_products.build product_id: product_id if stock_product.blank?
                               if stock_product.new_record?
-                                shipment_product.shipment_product_items.select(:order_booking_product_item_id, :quantity).each do |shipment_product_item|
+                                shipment_product.shipment_product_items.select(:id, :order_booking_product_item_id, :quantity).each do |shipment_product_item|
                                   if shipment_product_item.quantity > 0
                                     size_id = shipment_product_item.order_booking_product_item.size_id
                                     color_id = shipment_product_item.order_booking_product_item.color_id
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
                                     create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                    create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                   end
                                 end
                                 stock_product.save
                               else
-                                shipment_product.shipment_product_items.select(:order_booking_product_item_id, :quantity).each do |shipment_product_item|
+                                shipment_product.shipment_product_items.select(:id, :order_booking_product_item_id, :quantity).each do |shipment_product_item|
                                   if shipment_product_item.quantity > 0
                                     size_id = shipment_product_item.order_booking_product_item.size_id
                                     color_id = shipment_product_item.order_booking_product_item.color_id
@@ -207,6 +230,7 @@ class Shipment < ApplicationRecord
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity if stock_detail.blank?
                                     if stock_detail.new_record?                                      
                                       create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                      create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                       stock_detail.save
                                     else
                                       stock_detail.with_lock do
@@ -214,6 +238,7 @@ class Shipment < ApplicationRecord
                                         stock_detail.save
                                       end
                                       create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                      create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                     end
                                   end
                                 end

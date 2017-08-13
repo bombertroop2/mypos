@@ -1,0 +1,2 @@
+module ListingStocksHelper
+end

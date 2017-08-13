@@ -20,6 +20,8 @@ class Ability
             "ReceivedPurchaseOrder"
           elsif user_menu.eql?("Fiscal Reopening/Closing")
             "FiscalYear"
+          elsif user_menu.eql?("Listing Stocks")
+            "ListingStock"
           else
             user_menu
           end
@@ -44,6 +46,8 @@ class Ability
             "CostList"
           elsif user_menu.name.eql?("Receiving")
             "ReceivedPurchaseOrder"
+          elsif user_menu.name.eql?("Listing Stocks")
+            "ListingStock"
           else
             user_menu.name
           end
@@ -94,6 +98,8 @@ class Ability
             "ReceivedPurchaseOrder"
           elsif user_menu.name.eql?("Fiscal Reopening/Closing")
             "FiscalYear"
+          elsif user_menu.name.eql?("Listing Stocks")
+            "ListingStock"
           else
             user_menu.name
           end

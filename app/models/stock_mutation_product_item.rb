@@ -17,8 +17,29 @@ class StockMutationProductItem < ApplicationRecord
       before_destroy :delete_tracks
       before_update :update_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
         before_create :update_stock, :create_stock_movement, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
+        after_create :create_listing_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
   
           private
+          
+          def create_listing_stock
+            listing_stock = ListingStock.select(:id).where(warehouse_id: @stock_mutation.origin_warehouse_id, product_id: @stock_mutation_product.product_id).first
+            listing_stock = ListingStock.new warehouse_id: @stock_mutation.origin_warehouse_id, product_id: @stock_mutation_product.product_id if listing_stock.blank?
+            if listing_stock.new_record?                    
+              listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id
+              listing_stock_product_detail.listing_stock_transactions.build transaction_date: @stock_mutation.delivery_date, transaction_number: @stock_mutation.number, transaction_type: "RW", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+              listing_stock.save
+            else
+              listing_stock_product_detail = listing_stock.listing_stock_product_details.where(color_id: color_id, size_id: size_id).select(:id).first
+              listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id if listing_stock_product_detail.blank?
+              if listing_stock_product_detail.new_record?
+                listing_stock_product_detail.listing_stock_transactions.build transaction_date: @stock_mutation.delivery_date, transaction_number: @stock_mutation.number, transaction_type: "RW", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                listing_stock_product_detail.save
+              else
+                listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: @stock_mutation.delivery_date, transaction_number: @stock_mutation.number, transaction_type: "RW", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                listing_stock_transaction.save
+              end
+            end
+          end
           
           def delete_stock_movement
             stock_mutation_product = StockMutationProduct.select(:stock_mutation_id, :product_id).where(id: stock_mutation_product_id).first
@@ -50,8 +71,8 @@ class StockMutationProductItem < ApplicationRecord
           end
           
           def create_stock_movement
-            stock_mutation_product = StockMutationProduct.select(:stock_mutation_id, :product_id).where(id: stock_mutation_product_id).first
-            stock_mutation = StockMutation.select(:delivery_date, :origin_warehouse_id).where(id: stock_mutation_product.stock_mutation_id).first
+            @stock_mutation_product = stock_mutation_product = StockMutationProduct.select(:stock_mutation_id, :product_id).where(id: stock_mutation_product_id).first
+            @stock_mutation = stock_mutation = StockMutation.select(:delivery_date, :origin_warehouse_id, :number).where(id: stock_mutation_product.stock_mutation_id).first
             stock_movement = StockMovement.select(:id).where(year: stock_mutation.delivery_date.year).first
             stock_movement = StockMovement.new year: stock_mutation.delivery_date.year if stock_movement.blank?
             if stock_movement.new_record?                    
@@ -68,7 +89,7 @@ class StockMutationProductItem < ApplicationRecord
               stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
               stock_movement.save
             else
-              stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == stock_mutation.delivery_date.month}.first
+              stock_movement_month = stock_movement.stock_movement_months.select(:id).where(month: stock_mutation.delivery_date.month).first
               stock_movement_month = stock_movement.stock_movement_months.build month: stock_mutation.delivery_date.month if stock_movement_month.blank?
               if stock_movement_month.new_record?                      
                 stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: stock_mutation.origin_warehouse_id
@@ -84,7 +105,7 @@ class StockMutationProductItem < ApplicationRecord
                 stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
                 stock_movement_month.save
               else
-                stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == stock_mutation.origin_warehouse_id}.first
+                stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select(:id).where(warehouse_id: stock_mutation.origin_warehouse_id).first
                 stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: stock_mutation.origin_warehouse_id if stock_movement_warehouse.blank?
                 if stock_movement_warehouse.new_record?                        
                   stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: stock_mutation_product.product_id
@@ -99,7 +120,7 @@ class StockMutationProductItem < ApplicationRecord
                   stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
                   stock_movement_warehouse.save
                 else
-                  stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == stock_mutation_product.product_id}.first
+                  stock_movement_product = stock_movement_warehouse.stock_movement_products.select(:id).where(product_id: stock_mutation_product.product_id).first
                   stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: stock_mutation_product.product_id if stock_movement_product.blank?
                   if stock_movement_product.new_record?                          
                     beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", stock_mutation.origin_warehouse_id, stock_mutation_product.product_id, color_id, size_id, stock_mutation.delivery_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
@@ -113,8 +134,8 @@ class StockMutationProductItem < ApplicationRecord
                     stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_returned: quantity, transaction_date: stock_mutation.delivery_date
                     stock_movement_product.save
                   else
-                    stock_movement_product_detail = stock_movement_product.stock_movement_product_details.
-                      select{|stock_movement_product_detail| stock_movement_product_detail.color_id == color_id && stock_movement_product_detail.size_id == size_id}.first
+                    stock_movement_product_detail = stock_movement_product.stock_movement_product_details.select(:id, :ending_stock).
+                      where(color_id: color_id, size_id: size_id).first
                     if stock_movement_product_detail.blank?
                       beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", stock_mutation.origin_warehouse_id, stock_mutation_product.product_id, color_id, size_id, stock_mutation.delivery_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                       beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", stock_mutation.delivery_date.year, stock_mutation.delivery_date.month, stock_mutation.delivery_date.year, stock_mutation.origin_warehouse_id, stock_mutation_product.product_id, color_id, size_id]).first.quantity if beginning_stock.nil?

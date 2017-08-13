@@ -60,6 +60,7 @@ module ApplicationHelper
   def report_menu_active?
     return true if can? :read, Stock
     return true if can? :read, StockMovement
+    return true if can? :read, ListingStock
   end
   
   def setting_menu_active?

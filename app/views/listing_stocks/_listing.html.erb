@@ -1,0 +1,63 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-stock-transactions-thead">
+        <tr>
+            <th class="col-md-5 text-center" colspan="3">Transaction</th>
+            <th class="col-md-6 text-center" colspan="3">Article</th>
+            <th class="col-md-1 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Qty", "quantity" %></th>
+        </tr>
+        <tr>
+            <th class="text-center"><%= smart_listing.sortable "Date", "transaction_date" %></th>
+            <th class="text-center"><%= smart_listing.sortable "Number", "transaction_number" %></th>
+            <th class="text-center"><%= smart_listing.sortable "Type", "transaction_type" %></th>
+            <th class="text-center"><%= smart_listing.sortable "Article", "products.code" %></th>
+            <th class="text-center"><%= smart_listing.sortable "Color", "common_fields.code" %></th>
+            <th class="text-center"><%= smart_listing.sortable "Size", "size" %></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% total_qty = 0 %>
+        <% smart_listing.collection.each do |stock_transaction| %>
+          <% if stock_transaction.transaction_type.eql?("PO") %>
+            <% total_qty += stock_transaction.quantity %>
+          <% elsif stock_transaction.transaction_type.eql?("PR") %>
+            <% total_qty -= stock_transaction.quantity %>
+          <% elsif stock_transaction.transaction_type.eql?("DO") %>
+            <% if @warehouse.warehouse_type.eql?("central") %>
+              <% total_qty -= stock_transaction.quantity %>
+            <% else %>
+              <% total_qty += stock_transaction.quantity %>
+            <% end %>
+          <% elsif stock_transaction.transaction_type.eql?("RW") %>
+            <% if @warehouse.warehouse_type.eql?("central") %>
+              <% total_qty += stock_transaction.quantity %>
+            <% else %>
+              <% total_qty -= stock_transaction.quantity %>
+            <% end %>
+          <% elsif stock_transaction.transaction_type.eql?("RGO") %>
+            <% total_qty -= stock_transaction.quantity %>
+          <% elsif stock_transaction.transaction_type.eql?("RGI") %>
+            <% total_qty += stock_transaction.quantity %>
+          <% end %>
+          <tr class="editable" data-id="<%#= brand.id %>">
+              <%= smart_listing.render object: stock_transaction, partial: "listing_stocks/stock_transaction", locals: {object: stock_transaction} %>
+          </tr>
+        <% end %>
+<%#= smart_listing.item_new colspan: 4, link: new_brand_path %>
+    </tbody>
+    <tfootO>
+        <tr>
+            <td colspan="6" class="text-right">Total</td>
+            <td class="text-right"><%= total_qty %></td>
+        </tr>
+        </tfoot>
+</table>
+<%#= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-stock-transactions-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-stock-transactions-thead").show();
+      }
+  }, 0);
+</script>

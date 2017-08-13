@@ -1,6 +1,7 @@
 class Size < ApplicationRecord
   audited associated_with: :size_group, on: [:create, :update]
   belongs_to :size_group
+  has_many :listing_stock_product_details, dependent: :restrict_with_error
   has_many :product_details, dependent: :restrict_with_error
   has_many :stock_details, dependent: :restrict_with_error
   has_many :order_booking_product_items, dependent: :restrict_with_error

@@ -1,0 +1,12 @@
+<td><%= object.transaction_date.strftime("%d/%m/%Y") %></td>
+<td><%= object.transaction_number %></td>
+<td><%= object.transaction_type %></td>
+<td><%= "#{object.product_code} - #{object.product_name}" %></td>
+<td><%= "#{object.color_code} - #{object.color_name}" %></td>
+<td><%= object.size %></td>
+<td class="text-right"><%= object.quantity %></td>
+<!--
+<td class="actions" style="text-align: right">
+    <%#= link_to_if(can?(:manage, Brand), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_brand_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
+      <%#= link_to_if(can?(:manage, Brand) && !object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+  </td>-->

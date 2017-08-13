@@ -180,7 +180,7 @@
                                                 </ul>
                                             </li>
                                           <% end %>
-                                          <% if report_menu_active? %>
+                                          <% if report_menu_active? || goods_in_transit_active? %>
                                             <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :read, Stock %>
@@ -199,6 +199,10 @@
 
                                                     <% if can? :read, StockMovement %>
                                                       <li><%= link_to "Stock Movement", stock_movements_path, method: :get %></li>
+                                                    <% end %>
+
+                                                    <% if can? :read, ListingStock %>
+                                                      <li><%= link_to "Listing Stocks", listing_stocks_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
@@ -621,6 +625,22 @@
                                     month: $("#month").val(),
                                     product_code: $("#product_code").val()
                                 });
+        <% end %>
+                          }
+                      });
+      <% elsif controller_name.eql?("listing_stocks") %>
+                      $("#search-btn").click(function () {
+                          if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
+                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                          else {
+        <% if current_user.has_non_spg_role? %>
+                                $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                                $("#filter_warehouse").val($("#warehouse").val());
+                                $(".smart-listing-controls").submit();
+        <% else %>
+                                $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                                $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
+                                $(".smart-listing-controls").submit();
         <% end %>
                           }
                       });

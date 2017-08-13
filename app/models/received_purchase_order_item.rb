@@ -12,11 +12,52 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
             before_create :create_stock_and_update_receiving_qty, unless: proc {|rpoi| rpoi.is_it_direct_purchasing}
               before_create :create_stock, if: proc {|rpoi| rpoi.is_it_direct_purchasing}
                 before_create :create_stock_movement
+                after_create :create_listing_stock
       
                 attr_accessor :is_it_direct_purchasing, :purchase_order_product_id,
                   :purchase_order_id, :receiving_date, :warehouse_id, :product_id
     
                 private
+                
+                def create_listing_stock
+                  transaction = unless is_it_direct_purchasing
+                    purchase_order_product = PurchaseOrderProduct.select(:purchase_order_id).where(id: purchase_order_detail.purchase_order_product_id).first
+                    PurchaseOrder.select(:number).where(id: purchase_order_product.purchase_order_id).first
+                  else
+                    direct_purchase_product = DirectPurchaseProduct.select(:direct_purchase_id).where(id: direct_purchase_detail.direct_purchase_product_id).first
+                    direct_purchase = DirectPurchase.select(:id).where(id: direct_purchase_product.direct_purchase_id).first
+                    direct_purchase.received_purchase_order
+                  end
+                  listing_stock = ListingStock.select(:id).where(warehouse_id: warehouse_id, product_id: product_id).first
+                  listing_stock = ListingStock.new warehouse_id: warehouse_id, product_id: product_id if listing_stock.blank?
+                  if listing_stock.new_record?                    
+                    listing_stock_product_detail = unless is_it_direct_purchasing
+                      listing_stock.listing_stock_product_details.build color_id: purchase_order_detail.color_id, size_id: purchase_order_detail.size_id
+                    else
+                      listing_stock.listing_stock_product_details.build color_id: direct_purchase_detail.color_id, size_id: direct_purchase_detail.size_id
+                    end
+                    listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: (is_it_direct_purchasing ? transaction.delivery_order_number : transaction.number), transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                    listing_stock.save
+                  else
+                    listing_stock_product_detail = unless is_it_direct_purchasing
+                      listing_stock.listing_stock_product_details.where(color_id: purchase_order_detail.color_id, size_id: purchase_order_detail.size_id).select(:id).first
+                    else
+                      listing_stock.listing_stock_product_details.where(color_id: direct_purchase_detail.color_id, size_id: direct_purchase_detail.size_id).select(:id).first
+                    end
+                    listing_stock_product_detail = unless is_it_direct_purchasing
+                      listing_stock.listing_stock_product_details.build color_id: purchase_order_detail.color_id, size_id: purchase_order_detail.size_id
+                    else
+                      listing_stock.listing_stock_product_details.build color_id: direct_purchase_detail.color_id, size_id: direct_purchase_detail.size_id
+                    end if listing_stock_product_detail.blank?
+                    if listing_stock_product_detail.new_record?
+                      listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: (is_it_direct_purchasing ? transaction.delivery_order_number : transaction.number), transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                      listing_stock_product_detail.save
+                    else
+                      listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: (is_it_direct_purchasing ? transaction.delivery_order_number : transaction.number), transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                      listing_stock_transaction.save
+                    end
+                  end
+                end
                 
                 def create_stock_movement
                   next_month_movements = unless is_it_direct_purchasing
@@ -68,7 +109,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                     stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                     stock_movement.save
                   else
-                    stock_movement_month = stock_movement.stock_movement_months.select{|stock_movement_month| stock_movement_month.month == receiving_date.to_date.month}.first
+                    stock_movement_month = stock_movement.stock_movement_months.select(:id).where(month: receiving_date.to_date.month).first
                     stock_movement_month = stock_movement.stock_movement_months.build month: receiving_date.to_date.month if stock_movement_month.blank?
                     if stock_movement_month.new_record?                      
                       stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
@@ -105,7 +146,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                       stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                       stock_movement_month.save
                     else
-                      stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select{|stock_movement_warehouse| stock_movement_warehouse.warehouse_id == warehouse_id.to_i}.first
+                      stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select(:id).where(warehouse_id: warehouse_id.to_i).first
                       stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
                       if stock_movement_warehouse.new_record?                        
                         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
@@ -141,7 +182,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                         stock_movement_product_detail.stock_movement_transactions.build purchase_order_quantity_received: quantity, transaction_date: receiving_date.to_date
                         stock_movement_warehouse.save
                       else
-                        stock_movement_product = stock_movement_warehouse.stock_movement_products.select{|stock_movement_product| stock_movement_product.product_id == product_id.to_i}.first
+                        stock_movement_product = stock_movement_warehouse.stock_movement_products.select(:id).where(product_id: product_id.to_i).first
                         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
                         if stock_movement_product.new_record?                          
                           stock_movement_product_detail = unless is_it_direct_purchasing
@@ -177,11 +218,11 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                           stock_movement_product.save
                         else
                           stock_movement_product_detail = unless is_it_direct_purchasing
-                            stock_movement_product.stock_movement_product_details.
-                              select{|stock_movement_product_detail| stock_movement_product_detail.color_id == purchase_order_detail.color_id && stock_movement_product_detail.size_id == purchase_order_detail.size_id}.first
+                            stock_movement_product.stock_movement_product_details.select(:id, :ending_stock).
+                              where(color_id: purchase_order_detail.color_id, size_id: purchase_order_detail.size_id).first
                           else
-                            stock_movement_product.stock_movement_product_details.
-                              select{|stock_movement_product_detail| stock_movement_product_detail.color_id == direct_purchase_detail.color_id && stock_movement_product_detail.size_id == direct_purchase_detail.size_id}.first
+                            stock_movement_product.stock_movement_product_details.select(:id, :ending_stock).
+                              where(color_id: direct_purchase_detail.color_id, size_id: direct_purchase_detail.size_id).first
                           end
                           if stock_movement_product_detail.blank?
                             stock_movement_product_detail = unless is_it_direct_purchasing
