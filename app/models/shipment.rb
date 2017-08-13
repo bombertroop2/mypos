@@ -26,8 +26,8 @@ class Shipment < ApplicationRecord
 
                       before_create :generate_do_number
                       after_create :finish_ob, :notify_store
-                      before_destroy :deletable, :transaction_open, :delete_tracks
-                      after_destroy :set_ob_status_to_p
+#                      before_destroy :deletable, :transaction_open, :delete_tracks
+#                      after_destroy :set_ob_status_to_p
                       after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, if: proc{|shpmnt| shpmnt.receiving_inventory}
 
 
