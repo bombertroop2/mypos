@@ -15,7 +15,7 @@ class PurchaseOrderDetail < ApplicationRecord
     validate :size_available, :color_available, if: proc { |pod| !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity}
 
       #      before_validation :delete_record, if: proc {|pod| !pod.is_user_changing_po_date && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity && !pod.is_user_changing_cost}
-      before_destroy :delete_tracks
+#      before_destroy :delete_tracks
 
       private
 
