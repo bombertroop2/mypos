@@ -12,7 +12,7 @@ class ShipmentProduct < ApplicationRecord
   
   validate :product_available
   
-#  before_destroy :delete_tracks
+  before_destroy :delete_tracks
 
   private
   
