@@ -39,7 +39,14 @@
             <% total_qty += stock_transaction.quantity %>
           <% end %>
           <tr class="editable" data-id="<%#= brand.id %>">
-              <%= smart_listing.render object: stock_transaction, partial: "listing_stocks/stock_transaction", locals: {object: stock_transaction} %>
+              <td><%= stock_transaction.transaction_date.strftime("%d/%m/%Y") %></td>
+              <td><%= stock_transaction.transaction_number %></td>
+              <td><%= stock_transaction.transaction_type %></td>
+              <td><%= "#{stock_transaction.product_code} - #{stock_transaction.product_name}" %></td>
+              <td><%= "#{stock_transaction.color_code} - #{stock_transaction.color_name}" %></td>
+              <td><%= stock_transaction.size %></td>
+              <td class="text-right"><%= stock_transaction.quantity %></td>
+  <%#= smart_listing.render object: stock_transaction, partial: "listing_stocks/stock_transaction", locals: {object: stock_transaction} %>
           </tr>
         <% end %>
 <%#= smart_listing.item_new colspan: 4, link: new_brand_path %>
