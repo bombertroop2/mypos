@@ -63,6 +63,7 @@ class PurchaseOrdersController < ApplicationController
       render js: "bootbox.alert({message: \"Please insert at least one quantity per product!\",size: 'small'});"
     else
       @purchase_order = PurchaseOrder.new(purchase_order_params)
+      @purchase_order.order_value = @total_product_value
       @valid = false
       begin
         unless @purchase_order.save
@@ -216,15 +217,27 @@ class PurchaseOrdersController < ApplicationController
   end
   
   def add_additional_params_to_purchase_order_products(po_date)
+    @total_product_value = 0                                            
     params[:purchase_order][:purchase_order_products_attributes].each do |key, value|
       @quantity_per_product_present = false
       params[:purchase_order][:purchase_order_products_attributes][key].merge! purchase_order_date: po_date
       unless params[:purchase_order][:purchase_order_products_attributes][key][:_destroy].eql?("true")
+        total_quantity = 0
         params[:purchase_order][:purchase_order_products_attributes][key][:purchase_order_details_attributes].each do |pod_key, pod_value|
+          total_quantity += params[:purchase_order][:purchase_order_products_attributes][key][:purchase_order_details_attributes][pod_key][:quantity].to_i
           if params[:purchase_order][:purchase_order_products_attributes][key][:purchase_order_details_attributes][pod_key][:quantity].strip.present?
             @quantity_per_product_present = true
           end
         end
+        cost_lists = CostList.where(product_id: params[:purchase_order][:purchase_order_products_attributes][key][:product_id]).select(:id, :cost, :effective_date)
+        effectice_cost = nil
+        cost_lists.each do |cost_list|
+          if params[:purchase_order][:purchase_order_date].present? && params[:purchase_order][:purchase_order_date].to_date >= cost_list.effective_date
+            effectice_cost = cost_list
+            break
+          end
+        end
+        @total_product_value += effectice_cost.cost * total_quantity if effectice_cost.present?
       else
         @quantity_per_product_present = true
       end

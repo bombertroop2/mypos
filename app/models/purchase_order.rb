@@ -31,7 +31,8 @@ class PurchaseOrder < ApplicationRecord
                         validates :first_discount, presence: true, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
                           validate :vendor_available, :warehouse_available
                                   
-                          before_save :set_nil_to_is_additional_disc_from_net, :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
+                          before_save :set_nil_to_is_additional_disc_from_net, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
+                          before_update :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
                             #                            before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}
                             before_update :calculate_net_amount, if: proc{|po| po.edit_document}
                               before_create :calculate_net_amount, :generate_number
