@@ -1,25 +1,49 @@
 <div class="page-header"><h1>Stock Balance</h1></div>
 
-<div id="search-form-container" class="form-inline text-right">
-    <% if @warehouses.present? %>
-      <div class="form-group">
-          <%= select_tag "warehouse_id", options_from_collection_for_select(@warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Show Stocks</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <br>
+                <div class="form-horizontal">
+
+                    <% if @warehouses.present? %>
+                      <div class="form-group">
+                          <label for="warehouse" class="control-label col-md-3 col-sm-3 col-xs-12">Warehouse <span class="required">*</span></label>
+                          <div class="col-md-6 col-sm-6 col-xs-12">
+                              <%= select_tag "warehouse_id", options_from_collection_for_select(@warehouses, :id, "code_and_name"), {include_blank: true, class: "form-control col-md-7 col-xs-12 chosen-select"} %>
+                            </div>
+                        </div>
+                      <% end %>
+                      <div class="form-group">
+                          <label for="product" class="control-label col-md-3 col-sm-3 col-xs-12">Search</label>
+                          <div class="col-md-6 col-sm-6 col-xs-12">
+                              <%= text_field_tag :product_criteria, '', class: "form-control col-md-7 col-xs-12" %>
+                            </div>
+                        </div>
+                        <div class="ln_solid"></div>
+                        <div class="form-group">
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                <button type="submit" class="btn btn-success" id="search-stock-btn">Show</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
-      <% end %>
-      <div class="form-group">
-          <input type="text" id="filter-product-criteria" class="form-control" placeholder="Product code/name/color/size/quantity">
-      </div>
-      <button id="search-stock-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-  </div>
-  <div class="hidden">
-      <%= smart_listing_controls_for(:stocks, {class: "form-inline text-right"}) do %>
-          <% if @warehouses.present? %>
-            <%= text_field_tag :filter_warehouse_id, '', class: "search form-control", autocomplete: :off %>
-            <% end %>
-            <%= text_field_tag :filter_product_criteria, '', class: "search form-control", autocomplete: :off %>
-            <% end %>
-        </div>
-        <%= smart_listing_render(:stocks) %>    
+    </div>
 
-
-
+    <div class="hidden">
+        <%= smart_listing_controls_for(:stocks, {class: "form-inline text-right"}) do %>
+            <% if @warehouses.present? %>
+              <%= text_field_tag :filter_warehouse_id, '', class: "search form-control", autocomplete: :off %>
+              <% end %>
+              <%= text_field_tag :filter_product_criteria, '', class: "search form-control", autocomplete: :off %>
+              <% end %>
+          </div>
+          <%= smart_listing_render(:stocks) %>
