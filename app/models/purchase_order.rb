@@ -22,7 +22,7 @@ class PurchaseOrder < ApplicationRecord
         validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|po| po.is_po_date_validable}
           validate :prevent_update_if_article_received, on: :update
           validate :disable_receive_po_if_finish, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
-            validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}                  
+#            validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po && !po.is_user_changing_cost}                  
               validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
                 validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && !po.is_user_changing_cost && po.first_discount.present?}
                   validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.is_user_changing_cost && po.second_discount.present?}
@@ -74,7 +74,8 @@ class PurchaseOrder < ApplicationRecord
                                 end
 
                                 def vendor_available
-                                  errors.add(:vendor_id, "does not exist!") if vendor_id.present? && Vendor.where(id: vendor_id).select("1 AS one").blank?
+                                  @vendor = Vendor.where(id: vendor_id).select(:value_added_tax, :is_taxable_entrepreneur, :code).first
+                                  errors.add(:vendor_id, "does not exist!") if vendor_id.present? && @vendor.blank?
                                 end
 
                                 def warehouse_available
@@ -177,37 +178,37 @@ class PurchaseOrder < ApplicationRecord
                                 end
 
                                 def generate_number
-                                  self.value_added_tax = vendor.value_added_tax rescue nil
-                                  self.is_taxable_entrepreneur = vendor.is_taxable_entrepreneur rescue nil
+                                  self.value_added_tax = @vendor.value_added_tax rescue nil
+                                  self.is_taxable_entrepreneur = @vendor.is_taxable_entrepreneur rescue nil
                                   pkp_code = is_taxable_entrepreneur ? "1" : "0"
                                   today = Date.current
                                   current_month = today.month.to_s.rjust(2, '0')
                                   current_year = today.strftime("%y").rjust(2, '0')
-                                  existed_numbers = PurchaseOrder.where("number LIKE '#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}%'").select(:number).order(:number)
+                                  existed_numbers = PurchaseOrder.where("number LIKE '#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}%'").select(:number).order(:number)
                                   if existed_numbers.blank?
-                                    new_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}0001"
+                                    new_number = "#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}0001"
                                   else
                                     if existed_numbers.length == 1
-                                      seq_number = existed_numbers[0].number.split("#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}").last
+                                      seq_number = existed_numbers[0].number.split("#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}").last
                                       if seq_number.to_i > 1
-                                        new_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}0001"
+                                        new_number = "#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}0001"
                                       else
-                                        new_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}#{seq_number.succ}"
+                                        new_number = "#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}#{seq_number.succ}"
                                       end
                                     else
                                       last_seq_number = ""
                                       existed_numbers.each_with_index do |existed_number, index|
-                                        seq_number = existed_number.number.split("#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}").last
+                                        seq_number = existed_number.number.split("#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}").last
                                         if seq_number.to_i > 1 && index == 0
-                                          new_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}0001"
+                                          new_number = "#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}0001"
                                           break                              
                                         elsif last_seq_number.eql?("")
                                           last_seq_number = seq_number
                                         elsif (seq_number.to_i - last_seq_number.to_i) > 1
-                                          new_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}#{last_seq_number.succ}"
+                                          new_number = "#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}#{last_seq_number.succ}"
                                           break
                                         elsif index == existed_numbers.length - 1
-                                          new_number = "#{pkp_code}POR#{vendor.code}#{current_month}#{current_year}#{seq_number.succ}"
+                                          new_number = "#{pkp_code}POR#{@vendor.code}#{current_month}#{current_year}#{seq_number.succ}"
                                         else
                                           last_seq_number = seq_number
                                         end
@@ -226,27 +227,27 @@ class PurchaseOrder < ApplicationRecord
                                 end
               
                                 # method ini perlu di-refactor --start
-                                def minimum_one_color_per_product
-                                  is_valid = false
-                                  colors = Color.order(:id).select(:id)
-                                  purchase_order_products.each do |pop|
-                                    colors.each_with_index do |color, index|
-                                      if pop._destroy || pop.purchase_order_details.select{|pod| pod.color_id.eql?(color.id)}.size.eql?(pop.product.sizes.size)
-                                        is_valid = true
-                                        break
-                                      else
-                                        if index.eql?(colors.size - 1)
-                                          is_valid = false
-                                          break
-                                        end
-                                      end
-                                    end
-                  
-                                    break unless is_valid
-                                  end
-                
-                                  errors.add(:base, "Please insert at least one row of colors per product!") unless is_valid
-                                end
+#                                def minimum_one_color_per_product
+#                                  is_valid = false
+#                                  colors = Color.order(:id).select(:id)
+#                                  purchase_order_products.each do |pop|
+#                                    colors.each_with_index do |color, index|
+#                                      if pop._destroy || pop.purchase_order_details.select{|pod| pod.color_id.eql?(color.id)}.size.eql?(pop.product.sizes.size)
+#                                        is_valid = true
+#                                        break
+#                                      else
+#                                        if index.eql?(colors.size - 1)
+#                                          is_valid = false
+#                                          break
+#                                        end
+#                                      end
+#                                    end
+#                  
+#                                    break unless is_valid
+#                                  end
+#                
+#                                  errors.add(:base, "Please insert at least one row of colors per product!") unless is_valid
+#                                end
               
                                 #                              def is_product_has_one_color?                
                                 #                                is_valid = false

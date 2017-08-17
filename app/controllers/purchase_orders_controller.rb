@@ -59,60 +59,70 @@ class PurchaseOrdersController < ApplicationController
   # POST /purchase_orders.json
   def create
     add_additional_params_to_purchase_order_products(params[:purchase_order][:purchase_order_date])
-    @purchase_order = PurchaseOrder.new(purchase_order_params)
-    @valid = false
-    unless @purchase_order.save
-      populate_combobox_list
-      populate_products
-      @colors = []
-      @sizes = []
-      @products = Product.where(id: params[:product_ids].split(",")).select(:id)
-      @purchase_order.purchase_order_products.each do |pop|
-        product = pop.product
-        @colors[product.id] = product.colors
-        @sizes[product.id] = product.sizes
-        @colors[product.id].each do |color|
-          @sizes[product.id].each do |size|
-            pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
-          end
-        end
-      end
-        
-      render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
+    unless @quantity_per_product_present
+      render js: "bootbox.alert({message: \"Please insert at least one quantity per product!\",size: 'small'});"
     else
-      @valid = true
-      @vendor_name = Vendor.select(:name).find_by(id: @purchase_order.vendor_id).name rescue nil
+      @purchase_order = PurchaseOrder.new(purchase_order_params)
+      @valid = false
+      begin
+        unless @purchase_order.save
+          populate_combobox_list
+          populate_products
+          @colors = []
+          @sizes = []
+          @products = Product.where(id: params[:product_ids].split(",")).select(:id)
+          @purchase_order.purchase_order_products.each do |pop|
+            product = pop.product
+            @colors[product.id] = product.colors
+            @sizes[product.id] = product.sizes
+            @colors[product.id].each do |color|
+              @sizes[product.id].each do |size|
+                pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
+              end
+            end
+          end
+        
+          render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
+        else
+          @valid = true
+          @vendor_name = Vendor.select(:name).find_by(id: @purchase_order.vendor_id).name rescue nil
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+      end
     end
-  rescue ActiveRecord::RecordNotUnique => e
-    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
 
   # PATCH/PUT /purchase_orders/1
   # PATCH/PUT /purchase_orders/1.json
   def update
     add_additional_params_to_purchase_order_products(params[:purchase_order][:purchase_order_date])
-    @valid = true
-    @purchase_order.edit_document = true
-    unless @purchase_order.update(purchase_order_params)
-      @valid = false
-      populate_combobox_list
-      populate_products
-      @products = Product.where(id: params[:product_ids].split(",")).select(:id)
-      @colors = []
-      @sizes = []
-      @purchase_order.purchase_order_products.each do |pop|
-        product = pop.product
-        @colors[product.id] = product.colors
-        @sizes[product.id] = product.sizes
-        @colors[product.id].each do |color|
-          @sizes[product.id].each do |size|  
-            pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?              
+    unless @quantity_per_product_present
+      render js: "bootbox.alert({message: \"Please insert at least one quantity per product!\",size: 'small'});"
+    else
+      @valid = true
+      @purchase_order.edit_document = true
+      unless @purchase_order.update(purchase_order_params)
+        @valid = false
+        populate_combobox_list
+        populate_products
+        @products = Product.where(id: params[:product_ids].split(",")).select(:id)
+        @colors = []
+        @sizes = []
+        @purchase_order.purchase_order_products.each do |pop|
+          product = pop.product
+          @colors[product.id] = product.colors
+          @sizes[product.id] = product.sizes
+          @colors[product.id].each do |color|
+            @sizes[product.id].each do |size|  
+              pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?              
+            end
           end
         end
-      end
         
-      render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
 
+      end
     end
   end
   
@@ -207,7 +217,18 @@ class PurchaseOrdersController < ApplicationController
   
   def add_additional_params_to_purchase_order_products(po_date)
     params[:purchase_order][:purchase_order_products_attributes].each do |key, value|
+      @quantity_per_product_present = false
       params[:purchase_order][:purchase_order_products_attributes][key].merge! purchase_order_date: po_date
+      unless params[:purchase_order][:purchase_order_products_attributes][key][:_destroy].eql?("true")
+        params[:purchase_order][:purchase_order_products_attributes][key][:purchase_order_details_attributes].each do |pod_key, pod_value|
+          if params[:purchase_order][:purchase_order_products_attributes][key][:purchase_order_details_attributes][pod_key][:quantity].strip.present?
+            @quantity_per_product_present = true
+          end
+        end
+      else
+        @quantity_per_product_present = true
+      end
+      break unless @quantity_per_product_present
     end if params[:purchase_order][:purchase_order_products_attributes].present?
   end
 end
