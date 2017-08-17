@@ -1,6 +1,6 @@
 class PurchaseOrderDetail < ApplicationRecord
   attr_accessor :is_updating_receiving_quantity, :is_updating_returning_quantity,
-    :is_user_changing_cost, :is_user_changing_po_date, :product_id
+    :is_user_changing_po_date, :product_id
 
   audited associated_with: :purchase_order_product, on: [:create, :update], except: [:receiving_qty, :returning_qty]
 
@@ -14,7 +14,7 @@ class PurchaseOrderDetail < ApplicationRecord
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |pod| pod.quantity.present? && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity }
     validate :size_available, :color_available, if: proc { |pod| !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity}
 
-      #      before_validation :delete_record, if: proc {|pod| !pod.is_user_changing_po_date && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity && !pod.is_user_changing_cost}
+      #      before_validation :delete_record, if: proc {|pod| !pod.is_user_changing_po_date && !pod.is_updating_receiving_quantity && !pod.is_updating_returning_quantity}
       before_destroy :delete_tracks
 
       private

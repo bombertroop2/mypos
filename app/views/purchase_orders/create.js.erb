@@ -1,5 +1,6 @@
 <% if @valid %>
   <%= smart_listing_item :purchase_orders, :create, @purchase_order, "purchase_orders/purchase_order" %>
+    bootbox.alert({message: "Purchase Order <%= @purchase_order.number %> has been successfully created", size: "small"});
 <% else %>
   <%= smart_listing_item :purchase_orders, :create, @purchase_order, "purchase_orders/form" %>
 <% end %>
