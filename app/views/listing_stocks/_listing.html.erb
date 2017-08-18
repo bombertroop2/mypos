@@ -11,12 +11,48 @@
             <th class="text-center"><%= smart_listing.sortable "Type", "transaction_type" %></th>
             <th class="text-center"><%= smart_listing.sortable "Article", "products.code" %></th>
             <th class="text-center"><%= smart_listing.sortable "Color", "common_fields.code" %></th>
-            <th class="text-center"><%= smart_listing.sortable "Size", "size" %></th>
+            <th class="text-center"><%= smart_listing.sortable "Size", "size_order" %></th>
         </tr>
     </thead>
     <tbody>
         <% total_qty = 0 %>
-        <% smart_listing.collection.each do |stock_transaction| %>
+        <% last_transaction_date = nil %>
+        <% last_transaction_number = "" %>
+        <% last_transaction_type = "" %>
+        <% last_product_code = "" %>
+        <% last_color_code = "" %>
+        <% last_size = "" %>
+        <% collection = smart_listing.collection %>
+        <% collection.each do |stock_transaction| %>
+          <% unless last_transaction_date == stock_transaction.transaction_date %>
+            <% total_transaction = collection.select{|st| st.transaction_date == stock_transaction.transaction_date}.length %>
+            <% total_transaction_number = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number)}.length %>
+            <% total_transaction_type = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type)}.length %>
+            <% total_product_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code)}.length %>
+            <% total_color_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code)}.length %>
+            <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% end %>
+          <% if last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number) %>
+            <% total_transaction_number = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number)}.length %>
+            <% total_transaction_type = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type)}.length %>
+            <% total_product_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code)}.length %>
+            <% total_color_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code)}.length %>
+            <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% elsif last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type) %>
+            <% total_transaction_type = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type)}.length %>
+            <% total_product_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code)}.length %>
+            <% total_color_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code)}.length %>
+            <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% elsif last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code) %>
+            <% total_product_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code)}.length %>
+            <% total_color_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code)}.length %>
+            <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% elsif last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && !last_color_code.eql?(stock_transaction.color_code) %>
+            <% total_color_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code)}.length %>
+            <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% elsif last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && last_color_code.eql?(stock_transaction.color_code) && !last_size.eql?(stock_transaction.size) %>
+            <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% end %>
           <% if stock_transaction.transaction_type.eql?("PO") %>
             <% total_qty += stock_transaction.quantity %>
           <% elsif stock_transaction.transaction_type.eql?("PR") %>
@@ -39,15 +75,33 @@
             <% total_qty += stock_transaction.quantity %>
           <% end %>
           <tr class="editable" data-id="<%#= brand.id %>">
-              <td><%= stock_transaction.transaction_date.strftime("%d/%m/%Y") %></td>
-              <td><%= stock_transaction.transaction_number %></td>
-              <td><%= stock_transaction.transaction_type %></td>
-              <td><%= "#{stock_transaction.product_code} - #{stock_transaction.product_name}" %></td>
-              <td><%= "#{stock_transaction.color_code} - #{stock_transaction.color_name}" %></td>
-              <td><%= stock_transaction.size %></td>
+              <% unless last_transaction_date == stock_transaction.transaction_date %>
+                <td rowspan="<%= total_transaction %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.transaction_date.strftime("%d/%m/%Y") %></td>
+              <% end %>
+              <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) %>
+                <td rowspan="<%= total_transaction_number %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.transaction_number %></td>
+              <% end %>
+              <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) %>
+                <td rowspan="<%= total_transaction_type %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.transaction_type %></td>
+              <% end %>
+              <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code)) %>
+                <td rowspan="<%= total_product_code %>" class="text-center" style="vertical-align: middle"><%= "#{stock_transaction.product_code} - #{stock_transaction.product_name}" %></td>
+              <% end %>
+              <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && !last_color_code.eql?(stock_transaction.color_code)) %>
+                <td rowspan="<%= total_color_code %>" class="text-center" style="vertical-align: middle"><%= "#{stock_transaction.color_code} - #{stock_transaction.color_name}" %></td>
+              <% end %>
+              <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && !last_color_code.eql?(stock_transaction.color_code)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && last_color_code.eql?(stock_transaction.color_code) && !last_size.eql?(stock_transaction.size)) %>
+                <td rowspan="<%= total_size %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.size %></td>
+              <% end %>
               <td class="text-right"><%= stock_transaction.quantity %></td>
   <%#= smart_listing.render object: stock_transaction, partial: "listing_stocks/stock_transaction", locals: {object: stock_transaction} %>
           </tr>
+          <% last_transaction_date = stock_transaction.transaction_date %>
+          <% last_transaction_number = stock_transaction.transaction_number %>
+          <% last_transaction_type = stock_transaction.transaction_type %>
+          <% last_product_code = stock_transaction.product_code %>
+          <% last_color_code = stock_transaction.color_code %>
+          <% last_size = stock_transaction.size %>
         <% end %>
 <%#= smart_listing.item_new colspan: 4, link: new_brand_path %>
     </tbody>
