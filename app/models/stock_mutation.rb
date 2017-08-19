@@ -25,7 +25,7 @@ class StockMutation < ApplicationRecord
                     validate :transaction_open, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse || sm.approving_mutation}
 
                       before_create :generate_number
-#                      before_destroy :transaction_open, :prevent_delete_if_mutation_approved, :delete_tracks
+                      before_destroy :transaction_open, :prevent_delete_if_mutation_approved, :delete_tracks
                       before_update :apologize_to_previous_destination_store, if: proc{|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                         after_create :notify_origin_store, :notify_destination_store, unless: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
                           after_create :notify_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
