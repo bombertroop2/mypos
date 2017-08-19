@@ -53,7 +53,9 @@
           <% elsif last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && last_color_code.eql?(stock_transaction.color_code) && !last_size.eql?(stock_transaction.size) %>
             <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
           <% end %>
-          <% if stock_transaction.transaction_type.eql?("PO") %>
+          <% if stock_transaction.transaction_type.eql?("BS") %>
+            <% total_qty += stock_transaction.quantity %>
+          <% elsif stock_transaction.transaction_type.eql?("PO") %>
             <% total_qty += stock_transaction.quantity %>
           <% elsif stock_transaction.transaction_type.eql?("PR") %>
             <% total_qty -= stock_transaction.quantity %>
