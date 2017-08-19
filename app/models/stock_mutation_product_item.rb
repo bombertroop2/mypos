@@ -13,8 +13,8 @@ class StockMutationProductItem < ApplicationRecord
     validate :item_available
     validate :quantity_valid
     
-    before_destroy :return_goods_to_warehouse, :delete_stock_movement, if: proc{|smpi| smpi.stock_mutation_product.stock_mutation.destination_warehouse.warehouse_type.eql?("central")}
-      before_destroy :delete_tracks
+#    before_destroy :return_goods_to_warehouse, :delete_stock_movement, if: proc{|smpi| smpi.stock_mutation_product.stock_mutation.destination_warehouse.warehouse_type.eql?("central")}
+#      before_destroy :delete_tracks
       before_update :update_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
         before_create :update_stock, :create_stock_movement, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
         after_create :create_listing_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}

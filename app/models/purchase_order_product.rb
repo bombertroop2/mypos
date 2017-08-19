@@ -17,7 +17,7 @@ class PurchaseOrderProduct < ApplicationRecord
   validate :existing_cost, if: proc {|pop| pop.purchase_order_date.present?}
 
     before_save :set_active_cost, unless: proc {|pop| pop.is_user_adding_new_cost}
-      before_destroy :delete_tracks
+#      before_destroy :delete_tracks
 
       accepts_nested_attributes_for :purchase_order_details, allow_destroy: true, reject_if: proc { |attributes| attributes[:quantity].blank? && attributes[:id].blank? }
 

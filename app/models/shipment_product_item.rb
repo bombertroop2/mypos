@@ -11,10 +11,10 @@ class ShipmentProductItem < ApplicationRecord
     validate :item_available
     validate :quantity_available, if: proc{|spi| spi.quantity.present? && spi.quantity.is_a?(Numeric)}
   
-      before_destroy :delete_tracks, :delete_stock_movement, :delete_listing_stock
+#      before_destroy :delete_tracks, :delete_stock_movement, :delete_listing_stock
       before_create :update_available_quantity
       after_create :create_listing_stock
-      after_destroy :update_available_quantity
+#      after_destroy :update_available_quantity
       
       private
       
