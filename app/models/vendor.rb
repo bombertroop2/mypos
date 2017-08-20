@@ -25,6 +25,7 @@ class Vendor < ApplicationRecord
       has_one :product_relation, -> {select("1 AS one")}, class_name: "Product"
       has_one :purchase_order_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
       has_one :account_payable_relation, -> {select("1 AS one")}, class_name: "AccountPayable"
+      has_one :direct_purchase_relation, -> {select("1 AS one")}, class_name: "DirectPurchase"
       has_many :po_returns, -> {select(:id, :number, :purchase_order_id, :direct_purchase_id).where(["is_allocated = ?", false])}, through: :purchase_orders, source: :purchase_returns
       has_many :dp_returns, -> {select(:id, :number, :purchase_order_id, :direct_purchase_id).where(["is_allocated = ?", false])}, through: :direct_purchases, source: :purchase_returns
 
@@ -59,6 +60,6 @@ class Vendor < ApplicationRecord
         end
     
         def code_not_changed
-          errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (product_relation.present? || purchase_order_relation.present? || account_payable_relation.present?)
+          errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (product_relation.present? || purchase_order_relation.present? || account_payable_relation.present? || direct_purchase_relation.present?)
         end
       end
