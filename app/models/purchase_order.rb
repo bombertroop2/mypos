@@ -32,7 +32,7 @@ class PurchaseOrder < ApplicationRecord
                           validate :vendor_available, :warehouse_available
                                   
                           before_save :set_nil_to_is_additional_disc_from_net, if: proc {|po| !po.receiving_po && !po.closing_po}
-                          before_update :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po}
+                          before_update :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.edit_document}
                             #                            before_update :is_product_has_one_color?, if: proc {|po| !po.receiving_po && !po.closing_po}
                             before_update :calculate_net_amount, if: proc{|po| po.edit_document}
                               before_create :calculate_net_amount, :generate_number

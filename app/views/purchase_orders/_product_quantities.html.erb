@@ -1,10 +1,9 @@
 <% @purchase_order.purchase_order_products.each do |pop| %>
-  <% product = pop.product %>
   <% if pop.new_record? || action_name.eql?("edit") || (action_name.eql?("update") && !pop._destroy) %>
     <% if pop.errors and pop.errors.messages[:base] %>
       <span class='help-block'><%= pop.errors.messages[:base][0] %></span>
     <% end %>
-    <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= product.id %>" style="table-layout: fixed;width: 100%">
+    <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= pop.product_id %>" style="table-layout: fixed;width: 100%">
         <tr style="text-align: center">
             <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
             <td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>
@@ -12,20 +11,20 @@
         </tr>    
         <tr style="text-align: center">
             <td style="vertical-align: middle;width: 20% !important;">
-                <%= "#{product.code} - #{product.brand.name}" %>
+                <%= "#{pop.prdct_code} - #{pop.prdct_name}" %>
             </td>
-            <td style="vertical-align: middle;width: 20% !important;" id="product_table_cost_<%= product.id %>">
+            <td style="vertical-align: middle;width: 20% !important;" id="product_table_cost_<%= pop.product_id %>">
                 <%= number_to_currency((pop.po_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
             </td>
             <td style="width: auto !important;">                
-                <% pop_field_name = create_product_array_variable_name(pop, product.id) %>
+                <% pop_field_name = create_product_array_variable_name(pop, pop.product_id) %>
                 <%= fields_for pop_field_name, pop do |pop_form| %>
                   <%= pop_form.hidden_field :po_cost %>
                   <%= pop_form.hidden_field :product_id %>
                   <%= pop_form.hidden_field :id unless pop_form.object.new_record? %>
                 <% end %>
 
-                <% sizes = @sizes[product.id] %>
+                <% sizes = @sizes[pop.product_id] %>
                 <% index = 0 %>
 
                 <script>
@@ -36,7 +35,7 @@
                         <tr style="text-align: center">
                             <th colspan="2" rowspan="2"></th>
                             <td colspan="<%= sizes.length %>" align="center">
-                                <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
+                                <%= text_field_tag "quantity_#{pop.product_id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
                               </td>
                           </tr>
 
@@ -45,12 +44,12 @@
                                 <td align="center">
                                     <%= size.size %>
                                     <br />
-                                    <%= text_field_tag "quantity_#{product.id}_#{size.id}", "", {placeholder: "qty", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %>
+                                    <%= text_field_tag "quantity_#{pop.product_id}_#{size.id}", "", {placeholder: "qty", class: "quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %>
                                   </td>
                                 <% end %>
                             </tr>
 
-                            <% product_colors = @colors[product.id] %>
+                            <% product_colors = @colors[pop.product_id] %>
                             <% product_colors.each_with_index do |color, idx| %>                          
                               <tr style="text-align: center">
                                   <td colspan="2" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>                            
@@ -66,10 +65,10 @@
                                     <%= fields_for pod_field_name, pod do |pod_form| %>
                                       <%= pod_form.hidden_field :size_id %>
                                       <%= pod_form.hidden_field :color_id %>
-                                      <%= pod_form.hidden_field :product_id, value: product.id %>
+                                      <%= pod_form.hidden_field :product_id, value: pop.product_id %>
                                       <%= pod_form.hidden_field :id unless pod_form.object.new_record? %>
                                       <div class="<%= control_group_error(pod, :quantity) %>">
-                                          <%= pod_form.text_field :quantity, placeholder: "qty", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                          <%= pod_form.text_field :quantity, placeholder: "qty", class: "quantity-#{pop.product_id}-#{size.id} quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
                                             <%= error_help_text(pod, :quantity) %>
                                         </div>
                                       <% end %>
@@ -85,17 +84,17 @@
               </tr>              
               <script>
                 $.each(colorSizes, function (index, value) {
-                    $('#quantity_<%= product.id %>_' + value).keyup(function () {
-                        $('.quantity-<%= product.id %>-' + value).val($('#quantity_<%= product.id %>_' + value).val());
+                    $('#quantity_<%= pop.product_id %>_' + value).keyup(function () {
+                        $('.quantity-<%= pop.product_id %>-' + value).val($('#quantity_<%= pop.product_id %>_' + value).val());
                     });
                 });
-                $('#<%= "quantity_#{product.id}" %>').keyup(function () {
-                    $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
+                $('#<%= "quantity_#{pop.product_id}" %>').keyup(function () {
+                    $('.quantity-<%= pop.product_id %>').val($('#<%= "quantity_#{pop.product_id}" %>').val());
                 });
               </script>
           </table>
         <% else %>
-          <% pop_field_name = create_product_array_variable_name(pop, product.id) %>
+          <% pop_field_name = create_product_array_variable_name(pop, pop.product_id) %>
           <%= fields_for pop_field_name, pop do |pop_form| %>
             <%= pop_form.hidden_field :_destroy, value: true %>
             <%= pop_form.hidden_field :id %>

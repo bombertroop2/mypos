@@ -22,7 +22,9 @@ class Product < ApplicationRecord
 
   has_many :price_codes, -> {group("common_fields.id").order(:code).select(:id, :code)}, through: :product_details
   #  has_many :colors, -> {group("common_fields.id").order(:code)}, through: :product_details
-  has_many :sizes, -> {group("sizes.id").order(:size_order).select(:id, :size)}, through: :product_details
+  has_many :cost_list_costs_effective_dates_product_ids, -> {select("cost, effective_date, product_id")}, class_name: "CostList"
+  has_many :product_detail_size_and_product_ids, -> {select("size_id, product_id")}, class_name: "ProductDetail"
+  has_many :sizes, -> {group("sizes.id").order(:size_order).select(:id, :size)}, through: :product_detail_size_and_product_ids
   has_many :product_detail_histories, through: :product_details
   has_many :grouped_product_details, -> {joins(:size).group("size_id, barcode, size").select("size_id, barcode, size AS item_size").order(:barcode)}, class_name: "ProductDetail"
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open'")}, through: :purchase_order_products, source: :purchase_order
@@ -86,8 +88,8 @@ class Product < ApplicationRecord
     return nil
   end
   
-  def active_cost_by_po_date(po_date)
-    cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
+  def active_cost_by_po_date(po_date, cost_lists=[])
+    cost_lists = self.cost_lists.select(:id, :cost, :effective_date) if cost_lists.blank?
     cost_lists.each do |cost_list|
       if po_date >= cost_list.effective_date
         return cost_list

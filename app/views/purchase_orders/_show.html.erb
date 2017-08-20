@@ -78,11 +78,11 @@
                                         <td><strong>Unit Cost</strong></td>
                                         <td><strong>Total Cost</strong></td>
                                     </tr>
-                                    <% @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).select("name, cost, purchase_order_products.id, products.code AS product_code").each_with_index do |po_product, idx| %>
+                                    <% @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:purchase_order_details_selected_columns, :color_selected_columns, :size_selected_columns).select("name, cost, purchase_order_products.id, products.code AS product_code").each_with_index do |po_product, idx| %>
                                       <% total_quantity = 0 %>
-                                      <% product_sizes = po_product.sizes.select(:id, :size) %>
-                                      <% product_colors = po_product.colors.select(:id, :code, :name) %>
-                                      <% purchase_order_details = po_product.purchase_order_details.select(:size_id, :color_id, :quantity) %>
+                                      <% product_sizes = po_product.size_selected_columns.distinct %>
+                                      <% product_colors = po_product.color_selected_columns.distinct %>
+                                      <% purchase_order_details = po_product.purchase_order_details_selected_columns %>
                                       <tr align="center">
                                           <td style="vertical-align: middle"><%= idx.succ %></td>
                                           <td style="vertical-align: middle"><%= "#{po_product.product_code} - #{po_product.name}" %></td>

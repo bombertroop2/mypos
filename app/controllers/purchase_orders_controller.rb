@@ -43,10 +43,12 @@ class PurchaseOrdersController < ApplicationController
     @colors = []
     @sizes = []
     @purchase_order.purchase_order_products.each do |pop|
-      pop.po_cost = pop.cost_list.cost
-      product = pop.product
-      @colors[product.id] = product.colors.select :id
-      @sizes[product.id] = product.sizes.select :id
+      pop.po_cost = CostList.where(id: pop.cost_list_id).select(:cost).first.cost
+      product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
+      pop.prdct_code = product.code
+      pop.prdct_name = product.name
+      @colors[product.id] = product.colors.distinct
+      @sizes[product.id] = product.sizes.distinct
       @colors[product.id].each do |color|
         @sizes[product.id].each do |size|
           pop.purchase_order_details.build size_id: size.id, color_id: color.id             
@@ -73,9 +75,11 @@ class PurchaseOrdersController < ApplicationController
           @sizes = []
           @products = Product.where(id: params[:product_ids].split(",")).select(:id)
           @purchase_order.purchase_order_products.each do |pop|
-            product = pop.product
-            @colors[product.id] = product.colors
-            @sizes[product.id] = product.sizes
+            product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
+            pop.prdct_code = product.code
+            pop.prdct_name = product.name
+            @colors[product.id] = product.colors.distinct
+            @sizes[product.id] = product.sizes.distinct
             @colors[product.id].each do |color|
               @sizes[product.id].each do |size|
                 pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select(:id, :quantity, :size_id, :color_id).select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
@@ -103,6 +107,7 @@ class PurchaseOrdersController < ApplicationController
     else
       @valid = true
       @purchase_order.edit_document = true
+      @purchase_order.order_value = @total_product_value      
       unless @purchase_order.update(purchase_order_params)
         @valid = false
         populate_combobox_list
@@ -111,9 +116,11 @@ class PurchaseOrdersController < ApplicationController
         @colors = []
         @sizes = []
         @purchase_order.purchase_order_products.each do |pop|
-          product = pop.product
-          @colors[product.id] = product.colors
-          @sizes[product.id] = product.sizes
+          product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
+          pop.prdct_code = product.code
+          pop.prdct_name = product.name
+          @colors[product.id] = product.colors.distinct
+          @sizes[product.id] = product.sizes.distinct
           @colors[product.id].each do |color|
             @sizes[product.id].each do |size|  
               pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?              
@@ -141,13 +148,13 @@ class PurchaseOrdersController < ApplicationController
       PurchaseOrder.new
     end
     #    if splitted_selected_product_ids.present?      
-    products = Product.where(id: params[:product_ids].split(",")).select(:id)
+    products = Product.joins(:brand).where(id: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
     products.each do |product|
-      @colors[product.id] = product.colors
-      @sizes[product.id] = product.sizes
-      active_cost = product.active_cost_by_po_date(params[:po_date].to_date).cost rescue 0
+      @colors[product.id] = product.colors.distinct
+      @sizes[product.id] = product.sizes.distinct
+      active_cost = product.active_cost_by_po_date(params[:po_date].to_date, product.cost_list_costs_effective_dates_product_ids).cost rescue 0
       @product_costs[product.id] = active_cost
-      pop = @purchase_order.purchase_order_products.build product_id: product.id, po_cost: active_cost
+      pop = @purchase_order.purchase_order_products.build product_id: product.id, po_cost: active_cost, prdct_code: product.code, prdct_name: product.name
       @colors[product.id].each do |color|
         @sizes[product.id].each do |size|
           pop.purchase_order_details.build size_id: size.id, color_id: color.id #unless existing_item

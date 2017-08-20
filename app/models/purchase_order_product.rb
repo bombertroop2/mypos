@@ -1,5 +1,5 @@
 class PurchaseOrderProduct < ApplicationRecord
-  attr_accessor :purchase_order_date, :is_user_adding_new_cost, :po_cost
+  attr_accessor :purchase_order_date, :is_user_adding_new_cost, :po_cost, :prdct_code, :prdct_name
   
   audited associated_with: :purchase_order, on: [:create, :update]
   has_associated_audits
@@ -9,8 +9,11 @@ class PurchaseOrderProduct < ApplicationRecord
   belongs_to :cost_list
   
   has_many :purchase_order_details, dependent: :destroy
+  has_many :purchase_order_details_selected_columns, -> {select(:purchase_order_product_id, :size_id, :color_id, :quantity)}, class_name: "PurchaseOrderDetail"
   has_many :sizes, -> { group("sizes.id").order(:size_order) }, through: :purchase_order_details
+  has_many :size_selected_columns, -> { select(:id, :size).order(:size_order) }, through: :purchase_order_details_selected_columns, source: :size
   has_many :colors, -> { group("common_fields.id").order(:code) }, through: :purchase_order_details
+  has_many :color_selected_columns, -> { select(:id, :code, :name).order(:code) }, through: :purchase_order_details_selected_columns, source: :color
   
   
   validate :product_available
