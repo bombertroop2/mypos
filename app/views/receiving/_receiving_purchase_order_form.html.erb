@@ -53,23 +53,17 @@
                                         <%= received_purchase_order_form.fields_for :received_purchase_order_products do |received_purchase_order_product_form| %>
                                           <%= received_purchase_order_product_form.hidden_field :purchase_order_product_id %>
                                           <% received_purchase_order_product = received_purchase_order_product_form.object %>
-                                          <% purchase_order_product = received_purchase_order_product.purchase_order_product %>
-                                          <% colors = purchase_order_product.colors.select(:code, :id, :name) rescue [] %>
-                                          <% sizes = purchase_order_product.sizes.select(:size, :id) rescue [] %>
+                                          <% colors = @colors[received_purchase_order_product.purchase_order_product_id] rescue [] %>
+                                          <% sizes = @sizes[received_purchase_order_product.purchase_order_product_id] rescue [] %>
                                           <tr align="center">
-                                              <td style="vertical-align: middle;width: 20% !important;"><%= "#{purchase_order_product.product.code} - #{purchase_order_product.product.brand.name}" %></td>
+                                              <td style="vertical-align: middle;width: 20% !important;"><%= "#{received_purchase_order_product.prdct_code} - #{received_purchase_order_product.prdct_name}" %></td>
                                               <% if current_user.has_managerial_role? %>
-                                                <td style="vertical-align: middle;width: 20% !important;"><%= number_to_currency(purchase_order_product.cost_list.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                                <td style="vertical-align: middle;width: 20% !important;"><%= number_to_currency(received_purchase_order_product.prdct_cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                                               <% end %>
                                               <td style="vertical-align: middle;width: auto !important;">                                    
                                                   <div class="table-responsive">
                                                       <table class="table table-condensed table-responsive table-bordered">
                                                           <tbody>
-                                                              <!--
-                                                              <tr>
-                                                                  <td colspan="2" rowspan="2"></td>
-                                                                  <td align="center" colspan="<%#= sizes.length %>">Sizes</td>
-                                                              </tr>-->
                                                               <tr>
                                                                   <td></td>
                                                                   <% sizes.each do |size| %>
@@ -78,10 +72,6 @@
                                                               </tr>                                            
                                                               <% colors.each_with_index do |color, idx| %>
                                                                 <tr style="text-align: center">
-                        <%# if idx == 0 %>
-                                                                    <!--
-                                                                      <td style="vertical-align: middle" rowspan="<%#= colors.length %>">Colors</td>-->
-                        <%# end %>
                                                                     <td style="vertical-align: middle">
                                                                         <%= "#{color.code} - #{color.name}" %>
                                                                     </td>
@@ -89,7 +79,7 @@
                                                                       <td style="vertical-align: middle;" align="center">
                                                                           <%= received_purchase_order_product_form.fields_for :received_purchase_order_items do |received_purchase_order_item_form| %>
                                                                             <% received_purchase_order_item = received_purchase_order_item_form.object %>
-                                                                            <% purchase_order_detail = received_purchase_order_item.purchase_order_detail %>
+                                                                            <% purchase_order_detail = received_purchase_order_item.pod %>
                                                                             <% if purchase_order_detail.size_id.eql?(size.id) && purchase_order_detail.color_id.eql?(color.id) %>
                                                                               <table class="table table-condensed table-responsive table-bordered">
                                                                                   <thead>

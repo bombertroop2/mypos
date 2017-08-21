@@ -9,7 +9,7 @@ class PurchaseOrderProduct < ApplicationRecord
   belongs_to :cost_list
   
   has_many :purchase_order_details, dependent: :destroy
-  has_many :purchase_order_details_selected_columns, -> {select(:purchase_order_product_id, :size_id, :color_id, :quantity)}, class_name: "PurchaseOrderDetail"
+  has_many :purchase_order_details_selected_columns, -> {select(:id, :purchase_order_product_id, :size_id, :color_id, :quantity, :receiving_qty)}, class_name: "PurchaseOrderDetail"
   has_many :sizes, -> { group("sizes.id").order(:size_order) }, through: :purchase_order_details
   has_many :size_selected_columns, -> { select(:id, :size).order(:size_order) }, through: :purchase_order_details_selected_columns, source: :size
   has_many :colors, -> { group("common_fields.id").order(:code) }, through: :purchase_order_details

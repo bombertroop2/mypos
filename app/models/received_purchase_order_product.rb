@@ -1,5 +1,5 @@
 class ReceivedPurchaseOrderProduct < ApplicationRecord
-  attr_accessor :purchase_order_id
+  attr_accessor :purchase_order_id, :prdct_code, :prdct_name, :prdct_cost
   
   belongs_to :received_purchase_order
   belongs_to :purchase_order_product

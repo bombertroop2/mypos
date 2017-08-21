@@ -15,7 +15,8 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 after_create :create_listing_stock
       
                 attr_accessor :is_it_direct_purchasing, :purchase_order_product_id,
-                  :purchase_order_id, :receiving_date, :warehouse_id, :product_id
+                  :purchase_order_id, :receiving_date, :warehouse_id, :product_id,
+                  :pod
     
                 private
                 

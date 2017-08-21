@@ -47,10 +47,14 @@ class ReceivingController < ApplicationController
       @purchase_order.receiving_po = true
       received_purchase_order = @purchase_order.received_purchase_orders.build vendor_id: @purchase_order.vendor_id
       authorize! :manage, received_purchase_order
-      @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
-        received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id
-        po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
-          received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
+      @colors = []
+      @sizes = []
+      @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
+        @colors[po_product.id] = po_product.color_selected_columns.distinct
+        @sizes[po_product.id] = po_product.size_selected_columns.distinct
+        received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id, prdct_code: po_product.product_code, prdct_name: po_product.product_name, prdct_cost: po_product.cost
+        po_product.purchase_order_details_selected_columns.each do |purchase_order_detail|
+          received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id, pod: purchase_order_detail
         end
       end
     end
@@ -64,12 +68,24 @@ class ReceivingController < ApplicationController
         unless @purchase_order.update(purchase_order_params)
           @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
           received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
-          @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
+          @colors = []
+          @sizes = []
+          @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
+            @colors[po_product.id] = po_product.color_selected_columns.distinct
+            @sizes[po_product.id] = po_product.size_selected_columns.distinct
             received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
-            received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id if received_purchase_order_product.blank?
-            po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
-              if received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.blank?
-                received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
+            if received_purchase_order_product.blank?
+              received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id, prdct_code: po_product.product_code, prdct_name: po_product.product_name, prdct_cost: po_product.cost
+            else
+              received_purchase_order_product.prdct_code = po_product.product_code
+              received_purchase_order_product.prdct_name = po_product.product_name
+              received_purchase_order_product.prdct_cost = po_product.cost
+            end
+            po_product.purchase_order_details_selected_columns.each do |purchase_order_detail|
+              if (rpoi = received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.first).blank?
+                received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id, pod: purchase_order_detail
+              else
+                rpoi.pod = purchase_order_detail
               end
             end
           end
@@ -87,12 +103,24 @@ class ReceivingController < ApplicationController
         @do_number_not_unique = true
         @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
         received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
-        @purchase_order.purchase_order_products.joins(:product).select("purchase_order_products.id, code").each do |po_product|
+        @colors = []
+        @sizes = []
+        @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
+          @colors[po_product.id] = po_product.color_selected_columns.distinct
+          @sizes[po_product.id] = po_product.size_selected_columns.distinct
           received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
-          received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id if received_purchase_order_product.blank?
-          po_product.purchase_order_details.select(:id).each do |purchase_order_detail|
-            if received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.blank?
-              received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id
+          if received_purchase_order_product.blank?
+            received_purchase_order_product = received_purchase_order.received_purchase_order_products.build purchase_order_product_id: po_product.id, prdct_code: po_product.product_code, prdct_name: po_product.product_name, prdct_cost: po_product.cost
+          else
+            received_purchase_order_product.prdct_code = po_product.product_code
+            received_purchase_order_product.prdct_name = po_product.product_name
+            received_purchase_order_product.prdct_cost = po_product.cost
+          end
+          po_product.purchase_order_details_selected_columns.each do |purchase_order_detail|
+            if (rpoi = received_purchase_order_product.received_purchase_order_items.select{|rpoi| rpoi.purchase_order_detail_id.eql?(purchase_order_detail.id)}.first).blank?
+              received_purchase_order_product.received_purchase_order_items.build purchase_order_detail_id: purchase_order_detail.id, pod: purchase_order_detail
+            else
+              rpoi.pod = purchase_order_detail
             end
           end
         end
