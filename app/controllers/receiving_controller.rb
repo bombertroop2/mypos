@@ -131,57 +131,23 @@ class ReceivingController < ApplicationController
     end
   
     def get_product_details
-      @product_costs = Hash.new
-      previous_selected_product_ids = params[:previous_selected_product_ids]
-      selected_product_ids = params[:product_ids]
-      splitted_selected_product_ids = selected_product_ids.split(",") - previous_selected_product_ids.split(",")
+      @colors = []
+      @sizes = []
       @direct_purchase = DirectPurchase.new
-      if splitted_selected_product_ids.present?
-        #      @colors = Color.select(:id, :code).order :code
-        @products = Product.where("id IN (#{splitted_selected_product_ids.join(",")})").select(:id, :code)
-        @products.each do |product|
-          active_cost = product.active_cost_by_po_date(params[:dp_date].to_date).cost rescue 0
-          @product_costs[product.id] = active_cost
-          existing_dpp = @direct_purchase.direct_purchase_products.select{|dpp| dpp.product_id.eql?(product.id)}.first
-          dpp = if existing_dpp.nil?
-            @direct_purchase.direct_purchase_products.build product_id: product.id, dp_cost: active_cost
-          else
-            existing_dpp        
-          end
-          #        pop = @purchase_order.purchase_order_products.build product_id: product.id
-          product.grouped_product_details.each do |gpd|
-            product.colors.each do |color|
-              existing_item = dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(gpd.size.id) and dpd.color_id.eql?(color.id)}.first
-              dpp.direct_purchase_details.build size_id: gpd.size.id, color_id: color.id unless existing_item
-            end
+      products = Product.joins(:brand).where(id: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
+      products.each do |product|
+        active_cost = product.active_cost_by_po_date(params[:dp_date].to_date, product.cost_list_costs_effective_dates_product_ids).cost rescue 0
+        @colors[product.id] = product.colors.distinct
+        @sizes[product.id] = product.sizes.distinct
+        dpp = @direct_purchase.direct_purchase_products.build product_id: product.id, dp_cost: active_cost, prdct_code: product.code, prdct_name: product.name
+        @colors[product.id].each do |color|
+          @sizes[product.id].each do |size|
+            dpp.direct_purchase_details.build size_id: size.id, color_id: color.id
           end
         end
-
-        # id yang diganti, caranya yang lama dihapus dan yang baru ditambahkan      
-        @replaced_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")
-        respond_to { |format| format.js }
-      else
-        previous_selected_product_ids = params[:previous_selected_product_ids]
-        selected_product_ids = params[:product_ids]
-        if previous_selected_product_ids.split(",").length > selected_product_ids.split(",").length
-          @removed_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")
-          products = Product.where(id: selected_product_ids.split(",")).select(:id)
-          products.each do |product|
-            active_cost = product.active_cost_by_po_date(params[:dp_date].to_date).cost rescue 0
-            @product_costs[product.id] = active_cost
-          end
-          respond_to { |format| format.js }
-        else
-          products = Product.where(id: selected_product_ids.split(",")).select(:id)
-          products.each do |product|
-            active_cost = product.active_cost_by_po_date(params[:dp_date].to_date).cost rescue 0
-            @product_costs[product.id] = active_cost
-          end
-          respond_to do |format|
-            format.js { render 'update_cost' }
-          end
-        end      
       end
+
+      respond_to { |format| format.js }
     end
   
     def create
@@ -191,15 +157,21 @@ class ReceivingController < ApplicationController
       @direct_purchase.received_purchase_order.vendor_id = params[:direct_purchase][:vendor_id]
       begin
         unless @direct_purchase.save
+          @colors = []
+          @sizes = []
           @suppliers = Vendor.select(:id, :name)
           @warehouses = Warehouse.central.select :id, :code
           #        @colors = Color.select(:id, :code).order :code
-          @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)
-
+          products = Product.joins(:brand).where(id: @direct_purchase.direct_purchase_products.map(&:product_id)).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
           @direct_purchase.direct_purchase_products.each do |dpp|
-            dpp.product.grouped_product_details.each do |gpd|
-              dpp.product.colors.each do |color|
-                dpp.direct_purchase_details.build size_id: gpd.size.id, color_id: color.id if dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(gpd.size.id) and dpd.color_id.eql?(color.id)}.blank?
+            product = products.select{|prdct| prdct.id == dpp.product_id}.first
+            dpp.prdct_code = product.code
+            dpp.prdct_name = product.name
+            @colors[product.id] = product.colors.distinct
+            @sizes[product.id] = product.sizes.distinct
+            @colors[product.id].each do |color|
+              @sizes[product.id].each do |size|
+                dpp.direct_purchase_details.build size_id: size.id, color_id: color.id if dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(size.id) and dpd.color_id.eql?(color.id)}.blank?
               end
             end
           end
@@ -218,15 +190,22 @@ class ReceivingController < ApplicationController
             where("direct_purchase_id = '#{@direct_purchase.id}'").last
         end
       rescue ActiveRecord::RecordNotUnique => e
+        @colors = []
+        @sizes = []
         @suppliers = Vendor.select(:id, :name)
         @warehouses = Warehouse.central.select :id, :code
         #      @colors = Color.select(:id, :code).order :code
-        @products = Product.where("id IN (#{params[:product_ids]})").select(:id, :code)
+        products = Product.joins(:brand).where(id: @direct_purchase.direct_purchase_products.map(&:product_id)).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
 
         @direct_purchase.direct_purchase_products.each do |dpp|
-          dpp.product.grouped_product_details.each do |gpd|
-            dpp.product.colors.each do |color|
-              dpp.direct_purchase_details.build size_id: gpd.size.id, color_id: color.id if dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(gpd.size.id) and dpd.color_id.eql?(color.id)}.blank?
+          product = products.select{|prdct| prdct.id == dpp.product_id}.first
+          dpp.prdct_code = product.code
+          dpp.prdct_name = product.name
+          @colors[product.id] = product.colors.distinct
+          @sizes[product.id] = product.sizes.distinct
+          @colors[product.id].each do |color|
+            @sizes[product.id].each do |size|
+              dpp.direct_purchase_details.build size_id: size.id, color_id: color.id if dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(size.id) and dpd.color_id.eql?(color.id)}.blank?
             end
           end
         end

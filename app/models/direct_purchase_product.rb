@@ -1,5 +1,5 @@
 class DirectPurchaseProduct < ApplicationRecord
-  attr_accessor :receiving_date, :dp_cost
+  attr_accessor :receiving_date, :dp_cost, :prdct_code, :prdct_name
 
   belongs_to :direct_purchase
   belongs_to :product
