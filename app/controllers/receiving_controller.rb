@@ -214,6 +214,13 @@ class ReceivingController < ApplicationController
     end
   
     private
+    
+    def active_cost(product_id)
+      product = Product.select(:id).where(id: product_id).first
+      cost_list = product.cost_lists.where(["effective_date <= ?", params[:direct_purchase][:receiving_date].to_date]).select(:id, :cost).first
+      return cost_list
+    end
+
   
     def purchase_order_params
       params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:vendor_id, :receiving_date, :is_using_delivery_order, :delivery_order_number, 
@@ -224,8 +231,8 @@ class ReceivingController < ApplicationController
     def direct_purchase_params
       params.require(:direct_purchase).permit(:receiving_date, :vendor_id, :warehouse_id, :first_discount, :second_discount, :is_additional_disc_from_net,
         received_purchase_order_attributes: [:is_using_delivery_order, :delivery_order_number], 
-        direct_purchase_products_attributes: [:dp_cost, :product_id, :receiving_date,
-          direct_purchase_details_attributes: [:size_id, :color_id, :quantity, :product_id, :warehouse_id, :receiving_date]])
+        direct_purchase_products_attributes: [:dp_cost, :product_id, :receiving_date, :prdct_code, :cost_list_id,
+          direct_purchase_details_attributes: [:size_id, :color_id, :quantity, :product_id, :warehouse_id, :receiving_date, :total_unit_price]])
     end
   
     def set_purchase_order
@@ -249,12 +256,15 @@ class ReceivingController < ApplicationController
       end if params[:purchase_order][:received_purchase_orders_attributes].present?
     end
   
-    def add_additional_params_to_direct_purchase_products
+    def add_additional_params_to_direct_purchase_products      
       params[:direct_purchase][:direct_purchase_products_attributes].each do |key, value|
-        params[:direct_purchase][:direct_purchase_products_attributes][key].merge! receiving_date: params[:direct_purchase][:receiving_date]
         product_id = params[:direct_purchase][:direct_purchase_products_attributes][key][:product_id]
+        cost_list = active_cost(product_id)
+        params[:direct_purchase][:direct_purchase_products_attributes][key].merge! receiving_date: params[:direct_purchase][:receiving_date], cost_list_id: (cost_list.id rescue nil)
         params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].each do |dpd_key, value|
-          params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key].merge! product_id: product_id, warehouse_id: params[:direct_purchase][:warehouse_id], receiving_date: params[:direct_purchase][:receiving_date]
+          quantity = params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key][:quantity].to_i
+          total_unit_price = quantity * cost_list.cost rescue 0
+          params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key].merge! product_id: product_id, warehouse_id: params[:direct_purchase][:warehouse_id], receiving_date: params[:direct_purchase][:receiving_date], total_unit_price: total_unit_price
         end if params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].present?
       end if params[:direct_purchase][:direct_purchase_products_attributes].present?
     end

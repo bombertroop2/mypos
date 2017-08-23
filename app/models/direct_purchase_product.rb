@@ -18,7 +18,7 @@ class DirectPurchaseProduct < ApplicationRecord
   accepts_nested_attributes_for :received_purchase_order_product
   accepts_nested_attributes_for :direct_purchase_details, reject_if: proc { |attributes| attributes[:quantity].blank? }
 
-  before_create :create_received_purchase_order_product, :set_active_cost
+  before_create :create_received_purchase_order_product
 
   
   def active_cost(receiving_date)
@@ -49,7 +49,7 @@ class DirectPurchaseProduct < ApplicationRecord
   #      end
     
   def existing_cost
-    errors.add(:base, "Sorry, there is no active cost for product #{product.code} on #{receiving_date}") if (@cost = active_cost(receiving_date.to_date)).blank? && direct_purchase_details.present?
+    errors.add(:base, "Sorry, there is no active cost for product #{prdct_code} on #{receiving_date}") if cost_list_id.nil? && direct_purchase_details.present?
   end
   
   def should_has_details    
@@ -57,13 +57,10 @@ class DirectPurchaseProduct < ApplicationRecord
   end
   
   def create_received_purchase_order_product
+    received_purchase_order_id = ReceivedPurchaseOrder.select(:id).where(direct_purchase_id: direct_purchase_id).first.id
     self.attributes = self.attributes.merge(received_purchase_order_product_attributes: {
-        received_purchase_order_id: direct_purchase.received_purchase_order.id,
+        received_purchase_order_id: received_purchase_order_id,
         direct_purchase_product_id: id
       })
-  end
-  
-  def set_active_cost
-    self.cost_list_id = @cost.id
   end
 end

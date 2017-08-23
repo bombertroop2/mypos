@@ -1,4 +1,4 @@
-<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+<table class="table table-striped table-bordered" style="table-layout: fixed;word-wrap: break-word;">
     <thead id="listing-stock-transactions-thead">
         <tr>
             <th class="col-md-5 text-center" colspan="3">Transaction</th>
@@ -78,22 +78,22 @@
           <% end %>
           <tr class="editable" data-id="<%#= brand.id %>">
               <% unless last_transaction_date == stock_transaction.transaction_date %>
-                <td rowspan="<%= total_transaction %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.transaction_date.strftime("%d/%m/%Y") %></td>
+                <td rowspan="<%= total_transaction %>"><%= stock_transaction.transaction_date.strftime("%d/%m/%Y") %></td>
               <% end %>
               <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) %>
-                <td rowspan="<%= total_transaction_number %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.transaction_number %></td>
+                <td rowspan="<%= total_transaction_number %>"><%= stock_transaction.transaction_number %></td>
               <% end %>
               <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) %>
-                <td rowspan="<%= total_transaction_type %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.transaction_type %></td>
+                <td rowspan="<%= total_transaction_type %>"><%= stock_transaction.transaction_type %></td>
               <% end %>
               <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code)) %>
-                <td rowspan="<%= total_product_code %>" class="text-center" style="vertical-align: middle"><%= "#{stock_transaction.product_code} - #{stock_transaction.product_name}" %></td>
+                <td rowspan="<%= total_product_code %>"><%= "#{stock_transaction.product_code} - #{stock_transaction.product_name}" %></td>
               <% end %>
               <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && !last_color_code.eql?(stock_transaction.color_code)) %>
-                <td rowspan="<%= total_color_code %>" class="text-center" style="vertical-align: middle"><%= "#{stock_transaction.color_code} - #{stock_transaction.color_name}" %></td>
+                <td rowspan="<%= total_color_code %>"><%= "#{stock_transaction.color_code} - #{stock_transaction.color_name}" %></td>
               <% end %>
               <% if last_transaction_date != stock_transaction.transaction_date || (last_transaction_date == stock_transaction.transaction_date && !last_transaction_number.eql?(stock_transaction.transaction_number)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && !last_transaction_type.eql?(stock_transaction.transaction_type)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && !last_product_code.eql?(stock_transaction.product_code)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && !last_color_code.eql?(stock_transaction.color_code)) || (last_transaction_date == stock_transaction.transaction_date && last_transaction_number.eql?(stock_transaction.transaction_number) && last_transaction_type.eql?(stock_transaction.transaction_type) && last_product_code.eql?(stock_transaction.product_code) && last_color_code.eql?(stock_transaction.color_code) && !last_size.eql?(stock_transaction.size)) %>
-                <td rowspan="<%= total_size %>" class="text-center" style="vertical-align: middle"><%= stock_transaction.size %></td>
+                <td rowspan="<%= total_size %>"><%= stock_transaction.size %></td>
               <% end %>
               <td class="text-right"><%= stock_transaction.quantity %></td>
   <%#= smart_listing.render object: stock_transaction, partial: "listing_stocks/stock_transaction", locals: {object: stock_transaction} %>
