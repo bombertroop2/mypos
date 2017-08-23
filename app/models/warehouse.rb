@@ -7,6 +7,7 @@ class Warehouse < ApplicationRecord
   has_many :listing_stocks, dependent: :restrict_with_error
   has_many :purchase_orders, dependent: :restrict_with_error
   has_many :sales_promotion_girls, dependent: :restrict_with_error
+  has_many :direct_purchases, dependent: :restrict_with_error
   has_many :origin_warehouse_order_bookings, class_name: "OrderBooking", foreign_key: :origin_warehouse_id, dependent: :restrict_with_error
   has_many :destination_warehouse_order_bookings, class_name: "OrderBooking", foreign_key: :destination_warehouse_id, dependent: :restrict_with_error
   has_many :origin_warehouse_stock_mutations, class_name: "StockMutation", foreign_key: :origin_warehouse_id, dependent: :restrict_with_error

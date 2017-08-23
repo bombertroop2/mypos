@@ -25,9 +25,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                     purchase_order_product = PurchaseOrderProduct.select(:purchase_order_id).where(id: purchase_order_detail.purchase_order_product_id).first
                     PurchaseOrder.select(:number).where(id: purchase_order_product.purchase_order_id).first
                   else
-                    direct_purchase_product = DirectPurchaseProduct.select(:direct_purchase_id).where(id: direct_purchase_detail.direct_purchase_product_id).first
-                    direct_purchase = DirectPurchase.select(:id).where(id: direct_purchase_product.direct_purchase_id).first
-                    direct_purchase.received_purchase_order
+                    ReceivedPurchaseOrder.select(:delivery_order_number).joins(direct_purchase: :direct_purchase_products).where(["direct_purchase_products.id = ?", direct_purchase_detail.direct_purchase_product_id]).first
                   end
                   listing_stock = ListingStock.select(:id).where(warehouse_id: warehouse_id, product_id: product_id).first
                   listing_stock = ListingStock.new warehouse_id: warehouse_id, product_id: product_id if listing_stock.blank?
@@ -60,7 +58,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   end
                 end
                 
-                def create_stock_movement
+                def create_stock_movement                  
                   next_month_movements = unless is_it_direct_purchasing
                     StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:id, :beginning_stock, :ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date >= ?", warehouse_id, product_id, purchase_order_detail.color_id, purchase_order_detail.size_id, receiving_date.to_date.next_month.beginning_of_month]).group(:id, :beginning_stock, :ending_stock)
                   else
@@ -351,23 +349,23 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                 end
       
                 def create_stock
-                  direct_purchase_product = direct_purchase_detail.direct_purchase_product
-                  warehouse = direct_purchase_product.direct_purchase.warehouse                  
+                  direct_purchase_product = DirectPurchaseProduct.select(:product_id, :direct_purchase_id, :product_id).where(id: direct_purchase_detail.direct_purchase_product_id).first
+                  warehouse = Warehouse.joins(:direct_purchases).where(["direct_purchases.id = ?", direct_purchase_product.direct_purchase_id]).select(:id).first
                   stock = Stock.select(:id).where(warehouse_id: warehouse.id).first
                   stock = Stock.new warehouse_id: warehouse.id if stock.blank?
-                  product = direct_purchase_product.product
+                  product = Product.select(:id).where(id: direct_purchase_product.product_id).first
                   if stock.new_record?                    
                     stock_product = stock.stock_products.build product_id: product.id
                     stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
                     stock.save
                   else
-                    stock_product = stock.stock_products.select{|stock_product| stock_product.product_id == product.id}.first
+                    stock_product = stock.stock_products.select(:id).where(product_id: product.id).first
                     stock_product = stock.stock_products.build product_id: product.id if stock_product.blank?
                     if stock_product.new_record?                      
                       stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity
                       stock_product.save
                     else
-                      stock_detail = stock_product.stock_details.select{|sd| sd.size_id == direct_purchase_detail.size_id && sd.color_id == direct_purchase_detail.color_id}.first
+                      stock_detail = stock_product.stock_details.select(:id, :quantity).where(size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id).first
                       stock_detail = stock_product.stock_details.build size_id: direct_purchase_detail.size_id, color_id: direct_purchase_detail.color_id, quantity: direct_purchase_detail.quantity if stock_detail.blank?
                       if stock_detail.new_record?
                         stock_detail.save
