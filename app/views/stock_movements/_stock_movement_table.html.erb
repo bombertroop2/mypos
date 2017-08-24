@@ -2,16 +2,17 @@
     <table class="table table-bordered table-condensed">
         <thead>
             <tr>
-                <th class="text-center" colspan="12">Stock Movement Report</th>
+                <th class="text-center" colspan="13">Stock Movement Report</th>
             </tr>
             <tr>
-                <th class="text-center" colspan="12"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
+                <th class="text-center" colspan="13"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
             </tr>
             <tr>
                 <th class="text-center" rowspan="2">Article</th>
                 <th class="text-center" rowspan="2">Color</th>
                 <th class="text-center" rowspan="2">Size</th>
                 <th class="text-center" rowspan="2">Beginning Stock</th>
+                <th class="text-center" rowspan="2">BS</th>
                 <th class="text-center" rowspan="2">Rec. PO</th>
                 <th class="text-center" rowspan="2">Ret. PO</th>
                 <th class="text-center" rowspan="2">DO</th>
@@ -45,6 +46,7 @@
                   <% end %>
                   <td class="text-right"><%= stock_movement_transaction.product_size %></td>
                   <td class="text-right"><%= stock_movement_transaction.beginning_stock %></td>
+                  <td class="text-right"><%= stock_movement_transaction.total_beginning_stock %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_po_quantity_received rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_pr_quantity_returned rescue 0 %></th>
                   <td class="text-right">
