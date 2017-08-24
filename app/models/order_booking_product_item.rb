@@ -14,8 +14,8 @@ class OrderBookingProductItem < ApplicationRecord
         validate :quantity_available, if: proc{|obpi| obpi.quantity.present? && obpi.quantity.is_a?(Numeric)}
     
           before_save :update_booked_quantity, :update_total_quantity
-#          before_destroy :delete_tracks
-#          after_destroy :update_booked_quantity
+          before_destroy :delete_tracks
+          after_destroy :update_booked_quantity
           after_update :update_stock_and_booked_quantity, if: proc{|spi| spi.shipping || spi.cancel_shipment}
       
             def available_for_booking_quantity=(value)

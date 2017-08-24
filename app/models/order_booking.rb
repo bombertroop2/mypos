@@ -24,7 +24,7 @@ class OrderBooking < ApplicationRecord
 
           before_create :generate_number, :set_status
           before_update :delete_old_products    
-#          before_destroy :deletable, :delete_tracks
+          before_destroy :deletable, :delete_tracks
 
     
           def plan_date_validable
