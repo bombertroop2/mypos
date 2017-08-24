@@ -19,8 +19,8 @@ class OrderBookingProduct < ApplicationRecord
     validate :check_min_product_quantity
     
     before_create :calculate_quantity, :update_order_booking_quantity
-    before_destroy :delete_tracks
-    after_destroy :update_order_booking_quantity
+#    before_destroy :delete_tracks
+#    after_destroy :update_order_booking_quantity
     
     def origin_warehouse_id=(value)
       attribute_will_change!(:origin_warehouse_id)

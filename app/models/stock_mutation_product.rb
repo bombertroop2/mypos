@@ -16,7 +16,7 @@ class StockMutationProduct < ApplicationRecord
   validate :should_has_details
   validate :product_available, on: :create
 
-  before_destroy :delete_tracks
+#  before_destroy :delete_tracks
 
   private
   
