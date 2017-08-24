@@ -215,13 +215,6 @@ class ReceivingController < ApplicationController
   
     private
     
-    def active_cost(product_id)
-      product = Product.select(:id).where(id: product_id).first
-      cost_list = product.cost_lists.where(["effective_date <= ?", params[:direct_purchase][:receiving_date].to_date]).select(:id, :cost).first
-      return cost_list
-    end
-
-  
     def purchase_order_params
       params.require(:purchase_order).permit(:id, received_purchase_orders_attributes: [:vendor_id, :receiving_date, :is_using_delivery_order, :delivery_order_number, 
           received_purchase_order_products_attributes: [:purchase_order_id, :purchase_order_product_id,
@@ -257,10 +250,11 @@ class ReceivingController < ApplicationController
     end
   
     def add_additional_params_to_direct_purchase_products      
+      products = Product.joins(:cost_lists).select("products.id, cost_lists.id AS cost_list_id, cost").where(id: params[:receiving_product_ids].split(",")).where(["effective_date <= ?", params[:direct_purchase][:receiving_date].to_date]).order("effective_date DESC")
       params[:direct_purchase][:direct_purchase_products_attributes].each do |key, value|
         product_id = params[:direct_purchase][:direct_purchase_products_attributes][key][:product_id]
-        cost_list = active_cost(product_id)
-        params[:direct_purchase][:direct_purchase_products_attributes][key].merge! receiving_date: params[:direct_purchase][:receiving_date], cost_list_id: (cost_list.id rescue nil)
+        cost_list = products.select{|product| product.id == product_id.to_i}.first        
+        params[:direct_purchase][:direct_purchase_products_attributes][key].merge! receiving_date: params[:direct_purchase][:receiving_date], cost_list_id: (cost_list.cost_list_id rescue nil)
         params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes].each do |dpd_key, value|
           quantity = params[:direct_purchase][:direct_purchase_products_attributes][key][:direct_purchase_details_attributes][dpd_key][:quantity].to_i
           total_unit_price = quantity * cost_list.cost rescue 0
