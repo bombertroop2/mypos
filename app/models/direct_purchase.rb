@@ -22,7 +22,7 @@ class DirectPurchase < ApplicationRecord
             validates :receiving_date, date: {before_or_equal_to: Proc.new { Date.current }, message: 'must be before or equal to today' }, if: proc {|dp| dp.receiving_date.present?}
               validate :vendor_exist, if: proc{|dp| dp.vendor_id.present?}
                 validate :warehouse_exist, if: proc{|dp| dp.warehouse_id.present?}
-                  validate :transaction_open, if: proc{|dp| dp.receiving_date.present?}
+                  validate :transaction_open, :transaction_after_beginning_stock_added, if: proc{|dp| dp.receiving_date.present?}
 
                     before_create :set_vat_and_entrepreneur_status, :set_nil_to_is_additional_disc_from_net, :calculate_total_quantity, :set_receiving_date_to_receiving_purchase_order
   
@@ -43,6 +43,11 @@ class DirectPurchase < ApplicationRecord
                     end
           
                     private
+                    
+                    def transaction_after_beginning_stock_added
+                      listing_stock_transaction = ListingStockTransaction.select(:transaction_date).where(transaction_type: "BS").first
+                      errors.add(:base, "Sorry, you can't receive article on #{receiving_date.strftime("%d/%m/%Y")}") if listing_stock_transaction.transaction_date > receiving_date
+                    end
                     
                     def transaction_open                            
                       errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: receiving_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[receiving_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
