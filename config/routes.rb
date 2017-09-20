@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :events do    
+    collection do
+      get "generate_warehouse_form"
+      get "add_products"
+    end
+  end
   resources :listing_stocks, only: :index
   resources :stock_movements, only: :index
   resources :fiscal_years

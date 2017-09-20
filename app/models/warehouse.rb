@@ -19,6 +19,8 @@ class Warehouse < ApplicationRecord
   has_one :destination_warehouse_order_booking_relation, -> {select("1 AS one")}, class_name: "OrderBooking", foreign_key: :destination_warehouse_id
   has_one :origin_warehouse_stock_mutation_relation, -> {select("1 AS one")}, class_name: "StockMutation", foreign_key: :origin_warehouse_id
   has_one :destination_warehouse_stock_mutation_relation, -> {select("1 AS one")}, class_name: "StockMutation", foreign_key: :destination_warehouse_id
+  has_one :selected_columns_stock, -> {select(:id, :warehouse_id)}, class_name: "Stock"
+  has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
   validates :code, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}

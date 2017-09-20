@@ -1,0 +1,8 @@
+<td><%= object.code %></td>
+<td><%= object.name %></td>
+<td><%= object.start_date_time.strftime("%d/%m/%Y %H:%M") %></td>
+<td><%= object.end_date_time.strftime("%d/%m/%Y %H:%M") %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to_if(can?(:manage, Event), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_event_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
+      <%= link_to_if(can?(:manage, Event), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+  </td>

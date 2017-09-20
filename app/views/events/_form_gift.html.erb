@@ -1,0 +1,145 @@
+<%= form_for(@event, remote: true, html: {class: "form-horizontal"}) do |f| %>
+    <%= hidden_field_tag "event_type", "gift" %>
+    <%= f.hidden_field :type, value: "gift" %>
+    <div class="form-group<%= control_group_error(@event, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs" %>
+                <%= error_help_text(@event, :code) %>
+            </div>
+
+        </div>
+        <div class="form-group<%= control_group_error(@event, :name) %>">
+            <%= f.label :name, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :name, class: "form-control inputs" %>
+                    <%= error_help_text(@event, :name) %>
+                </div>
+            </div>
+
+            <div class="form-group<%= control_group_error(@event, :start_date_time) %>">
+                <%= f.label :start_date_time, "Start time", class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :start_date_time, size: 10, readonly: true, class: "form-control", id: "event_start_date_time_gift" %>
+                        <%= error_help_text(@event, :start_date_time) %>
+                    </div>
+                </div>
+
+                <div class="form-group<%= control_group_error(@event, :end_date_time) %>">
+                    <%= f.label :end_date_time, "End time", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :end_date_time, size: 10, readonly: true, class: "form-control", id: "event_end_date_time_gift" %>
+                            <%= error_help_text(@event, :end_date_time) %>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Warehouses</label>
+                        <div class="col-sm-10">
+                            <table id="listing_event_warehouses_table_gift" class="display">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th id="code_th_gift">Code</th>
+                                        <th>Name</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <% @warehouses.each do |warehouse| %>
+                                      <tr id="warehouse_<%= warehouse.id %>_gift">
+                                          <td></td>
+                                          <td><%= warehouse.code %></td>
+                                          <td><%= warehouse.name %></td>
+                                      </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                            <a class="btn btn-default active" id="generate_event_gift_warehouse_form" style="float: right;margin-top: 10px;">Generate form</a>
+                        </div>
+                    </div>
+
+
+                    <div id="listing-warehouse-details-gift">
+                        <% if @event.event_warehouses.present? %>
+                          <%= render "warehouse_form_gift" %>
+                        <% end %>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-gift" %>
+                              <button class="btn btn-link cancel">Cancel</button>
+                          </div>
+                      </div>
+                    <% end %>
+
+                    <script type="text/javascript">
+                      $(function () {
+                          $("#event_start_date_time_gift").datetimepicker({
+                              format: "dd/mm/yyyy hh:ii",
+                              autoclose: true,
+                              minuteStep: 1
+                          });
+                          $("#event_end_date_time_gift").datetimepicker({
+                              format: "dd/mm/yyyy hh:ii",
+                              autoclose: true,
+                              minuteStep: 1
+                          });
+                          var eventWarehousesGiftDataTable = $('#listing_event_warehouses_table_gift').DataTable({
+                              order: [1, 'asc'],
+                              dom: 'T<"clear">lfrtip',
+                              columns: [
+                                  {data: null, defaultContent: '', orderable: false},
+                                  {data: 'code'},
+                                  {data: 'name'}
+                              ],
+                              tableTools: {
+                                  sRowSelect: 'os',
+                                  aButtons: ['select_all', 'select_none']
+                              },
+                              paging: false,
+                              info: false,
+                              scrollY: "250px",
+                              scrollCollapse: true
+                          });
+
+                          $("#submit-btn-gift").click(function () {
+                              if (eventWarehousesGiftDataTable.rows('.selected').data().length == 0) {
+                                  bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+                                  return false;
+                              } else if ($("#listing-warehouse-details-gift").html().trim() == "") {
+                                  bootbox.alert({message: "Please add discount amount or gift items for each selected warehouse", size: 'small'});
+                                  return false;
+                              }
+                              return true;
+                          });
+
+                          $("#generate_event_gift_warehouse_form").click(function () {
+                              if (eventWarehousesGiftDataTable.rows('.selected').data().length == 0) {
+                                  bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+                                  return false;
+                              } else {
+                                  var warehouseIds = [];
+                                  $.each(eventWarehousesGiftDataTable.rows('.selected')[0], function (index, value) {
+                                      warehouseIds.push(eventWarehousesGiftDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                  });
+
+                                  $.get("/events/generate_warehouse_form", {
+                                      warehouse_ids: warehouseIds.join(","),
+                                      event_type: "gift"
+                                  });
+                              }
+                          });
+
+                    <% @event.event_warehouses.each do |event_warehouse| %>
+                            var e = jQuery.Event("click");
+                            e.ctrlKey = true;
+                            $("#warehouse_<%= event_warehouse.warehouse_id %>_gift").find("td:first-child").trigger(e);
+                    <% end %>
+
+                          $('#event_minimum_purchase_amount').autoNumeric('init');
+                          $('#event_discount_amount').autoNumeric('init');
+                      });
+                    </script>  

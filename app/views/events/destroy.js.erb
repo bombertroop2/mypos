@@ -1,0 +1,8 @@
+<% if @deleted %>
+  <%= smart_listing_item :events, :destroy, @event %>
+<% else %>
+  <% if @event.errors.present? && @event.errors.messages[:base].present? %>
+    bootbox.alert({message: "<%= @event.errors.messages[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+  <%= smart_listing_item :events, :update, @event, "events/event" %>
+<% end %>

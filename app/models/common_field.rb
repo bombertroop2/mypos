@@ -8,6 +8,11 @@ class CommonField < ApplicationRecord
     %w(Brand Color GoodsType Model Region PriceCode)
   end
   
+  def code_and_name
+    "#{code} - #{name}"
+  end
+
+  
   private
   
   def strip_string_values

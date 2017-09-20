@@ -1,0 +1,13 @@
+<% unless @valid %>
+  <% if params[:event][:type].strip.eql?("") %>
+    $("#form_container_disc_percentage").html("<%= j(render(partial: "form_discount_percentage")) %>");
+  <% elsif params[:event][:type].strip.eql?("cash discount") %>
+    $("#form_container_discount_cash").html("<%= j(render(partial: "form_discount_cash")) %>");
+  <% elsif params[:event][:type].strip.eql?("special price") %>
+    $("#form_container_special_price").html("<%= j(render(partial: "form_special_price")) %>");
+  <% elsif params[:event][:type].strip.eql?("buy one get one") %>
+    $("#form_container_buy_one_get_one_free").html("<%= j(render(partial: "form_buy_one_get_one")) %>");
+  <% end %>
+<% else %>
+  <%= smart_listing_item :events, :update, @event, "events/event" %>
+<% end %>

@@ -1,0 +1,184 @@
+<%= form_for(@event, remote: true, html: {class: "form-horizontal"}) do |f| %>
+    <%= hidden_field_tag "event_type", "" %>
+    <%= f.hidden_field :type, value: "" %>
+    <div class="form-group<%= control_group_error(@event, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs" %>
+                <%= error_help_text(@event, :code) %>
+            </div>
+        </div>
+
+        <div class="form-group<%= control_group_error(@event, :name) %>">
+            <%= f.label :name, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :name, class: "form-control inputs" %>
+                    <%= error_help_text(@event, :name) %>
+                </div>
+            </div>
+
+            <div class="form-group<%= control_group_error(@event, :start_date_time) %>">
+                <%= f.label :start_date_time, "Start time", class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :start_date_time, size: 10, readonly: true, class: "form-control" %>
+                        <%= error_help_text(@event, :start_date_time) %>
+                    </div>
+                </div>
+
+                <div class="form-group<%= control_group_error(@event, :end_date_time) %>">
+                    <%= f.label :end_date_time, "End time", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :end_date_time, size: 10, readonly: true, class: "form-control" %>
+                            <%= error_help_text(@event, :end_date_time) %>
+                        </div>
+                    </div>
+
+                    <div class="form-group<%= control_group_error(@event, :first_plus_discount) %>">
+                        <%= f.label :first_plus_discount, "First discount", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_field :first_plus_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
+                                <%= error_help_text(@event, :first_plus_discount) %>
+                            </div>
+                        </div>
+
+                        <div class="form-group<%= control_group_error(@event, :second_plus_discount) %>">
+                            <%= f.label :second_plus_discount, "Second discount", class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.text_field :second_plus_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
+                                    <%= error_help_text(@event, :second_plus_discount) %>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Warehouses</label>
+                                <div class="col-sm-10">
+                                    <table id="listing_event_warehouses_table" class="display">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <% @warehouses.each do |warehouse| %>
+                                              <tr id="warehouse_<%= warehouse.id %>">
+                                                  <td></td>
+                                                  <td><%= warehouse.code %></td>
+                                                  <td><%= warehouse.name %></td>
+                                              </tr>
+                                            <% end %>
+                                        </tbody>
+                                    </table>
+                                    <a class="btn btn-default active" id="generate_event_percentage_warehouse_form" style="float: right;margin-top: 10px;">Generate form</a>
+                                </div>
+                            </div>
+
+                            <div id="listing-warehouse-details">
+                                <% if action_name.eql?("create") || !@event.new_record? %>
+                                  <%= render(partial: "warehouse_form") %>    
+                                <% end %>      
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn" %>
+                                      <button class="btn btn-link cancel">Cancel</button>
+                                  </div>
+                              </div>
+                            <% end %>
+
+                            <script type="text/javascript">
+                              $(function () {
+                                  $("#event_start_date_time").datetimepicker({
+                                      format: "dd/mm/yyyy hh:ii",
+                                      autoclose: true,
+                                      minuteStep: 1
+                                  });
+                                  $("#event_end_date_time").datetimepicker({
+                                      format: "dd/mm/yyyy hh:ii",
+                                      autoclose: true,
+                                      minuteStep: 1
+                                  });
+                                  var eventWarehousesDataTable = $('#listing_event_warehouses_table').DataTable({
+                                      order: [1, 'asc'],
+                                      dom: 'T<"clear">lfrtip',
+                                      columns: [
+                                          {data: null, defaultContent: '', orderable: false},
+                                          {data: 'code'},
+                                          {data: 'name'}
+                                      ],
+                                      tableTools: {
+                                          sRowSelect: 'os',
+                                          /*sRowSelector: 'td:first-child',*/
+                                          aButtons: ['select_all', 'select_none']
+                                      },
+                                      paging: false,
+                                      info: false,
+                                      scrollY: "250px",
+                                      scrollCollapse: true
+                                  });
+                                  $("#generate_event_percentage_warehouse_form").click(function (e) {
+                                      if (eventWarehousesDataTable.rows('.selected').data().length == 0) {
+                                          e.preventDefault();
+                                          bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+                                      } else {
+                                          var warehouseIds = [];
+                                          $.each(eventWarehousesDataTable.rows('.selected')[0], function (index, value) {
+                                              warehouseIds.push(eventWarehousesDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                          });
+                            <% if @event.new_record? %>
+                                            $.get("/events/generate_warehouse_form", {
+                                                warehouse_ids: warehouseIds.join(","),
+                                                event_type: ""
+                                            });
+                            <% else %>
+                                            $.get("/events/generate_warehouse_form", {
+                                                warehouse_ids: warehouseIds.join(","),
+                                                event_type: "",
+                                                event_id: "<%= @event.id %>"
+                                            });
+                            <% end %>
+                                      }
+
+                                  });
+                                  if ($(".discount-fields").length > 0)
+                                      $(".discount-fields").numeric();
+
+                                  $("#submit-btn").click(function () {
+                                      if ($("#listing-warehouse-details").html().trim() == "") {
+                                          bootbox.alert({message: "Please select product(s) from selected warehouse(s)", size: 'small'});
+                                          return false;
+                                      } else {
+                                          var valid = true;
+                                          if ($(".event_warehouse_id_fields").length > 0) {
+                                              $(".event_warehouse_id_fields").each(function () {
+                                                  if ($("#event_product_fields_container_" + $(this).val()).length == 0) {
+                                                      valid = false;
+                                                      return false;
+                                                  } else if ($("#event_product_fields_container_" + $(this).val()).html().trim() == "") {
+                                                      valid = false;
+                                                      return false;
+                                                  }
+                                              });
+                                          } else
+                                              valid = false;
+
+                                          if (!valid) {
+                                              bootbox.alert({message: "Please select product(s) from selected warehouse(s)", size: 'small'});
+                                              return false;
+                                          } else
+                                              return true;
+                                      }
+                                  });
+
+                            <% @event.event_warehouses.each do |event_warehouse| %>
+                              <% unless event_warehouse._destroy %>
+                                      var e = jQuery.Event("click");
+                                      e.ctrlKey = true;
+                                      $("#warehouse_<%= event_warehouse.warehouse_id %>").find("td:first-child").trigger(e);
+                              <% end %>
+                            <% end %>
+                              });
+                            </script>  

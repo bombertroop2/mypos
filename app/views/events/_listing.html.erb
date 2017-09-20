@@ -1,0 +1,29 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-event-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Start time", "start_date_time" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "End time", "end_date_time" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |event| %>
+          <tr class="editable" data-id="<%= event.id %>">
+              <%= smart_listing.render object: event, partial: "events/event", locals: {object: event} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 5, link: new_event_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-event-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-event-thead").show();
+      }
+  }, 0);
+</script>
