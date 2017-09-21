@@ -7,6 +7,8 @@
     $("#form_container_special_price").html("<%= j(render(partial: "form_special_price")) %>");
   <% elsif params[:event][:type].strip.eql?("buy one get one") %>
     $("#form_container_buy_one_get_one_free").html("<%= j(render(partial: "form_buy_one_get_one")) %>");
+  <% elsif params[:event][:type].strip.eql?("gift") %>
+    $("#form_container_reward").html("<%= j(render(partial: "form_gift")) %>");
   <% end %>
 <% else %>
   <%= smart_listing_item :events, :update, @event, "events/event" %>

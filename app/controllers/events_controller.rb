@@ -47,19 +47,6 @@ class EventsController < ApplicationController
     convert_amount_fields_to_numeric
     @event = Event.new(event_params)
     
-    unless @event.type.eql?("gift")
-      warehouse_ids = []
-      params[:event][:event_warehouses_attributes].each do |key, value|
-        warehouse_ids << params[:event][:event_warehouses_attributes][key][:warehouse_id]
-      end
-      warehouses = if warehouse_ids.length > 1
-        Warehouse.where(id: warehouse_ids).includes(:stock_products).actived.not_central.select(:id)
-      else
-        Warehouse.where(id: warehouse_ids).actived.not_central.select(:id)
-      end
-
-    end
-    
     begin
       @valid = @event.save
       unless @valid
@@ -83,6 +70,7 @@ class EventsController < ApplicationController
   def update
     params[:event][:cash_discount] = params[:event][:cash_discount].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:event][:cash_discount].present?
     params[:event][:special_price] = params[:event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:event][:special_price].present?
+    convert_amount_fields_to_numeric
     begin
       @valid = @event.update(event_params)
       unless @valid
@@ -118,19 +106,11 @@ class EventsController < ApplicationController
       Event.new
     end
     warehouse_ids = params[:warehouse_ids].split(",")
-    unless params[:event_type].eql?("gift")
-      warehouses = if warehouse_ids.length > 1
-        Warehouse.where(id: warehouse_ids).includes(:stock_products).actived.not_central.select(:id, :code, :name)
-      else
-        Warehouse.where(id: warehouse_ids).actived.not_central.select(:id, :code, :name)
-      end
-    else
-      warehouses = Warehouse.where(id: warehouse_ids).actived.not_central.select(:id, :code, :name)
-    end
+    warehouses = Warehouse.where(id: warehouse_ids).actived.not_central.select(:id, :code, :name)
     
     unless @event.new_record?
       @event_warehouses = []
-      event_warehouses = @event.event_warehouses.joins(:warehouse).select(:id, :warehouse_id, :code, :name)
+      event_warehouses = @event.event_warehouses.joins(:warehouse).select(:id, :warehouse_id, :code, :name, :minimum_purchase_amount, :discount_amount)
       event_warehouses.each do |ew|
         unless warehouse_ids.include?(ew.warehouse_id.to_s)
           ew.remove = true
@@ -152,7 +132,13 @@ class EventsController < ApplicationController
           @event.event_warehouses.build warehouse_id: warehouse.id, wrhs_code: warehouse.code, wrhs_name: warehouse.name
         end
       else
-        @event.event_warehouses.build warehouse_id: warehouse.id, wrhs_code: warehouse.code, wrhs_name: warehouse.name, event_type: "gift"
+        unless @event.new_record?
+          if @event_warehouses.select{|ew| ew.warehouse_id == warehouse.id}.empty?
+            @event_warehouses << @event.event_warehouses.build(warehouse_id: warehouse.id, wrhs_code: warehouse.code, wrhs_name: warehouse.name, event_type: "gift")
+          end
+        else
+          @event.event_warehouses.build warehouse_id: warehouse.id, wrhs_code: warehouse.code, wrhs_name: warehouse.name, event_type: "gift"
+        end
       end
     end
     @brands = Brand.select(:id, :code, :name).order(:code)
@@ -235,9 +221,9 @@ class EventsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def event_params
-    params.require(:event).permit(:buy_one_get_one_free, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :type, :cash_discount, :special_price,
+    params.require(:event).permit(:reward_system, :buy_one_get_one_free, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :type, :cash_discount, :special_price,
       event_warehouses_attributes: [:_destroy, :id, :event_type, :minimum_purchase_amount,
-        :discount_amount, :add_items_to_gift_list, :warehouse_id,
+        :discount_amount, :warehouse_id,
         :wrhs_code, :wrhs_name,
         event_products_attributes: [:id, :product_id, :prdct_code, :prdct_name, :_destroy]])
   end

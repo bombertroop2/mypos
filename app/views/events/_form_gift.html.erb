@@ -1,6 +1,7 @@
 <%= form_for(@event, remote: true, html: {class: "form-horizontal"}) do |f| %>
     <%= hidden_field_tag "event_type", "gift" %>
     <%= f.hidden_field :type, value: "gift" %>
+    <%= f.hidden_field :reward_system, value: true %>
     <div class="form-group<%= control_group_error(@event, :code) %>">
         <%= f.label :code, class: "col-sm-2 control-label" %>
           <div class="col-sm-10">
@@ -61,8 +62,8 @@
 
 
                     <div id="listing-warehouse-details-gift">
-                        <% if @event.event_warehouses.present? %>
-                          <%= render "warehouse_form_gift" %>
+                        <% if action_name.eql?("create") || !@event.new_record? %>
+                          <%= render partial: "warehouse_form_gift" %>
                         <% end %>
                     </div>
 
@@ -105,17 +106,6 @@
                               scrollCollapse: true
                           });
 
-                          $("#submit-btn-gift").click(function () {
-                              if (eventWarehousesGiftDataTable.rows('.selected').data().length == 0) {
-                                  bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
-                                  return false;
-                              } else if ($("#listing-warehouse-details-gift").html().trim() == "") {
-                                  bootbox.alert({message: "Please add discount amount or gift items for each selected warehouse", size: 'small'});
-                                  return false;
-                              }
-                              return true;
-                          });
-
                           $("#generate_event_gift_warehouse_form").click(function () {
                               if (eventWarehousesGiftDataTable.rows('.selected').data().length == 0) {
                                   bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
@@ -125,21 +115,57 @@
                                   $.each(eventWarehousesGiftDataTable.rows('.selected')[0], function (index, value) {
                                       warehouseIds.push(eventWarehousesGiftDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
                                   });
+                    <% if @event.new_record? %>
+                                    $.get("/events/generate_warehouse_form", {
+                                        warehouse_ids: warehouseIds.join(","),
+                                        event_type: "gift"
+                                    });
+                    <% else %>
+                                    $.get("/events/generate_warehouse_form", {
+                                        warehouse_ids: warehouseIds.join(","),
+                                        event_type: "gift",
+                                        event_id: "<%= @event.id %>"
+                                    });
+                    <% end %>
+                              }
+                          });
 
-                                  $.get("/events/generate_warehouse_form", {
-                                      warehouse_ids: warehouseIds.join(","),
-                                      event_type: "gift"
-                                  });
+                          $("#submit-btn-gift").click(function () {
+                              if ($("#listing-warehouse-details-gift").html().trim() == "") {
+                                  bootbox.alert({message: "Please add discount amount or gift items for each selected warehouse", size: 'small'});
+                                  return false;
+                              } else {
+                                  var valid = true;
+                                  if ($(".event_warehouse_id_fields_gift").length > 0) {
+                                      $(".event_warehouse_id_fields_gift").each(function () {
+                                          if ($("#event_product_fields_container_" + $(this).val() + "_gift").length == 0 && $("#event_event_warehouses_attributes_" + $(this).val() + "_discount_amount").val().trim() == "") {
+                                              valid = false;
+                                              return false;
+                                          } else if ($("#event_product_fields_container_" + $(this).val() + "_gift").length > 0 && $("#event_product_fields_container_" + $(this).val() + "_gift").html().trim() == "" && $("#event_event_warehouses_attributes_" + $(this).val() + "_discount_amount").val().trim() == "") {
+                                              valid = false;
+                                              return false;
+                                          } else if ($(".event-products-" + $(this).val() + "-product-id-fields-gift").length == $(".event-products-" + $(this).val() + "-destroy-fields-gift").length && $(".event-products-" + $(this).val() + "-destroy-fields-gift[value='false']").length == 0 && $("#event_event_warehouses_attributes_" + $(this).val() + "_discount_amount").val().trim() == "") {
+                                              valid = false;
+                                              return false;
+                                          }
+                                      });
+                                  } else
+                                      valid = false;
+
+                                  if (!valid) {
+                                      bootbox.alert({message: "Please add discount amount or gift items for each selected warehouse", size: 'small'});
+                                      return false;
+                                  } else
+                                      return true;
                               }
                           });
 
                     <% @event.event_warehouses.each do |event_warehouse| %>
-                            var e = jQuery.Event("click");
-                            e.ctrlKey = true;
-                            $("#warehouse_<%= event_warehouse.warehouse_id %>_gift").find("td:first-child").trigger(e);
+                      <% unless event_warehouse._destroy %>
+                              var e = jQuery.Event("click");
+                              e.ctrlKey = true;
+                              $("#warehouse_<%= event_warehouse.warehouse_id %>_gift").find("td:first-child").trigger(e);
+                      <% end %>
                     <% end %>
-
-                          $('#event_minimum_purchase_amount').autoNumeric('init');
-                          $('#event_discount_amount').autoNumeric('init');
                       });
                     </script>  

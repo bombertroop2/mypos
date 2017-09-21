@@ -21,6 +21,8 @@
                 <li role="presentation" class="active"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>
               <% elsif @event.buy_one_get_one_free? %>
                 <li role="presentation" class="active"><a href="#buy_one_get_one_free" aria-controls="buy_one_get_one_free" role="tab" data-toggle="tab">Buy 1 Get 1 Free</a></li>
+              <% elsif @event.reward_system? %>
+                <li role="presentation" class="active"><a href="#reward" aria-controls="reward" role="tab" data-toggle="tab">Gift</a></li>
               <% end %>
             <% end %>
         </ul>
@@ -76,6 +78,12 @@
                 <div role="tabpanel" class="tab-pane fade in active" id="buy_one_get_one_free" style="padding-top: 20px">
                     <div id="form_container_buy_one_get_one_free">
                         <%= render "form_buy_one_get_one" %>
+                    </div>
+                </div>
+              <% elsif @event.reward_system? %>
+                <div role="tabpanel" class="tab-pane fade in active" id="reward" style="padding-top: 20px">
+                    <div id="form_container_reward">
+                        <%= render "form_gift" %>
                     </div>
                 </div>
               <% end %>

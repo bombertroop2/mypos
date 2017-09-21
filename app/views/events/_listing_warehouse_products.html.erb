@@ -240,7 +240,10 @@
                                                                                 var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
                                                                                 var selectedWarehouseId = splittedRowId[1];
                                                                                 var selectedProductId = splittedRowId[3];
-                                                                                $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-gift").remove();
+                                                                                if ($("#gift_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                    $("#gift_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                else
+                                                                                    $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-gift").remove();
                                                                             });
                                                                             dt.rows('.selected').remove().draw();
                                                                         }
