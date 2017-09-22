@@ -581,6 +581,12 @@
                         });
         <% end %>
       <% elsif controller_name.eql?("events") %>
+                      $("#search-event-btn").click(function () {
+                          $("#filter_event_start_time").val($("#filter-event-start-time").val());
+                          $("#filter_event_end_time").val($("#filter-event-end-time").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
         <% if cannot? :manage, Event %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");

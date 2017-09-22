@@ -12,9 +12,24 @@ class EventsController < ApplicationController
     else
       "LIKE"
     end
+
+    if params[:filter_event_start_time].present?
+      splitted_start_time_range = params[:filter_event_start_time].split("-")
+      start_start_time = Time.zone.parse splitted_start_time_range[0].strip
+      end_start_time = Time.zone.parse splitted_start_time_range[1].strip
+    end
+
+    if params[:filter_event_end_time].present?
+      splitted_end_time_range = params[:filter_event_end_time].split("-")
+      start_end_time = Time.zone.parse splitted_end_time_range[0].strip
+      end_end_time = Time.zone.parse splitted_end_time_range[1].strip
+    end
+
     events_scope = Event.select(:id, :code, :name, :start_date_time, :end_date_time)
-    events_scope = events_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(events_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    events_scope = events_scope.where(["code #{like_command} ?", "%"+params[:filter_string]+"%"]).
+      or(events_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string]
+    events_scope = events_scope.where(["start_date_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
+    events_scope = events_scope.where(["end_date_time BETWEEN ? AND ?", start_end_time, end_end_time]) if params[:filter_event_end_time].present?
     @events = smart_listing_create(:events, events_scope, partial: 'events/listing', default_sort: {code: "asc"})
   end
 
