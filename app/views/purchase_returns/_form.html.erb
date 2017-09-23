@@ -19,15 +19,10 @@
                                 <%= error_help_text(@purchase_return, :purchase_order_id) %>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <div id="purchase_order_detail">
-                                    <% if @purchase_return.purchase_return_products.present? && params[:action].eql?("create") %>
-                                      <%= render "purchase_order_details" %>
-                                    <% end %>
-                                </div>
-
-                            </div>
+                        <div id="purchase_order_detail">
+                            <% if @purchase_return.purchase_return_products.present? && params[:action].eql?("create") %>
+                              <%= render "purchase_order_details" %>
+                            <% end %>
                         </div>
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">

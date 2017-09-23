@@ -70,12 +70,15 @@ class PurchaseReturnsController < ApplicationController
     @purchase_return = PurchaseReturn.new(purchase_return_params)
     unless @purchase_return.save
       purchase_order = PurchaseOrder.where(id: @purchase_return.purchase_order_id).select(:id).first
-      purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
+      @purchase_order_products = purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).includes(:purchase_order_details, :colors, :sizes).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id")
+      @purchase_order_details = {}
+      @purchase_order_products.each do |pop|
         purchase_return_product = @purchase_return.purchase_return_products.select{|prp| prp.purchase_order_product_id == pop.id}.first
         unless purchase_return_product.present?
           purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
         end
-        pop.purchase_order_details.select(:id).each do |pod|
+        @purchase_order_details[pop.id] = pop.purchase_order_details
+        @purchase_order_details[pop.id].each do |pod|
           purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id if purchase_return_product.purchase_return_items.select{|pri| pri.purchase_order_detail_id.eql?(pod.id)}.blank?
         end
       end if purchase_order
@@ -118,9 +121,12 @@ class PurchaseReturnsController < ApplicationController
   def get_purchase_order_details
     @purchase_return = PurchaseReturn.new
     purchase_order = PurchaseOrder.where(id: params[:purchase_order_id]).select(:id).first
-    purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |pop|
+    @purchase_order_products = purchase_order.purchase_order_products.joins({product: :brand}, :cost_list).includes(:purchase_order_details, :colors, :sizes).select("purchase_order_products.id, products.code, common_fields.name, cost, products.id AS product_id")
+    @purchase_order_details = {}
+    @purchase_order_products.each do |pop|
       purchase_return_product = @purchase_return.purchase_return_products.build purchase_order_product_id: pop.id, product_cost: pop.cost, product_code: pop.code, product_name: pop.name, product_id: pop.product_id
-      pop.purchase_order_details.select(:id).each do |pod|
+      @purchase_order_details[pop.id] = pop.purchase_order_details
+      @purchase_order_details[pop.id].each do |pod|
         purchase_return_product.purchase_return_items.build purchase_order_detail_id: pod.id
       end
     end
