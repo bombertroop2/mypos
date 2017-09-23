@@ -39,12 +39,15 @@ class PurchaseReturnsController < ApplicationController
     @purchase_return = PurchaseReturn.new(purchase_return_params)
     unless @purchase_return.save
       direct_purchase = DirectPurchase.select(:id).where(id: @purchase_return.direct_purchase_id).first
-      direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |dpp|
+      @direct_purchase_products = direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).includes(:direct_purchase_details, :colors, :sizes).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id")
+      @direct_purchase_details = {}
+      @direct_purchase_products.each do |dpp|
         purchase_return_product = @purchase_return.purchase_return_products.select{|prp| prp.direct_purchase_product_id == dpp.id}.first
         unless purchase_return_product.present?
           purchase_return_product = @purchase_return.purchase_return_products.build direct_purchase_product_id: dpp.id, product_cost: dpp.cost, product_code: dpp.code, product_name: dpp.name, product_id: dpp.product_id
         end
-        dpp.direct_purchase_details.select(:id).each do |dpd|
+        @direct_purchase_details[dpp.id] = dpp.direct_purchase_details
+        @direct_purchase_details[dpp.id].each do |dpd|
           purchase_return_product.purchase_return_items.build direct_purchase_detail_id: dpd.id if purchase_return_product.purchase_return_items.select{|pri| pri.direct_purchase_detail_id.eql?(dpd.id)}.blank?
         end
       end if direct_purchase.present?
@@ -128,9 +131,12 @@ class PurchaseReturnsController < ApplicationController
     @purchase_return = PurchaseReturn.new
     @direct_purchase_id = ReceivedPurchaseOrder.select("direct_purchase_id").where(id: params[:received_purchase_order_id]).first.direct_purchase_id
     direct_purchase = DirectPurchase.select(:id).where(id: @direct_purchase_id).first
-    direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id").each do |dpp|
+    @direct_purchase_products = direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).includes(:direct_purchase_details, :colors, :sizes).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id")
+    @direct_purchase_details = {}
+    @direct_purchase_products.each do |dpp|
       purchase_return_product = @purchase_return.purchase_return_products.build direct_purchase_product_id: dpp.id, product_cost: dpp.cost, product_code: dpp.code, product_name: dpp.name, product_id: dpp.product_id
-      dpp.direct_purchase_details.select(:id).each do |dpd|
+      @direct_purchase_details[dpp.id] = dpp.direct_purchase_details
+      @direct_purchase_details[dpp.id].each do |dpd|
         purchase_return_product.purchase_return_items.build direct_purchase_detail_id: dpd.id
       end
     end

@@ -15,13 +15,12 @@ module PurchaseReturnsHelper
     end
   end
   
-  def is_having_stock?(pr_item, is_this_direct_purchase=false)
+  def is_having_stock?(purchase_object, is_this_direct_purchase=false)
     unless is_this_direct_purchase
       purchase_order_detail = pr_item.purchase_order_detail rescue nil    
       quantity = purchase_order_detail.receiving_qty.to_i - purchase_order_detail.returning_qty.to_i
     else
-      direct_purchase_detail = pr_item.direct_purchase_detail rescue nil    
-      quantity = direct_purchase_detail.quantity.to_i - direct_purchase_detail.returning_qty.to_i rescue 0
+      quantity = purchase_object.quantity.to_i - purchase_object.returning_qty.to_i rescue 0
     end
   end
   

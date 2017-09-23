@@ -9,12 +9,9 @@
             <td style="text-align: center;vertical-align: middle;width: auto !important"><strong>Return Quantity</strong></td>
         </tr>
         <% @purchase_return.purchase_return_products.each_with_index do |pr_product, idx| %>
-          <% product = Product.where(id: pr_product.product_id).select(:id).first %>
-          <% direct_purchase_product = DirectPurchaseProduct.where(id: pr_product.direct_purchase_product_id).select(:id).first %>
-          <% direct_purchase_product_colors = direct_purchase_product.colors.select(:id, :code, :name) %>
-          <% direct_purchase_product_sizes = direct_purchase_product.sizes.select(:id, :size) %>
-          <% purchase_return_product_array_index = create_return_product_array_variable_name(pr_product, product.id) %>
-          <%= fields_for purchase_return_product_array_index, pr_product do |purchase_return_product_detail_form| %>
+          <% direct_purchase_product_colors = @direct_purchase_products.select{|dpp| dpp.id == pr_product.direct_purchase_product_id}.first.colors.distinct %>
+          <% direct_purchase_product_sizes = @direct_purchase_products.select{|dpp| dpp.id == pr_product.direct_purchase_product_id}.first.sizes.distinct %>
+          <%= fields_for "purchase_return[purchase_return_products_attributes][#{pr_product.direct_purchase_product_id}]", pr_product do |purchase_return_product_detail_form| %>
             <%= purchase_return_product_detail_form.hidden_field :direct_purchase_product_id %>
             <%= purchase_return_product_detail_form.hidden_field :product_cost if current_user.has_managerial_role? %>
             <%= purchase_return_product_detail_form.hidden_field :product_code %>
@@ -28,12 +25,7 @@
                 <td style="text-align: center;vertical-align: top;width: auto !important">
                     <div class="table-responsive">
                         <table class="table table-condensed table-responsive table-bordered">
-                            <tbody>
-                                <!--
-                                <tr>
-                                    <td colspan="2" rowspan="2"></td>
-                                    <td align="center" colspan="<%#= direct_purchase_product_sizes.length %>">Sizes</td>
-                                </tr>-->
+                            <tbody>                                
                                 <tr>
                                     <td></td>
                                     <% direct_purchase_product_sizes.each do |size| %>
@@ -43,18 +35,16 @@
                                 </tr>
                                 <% direct_purchase_product_colors.each_with_index do |color, idx| %>
                                   <tr>
-      <%# if idx == 0 %>
-                                        <!--<td style="vertical-align: middle" rowspan="<%#= direct_purchase_product_colors.length %>">Colors</td>-->
-      <%# end %>
                                       <td style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
                                       <% qty_per_color = 0 %>
                                       <% direct_purchase_product_sizes.each do |size| %>
+                                        <% direct_purchase_detail = nil %>                                
                                         <% pr_item = pr_product.purchase_return_items.select do |pri| %>
-                                          <% direct_purchase_detail = DirectPurchaseDetail.where(id: pri.direct_purchase_detail_id).select(:color_id, :size_id).first %>
+                                          <% direct_purchase_detail = @direct_purchase_details[pr_product.direct_purchase_product_id].select{|dpd| dpd.id == pri.direct_purchase_detail_id}.first %>
                                           <% direct_purchase_detail.color_id.eql?(color.id) && direct_purchase_detail.size_id.eql?(size.id) %>
                                         <% end.first %>
 
-                                        <% if quantity = is_having_stock?(pr_item, true) %>
+                                        <% if quantity = is_having_stock?(direct_purchase_detail, true) %>
                                           <td align="center" style="vertical-align: middle">      
                                               <%= quantity %>
                                               <% qty_per_color += quantity %>
@@ -76,11 +66,6 @@
                     <div class="table-responsive">
                         <table class="table table-condensed table-responsive table-bordered">
                             <tbody>
-                                <!--
-                                <tr>
-                                    <td colspan="2" rowspan="2"></td>
-                                    <td align="center" colspan="<%#= direct_purchase_product_sizes.length %>">Sizes</td>
-                                </tr>-->
                                 <tr>
                                     <td></td>
                                     <% direct_purchase_product_sizes.each do |size| %>
@@ -89,20 +74,15 @@
                                 </tr>
                                 <% direct_purchase_product_colors.each_with_index do |color, idx| %>
                                   <tr>
-                                      <!--
-      <%# if idx == 0 %>
-                                        <td style="vertical-align: middle" rowspan="<%#= direct_purchase_product_colors.length %>">Colors</td>
-      <%# end %>-->
                                       <td style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
                                       <% direct_purchase_product_sizes.each do |size| %>
                                         <% pr_item = pr_product.purchase_return_items.select do |pri| %>
-                                          <% direct_purchase_detail = DirectPurchaseDetail.where(id: pri.direct_purchase_detail_id).select(:color_id, :size_id).first %>
+                                          <% direct_purchase_detail = @direct_purchase_details[pr_product.direct_purchase_product_id].select{|dpd| dpd.id == pri.direct_purchase_detail_id}.first %>
                                           <% direct_purchase_detail.color_id.eql?(color.id) && direct_purchase_detail.size_id.eql?(size.id) %>
                                         <% end.first %>
                                         <td style="vertical-align: middle" align="center">
                                             <% if pr_item %>
-                                              <% purchase_return_item_array_index = create_return_item_array_variable_name(pr_item, pr_item.direct_purchase_detail_id, purchase_return_product_array_index) %>
-                                              <%= fields_for purchase_return_item_array_index, pr_item do |purchase_return_detail_detail_form| %>
+                                              <%= fields_for "purchase_return[purchase_return_products_attributes][#{pr_product.direct_purchase_product_id}][purchase_return_items_attributes][#{pr_item.direct_purchase_detail_id}]", pr_item do |purchase_return_detail_detail_form| %>
                                                 <%= purchase_return_detail_detail_form.hidden_field :direct_purchase_detail_id %>
                                                 <div class="<%= control_group_error(pr_item, :quantity) %>">
                                                     <%= purchase_return_detail_detail_form.text_field :quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 5, style: "width: 50px !important" %>

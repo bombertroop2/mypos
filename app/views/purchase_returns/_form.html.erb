@@ -48,15 +48,10 @@
                                         <%= error_help_text(@purchase_return, :delivery_order_number) %>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <div id="direct_purchase_detail">
-                                            <% if @purchase_return.purchase_return_products.present? && params[:action].eql?("create_direct_purchase_return") %>
-                                              <%= render "direct_purchase_details" %>
-                                            <% end %>
-                                        </div>
-
-                                    </div>
+                                <div id="direct_purchase_detail">
+                                    <% if @purchase_return.purchase_return_products.present? && params[:action].eql?("create_direct_purchase_return") %>
+                                      <%= render "direct_purchase_details" %>
+                                    <% end %>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-offset-2 col-sm-10">
