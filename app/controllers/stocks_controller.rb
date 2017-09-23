@@ -24,8 +24,8 @@ class StocksController < ApplicationController
     stocks_scope = stocks_scope.where(["products.code #{like_command} ?", "%"+params[:filter_product_criteria]+"%"]).
       or(stocks_scope.where(["brands_products.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
       or(stocks_scope.where(["common_fields.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
-      or(stocks_scope.where(["size #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
-      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) if params[:filter_product_criteria].present?
+      or(stocks_scope.where(["size #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) if params[:filter_product_criteria].present?
+#      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) 
     stocks_scope = if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
       stocks_scope.order("#{params[:stocks_smart_listing][:sort].keys.first} #{params[:stocks_smart_listing][:sort][params[:stocks_smart_listing][:sort].keys.first]}")
     else
