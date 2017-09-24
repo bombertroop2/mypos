@@ -1,60 +1,151 @@
 <td colspan="3">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
     <div style="padding-top: 20px"></div>
     <div>
 
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation"<% if params[:action].eql?("new") || params[:action].eql?("create") %> class="active"<% end %>><a href="#purchase_order" aria-controls="purchase_order" role="tab" data-toggle="tab">Purchase Order</a></li>
-            <li role="presentation"<% if params[:action].eql?("create_direct_purchase_return") %> class="active"<% end %>><a href="#direct_purchase" aria-controls="direct_purchase" role="tab" data-toggle="tab">Direct Purchase</a></li>
+            <li role="presentation" class="active"><a href="#purchase_order" aria-controls="purchase_order" role="tab" data-toggle="tab">Purchase Order</a></li>
+            <li role="presentation"><a href="#direct_purchase" aria-controls="direct_purchase" role="tab" data-toggle="tab">Direct Purchase</a></li>
         </ul>
 
         <!-- Tab panes -->
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane fade<% if params[:action].eql?("new") || params[:action].eql?("create") %> in active<% end %>" id="purchase_order" style="padding-top: 20px">
-                <%= form_for(@purchase_return, remote: true, html: {class: "form-horizontal"}) do |f| %>
-                    <div class="form-group<%= control_group_error(@purchase_return, :purchase_order_id) %>">
-                        <%= f.label :purchase_order_id, class: "col-sm-2 control-label" %>
-                          <div class="col-sm-10">
-                              <%= f.select :purchase_order_id, options_from_collection_for_select(@purchase_orders, :id, :number, @purchase_return.purchase_order_id.to_s), {include_blank: true}, {class: "form-control chosen-select"} %>
-                                <%= error_help_text(@purchase_return, :purchase_order_id) %>
+            <div role="tabpanel" class="tab-pane fade in active" id="purchase_order" style="padding-top: 20px">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Search purchase records</h2>
+                                <div class="clearfix"></div>
                             </div>
-                        </div>
-                        <div id="purchase_order_detail">
-                            <% if @purchase_return.purchase_return_products.present? && params[:action].eql?("create") %>
-                              <%= render "purchase_order_details" %>
-                            <% end %>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <%= f.submit "Save", id: "save-btn-return-po", class: "btn btn-primary" %>
-                                  <button class="btn btn-link cancel">Cancel</button>
-                              </div>
-                          </div>
-                        <% end %>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade<% if params[:action].eql?("create_direct_purchase_return") %> in active<% end %>" id="direct_purchase" style="padding-top: 20px">
-                        <%= form_for(@purchase_return, url: create_direct_purchase_return_purchase_returns_path, remote: true, html: {id: "new_direct_purchase_return", class: "form-horizontal"}) do |f| %>
-                            <%= f.hidden_field :direct_purchase_return %>
-                            <%= f.hidden_field :direct_purchase_id %>
-                            <div class="form-group<%= control_group_error(@purchase_return, :delivery_order_number) %>">
-                                <%= f.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
-                                  <div class="col-sm-10">
-                                      <%= f.select :delivery_order_number, options_from_collection_for_select(@do_numbers, :id, :delivery_order_number, @purchase_return.delivery_order_number.to_s), {include_blank: true}, {class: "form-control chosen-select"} %>
-                                        <%= error_help_text(@purchase_return, :delivery_order_number) %>
+                            <div class="x_content">
+                                <div class="form-horizontal">
+
+                                    <!-- Nav tabs -->
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li role="presentation" class="active"><a href="#search_by_multi_criterias_po" aria-controls="search_by_multi_criterias_po" role="tab" data-toggle="tab">Search by po date/vendor</a></li>
+                                        <li role="presentation"><a href="#search_by_po_number" aria-controls="search_by_po_number" role="tab" data-toggle="tab">Search by PO number</a></li>
+                                    </ul>
+                                    <!-- Tab panes -->
+                                    <div class="tab-content">
+                                        <div role="tabpanel" class="tab-pane fade in active" id="search_by_multi_criterias_po" style="padding-top: 20px">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-2" for="po-date">PO Date</label>
+                                                <div class="col-sm-10">
+                                                    <%= text_field_tag "po_date", "", {class: "form-control", readonly: true} %>
+                                                  </div>
+                                              </div>
+                                              <div class="form-group">
+                                                  <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">                                                      
+                                                      <%= select_tag "query_operator", options_for_select(PurchaseReturn::QUERY_OPERATORS), {class: "form-control", style: "width: 76px !important"} %>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-sm-2" for="vendor">Vendor</label>
+                                                    <div class="col-sm-10">
+                                                        <%= select_tag "vendor", options_from_collection_for_select(@vendors, :id, :name), {prompt: "Select", class: "form-control"} %>
+                                                      </div>
+                                                  </div>
+                                                  <div class="ln_solid"></div>
+                                                  <div class="form-group">
+                                                      <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                                          <button type="submit" class="btn btn-success" id="search-po-btn">Search</button>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              <div role="tabpanel" class="tab-pane fade" id="search_by_po_number" style="padding-top: 20px">
+                                                  <div class="form-group">
+                                                      <label class="control-label col-sm-2" for="po-number">Number</label>
+                                                      <div class="col-sm-10">
+                                                          <%= text_field_tag "number", "", {class: "form-control"} %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ln_solid"></div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                                            <button type="submit" class="btn btn-success" id="search-po-by-number-btn">Search</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
-                                <div id="direct_purchase_detail">
-                                    <% if @purchase_return.purchase_return_products.present? && params[:action].eql?("create_direct_purchase_return") %>
-                                      <%= render "direct_purchase_details" %>
-                                    <% end %>
+                            </div>
+                        </div>
+                        <div id="pr_form_container_po">
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="direct_purchase" style="padding-top: 20px">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="x_panel">
+                                    <div class="x_title">
+                                        <h2>Search purchase records</h2>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content">
+                                        <div class="form-horizontal">
+
+                                            <!-- Nav tabs -->
+                                            <ul class="nav nav-tabs" role="tablist">
+                                                <li role="presentation" class="active"><a href="#search_by_multi_criterias_dp" aria-controls="search_by_multi_criterias_dp" role="tab" data-toggle="tab">Search by received date/vendor</a></li>
+                                                <li role="presentation"><a href="#search_by_do_number" aria-controls="search_by_do_number" role="tab" data-toggle="tab">Search by DO number</a></li>
+                                            </ul>
+                                            <!-- Tab panes -->
+                                            <div class="tab-content">
+                                                <div role="tabpanel" class="tab-pane fade in active" id="search_by_multi_criterias_dp" style="padding-top: 20px">
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-2" for="received-date">Received Date</label>
+                                                        <div class="col-sm-10">
+                                                            <%= text_field_tag "received_date", "", {class: "form-control", readonly: true} %>
+                                                          </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                          <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                                              <%= select_tag "query_operator", options_for_select(PurchaseReturn::QUERY_OPERATORS), {class: "form-control", style: "width: 76px !important", id: "query_operator_dp"} %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="control-label col-sm-2" for="vendor">Vendor</label>
+                                                            <div class="col-sm-10">
+                                                                <%= select_tag "vendor", options_from_collection_for_select(@vendors, :id, :name), {prompt: "Select", class: "form-control", id: "vendor_dp"} %>
+                                                              </div>
+                                                          </div>
+                                                          <div class="ln_solid"></div>
+                                                          <div class="form-group">
+                                                              <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                                                  <button type="submit" class="btn btn-success" id="search-dp-btn">Search</button>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+                                                      <div role="tabpanel" class="tab-pane fade" id="search_by_do_number" style="padding-top: 20px">
+                                                          <div class="form-group">
+                                                              <label class="control-label col-sm-2" for="do-number">Number</label>
+                                                              <div class="col-sm-10">
+                                                                  <%= text_field_tag "number", "", {class: "form-control", id: "number_do"} %>
+                                                                </div>
+                                                            </div>
+                                                            <div class="ln_solid"></div>
+                                                            <div class="form-group">
+                                                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                                                    <button type="submit" class="btn btn-success" id="search-dp-by-number-btn">Search</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <%= f.submit "Save", id: "save-btn-return-dp", class: "btn btn-primary" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
-                                      </div>
-                                  </div>
-                                <% end %>
+                                <div id="pr_form_container_dp">
+                                </div>
                             </div>
                         </div>
 
@@ -63,80 +154,75 @@
 
                 <script>
                   $(function () {
-                      $("#save-btn-return-po").click(function () {
-                          bootbox.confirm({
-                              message: "Once you've returned the article, you'll not be able to change or cancel it</br>Are you sure?",
-                              buttons: {
-                                  confirm: {
-                                      label: '<i class="fa fa-check"></i> Confirm'
+                      $('#po_date').daterangepicker(
+                              {
+                                  locale: {
+                                      format: 'DD/MM/YYYY'
                                   },
-                                  cancel: {
-                                      label: '<i class="fa fa-times"></i> Cancel'
-                                  }
-                              },
-                              callback: function (result) {
-                                  if (result) {
-                                      $("body").css('padding-right', '0px');
-                                      $("#new_purchase_return").submit();
-                                  }
-                              },
-                              size: "small"
-                          });
-                          return false;
+                                  opens: "right",
+                                  autoUpdateInput: false
+                              });
+                      $('#po_date').on('apply.daterangepicker', function (ev, picker) {
+                          $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
                       });
 
-                      $("#save-btn-return-dp").click(function () {
-                          bootbox.confirm({
-                              message: "Once you've returned the article, you'll not be able to change or cancel it</br>Are you sure?",
-                              buttons: {
-                                  confirm: {
-                                      label: '<i class="fa fa-check"></i> Confirm'
+                      $('#po_date').on('cancel.daterangepicker', function (ev, picker) {
+                          $(this).val('');
+                      });
+
+                      $('#received_date').daterangepicker(
+                              {
+                                  locale: {
+                                      format: 'DD/MM/YYYY'
                                   },
-                                  cancel: {
-                                      label: '<i class="fa fa-times"></i> Cancel'
-                                  }
-                              },
-                              callback: function (result) {
-                                  if (result) {
-                                      $("body").css('padding-right', '0px');
-                                      $("#new_direct_purchase_return").submit();
-                                  }
-                              },
-                              size: "small"
-                          });
-                          return false;
+                                  opens: "right",
+                                  autoUpdateInput: false
+                              });
+                      $('#received_date').on('apply.daterangepicker', function (ev, picker) {
+                          $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
                       });
 
-                      $("#purchase_return_purchase_order_id").change(function () {
-                          $.get("/purchase_returns/get_purchase_order_details", {
-                              purchase_order_id: $(this).val()
+                      $('#received_date').on('cancel.daterangepicker', function (ev, picker) {
+                          $(this).val('');
+                      });
+
+                      $("#search-po-btn").click(function () {
+                          $.get("/purchase_returns/filter_purchase_records", {
+                              po_date: $("#po_date").val(),
+                              query_operator: $("#query_operator").val(),
+                              vendor_id: $("#vendor").val()
                           });
                       });
 
-                      $("#purchase_return_delivery_order_number").change(function () {
-                          $.get("/purchase_returns/get_direct_purchase_details", {
-                              received_purchase_order_id: $(this).val()
+                      $("#search-dp-btn").click(function () {
+                          $.get("/purchase_returns/filter_purchase_records", {
+                              received_date: $("#received_date").val(),
+                              query_operator: $("#query_operator_dp").val(),
+                              vendor_id: $("#vendor_dp").val(),
+                              type: "direct purchase"
                           });
                       });
 
-                <% if params[:action].eql?("create_direct_purchase_return") %>
-                        $("#purchase_return_delivery_order_number").attr("data-placeholder", "Please select").chosen('destroy').chosen();
-                        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                            var target = $(e.target).attr("href") // activated tab
-                            if (target == "#purchase_order")
-                                $("#purchase_return_purchase_order_id").attr("data-placeholder", "Please select").chosen('destroy').chosen();
+                      $("#search-po-by-number-btn").click(function () {
+                          if ($("#number").val().trim() == "")
+                              bootbox.alert({message: "Please fill out the field above", size: "small"});
+                          else {
+                              $.get("/purchase_returns/filter_purchase_records", {
+                                  po_number: $("#number").val().trim()
+                              });
+                          }
+                      });
 
-                        });
-                <% else %>
-                        $("#purchase_return_purchase_order_id").attr("data-placeholder", "Please select").chosen('destroy').chosen();
-                        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                            var target = $(e.target).attr("href") // activated tab
-                            if (target == "#direct_purchase")
-                                $("#purchase_return_delivery_order_number").attr("data-placeholder", "Please select").chosen('destroy').chosen();
-
-                        });
-                <% end %>
-
+                      $("#search-dp-by-number-btn").click(function () {
+                          if ($("#number_do").val().trim() == "")
+                              bootbox.alert({message: "Please fill out the field above", size: "small"});
+                          else {
+                              $.get("/purchase_returns/filter_purchase_records", {
+                                  do_number: $("#number_do").val().trim(),
+                                  type: "direct purchase"
+                              });
+                          }
+                      });
 
                   });
                 </script>

@@ -43,8 +43,7 @@
                                           <% direct_purchase_detail = @direct_purchase_details[pr_product.direct_purchase_product_id].select{|dpd| dpd.id == pri.direct_purchase_detail_id}.first %>
                                           <% direct_purchase_detail.color_id.eql?(color.id) && direct_purchase_detail.size_id.eql?(size.id) %>
                                         <% end.first %>
-
-                                        <% if quantity = is_having_stock?(direct_purchase_detail, true) %>
+                                        <% if quantity = is_having_stock?(@direct_purchase_details[pr_product.direct_purchase_product_id].select{|dpd| dpd.id == pr_item.direct_purchase_detail_id}.first, true) %>
                                           <td align="center" style="vertical-align: middle">      
                                               <%= quantity %>
                                               <% qty_per_color += quantity %>

@@ -18,6 +18,11 @@ class PurchaseReturn < ApplicationRecord
   
             accepts_nested_attributes_for :purchase_return_products, reject_if: :quantity_blank
 
+            QUERY_OPERATORS = [
+              ["AND", "AND"],
+              ["OR", "OR"]
+            ]
+  
             def quantity_returned
               quantity = 0
               purchase_return_products.select(:total_quantity).each do |prp|

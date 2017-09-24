@@ -1,0 +1,73 @@
+<%= form_for(@purchase_return, url: create_direct_purchase_return_purchase_returns_path, remote: true, html: {id: "new_direct_purchase_return", class: "form-horizontal"}) do |f| %>
+    <%= hidden_field_tag "received_date", params[:received_date] %>
+    <%= hidden_field_tag "query_operator", params[:query_operator] %>
+    <%= hidden_field_tag "vendor_id", params[:vendor_id] %>
+    <%= hidden_field_tag "do_number", params[:do_number] %>
+    <%= hidden_field_tag "type", "direct purchase" %>
+    <%= f.hidden_field :direct_purchase_return %>
+    <%= f.hidden_field :direct_purchase_id %>
+    <div class="form-group<%= control_group_error(@purchase_return, :delivery_order_number) %>">
+        <%= f.label :delivery_order_number, "DO Number", class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <% if params[:do_number].present? %>
+                <%= f.hidden_field :delivery_order_number %>
+                <div class="form-control">
+                    <%= params[:do_number] %>
+                </div> 
+              <% else %>
+                <%= f.select :delivery_order_number, options_from_collection_for_select(@do_numbers, :id, :delivery_order_number, @purchase_return.delivery_order_number.to_s), {include_blank: true}, {class: "form-control chosen-select"} %>
+                <% end %>
+                <%= error_help_text(@purchase_return, :delivery_order_number) %>
+            </div>
+        </div>
+        <div id="direct_purchase_detail">
+            <% if @purchase_return.purchase_return_products.present? && (params[:action].eql?("create_direct_purchase_return") || params[:action].eql?("filter_purchase_records")) %>
+              <%= render "direct_purchase_details" %>
+            <% end %>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <%= f.submit "Save", id: "save-btn-return-dp", class: "btn btn-primary" %>
+                  <button class="btn btn-link cancel">Cancel</button>
+              </div>
+          </div>
+        <% end %>
+
+        <script>
+          $(function () {
+              $("#save-btn-return-dp").click(function () {
+                  bootbox.confirm({
+                      message: "Once you've returned the article, you'll not be able to change or cancel it</br>Are you sure?",
+                      buttons: {
+                          confirm: {
+                              label: '<i class="fa fa-check"></i> Confirm'
+                          },
+                          cancel: {
+                              label: '<i class="fa fa-times"></i> Cancel'
+                          }
+                      },
+                      callback: function (result) {
+                          if (result) {
+                              $("body").css('padding-right', '0px');
+                              $("#new_direct_purchase_return").submit();
+                          }
+                      },
+                      size: "small"
+                  });
+                  return false;
+              });
+
+
+        <% unless params[:do_number].present? %>
+                $("#purchase_return_delivery_order_number").change(function () {
+                    $.get("/purchase_returns/get_direct_purchase_details", {
+                        received_purchase_order_id: $(this).val()
+                    });
+                });
+
+                $("#purchase_return_delivery_order_number").attr("data-placeholder", "Please select").chosen('destroy').chosen();
+        <% end %>
+
+
+          });
+        </script>

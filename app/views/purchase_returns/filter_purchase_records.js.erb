@@ -1,0 +1,5 @@
+<% unless params[:type].present? %>
+  $("#pr_form_container_po").html("<%= j(render(partial: "pr_form_po")) %>");
+<% else %>
+  $("#pr_form_container_dp").html("<%= j(render(partial: "pr_form_dp")) %>");
+<% end %>

@@ -108,6 +108,7 @@ Rails.application.routes.draw do
       get 'get_purchase_order_details'
       get 'get_direct_purchase_details'
       post 'create_direct_purchase_return'
+      get 'filter_purchase_records'
     end    
   end
   resources :stocks, only: :index

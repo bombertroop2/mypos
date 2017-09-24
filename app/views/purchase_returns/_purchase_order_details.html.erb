@@ -44,7 +44,7 @@
                                           <% purchase_order_detail.color_id.eql?(color.id) && purchase_order_detail.size_id.eql?(size.id) %>
                                         <% end.first %>
 
-                                        <% if quantity = is_having_stock?(purchase_order_detail) %>
+                                        <% if quantity = is_having_stock?(@purchase_order_details[pr_product.purchase_order_product_id].select{|pod| pod.id == pr_item.purchase_order_detail_id}.first) %>
                                           <td align="center">      
                                               <%= quantity %>
                                               <% qty_per_color += quantity %>
