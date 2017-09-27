@@ -1,144 +1,144 @@
-<table border="1" class="product-table table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
-    <tr style="text-align: center">
-        <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
-        <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
-    </tr>
-    <% @order_booking.order_booking_products.each do |order_booking_product| %>
+<% @order_booking_products.each do |order_booking_product| %>
+  <table border="1" class="product-table table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
+      <tr style="text-align: center">
+          <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
+          <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
+      </tr>
       <%= fields_for "order_booking[order_booking_products_attributes][#{order_booking_product.product_id}]", order_booking_product do |order_booking_product_fields| %>
         <% if !params[:action].eql?("update") || (params[:action].eql?("update") && (@order_booking.origin_warehouse_id_was != @order_booking.origin_warehouse_id && order_booking_product_fields.object.new_record?) || @order_booking.origin_warehouse_id_was == @order_booking.origin_warehouse_id) %>
           <% product = @selected_products.select{|prdct| prdct.id == order_booking_product_fields.object.product_id}.first %>
           <% if product.present? %>
-            <%= order_booking_product_fields.hidden_field :product_id %>
-            <% if order_booking_product_fields.object.new_record? %>
-              <%= order_booking_product_fields.hidden_field :product_code %>
-              <%= order_booking_product_fields.hidden_field :product_name %>
-            <% else %>
-              <% if order_booking_product_fields.object.product_code.present? && order_booking_product_fields.object.product_name.present? %>
+            <%= order_booking_product_fields.hidden_field :product_id, class: "order-booking-product-id-fields" %>
+              <% if order_booking_product_fields.object.new_record? %>
                 <%= order_booking_product_fields.hidden_field :product_code %>
                 <%= order_booking_product_fields.hidden_field :product_name %>
               <% else %>
-                <%= order_booking_product_fields.hidden_field :product_code, value: product.code %>
-                <%= order_booking_product_fields.hidden_field :product_name, value: product.brand_name %>
+                <% if order_booking_product_fields.object.product_code.present? && order_booking_product_fields.object.product_name.present? %>
+                  <%= order_booking_product_fields.hidden_field :product_code %>
+                  <%= order_booking_product_fields.hidden_field :product_name %>
+                <% else %>
+                  <%= order_booking_product_fields.hidden_field :product_code, value: product.code %>
+                  <%= order_booking_product_fields.hidden_field :product_name, value: product.brand_name %>
+                <% end %>
+                <%= order_booking_product_fields.hidden_field :id %>
               <% end %>
-              <%= order_booking_product_fields.hidden_field :id %>
-            <% end %>
-            <% colors = product.colors.select(:id, :code) %>
-            <% sizes = product.sizes.select(:id, :size) %>
-            <% order_booking_product_items = order_booking_product_fields.object.order_booking_product_items %>
+              <% colors = product.colors.select(:id, :code) %>
+              <% sizes = product.sizes.select(:id, :size) %>
+              <% order_booking_product_items = order_booking_product_fields.object.order_booking_product_items %>
 
-            <tr style="text-align: center">
-                <td style="vertical-align: middle;width: 20% !important;">
-                    <% unless params[:action].eql?("edit") %>
-                      <%= "#{order_booking_product_fields.object.product_code} - #{order_booking_product_fields.object.product_name}" %>
-                    <% else %>
-                      <%= "#{product.code} - #{product.brand_name}" %>
-                    <% end %>
-                </td>
-                <td style="width: auto !important;">
-                    <script>
-                      var colorSizes = [];
-                    </script>
-                    <div class="table-responsive">
-                        <table border="1" class="table table-condensed table-responsive table-bordered">
-                            <tr style="text-align: center">
-                                <th colspan="2" rowspan="2"></th>
-                                <td colspan="<%= sizes.length %>" align="center">
-                                    <!--<strong>Sizes</strong>
-                                    <br />-->
-                                    <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
-                                  </td>
-                              </tr>
-
+              <tr style="text-align: center">
+                  <td style="vertical-align: middle;width: 20% !important;">
+                      <% unless params[:action].eql?("edit") %>
+                        <%= "#{order_booking_product_fields.object.product_code} - #{order_booking_product_fields.object.product_name}" %>
+                      <% else %>
+                        <%= "#{product.code} - #{product.brand_name}" %>
+                      <% end %>
+                  </td>
+                  <td style="width: auto !important;">
+                      <script>
+                        var colorSizes = [];
+                      </script>
+                      <div class="table-responsive">
+                          <table border="1" class="table table-condensed table-responsive table-bordered">
                               <tr style="text-align: center">
-                                  <% sizes.each do |size| %>
-                                    <td align="center">
-                                        <%= size.size %>
-                                        <br />
-                                        <%= text_field_tag "quantity_#{product.id}_#{size.id}", "", {placeholder: "qty", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %>
-                                      </td>
-                                    <% end %>
+                                  <th colspan="2" rowspan="2"></th>
+                                  <td colspan="<%= sizes.length %>" align="center">
+                                      <!--<strong>Sizes</strong>
+                                      <br />-->
+                                      <%= text_field_tag "quantity_#{product.id}", "", {placeholder: "qty", size: 16, class: "quantity form-control quantity-fields", style: "width: 50px !important"} %>
+                                    </td>
                                 </tr>
 
-                                <% colors.each_with_index do |color, idx| %>                          
-                                  <tr style="text-align: center">
-                                      <%# if idx.eql? 0 %>
-                                        <!--<td rowspan="<%#= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>-->
-                                      <%# end %>
-                                      <td style="vertical-align: middle" colspan="2"><%= "#{color.code} - #{color.name}" %></td>                            
-                                      <% sizes.each do |size| %>
-                                        <% if idx == 0 %>
-                                      <script>
-                                        colorSizes.push('<%= size.id %>');
-                                      </script>
-                                    <% end %>
-                                    <% order_booking_product_item = order_booking_product_items.select{|obpi| obpi.size_id == size.id && obpi.color_id == color.id}.first %>
-                                    <% if order_booking_product_item.present? %>
-                                      <td align="center" style="vertical-align: middle">
-                                          <%= fields_for "order_booking[order_booking_products_attributes][#{order_booking_product.product_id}][order_booking_product_items_attributes][#{size.id}#{color.id}]", order_booking_product_item do |obpi_form| %>
-                                            <%= obpi_form.hidden_field :size_id %>
-                                            <%= obpi_form.hidden_field :available_for_booking_quantity %>
-                                            <%= obpi_form.hidden_field :color_id %>
-                                            <div class="<%= control_group_error(obpi_form.object, :quantity) %>">
-                                                <table cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td><%= obpi_form.text_field :quantity, placeholder: "qty", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
-                                                          <td>&nbsp;/&nbsp;</td> 
-                                                          <td><%= order_booking_product_item.available_for_booking_quantity %></td> 
-                                                      </tr>
-                                                  </table>                                                
-                                                  <%= error_help_text(obpi_form.object, :quantity) %>
-                                              </div>
-                                              <% if obpi_form.object && !obpi_form.object.new_record? %>
-                                                <%= obpi_form.hidden_field :id %>
-                                              <% end %>
-                                            <% end %>
+                                <tr style="text-align: center">
+                                    <% sizes.each do |size| %>
+                                      <td align="center">
+                                          <%= size.size %>
+                                          <br />
+                                          <%= text_field_tag "quantity_#{product.id}_#{size.id}", "", {placeholder: "qty", class: "quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %>
                                         </td>
-                                      <% else %>
-                                        <td></td>
                                       <% end %>
-                                    <% end %>
-                                    </tr>
-                                  <% end %>              
-                              </table>
-                          </div>
-                      </td>
-                  </tr>
-                  <% unless order_booking_product_fields.object.new_record? %>
+                                  </tr>
+
+                                  <% colors.each_with_index do |color, idx| %>                          
+                                    <tr style="text-align: center">
+                <%# if idx.eql? 0 %>
+                                          <!--<td rowspan="<%#= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>-->
+                <%# end %>
+                                        <td style="vertical-align: middle" colspan="2"><%= "#{color.code} - #{color.name}" %></td>                            
+                                        <% sizes.each do |size| %>
+                                          <% if idx == 0 %>
+                                        <script>
+                                          colorSizes.push('<%= size.id %>');
+                                        </script>
+                                      <% end %>
+                                      <% order_booking_product_item = order_booking_product_items.select{|obpi| obpi.size_id == size.id && obpi.color_id == color.id}.first %>
+                                      <% if order_booking_product_item.present? %>
+                                        <td align="center" style="vertical-align: middle">
+                                            <%= fields_for "order_booking[order_booking_products_attributes][#{order_booking_product.product_id}][order_booking_product_items_attributes][#{size.id}#{color.id}]", order_booking_product_item do |obpi_form| %>
+                                              <%= obpi_form.hidden_field :size_id %>
+                                              <%= obpi_form.hidden_field :available_for_booking_quantity %>
+                                              <%= obpi_form.hidden_field :color_id %>
+                                              <div class="<%= control_group_error(obpi_form.object, :quantity) %>">
+                                                  <table cellpadding="0" cellspacing="0">
+                                                      <tr>
+                                                          <td><%= obpi_form.text_field :quantity, placeholder: "qty", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
+                                                            <td>&nbsp;/&nbsp;</td> 
+                                                            <td><%= order_booking_product_item.available_for_booking_quantity %></td> 
+                                                        </tr>
+                                                    </table>                                                
+                                                    <%= error_help_text(obpi_form.object, :quantity) %>
+                                                </div>
+                                                <% if obpi_form.object && !obpi_form.object.new_record? %>
+                                                  <%= obpi_form.hidden_field :id %>
+                                                <% end %>
+                                              <% end %>
+                                          </td>
+                                        <% else %>
+                                          <td></td>
+                                        <% end %>
+                                      <% end %>
+                                      </tr>
+                                    <% end %>              
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                <%# unless order_booking_product_fields.object.new_record? %>
                     <tr style="text-align: center">
                         <td style="vertical-align: middle;" colspan="2" align="left">
                             <%= order_booking_product_fields.check_box :_destroy %> Delete
                         </td>
                     </tr>
+                <%# end %>
+                    <script>
+                      $.each(colorSizes, function (index, value) {
+                          $('#quantity_<%= product.id %>_' + value).keyup(function () {
+                              $('.quantity-<%= product.id %>-' + value).val($('#quantity_<%= product.id %>_' + value).val());
+                          });
+                      });
+                      $('#<%= "quantity_#{product.id}" %>').keyup(function () {
+                          $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
+                      });
+                    </script>
+                  <% elsif !order_booking_product_fields.object.new_record? %>
+                    <%= order_booking_product_fields.hidden_field :id %>
+                    <%= order_booking_product_fields.hidden_field :_destroy, value: true %>
                   <% end %>
-                  <script>
-                    $.each(colorSizes, function (index, value) {
-                        $('#quantity_<%= product.id %>_' + value).keyup(function () {
-                            $('.quantity-<%= product.id %>-' + value).val($('#quantity_<%= product.id %>_' + value).val());
-                        });
-                    });
-                    $('#<%= "quantity_#{product.id}" %>').keyup(function () {
-                        $('.quantity-<%= product.id %>').val($('#<%= "quantity_#{product.id}" %>').val());
-                    });
-                  </script>
-                <% elsif !order_booking_product_fields.object.new_record? %>
-                  <%= order_booking_product_fields.hidden_field :id %>
-                  <%= order_booking_product_fields.hidden_field :_destroy, value: true %>
                 <% end %>
               <% end %>
-            <% end %>
-          <% end %>
-      </table>
+          </table>
+        <% end %>
 
-      <script>
-        $(function () {
-            $(".quantity").numeric({
-                decimal: false,
-                negative: false
-            }, function () {
-                alert("Positive integers only");
-                this.value = "";
-                this.focus();
-            });
-        });
+        <script>
+          $(function () {
+              $(".quantity").numeric({
+                  decimal: false,
+                  negative: false
+              }, function () {
+                  alert("Positive integers only");
+                  this.value = "";
+                  this.focus();
+              });
+          });
 
-      </script>
+        </script>

@@ -62,12 +62,14 @@ class OrderBookingsController < ApplicationController
       where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
       select(:id).select("products.code, common_fields.name AS brand_name").
       select("stock_products.id AS stock_product_id")
+    @order_booking_products = []
     @order_booking.order_booking_products.each do |order_booking_product|
       selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
       StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
         afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
         order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
       end
+      @order_booking_products << order_booking_product
     end
   end
 
@@ -98,12 +100,14 @@ class OrderBookingsController < ApplicationController
                 where(id: @order_booking.order_booking_products.map(&:product_id)).
                 where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
                 select(:id).select("stock_products.id AS stock_product_id")
+              @order_booking_products = []
               @order_booking.order_booking_products.each do |order_booking_product|
                 selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
                 StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
                   afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
                   order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
                 end
+                @order_booking_products << order_booking_product
               end
               @invalid = true
             end
@@ -146,11 +150,19 @@ class OrderBookingsController < ApplicationController
             where(id: selected_product_ids).
             where(["stocks.warehouse_id = ?", @order_booking.origin_warehouse_id]).
             select(:id).select("stock_products.id AS stock_product_id")
+          @order_booking_products = []
           @order_booking.order_booking_products.each do |order_booking_product|
             selected_product = @selected_products.select{|slctd_prdct| slctd_prdct.id == order_booking_product.product_id}.first
-            StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
-              afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
-              order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity, disable_validation: true if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+            if selected_product.present?
+              StockDetail.where(stock_product_id: selected_product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
+                afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
+                order_booking_product.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity, disable_validation: true if order_booking_product.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+              end
+              if @order_booking.origin_warehouse_id_changed? && order_booking_product.new_record?
+                @order_booking_products << order_booking_product
+              elsif !@order_booking.origin_warehouse_id_changed?
+                @order_booking_products << order_booking_product
+              end
             end
           end
           @invalid = true
@@ -180,30 +192,57 @@ class OrderBookingsController < ApplicationController
   end
   
   def generate_product_item_form
-    selected_product_ids = params[:product_ids].split(",")
     @order_booking = if params[:order_booking_id].present?
       OrderBooking.select(:id, :origin_warehouse_id).where(id: params[:order_booking_id]).first
     else
       OrderBooking.new
     end
-    @selected_products = Product.joins(stock_products: :stock).joins(:brand).
-      where(id: selected_product_ids).
-      where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
-      select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
-    @selected_products.each do |product|
-      if (obp = @order_booking.order_booking_products.select{|order_booking_product| order_booking_product.product_id == product.id}.first).blank?
-        obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
-      elsif @order_booking.origin_warehouse_id == params[:origin_warehouse_id].to_i
-        obp.product_code = product.code
-        obp.product_name = product.brand_name
+    
+    @selected_products = if params[:prev_selected_product_ids].present?
+      if params[:add_all_products].eql?("true")
+        Product.joins(stock_products: :stock).joins(:brand).
+          where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
+          where(["products.id NOT IN (?)", params[:prev_selected_product_ids].split(",")]).
+          select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
       else
-        @order_booking = OrderBooking.new
-        obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
+        Product.joins(stock_products: :stock).joins(:brand).
+          where(code: params[:product_code]).
+          where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
+          where(["products.id NOT IN (?)", params[:prev_selected_product_ids].split(",")]).
+          select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
       end
-      StockDetail.where(stock_product_id: product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
-        afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
-        obp.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if obp.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+    else
+      if params[:add_all_products].eql?("true")
+        Product.joins(stock_products: :stock).joins(:brand).
+          where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
+          select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
+      else
+        Product.joins(stock_products: :stock).joins(:brand).
+          where(code: params[:product_code]).
+          where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
+          select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
       end
+    end
+
+    if @selected_products.present?
+      @order_booking_products = []
+      @selected_products.each do |product|
+        if (obp = @order_booking.order_booking_products.select{|order_booking_product| order_booking_product.product_id == product.id}.first).blank?
+          obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
+        elsif @order_booking.origin_warehouse_id == params[:origin_warehouse_id].to_i
+          obp.product_code = product.code
+          obp.product_name = product.brand_name
+        else
+          obp = @order_booking.order_booking_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
+        end
+        StockDetail.where(stock_product_id: product.stock_product_id).select("size_id, color_id, quantity, booked_quantity").each do |stock_detail|
+          afs_quantity = stock_detail.quantity - stock_detail.booked_quantity
+          obp.order_booking_product_items.build size_id: stock_detail.size_id, color_id: stock_detail.color_id, available_for_booking_quantity: afs_quantity if obp.order_booking_product_items.select{|obpi| obpi.size_id == stock_detail.size_id && obpi.color_id == stock_detail.color_id}.blank?
+        end
+        @order_booking_products << obp
+      end
+    else
+      render js: "bootbox.alert({message: \"No records found or already added to the list\",size: 'small'});"
     end
   end
   

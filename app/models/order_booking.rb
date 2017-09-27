@@ -1,5 +1,5 @@
 class OrderBooking < ApplicationRecord
-  attr_accessor :picking_note
+  attr_accessor :picking_note, :product_code
   audited on: [:create, :update]
   has_associated_audits
 
