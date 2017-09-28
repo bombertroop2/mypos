@@ -163,40 +163,39 @@ class EventsController < ApplicationController
   
   def add_products
     if params[:product_code].blank?
-      products = Product.joins([:brand, :goods_type, :model, stock_products: :stock]).
+      products = Product.joins(:brand, :goods_type, :model).
         select("products.id, products.code AS product_code, common_fields.name AS product_name")
       if params[:brand_id].blank? && params[:goods_type_id].blank? && params[:model_id].blank?      
-        products = products.where(["stocks.warehouse_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ?", params[:warehouse_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["products.id NOT IN (?)", params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
       elsif params[:brand_id].present? && params[:goods_type_id].blank? && params[:model_id].blank?      
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:brand_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ?", params[:warehouse_id], params[:brand_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["brand_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ?", params[:brand_id]]) if params[:selected_product_ids].blank?
       elsif params[:brand_id].blank? && params[:goods_type_id].present? && params[:model_id].blank?      
-        products = products.where(["stocks.warehouse_id = ? AND goods_type_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:goods_type_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND goods_type_id = ?", params[:warehouse_id], params[:goods_type_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["goods_type_id = ? AND products.id NOT IN (?)", params[:goods_type_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["goods_type_id = ?", params[:goods_type_id]]) if params[:selected_product_ids].blank?
       elsif params[:brand_id].blank? && params[:goods_type_id].blank? && params[:model_id].present?      
-        products = products.where(["stocks.warehouse_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND model_id = ?", params[:warehouse_id], params[:model_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["model_id = ? AND products.id NOT IN (?)", params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["model_id = ?", params[:model_id]]) if params[:selected_product_ids].blank?
       elsif params[:brand_id].present? && params[:goods_type_id].present? && params[:model_id].blank?      
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND goods_type_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:brand_id], params[:goods_type_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND goods_type_id = ?", params[:warehouse_id], params[:brand_id], params[:goods_type_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["brand_id = ? AND goods_type_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:goods_type_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ? AND goods_type_id = ?", params[:brand_id], params[:goods_type_id]]) if params[:selected_product_ids].blank?
       elsif params[:brand_id].present? && params[:goods_type_id].blank? && params[:model_id].present?      
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:brand_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND model_id = ?", params[:warehouse_id], params[:brand_id], params[:model_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["brand_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ? AND model_id = ?", params[:brand_id], params[:model_id]]) if params[:selected_product_ids].blank?
       elsif params[:brand_id].blank? && params[:goods_type_id].present? && params[:model_id].present?      
-        products = products.where(["stocks.warehouse_id = ? AND goods_type_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:goods_type_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND goods_type_id = ? AND model_id = ?", params[:warehouse_id], params[:goods_type_id], params[:model_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["goods_type_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:goods_type_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["goods_type_id = ? AND model_id = ?", params[:goods_type_id], params[:model_id]]) if params[:selected_product_ids].blank?
       elsif params[:brand_id].present? && params[:goods_type_id].present? && params[:model_id].present?      
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND goods_type_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:brand_id], params[:goods_type_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
-        products = products.where(["stocks.warehouse_id = ? AND brand_id = ? AND goods_type_id = ? AND model_id = ?", params[:warehouse_id], params[:brand_id], params[:goods_type_id], params[:model_id]]) if params[:selected_product_ids].blank?
+        products = products.where(["brand_id = ? AND goods_type_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:goods_type_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ? AND goods_type_id = ? AND model_id = ?", params[:brand_id], params[:goods_type_id], params[:model_id]]) if params[:selected_product_ids].blank?
       end
     else
-      products = Product.joins(:brand, stock_products: :stock).
+      products = Product.joins(:brand).
         select("products.id, products.code AS product_code, common_fields.name AS product_name").
-        where(["stocks.warehouse_id = ? AND products.code = ?", params[:warehouse_id], params[:product_code]]) if params[:selected_product_ids].blank?
-      products = Product.joins(:brand, stock_products: :stock).
+        where(["products.code = ?", params[:product_code]]) if params[:selected_product_ids].blank?
+      products = Product.joins(:brand).
         select("products.id, products.code AS product_code, common_fields.name AS product_name").
-        where(["stocks.warehouse_id = ? AND products.code = ? AND products.id NOT IN (?)", params[:warehouse_id], params[:product_code], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        where(["products.code = ? AND products.id NOT IN (?)", params[:product_code], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
     end
     if products.blank?
       render js: "bootbox.alert({message: \"No records found or already added to the list\",size: 'small'});"
