@@ -125,16 +125,20 @@
                                                                     {
                                                                         text: 'Delete',
                                                                         action: function (e, dt, node, config) {
-                                                                            $.each(dt.rows('.selected')[0], function (index, value) {
-                                                                                var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                var selectedWarehouseId = splittedRowId[1];
-                                                                                var selectedProductId = splittedRowId[3];
-                                                                                if ($("#cash_discount_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                    $("#cash_discount_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
-                                                                                else
-                                                                                    $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-cash-discount").remove();
-                                                                            });
-                                                                            dt.rows('.selected').remove().draw();
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#cash_discount_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#cash_discount_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-cash-discount").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+
                                                                         }
                                                                     }
                                                                 ]
@@ -162,16 +166,20 @@
                                                                     {
                                                                         text: 'Delete',
                                                                         action: function (e, dt, node, config) {
-                                                                            $.each(dt.rows('.selected')[0], function (index, value) {
-                                                                                var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                var selectedWarehouseId = splittedRowId[1];
-                                                                                var selectedProductId = splittedRowId[3];
-                                                                                if ($("#special_price_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                    $("#special_price_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
-                                                                                else
-                                                                                    $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-special-price").remove();
-                                                                            });
-                                                                            dt.rows('.selected').remove().draw();
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#special_price_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#special_price_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-special-price").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+
                                                                         }
                                                                     }
                                                                 ]
@@ -199,16 +207,19 @@
                                                                     {
                                                                         text: 'Delete',
                                                                         action: function (e, dt, node, config) {
-                                                                            $.each(dt.rows('.selected')[0], function (index, value) {
-                                                                                var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                var selectedWarehouseId = splittedRowId[1];
-                                                                                var selectedProductId = splittedRowId[3];
-                                                                                if ($("#buy_one_get_one_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                    $("#buy_one_get_one_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
-                                                                                else
-                                                                                    $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-buy-one-get-one").remove();
-                                                                            });
-                                                                            dt.rows('.selected').remove().draw();
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#buy_one_get_one_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#buy_one_get_one_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-buy-one-get-one").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
                                                                         }
                                                                     }
                                                                 ]
@@ -236,16 +247,19 @@
                                                                     {
                                                                         text: 'Delete',
                                                                         action: function (e, dt, node, config) {
-                                                                            $.each(dt.rows('.selected')[0], function (index, value) {
-                                                                                var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                var selectedWarehouseId = splittedRowId[1];
-                                                                                var selectedProductId = splittedRowId[3];
-                                                                                if ($("#gift_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                    $("#gift_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
-                                                                                else
-                                                                                    $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-gift").remove();
-                                                                            });
-                                                                            dt.rows('.selected').remove().draw();
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#gift_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#gift_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-gift").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
                                                                         }
                                                                     }
                                                                 ]
@@ -273,16 +287,19 @@
                                                                     {
                                                                         text: 'Delete',
                                                                         action: function (e, dt, node, config) {
-                                                                            $.each(dt.rows('.selected')[0], function (index, value) {
-                                                                                var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                var selectedWarehouseId = splittedRowId[1];
-                                                                                var selectedProductId = splittedRowId[3];
-                                                                                if ($("#event_event_warehouses_attributes_" + selectedWarehouseId + "_event_products_attributes_" + selectedProductId + "_id").length > 0)
-                                                                                    $("#event_event_warehouses_attributes_" + selectedWarehouseId + "_event_products_attributes_" + selectedProductId + "__destroy").val("true");
-                                                                                else
-                                                                                    $(".event-products-" + selectedWarehouseId + "-" + selectedProductId).remove();
-                                                                            });
-                                                                            dt.rows('.selected').remove().draw();
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#event_event_warehouses_attributes_" + selectedWarehouseId + "_event_products_attributes_" + selectedProductId + "_id").length > 0)
+                                                                                        $("#event_event_warehouses_attributes_" + selectedWarehouseId + "_event_products_attributes_" + selectedProductId + "__destroy").val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId).remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
                                                                         }
                                                                     }
                                                                 ]
