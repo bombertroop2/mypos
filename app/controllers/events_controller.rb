@@ -25,12 +25,12 @@ class EventsController < ApplicationController
       end_end_time = Time.zone.parse splitted_end_time_range[1].strip
     end
 
-    events_scope = Event.select(:id, :code, :name, :start_date_time, :end_date_time)
+    events_scope = Event.select(:id, :code, :name, :start_date_time, :end_date_time, :event_type)
     events_scope = events_scope.where(["code #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(events_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string]
     events_scope = events_scope.where(["start_date_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
     events_scope = events_scope.where(["end_date_time BETWEEN ? AND ?", start_end_time, end_end_time]) if params[:filter_event_end_time].present?
-    @events = smart_listing_create(:events, events_scope, partial: 'events/listing', default_sort: {code: "asc"})
+    @events = smart_listing_create(:events, events_scope, partial: 'events/listing', default_sort: {event_type: "asc"})
   end
 
   # GET /events/1
@@ -235,7 +235,7 @@ class EventsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def event_params
-    params.require(:event).permit(:reward_system, :buy_one_get_one_free, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :type, :cash_discount, :special_price,
+    params.require(:event).permit(:reward_system, :buy_one_get_one_free, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
       event_warehouses_attributes: [:_destroy, :id, :event_type, :minimum_purchase_amount,
         :discount_amount, :warehouse_id,
         :wrhs_code, :wrhs_name,
