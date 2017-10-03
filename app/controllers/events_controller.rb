@@ -42,6 +42,9 @@ class EventsController < ApplicationController
   def new
     @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
     @event = Event.new
+    @brands = Brand.select(:id, :code, :name).order(:code)
+    @goods_types = GoodsType.select(:id, :code, :name).order(:code)
+    @models = Model.select(:id, :code, :name).order(:code)
   end
 
   # GET /events/1/edit
@@ -226,6 +229,58 @@ class EventsController < ApplicationController
       end
     end
   end
+  
+  def add_general_products
+    if params[:product_code].blank?
+      products = Product.joins(:brand, :goods_type, :model).
+        select("products.id, products.code AS product_code, common_fields.name AS product_name")
+      if params[:brand_id].blank? && params[:goods_type_id].blank? && params[:model_id].blank?      
+        products = products.where(["products.id NOT IN (?)", params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+      elsif params[:brand_id].present? && params[:goods_type_id].blank? && params[:model_id].blank?      
+        products = products.where(["brand_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ?", params[:brand_id]]) if params[:selected_product_ids].blank?
+      elsif params[:brand_id].blank? && params[:goods_type_id].present? && params[:model_id].blank?      
+        products = products.where(["goods_type_id = ? AND products.id NOT IN (?)", params[:goods_type_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["goods_type_id = ?", params[:goods_type_id]]) if params[:selected_product_ids].blank?
+      elsif params[:brand_id].blank? && params[:goods_type_id].blank? && params[:model_id].present?      
+        products = products.where(["model_id = ? AND products.id NOT IN (?)", params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["model_id = ?", params[:model_id]]) if params[:selected_product_ids].blank?
+      elsif params[:brand_id].present? && params[:goods_type_id].present? && params[:model_id].blank?      
+        products = products.where(["brand_id = ? AND goods_type_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:goods_type_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ? AND goods_type_id = ?", params[:brand_id], params[:goods_type_id]]) if params[:selected_product_ids].blank?
+      elsif params[:brand_id].present? && params[:goods_type_id].blank? && params[:model_id].present?      
+        products = products.where(["brand_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ? AND model_id = ?", params[:brand_id], params[:model_id]]) if params[:selected_product_ids].blank?
+      elsif params[:brand_id].blank? && params[:goods_type_id].present? && params[:model_id].present?      
+        products = products.where(["goods_type_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:goods_type_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["goods_type_id = ? AND model_id = ?", params[:goods_type_id], params[:model_id]]) if params[:selected_product_ids].blank?
+      elsif params[:brand_id].present? && params[:goods_type_id].present? && params[:model_id].present?      
+        products = products.where(["brand_id = ? AND goods_type_id = ? AND model_id = ? AND products.id NOT IN (?)", params[:brand_id], params[:goods_type_id], params[:model_id], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+        products = products.where(["brand_id = ? AND goods_type_id = ? AND model_id = ?", params[:brand_id], params[:goods_type_id], params[:model_id]]) if params[:selected_product_ids].blank?
+      end
+    else
+      products = Product.joins(:brand).
+        select("products.id, products.code AS product_code, common_fields.name AS product_name").
+        where(["products.code = ?", params[:product_code]]) if params[:selected_product_ids].blank?
+      products = Product.joins(:brand).
+        select("products.id, products.code AS product_code, common_fields.name AS product_name").
+        where(["products.code = ? AND products.id NOT IN (?)", params[:product_code], params[:selected_product_ids].split(",")]) if params[:selected_product_ids].present?
+    end
+    if products.blank?
+      render js: "bootbox.alert({message: \"No records found or already added to the list\",size: 'small'});"
+    else
+      @products = products
+      @event = if params[:event_id].blank?
+        Event.new
+      else
+        Event.where(id: params[:event_id]).select(:id).first
+      end
+      @existing_event_new_general_products = []
+      products.each do |product|
+        @existing_event_new_general_products << @event.event_general_products.build(product_id: product.id, prdct_code: product.product_code, prdct_name: product.product_name) if (!@event.new_record? && @event.event_general_products.where(product_id: product.id).select("1 AS one").blank?) || @event.new_record?
+      end
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -236,9 +291,10 @@ class EventsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def event_params
     params.require(:event).permit(:reward_system, :buy_one_get_one_free, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
+      event_general_products_attributes: [:id, :_destroy, :product_id, :prdct_code, :prdct_name],
       event_warehouses_attributes: [:_destroy, :id, :event_type, :minimum_purchase_amount,
         :discount_amount, :warehouse_id,
-        :wrhs_code, :wrhs_name,
+        :wrhs_code, :wrhs_name, :select_different_products,
         event_products_attributes: [:id, :product_id, :prdct_code, :prdct_name, :_destroy]])
   end
   

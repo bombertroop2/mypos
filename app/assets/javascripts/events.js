@@ -3,6 +3,7 @@ var eventWarehouseProductDataTablesCashDiscount = [];
 var eventWarehouseProductDataTablesSpecialPrice = [];
 var eventWarehouseProductDataTablesBuyOneGetOne = [];
 var eventWarehouseProductDataTablesGift = [];
+var eventGeneralProductDataTablesPercentageDiscount = [];
 
 
 $(function () {

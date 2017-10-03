@@ -1,5 +1,6 @@
 class Event < ApplicationRecord
   has_many :event_warehouses, dependent: :destroy
+  has_many :event_general_products, dependent: :destroy
   
   before_validation :remove_white_space, :upcase_code
   validates :code, :name, :start_date_time, :end_date_time, :event_type, presence: true
@@ -16,6 +17,7 @@ class Event < ApplicationRecord
                   validates :special_price, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Special Price") && event.special_price.present? }
 
                     accepts_nested_attributes_for :event_warehouses, allow_destroy: true
+                    accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
                     private
                     

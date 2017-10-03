@@ -1,0 +1,67 @@
+<% if action_name.eql?("edit") %>
+  <% event_general_product.prdct_code = event_general_product.product_code %>
+  <% event_general_product.prdct_name = event_general_product.product_name %>
+<% end %>
+<%= fields_for "event[event_general_products_attributes][#{event_general_product.product_id}]", event_general_product do |event_general_product_fields| %>
+  <% if event_type.present? && event_type.eql?("cash discount") %>
+    <% unless event_product_fields.object.new_record? %>
+      <%= event_product_fields.hidden_field :id, id: "cash_discount_event_product_id_#{warehouse_id}_#{event_product.product_id}" %>
+      <%= event_product_fields.hidden_field :_destroy, id: "cash_discount_event_product_destroy_#{warehouse_id}_#{event_product.product_id}" %>
+    <% end %>
+    <% warehouse_product_fields_class_name = "" %>
+    <% unless @event.new_record? %>
+      <% warehouse_product_fields_class_name = " event-products-#{warehouse_id}-fields-cash-discount" %>                                
+    <% end %>
+    <%= event_product_fields.hidden_field :product_id, class: "event-products-#{warehouse_id}-#{event_product.product_id}-cash-discount#{warehouse_product_fields_class_name} event-products-#{warehouse_id}-product-id-fields-cash-discount" %>
+      <%= event_product_fields.hidden_field :prdct_code, class: "event-products-#{warehouse_id}-#{event_product.product_id}-cash-discount#{warehouse_product_fields_class_name}" %>
+        <%= event_product_fields.hidden_field :prdct_name, class: "event-products-#{warehouse_id}-#{event_product.product_id}-cash-discount#{warehouse_product_fields_class_name}" %>
+        <% elsif event_type.present? && event_type.eql?("special price") %>
+          <% unless event_product_fields.object.new_record? %>
+            <%= event_product_fields.hidden_field :id, id: "special_price_event_product_id_#{warehouse_id}_#{event_product.product_id}" %>
+            <%= event_product_fields.hidden_field :_destroy, id: "special_price_event_product_destroy_#{warehouse_id}_#{event_product.product_id}" %>
+          <% end %>
+          <% warehouse_product_fields_class_name = "" %>
+          <% unless @event.new_record? %>
+            <% warehouse_product_fields_class_name = " event-products-#{warehouse_id}-fields-special-price" %>
+          <% end %>
+          <%= event_product_fields.hidden_field :product_id, class: "event-products-#{warehouse_id}-#{event_product.product_id}-special-price#{warehouse_product_fields_class_name} event-products-#{warehouse_id}-product-id-fields-special-price" %>
+            <%= event_product_fields.hidden_field :prdct_code, class: "event-products-#{warehouse_id}-#{event_product.product_id}-special-price#{warehouse_product_fields_class_name}" %>
+              <%= event_product_fields.hidden_field :prdct_name, class: "event-products-#{warehouse_id}-#{event_product.product_id}-special-price#{warehouse_product_fields_class_name}" %>
+              <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                <% unless event_product_fields.object.new_record? %>
+                  <%= event_product_fields.hidden_field :id, id: "buy_one_get_one_event_product_id_#{warehouse_id}_#{event_product.product_id}" %>
+                  <%= event_product_fields.hidden_field :_destroy, id: "buy_one_get_one_event_product_destroy_#{warehouse_id}_#{event_product.product_id}" %>
+                <% end %>
+                <% warehouse_product_fields_class_name = "" %>
+                <% unless @event.new_record? %>
+                  <% warehouse_product_fields_class_name = " event-products-#{warehouse_id}-fields-buy-one-get-one" %>
+                <% end %>
+                <%= event_product_fields.hidden_field :product_id, class: "event-products-#{warehouse_id}-#{event_product.product_id}-buy-one-get-one#{warehouse_product_fields_class_name} event-products-#{warehouse_id}-product-id-fields-buy-one-get-one" %>
+                  <%= event_product_fields.hidden_field :prdct_code, class: "event-products-#{warehouse_id}-#{event_product.product_id}-buy-one-get-one#{warehouse_product_fields_class_name}" %>
+                    <%= event_product_fields.hidden_field :prdct_name, class: "event-products-#{warehouse_id}-#{event_product.product_id}-buy-one-get-one#{warehouse_product_fields_class_name}" %>
+                    <% elsif event_type.present? && event_type.eql?("gift") %>
+                      <% unless event_product_fields.object.new_record? %>
+                        <%= event_product_fields.hidden_field :id, id: "gift_event_product_id_#{warehouse_id}_#{event_product.product_id}" %>
+                        <%= event_product_fields.hidden_field :_destroy, id: "gift_event_product_destroy_#{warehouse_id}_#{event_product.product_id}", class: "event-products-#{warehouse_id}-destroy-fields-gift" %>
+                        <% end %>
+                        <% warehouse_product_fields_class_name = "" %>
+                        <% unless @event.new_record? %>
+                          <% warehouse_product_fields_class_name = " event-products-#{warehouse_id}-fields-gift" %>
+                        <% end %>
+                        <%= event_product_fields.hidden_field :product_id, class: "event-products-#{warehouse_id}-#{event_product.product_id}-gift#{warehouse_product_fields_class_name} event-products-#{warehouse_id}-product-id-fields-gift" %>
+                          <%= event_product_fields.hidden_field :prdct_code, class: "event-products-#{warehouse_id}-#{event_product.product_id}-gift#{warehouse_product_fields_class_name}" %>
+                            <%= event_product_fields.hidden_field :prdct_name, class: "event-products-#{warehouse_id}-#{event_product.product_id}-gift#{warehouse_product_fields_class_name}" %>
+                            <% else %>
+                              <% unless event_general_product_fields.object.new_record? %>
+                                <%= event_general_product_fields.hidden_field :id %>
+                                <%= event_general_product_fields.hidden_field :_destroy %>
+                              <% end %>
+                              <% general_product_fields_class_name = "" %>
+                              <% unless @event.new_record? %>
+                                <% general_product_fields_class_name = " event-general-products-fields-percentage-discount" %>
+                              <% end %>
+                              <%= event_general_product_fields.hidden_field :product_id, class: "event-general-products-#{event_general_product.product_id}-percentage-discount#{general_product_fields_class_name} event-general-products-product-id-fields-percentage-discount" %>
+                                <%= event_general_product_fields.hidden_field :prdct_code, class: "event-general-products-#{event_general_product.product_id}-percentage-discount#{general_product_fields_class_name}" %>
+                                  <%= event_general_product_fields.hidden_field :prdct_name, class: "event-general-products-#{event_general_product.product_id}-percentage-discount#{general_product_fields_class_name}" %>
+                                  <% end %>
+                                <% end %>

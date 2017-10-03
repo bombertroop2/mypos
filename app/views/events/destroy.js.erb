@@ -1,5 +1,5 @@
 <% if @deleted %>
-  <%= smart_listing_item :events, :destroy, @event %>
+  window.location = '<%= events_path %>';
 <% else %>
   <% if @event.errors.present? && @event.errors.messages[:base].present? %>
     bootbox.alert({message: "<%= @event.errors.messages[:base].join("<br/>") %>",size: 'small'});

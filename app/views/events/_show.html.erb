@@ -48,7 +48,7 @@
       </dl>
     <% end %>
 
-    <% event_warehouses = object.event_warehouses.joins(:warehouse).includes(event_products: [product: :brand]).select(:id, :code, :name, :minimum_purchase_amount, :discount_amount) %>
+    <% event_warehouses = object.event_warehouses.joins(:warehouse).includes(event_products: [product: :brand]).select(:id, :code, :name, :minimum_purchase_amount, :discount_amount, :select_different_products) %>
     <% if event_warehouses.length > 0 %>
       <table class="table table-striped">
           <thead>
@@ -67,33 +67,57 @@
           <tbody>
               <% event_warehouses.each_with_index do |event_warehouse, index| %>
                 <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= "#{event_warehouse.code} - #{event_warehouse.name}" %></td>
+                    <td style="vertical-align: middle"><%= index + 1 %></td>
+                    <td style="vertical-align: middle"><%= "#{event_warehouse.code} - #{event_warehouse.name}" %></td>
                     <% if object.reward_system? %>
                       <td><%= number_to_currency(event_warehouse.minimum_purchase_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                       <td><%= number_to_currency(event_warehouse.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                     <% end %>
                     <td>
-                        <% event_products = event_warehouse.event_products %>
-                        <% if event_products.length > 0 %>
-                          <table class="table table-striped">
-                              <thead>
-                                  <tr>
-                                      <th>No.</th>
-                                      <th>Code</th>
-                                      <th>Name</th>
-                                  </tr>
-                              </thead>
-                              <tbody>
-                                  <% event_products.each_with_index do |event_product, ep_index| %>
+                        <% if event_warehouse.select_different_products? %>
+                          <% event_products = event_warehouse.event_products %>
+                          <% if event_products.length > 0 %>
+                            <table class="table table-striped">
+                                <thead>
                                     <tr>
-                                        <td><%= ep_index + 1 %></td>
-                                        <td><%= event_product.product.code %></td>
-                                        <td><%= event_product.product.brand.name %></td>
+                                        <th>No.</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
                                     </tr>
-                                  <% end %>
-                              </tbody>
-                          </table>
+                                </thead>
+                                <tbody>
+                                    <% event_products.each_with_index do |event_product, ep_index| %>
+                                      <tr>
+                                          <td><%= ep_index + 1 %></td>
+                                          <td><%= event_product.product.code %></td>
+                                          <td><%= event_product.product.brand.name %></td>
+                                      </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                          <% end %>
+                        <% else %>
+                          <% event_general_products = object.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+                          <% if event_general_products.length > 0 %>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% event_general_products.each_with_index do |event_general_product, egp_index| %>
+                                      <tr>
+                                          <td><%= egp_index + 1 %></td>
+                                          <td><%= event_general_product.product_code %></td>
+                                          <td><%= event_general_product.product_name %></td>
+                                      </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                          <% end %>
                         <% end %>
                     </td>
                 </tr>

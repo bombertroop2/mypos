@@ -3,6 +3,7 @@ Rails.application.routes.draw do
     collection do
       get "generate_warehouse_form"
       get "add_products"
+      get "add_general_products"
     end
   end
   resources :listing_stocks, only: :index

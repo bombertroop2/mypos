@@ -1,0 +1,405 @@
+<% event_type = event_type rescue nil %>
+<% event_type = params[:event_type] rescue nil if event_type.nil? %>
+<% if event_type.present? && event_type.eql?("cash discount") %>
+  <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_cash_discount'>
+    <% elsif event_type.present? && event_type.eql?("special price") %>
+      <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_special_price'>
+        <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+          <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_buy_one_get_one'>
+            <% elsif event_type.present? && event_type.eql?("gift") %>
+              <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_gift'>
+                <% else %>
+                  <div id='event_general_product_fields_container_percentage_discount'>
+                    <% end %>  
+                    <% event_general_products.each do |event_general_product| %>
+                      <%= render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: event_type}) %>
+                    <% end %>
+                </div>
+                <% if event_type.present? && event_type.eql?("cash discount") %>
+                  <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_cash_discount">
+                    <% elsif event_type.present? && event_type.eql?("special price") %>
+                      <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_special_price">
+                        <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                          <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_buy_one_get_one">
+                            <% elsif event_type.present? && event_type.eql?("gift") %>
+                              <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_gift">
+                                <% else %>
+                                  <div id="general_product_datatable_percentage_discount">
+                                    <% end %>
+                                    <% if event_type.present? && event_type.eql?("cash discount") %>
+                                      <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount" class="display">
+                                        <% elsif event_type.present? && event_type.eql?("special price") %>
+                                          <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price" class="display">
+                                            <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                              <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one" class="display">
+                                                <% elsif event_type.present? && event_type.eql?("gift") %>
+                                                  <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift" class="display">
+                                                    <% else %>
+                                                      <table id="listing_event_general_products_table_percentage_discount" class="display">
+                                                        <% end %>
+                                                        <thead>
+                                                            <tr>
+                                                                <th></th>
+                                                                <th>Code</th>
+                                                                <th>Name</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            <% event_general_products.each do |event_general_product| %>
+                                                              <% unless event_general_product._destroy %>
+                                                                <% if event_type.present? && event_type.eql?("cash discount") %>
+                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_cash_discount">
+                                                                    <% elsif event_type.present? && event_type.eql?("special price") %>
+                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_special_price">
+                                                                    <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_buy_one_get_one">
+                                                                    <% elsif event_type.present? && event_type.eql?("gift") %>
+                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_gift">
+                                                                    <% else %>
+                                                                  <tr id="general_product_percentage_discount_<%= event_general_product.product_id %>">
+                                                                    <% end %>
+                                                                    <td></td>
+                                                                    <td>
+    <%# if !@event.new_record? && event_product.new_record? %>
+    <%#= event_product.prdct_code %>
+    <%# elsif action_name.eql?("update") || (action_name.eql?("add_products") && !event_warehouse.new_record? && !event_product.new_record?) %>
+    <%#= event_product.product.code %>
+    <%# elsif action_name.eql?("edit") || !@event.new_record? %>
+    <%#= event_product.product_code %>
+    <%# else %>
+                                                                        <%= event_general_product.prdct_code %>
+    <%# end %>
+                                                                    </td>
+                                                                    <td>
+    <%# if !@event.new_record? && event_product.new_record? %>
+    <%#= event_product.prdct_name %>
+    <%# elsif action_name.eql?("update") || (action_name.eql?("add_products") && !event_warehouse.new_record? && !event_product.new_record?) %>
+    <%#= event_product.product.brand.name %>
+    <%# elsif action_name.eql?("edit") || !@event.new_record? %>
+    <%#= event_product.product_name %>
+    <%# else %>
+                                                                        <%= event_general_product.prdct_name %>
+    <%# end %>
+                                                                    </td>
+                                                                </tr>
+                                                              <% end %>
+                                                            <% end %>
+                                                        </tbody>
+                                                    </table>
+                                                    </div>
+
+                                                    <script type="text/javascript">
+                                                      $(function () {
+<% if event_type.present? && event_type.eql?("cash discount") %>
+                                                            eventWarehouseProductDataTablesCashDiscount['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount').DataTable({
+                                                                order: [1, 'asc'],
+                                                                dom: 'T<"clear">lBfrtip',
+                                                                columns: [
+                                                                    {data: null, defaultContent: '', orderable: false},
+                                                                    {data: 'code'},
+                                                                    {data: 'name'}
+                                                                ],
+                                                                tableTools: {
+                                                                    sRowSelect: 'os',
+                                                                    /*sRowSelector: 'td:last-child',*/
+                                                                    aButtons: []
+                                                                },
+                                                                paging: false,
+                                                                info: false,
+                                                                scrollY: "250px",
+                                                                scrollCollapse: true,
+                                                                buttons: [
+                                                                    {
+                                                                        text: 'Delete',
+                                                                        action: function (e, dt, node, config) {
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#cash_discount_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#cash_discount_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-cash-discount").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+
+                                                                        }
+                                                                    }
+                                                                ]
+
+                                                            });
+<% elsif event_type.present? && event_type.eql?("special price") %>
+                                                            eventWarehouseProductDataTablesSpecialPrice['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price').DataTable({
+                                                                order: [1, 'asc'],
+                                                                dom: 'T<"clear">lBfrtip',
+                                                                columns: [
+                                                                    {data: null, defaultContent: '', orderable: false},
+                                                                    {data: 'code'},
+                                                                    {data: 'name'}
+                                                                ],
+                                                                tableTools: {
+                                                                    sRowSelect: 'os',
+                                                                    /*sRowSelector: 'td:last-child',*/
+                                                                    aButtons: []
+                                                                },
+                                                                paging: false,
+                                                                info: false,
+                                                                scrollY: "250px",
+                                                                scrollCollapse: true,
+                                                                buttons: [
+                                                                    {
+                                                                        text: 'Delete',
+                                                                        action: function (e, dt, node, config) {
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#special_price_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#special_price_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-special-price").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+
+                                                                        }
+                                                                    }
+                                                                ]
+
+                                                            });
+<% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                                            eventWarehouseProductDataTablesBuyOneGetOne['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one').DataTable({
+                                                                order: [1, 'asc'],
+                                                                dom: 'T<"clear">lBfrtip',
+                                                                columns: [
+                                                                    {data: null, defaultContent: '', orderable: false},
+                                                                    {data: 'code'},
+                                                                    {data: 'name'}
+                                                                ],
+                                                                tableTools: {
+                                                                    sRowSelect: 'os',
+                                                                    /*sRowSelector: 'td:last-child',*/
+                                                                    aButtons: []
+                                                                },
+                                                                paging: false,
+                                                                info: false,
+                                                                scrollY: "250px",
+                                                                scrollCollapse: true,
+                                                                buttons: [
+                                                                    {
+                                                                        text: 'Delete',
+                                                                        action: function (e, dt, node, config) {
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#buy_one_get_one_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#buy_one_get_one_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-buy-one-get-one").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+                                                                        }
+                                                                    }
+                                                                ]
+
+                                                            });
+<% elsif event_type.present? && event_type.eql?("gift") %>
+                                                            eventWarehouseProductDataTablesGift['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift').DataTable({
+                                                                order: [1, 'asc'],
+                                                                dom: 'T<"clear">lBfrtip',
+                                                                columns: [
+                                                                    {data: null, defaultContent: '', orderable: false},
+                                                                    {data: 'code'},
+                                                                    {data: 'name'}
+                                                                ],
+                                                                tableTools: {
+                                                                    sRowSelect: 'os',
+                                                                    /*sRowSelector: 'td:last-child',*/
+                                                                    aButtons: []
+                                                                },
+                                                                paging: false,
+                                                                info: false,
+                                                                scrollY: "250px",
+                                                                scrollCollapse: true,
+                                                                buttons: [
+                                                                    {
+                                                                        text: 'Delete',
+                                                                        action: function (e, dt, node, config) {
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedWarehouseId = splittedRowId[1];
+                                                                                    var selectedProductId = splittedRowId[3];
+                                                                                    if ($("#gift_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
+                                                                                        $("#gift_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    else
+                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-gift").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+                                                                        }
+                                                                    }
+                                                                ]
+
+                                                            });
+<% else %>
+                                                            eventGeneralProductDataTablesPercentageDiscount = $('#listing_event_general_products_table_percentage_discount').DataTable({
+                                                                order: [1, 'asc'],
+                                                                dom: 'T<"clear">lBfrtip',
+                                                                columns: [
+                                                                    {data: null, defaultContent: '', orderable: false},
+                                                                    {data: 'code'},
+                                                                    {data: 'name'}
+                                                                ],
+                                                                tableTools: {
+                                                                    sRowSelect: 'os',
+                                                                    /*sRowSelector: 'td:last-child',*/
+                                                                    aButtons: []
+                                                                },
+                                                                paging: false,
+                                                                info: false,
+                                                                scrollY: "250px",
+                                                                scrollCollapse: true,
+                                                                buttons: [
+                                                                    {
+                                                                        text: 'Delete',
+                                                                        action: function (e, dt, node, config) {
+                                                                            if (dt.rows('.selected')[0].length > 0) {
+                                                                                $.each(dt.rows('.selected')[0], function (index, value) {
+                                                                                    var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
+                                                                                    var selectedProductId = splittedRowId[4];
+                                                                                    if ($("#event_event_general_products_attributes_" + selectedProductId + "_id").length > 0)
+                                                                                        $("#event_event_general_products_attributes_" + selectedProductId + "__destroy").val("true");
+                                                                                    else
+                                                                                        $(".event-general-products-" + selectedProductId + "-percentage-discount").remove();
+                                                                                });
+                                                                                dt.rows('.selected').remove().draw();
+                                                                            } else
+                                                                                bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
+                                                                        }
+                                                                    }
+                                                                ]
+
+                                                            });
+<% end %>
+                                                      });
+                                                    </script>
+                                                    <style>
+<% if event_type.present? && event_type.eql?("cash discount") %>
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount_filter label {
+                                                              font-weight: normal;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount tr td:first-child {
+                                                              text-align: center;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount tr td:first-child:before {
+                                                              content: "\f096"; /* fa-square-o */
+                                                              font-family: FontAwesome;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount tr.selected td:first-child:before {
+                                                              content: "\f046"; /* fa-check-square-o */
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_cash_discount_wrapper .DTTT_container {
+                                                              position: absolute
+                                                          }
+<% elsif event_type.present? && event_type.eql?("special price") %>
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price_filter label {
+                                                              font-weight: normal;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price tr td:first-child {
+                                                              text-align: center;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price tr td:first-child:before {
+                                                              content: "\f096"; /* fa-square-o */
+                                                              font-family: FontAwesome;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price tr.selected td:first-child:before {
+                                                              content: "\f046"; /* fa-check-square-o */
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price_wrapper .DTTT_container {
+                                                              position: absolute
+                                                          }
+<% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one_filter label {
+                                                              font-weight: normal;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one tr td:first-child {
+                                                              text-align: center;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one tr td:first-child:before {
+                                                              content: "\f096"; /* fa-square-o */
+                                                              font-family: FontAwesome;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one tr.selected td:first-child:before {
+                                                              content: "\f046"; /* fa-check-square-o */
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one_wrapper .DTTT_container {
+                                                              position: absolute
+                                                          }
+<% elsif event_type.present? && event_type.eql?("gift") %>
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift_filter label {
+                                                              font-weight: normal;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift tr td:first-child {
+                                                              text-align: center;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift tr td:first-child:before {
+                                                              content: "\f096"; /* fa-square-o */
+                                                              font-family: FontAwesome;
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift tr.selected td:first-child:before {
+                                                              content: "\f046"; /* fa-check-square-o */
+                                                          }
+
+                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift_wrapper .DTTT_container {
+                                                              position: absolute
+                                                          }
+<% else %>
+                                                          #listing_event_general_products_table_percentage_discount_filter label {
+                                                              font-weight: normal;
+                                                          }
+
+                                                          #listing_event_general_products_table_percentage_discount tr td:first-child {
+                                                              text-align: center;
+                                                          }
+
+                                                          #listing_event_general_products_table_percentage_discount tr td:first-child:before {
+                                                              content: "\f096"; /* fa-square-o */
+                                                              font-family: FontAwesome;
+                                                          }
+
+                                                          #listing_event_general_products_table_percentage_discount tr.selected td:first-child:before {
+                                                              content: "\f046"; /* fa-check-square-o */
+                                                          }
+
+                                                          #listing_event_general_products_table_percentage_discount_wrapper .DTTT_container {
+                                                              position: absolute
+                                                          }
+<% end %>
+                                                    </style>

@@ -11,5 +11,5 @@
     $("#form_container_reward").html("<%= j(render(partial: "form_gift")) %>");
   <% end %>
 <% else %>
-  <%= smart_listing_item :events, :update, @event, "events/event" %>
+  window.location = '<%= events_path %>';
 <% end %>
