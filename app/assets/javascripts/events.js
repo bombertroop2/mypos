@@ -4,6 +4,7 @@ var eventWarehouseProductDataTablesSpecialPrice = [];
 var eventWarehouseProductDataTablesBuyOneGetOne = [];
 var eventWarehouseProductDataTablesGift = [];
 var eventGeneralProductDataTablesPercentageDiscount = [];
+var eventGeneralProductDataTablesCashDiscount = [];
 
 
 $(function () {

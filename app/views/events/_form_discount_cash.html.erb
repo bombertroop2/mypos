@@ -43,136 +43,283 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">Warehouses</label>
+                            <label class="col-sm-2 control-label">Product</label>
                             <div class="col-sm-10">
-                                <table id="listing_event_warehouses_table_discount_cash" class="display">
-                                    <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th id="code_th_cash_discount">Code</th>
-                                            <th>Name</th>
-                                        </tr>
-                                    </thead>
+                                <div class="x_panel">
+                                    <div class="x_content">                        
 
-                                    <tbody>
-                                        <% @warehouses.each do |warehouse| %>
-                                          <tr id="warehouse_<%= warehouse.id %>_discount_cash">
-                                              <td></td>
-                                              <td><%= warehouse.code %></td>
-                                              <td><%= warehouse.name %></td>
-                                          </tr>
-                                        <% end %>
-                                    </tbody>
-                                </table>
-                                <a class="btn btn-default active" id="generate_event_cash_warehouse_form" style="float: right;margin-top: 10px;">Generate form</a>
-                            </div>
-                        </div>
+                                        <div>
+                                            <!-- Nav tabs -->
+                                            <ul class="nav nav-tabs" role="tablist">
+                                                <li role="presentation" class="active"><a href="#add_general_products_by_bgm_cash_discount" aria-controls="add_general_products_by_bgm_cash_discount" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
+                                                <li role="presentation"><a href="#add_general_products_by_code_cash_discount" aria-controls="add_general_products_by_code_cash_discount" role="tab" data-toggle="tab">Add products by code</a></li>
+                                            </ul>
 
-                        <div id="listing-warehouse-details-cash">
-                            <% if action_name.eql?("create") || !@event.new_record? %>
-                              <%= render partial: "warehouse_form", locals: {event_type: "cash discount"} %>
-                            <% end %>
-                        </div>
+                                            <!-- Tab panes -->
+                                            <div class="tab-content">
+                                                <div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_cash_discount" style="padding-top: 20px">
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="brand">Brand</label>
+                                                        <div class="col-sm-9">
+                                                            <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_cash_discount"} %>
+                                                          </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                          <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
+                                                          <div class="col-sm-9">
+                                                              <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_cash_discount"} %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="control-label col-sm-3" for="model">Model</label>
+                                                            <div class="col-sm-9">
+                                                                <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_cash_discount"} %>
+                                                              </div>
+                                                          </div>
+                                                          <div class="form-group">
+                                                              <div class="col-sm-offset-3 col-sm-9">
+                                                                  <button type="submit" class="btn btn-success" id="add-btn-general-products-cash-discount">Add</button>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+                                                      <div role="tabpanel" class="tab-pane fade" id="add_general_products_by_code_cash_discount" style="padding-top: 20px">
+                                                          <div class="form-group">
+                                                              <label class="control-label col-sm-3" for="code">Code</label>
+                                                              <div class="col-sm-9">
+                                                                  <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_cash_discount"} %>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div class="col-sm-offset-3 col-sm-9">
+                                                                    <button type="submit" class="btn btn-success" id="add-btn-by-code-general-products-cash-discount">Add</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="listing-general-products-cash-discount">
+                                                        <% if action_name.eql?("edit") %>
+                                                          <% event_general_products = @event.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+                                                        <% else %>
+                                                          <% event_general_products = @event.event_general_products %>
+                                                        <% end %>
+                                                        <% if event_general_products.present? %>                        
+                                                          <%= render partial: "listing_general_products", locals: {event_general_products: event_general_products, event_type: "cash discount"} %>
+                                                        <% end %>
+                                                    </div>
+                                                </div>                    
+
+                                                <div class="ln_solid"></div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Warehouses</label>
+                                    <div class="col-sm-10">
+                                        <table id="listing_event_warehouses_table_discount_cash" class="display">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th id="code_th_cash_discount">Code</th>
+                                                    <th>Name</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <% @warehouses.each do |warehouse| %>
+                                                  <tr id="warehouse_<%= warehouse.id %>_discount_cash">
+                                                      <td></td>
+                                                      <td><%= warehouse.code %></td>
+                                                      <td><%= warehouse.name %></td>
+                                                  </tr>
+                                                <% end %>
+                                            </tbody>
+                                        </table>
+                                        <a class="btn btn-default active" id="generate_event_cash_warehouse_form" style="float: right;margin-top: 10px;">Generate form</a>
+                                    </div>
+                                </div>
+
+                                <div id="listing-warehouse-details-cash">
+                                    <% if action_name.eql?("create") || !@event.new_record? %>
+                                      <%= render partial: "warehouse_form", locals: {event_type: "cash discount"} %>
+                                    <% end %>
+                                </div>
 
 
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-discount-cash" %>
-                                  <button class="btn btn-link cancel">Cancel</button>
-                              </div>
-                          </div>
-                        <% end %>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-discount-cash" %>
+                                          <button class="btn btn-link cancel">Cancel</button>
+                                      </div>
+                                  </div>
+                                <% end %>
 
-                        <script type="text/javascript">
-                          $(function () {
-                              $("#event_start_date_time_discount_cash").datetimepicker({
-                                  format: "dd/mm/yyyy hh:ii",
-                                  autoclose: true,
-                                  minuteStep: 1
-                              });
-                              $("#event_end_date_time_discount_cash").datetimepicker({
-                                  format: "dd/mm/yyyy hh:ii",
-                                  autoclose: true,
-                                  minuteStep: 1
-                              });
-                              var eventWarehousesDiscountCashDataTable = $('#listing_event_warehouses_table_discount_cash').DataTable({
-                                  order: [1, 'asc'],
-                                  dom: 'T<"clear">lfrtip',
-                                  columns: [
-                                      {data: null, defaultContent: '', orderable: false},
-                                      {data: 'code'},
-                                      {data: 'name'}
-                                  ],
-                                  tableTools: {
-                                      sRowSelect: 'os',
-                                      aButtons: ['select_all', 'select_none']
-                                  },
-                                  paging: false,
-                                  info: false,
-                                  scrollY: "250px",
-                                  scrollCollapse: true
-                              });
-
-                              $("#generate_event_cash_warehouse_form").click(function (e) {
-                                  if (eventWarehousesDiscountCashDataTable.rows('.selected').data().length == 0) {
-                                      e.preventDefault();
-                                      bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
-                                  } else {
-                                      var warehouseIds = [];
-                                      $.each(eventWarehousesDiscountCashDataTable.rows('.selected')[0], function (index, value) {
-                                          warehouseIds.push(eventWarehousesDiscountCashDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                <script type="text/javascript">
+                                  $(function () {
+                                      $("#event_start_date_time_discount_cash").datetimepicker({
+                                          format: "dd/mm/yyyy hh:ii",
+                                          autoclose: true,
+                                          minuteStep: 1
                                       });
-                        <% if @event.new_record? %>
-                                        $.get("/events/generate_warehouse_form", {
-                                            warehouse_ids: warehouseIds.join(","),
-                                            event_type: "cash discount"
-                                        });
-                        <% else %>
-                                        $.get("/events/generate_warehouse_form", {
-                                            warehouse_ids: warehouseIds.join(","),
-                                            event_type: "cash discount",
-                                            event_id: "<%= @event.id %>"
-                                        });
-                        <% end %>
-                                  }
+                                      $("#event_end_date_time_discount_cash").datetimepicker({
+                                          format: "dd/mm/yyyy hh:ii",
+                                          autoclose: true,
+                                          minuteStep: 1
+                                      });
+                                      var eventWarehousesDiscountCashDataTable = $('#listing_event_warehouses_table_discount_cash').DataTable({
+                                          order: [1, 'asc'],
+                                          dom: 'T<"clear">lfrtip',
+                                          columns: [
+                                              {data: null, defaultContent: '', orderable: false},
+                                              {data: 'code'},
+                                              {data: 'name'}
+                                          ],
+                                          tableTools: {
+                                              sRowSelect: 'os',
+                                              aButtons: ['select_all', 'select_none']
+                                          },
+                                          paging: false,
+                                          info: false,
+                                          scrollY: "250px",
+                                          scrollCollapse: true
+                                      });
 
-                              });
+                                      $("#generate_event_cash_warehouse_form").click(function (e) {
+                                          if (eventWarehousesDiscountCashDataTable.rows('.selected').data().length == 0) {
+                                              e.preventDefault();
+                                              bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+                                          } else {
+                                              var warehouseIds = [];
+                                              $.each(eventWarehousesDiscountCashDataTable.rows('.selected')[0], function (index, value) {
+                                                  warehouseIds.push(eventWarehousesDiscountCashDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                              });
+                                <% if @event.new_record? %>
+                                                $.get("/events/generate_warehouse_form", {
+                                                    warehouse_ids: warehouseIds.join(","),
+                                                    event_type: "cash discount"
+                                                });
+                                <% else %>
+                                                $.get("/events/generate_warehouse_form", {
+                                                    warehouse_ids: warehouseIds.join(","),
+                                                    event_type: "cash discount",
+                                                    event_id: "<%= @event.id %>"
+                                                });
+                                <% end %>
+                                          }
 
-                              $("#submit-btn-discount-cash").click(function () {
-                                  if ($("#listing-warehouse-details-cash").html().trim() == "") {
-                                      bootbox.alert({message: "Please select product(s) from selected warehouse(s)", size: 'small'});
-                                      return false;
-                                  } else {
-                                      var valid = true;
-                                      if ($(".event_warehouse_id_fields_cash_discount").length > 0) {
-                                          $(".event_warehouse_id_fields_cash_discount").each(function () {
-                                              if ($("#event_product_fields_container_" + $(this).val() + "_cash_discount").length == 0) {
-                                                  valid = false;
-                                                  return false;
-                                              } else if ($("#event_product_fields_container_" + $(this).val() + "_cash_discount").html().trim() == "") {
-                                                  valid = false;
+                                      });
+
+                                      $("#submit-btn-discount-cash").click(function () {
+                                          if ($("#listing-warehouse-details-cash").html().trim() == "") {
+                                              bootbox.alert({message: "Please generate warehouse form", size: 'small'});
+                                              return false;
+                                          } else {
+                                              if ($(".event_warehouse_id_fields_cash_discount").length > 0) {
+                                                  var valid = true;
+                                                  $(".event_warehouse_id_fields_cash_discount").each(function () {
+                                                      if ($("#event_event_warehouses_attributes_" + $(this).val() + "_select_different_products_cash_discount").is(':checked')) {
+                                                          if ($("#event_product_fields_container_" + $(this).val() + "_cash_discount").length == 0) {
+                                                              valid = false;
+                                                              return false;
+                                                          } else if ($("#event_product_fields_container_" + $(this).val() + "_cash_discount").html().trim() == "") {
+                                                              valid = false;
+                                                              return false;
+                                                          }
+                                                      } else
+                                                      if ($("#event_general_product_fields_container_cash_discount").length == 0) {
+                                                          valid = false;
+                                                          return false;
+                                                      } else if ($("#event_general_product_fields_container_cash_discount").html().trim() == "") {
+                                                          valid = false;
+                                                          return false;
+                                                      }
+                                                  });
+                                                  if (!valid) {
+                                                      bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
+                                                      return false;
+                                                  } else
+                                                      return true;
+                                              } else {
+                                                  bootbox.alert({message: "Please generate warehouse form", size: 'small'});
                                                   return false;
                                               }
+
+                                          }
+
+                                      });
+
+                                <% @event.event_warehouses.each do |event_warehouse| %>
+                                  <% unless event_warehouse._destroy %>
+                                          var e = jQuery.Event("click");
+                                          e.ctrlKey = true;
+                                          $("#warehouse_<%= event_warehouse.warehouse_id %>_discount_cash").find("td:first-child").trigger(e);
+                                  <% end %>
+                                <% end %>
+
+                                      $('#event_cash_discount').autoNumeric('init');
+
+                                      $("#add-btn-general-products-cash-discount").click(function () {
+                                          var productIds = [];
+                                          $(".event-general-products-product-id-fields-cash-discount").each(function () {
+                                              var attrId = $(this).attr('id');
+                                              productIds.push(attrId.split("_")[5]);
                                           });
-                                      } else
-                                          valid = false;
-
-                                      if (!valid) {
-                                          bootbox.alert({message: "Please select product(s) from selected warehouse(s)", size: 'small'});
+                                          var addProductParams = {};
+                                <% if @event.new_record? %>
+                                            addProductParams = {
+                                                brand_id: $("#brand_general_products_cash_discount").val(),
+                                                goods_type_id: $("#goods_type_general_products_cash_discount").val(),
+                                                model_id: $("#model_general_products_cash_discount").val(),
+                                                selected_product_ids: productIds.join(","),
+                                                event_type: "cash discount"
+                                            };
+                                <% else %>
+                                            addProductParams = {
+                                                brand_id: $("#brand_general_products_cash_discount").val(),
+                                                goods_type_id: $("#goods_type_general_products_cash_discount").val(),
+                                                model_id: $("#model_general_products_cash_discount").val(),
+                                                selected_product_ids: productIds.join(","),
+                                                event_type: "cash discount",
+                                                event_id: "<%= @event.id %>"
+                                            };
+                                <% end %>
+                                          $.get("/events/add_general_products", addProductParams);
+                                          $("#brand_general_products_cash_discount").prop('selectedIndex', 0);
+                                          $("#goods_type_general_products_cash_discount").prop('selectedIndex', 0);
+                                          $("#model_general_products_cash_discount").prop('selectedIndex', 0);
                                           return false;
-                                      } else
-                                          return true;
-                                  }
-                              });
+                                      });
 
-                        <% @event.event_warehouses.each do |event_warehouse| %>
-                          <% unless event_warehouse._destroy %>
-                                  var e = jQuery.Event("click");
-                                  e.ctrlKey = true;
-                                  $("#warehouse_<%= event_warehouse.warehouse_id %>_discount_cash").find("td:first-child").trigger(e);
-                          <% end %>
-                        <% end %>
-
-                              $('#event_cash_discount').autoNumeric('init');
-                          });
-                        </script>  
+                                      $("#add-btn-by-code-general-products-cash-discount").click(function () {
+                                          if ($("#code_general_products_cash_discount").val().trim() == "")
+                                              bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                          else {
+                                              var productIds = [];
+                                              $(".event-general-products-product-id-fields-cash-discount").each(function () {
+                                                  var attrId = $(this).attr('id');
+                                                  productIds.push(attrId.split("_")[5]);
+                                              });
+                                              var addProductParams = {};
+                                <% if @event.new_record? %>
+                                                addProductParams = {
+                                                    product_code: $("#code_general_products_cash_discount").val(),
+                                                    selected_product_ids: productIds.join(","),
+                                                    event_type: "cash discount"
+                                                };
+                                <% else %>
+                                                addProductParams = {
+                                                    product_code: $("#code_general_products_cash_discount").val(),
+                                                    selected_product_ids: productIds.join(","),
+                                                    event_type: "cash discount",
+                                                    event_id: "<%= @event.id %>"
+                                                };
+                                <% end %>
+                                              $.get("/events/add_general_products", addProductParams);
+                                              $("#code_general_products_cash_discount").val("");
+                                          }
+                                          return false;
+                                      });
+                                  });
+                                </script>  

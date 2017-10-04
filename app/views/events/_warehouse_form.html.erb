@@ -46,11 +46,23 @@
                             <% if !event_warehouse_fields.object.new_record? %>                      
                               <%= event_warehouse_fields.check_box :_destroy %> Delete
                             <% end %>
-                            <%= event_warehouse_fields.check_box :select_different_products, class: "event-warehouse-select-different-products-fields-percentage-discount" %> Select different products
+                            <% if event_type.present? && event_type.eql?("cash discount") %>
+                              <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_cash_discount" %>
+                              <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-cash-discount" %>
+                            <% else %>
+                              <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products" %>
+                              <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-percentage-discount" %>
+                            <% end %>
+                            <%= event_warehouse_fields.check_box :select_different_products, class: select_different_products_field_class_name, id: select_different_products_field_id %> Select different products
                           </div>
                           <div class="clearfix"></div>
                       </div>
-                      <div class="x_content<%= " hidden" unless event_warehouse.select_different_products? %>" id="event-warehouse-<%= event_warehouse.warehouse_id %>-form-container-percentage-discount">
+                      <% if event_type.present? && event_type.eql?("cash discount") %>
+                        <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-cash-discount" %>
+                      <% else %>
+                        <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-percentage-discount" %>
+                      <% end %>
+                      <div class="x_content<%= " hidden" unless event_warehouse.select_different_products? %>" id="<%= x_content_id %>">
 
                           <div>
                               <% if event_type.present? && event_type.eql?("cash discount") %>
@@ -273,6 +285,16 @@
                                         $("#code_" + warehouseId + "_cash_discount").val("");
                                     }
                                     return false;
+                                });
+
+                                $(".event-warehouse-select-different-products-fields-cash-discount").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#event-warehouse-" + warehouseId + "-form-container-cash-discount").removeClass("hidden");
+                                    else {
+                                        $("#event-warehouse-" + warehouseId + "-form-container-cash-discount").addClass("hidden");
+                                        $("#listing-warehouse-" + warehouseId + "-products-cash-discount").html("");
+                                    }
                                 });
             <% elsif event_type.present? && event_type.eql?("special price") %>
                                 $(".add-buttons-special-price").click(function () {
