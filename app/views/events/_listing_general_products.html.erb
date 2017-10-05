@@ -3,7 +3,7 @@
 <% if event_type.present? && event_type.eql?("cash discount") %>
   <div id='event_general_product_fields_container_cash_discount'>
     <% elsif event_type.present? && event_type.eql?("special price") %>
-      <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_special_price'>
+      <div id='event_general_product_fields_container_special_price'>
         <% elsif event_type.present? && event_type.eql?("buy one get one") %>
           <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_buy_one_get_one'>
             <% elsif event_type.present? && event_type.eql?("gift") %>
@@ -18,7 +18,7 @@
                 <% if event_type.present? && event_type.eql?("cash discount") %>
                   <div id="general_product_datatable_cash_discount">
                     <% elsif event_type.present? && event_type.eql?("special price") %>
-                      <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_special_price">
+                      <div id="general_product_datatable_special_price">
                         <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                           <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_buy_one_get_one">
                             <% elsif event_type.present? && event_type.eql?("gift") %>
@@ -29,7 +29,7 @@
                                     <% if event_type.present? && event_type.eql?("cash discount") %>
                                       <table id="listing_event_general_products_table_cash_discount" class="display">
                                         <% elsif event_type.present? && event_type.eql?("special price") %>
-                                          <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price" class="display">
+                                          <table id="listing_event_general_products_table_special_price" class="display">
                                             <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                                               <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one" class="display">
                                                 <% elsif event_type.present? && event_type.eql?("gift") %>
@@ -51,7 +51,7 @@
                                                                 <% if event_type.present? && event_type.eql?("cash discount") %>
                                                                   <tr id="general_product_cash_discount_<%= event_general_product.product_id %>">
                                                                     <% elsif event_type.present? && event_type.eql?("special price") %>
-                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_special_price">
+                                                                  <tr id="general_product_special_price_<%= event_general_product.product_id %>">
                                                                     <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                                                                   <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_buy_one_get_one">
                                                                     <% elsif event_type.present? && event_type.eql?("gift") %>
@@ -131,7 +131,7 @@
 
                                                             });
 <% elsif event_type.present? && event_type.eql?("special price") %>
-                                                            eventWarehouseProductDataTablesSpecialPrice['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price').DataTable({
+                                                            eventGeneralProductDataTablesSpecialPrice = $('#listing_event_general_products_table_special_price').DataTable({
                                                                 order: [1, 'asc'],
                                                                 dom: 'T<"clear">lBfrtip',
                                                                 columns: [
@@ -155,17 +155,15 @@
                                                                             if (dt.rows('.selected')[0].length > 0) {
                                                                                 $.each(dt.rows('.selected')[0], function (index, value) {
                                                                                     var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                    var selectedWarehouseId = splittedRowId[1];
-                                                                                    var selectedProductId = splittedRowId[3];
-                                                                                    if ($("#special_price_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                        $("#special_price_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    var selectedProductId = splittedRowId[4];
+                                                                                    if ($("#special_price_event_general_product_id_" + selectedProductId).length > 0)
+                                                                                        $("#special_price_event_general_product_destroy_" + selectedProductId).val("true");
                                                                                     else
-                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-special-price").remove();
+                                                                                        $(".event-general-products-" + selectedProductId + "-special-price").remove();
                                                                                 });
                                                                                 dt.rows('.selected').remove().draw();
                                                                             } else
                                                                                 bootbox.alert({message: "Please select product(s) that you want to delete", size: 'small'});
-
                                                                         }
                                                                     }
                                                                 ]
@@ -316,24 +314,24 @@
                                                               position: absolute
                                                           }
 <% elsif event_type.present? && event_type.eql?("special price") %>
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price_filter label {
+                                                          #listing_event_general_products_table_special_price_filter label {
                                                               font-weight: normal;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price tr td:first-child {
+                                                          #listing_event_general_products_table_special_price tr td:first-child {
                                                               text-align: center;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price tr td:first-child:before {
+                                                          #listing_event_general_products_table_special_price tr td:first-child:before {
                                                               content: "\f096"; /* fa-square-o */
                                                               font-family: FontAwesome;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price tr.selected td:first-child:before {
+                                                          #listing_event_general_products_table_special_price tr.selected td:first-child:before {
                                                               content: "\f046"; /* fa-check-square-o */
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_special_price_wrapper .DTTT_container {
+                                                          #listing_event_general_products_table_special_price_wrapper .DTTT_container {
                                                               position: absolute
                                                           }
 <% elsif event_type.present? && event_type.eql?("buy one get one") %>

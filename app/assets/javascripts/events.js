@@ -5,7 +5,7 @@ var eventWarehouseProductDataTablesBuyOneGetOne = [];
 var eventWarehouseProductDataTablesGift = [];
 var eventGeneralProductDataTablesPercentageDiscount = [];
 var eventGeneralProductDataTablesCashDiscount = [];
-
+var eventGeneralProductDataTablesSpecialPrice = [];
 
 $(function () {
     $('#filter-event-start-time').daterangepicker(

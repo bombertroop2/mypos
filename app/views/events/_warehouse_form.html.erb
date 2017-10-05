@@ -49,6 +49,9 @@
                             <% if event_type.present? && event_type.eql?("cash discount") %>
                               <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_cash_discount" %>
                               <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-cash-discount" %>
+                            <% elsif event_type.present? && event_type.eql?("special price") %>
+                              <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_special_price" %>
+                              <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-special-price" %>
                             <% else %>
                               <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products" %>
                               <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-percentage-discount" %>
@@ -59,6 +62,8 @@
                       </div>
                       <% if event_type.present? && event_type.eql?("cash discount") %>
                         <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-cash-discount" %>
+                      <% elsif event_type.present? && event_type.eql?("special price") %>
+                        <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-special-price" %>
                       <% else %>
                         <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-percentage-discount" %>
                       <% end %>
@@ -362,6 +367,16 @@
                                         $("#code_" + warehouseId + "_special_price").val("");
                                     }
                                     return false;
+                                });
+                                
+                                $(".event-warehouse-select-different-products-fields-special-price").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#event-warehouse-" + warehouseId + "-form-container-special-price").removeClass("hidden");
+                                    else {
+                                        $("#event-warehouse-" + warehouseId + "-form-container-special-price").addClass("hidden");
+                                        $("#listing-warehouse-" + warehouseId + "-products-special-price").html("");
+                                    }
                                 });
             <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                                 $(".add-buttons-buy-one-get-one").click(function () {
