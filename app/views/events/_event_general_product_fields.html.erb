@@ -28,17 +28,17 @@
             <%= event_general_product_fields.hidden_field :prdct_code, class: "event-general-products-#{event_general_product.product_id}-special-price#{general_product_fields_class_name}" %>
               <%= event_general_product_fields.hidden_field :prdct_name, class: "event-general-products-#{event_general_product.product_id}-special-price#{general_product_fields_class_name}" %>
               <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                <% unless event_product_fields.object.new_record? %>
-                  <%= event_product_fields.hidden_field :id, id: "buy_one_get_one_event_product_id_#{warehouse_id}_#{event_product.product_id}" %>
-                  <%= event_product_fields.hidden_field :_destroy, id: "buy_one_get_one_event_product_destroy_#{warehouse_id}_#{event_product.product_id}" %>
+                <% unless event_general_product_fields.object.new_record? %>
+                  <%= event_general_product_fields.hidden_field :id, id: "buy_one_get_one_event_general_product_id_#{event_general_product.product_id}" %>
+                  <%= event_general_product_fields.hidden_field :_destroy, id: "buy_one_get_one_event_general_product_destroy_#{event_general_product.product_id}" %>
                 <% end %>
-                <% warehouse_product_fields_class_name = "" %>
+                <% general_product_fields_class_name = "" %>
                 <% unless @event.new_record? %>
-                  <% warehouse_product_fields_class_name = " event-products-#{warehouse_id}-fields-buy-one-get-one" %>
+                  <% general_product_fields_class_name = " event-general-products-fields-buy-one-get-one" %>
                 <% end %>
-                <%= event_product_fields.hidden_field :product_id, class: "event-products-#{warehouse_id}-#{event_product.product_id}-buy-one-get-one#{warehouse_product_fields_class_name} event-products-#{warehouse_id}-product-id-fields-buy-one-get-one" %>
-                  <%= event_product_fields.hidden_field :prdct_code, class: "event-products-#{warehouse_id}-#{event_product.product_id}-buy-one-get-one#{warehouse_product_fields_class_name}" %>
-                    <%= event_product_fields.hidden_field :prdct_name, class: "event-products-#{warehouse_id}-#{event_product.product_id}-buy-one-get-one#{warehouse_product_fields_class_name}" %>
+                <%= event_general_product_fields.hidden_field :product_id, class: "event-general-products-#{event_general_product.product_id}-buy-one-get-one#{general_product_fields_class_name} event-general-products-product-id-fields-buy-one-get-one" %>
+                  <%= event_general_product_fields.hidden_field :prdct_code, class: "event-general-products-#{event_general_product.product_id}-buy-one-get-one#{general_product_fields_class_name}" %>
+                    <%= event_general_product_fields.hidden_field :prdct_name, class: "event-general-products-#{event_general_product.product_id}-buy-one-get-one#{general_product_fields_class_name}" %>
                     <% elsif event_type.present? && event_type.eql?("gift") %>
                       <% unless event_product_fields.object.new_record? %>
                         <%= event_product_fields.hidden_field :id, id: "gift_event_product_id_#{warehouse_id}_#{event_product.product_id}" %>

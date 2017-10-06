@@ -3,9 +3,10 @@ var eventWarehouseProductDataTablesCashDiscount = [];
 var eventWarehouseProductDataTablesSpecialPrice = [];
 var eventWarehouseProductDataTablesBuyOneGetOne = [];
 var eventWarehouseProductDataTablesGift = [];
-var eventGeneralProductDataTablesPercentageDiscount = [];
-var eventGeneralProductDataTablesCashDiscount = [];
-var eventGeneralProductDataTablesSpecialPrice = [];
+var eventGeneralProductDataTablesPercentageDiscount = null;
+var eventGeneralProductDataTablesCashDiscount = null;
+var eventGeneralProductDataTablesSpecialPrice = null;
+var eventGeneralProductDataTablesBuyOneGetOne = null;
 
 $(function () {
     $('#filter-event-start-time').daterangepicker(

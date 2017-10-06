@@ -5,7 +5,7 @@
     <% elsif event_type.present? && event_type.eql?("special price") %>
       <div id='event_general_product_fields_container_special_price'>
         <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-          <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_buy_one_get_one'>
+          <div id='event_general_product_fields_container_buy_one_get_one'>
             <% elsif event_type.present? && event_type.eql?("gift") %>
               <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_gift'>
                 <% else %>
@@ -20,7 +20,7 @@
                     <% elsif event_type.present? && event_type.eql?("special price") %>
                       <div id="general_product_datatable_special_price">
                         <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                          <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_buy_one_get_one">
+                          <div id="general_product_datatable_buy_one_get_one">
                             <% elsif event_type.present? && event_type.eql?("gift") %>
                               <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_gift">
                                 <% else %>
@@ -31,7 +31,7 @@
                                         <% elsif event_type.present? && event_type.eql?("special price") %>
                                           <table id="listing_event_general_products_table_special_price" class="display">
                                             <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                              <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one" class="display">
+                                              <table id="listing_event_general_products_table_buy_one_get_one" class="display">
                                                 <% elsif event_type.present? && event_type.eql?("gift") %>
                                                   <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift" class="display">
                                                     <% else %>
@@ -53,7 +53,7 @@
                                                                     <% elsif event_type.present? && event_type.eql?("special price") %>
                                                                   <tr id="general_product_special_price_<%= event_general_product.product_id %>">
                                                                     <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_buy_one_get_one">
+                                                                  <tr id="general_product_bo_go_<%= event_general_product.product_id %>">
                                                                     <% elsif event_type.present? && event_type.eql?("gift") %>
                                                                   <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_gift">
                                                                     <% else %>
@@ -170,7 +170,7 @@
 
                                                             });
 <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                                            eventWarehouseProductDataTablesBuyOneGetOne['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one').DataTable({
+                                                            eventGeneralProductDataTablesBuyOneGetOne = $('#listing_event_general_products_table_buy_one_get_one').DataTable({
                                                                 order: [1, 'asc'],
                                                                 dom: 'T<"clear">lBfrtip',
                                                                 columns: [
@@ -194,12 +194,11 @@
                                                                             if (dt.rows('.selected')[0].length > 0) {
                                                                                 $.each(dt.rows('.selected')[0], function (index, value) {
                                                                                     var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                    var selectedWarehouseId = splittedRowId[1];
-                                                                                    var selectedProductId = splittedRowId[3];
-                                                                                    if ($("#buy_one_get_one_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                        $("#buy_one_get_one_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    var selectedProductId = splittedRowId[4];
+                                                                                    if ($("#buy_one_get_one_event_general_product_id_" + selectedProductId).length > 0)
+                                                                                        $("#buy_one_get_one_event_general_product_destroy_" + selectedProductId).val("true");
                                                                                     else
-                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-buy-one-get-one").remove();
+                                                                                        $(".event-general-products-" + selectedProductId + "-buy-one-get-one").remove();
                                                                                 });
                                                                                 dt.rows('.selected').remove().draw();
                                                                             } else
@@ -335,24 +334,24 @@
                                                               position: absolute
                                                           }
 <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one_filter label {
+                                                          #listing_event_general_products_table_buy_one_get_one_filter label {
                                                               font-weight: normal;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one tr td:first-child {
+                                                          #listing_event_general_products_table_buy_one_get_one tr td:first-child {
                                                               text-align: center;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one tr td:first-child:before {
+                                                          #listing_event_general_products_table_buy_one_get_one tr td:first-child:before {
                                                               content: "\f096"; /* fa-square-o */
                                                               font-family: FontAwesome;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one tr.selected td:first-child:before {
+                                                          #listing_event_general_products_table_buy_one_get_one tr.selected td:first-child:before {
                                                               content: "\f046"; /* fa-check-square-o */
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_buy_one_get_one_wrapper .DTTT_container {
+                                                          #listing_event_general_products_table_buy_one_get_one_wrapper .DTTT_container {
                                                               position: absolute
                                                           }
 <% elsif event_type.present? && event_type.eql?("gift") %>

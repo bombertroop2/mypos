@@ -52,6 +52,9 @@
                             <% elsif event_type.present? && event_type.eql?("special price") %>
                               <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_special_price" %>
                               <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-special-price" %>
+                            <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                              <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_buy_one_get_one" %>
+                              <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-buy-one-get-one" %>
                             <% else %>
                               <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products" %>
                               <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-percentage-discount" %>
@@ -64,6 +67,8 @@
                         <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-cash-discount" %>
                       <% elsif event_type.present? && event_type.eql?("special price") %>
                         <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-special-price" %>
+                      <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                        <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-buy-one-get-one" %>
                       <% else %>
                         <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-percentage-discount" %>
                       <% end %>
@@ -444,6 +449,15 @@
                                         $("#code_" + warehouseId + "_buy_one_get_one").val("");
                                     }
                                     return false;
+                                });
+                                $(".event-warehouse-select-different-products-fields-buy-one-get-one").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").removeClass("hidden");
+                                    else {
+                                        $("#event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").addClass("hidden");
+                                        $("#listing-warehouse-" + warehouseId + "-products-buy-one-get-one").html("");
+                                    }
                                 });
             <% else %>
                                 $(".add-buttons").click(function () {
