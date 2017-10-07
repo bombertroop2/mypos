@@ -18,11 +18,11 @@ class EventWarehouse < ApplicationRecord
     validates :minimum_purchase_amount, numericality: {greater_than: 0}, if: proc { |ew| ew.event_type.present? && ew.event_type.strip.eql?("gift") && ew.minimum_purchase_amount.present? }
       validates :discount_amount, numericality: {greater_than: 0}, if: proc { |ew| ew.event_type.present? && ew.event_type.strip.eql?("gift") && ew.discount_amount.present? }
 
-        before_update :delete_old_products, if: proc {|ew| ew.select_different_products_changed? && ew.persisted? && ew.select_different_products == false}
+#        before_update :delete_old_products, if: proc {|ew| ew.select_different_products_changed? && ew.persisted? && ew.select_different_products == false}
 
-          private
+#          private
         
-          def delete_old_products
-            event_products.select(:id).destroy_all
-          end
+#          def delete_old_products
+#            event_products.select(:id).destroy_all
+#          end
         end

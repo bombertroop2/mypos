@@ -60,6 +60,7 @@ class EventsController < ApplicationController
   # POST /events
   # POST /events.json
   def create
+    remove_warehouse_products
     params[:event][:cash_discount] = params[:event][:cash_discount].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:event][:cash_discount].present?
     params[:event][:special_price] = params[:event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:event][:special_price].present?
     convert_amount_fields_to_numeric
@@ -86,6 +87,7 @@ class EventsController < ApplicationController
   # PATCH/PUT /events/1
   # PATCH/PUT /events/1.json
   def update
+    remove_warehouse_products
     params[:event][:cash_discount] = params[:event][:cash_discount].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:event][:cash_discount].present?
     params[:event][:special_price] = params[:event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:event][:special_price].present?
     convert_amount_fields_to_numeric
@@ -302,6 +304,20 @@ class EventsController < ApplicationController
     params[:event][:event_warehouses_attributes].each do |key, value|
       params[:event][:event_warehouses_attributes][key][:minimum_purchase_amount] = params[:event][:event_warehouses_attributes][key][:minimum_purchase_amount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:event][:event_warehouses_attributes][key][:minimum_purchase_amount].present?
       params[:event][:event_warehouses_attributes][key][:discount_amount] = params[:event][:event_warehouses_attributes][key][:discount_amount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:event][:event_warehouses_attributes][key][:discount_amount].present?
+    end if params[:event][:event_warehouses_attributes].present?
+  end
+
+  def remove_warehouse_products
+    params[:event][:event_warehouses_attributes].each do |key, value|
+      if params[:event][:event_warehouses_attributes][key][:select_different_products].eql?("0")
+        params[:event][:event_warehouses_attributes][key][:event_products_attributes].each do |ep_key, ep_value|
+          if params[:event][:event_warehouses_attributes][key][:event_products_attributes][ep_key][:id].present?
+            params[:event][:event_warehouses_attributes][key][:event_products_attributes][ep_key][:_destroy] = "true"
+          else
+            params[:event][:event_warehouses_attributes][key][:event_products_attributes].delete ep_key
+          end
+        end if params[:event][:event_warehouses_attributes][key][:event_products_attributes].present?
+      end
     end if params[:event][:event_warehouses_attributes].present?
   end
 end

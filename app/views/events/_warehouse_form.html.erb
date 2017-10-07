@@ -206,12 +206,12 @@
                                                   <% else %>
                                                     <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products">
                                                       <% end %>
-                                                      <% if event_warehouse.select_different_products %>
+                                                      <%# if event_warehouse.select_different_products %>
                                                         <% if (action_name.eql?("edit") && event_products.length > 0) || action_name.eql?("update") %>
                                                           <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_products: event_products, event_type: event_type} %>
                                                         <% elsif event_warehouse.event_products.present? %>
                                                           <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_type: event_type} %>
-                                                        <% end %>
+                                                        <%# end %>
                                                       <% end %>
                                                   </div>
                                               </div>                    
@@ -303,7 +303,6 @@
                                         $("#event-warehouse-" + warehouseId + "-form-container-cash-discount").removeClass("hidden");
                                     else {
                                         $("#event-warehouse-" + warehouseId + "-form-container-cash-discount").addClass("hidden");
-                                        $("#listing-warehouse-" + warehouseId + "-products-cash-discount").html("");
                                     }
                                 });
             <% elsif event_type.present? && event_type.eql?("special price") %>
@@ -373,14 +372,13 @@
                                     }
                                     return false;
                                 });
-                                
+
                                 $(".event-warehouse-select-different-products-fields-special-price").click(function () {
                                     var warehouseId = $(this).attr("id").split("_")[4];
                                     if ($(this).is(":checked"))
                                         $("#event-warehouse-" + warehouseId + "-form-container-special-price").removeClass("hidden");
                                     else {
                                         $("#event-warehouse-" + warehouseId + "-form-container-special-price").addClass("hidden");
-                                        $("#listing-warehouse-" + warehouseId + "-products-special-price").html("");
                                     }
                                 });
             <% elsif event_type.present? && event_type.eql?("buy one get one") %>
@@ -456,7 +454,6 @@
                                         $("#event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").removeClass("hidden");
                                     else {
                                         $("#event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").addClass("hidden");
-                                        $("#listing-warehouse-" + warehouseId + "-products-buy-one-get-one").html("");
                                     }
                                 });
             <% else %>
@@ -534,7 +531,6 @@
                                         $("#event-warehouse-" + warehouseId + "-form-container-percentage-discount").removeClass("hidden");
                                     else {
                                         $("#event-warehouse-" + warehouseId + "-form-container-percentage-discount").addClass("hidden");
-                                        $("#listing-warehouse-" + warehouseId + "-products").html("");
                                     }
                                 });
             <% end %>
