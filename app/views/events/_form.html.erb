@@ -19,9 +19,9 @@
                 <li role="presentation" class="active"><a href="#discount_cash" aria-controls="discount_cash" role="tab" data-toggle="tab">Discount(Rp)</a></li>
               <% elsif @event.special_price.present? %>
                 <li role="presentation" class="active"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>
-              <% elsif @event.buy_one_get_one_free? %>
+              <% elsif @event.event_type.eql?("Buy 1 Get 1 Free") %>
                 <li role="presentation" class="active"><a href="#buy_one_get_one_free" aria-controls="buy_one_get_one_free" role="tab" data-toggle="tab">Buy 1 Get 1 Free</a></li>
-              <% elsif @event.reward_system? %>
+              <% elsif @event.event_type.eql?("Gift") %>
                 <li role="presentation" class="active"><a href="#reward" aria-controls="reward" role="tab" data-toggle="tab">Gift</a></li>
               <% end %>
             <% end %>
@@ -74,13 +74,13 @@
                         <%= render "form_special_price" %>
                     </div>
                 </div>
-              <% elsif @event.buy_one_get_one_free? %>
+              <% elsif @event.event_type.eql?("Buy 1 Get 1 Free") %>
                 <div role="tabpanel" class="tab-pane fade in active" id="buy_one_get_one_free" style="padding-top: 20px">
                     <div id="form_container_buy_one_get_one_free">
                         <%= render "form_buy_one_get_one" %>
                     </div>
                 </div>
-              <% elsif @event.reward_system? %>
+              <% elsif @event.event_type.eql?("Gift") %>
                 <div role="tabpanel" class="tab-pane fade in active" id="reward" style="padding-top: 20px">
                     <div id="form_container_reward">
                         <%= render "form_gift" %>

@@ -102,41 +102,35 @@
   <% end %>
 <% elsif params[:event_type].present? && params[:event_type].eql?("gift") %>
   <% if @event.new_record? %>
-    if($("#listing_event_warehouse_products_table_<%= params[:warehouse_id] %>_gift").length == 0){
-    $("#listing-warehouse-<%= params[:warehouse_id] %>-products-gift").html("<%= j(render(partial: "listing_warehouse_products")) %>");
+    if($("#listing_event_general_products_table_gift").length == 0){
+    $("#listing-general-products-gift").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
     }else{
-    <% event_warehouse = @event.event_warehouses.select{|ew| ew.warehouse_id == params[:warehouse_id].to_i}.first %>
     <% @products.each do |product| %>
       var rowValue = {
       'code': '<%= product.product_code %>',
       'name': '<%= product.product_name %>'
       };
-      var rowObject = eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
-      eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_gift');
-      <% event_product = event_warehouse.event_products.select{|ep| ep.product_id == product.id}.first %>
-      $("#event_product_fields_container_<%= params[:warehouse_id] %>_gift").append("<%= j(render(partial: "event_product_fields", locals: {warehouse_id: params[:warehouse_id], event_product: event_product, event_type: params[:event_type]})) %>");
+      var rowObject = eventGeneralProductDataTablesGift.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesGift.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_gift_event_<%= product.id %>');
+      <% event_general_product = @event.event_general_products.select{|ep| ep.product_id == product.id}.first %>
+      $("#event_general_product_fields_container_gift").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
     <% end %>
     }
   <% else %>
-    <% event_warehouse = @event_warehouse %>
-    if($("#listing_event_warehouse_products_table_<%= params[:warehouse_id] %>_gift").length == 0){
-    $("#listing-warehouse-<%= params[:warehouse_id] %>-products-gift").html("<%= j(render(partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse})) %>");
+    if($("#listing_event_general_products_table_gift").length == 0){
+    $("#listing-general-products-gift").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
     }else{
     <% @products.each do |product| %>
       var rowValue = {
       'code': '<%= product.product_code %>',
       'name': '<%= product.product_name %>'
       };
-      var rowObject = eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
-      eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_gift');
-      if($("#gift_event_product_destroy_<%= params[:warehouse_id] %>_<%= product.id %>").length > 0)
-      $("#gift_event_product_destroy_<%= params[:warehouse_id] %>_<%= product.id %>").val("false");
-      else{
-      <% event_product = @existing_event_new_products.select{|ep| ep.product_id == product.id}.first %>
-      <% if event_product.present? %>
-        $("#event_product_fields_container_<%= params[:warehouse_id] %>_gift").append("<%= j(render(partial: "event_product_fields", locals: {warehouse_id: params[:warehouse_id], event_product: event_product, event_type: params[:event_type]})) %>");
+      var rowObject = eventGeneralProductDataTablesGift.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesGift.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_gift_event_<%= product.id %>');
+      <% event_general_product = @existing_event_new_general_products.select{|ep| ep.product_id == product.id}.first %>
+      <% if event_general_product.present? %>
+        $("#event_general_product_fields_container_gift").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
       <% end %>
-      }
     <% end %>
     }
   <% end %>

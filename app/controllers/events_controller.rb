@@ -130,7 +130,7 @@ class EventsController < ApplicationController
     
     unless @event.new_record?
       @event_warehouses = []
-      event_warehouses = @event.event_warehouses.joins(:warehouse).select(:id, :warehouse_id, :code, :name, :minimum_purchase_amount, :discount_amount)
+      event_warehouses = @event.event_warehouses.joins(:warehouse).select(:id, :warehouse_id, :code, :name)
       event_warehouses.each do |ew|
         unless warehouse_ids.include?(ew.warehouse_id.to_s)
           ew.remove = true
@@ -292,19 +292,16 @@ class EventsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def event_params
-    params.require(:event).permit(:reward_system, :buy_one_get_one_free, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
+    params.require(:event).permit(:minimum_purchase_amount, :discount_amount, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
       event_general_products_attributes: [:id, :_destroy, :product_id, :prdct_code, :prdct_name],
-      event_warehouses_attributes: [:_destroy, :id, :event_type, :minimum_purchase_amount,
-        :discount_amount, :warehouse_id,
+      event_warehouses_attributes: [:_destroy, :id, :event_type, :warehouse_id,
         :wrhs_code, :wrhs_name, :select_different_products,
         event_products_attributes: [:id, :product_id, :prdct_code, :prdct_name, :_destroy]])
   end
   
   def convert_amount_fields_to_numeric
-    params[:event][:event_warehouses_attributes].each do |key, value|
-      params[:event][:event_warehouses_attributes][key][:minimum_purchase_amount] = params[:event][:event_warehouses_attributes][key][:minimum_purchase_amount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:event][:event_warehouses_attributes][key][:minimum_purchase_amount].present?
-      params[:event][:event_warehouses_attributes][key][:discount_amount] = params[:event][:event_warehouses_attributes][key][:discount_amount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:event][:event_warehouses_attributes][key][:discount_amount].present?
-    end if params[:event][:event_warehouses_attributes].present?
+    params[:event][:minimum_purchase_amount] = params[:event][:minimum_purchase_amount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:event][:minimum_purchase_amount].present?
+    params[:event][:discount_amount] = params[:event][:discount_amount].gsub("Rp","").gsub(".","").gsub(",",".") if params[:event][:discount_amount].present?
   end
 
   def remove_warehouse_products

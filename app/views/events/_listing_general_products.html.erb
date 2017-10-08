@@ -7,7 +7,7 @@
         <% elsif event_type.present? && event_type.eql?("buy one get one") %>
           <div id='event_general_product_fields_container_buy_one_get_one'>
             <% elsif event_type.present? && event_type.eql?("gift") %>
-              <div id='event_product_fields_container_<%= event_warehouse.warehouse_id %>_gift'>
+              <div id='event_general_product_fields_container_gift'>
                 <% else %>
                   <div id='event_general_product_fields_container_percentage_discount'>
                     <% end %>  
@@ -22,7 +22,7 @@
                         <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                           <div id="general_product_datatable_buy_one_get_one">
                             <% elsif event_type.present? && event_type.eql?("gift") %>
-                              <div id="warehouse_product_datatable_<%= event_warehouse.warehouse_id %>_gift">
+                              <div id="general_product_datatable_gift">
                                 <% else %>
                                   <div id="general_product_datatable_percentage_discount">
                                     <% end %>
@@ -33,7 +33,7 @@
                                             <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                                               <table id="listing_event_general_products_table_buy_one_get_one" class="display">
                                                 <% elsif event_type.present? && event_type.eql?("gift") %>
-                                                  <table id="listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift" class="display">
+                                                  <table id="listing_event_general_products_table_gift" class="display">
                                                     <% else %>
                                                       <table id="listing_event_general_products_table_percentage_discount" class="display">
                                                         <% end %>
@@ -55,7 +55,7 @@
                                                                     <% elsif event_type.present? && event_type.eql?("buy one get one") %>
                                                                   <tr id="general_product_bo_go_<%= event_general_product.product_id %>">
                                                                     <% elsif event_type.present? && event_type.eql?("gift") %>
-                                                                  <tr id="warehouse_<%= event_warehouse.warehouse_id %>_product_<%= event_product.product_id %>_gift">
+                                                                  <tr id="general_product_gift_event_<%= event_general_product.product_id %>">
                                                                     <% else %>
                                                                   <tr id="general_product_percentage_discount_<%= event_general_product.product_id %>">
                                                                     <% end %>
@@ -209,7 +209,7 @@
 
                                                             });
 <% elsif event_type.present? && event_type.eql?("gift") %>
-                                                            eventWarehouseProductDataTablesGift['<%= event_warehouse.warehouse_id %>'] = $('#listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift').DataTable({
+                                                            eventGeneralProductDataTablesGift = $('#listing_event_general_products_table_gift').DataTable({
                                                                 order: [1, 'asc'],
                                                                 dom: 'T<"clear">lBfrtip',
                                                                 columns: [
@@ -233,12 +233,11 @@
                                                                             if (dt.rows('.selected')[0].length > 0) {
                                                                                 $.each(dt.rows('.selected')[0], function (index, value) {
                                                                                     var splittedRowId = dt.rows(value).nodes().to$().attr("id").split("_");
-                                                                                    var selectedWarehouseId = splittedRowId[1];
-                                                                                    var selectedProductId = splittedRowId[3];
-                                                                                    if ($("#gift_event_product_id_" + selectedWarehouseId + "_" + selectedProductId).length > 0)
-                                                                                        $("#gift_event_product_destroy_" + selectedWarehouseId + "_" + selectedProductId).val("true");
+                                                                                    var selectedProductId = splittedRowId[4];
+                                                                                    if ($("#gift_event_general_product_id_" + selectedProductId).length > 0)
+                                                                                        $("#gift_event_general_product_destroy_" + selectedProductId).val("true");
                                                                                     else
-                                                                                        $(".event-products-" + selectedWarehouseId + "-" + selectedProductId + "-gift").remove();
+                                                                                        $(".event-general-products-" + selectedProductId + "-gift").remove();
                                                                                 });
                                                                                 dt.rows('.selected').remove().draw();
                                                                             } else
@@ -355,24 +354,24 @@
                                                               position: absolute
                                                           }
 <% elsif event_type.present? && event_type.eql?("gift") %>
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift_filter label {
+                                                          #listing_event_general_products_table_gift_filter label {
                                                               font-weight: normal;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift tr td:first-child {
+                                                          #listing_event_general_products_table_gift tr td:first-child {
                                                               text-align: center;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift tr td:first-child:before {
+                                                          #listing_event_general_products_table_gift tr td:first-child:before {
                                                               content: "\f096"; /* fa-square-o */
                                                               font-family: FontAwesome;
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift tr.selected td:first-child:before {
+                                                          #listing_event_general_products_table_gift tr.selected td:first-child:before {
                                                               content: "\f046"; /* fa-check-square-o */
                                                           }
 
-                                                          #listing_event_warehouse_products_table_<%= event_warehouse.warehouse_id %>_gift_wrapper .DTTT_container {
+                                                          #listing_event_general_products_table_gift_wrapper .DTTT_container {
                                                               position: absolute
                                                           }
 <% else %>

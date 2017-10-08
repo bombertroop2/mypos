@@ -5,6 +5,11 @@
     <div style="padding-top: 20px"></div>
 
     <dl class="dl-horizontal">
+        <dt>Type</dt>
+        <dd><%= object.event_type %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
         <dt>Code</dt>
         <dd><%= object.code %></dd>
     </dl>
@@ -46,18 +51,28 @@
           <dt>Special price</dt>
           <dd><%= number_to_currency(object.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
       </dl>
+    <% elsif object.event_type.eql?("Gift") %>
+      <dl class="dl-horizontal">
+          <dt>Min. purchase amount</dt>
+          <dd><%= number_to_currency(object.minimum_purchase_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>
+      <% if object.discount_amount.present? %>
+        <dl class="dl-horizontal">
+            <dt>Discount amount</dt>
+            <dd><%= number_to_currency(object.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+        </dl>
+
+      <% end %>    
     <% end %>
 
-    <% event_warehouses = object.event_warehouses.joins(:warehouse).includes(event_products: [product: :brand]).select(:id, :code, :name, :minimum_purchase_amount, :discount_amount, :select_different_products) %>
+    <% event_warehouses = object.event_warehouses.joins(:warehouse).includes(event_products: [product: :brand]).select(:id, :code, :name, :select_different_products) %>
     <% if event_warehouses.length > 0 %>
       <table class="table table-striped">
           <thead>
               <tr>
                   <th>No.</th>
                   <th>Warehouse</th>
-                  <% if object.reward_system? %>
-                    <th>Minimum purchase amount</th>
-                    <th>Discount amount</th>
+                  <% if object.event_type.eql?("Gift") %>
                     <th>Gift items</th>
                   <% else %>
                     <th>Product</th>
@@ -69,10 +84,6 @@
                 <tr>
                     <td style="vertical-align: middle"><%= index + 1 %></td>
                     <td style="vertical-align: middle"><%= "#{event_warehouse.code} - #{event_warehouse.name}" %></td>
-                    <% if object.reward_system? %>
-                      <td><%= number_to_currency(event_warehouse.minimum_purchase_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-                      <td><%= number_to_currency(event_warehouse.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-                    <% end %>
                     <td>
                         <% if event_warehouse.select_different_products? %>
                           <% event_products = event_warehouse.event_products %>

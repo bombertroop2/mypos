@@ -15,19 +15,21 @@ class Event < ApplicationRecord
               validates :cash_discount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Discount(Rp)") && event.cash_discount.present? }
                 validates :special_price, presence: true, if: proc{|event| event.event_type.strip.eql?("Special Price")}
                   validates :special_price, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Special Price") && event.special_price.present? }
-
-                    accepts_nested_attributes_for :event_warehouses, allow_destroy: true
-                    accepts_nested_attributes_for :event_general_products, allow_destroy: true
+                    validates :minimum_purchase_amount, presence: true, if: proc{|event| event.event_type.strip.eql?("Gift")}
+                      validates :minimum_purchase_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.minimum_purchase_amount.present? }
+                        validates :discount_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? }
+                          accepts_nested_attributes_for :event_warehouses, allow_destroy: true
+                          accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
-                    private
+                          private
                     
   
-                    def remove_white_space
-                      self.code = code.strip
-                      self.name = name.strip
-                    end
+                          def remove_white_space
+                            self.code = code.strip
+                            self.name = name.strip
+                          end
 
-                    def upcase_code
-                      self.code = code.upcase
-                    end
-                  end
+                          def upcase_code
+                            self.code = code.upcase
+                          end
+                        end

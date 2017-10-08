@@ -11,6 +11,7 @@ class Product < ApplicationRecord
   
   mount_uploader :image, ImageUploader
   
+  has_many :event_general_products, dependent: :restrict_with_error
   has_many :event_products, dependent: :restrict_with_error
   has_many :direct_purchase_products, dependent: :restrict_with_error
   has_many :purchase_order_products, dependent: :restrict_with_error
@@ -39,6 +40,7 @@ class Product < ApplicationRecord
   has_one :order_booking_product_relation, -> {select("1 AS one")}, class_name: "OrderBookingProduct"
   has_one :stock_mutation_product_relation, -> {select("1 AS one")}, class_name: "StockMutationProduct"
   has_one :event_product_relation, -> {select("1 AS one")}, class_name: "EventProduct"
+  has_one :event_general_product_relation, -> {select("1 AS one")}, class_name: "EventGeneralProduct"
   
   
   accepts_nested_attributes_for :product_details#, reject_if: :price_blank
@@ -188,7 +190,7 @@ class Product < ApplicationRecord
             
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def code_not_changed
-    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_product_relation.present? || order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || stock_mutation_product_relation.present?)
+    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_general_product_relation.present? || event_product_relation.present? || order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || stock_mutation_product_relation.present?)
   end
   
   def size_group_not_changed

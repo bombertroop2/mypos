@@ -7,6 +7,7 @@ var eventGeneralProductDataTablesPercentageDiscount = null;
 var eventGeneralProductDataTablesCashDiscount = null;
 var eventGeneralProductDataTablesSpecialPrice = null;
 var eventGeneralProductDataTablesBuyOneGetOne = null;
+var eventGeneralProductDataTablesGift = null;
 
 $(function () {
     $('#filter-event-start-time').daterangepicker(
