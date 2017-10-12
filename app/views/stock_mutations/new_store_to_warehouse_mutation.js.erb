@@ -1,10 +1,10 @@
 <%= smart_listing_item :stock_mutations, :new, @stock_mutation, "stock_mutations/form" %>
 
-<% if current_user.has_non_spg_role? %>
-  $("#warehouse_id").attr("data-placeholder", "Please select warehouse").chosen().change(function() {
+<%# if current_user.has_non_spg_role? %>
+  /*$("#warehouse_id").attr("data-placeholder", "Please select warehouse").chosen().change(function() {
     $.get("/stock_mutations/get_products", {
       warehouse_id: $(this).val(),
       mutation_type: "store to warehouse"
     });
-  });
-<% end %>
+  });*/
+<%# end %>

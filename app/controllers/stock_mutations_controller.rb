@@ -260,46 +260,92 @@ class StockMutationsController < ApplicationController
   # GET /stock_mutations/new
   def new_store_to_warehouse_mutation
     if current_user.has_non_spg_role?
+      #      @origin_warehouses = Warehouse.not_central.select(:id, :code)
       @origin_warehouses = Warehouse.not_central.select(:id, :code)
+      @stock_mutation = StockMutation.new mutation_type: "store to warehouse"
     else
-      @products = Product.joins(:brand).joins(stock_products: :stock).where(["warehouse_id = ?", current_user.sales_promotion_girl.warehouse_id]).select(:id, :code, :name).order(:code)
-      @mutation_type = "store to warehouse"
+      #      @products = Product.joins(:brand).joins(stock_products: :stock).where(["warehouse_id = ?", current_user.sales_promotion_girl.warehouse_id]).select(:id, :code, :name).order(:code)
+      #      @mutation_type = "store to warehouse"    
+      @origin_warehouse = current_user.sales_promotion_girl.warehouse
+      @stock_mutation = StockMutation.new mutation_type: "store to warehouse", origin_warehouse_id: @origin_warehouse.id
     end
+    @destintation_warehouses = Warehouse.central.select(:id, :code)
   end
 
   # POST /stock_mutations
   # POST /stock_mutations.json
   def create_store_to_warehouse_mutation
     add_additional_params("store to warehouse")
-    @stock_mutation = StockMutation.new(stock_mutation_params)
-    @stock_mutation.quantity = @total_stock_mutation_quantity
-    @stock_mutation.mutation_type = "store to warehouse"
-    begin
-      unless @saved = @stock_mutation.save
-        if @stock_mutation.errors[:"stock_mutation_products.base"].present?
-          render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
-        elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
-          render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
-        else
-          @destintation_warehouses = Warehouse.central.where(["id <> ?", params[:stock_mutation][:origin_warehouse_id]]).select(:id, :code)
-          @colors = []
-          @sizes = []
-          @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
-            stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", params[:stock_mutation][:origin_warehouse_id]]).first
-            @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
-            @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
-            @colors[stock_mutation_product.product_id].each do |color|
-              @sizes[stock_mutation_product.product_id].each do |size|
-                stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.select{|smpi| smpi.color_id == color.id && smpi.size_id == size.id}.blank?
+    if @valid
+      @stock_mutation = StockMutation.new(stock_mutation_params)
+      @stock_mutation.quantity = @total_stock_mutation_quantity
+      @stock_mutation.mutation_type = "store to warehouse"
+      begin
+        unless @saved = @stock_mutation.save
+          if @stock_mutation.errors[:"stock_mutation_products.base"].present?
+            render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.base"].join("<br/>")}\",size: 'small'});"
+          elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
+            render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
+          else
+            if current_user.has_non_spg_role?
+              @origin_warehouses = Warehouse.not_central.select(:id, :code)
+            else
+              @origin_warehouse = current_user.sales_promotion_girl.warehouse
+            end
+            @destintation_warehouses = Warehouse.central.select(:id, :code)
+            selected_product_ids = @stock_mutation.stock_mutation_products.map(&:product_id)
+            @selected_products = Product.joins(stock_products: :stock).
+              where(id: selected_product_ids).
+              where(["stocks.warehouse_id = ?", @stock_mutation.origin_warehouse_id]).
+              select(:id).select("stock_products.id AS stock_product_id")
+            stock_products = if @selected_products.length > 1
+              StockProduct.joins(:stock).includes(:colors, :sizes).where(product_id: @selected_products.pluck(:id)).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).select(:id, :product_id)
+            else
+              StockProduct.joins(:stock).where(product_id: @selected_products.pluck(:id)).where(["warehouse_id = ?", @stock_mutation.origin_warehouse_id]).select(:id, :product_id)
+            end
+            @stock_mutation_products = []
+            @product_colors = {}
+            @product_sizes = {}
+            @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+              stock_product = stock_products.select{|sp| sp.product_id == stock_mutation_product.product_id}.first
+
+              if stock_products.length > 1
+                @product_colors[stock_mutation_product.product_id] = stock_product.colors.distinct
+                @product_sizes[stock_mutation_product.product_id] = stock_product.sizes.distinct
+              else
+                @product_colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+                @product_sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
               end
-            end        
+              @product_colors[stock_mutation_product.product_id].each do |color|
+                @product_sizes[stock_mutation_product.product_id].each do |size|
+                  stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.select{|smpi| smpi.color_id == color.id && smpi.size_id == size.id}.blank?
+                end
+              end        
+              @stock_mutation_products << stock_mutation_product
+            end
+            
+            #            @destintation_warehouses = Warehouse.central.where(["id <> ?", params[:stock_mutation][:origin_warehouse_id]]).select(:id, :code)
+            #            @colors = []
+            #            @sizes = []
+            #            @stock_mutation.stock_mutation_products.each do |stock_mutation_product|
+            #              stock_product = StockProduct.joins(:stock).where(product_id: stock_mutation_product.product_id).where(["warehouse_id = ?", params[:stock_mutation][:origin_warehouse_id]]).first
+            #              @colors[stock_mutation_product.product_id] = stock_product.colors.select(:id, :code, :name)
+            #              @sizes[stock_mutation_product.product_id] = stock_product.sizes.select(:id, :size)
+            #              @colors[stock_mutation_product.product_id].each do |color|
+            #                @sizes[stock_mutation_product.product_id].each do |size|
+            #                  stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id if stock_mutation_product.stock_mutation_product_items.select{|smpi| smpi.color_id == color.id && smpi.size_id == size.id}.blank?
+            #                end
+            #              end        
+            #            end
           end
         end
+      rescue ActiveRecord::RecordNotUnique => e
+        render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+      rescue RuntimeError => e
+        render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
       end
-    rescue ActiveRecord::RecordNotUnique => e
-      render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
-    rescue RuntimeError => e
-      render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
+    else
+      render js: "bootbox.alert({message: \"#{@error_message}\",size: 'small'});"
     end
   end
   
@@ -333,16 +379,22 @@ class StockMutationsController < ApplicationController
       StockMutation.new
     end
     
+    origin_warehouse_id = if current_user.has_non_spg_role?
+      params[:origin_warehouse_id]
+    else
+      current_user.sales_promotion_girl.warehouse_id
+    end
+    
     @selected_products = if params[:prev_selected_product_ids].present?
       Product.joins(stock_products: :stock).joins(:brand).
         where(code: params[:product_code]).
-        where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
+        where(["stocks.warehouse_id = ?", origin_warehouse_id]).
         where(["products.id NOT IN (?)", params[:prev_selected_product_ids].split(",")]).
         select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
     else
       Product.joins(stock_products: :stock).joins(:brand).
         where(code: params[:product_code]).
-        where(["stocks.warehouse_id = ?", params[:origin_warehouse_id]]).
+        where(["stocks.warehouse_id = ?", origin_warehouse_id]).
         select("products.id, products.code, stock_products.id AS stock_product_id, common_fields.name AS brand_name")
     end
 
@@ -351,12 +403,12 @@ class StockMutationsController < ApplicationController
       @product_colors = {}
       @product_sizes = {}
       @selected_products.each do |product|
-        stock_product = StockProduct.joins(:stock).where(product_id: product.id).where(["warehouse_id = ?", params[:origin_warehouse_id]]).first
+        stock_product = StockProduct.joins(:stock).where(product_id: product.id).where(["warehouse_id = ?", origin_warehouse_id]).first
         @product_colors[product.id] = stock_product.colors.select(:id, :code, :name)
         @product_sizes[product.id] = stock_product.sizes.select(:id, :size)
         if (smp = @stock_mutation.stock_mutation_products.where(product_id: product.id).first).blank?
           smp = @stock_mutation.stock_mutation_products.build product_id: product.id, product_code: product.code, product_name: product.brand_name
-        elsif @stock_mutation.origin_warehouse_id == params[:origin_warehouse_id].to_i
+        elsif @stock_mutation.origin_warehouse_id == origin_warehouse_id.to_i
           smp.product_code = product.code
           smp.product_name = product.brand_name
         else
@@ -374,29 +426,29 @@ class StockMutationsController < ApplicationController
     end
   end
 
-  def generate_form
-    selected_product_ids = params[:product_ids]
-    @destintation_warehouses = unless params[:mutation_type].eql?("store to warehouse")
-      Warehouse.not_central.where(["id <> ?", params[:warehouse_id]]).select(:id, :code)
-    else
-      Warehouse.central.where(["id <> ?", params[:warehouse_id]]).select(:id, :code)
-    end
-    @stock_mutation = StockMutation.new origin_warehouse_id: params[:warehouse_id]
-    products = Product.where(id: params[:product_ids].split(",")).select(:id)
-    @colors = []
-    @sizes = []
-    products.each do |product|
-      stock_mutation_product = @stock_mutation.stock_mutation_products.build product_id: product.id
-      stock_product = StockProduct.joins(:stock).where(product_id: product.id).where(["warehouse_id = ?", params[:warehouse_id]]).first
-      @colors[product.id] = stock_product.colors.select(:id, :code, :name)
-      @sizes[product.id] = stock_product.sizes.select(:id, :size)
-      @colors[product.id].each do |color|
-        @sizes[product.id].each do |size|
-          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id
-        end
-      end        
-    end
-  end
+  #  def generate_form
+  #    selected_product_ids = params[:product_ids]
+  #    @destintation_warehouses = unless params[:mutation_type].eql?("store to warehouse")
+  #      Warehouse.not_central.where(["id <> ?", params[:warehouse_id]]).select(:id, :code)
+  #    else
+  #      Warehouse.central.where(["id <> ?", params[:warehouse_id]]).select(:id, :code)
+  #    end
+  #    @stock_mutation = StockMutation.new origin_warehouse_id: params[:warehouse_id]
+  #    products = Product.where(id: params[:product_ids].split(",")).select(:id)
+  #    @colors = []
+  #    @sizes = []
+  #    products.each do |product|
+  #      stock_mutation_product = @stock_mutation.stock_mutation_products.build product_id: product.id
+  #      stock_product = StockProduct.joins(:stock).where(product_id: product.id).where(["warehouse_id = ?", params[:warehouse_id]]).first
+  #      @colors[product.id] = stock_product.colors.select(:id, :code, :name)
+  #      @sizes[product.id] = stock_product.sizes.select(:id, :size)
+  #      @colors[product.id].each do |color|
+  #        @sizes[product.id].each do |size|
+  #          stock_mutation_product.stock_mutation_product_items.build size_id: size.id, color_id: color.id
+  #        end
+  #      end        
+  #    end
+  #  end
   
   def edit
     @origin_warehouses = @destintation_warehouses = Warehouse.not_central.select(:id, :code)
@@ -656,7 +708,7 @@ class StockMutationsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def stock_mutation_params
-    params.require(:stock_mutation).permit(:delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id,
+    params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id,
       stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id,
         stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
           :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])

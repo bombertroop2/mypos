@@ -1,5 +1,6 @@
 <% unless @saved %>
-  $("#form_container").html("<%= j(render(partial: "detail_form_store_to_warehouse")) %>");
+  //$("#form_container").html("<%#= j(render(partial: "detail_form_store_to_warehouse")) %>");
+  <%= smart_listing_item :stock_mutations, :create, @stock_mutation, "stock_mutations/form" %>
 <% else %>
   <%= smart_listing_item :stock_mutations, :create, @stock_mutation, "stock_mutations/stock_mutation" %>
 <% end %>
