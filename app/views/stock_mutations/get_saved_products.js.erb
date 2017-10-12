@@ -1,0 +1,5 @@
+<% if @stock_mutation.origin_warehouse_id.to_s.eql?(params[:origin_warehouse_id]) %>
+  $("#warehouse_products_form_container").html("<%= j(render(partial: "listing_saved_products")) %>");
+<% else %>
+  $("#warehouse_products_form_container").html("");
+<% end %>

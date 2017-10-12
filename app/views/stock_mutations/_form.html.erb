@@ -1,23 +1,155 @@
-<td colspan="<%= action_name.eql?("new") ? "6" : "5" %>">
+<!--<td colspan="<%#= action_name.eql?("new") ? "6" : "5" %>">
     <button type="button" class="close cancel" aria-label="Close" id="x_button">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>
     <div class="form-horizontal">
-        <% if current_user.has_non_spg_role? %>
-          <div class="form-group">
-              <label class="col-sm-2 control-label">From</label>
-              <div class="col-sm-10" style="width: 0% !important">
-                  <%= select_tag "warehouse_id", options_from_collection_for_select(@origin_warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
-                </div>
-            </div>
-          <% end %>
+<%# if current_user.has_non_spg_role? %>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">From</label>
+                <div class="col-sm-10" style="width: 0% !important">
+<%#= select_tag "warehouse_id", options_from_collection_for_select(@origin_warehouses, :id, :code), {include_blank: true, class: "form-control chosen-select", style: "width: 200px;"} %>
+                  </div>
+              </div>
+<%# end %>
           <div id="products_container">
-              <% unless current_user.has_non_spg_role? %>
-                <%= render(partial: "listing_products") %>
-              <% end %>
+<%# unless current_user.has_non_spg_role? %>
+<%#= render(partial: "listing_products") %>
+<%# end %>
           </div>
           <div id="form_container"></div>
       </div>
 
-  </td>
+  </td>-->
+
+
+<td colspan="6">
+    <button type="button" class="close cancel hidden" aria-label="Close" id="x_button">
+        <span aria-hidden="true">&times;</span>
+    </button>
+
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@stock_mutation, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <div class="form-group<%= control_group_error(@stock_mutation, :origin_warehouse_id) %>">
+            <%= f.label :origin_warehouse_id, "From", class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.select :origin_warehouse_id, options_from_collection_for_select(@origin_warehouses, 'id', 'code', @stock_mutation.origin_warehouse_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                    <%= error_help_text(@stock_mutation, :origin_warehouse_id) %>
+                </div>
+            </div>
+
+            <div class="form-group<%= control_group_error(@stock_mutation, :product_code) %>">
+                <%= f.label :product_code, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <div class="form-inline">
+                          <%= f.text_field :product_code, size: 10, class: "form-control" %>
+                            <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_product">
+                                <span class="glyphicon glyphicon-plus"></span> Add
+                            </button>
+                        </div>
+                        <%= error_help_text(@stock_mutation, :product_code) %>
+                    </div>
+                </div>
+
+                <div id="warehouse_products_form_container">
+                    <% if params[:action].eql?("create") || params[:action].eql?("edit") || params[:action].eql?("update") %>
+                      <%= render "listing_products" %>
+                    <% end %>
+                </div>                                         
+
+                <div class="form-group<%= control_group_error(@stock_mutation, :destination_warehouse_id) %>">
+                    <%= f.label :destination_warehouse_id, "To", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destintation_warehouses, 'id', 'code', @stock_mutation.destination_warehouse_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                            <%= error_help_text(@stock_mutation, :destination_warehouse_id) %>
+                        </div>
+                    </div>
+
+                    <div class="form-group<%= control_group_error(@stock_mutation, :delivery_date) %>">
+                        <%= f.label :delivery_date, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_field :delivery_date, size: 10, readonly: true, class: "form-control" %>
+                                <%= error_help_text(@stock_mutation, :delivery_date) %>
+                            </div>
+                        </div>
+
+                        <div class="form-group<%= control_group_error(@stock_mutation, :courier_id) %>">
+                            <%= f.label :courier_id, class: "col-sm-2 control-label" %>            
+                              <div class="col-sm-10">
+                                  <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', @stock_mutation.courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                    <%= error_help_text(@stock_mutation, :courier_id) %>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <a class="btn btn-primary" id="save-btn">Save</a>
+                                    <a class="btn btn-link cancel" id="btn-cancel-new-po">Cancel</a>
+                                </div>
+                            </div>
+                          <% end %>
+
+                          <script>
+                            $(function () {
+                                $("#stock_mutation_origin_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
+                                $("#stock_mutation_destination_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
+                                $("#stock_mutation_courier_id").attr("data-placeholder", "Please select courier").chosen();
+                                $("#stock_mutation_origin_warehouse_id").change(function () {
+                      <% if @stock_mutation.new_record? %>
+                                      $("#warehouse_products_form_container").html("");
+                      <% else %>
+                                      $.get("/stock_mutations/get_saved_products", {
+                                          origin_warehouse_id: $("#stock_mutation_origin_warehouse_id").val().trim(),
+                                          stock_mutation_id: <%= @stock_mutation.id %>
+                                      });
+                      <% end %>
+                                });
+                                $("#btn_add_product").click(function () {
+
+                                    if ($("#stock_mutation_origin_warehouse_id").val().trim() == "")
+                                        bootbox.alert({message: "Please select origin warehouse", size: "small"});
+                                    else if ($("#stock_mutation_product_code").val().trim() == "")
+                                        bootbox.alert({message: "Please fill in product code field", size: "small"});
+                                    else {
+                                        var productIds = [];
+                                        $(".stock-mutation-product-id-fields").each(function () {
+                                            productIds.push($(this).val());
+                                        });
+                                        var addProductParams = {};
+                      <% if !@stock_mutation.new_record? %>
+                                          addProductParams = {
+                                              origin_warehouse_id: $("#stock_mutation_origin_warehouse_id").val().trim(),
+                                              product_code: $("#stock_mutation_product_code").val().trim(),
+                                              prev_selected_product_ids: productIds.join(","),
+                                              stock_mutation_id: <%= @stock_mutation.id %>
+                                          };
+
+                      <% else %>
+                                          addProductParams = {
+                                              origin_warehouse_id: $("#stock_mutation_origin_warehouse_id").val().trim(),
+                                              product_code: $("#stock_mutation_product_code").val().trim(),
+                                              prev_selected_product_ids: productIds.join(",")
+                                          };
+                      <% end %>
+                                        $.get("/stock_mutations/get_products", addProductParams);
+                                    }
+                                });
+
+                                $("#stock_mutation_delivery_date").datepicker({
+                                    dateFormat: "dd/mm/yy"
+                                });
+
+                                $("#btn-cancel-new-po").click(function () {
+                                    $("#x_button").click();
+                                });
+
+                                $("#save-btn").click(function () {
+                      <% if @stock_mutation.new_record? %>
+                                      $("#new_stock_mutation").submit();
+                      <% else %>
+                                      $("#edit_stock_mutation_<%= @stock_mutation.id %>").submit();
+                      <% end %>
+                                });
+
+                            });
+                          </script>

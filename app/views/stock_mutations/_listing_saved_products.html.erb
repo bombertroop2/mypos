@@ -1,71 +1,3 @@
-<!--<div class="form-group">
-    <label class="col-sm-2 control-label">Products</label>
-    <div class="col-sm-10">
-        <table id="listing_sm_products_table" class="display">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Code</th>
-                    <th>Brand</th>
-                </tr>
-            </thead>
-
-            <tbody>
-<%# @products.each do |product| %>
-                  <tr id="product_<%#= product.id %>_<%#= current_user.has_non_spg_role? ? params[:warehouse_id] : current_user.sales_promotion_girl.warehouse_id %>">
-                      <td></td>
-                      <td><%#= product.code %></td>
-                      <td><%#= product.name %></td>
-                  </tr>
-<%# end %>
-            </tbody>
-        </table>
-        <a class="btn btn-default active" id="generate_stock_mutation_form" style="float: right;margin-top: 10px;">Generate form</a>
-    </div>
-</div>
-
-<script>
-  $(function () {
-      var smProductsDataTable = $('#listing_sm_products_table').DataTable({
-          order: [1, 'asc'],
-          dom: 'T<"clear">lfrtip',
-          columns: [
-              {data: null, defaultContent: '', orderable: false},
-              {data: 'code'},
-              {data: 'brand'}
-          ],
-          tableTools: {
-              sRowSelect: 'os',
-              /*sRowSelector: 'td:first-child',*/
-              aButtons: ['select_all', 'select_none']
-          },
-          paging: false,
-          info: false,
-          scrollY: "250px",
-          scrollCollapse: true
-      });
-      $("#generate_stock_mutation_form").click(function () {
-          if (smProductsDataTable.rows('.selected').data().length == 0)
-              bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
-          else {
-              var productIds = [];
-              var warehouseId = "0";
-              $.each(smProductsDataTable.rows('.selected')[0], function (index, value) {
-                  productIds.push(smProductsDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
-                  warehouseId = smProductsDataTable.rows(value).nodes().to$().attr("id").split("_")[2];
-              });
-              $.get("/stock_mutations/generate_form", {
-                  product_ids: productIds.join(","),
-                  warehouse_id: warehouseId,
-                  mutation_type: "<%#= @mutation_type %>"
-              });
-          }
-
-          return false;
-      });
-  });
-</script>-->
-
 <% @stock_mutation_products.each do |stock_mutation_product| %>
   <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
@@ -75,34 +7,17 @@
                   <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
               </tr>
               <%= fields_for "stock_mutation[stock_mutation_products_attributes][#{stock_mutation_product.product_id}]", stock_mutation_product do |stock_mutation_product_fields| %>
-    <%# if !params[:action].eql?("update") || (params[:action].eql?("update") && (@stock_mutation.origin_warehouse_id_was != @stock_mutation.origin_warehouse_id && stock_mutation_product_fields.object.new_record?) || @stock_mutation.origin_warehouse_id_was == @stock_mutation.origin_warehouse_id) %>
-                <% product = @selected_products.select{|prdct| prdct.id == stock_mutation_product_fields.object.product_id}.first %>
-    <%# if product.present? %>
                 <%= stock_mutation_product_fields.hidden_field :product_id, class: "stock-mutation-product-id-fields" %>
-                  <% if stock_mutation_product_fields.object.new_record? %>
-                    <%= stock_mutation_product_fields.hidden_field :product_code %>
-                    <%= stock_mutation_product_fields.hidden_field :product_name %>
-                  <% else %>
-                    <% if stock_mutation_product_fields.object.product_code.present? && stock_mutation_product_fields.object.product_name.present? %>
-                      <%= stock_mutation_product_fields.hidden_field :product_code %>
-                      <%= stock_mutation_product_fields.hidden_field :product_name %>
-                    <% else %>
-                      <%= stock_mutation_product_fields.hidden_field :product_code, value: product.code %>
-                      <%= stock_mutation_product_fields.hidden_field :product_name, value: product.brand_name %>
-                    <% end %>
-                    <%= stock_mutation_product_fields.hidden_field :id %>
-                  <% end %>
-                  <% colors = @product_colors[product.id] %>
-                  <% sizes = @product_sizes[product.id] %>
+                  <%= stock_mutation_product_fields.hidden_field :product_code, value: stock_mutation_product.code %>
+                  <%= stock_mutation_product_fields.hidden_field :product_name, value: stock_mutation_product.brand_name %>
+                  <%= stock_mutation_product_fields.hidden_field :id %>
+                  <% colors = @product_colors[stock_mutation_product.product_id] %>
+                  <% sizes = @product_sizes[stock_mutation_product.product_id] %>
                   <% stock_mutation_product_items = stock_mutation_product_fields.object.stock_mutation_product_items %>
 
                   <tr style="text-align: center">
                       <td style="vertical-align: middle;width: 20% !important;">
-                          <% unless params[:action].eql?("edit") %>
-                            <%= "#{stock_mutation_product_fields.object.product_code} - #{stock_mutation_product_fields.object.product_name}" %>
-                          <% else %>
-                            <%= "#{product.code} - #{product.brand_name}" %>
-                          <% end %>
+                          <%= "#{stock_mutation_product.code} - #{stock_mutation_product.brand_name}" %>
                       </td>
                       <td style="width: auto !important;">
                           <div class="table-responsive">
@@ -133,7 +48,7 @@
                                                   <div class="<%= control_group_error(smpi_form.object, :quantity) %>">
                                                       <table cellpadding="0" cellspacing="0">
                                                           <tr>
-                                                              <td><%= smpi_form.text_field :quantity, placeholder: "qty", class: "quantity-#{product.id}-#{size.id} quantity-#{product.id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
+                                                              <td><%= smpi_form.text_field :quantity, placeholder: "qty", class: "quantity-#{stock_mutation_product.product_id}-#{size.id} quantity-#{stock_mutation_product.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %></td>
                                                             </tr>
                                                         </table>                                                
                                                         <%= error_help_text(smpi_form.object, :quantity) %>
@@ -155,11 +70,6 @@
                             <%= stock_mutation_product_fields.check_box :_destroy %> Delete
                         </td>
                     </tr>
-        <%# elsif !stock_mutation_product_fields.object.new_record? %>
-        <%#= stock_mutation_product_fields.hidden_field :id %>
-        <%#= stock_mutation_product_fields.hidden_field :_destroy, value: true %>
-        <%# end %>
-        <%# end %>
                   <% end %>
               </table>
           </div>
