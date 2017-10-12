@@ -123,7 +123,7 @@
                                 });
                                 $("#btn_add_product").click(function () {
 
-                      <% unless @stock_mutation.mutation_type.eql?("store to warehouse") %>
+                      <% if !@stock_mutation.mutation_type.eql?("store to warehouse") || (@stock_mutation.mutation_type.eql?("store to warehouse") && current_user.has_non_spg_role?) %>
                                       if ($("#stock_mutation_origin_warehouse_id").val().trim() == "")
                                           bootbox.alert({message: "Please select origin warehouse", size: "small"});
                                       else if ($("#stock_mutation_product_code").val().trim() == "")
