@@ -3,6 +3,7 @@ class ProductColor < ApplicationRecord
 
   belongs_to :product
   belongs_to :color
+  has_many :product_barcodes, dependent: :destroy
   
   attr_accessor :code, :name, :selected_color_id
   
@@ -15,7 +16,17 @@ class ProductColor < ApplicationRecord
     :prevent_deleting_if_order_booking_is_created, :delete_tracks,
     :prevent_deleting_if_stock_mutation_is_created
   
+  after_create :create_barcode
+
   private
+  
+  def create_barcode
+    product.product_details.select(:size_id).distinct.each do |product_detail|
+      barcode = ProductBarcode.select(:barcode).order("barcode DESC").first.barcode.succ rescue "0000001"
+      product_barcode = product_barcodes.build size_id: product_detail.size_id, barcode: barcode
+      product_barcode.save
+    end
+  end
   
   def delete_tracks
     audits.destroy_all

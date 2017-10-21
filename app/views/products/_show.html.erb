@@ -70,9 +70,9 @@
         <dd>
             <table class="table table-condensed table-responsive table-striped">
                 <tr>
-                    <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>
+                    <!--<td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>-->
                     <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Size</strong></td>
-                    <td colspan="<%= product_price_codes.size %>" align="center"><strong>Price</strong></td>
+                    <td colspan="<%= product_price_codes.length %>" align="center"><strong>Price</strong></td>
                 </tr>
 
                 <tr>
@@ -87,10 +87,10 @@
 
                 <% object.grouped_product_details.each do |prod_det| %>
                   <tr>
-                      <td><%= prod_det.barcode %></td>
+                      <!--<td><%#= prod_det.barcode %></td>-->
                       <td><%= prod_det.item_size %></td>
                       <% product_price_codes.each do |price_code| %>
-                        <% product_detail = product_details.select{|pd| pd.price_code_id.eql?(price_code.id) and pd.size_id.eql?(prod_det.size_id)}.first %>
+                        <% product_detail = product_details.select{|pd| pd.price_code_id.eql?(price_code.id) && pd.size_id.eql?(prod_det.size_id)}.first %>
                         <% if product_detail %>
                           <td align="right">
                               <%= number_to_currency((product_detail.price_lists.select(:price).where(effective_date: latest_cost.effective_date).first.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
@@ -104,4 +104,42 @@
             </table>
         </dd>
     </dl>        
+
+    <% product_colors = object.product_colors.joins(:color).select(:id).select("code AS color_code, name AS color_name") %>
+    <% product_sizes = object.sizes %>
+    <dl class="dl-horizontal">
+        <dt>Barcodes</dt>
+        <dd>
+            <table class="table table-condensed table-responsive table-striped">
+                <tr>
+                    <!--<td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Barcode</strong></td>-->
+                    <td rowspan="2" style="vertical-align: middle;text-align: center"><strong>Size</strong></td>
+                    <td colspan="<%= product_colors.length %>" align="center"><strong>Color</strong></td>
+                </tr>
+
+                <tr>
+                    <% product_colors.each do |product_color| %>
+                      <td align="center">
+                          <strong>
+                              <%= "#{product_color.color_code} - #{product_color.color_name}" %>
+                          </strong>
+                      </td>
+                    <% end %>
+                </tr>
+
+                <% product_sizes.each do |product_size| %>
+                  <tr>
+                      <!--<td><%#= prod_det.barcode %></td>-->
+                      <td><%= product_size.size %></td>
+                      <% product_colors.each do |product_color| %>
+                        <% barcode = ProductBarcode.where(product_color_id: product_color.id, size_id: product_size.id).select(:barcode).first.barcode %>
+                        <td align="right">
+                            <%= barcode %>
+                        </td>
+                      <% end %>
+                  </tr>
+                <% end %>
+            </table>
+        </dd>
+    </dl>
 </td>
