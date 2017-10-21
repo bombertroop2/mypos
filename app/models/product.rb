@@ -28,7 +28,7 @@ class Product < ApplicationRecord
   has_many :product_detail_size_and_product_ids, -> {select("size_id, product_id")}, class_name: "ProductDetail"
   has_many :sizes, -> {group("sizes.id").order(:size_order).select(:id, :size)}, through: :product_detail_size_and_product_ids
   has_many :product_detail_histories, through: :product_details
-  has_many :grouped_product_details, -> {joins(:size).group("size_id, size").select("size_id, size AS item_size").order("sizes.size_order")}, class_name: "ProductDetail"
+  has_many :grouped_product_details, -> {joins(:size).group("size_id, size, size_order").select("size_id, size AS item_size").order("sizes.size_order")}, class_name: "ProductDetail"
   has_many :received_purchase_orders, -> {select("purchase_orders.id").where("purchase_orders.status <> 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :open_purchase_orders, -> {select("purchase_orders.id, purchase_order_date, purchase_orders.order_value").where("purchase_orders.status = 'Open'")}, through: :purchase_order_products, source: :purchase_order
   has_many :color_codes, -> {select(:code)}, through: :product_colors, source: :color
