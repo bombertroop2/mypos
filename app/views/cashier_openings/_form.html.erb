@@ -1,0 +1,44 @@
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Cashier<small>opening</small></h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <%= form_for(cashier_opening, remote: true, html: {class: "form-horizontal"}) do |f| %>
+                    <div class="form-group<%= control_group_error(cashier_opening, :shift) %>">
+                        <%= f.label :shift, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.select :shift, options_for_select(CashierOpening::SHIFTS, cashier_opening.shift), {include_blank: true}, {class: "form-control"} %>
+                                <%= error_help_text(cashier_opening, :shift) %>
+                            </div>
+
+                        </div>
+                        <div class="form-group<%= control_group_error(cashier_opening, :station) %>">
+                            <%= f.label :station, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.select :station, options_for_select(CashierOpening::STATIONS, cashier_opening.station), {include_blank: true}, {class: "form-control"} %>
+                                    <%= error_help_text(cashier_opening, :station) %>
+                                </div>
+
+                            </div>
+                            <div class="form-group<%= control_group_error(cashier_opening, :beginning_cash) %>">
+                                <%= f.label :beginning_cash, class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.text_field :beginning_cash, class: "form-control", "data-a-sep" => ".", "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;" %>
+                                        <%= error_help_text(cashier_opening, :beginning_cash) %>
+                                    </div>
+                                </div>
+
+                                <div class="ln_solid"></div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <%= f.submit "Open", class: "btn btn-primary", id: "cashier_opening_submit_button" %>
+                                      </div>
+                                  </div>
+                                <% end %>
+                            </div>
+                        </div>
+                    </div>
+                </div>

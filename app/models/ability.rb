@@ -7,6 +7,8 @@ class Ability
     user ||= User.new # guest user (not logged in)
     if user.has_role? :superadmin
       can :manage, :all
+      cannot :manage, CashierOpening
+      cannot :manage, CashDisbursement
     elsif user.has_role? :administrator
       (User::MENUS.clone << "User").each do |user_menu|
         if user_menu.eql?("User") || AvailableMenu.select("1 AS one").where(active: true, name: user_menu).present?
@@ -29,7 +31,7 @@ class Ability
             can :manage, Shipment
             can :manage, StockMutation
           else
-            can :manage, class_name.gsub(/\s+/, "").constantize
+            can :manage, class_name.gsub(/\s+/, "").constantize unless user_menu.eql?("Cashier")
           end
         end
       end
@@ -78,6 +80,11 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
+          elsif class_name.eql?("Cashier")
+            if user.has_role? :cashier
+              can ability, CashierOpening
+              can ability, CashDisbursement
+            end
           else
             can :read, class_name.gsub(/\s+/, "").constantize
           end        
@@ -161,6 +168,7 @@ class Ability
             else
               can ability, FiscalYear
             end
+          elsif class_name.eql?("Cashier")
           elsif ability && !user.has_role?(:accountant)
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user.has_role?(:accountant)

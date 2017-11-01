@@ -1,0 +1,7 @@
+<% if @valid %>
+  <%= smart_listing_item :cash_disbursements, :create, @cash_disbursement, "cash_disbursements/cash_disbursement" %>
+  $("#open_date_<%= @cash_disbursement.id %>").html("<%= @my_cashier.open_date.to_date.strftime("%d/%m/%Y") %>");
+  $("#station_<%= @cash_disbursement.id %>").html("<%= @my_cashier.station %>");
+<% else %>
+  <%= smart_listing_item :cash_disbursements, :create, @cash_disbursement, "cash_disbursements/form" %>
+<% end %>

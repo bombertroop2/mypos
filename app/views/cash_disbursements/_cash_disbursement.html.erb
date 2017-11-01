@@ -1,0 +1,4 @@
+<td id="open_date_<%= object.id %>"><%= object.open_date.to_date.strftime("%d/%m/%Y") rescue "" %></td>
+<td id="station_<%= object.id %>"><%= object.station rescue "" %></td>
+<td><%= number_to_currency(object.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+<td><%= object.description %></td>

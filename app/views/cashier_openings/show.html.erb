@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+
+<p>
+  <strong>Warehouse:</strong>
+  <%= @cashier_opening.warehouse %>
+</p>
+
+<p>
+  <strong>Station:</strong>
+  <%= @cashier_opening.station %>
+</p>
+
+<p>
+  <strong>Beginning cash:</strong>
+  <%= @cashier_opening.beginning_cash %>
+</p>
+
+<%= link_to 'Edit', edit_cashier_opening_path(@cashier_opening) %> |
+<%= link_to 'Back', cashier_openings_path %>

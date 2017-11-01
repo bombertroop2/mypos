@@ -207,6 +207,18 @@
                                                 </ul>
                                             </li>
                                           <% end %>
+                                          <% if cashier_menu_active? %>
+                                            <li><a><i class="fa fa-calculator"></i> Cashier <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :manage, CashierOpening %>
+                                                      <li><%= link_to "Opening", new_cashier_opening_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, CashDisbursement %>
+                                                      <li><%= link_to "Cash Disbursements", cash_disbursements_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
                                           <% if setting_menu_active? %>
                                             <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
@@ -661,6 +673,23 @@
         <% end %>
                           }
                       });
+      <% elsif controller_name.eql?("cashier_openings") %>
+                      $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
+                      $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();
+      <% elsif controller_name.eql?("cash_disbursements") %>
+                      $("#search-cash-disbursement-btn").click(function () {
+                          $("#filter_date").val($("#filter-date").val());
+                          $("#filter_station").val($("#filter-station").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+        <% if cannot?(:manage, CashDisbursement) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% end %>
                 });
               </script>

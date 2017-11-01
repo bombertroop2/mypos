@@ -1,0 +1,32 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Cashier Openings</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Open time</th>
+      <th>Warehouse</th>
+      <th>Station</th>
+      <th>Beginning cash</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @cashier_openings.each do |cashier_opening| %>
+      <tr>
+        <td><%= cashier_opening.warehouse %></td>
+        <td><%= cashier_opening.station %></td>
+        <td><%= cashier_opening.beginning_cash %></td>
+        <td><%= link_to 'Show', cashier_opening %></td>
+        <td><%= link_to 'Edit', edit_cashier_opening_path(cashier_opening) %></td>
+        <td><%= link_to 'Destroy', cashier_opening, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Cashier Opening', new_cashier_opening_path %>

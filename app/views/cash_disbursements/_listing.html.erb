@@ -1,0 +1,28 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-cash-disbursements-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Date", "open_date" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Station", "station" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Price", "price" %></th>
+            <th class="col-md-6"><%= smart_listing.sortable "Description", "description" %></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |cash_disbursement| %>
+          <tr class="editable" data-id="<%#= cash_disbursement.id %>">
+              <%= smart_listing.render object: cash_disbursement, partial: "cash_disbursements/cash_disbursement", locals: {object: cash_disbursement} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_cash_disbursement_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-cash-disbursements-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-cash-disbursements-thead").show();
+      }
+  }, 0);
+</script>

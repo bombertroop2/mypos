@@ -1,0 +1,2 @@
+module CashierOpeningsHelper
+end

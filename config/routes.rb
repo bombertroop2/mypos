@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :cash_disbursements, only: [:index, :new, :create]
+  resources :cashier_openings
   resources :events do    
     collection do
       get "generate_warehouse_form"

@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Cashier opening:</strong>
+  <%= @cash_disbursement.cashier_opening %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @cash_disbursement.description %>
+</p>
+
+<p>
+  <strong>Price:</strong>
+  <%= @cash_disbursement.price %>
+</p>
+
+<%= link_to 'Edit', edit_cash_disbursement_path(@cash_disbursement) %> |
+<%= link_to 'Back', cash_disbursements_path %>

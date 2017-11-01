@@ -71,6 +71,11 @@ module ApplicationHelper
     return true if can? :read, Event
   end
 
+  def cashier_menu_active?
+    return true if can? :manage, CashierOpening
+    return true if can? :read, CashDisbursement
+  end
+
   def goods_in_transit_active?
     return true if can? :read_shipment_goods, Shipment
     return true if can? :read_mutation_goods, StockMutation
