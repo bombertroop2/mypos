@@ -1,0 +1,9 @@
+<%= smart_listing_item :cashiers, :update, @cashier_opening, "cashier_openings/cashier" %>
+<% unless @valid %>
+  $("#cashier-opening-closed-at-<%= @cashier_opening.id %>").html("");
+  bootbox.alert({message: "<%= @cashier_opening.errors[:base].join("<br/>") %>",size: 'small'});
+<% else %>
+  $.get("/cashier_openings/<%= @cashier_opening.id %>",{
+  print_report: true
+  });
+<% end %>

@@ -13,6 +13,7 @@ class User < ApplicationRecord
 
   belongs_to :sales_promotion_girl
   has_many :created_audits, dependent: :restrict_with_error, class_name: "Audit"
+  has_many :cashier_openings, foreign_key: :opened_by, dependent: :restrict_with_error
   has_many :user_menus, dependent: :destroy
   has_many :recipients, dependent: :destroy
 

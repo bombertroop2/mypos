@@ -1,0 +1,29 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-cashiers-thead">
+        <tr>
+            <th class="col-md-4"><%= smart_listing.sortable "Opened At", "created_at" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Station", "station" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Shift", "shift" %></th>
+            <th class="col-md-4"><%= smart_listing.sortable "Closed At", "closed_at" %></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |cashier| %>
+          <tr class="editable" data-id="<%= cashier.id %>">
+              <%= smart_listing.render object: cashier, partial: "cashier_openings/cashier", locals: {object: cashier} %>
+          </tr>
+        <% end %>
+        <%#= smart_listing.item_new colspan: 5, link: new_cash_disbursement_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-cashiers-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-cashiers-thead").show();
+      }
+  }, 0);
+</script>

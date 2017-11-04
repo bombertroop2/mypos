@@ -1,16 +1,36 @@
+include SmartListing::Helper::ControllerExtensions
 class CashierOpeningsController < ApplicationController
+  helper SmartListing::Helper
   load_and_authorize_resource
-  before_action :set_cashier_opening, only: [:show, :edit, :update, :destroy]
+  before_action :set_cashier_opening, only: [:edit, :update, :destroy]
 
   # GET /cashier_openings
   # GET /cashier_openings.json
   def index
-    @cashier_openings = CashierOpening.all
+    flash[:notice] = ""
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    if params[:filter_opened_at].present?
+      splitted_date_range = params[:filter_opened_at].split("-")
+      start_date = splitted_date_range[0].strip.to_date.beginning_of_day
+      end_date = splitted_date_range[1].strip.to_date.end_of_day
+    end
+    warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
+    cashiers_scope = CashierOpening.select(:id, :station, :created_at, :shift, :closed_at).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+    cashiers_scope = cashiers_scope.where(["created_at BETWEEN ? AND ?", start_date, end_date]) if params[:filter_opened_at].present?
+    cashiers_scope = cashiers_scope.where(["station = ?", params[:filter_station]]) if params[:filter_station].present?
+    cashiers_scope = cashiers_scope.where(["shift = ?", params[:filter_shift]]) if params[:filter_shift].present?
+    @cashiers = smart_listing_create(:cashiers, cashiers_scope, partial: 'cashier_openings/listing', default_sort: {created_at: "DESC"})
   end
 
   # GET /cashier_openings/1
   # GET /cashier_openings/1.json
   def show
+    @cashier_opening = CashierOpening.joins(:warehouse).where(id: params[:id]).
+      select("code, name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at").first
   end
 
   # GET /cashier_openings/new
@@ -63,6 +83,10 @@ class CashierOpeningsController < ApplicationController
       format.html { redirect_to cashier_openings_url, notice: 'Cashier opening was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+  
+  def close
+    @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)
   end
 
   private

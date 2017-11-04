@@ -1,0 +1,4 @@
+<%= smart_listing_item :cashiers, :edit, @cashier_opening, "cashier_openings/show" %>
+<% if params[:print_report].present? %>
+  print("<%= @cashier_opening.id %>");
+<% end %>

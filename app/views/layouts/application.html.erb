@@ -216,6 +216,9 @@
                                                     <% if can? :read, CashDisbursement %>
                                                       <li><%= link_to "Cash Disbursements", cash_disbursements_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, CashierOpening %>
+                                                      <li><%= link_to "Closing", cashier_openings_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -366,7 +369,6 @@
                           $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
                           $(".smart-listing-controls").submit();
                       });
-
         <% if cannot?(:undelete_action, Shipment) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
@@ -384,7 +386,6 @@
                           //$(".smart-listing-controls").html($("#search-form-container").html());
                           $(".smart-listing-controls").submit();
                       });
-
         <% if cannot? :manage, CostList %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
@@ -676,6 +677,15 @@
       <% elsif controller_name.eql?("cashier_openings") %>
                       $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
                       $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();
+                      $("#search-cashier-opening-btn").click(function () {
+                          $("#filter_opened_at").val($("#filter-opened-at").val());
+                          $("#filter_station").val($("#filter-station").val());
+                          $("#filter_shift").val($("#filter-shift").val());
+                          $(".smart-listing-controls").submit();
+                      });
+        <% if notice.present? %>
+                        bootbox.alert({message: "<%= notice %>", size: 'small'});
+        <% end %>
       <% elsif controller_name.eql?("cash_disbursements") %>
                       $("#search-cash-disbursement-btn").click(function () {
                           $("#filter_date").val($("#filter-date").val());

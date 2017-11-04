@@ -1,0 +1,128 @@
+<td colspan="5">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Opened at</dt>
+        <dd><%= @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Station</dt>
+        <dd><%= @cashier_opening.station %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Shift</dt>
+        <dd><%= @cashier_opening.shift %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Beginning cash</dt>
+        <dd><%= number_to_currency(@cashier_opening.beginning_cash, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Cash on hand</dt>
+        <dd><%= number_to_currency(@cashier_opening.cash_balance, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Closed at</dt>
+        <dd><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Cash disbursements</dt>
+        <dd>
+            <table class="table table-condensed table-responsive table-bordered">
+                <tr style="text-align: center">
+                    <th>No.</th>
+                    <th>Description</th>
+                    <th>Price/Amount</th>
+                </tr>
+                <% sum = 0 %>
+                <% @cashier_opening.cash_disbursements.each_with_index do |cash_disbursement, index| %>
+                  <% sum += cash_disbursement.price %>
+                  <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= cash_disbursement.description %></td>
+                      <td style="text-align: right"><%= number_to_currency(cash_disbursement.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                  </tr>
+                <% end %>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">Sum</td>
+                        <td style="text-align: right"><%= number_to_currency(sum, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </dd>
+    </dl>
+
+    <% if @cashier_opening.closed_at.present? %>
+      <a class="btn btn-success btn-lg" onclick="return print('<%= @cashier_opening.id %>');">
+          <span class="glyphicon glyphicon-print"></span> Print 
+      </a>
+
+
+      <table width="100%" id="sales_summary_report_<%= @cashier_opening.id %>" style="display: none">
+          <tr>
+              <th colspan="3" style="text-align: center">Closing Report</th>
+          </tr>
+          <tr>
+              <td style="vertical-align: top">Store</td>
+              <td style="vertical-align: top">:</td>
+              <td><%= "#{@cashier_opening.code} - #{@cashier_opening.name}" %></td>
+          </tr>
+          <tr style="overflow: hidden; white-space: nowrap">
+              <td>Opened At</td>
+              <td>:</td>
+              <td><%= @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+          </tr>
+          <tr style="overflow: hidden; white-space: nowrap">
+              <td>Closed At</td>
+              <td>:</td>
+              <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></td>
+          </tr>
+          <tr style="overflow: hidden; white-space: nowrap">
+              <td>Beginning Cash</td>
+              <td>:</td>
+              <td><%= number_to_currency(@cashier_opening.beginning_cash, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+          </tr>
+          <tr style="overflow: hidden; white-space: nowrap">
+              <td>Cash On Hand</td>
+              <td>:</td>
+              <td><%= number_to_currency(@cashier_opening.cash_balance, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+          </tr>
+          <tr><td>&nbsp;</td></tr>
+          <tr><td colspan="3" align="center">
+                  Cash Disbursements
+                  <table class="table table-condensed table-responsive table-bordered">
+                      <tr>
+                          <th>No.</th>
+                          <th>Description</th>
+                          <th>Price/Amount</th>
+                      </tr>
+                      <% sum = 0 %>
+                      <% @cashier_opening.cash_disbursements.each_with_index do |cash_disbursement, index| %>
+                        <% sum += cash_disbursement.price %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= cash_disbursement.description %></td>
+                            <td style="text-align: right"><%= number_to_currency(cash_disbursement.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                        </tr>
+                      <% end %>
+                      <tfoot>
+                          <tr>
+                              <td colspan="2">Sum</td>
+                              <td style="text-align: right"><%= number_to_currency(sum, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                          </tr>
+                      </tfoot>
+                  </table>
+              </td></tr>
+      </table>
+    <% end %>
+</td>
