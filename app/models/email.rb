@@ -16,6 +16,10 @@ class Email < ApplicationRecord
   def self.account_payable_officers
     where("email_type = 'Account Payable Officer' OR email_type = 'All'").select(:address)
   end
+
+  def self.sales_officers
+    where("email_type = 'Sales Officer' OR email_type = 'All'").select(:address)
+  end
   
   private
   

@@ -86,7 +86,9 @@ class CashierOpeningsController < ApplicationController
   end
   
   def close
-    @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)
+    if @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)      
+      SendEmailJob.perform_later(@cashier_opening.id, "closing report")
+    end
   end
 
   private
