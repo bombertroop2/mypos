@@ -66,11 +66,11 @@ class ReceivingController < ApplicationController
         @do_number_not_unique = false
         @valid = false
         unless @purchase_order.update(purchase_order_params)
-          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+          #          @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
           received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
           @colors = []
           @sizes = []
-          @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
+          @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns, :purchase_order_details_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
             @colors[po_product.id] = po_product.color_selected_columns.distinct
             @sizes[po_product.id] = po_product.size_selected_columns.distinct
             received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
@@ -101,11 +101,11 @@ class ReceivingController < ApplicationController
         end
       rescue ActiveRecord::RecordNotUnique => e
         @do_number_not_unique = true
-        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+#        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
         received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
         @colors = []
         @sizes = []
-        @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
+        @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:size_selected_columns, :color_selected_columns, :purchase_order_details_selected_columns).select("purchase_order_products.id, products.code AS product_code, common_fields.name AS product_name, cost").each do |po_product|
           @colors[po_product.id] = po_product.color_selected_columns.distinct
           @sizes[po_product.id] = po_product.size_selected_columns.distinct
           received_purchase_order_product = received_purchase_order.received_purchase_order_products.select{|rpop| rpop.purchase_order_product_id.eql?(po_product.id)}.first
