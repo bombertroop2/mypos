@@ -1,0 +1,28 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-banks-thead">
+        <tr>
+            <th class="col-md-6"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-6"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Type", "card_type" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |bank| %>
+          <tr class="editable" data-id="<%= bank.id %>">
+              <%= smart_listing.render object: bank, partial: "banks/bank", locals: {object: bank} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_bank_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-banks-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-banks-thead").show();
+      }
+  }, 0);
+</script>

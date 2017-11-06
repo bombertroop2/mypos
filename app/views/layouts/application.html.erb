@@ -240,6 +240,9 @@
                                                     <% if can? :read, FiscalYear %>
                                                       <li><%= link_to "Fiscal Reopening/Closing", fiscal_years_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, Bank %>
+                                                      <li><%= link_to "Bank Master", banks_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -694,6 +697,19 @@
                           $(".smart-listing-controls").submit();
                       });
         <% if cannot?(:manage, CashDisbursement) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("banks") %>
+                      $("#search-bank-btn").click(function () {
+                          $("#filter_type").val($("#filter-type").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+        <% if cannot?(:manage, Bank) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {

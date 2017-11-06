@@ -1,0 +1,5 @@
+<% if @valid %>
+  <%= smart_listing_item :banks, :update, @bank, "banks/bank" %>
+<% else %>
+  <%= smart_listing_item :banks, :edit, @bank, "banks/form" %>
+<% end %>

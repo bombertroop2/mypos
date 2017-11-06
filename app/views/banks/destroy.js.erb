@@ -1,0 +1,8 @@
+<% if @deleted %>
+  <%= smart_listing_item :banks, :destroy, @bank %>
+<% else %>
+  <% if @bank.errors.present? && @bank.errors.messages[:base].present? %>
+    bootbox.alert({message: "<%= @bank.errors.messages[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+  <%= smart_listing_item :banks, :update, @bank, "banks/bank" %>
+<% end %>

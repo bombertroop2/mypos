@@ -1,0 +1,43 @@
+<td colspan="4">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@bank, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <div class="form-group<%= control_group_error(@bank, :code) %>">
+            <%= f.label :code, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :code, class: "form-control upcase", onkeyup: "nospaces(this)" %>
+                    <%= error_help_text(@bank, :code) %>
+                </div>
+
+            </div>
+            <div class="form-group<%= control_group_error(@bank, :name) %>">
+                <%= f.label :name, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :name, class: "form-control" %>
+                        <%= error_help_text(@bank, :name) %>
+                    </div>
+
+                </div>
+
+                <div class="form-group<%= control_group_error(@bank, :card_type) %>">
+                    <%= f.label :card_type, "Type", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.select :card_type, options_for_select(Bank::TYPES, @bank.card_type), {include_blank: true}, {class: "form-control"} %>
+                            <%= error_help_text(@bank, :card_type) %>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <%= f.submit "Save", class: "btn btn-primary" %>
+                              <button class="btn btn-link cancel">Cancel</button>
+                          </div>
+                      </div>
+                    <% end %>
+                </td>
+
+                <script>
+                  $(function () {
+                      $("#bank_card_type").attr("data-placeholder", "Please select type").chosen();
+                  });
+                </script>

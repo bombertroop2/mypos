@@ -24,6 +24,8 @@ class Ability
             "FiscalYear"
           elsif user_menu.eql?("Listing Stocks")
             "ListingStock"
+          elsif user_menu.eql?("Bank Master")
+            "Bank"
           else
             user_menu
           end
@@ -50,6 +52,8 @@ class Ability
             "ReceivedPurchaseOrder"
           elsif user_menu.name.eql?("Listing Stocks")
             "ListingStock"
+          elsif user_menu.name.eql?("Bank Master")
+            "Bank"
           else
             user_menu.name
           end
@@ -107,6 +111,8 @@ class Ability
             "FiscalYear"
           elsif user_menu.name.eql?("Listing Stocks")
             "ListingStock"
+          elsif user_menu.name.eql?("Bank Master")
+            "Bank"
           else
             user_menu.name
           end
