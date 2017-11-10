@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :members
   resources :banks, except: :show
   resources :cash_disbursements, only: [:index, :new, :create]
   resources :cashier_openings, except: [:edit, :update, :destroy] do

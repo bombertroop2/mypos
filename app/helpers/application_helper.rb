@@ -69,6 +69,7 @@ module ApplicationHelper
     return true if can? :manage, AvailableMenu
     return true if can? :read, FiscalYear
     return true if can? :read, Event
+    return true if can? :read, Member
   end
 
   def cashier_menu_active?

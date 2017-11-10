@@ -89,6 +89,8 @@ class Ability
               can ability, CashierOpening
               can ability, CashDisbursement
             end
+          elsif class_name.eql?("Member")
+            can ability, Member
           else
             can :read, class_name.gsub(/\s+/, "").constantize
           end        

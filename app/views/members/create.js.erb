@@ -1,0 +1,5 @@
+<% if @valid %>
+  <%= smart_listing_item :members, :create, @member, "members/member" %>
+<% else %>
+  <%= smart_listing_item :members, :create, @member, "members/form" %>
+<% end %>

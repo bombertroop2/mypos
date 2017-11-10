@@ -1,0 +1,8 @@
+<% if @deleted %>
+  <%= smart_listing_item :members, :destroy, @member %>
+<% else %>
+  <% if @member.errors.present? && @member.errors.messages[:base].present? %>
+    bootbox.alert({message: "<%= @member.errors.messages[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+  <%= smart_listing_item :members, :update, @member, "members/member" %>
+<% end %>

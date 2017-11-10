@@ -243,6 +243,9 @@
                                                     <% if can? :read, Bank %>
                                                       <li><%= link_to "Bank Master", banks_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, Member %>
+                                                      <li><%= link_to "Members", members_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>

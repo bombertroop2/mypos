@@ -1,0 +1,29 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-members-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-4"><%= smart_listing.sortable "Address", "address" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Mobile Phone", "mobile_phone" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Email", "email" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |member| %>
+          <tr class="editable" data-id="<%= member.id %>">
+              <%= smart_listing.render object: member, partial: "members/member", locals: {object: member} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 5, link: new_member_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-members-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-members-thead").show();
+      }
+  }, 0);
+</script>
