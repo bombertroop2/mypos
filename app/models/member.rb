@@ -2,7 +2,8 @@ class Member < ApplicationRecord
   before_validation :strip_string_values
 
   validates :name, :address, :gender, presence: true
-  validates :mobile_phone, :email, uniqueness: true
+  validates :mobile_phone, uniqueness: true, if: proc {|mbr| mbr.mobile_phone.present?}
+  validates :email, uniqueness: true, if: proc {|mbr| mbr.email.present?}
   validate :gender_available
   
   before_create :generate_member_id
@@ -18,6 +19,7 @@ class Member < ApplicationRecord
     self.name = name.strip
     self.address = address.strip
     self.email = email.strip
+    self.mobile_phone = mobile_phone.delete("_").strip
   end
   
   def gender_available
