@@ -65,6 +65,11 @@
       <% end %>    
     <% end %>
 
+    <dl class="dl-horizontal">
+        <dt>Active</dt>
+        <dd><%= object.is_active.to_s %></dd>
+    </dl>
+
     <% event_warehouses = object.event_warehouses.joins(:warehouse).includes(event_products: [product: :brand]).select(:id, :code, :name, :select_different_products) %>
     <% if event_warehouses.length > 0 %>
       <table class="table table-striped">
