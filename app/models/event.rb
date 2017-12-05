@@ -1,4 +1,6 @@
 class Event < ApplicationRecord
+  audited on: [:create, :update]
+
   has_many :event_warehouses, dependent: :destroy
   has_many :event_general_products, dependent: :destroy
   
@@ -21,8 +23,13 @@ class Event < ApplicationRecord
                           accepts_nested_attributes_for :event_warehouses, allow_destroy: true
                           accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
+                          before_destroy :delete_tracks
+
                           private
                     
+                          def delete_tracks
+                            audits.destroy_all
+                          end
   
                           def remove_white_space
                             self.code = code.strip

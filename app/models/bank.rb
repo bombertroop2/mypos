@@ -1,4 +1,5 @@
 class Bank < ApplicationRecord
+  audited on: [:create, :update]
   TYPES = [
     ["Credit", "Credit"],
     ["Debit", "Debit"]
@@ -11,7 +12,13 @@ class Bank < ApplicationRecord
   before_save :upcase_code
   before_save :remove_space_from_code
   
+  before_destroy :delete_tracks
+  
   private
+  
+  def delete_tracks
+    audits.destroy_all
+  end
   
   def remove_space_from_code
     self.code = code.delete(" ")
