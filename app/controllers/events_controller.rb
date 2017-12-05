@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class EventsController < ApplicationController
   helper SmartListing::Helper
   load_and_authorize_resource
-  before_action :set_event, only: [:show, :edit, :update, :destroy]
+  before_action :set_event, only: [:show, :edit, :update, :destroy, :toggle_event_activation]
 
   # GET /events
   # GET /events.json
@@ -25,7 +25,7 @@ class EventsController < ApplicationController
       end_end_time = Time.zone.parse splitted_end_time_range[1].strip
     end
 
-    events_scope = Event.select(:id, :code, :name, :start_date_time, :end_date_time, :event_type)
+    events_scope = Event.select(:id, :code, :name, :start_date_time, :end_date_time, :event_type, :is_active)
     events_scope = events_scope.where(["code #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(events_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string]
     events_scope = events_scope.where(["start_date_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
@@ -94,10 +94,14 @@ class EventsController < ApplicationController
     begin
       @valid = @event.update(event_params)
       unless @valid
-        @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
-        @brands = Brand.select(:id, :code, :name).order(:code)
-        @goods_types = GoodsType.select(:id, :code, :name).order(:code)
-        @models = Model.select(:id, :code, :name).order(:code)
+        unless @event.errors[:base].present?
+          @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+          @brands = Brand.select(:id, :code, :name).order(:code)
+          @goods_types = GoodsType.select(:id, :code, :name).order(:code)
+          @models = Model.select(:id, :code, :name).order(:code)
+        else
+          render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});"
+        end
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
@@ -283,6 +287,10 @@ class EventsController < ApplicationController
       end
     end
   end
+  
+  def toggle_event_activation
+    @event.update(is_active: params[:activate].eql?("true"), toggling_event_activation: true)
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -292,7 +300,7 @@ class EventsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def event_params
-    params.require(:event).permit(:is_active, :minimum_purchase_amount, :discount_amount, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
+    params.require(:event).permit(:minimum_purchase_amount, :discount_amount, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
       event_general_products_attributes: [:id, :_destroy, :product_id, :prdct_code, :prdct_name],
       event_warehouses_attributes: [:_destroy, :id, :event_type, :warehouse_id,
         :wrhs_code, :wrhs_name, :select_different_products,

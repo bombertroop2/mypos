@@ -1,4 +1,6 @@
 class Event < ApplicationRecord
+  attr_accessor :toggling_event_activation
+  
   audited on: [:create, :update]
 
   has_many :event_warehouses, dependent: :destroy
@@ -20,23 +22,28 @@ class Event < ApplicationRecord
                     validates :minimum_purchase_amount, presence: true, if: proc{|event| event.event_type.strip.eql?("Gift")}
                       validates :minimum_purchase_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.minimum_purchase_amount.present? }
                         validates :discount_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? }
-                          accepts_nested_attributes_for :event_warehouses, allow_destroy: true
-                          accepts_nested_attributes_for :event_general_products, allow_destroy: true
+                          validate :editable, on: :update, unless: proc {|event| event.toggling_event_activation}
+                            accepts_nested_attributes_for :event_warehouses, allow_destroy: true
+                            accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
-                          before_destroy :delete_tracks
+                            before_destroy :delete_tracks
 
-                          private
+                            private
+                          
+                            def editable
+                              errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
+                            end
                     
-                          def delete_tracks
-                            audits.destroy_all
-                          end
+                            def delete_tracks
+                              audits.destroy_all
+                            end
   
-                          def remove_white_space
-                            self.code = code.strip
-                            self.name = name.strip
-                          end
+                            def remove_white_space
+                              self.code = code.strip
+                              self.name = name.strip
+                            end
 
-                          def upcase_code
-                            self.code = code.upcase
+                            def upcase_code
+                              self.code = code.upcase
+                            end
                           end
-                        end

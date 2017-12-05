@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  resources :sales do
+    collection do
+      get "get_member"
+      get "get_product"
+      get "get_product_colors"
+      get "get_product_sizes"
+    end
+  end
   resources :members
   resources :banks, except: :show
   resources :cash_disbursements, only: [:index, :new, :create]
@@ -12,6 +20,9 @@ Rails.application.routes.draw do
       get "generate_warehouse_form"
       get "add_products"
       get "add_general_products"
+    end
+    member do
+      get "toggle_event_activation"
     end
   end
   resources :listing_stocks, only: :index
