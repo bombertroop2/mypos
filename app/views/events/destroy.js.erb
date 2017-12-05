@@ -2,7 +2,11 @@
   window.location = '<%= events_path %>';
 <% else %>
   <% if @event.errors.present? && @event.errors.messages[:base].present? %>
-    bootbox.alert({message: "<%= @event.errors.messages[:base].join("<br/>") %>",size: 'small'});
+    var bbox = bootbox.alert({message: "<%= @event.errors.messages[:base].join("<br/>") %>",size: 'small'});
+    bbox.on("hidden.bs.modal", function () { 
+      window.location = '<%= events_path %>';
+    });
+  <% else %>
+    <%= smart_listing_item :events, :update, @event, "events/event" %>
   <% end %>
-  <%= smart_listing_item :events, :update, @event, "events/event" %>
 <% end %>

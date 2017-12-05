@@ -26,9 +26,16 @@ class Event < ApplicationRecord
                             accepts_nested_attributes_for :event_warehouses, allow_destroy: true
                             accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
-                            before_destroy :delete_tracks
+                            before_destroy :deletable, :delete_tracks
 
                             private
+                            
+                            def deletable
+                              if start_date_time <= Time.current
+                                errors.add(:base, "The record cannot be deleted")
+                                throw :abort
+                              end
+                            end
                           
                             def editable
                               errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
