@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  attr_accessor :toggling_event_activation
+  attr_accessor :event_activation
   
   audited on: [:create, :update]
 
@@ -22,35 +22,45 @@ class Event < ApplicationRecord
                     validates :minimum_purchase_amount, presence: true, if: proc{|event| event.event_type.strip.eql?("Gift")}
                       validates :minimum_purchase_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.minimum_purchase_amount.present? }
                         validates :discount_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? }
-                          validate :editable, on: :update, unless: proc {|event| event.toggling_event_activation}
-                            accepts_nested_attributes_for :event_warehouses, allow_destroy: true
-                            accepts_nested_attributes_for :event_general_products, allow_destroy: true
+                          validate :editable, on: :update, unless: proc {|event| event.event_activation.eql?("true")}
+                            validate :activable, on: :update, if: proc {|event| event.event_activation.eql?("true")}
+                              accepts_nested_attributes_for :event_warehouses, allow_destroy: true
+                              accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
-                            before_destroy :deletable, :delete_tracks
-
-                            private
+                              before_destroy :deletable, :delete_tracks
                             
-                            def deletable
-                              if start_date_time <= Time.current
-                                errors.add(:base, "The record cannot be deleted")
-                                throw :abort
+                              private
+                            
+                              def activable
+                                cashier_opened = false
+                                event_warehouses.select(:warehouse_id).each do |event_warehouse|
+                                  cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL", event_warehouse.warehouse_id, Date.current]).present?
+                                  break
+                                end
+                                errors.add(:base, "Please close some cashiers and try again")
+                              end
+                            
+                              def deletable
+                                if start_date_time <= Time.current
+                                  errors.add(:base, "The record cannot be deleted")
+                                  throw :abort
+                                end
+                              end
+                          
+                              def editable
+                                errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
+                              end
+                    
+                              def delete_tracks
+                                audits.destroy_all
+                              end
+  
+                              def remove_white_space
+                                self.code = code.strip
+                                self.name = name.strip
+                              end
+
+                              def upcase_code
+                                self.code = code.upcase
                               end
                             end
-                          
-                            def editable
-                              errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
-                            end
-                    
-                            def delete_tracks
-                              audits.destroy_all
-                            end
-  
-                            def remove_white_space
-                              self.code = code.strip
-                              self.name = name.strip
-                            end
-
-                            def upcase_code
-                              self.code = code.upcase
-                            end
-                          end

@@ -51,11 +51,7 @@ class CashierOpeningsController < ApplicationController
     @cashier_opening.opened_by = current_user.id
 
     begin
-      if @cashier_opening.save
-        render js: "bootbox.alert({message: 'Cashier was successfully opened', size: 'small'});"
-      elsif @cashier_opening.errors[:base].present?
-        render js: "bootbox.alert({message: \"#{@cashier_opening.errors[:base].join("<br/>")}\",size: 'small'});"
-      end
+      @opened = @cashier_opening.save
     rescue Exception => e
       render js: "bootbox.alert({message: 'Sorry, you can open the cashier only once per day', size: 'small'});"
     end

@@ -1,26 +1,38 @@
-$("#cashier-opening-form-container").html("<%= j(render("form", cashier_opening: @cashier_opening)) %>");
-$("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
-$("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();
-$('#cashier_opening_beginning_cash').autoNumeric('init');
+<% if @opened %>
+  bootbox.alert({
+    message: 'Cashier was successfully opened',
+    size: 'small',
+    callback: function() {
+      window.location = '<%= new_sale_path %>';
+    }});
+<% elsif @cashier_opening.errors[:base].present? %>
+  bootbox.alert({message: "<%= @cashier_opening.errors[:base].join("<br/>") %>",size: 'small'});
+<% else %>
+  $("#cashier-opening-form-container").html("<%= j(render("form", cashier_opening: @cashier_opening)) %>");
+  $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
+  $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();
+  $('#cashier_opening_beginning_cash').autoNumeric('init');
 
-    $("#cashier_opening_submit_button").click(function () {
-        bootbox.confirm({
-            message: "Once you open cashier, you'll not be able to cancel it</br>Are you sure?",
-            buttons: {
-                confirm: {
-                    label: '<i class="fa fa-check"></i> Confirm'
-                },
-                cancel: {
-                    label: '<i class="fa fa-times"></i> Cancel'
-                }
-            },
-            callback: function (result) {
-                if (result) {
-                    $("body").css('padding-right', '0px');
-                    $("#new_cashier_opening").submit();
-                }
-            },
-            size: "small"
-        });
-        return false;
-    });
+  $("#cashier_opening_submit_button").click(function () {
+      bootbox.confirm({
+          message: "Once you open cashier, you'll not be able to cancel it</br>Are you sure?",
+          buttons: {
+              confirm: {
+                  label: '<i class="fa fa-check"></i> Confirm'
+              },
+              cancel: {
+                  label: '<i class="fa fa-times"></i> Cancel'
+              }
+          },
+          callback: function (result) {
+              if (result) {
+                  $("body").css('padding-right', '0px');
+                  $("#new_cashier_opening").submit();
+              }
+          },
+          size: "small"
+      });
+      return false;
+  });
+<% end %>
+

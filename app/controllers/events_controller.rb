@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class EventsController < ApplicationController
   helper SmartListing::Helper
   load_and_authorize_resource
-  before_action :set_event, only: [:show, :edit, :update, :destroy, :toggle_event_activation]
+  before_action :set_event, only: [:show, :edit, :update, :destroy]
 
   # GET /events
   # GET /events.json
@@ -288,8 +288,14 @@ class EventsController < ApplicationController
     end
   end
   
-  def toggle_event_activation
-    @event.update(is_active: params[:activate].eql?("true"), toggling_event_activation: true)
+  def generate_activation_form
+  end
+  
+  def activate_deactivate
+    params[:event][:is_active] = nil if params[:event][:is_active].eql?("on")
+    unless @updated = @event.update(event_params)    
+      render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});" if @event.errors[:base].present?
+    end
   end
 
   private
@@ -300,9 +306,9 @@ class EventsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def event_params
-    params.require(:event).permit(:minimum_purchase_amount, :discount_amount, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
+    params.require(:event).permit(:is_active, :event_activation, :minimum_purchase_amount, :discount_amount, :code, :name, :start_date_time, :end_date_time, :first_plus_discount, :second_plus_discount, :event_type, :cash_discount, :special_price,
       event_general_products_attributes: [:id, :_destroy, :product_id, :prdct_code, :prdct_name],
-      event_warehouses_attributes: [:_destroy, :id, :event_type, :warehouse_id,
+      event_warehouses_attributes: [:is_active, :_destroy, :id, :event_type, :warehouse_id,
         :wrhs_code, :wrhs_name, :select_different_products,
         event_products_attributes: [:id, :product_id, :prdct_code, :prdct_name, :_destroy]])
   end

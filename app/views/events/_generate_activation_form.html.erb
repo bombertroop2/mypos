@@ -1,0 +1,62 @@
+<td colspan="6">
+    <%= form_for(@event, url: activate_deactivate_event_path, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <%= f.hidden_field :event_activation, value: true %>
+        <div class="form-group">
+            <div class="radio">
+                <label class="radio-inline"><%= f.radio_button :is_active, true, checked: @event.is_active? == true %> Activate event for all stores</label>
+                <label class="radio-inline"><%= f.radio_button :is_active, false, checked: @event.is_active? == false && !@event.is_active.nil? %> Deactivate event for all stores</label>
+                <label class="radio-inline"><%= f.radio_button :is_active, nil, checked: @event.is_active.nil? %> Custom activation</label>
+            </div>
+        </div>
+        <table class="table table-striped table-responsive">
+            <thead>
+                <tr>
+                    <th>Store name</th>
+                    <th>Activate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%= f.fields_for :event_warehouses do |event_warehouse_form| %>
+                  <% warehouse = Warehouse.select(:code, :name).where(id: event_warehouse_form.object.warehouse_id).first %>
+                  <tr>
+                      <td><%= warehouse.code_and_name %></td>
+                      <td>
+                          <div class="form-group">
+                              <%= event_warehouse_form.check_box :is_active, checked: event_warehouse_form.object.is_active, class: "warehouse-event-activation-checkbox" %>
+                            </div>                          
+                        </td>
+                    </tr>
+                  <% end %>
+              </tbody>
+          </table>
+
+          <div class="form-group">
+              <%= f.submit "Save", class: "btn btn-primary" %>
+                <button class="btn btn-link cancel">Cancel</button>
+            </div>
+          <% end %>
+      </td>
+
+      <script>
+        $(function () {
+            $("#event_is_active_true").click(function () {
+                $(".warehouse-event-activation-checkbox").attr("disabled", true);
+                $(".warehouse-event-activation-checkbox").prop("checked", false);
+            });
+            $("#event_is_active_false").click(function () {
+                $(".warehouse-event-activation-checkbox").attr("disabled", true);
+                $(".warehouse-event-activation-checkbox").prop("checked", false);
+            });
+            $("#event_is_active").click(function () {
+                $(".warehouse-event-activation-checkbox").attr("disabled", false);
+            });
+
+      <% if @event.is_active? %>
+              $("#event_is_active_true").click();
+      <% elsif !@event.is_active? && !@event.is_active.nil? %>
+              $("#event_is_active_false").click();
+      <% else %>
+              $("#event_is_active").click();
+      <% end %>
+        });
+      </script>

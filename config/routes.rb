@@ -22,7 +22,8 @@ Rails.application.routes.draw do
       get "add_general_products"
     end
     member do
-      get "toggle_event_activation"
+      get "generate_activation_form"
+      patch "activate_deactivate"
     end
   end
   resources :listing_stocks, only: :index

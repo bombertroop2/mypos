@@ -61,7 +61,7 @@
                                                       <td style="vertical-align: middle" align="center"><%= "#{color.code} - #{color.name}" %></td>                            
                                                       <% sizes.each do |size| %>
                                                         <% order_booking_product_item = order_booking_product_items.select(:id, :quantity).where(size_id: size.id, color_id: color.id).first %>
-                                                        <% shipment_product_item = shipment_product_items.select{|spi| spi.order_booking_product_item_id == order_booking_product_item.id}.first %>
+                                                        <% shipment_product_item = shipment_product_items.select{|spi| spi.order_booking_product_item_id == order_booking_product_item.id}.first rescue nil %>
                                                         <% if shipment_product_item.present? %>
                                                           <td align="center" style="vertical-align: middle">
                                                               <%= shipment_product_fields.fields_for :shipment_product_items, shipment_product_item do |spi_form| %>
