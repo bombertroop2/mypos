@@ -32,12 +32,14 @@ class Event < ApplicationRecord
                               private
                             
                               def activable
-                                cashier_opened = false
-                                event_warehouses.select(:warehouse_id).each do |event_warehouse|
-                                  cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL", event_warehouse.warehouse_id, Date.current]).present?
-                                  break
+                                if is_active_changed? && persisted?
+                                  cashier_opened = false
+                                  event_warehouses.select(:warehouse_id).each do |event_warehouse|
+                                    cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
+                                    break
+                                  end
+                                  errors.add(:base, "Please close some cashiers and try again") if cashier_opened
                                 end
-                                errors.add(:base, "Please close some cashiers and try again")
                               end
                             
                               def deletable

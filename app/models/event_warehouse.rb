@@ -16,13 +16,21 @@ class EventWarehouse < ApplicationRecord
   ]
 
   validates :warehouse_id, presence: true
-  
+  validate :activable, on: :update
+
   before_destroy :delete_tracks
 
 
   #        before_update :delete_old_products, if: proc {|ew| ew.select_different_products_changed? && ew.persisted? && ew.select_different_products == false}
 
   private
+  
+  def activable
+    if is_active_changed? && persisted?
+      cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", warehouse_id, Date.current, event.start_date_time.to_date, event.end_date_time.to_date]).present?
+      errors.add(:base, "Please close some cashiers and try again") if cashier_opened
+    end
+  end
         
   #            def delete_old_products
   #              event_products.select(:id).destroy_all

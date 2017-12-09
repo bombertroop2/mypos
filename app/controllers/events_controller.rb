@@ -294,7 +294,11 @@ class EventsController < ApplicationController
   def activate_deactivate
     params[:event][:is_active] = nil if params[:event][:is_active].eql?("on")
     unless @updated = @event.update(event_params)    
-      render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});" if @event.errors[:base].present?
+      if @event.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @event.errors[:"event_warehouses.base"].present?
+        render js: "bootbox.alert({message: \"#{@event.errors[:"event_warehouses.base"].join("<br/>")}\",size: 'small'});"
+      end
     end
   end
 
