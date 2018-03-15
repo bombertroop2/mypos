@@ -10,7 +10,7 @@ $(function () {
 
     $("#cashier_opening_submit_button").click(function () {
         bootbox.confirm({
-            message: "Once you open cashier, you'll not be able to cancel it</br>Are you sure?",
+            message: "Please double check all of the data before you open the cashier, make sure the beginning cash is correct.<br>Once you open cashier, you'll not be able to edit or cancel it<br>Are you sure?",
             buttons: {
                 confirm: {
                     label: '<i class="fa fa-check"></i> Confirm'

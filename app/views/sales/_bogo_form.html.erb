@@ -1,0 +1,38 @@
+<div id="bogo-product-form-<%= row_index %>" class="form-horizontal bogo-product-forms-<%= row_index %>" style="display: none;">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Barcode</label>
+        <div class="col-sm-9">
+            <div class="input-group">
+                <input type="text" id="bogo_product_barcode_<%= row_index %>" class="form-control bogo_product_barcode" style="width: 100%">
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-primary search-barcode-btn-bogo" style="margin-bottom: 0px !important" id="search-barcode-btn-bogo-<%= row_index %>">
+                        <span class="glyphicon glyphicon-plus"></span> Add
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Product Code</label>
+        <div class="col-sm-9">
+            <input type="text" id="bogo_product_code_<%= row_index %>" name="bogo_product_code" class="form-control upcase bogo_product_code" style="width: 100%">
+        </div>
+    </div>
+
+    <div id="sale_product_bogo_color_field_container_<%= row_index %>">
+
+    </div>
+
+    <div id="sale_product_bogo_size_field_container_<%= row_index %>">
+
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-5 col-xs-offset-3">
+            <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_bogo_product_<%= row_index %>">
+                <span class="glyphicon glyphicon-plus"></span> Add
+            </button>
+        </div>
+    </div>
+</div>

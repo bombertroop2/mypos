@@ -1,0 +1,23 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label">Size</label>
+    <div class="col-sm-9">
+        <%= select_tag "sale_bogo_product_size_#{product_row_index}", options_from_collection_for_select(product_sizes, :id, :size), {include_blank: true, class: "form-control", style: "width: 100%"} %>
+      </div>
+  </div>
+
+  <script>
+    $(function () {
+        $("#sale_bogo_product_size_<%= product_row_index %>").attr("data-placeholder", "Select").chosen();
+        $("#modal_form_btn_add_bogo_product_<%= product_row_index %>").unbind();
+        $("#modal_form_btn_add_bogo_product_<%= product_row_index %>").click(function () {
+            $.get("/sales/get_free_product", {
+                sale_bogo_product_code: "<%= product_code %>",
+                sale_bogo_product_color: "<%= product_color %>",
+                sale_bogo_product_size: $("#sale_bogo_product_size_<%= product_row_index %>").val().trim(),
+                product_barcode_id: "<%= product_barcode_id %>",
+                product_row_index: "<%= product_row_index %>"
+            });
+        });
+
+    });
+  </script>

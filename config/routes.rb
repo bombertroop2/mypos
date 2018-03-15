@@ -1,10 +1,16 @@
 Rails.application.routes.draw do
-  resources :sales do
+  resources :sales, except: [:edit, :update, :destroy] do
     collection do
       get "get_member"
       get "get_product"
+      get "get_free_product"
       get "get_product_colors"
+      get "get_free_product_colors"
       get "get_product_sizes"
+      get "get_free_product_sizes"
+      get "get_gift_event_product"
+      get "get_gift_event_product_colors"
+      get "get_gift_event_product_sizes"
     end
   end
   resources :members

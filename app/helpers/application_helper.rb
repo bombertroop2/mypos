@@ -7,8 +7,8 @@ module ApplicationHelper
     " has-error" if model && model.errors[field_name].present?
   end
 
-  def error_help_text(model, field_name)
-    "<span class='help-block'>#{model.errors[field_name].join(", ")}</span>".html_safe if model && model.errors[field_name].present?
+  def error_help_text(model, field_name, displayed_field_name="")
+    "<span class='help-block'>#{displayed_field_name}#{model.errors[field_name].join(", ")}</span>".html_safe if model && model.errors[field_name].present?
   end
   
   def product_menu_active?
@@ -76,6 +76,7 @@ module ApplicationHelper
     return true if can? :read, CashierOpening
     return true if can? :manage, CashierOpening
     return true if can? :read, CashDisbursement
+    return true if can? :manage, Sale
   end
 
   def goods_in_transit_active?

@@ -24,6 +24,7 @@ class Event < ApplicationRecord
                         validates :discount_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? }
                           validate :editable, on: :update, unless: proc {|event| event.event_activation.eql?("true")}
                             validate :activable, on: :update, if: proc {|event| event.event_activation.eql?("true")}
+                              validate :activable, on: :create
                               accepts_nested_attributes_for :event_warehouses, allow_destroy: true
                               accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
@@ -32,13 +33,24 @@ class Event < ApplicationRecord
                               private
                             
                               def activable
-                                if is_active_changed? && persisted?
-                                  cashier_opened = false
-                                  event_warehouses.select(:warehouse_id).each do |event_warehouse|
-                                    cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
-                                    break
+                                unless new_record?
+                                  if is_active_changed? && persisted?
+                                    cashier_opened = false
+                                    event_warehouses.select(:warehouse_id).each do |event_warehouse|
+                                      cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
+                                      break
+                                    end
+                                    errors.add(:base, "Please close some cashiers and try again") if cashier_opened
                                   end
-                                  errors.add(:base, "Please close some cashiers and try again") if cashier_opened
+                                else
+                                  if start_date_time.present? && end_date_time.present?
+                                    cashier_opened = false
+                                    event_warehouses.each do |event_warehouse|
+                                      cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
+                                      break
+                                    end
+                                    errors.add(:base, "Please close some cashiers and try again") if cashier_opened
+                                  end
                                 end
                               end
                             

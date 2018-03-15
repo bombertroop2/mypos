@@ -1,0 +1,134 @@
+<div class="row">
+
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Sale <small>new transaction</small></h2>
+                <!--<ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Settings 1</a>
+                            </li>
+                            <li><a href="#">Settings 2</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                </ul>-->
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+
+                <!-- Smart Wizard -->
+                <div id="wizard" class="form_wizard wizard_horizontal">
+                    <ul class="wizard_steps anchor">
+                        <li>
+                            <a href="#step-1" class="selected" isdone="1" rel="1" id="list-step-1">
+                                <span class="step_no">1</span>
+                                <span class="step_descr"><!--
+                                    Step 1<br>
+                                    <small>Member form</small>
+                                    -->Member form</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-2" class="done" isdone="1" rel="2" id="list-step-2">
+                                <span class="step_no">2</span>
+                                <span class="step_descr"><!--
+                                    Step 2<br>
+                                    <small>Product form</small>
+                                    -->Product form</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#step-3" class="done" isdone="1" rel="3" id="list-step-3">
+                                <span class="step_no">3</span>
+                                <span class="step_descr"><!--
+                                    Step 3<br>
+                                    <small>Payment form</small>
+                                    -->Payment form</span>
+                            </a>
+                        </li>
+                        <!--<li>
+                            <a href="#step-4" class="done" isdone="1" rel="4">
+                                <span class="step_no">4</span>
+                                <span class="step_descr">
+                                    Step 4<br>
+                                    <small>Step 4 description</small>
+                                </span>
+                            </a>
+                        </li>-->
+                    </ul>
+
+
+
+
+
+                    <div class="stepContainer" style="overflow-x: visible !important;" id="stepContainer">
+                        <%= render partial: "wizard_form" %>
+                    </div>
+                    <!--<div class="actionBar">
+                        <div class="msgBox"><div class="content"></div><a href="#" class="close">X</a></div><div class="loader">Loading</div><a href="#" class="buttonFinish btn btn-default">Finish</a><a href="#" class="buttonNext btn btn-success">Next</a><a href="#" class="buttonPrevious btn btn-primary buttonDisabled">Previous</a></div>--></div>
+                <!-- End SmartWizard Content -->
+
+                <div id="addSaleGiftForm" class="form-horizontal add-sale-gift-form" style="display: none;">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Discount/Product</label>
+                        <div class="col-sm-9">
+                            <%= select_tag "discount_product", options_for_select(Sale::GIFT_OPTIONS), {include_blank: true, class: "form-control", style: "width: 100%;"} %>
+                          </div>
+                      </div>
+                      <div class="form-group hidden" id="sale_event_gift_discount_amount_field_layout">
+                          <label class="col-sm-3 control-label">Discount</label>
+                          <div class="col-sm-9">
+                              <span class="form-control" style="width: 100%;cursor: not-allowed" id="sale_event_gift_discount_amount"></span>
+                          </div>
+                      </div>
+
+                      <div class="form-group gift-event-product-search-fields hidden">
+                          <label class="col-sm-3 control-label">Barcode</label>
+                          <div class="col-sm-9">
+                              <div class="input-group">
+                                  <input type="text" id="gift_event_product_barcode" class="form-control" style="width: 100%">
+                                  <span class="input-group-btn">
+                                      <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="gift-event-search-barcode-btn">
+                                          <span class="glyphicon glyphicon-plus"></span> Add
+                                      </button>
+                                  </span>
+                              </div>
+                          </div>
+                      </div>
+
+
+                      <div class="form-group hidden gift-event-product-search-fields">
+                          <label class="col-sm-3 control-label">Product Code</label>
+                          <div class="col-sm-9">
+                              <input type="text" id="sale_event_gift_product_code" name="sale_event_gift_product_code" class="form-control upcase" style="width: 100%">
+                          </div>
+                      </div>
+
+                      <div id="sale_event_gift_product_color_field_container" class="gift-event-product-search-fields">
+
+                      </div>
+
+                      <div id="sale_event_gift_product_size_field_container" class="gift-event-product-search-fields">
+
+                      </div>
+
+                      <div class="form-group">
+                          <div class="col-xs-5 col-xs-offset-3">
+                              <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_event_gift_product">
+                                  <span class="glyphicon glyphicon-plus"></span> Add
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>

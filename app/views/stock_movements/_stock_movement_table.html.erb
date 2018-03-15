@@ -65,7 +65,7 @@
                   </td>
                   <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_received rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_delivered rescue 0 %></td>
-                  <td class="text-right">0</td>
+                  <td class="text-right"><%= stock_movement_transaction.total_sold_quantity rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.ending_stock %></td>
               </tr>
               <% last_product_code = stock_movement_transaction.product_code %>

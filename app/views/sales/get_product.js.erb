@@ -1,0 +1,497 @@
+<% if @product.nil? %>    
+  var box = bootbox.alert({message: "No records found",size: 'small'});
+  <% if params[:barcode] %>
+    box.on("hidden.bs.modal", function () { 
+      $("#barcode").focus();
+    });
+  <% else %>
+    box.on("hidden.bs.modal", function () { 
+      $("#sale_product_code").focus();
+    });
+  <% end %>
+<% else %>
+  if(bootboxDialogForm != null)
+    bootboxDialogForm.modal("hide");
+  if($("#listing_purchased_products_table").length == 0){
+    <% session["sale"] ||= {} %>
+    <% session["sale"]["#{@product.id}"] ||= {} %>
+    <% session["sale"]["#{@product.id}"]["store_event"] ||= {} %>
+    <% if @store_event.present? %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["id"] = @store_event.id %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["event_type"] = @store_event.event_type %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["first_plus_discount"] = @store_event.first_plus_discount %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["second_plus_discount"] = @store_event.second_plus_discount %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["cash_discount"] = @store_event.cash_discount %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["special_price"] = @store_event.special_price %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["minimum_purchase_amount"] = @store_event.minimum_purchase_amount %>
+      <% session["sale"]["#{@product.id}"]["store_event"]["discount_amount"] = @store_event.discount_amount %>
+    <% else %>
+      <% session["sale"]["#{@product.id}"].delete("store_event") %>
+    <% end %>
+    <%# session["sale"]["#{@product.id}"]["#{current_miliseconds}"] = nil %>
+    <%# session["sale"]["#{@product.id}-#{current_miliseconds}"]["free_product_id"] = nil %>
+    <% session["sale"]["#{@product.id}"]["effective_price"] = @product.price %>
+    <% session["sale"]["#{@product.id}"]["stock_detail_id"] = @product.stock_detail_id %>
+    <% session["sale"]["#{@product.id}"]["price_list_id"] = @product.price_list_id %>
+    <% session["sale"]["event"] ||= {} %>
+    <% if @store_event.present? && @store_event.event_type.eql?("Gift") %>
+      <% session["sale"]["event"]["id"] = @store_event.id %>
+      <% session["sale"]["event"]["discount_amount"] = @store_event.discount_amount %>
+    <% else %>
+      <% session["sale"].delete("event") %>
+    <% end %>
+    $("#listing-purchased-products").html("<%= j(render(partial: "listing_purchased_products")) %>");
+  }else{
+    if($("input:hidden[value='<%= @product.id %>']").length > 0){
+      <% current_miliseconds = DateTime.now.strftime("%Q") %>
+      var subtotal = <%= @product.price %>;
+      <% if session["sale"]["#{@product.id}"]["store_event"].present? %>
+        <% if session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Discount(%)") && session["sale"]["#{@product.id}"]["store_event"]["first_plus_discount"].present? && session["sale"]["#{@product.id}"]["store_event"]["second_plus_discount"].present? %>
+          var first_discounted_subtotal = <%= @product.price %> - <%= @product.price %> * <%= session["sale"]["#{@product.id}"]["store_event"]["first_plus_discount"].to_f %> / 100;
+          subtotal = first_discounted_subtotal - first_discounted_subtotal * <%= session["sale"]["#{@product.id}"]["store_event"]["second_plus_discount"].to_f %> / 100;
+        <% elsif session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Discount(%)") && session["sale"]["#{@product.id}"]["store_event"]["first_plus_discount"].present? %>
+          subtotal = <%= @product.price %> - <%= @product.price %> * <%= session["sale"]["#{@product.id}"]["store_event"]["first_plus_discount"].to_f %> / 100;
+        <% elsif session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Special Price") && session["sale"]["#{@product.id}"]["store_event"]["special_price"].present? %>
+          subtotal = <%= session["sale"]["#{@product.id}"]["store_event"]["special_price"] %>;
+        <% elsif session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Discount(Rp)") && session["sale"]["#{@product.id}"]["store_event"]["cash_discount"].present? %>
+          subtotal = <%= @product.price %> - <%= session["sale"]["#{@product.id}"]["store_event"]["cash_discount"].to_f %>;
+        <% end %>
+      <% else %>
+      <% end %>
+      var rowValue = {
+        'barcode': '<%= j(render(partial: "purchased_product_fields", locals: {sale_product: @sale_product, form_fields_index: current_miliseconds})) %><%= @product.barcode %>',
+        'product': '<%= "#{@product.product_code} - #{@product.brand_name}" %>',
+        'color': '<%= "#{@product.color_code} - #{@product.color_name}" %>',
+        'size': '<%= @product.product_size %>',
+        'price': '<%= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>',
+        'event': "<div id='bogo-product-form-container-<%= current_miliseconds %>'></div><%= get_event_value(session["sale"]["#{@product.id}"]["store_event"], current_miliseconds) if session["sale"]["#{@product.id}"]["store_event"].present? %>",
+        'subtotal': subtotal,
+        'delete_button': "<button type='button' class='btn btn-danger' id='btn-delete-sale-product-<%= current_miliseconds %>'>Delete</button>"
+      };
+      //'quantity': "<%#= j(render(partial: "purchased_product_fields", locals: {sale_product: @sale_product, form_fields_index: DateTime.now.strftime("%Q")})) %>",
+      var rowObject = eventPurchasedProductDataTables.row.add(rowValue).draw(false);
+      <% if session["sale"]["#{@product.id}"]["store_event"].present? %>
+        <% if session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Buy 1 Get 1 Free") %>
+          if($("#bogo-product-form-<%= current_miliseconds %>").length == 0)
+            $("#bogo-product-form-container-<%= current_miliseconds %>").append("<%= j(render(partial: "bogo_form", locals: {row_index: current_miliseconds})) %>");
+        <% end %>
+      <% end %>
+      eventPurchasedProductDataTables.rows(rowObject.index()).nodes().to$().attr("id", 'product-row-<%= current_miliseconds %>');
+      $("#product-row-<%= current_miliseconds %>").children("td").eq(6).attr("id", "sale-product-subtotal-column-<%= current_miliseconds %>");
+      $("#sale-product-subtotal-column-<%= current_miliseconds %>").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+      
+      var totalSale = 0;
+
+      $("#listing_purchased_products_table > tbody > tr").each(function () {
+          var subtotal = parseFloat($(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+          totalSale = totalSale + subtotal;
+      })
+
+      <% if session["sale"]["#{@product.id}"]["store_event"].present? %>
+        <% if session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Gift") %>
+          var minimumPurchaseAmount = parseFloat("<%= session["sale"]["#{@product.id}"]["store_event"]["minimum_purchase_amount"] %>");
+          if (isNaN(minimumPurchaseAmount))
+              minimumPurchaseAmount = 0;
+
+          if (totalSale >= minimumPurchaseAmount) {
+            if ($("#sale_gift_event_gift_type").val() == "Discount") {
+                $("#sale_total_label").html("Subtotal");
+                $("#sale_gift_event_discount_field").html("<%= session["sale"]["#{@product.id}"]["store_event"]["discount_amount"] %>");
+                $("#sale_gift_event_discount_field_layout").removeClass("hidden");
+                $("#sale_gift_event_total_after_discount_field_layout").removeClass("hidden");
+                $("#sale_gift_event_discount_field").toCurrency({
+                    precision: 2, // decimal precision
+                    delimiter: ".", // thousands delimiter
+                    separator: ",", // decimal separator
+                    unit: "Rp", // unit
+                    format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                    negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                });
+            } else if ($("#sale_gift_event_gift_type").val() == "Product") {
+                $("#sale_gift_event_gift_item").removeClass("hidden");
+                $("#payment_form_gift_item_field").html("<%= session["sale"]["gift_event_product_detail"] %>");
+            }
+          }
+        <% end %>
+      <% end %>
+
+      $("#total-sale").html(totalSale);
+
+      $("#total-sale").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+      
+      $("#btn-delete-sale-product-<%= current_miliseconds %>").click(function () {
+        eventPurchasedProductDataTables.row($("#product-row-<%= current_miliseconds %>")).remove().draw();
+        var totalSale = 0;
+
+        $("#listing_purchased_products_table > tbody > tr").each(function () {
+            var subtotal = 0;
+            if ($(this).children("td").eq(6).length > 0)
+                subtotal = parseFloat($(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+            totalSale = totalSale + subtotal;
+        })
+        
+        <% if session["sale"]["#{@product.id}"]["store_event"].present? %>
+          <% if session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Gift") %>
+            var minimumPurchaseAmount = parseFloat("<%= session["sale"]["#{@product.id}"]["store_event"]["minimum_purchase_amount"] %>");
+            if (isNaN(minimumPurchaseAmount))
+                minimumPurchaseAmount = 0;
+
+            if (totalSale < minimumPurchaseAmount) {
+                $("#sale_total_label").html("Total");
+                $("#sale_gift_event_discount_field").html("");
+                $("#sale_gift_event_discount_field_layout").addClass("hidden");
+                $("#payment_form_total_sale_after_discount").html("");
+                $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
+                $("#sale_gift_event_gift_item").addClass("hidden");
+                $("#payment_form_gift_item_field").html("");
+            }
+          <% end %>
+        <% end %>
+
+        if (totalSale == 0) {
+          $("#sale_total_label").html("Total");
+          $("#sale_gift_event_discount_field").html("");
+          $("#sale_gift_event_discount_field_layout").addClass("hidden");
+          $("#payment_form_total_sale_after_discount").html("");
+          $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
+          $("#sale_gift_event_gift_item").addClass("hidden");
+          $("#payment_form_gift_item_field").html("");
+        }
+
+        $("#total-sale").html(totalSale);
+
+        $("#total-sale").toCurrency({
+            precision: 2, // decimal precision
+            delimiter: ".", // thousands delimiter
+            separator: ",", // decimal separator
+            unit: "Rp", // unit
+            format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+            negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+        });
+        $("#barcode").focus();
+      });
+      <% if session["sale"]["#{@product.id}"]["store_event"].present? && session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Buy 1 Get 1 Free") %>
+        $("#btn_add_bogo_product_<%= current_miliseconds %>").click(function () {
+            bootboxDialogBOGOForm['<%= current_miliseconds %>'] = bootbox
+                    .dialog({
+                        title: 'Add Free Product',
+                        message: $('#bogo-product-form-<%= current_miliseconds %>'),
+                        show: false, // We will show it manually later 
+                        onEscape: true
+                    }).on('shown.bs.modal', function () {
+                $('#bogo-product-form-<%= current_miliseconds %>')
+                        .show();
+                $("#bogo_product_barcode_<%= current_miliseconds %>").focus();
+                $("#bogo_product_barcode_<%= current_miliseconds %>").val("");
+                $("#bogo_product_code_<%= current_miliseconds %>").val("");
+                $("#sale_product_bogo_color_field_container_<%= current_miliseconds %>").html("");
+                $("#sale_product_bogo_size_field_container_<%= current_miliseconds %>").html("");
+                $("#modal_form_btn_add_bogo_product_<%= current_miliseconds %>").addClass("hidden");
+            }).on('hide.bs.modal', function (e) {
+                $('#bogo-product-form-<%= current_miliseconds %>').hide().appendTo('body');
+                var processId = setInterval(function () {
+                    if ($("#barcode").is(":focus")) {
+                        clearInterval(processId);
+                    } else {
+                        $("#barcode").focus();
+                    }
+                }, 0);
+            }).modal('show');
+        });
+        $('#bogo_product_barcode_<%= current_miliseconds %>').off();
+        $('#bogo_product_barcode_<%= current_miliseconds %>').keypress(function (e) {
+            var key = e.which;
+            if (key == 13)  // the enter key code
+            {
+                $(this).blur();
+                $("#search-barcode-btn-bogo-<%= current_miliseconds %>").click();
+                return false;
+            }
+        });
+
+        $("#search-barcode-btn-bogo-<%= current_miliseconds %>").off();
+        $("#search-barcode-btn-bogo-<%= current_miliseconds %>").click(function () {
+            $("#barcode").blur();
+            $.get("/sales/get_free_product", {
+                barcode: $("#bogo_product_barcode_<%= current_miliseconds %>").val().trim(),
+                product_barcode_id: $("#sale_sale_products_attributes_<%= current_miliseconds %>_product_barcode_id").val(),
+                product_row_index: "<%= current_miliseconds %>"
+            });
+
+        });
+        
+        $('#bogo_product_code_<%= current_miliseconds %>').off();
+        $('#bogo_product_code_<%= current_miliseconds %>').keypress(function (e) {
+          var key = e.which;
+          if (key == 13)  // the enter key code
+          {
+              $.get("/sales/get_free_product_colors", {
+                  sale_bogo_product_code: $("#bogo_product_code_<%= current_miliseconds %>").val().trim(),
+                  product_barcode_id: $("#sale_sale_products_attributes_<%= current_miliseconds %>_product_barcode_id").val(),
+                  product_row_index: "<%= current_miliseconds %>"
+              });
+              return false;
+          }
+        });
+      <% end %>
+    }else{
+      <% current_miliseconds = DateTime.now.strftime("%Q") %>
+      <% session["sale"] ||= {} %>
+      <% session["sale"]["#{@product.id}"] ||= {} %>
+      <% session["sale"]["#{@product.id}"]["store_event"] ||= {} %>
+      <% if @store_event.present? %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["id"] = @store_event.id %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["event_type"] = @store_event.event_type %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["first_plus_discount"] = @store_event.first_plus_discount %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["second_plus_discount"] = @store_event.second_plus_discount %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["cash_discount"] = @store_event.cash_discount %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["special_price"] = @store_event.special_price %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["minimum_purchase_amount"] = @store_event.minimum_purchase_amount %>
+        <% session["sale"]["#{@product.id}"]["store_event"]["discount_amount"] = @store_event.discount_amount %>
+      <% else %>
+        <% session["sale"]["#{@product.id}"].delete("store_event") %>
+      <% end %>
+      <%# session["sale"]["#{@product.id}"]["free_product_id"] = nil %>
+      <% session["sale"]["#{@product.id}"]["effective_price"] = @product.price %>
+      <% session["sale"]["#{@product.id}"]["stock_detail_id"] = @product.stock_detail_id %>
+      <% session["sale"]["#{@product.id}"]["price_list_id"] = @product.price_list_id %>
+      <% session["sale"]["event"] ||= {} %>
+      <% if @store_event.present? && @store_event.event_type.eql?("Gift") %>
+        <% session["sale"]["event"]["id"] = @store_event.id %>
+        <% session["sale"]["event"]["discount_amount"] = @store_event.discount_amount %>
+      <% else %>
+        <% session["sale"].delete("event") %>
+      <% end %>
+    
+      var subtotal = <%= @product.price %>;
+      <% if @store_event.present? %>
+        <% if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present? %>
+          var first_discounted_subtotal = <%= @product.price %> - <%= @product.price %> * <%= @store_event.first_plus_discount %> / 100;
+          subtotal = first_discounted_subtotal - first_discounted_subtotal * <%= @store_event.second_plus_discount %> / 100;
+        <% elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? %>
+          subtotal = <%= @product.price %> - <%= @product.price %> * <%= @store_event.first_plus_discount %> / 100;
+        <% elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present? %>
+          subtotal = <%= @store_event.special_price %>;
+        <% elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present? %>
+          subtotal = <%= @product.price %> - <%= @store_event.cash_discount %>;
+        <% end %>
+      <% else %>
+      <% end %>
+      var rowValue = {
+        'barcode': '<%= j(render(partial: "purchased_product_fields", locals: {sale_product: @sale_product, form_fields_index: current_miliseconds})) %><%= @product.barcode %>',
+        'product': '<%= "#{@product.product_code} - #{@product.brand_name}" %>',
+        'color': '<%= "#{@product.color_code} - #{@product.color_name}" %>',
+        'size': '<%= @product.product_size %>',
+        'price': '<%= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>',
+        //'quantity': "<%#= j(render(partial: "purchased_product_fields", locals: {sale_product: @sale_product, form_fields_index: DateTime.now.strftime("%Q")})) %>",
+        'event': "<div id='bogo-product-form-container-<%= current_miliseconds %>'></div><%= get_event_value(@store_event, current_miliseconds) if @store_event.present? %>",
+        'subtotal': subtotal,
+        'delete_button': "<button type='button' class='btn btn-danger' id='btn-delete-sale-product-<%= current_miliseconds %>'>Delete</button>"
+      };
+      var rowObject = eventPurchasedProductDataTables.row.add(rowValue).draw(false);
+      <% if @store_event.present? %>
+        <% if @store_event.event_type.eql?("Buy 1 Get 1 Free") %>
+          if($("#bogo-product-form-<%= current_miliseconds %>").length == 0)
+            $("#bogo-product-form-container-<%= current_miliseconds %>").append("<%= j(render(partial: "bogo_form", locals: {row_index: current_miliseconds})) %>");
+        <% end %>
+      <% end %>
+      eventPurchasedProductDataTables.rows(rowObject.index()).nodes().to$().attr("id", 'product-row-<%= current_miliseconds %>');
+      $("#product-row-<%= current_miliseconds %>").children("td").eq(6).attr("id", "sale-product-subtotal-column-<%= current_miliseconds %>");
+      $("#sale-product-subtotal-column-<%= current_miliseconds %>").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+      
+      var totalSale = 0;
+
+      $("#listing_purchased_products_table > tbody > tr").each(function () {
+          var subtotal = parseFloat($(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+          totalSale = totalSale + subtotal;
+      })
+
+      <% if @store_event.present? %>
+        <% if @store_event.event_type.eql?("Gift") %>
+          var minimumPurchaseAmount = parseFloat("<%= @store_event.minimum_purchase_amount %>");
+          if (isNaN(minimumPurchaseAmount))
+              minimumPurchaseAmount = 0;
+
+          if (totalSale >= minimumPurchaseAmount) {
+            if ($("#sale_gift_event_gift_type").val() == "Discount") {
+                $("#sale_total_label").html("Subtotal");
+                $("#sale_gift_event_discount_field").html("<%= @store_event.discount_amount %>");
+                $("#sale_gift_event_discount_field_layout").removeClass("hidden");
+                $("#sale_gift_event_total_after_discount_field_layout").removeClass("hidden");
+                $("#sale_gift_event_discount_field").toCurrency({
+                    precision: 2, // decimal precision
+                    delimiter: ".", // thousands delimiter
+                    separator: ",", // decimal separator
+                    unit: "Rp", // unit
+                    format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                    negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                });
+            } else if ($("#sale_gift_event_gift_type").val() == "Product") {
+                $("#sale_gift_event_gift_item").removeClass("hidden");
+                $("#payment_form_gift_item_field").html("<%= session["sale"]["gift_event_product_detail"] %>");
+            }
+          }
+        <% end %>
+      <% end %>
+
+      $("#total-sale").html(totalSale);
+
+      $("#total-sale").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+      
+      /*$("#sale-product-quantity-<%#= @product.id %>").numeric({
+        decimal: false,
+        negative: false
+      }, function () {
+        alert("Positive integers only");
+        this.value = "";
+        this.focus();
+      });*/
+      $("#btn-delete-sale-product-<%= current_miliseconds %>").click(function () {
+        eventPurchasedProductDataTables.row($("#product-row-<%= current_miliseconds %>")).remove().draw();
+        var totalSale = 0;
+
+        $("#listing_purchased_products_table > tbody > tr").each(function () {
+            var subtotal = 0;
+            if ($(this).children("td").eq(6).length > 0)
+                subtotal = parseFloat($(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+            totalSale = totalSale + subtotal;
+        })
+        
+        <% if @store_event.present? %>
+          <% if @store_event.event_type.eql?("Gift") %>
+            var minimumPurchaseAmount = parseFloat("<%= @store_event.minimum_purchase_amount %>");
+            if (isNaN(minimumPurchaseAmount))
+                minimumPurchaseAmount = 0;
+
+            if (totalSale < minimumPurchaseAmount) {
+                $("#sale_total_label").html("Total");
+                $("#sale_gift_event_discount_field").html("");
+                $("#sale_gift_event_discount_field_layout").addClass("hidden");
+                $("#payment_form_total_sale_after_discount").html("");
+                $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
+                $("#sale_gift_event_gift_item").addClass("hidden");
+                $("#payment_form_gift_item_field").html("");
+            }
+          <% end %>
+        <% end %>
+
+        if (totalSale == 0) {
+          $("#sale_total_label").html("Total");
+          $("#sale_gift_event_discount_field").html("");
+          $("#sale_gift_event_discount_field_layout").addClass("hidden");
+          $("#payment_form_total_sale_after_discount").html("");
+          $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
+          $("#sale_gift_event_gift_item").addClass("hidden");
+          $("#payment_form_gift_item_field").html("");
+        }
+
+        $("#total-sale").html(totalSale);
+
+        $("#total-sale").toCurrency({
+            precision: 2, // decimal precision
+            delimiter: ".", // thousands delimiter
+            separator: ",", // decimal separator
+            unit: "Rp", // unit
+            format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+            negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+        });
+        $("#barcode").focus();
+      });
+      <% if @store_event.present? && @store_event.event_type.eql?("Buy 1 Get 1 Free") %>
+        $("#btn_add_bogo_product_<%= current_miliseconds %>").click(function () {
+            bootboxDialogBOGOForm['<%= current_miliseconds %>'] = bootbox
+                    .dialog({
+                        title: 'Add Free Product',
+                        message: $('#bogo-product-form-<%= current_miliseconds %>'),
+                        show: false, // We will show it manually later 
+                        onEscape: true
+                    }).on('shown.bs.modal', function () {
+                $('#bogo-product-form-<%= current_miliseconds %>')
+                        .show();
+                $("#bogo_product_barcode_<%= current_miliseconds %>").focus();
+                $("#bogo_product_barcode_<%= current_miliseconds %>").val("");
+                $("#bogo_product_code_<%= current_miliseconds %>").val("");
+                $("#sale_product_bogo_color_field_container_<%= current_miliseconds %>").html("");
+                $("#sale_product_bogo_size_field_container_<%= current_miliseconds %>").html("");
+                $("#modal_form_btn_add_bogo_product_<%= current_miliseconds %>").addClass("hidden");
+            }).on('hide.bs.modal', function (e) {
+                $('#bogo-product-form-<%= current_miliseconds %>').hide().appendTo('body');
+                var processId = setInterval(function () {
+                    if ($("#barcode").is(":focus")) {
+                        clearInterval(processId);
+                    } else {
+                        $("#barcode").focus();
+                    }
+                }, 0);
+            }).modal('show');
+        });
+        $('#bogo_product_barcode_<%= current_miliseconds %>').off();
+        $('#bogo_product_barcode_<%= current_miliseconds %>').keypress(function (e) {
+            var key = e.which;
+            if (key == 13)  // the enter key code
+            {
+                $(this).blur();
+                $("#search-barcode-btn-bogo-<%= current_miliseconds %>").click();
+                return false;
+            }
+        });
+
+        $("#search-barcode-btn-bogo-<%= current_miliseconds %>").off();
+        $("#search-barcode-btn-bogo-<%= current_miliseconds %>").click(function () {
+            $("#barcode").blur();
+            $.get("/sales/get_free_product", {
+                barcode: $("#bogo_product_barcode_<%= current_miliseconds %>").val().trim(),
+                product_barcode_id: $("#sale_sale_products_attributes_<%= current_miliseconds %>_product_barcode_id").val(),
+                product_row_index: "<%= current_miliseconds %>"
+            });
+
+        });
+        
+        $('#bogo_product_code_<%= current_miliseconds %>').off();
+        $('#bogo_product_code_<%= current_miliseconds %>').keypress(function (e) {
+          var key = e.which;
+          if (key == 13)  // the enter key code
+          {
+              $.get("/sales/get_free_product_colors", {
+                  sale_bogo_product_code: $("#bogo_product_code_<%= current_miliseconds %>").val().trim(),
+                  product_barcode_id: $("#sale_sale_products_attributes_<%= current_miliseconds %>_product_barcode_id").val(),
+                  product_row_index: "<%= current_miliseconds %>"
+              });
+              return false;
+          }
+        });
+      <% end %>
+    }
+  }
+  $($(".stepContainer")[0]).css("height", "100%");
+  $("#barcode").focus();
+<% end %>
+$("#barcode").val("");

@@ -1,5 +1,8 @@
 class Member < ApplicationRecord
   audited on: [:create, :update]
+  
+  has_many :sales, dependent: :restrict_with_error
+
   before_validation :strip_string_values
 
   validates :name, :address, :gender, presence: true

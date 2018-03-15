@@ -1,0 +1,10 @@
+$("#sale_product_color_field_container").html("<%= j(render(partial: "sale_product_colors_field")) %>");
+$("#sale_product_color").attr("data-placeholder", "Select").chosen();
+$("#sale_product_color").change(function(){
+  $.get("/sales/get_product_sizes", {
+    sale_product_code: $("#sale_product_code").val().trim(),
+    sale_product_color: $("#sale_product_color").val().trim()
+  });
+});
+$("#sale_product_size_field_container").html("");
+$("#modal_form_btn_add_product").addClass("hidden");

@@ -4,6 +4,7 @@ class CashierOpening < ApplicationRecord
   belongs_to :warehouse
   belongs_to :user, class_name: "User", foreign_key: :opened_by
   has_many :cash_disbursements, dependent: :destroy
+  has_many :sales
   
   before_validation :set_open_time, if: proc{|co| !co.update_cash_balance && !co.closing_cashier}
   

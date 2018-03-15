@@ -1,0 +1,614 @@
+<%= form_for(@sale, remote: true, html: {class: "form-horizontal"}) do |f| %>
+    <div id="step-1" class="content" style="display: block;">
+        <%= f.hidden_field :member_id %>
+        <div class="form-group">
+            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="member-id">Member Id</label>
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <div class="input-group">
+                    <input type="text" id="member-id" class="form-control col-md-7 col-xs-12" style="width: 100%">
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-primary" id="search-member-btn">Search</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group hidden" id="member-info">
+            <span class="col-md-3"></span>
+            <div class="col-md-9 profile_details">
+                <div class="well profile_view">
+                    <div class="col-md-12">
+                        <h4 class="brief"><i>Member Info</i></h4>
+                        <div class="left col-md-12">
+                            <h2 id="member-name"></h2>
+                            <!--<p><strong>About: </strong> Web Designer / UX / Graphic Artist / Coffee Lover </p>-->
+                            <ul class="list-unstyled">
+                                <li><i class="fa fa-list-alt"></i> Id: <span id="member-identifier"></span></li>
+                                <li><i class="fa fa-building"></i> Address: <span id="member-address"></span></li>
+                                <li><i class="fa fa-phone"></i> Phone #: <span id="member-phone"></span></li>
+                                <li><i class="fa fa-mobile-phone"></i> Mobile Phone #: <span id="member-mobile-phone"></span></li>
+                                <li><i class="fa fa-envelope"></i> Email: <span id="member-email"></span></li>
+                            </ul>
+                        </div>
+                        <!--<div class="right col-xs-5 text-center">
+                            <img src="images/img.jpg" alt="" class="img-circle img-responsive">
+                        </div>-->
+                    </div>
+                    <!--<div class="col-xs-12 bottom text-center">
+                        <div class="col-xs-12 col-sm-6 emphasis">
+                            <p class="ratings">
+                                <a>4.0</a>
+                                <a href="#"><span class="fa fa-star"></span></a>
+                                <a href="#"><span class="fa fa-star"></span></a>
+                                <a href="#"><span class="fa fa-star"></span></a>
+                                <a href="#"><span class="fa fa-star"></span></a>
+                                <a href="#"><span class="fa fa-star-o"></span></a>
+                            </p>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 emphasis">
+                            <button type="button" class="btn btn-success btn-xs"> <i class="fa fa-user">
+                                </i> <i class="fa fa-comments-o"></i> </button>
+                            <button type="button" class="btn btn-primary btn-xs">
+                                <i class="fa fa-user"> </i> View Profile
+                            </button>
+                        </div>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="step-2" class="content" style="display: none;">
+        <div class="form-group">
+            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="barcode">Barcode</label>
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <div class="input-group">
+                    <input type="text" id="barcode" class="form-control col-md-7 col-xs-12" style="width: 100%">
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="search-barcode-btn">
+                            <span class="glyphicon glyphicon-plus"></span> Add
+                        </button>
+                        <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="search-sale-product-btn">
+                            <span class="glyphicon glyphicon-search"></span> Search
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div id="listing-purchased-products">
+            <%= render(partial: "listing_purchased_products") if action_name.eql?("create") %>
+        </div>
+        <div id="searchSaleProductForm" class="form-horizontal search-sale-product-form" style="display: none;">
+            <div class="form-group">
+                <label class="col-xs-3 control-label">Product Code</label>
+                <div class="col-xs-5">
+                    <%= text_field_tag "sale_product_code", "", class: "form-control upcase" %>
+                  </div>
+              </div>
+
+              <div id="sale_product_color_field_container">
+
+              </div>
+
+              <div id="sale_product_size_field_container">
+
+              </div>
+
+              <div class="form-group">
+                  <div class="col-xs-5 col-xs-offset-3">
+                      <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_product">
+                          <span class="glyphicon glyphicon-plus"></span> Add
+                      </button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div id="step-3" class="content" style="display: none;">
+          <div class="form-group<%= control_group_error(@sale, :payment_method) %>">
+              <%= f.label :payment_method, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <%= f.select :payment_method, options_for_select(Sale::PAYMENT_METHODS, @sale.payment_method), {include_blank: true}, {class: "form-control", style: "width: 100%"} %>
+                      <%= error_help_text(@sale, :payment_method) %>
+                  </div>
+              </div>
+              <% if @sale.gift_event_id.present? && @sale.gift_event_gift_type.eql?("Product") && action_name.eql?("create") %>
+                <% hidden_class = nil %>
+              <% else %>
+                <% hidden_class = " hidden" %>
+              <% end %>
+              <div class="form-group<%= hidden_class %>" id="sale_gift_event_gift_item">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Gift Item</label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+                      <div class="input-group" style="margin-bottom: 0px">
+                          <span class="form-control" style="width: 100%;cursor: not-allowed" id="payment_form_gift_item_field"><%= session["sale"]["gift_event_product_detail"] if session["sale"].present? %></span>
+                          <span class="input-group-btn">
+                              <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="btn-change-gift-item-gift-event">
+                                  <span class="glyphicon glyphicon-edit"></span> Change
+                              </button>
+                          </span>
+                      </div>                                
+                  </div>
+              </div>
+              <% if action_name.eql?("create") && @sale.payment_method.eql?("Cash") %>
+                <div class="form-group<%= control_group_error(@sale, :cash) %>" id="sale_cash_field_container">
+                    <%= f.label :cash, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                          <%= f.text_field :cash, class: "form-control", "data-a-sep" => ".",
+                              "data-a-dec" => ",", "data-a-sign" => "Rp", style: "width: 100%;text-align: right" %>
+                            <%= error_help_text(@sale, :cash) %>
+                        </div>
+                    </div>
+                  <% else %>
+                    <div class="form-group hidden<%= control_group_error(@sale, :cash) %>" id="sale_cash_field_container">
+                        <%= f.label :cash, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                          <div class="col-md-6 col-sm-6 col-xs-12">
+                              <%= f.text_field :cash, class: "form-control", "data-a-sep" => ".",
+                                  "data-a-dec" => ",", "data-a-sign" => "Rp", style: "width: 100%;text-align: right" %>
+                                <%= error_help_text(@sale, :cash) %>
+                            </div>
+                        </div>
+                      <% end %>
+                      <% total_label = nil %>
+                      <% hidden_class = " hidden" %>
+                      <% gift_event_discount = nil %>
+                      <% if @sale.gift_event_id.present? && @sale.gift_event_gift_type.eql?("Discount") && action_name.eql?("create") %>
+                        <% total_label = "Subtotal" %>
+                        <% hidden_class = nil %>
+                        <% gift_event_discount = session["sale"]["event"]["discount_amount"] %>
+                      <% end %>
+                      <div class="form-group">
+                          <%= f.label :total, total_label, class: "control-label col-md-3 col-sm-3 col-xs-12", id: "sale_total_label" %>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_total_sale"></span>
+                            </div>
+                        </div>
+                        <div class="form-group<%= hidden_class %>" id="sale_gift_event_discount_field_layout">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Discount</label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <div class="input-group" style="margin-bottom: 0px">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="btn-change-discount-gift-event">
+                                            <span class="glyphicon glyphicon-edit"></span> Change
+                                        </button>
+                                    </span>
+                                    <span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="sale_gift_event_discount_field"><%= gift_event_discount %></span>
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="form-group<%= hidden_class %>" id="sale_gift_event_total_after_discount_field_layout">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Total</label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_total_sale_after_discount"></span>
+                            </div>
+                        </div>
+                        <% if action_name.eql?("create") && @sale.payment_method.eql?("Card") %>
+                          <div id="sale_card_fields_container">
+                              <div class="form-group<%= control_group_error(@sale, :bank_id) %>">
+                                  <%= f.label :bank_id, class: "col-md-3 col-sm-3 col-xs-12 control-label" %>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <%= f.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', @sale.bank_id.to_s), {include_blank: true}, {class: "form-control", style: "width: 100%"} %>
+                                          <%= error_help_text(@sale, :bank_id) %>
+                                      </div>
+                                  </div>
+                                  <div class="form-group<%= control_group_error(@sale, :card_number) %>">
+                                      <%= f.label :card_number, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <%= f.text_field :card_number, class: "form-control", style: "width: 100%" %>
+                                              <%= error_help_text(@sale, :card_number) %>
+                                          </div>
+                                      </div>
+                                      <div class="form-group<%= control_group_error(@sale, :trace_number) %>">
+                                          <%= f.label :trace_number, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                <%= f.text_field :trace_number, class: "form-control", style: "width: 100%" %>
+                                                  <%= error_help_text(@sale, :trace_number) %>
+                                              </div>
+                                          </div>
+                                          <div class="form-group<%= control_group_error(@sale, :pay) %>">
+                                              <%= f.label :pay, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                                    <%= f.text_field :pay, class: "form-control", "data-a-sep" => ".",
+                                                        "data-a-dec" => ",", "data-a-sign" => "Rp", style: "width: 100%;text-align: right" %>
+                                                      <%= error_help_text(@sale, :pay) %>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                        <% else %>
+                                          <div id="sale_card_fields_container" class="hidden">
+                                              <div class="form-group<%= control_group_error(@sale, :bank_id) %>">
+                                                  <%= f.label :bank_id, class: "col-md-3 col-sm-3 col-xs-12 control-label" %>
+                                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                                        <%= f.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', @sale.bank_id.to_s), {include_blank: true}, {class: "form-control", style: "width: 100%"} %>
+                                                          <%= error_help_text(@sale, :bank_id) %>
+                                                      </div>
+                                                  </div>
+                                                  <div class="form-group<%= control_group_error(@sale, :card_number) %>">
+                                                      <%= f.label :card_number, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                                            <%= f.text_field :card_number, class: "form-control", style: "width: 100%" %>
+                                                              <%= error_help_text(@sale, :card_number) %>
+                                                          </div>
+                                                      </div>
+                                                      <div class="form-group<%= control_group_error(@sale, :trace_number) %>">
+                                                          <%= f.label :trace_number, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                <%= f.text_field :trace_number, class: "form-control", style: "width: 100%" %>
+                                                                  <%= error_help_text(@sale, :trace_number) %>
+                                                              </div>
+                                                          </div>
+                                                          <div class="form-group<%= control_group_error(@sale, :pay) %>">
+                                                              <%= f.label :pay, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                    <%= f.text_field :pay, class: "form-control", "data-a-sep" => ".",
+                                                                        "data-a-dec" => ",", "data-a-sign" => "Rp", style: "width: 100%;text-align: right" %>
+                                                                      <%= error_help_text(@sale, :pay) %>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                        <% end %>
+                                                        <% if action_name.eql?("create") && @sale.payment_method.eql?("Cash") %>
+                                                          <div class="form-group" id="sale_change_field_container">
+                                                              <%= f.label :change, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                    <span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_sale_change"></span>
+                                                                </div>
+                                                            </div>                                          
+                                                          <% else %>
+                                                            <div class="form-group hidden" id="sale_change_field_container">
+                                                                <%= f.label :change, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
+                                                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                      <span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_sale_change"></span>
+                                                                  </div>
+                                                              </div>
+                                                            <% end %>
+                                                        </div>
+
+
+                                                        <!--<div id="step-4" class="content" style="display: none;">
+                                                            <h2 class="StepTitle">Step 4 Content</h2>
+                                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                                                                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                                            </p>
+                                                            <p>
+                                                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+                                                                in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                                            </p>
+                                                            <p>
+                                                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+                                                                in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                                            </p>
+                                                        </div>
+                                                        -->
+                                                        <%= f.hidden_field :gift_event_gift_type %>
+
+                                                      <% end %>
+
+                                                      <% if action_name.eql?("create") %>
+                                                        <script>
+                                                          $(function () {
+                                                              if ($("#list-step-1").hasClass("selected")) {
+                                                                  $("#step-1").css("display", "block");
+                                                                  $("#step-2").css("display", "none");
+                                                                  $("#step-3").css("display", "none");
+                                                              } else if ($("#list-step-2").hasClass("selected")) {
+                                                                  $("#step-1").css("display", "none");
+                                                                  $("#step-2").css("display", "block");
+                                                                  $("#step-3").css("display", "none");
+                                                                  $($(".stepContainer")[0]).css("height", "100%");
+                                                              } else if ($("#list-step-3").hasClass("selected")) {
+                                                                  $("#step-1").css("display", "none");
+                                                                  $("#step-2").css("display", "none");
+                                                                  $("#step-3").css("display", "block");
+                                                                  $("#sale_payment_method").attr("data-placeholder", "Please select").chosen();
+                                                                  $($(".stepContainer")[0]).css("height", "100%");
+                                                              }
+
+                                                              $('#sale_cash').autoNumeric('init');
+                                                              $('#sale_pay').autoNumeric('init');
+
+                                                              $('#sale_cash').keyup(function () {
+                                                                  var cashValue = parseFloat($(this).val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(cashValue))
+                                                                      cashValue = 0;
+
+                                                                  var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'))
+                                                                  if (isNaN(saleTotal))
+                                                                      saleTotal = 0;
+
+                                                                  var giftEventDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
+                                                                      giftEventDiscount = 0;
+
+                                                                  var moneyChange = cashValue - (saleTotal - giftEventDiscount);
+                                                                  $("#payment_form_sale_change").html(moneyChange);
+                                                                  $("#payment_form_sale_change").toCurrency({
+                                                                      precision: 2, // decimal precision
+                                                                      delimiter: ".", // thousands delimiter
+                                                                      separator: ",", // decimal separator
+                                                                      unit: "Rp", // unit
+                                                                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                                                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                                                                  });
+                                                              });
+
+
+                                                              $("#search-member-btn").click(function () {
+                                                                  $("#member-id").blur();
+                                                                  $.get("/sales/get_member", {
+                                                                      member_id: $("#member-id").val().trim()
+                                                                  });
+
+                                                              });
+
+                                                              $("#search-barcode-btn").click(function () {
+                                                                  $("#barcode").blur();
+                                                                  $.get("/sales/get_product", {
+                                                                      barcode: $("#barcode").val().trim()
+                                                                  });
+
+                                                              });
+
+                                                              $('#member-id').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $("#search-member-btn").click();
+                                                                      return false;
+                                                                  }
+                                                              });
+
+                                                              $('#barcode').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $("#search-barcode-btn").click();
+                                                                      return false;
+                                                                  }
+                                                              });
+
+                                                              $('#sale_card_number').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $("#sale_trace_number").focus();
+                                                                      return false;
+                                                                  }
+                                                              });
+
+                                                              $('#sale_trace_number').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $("#sale_pay").focus();
+                                                                      return false;
+                                                                  }
+                                                              });
+
+                                                              $('#sale_pay').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $(this).blur();
+                                                                      $(".actionBar > .buttonFinish").click();
+
+                                                                      return false;
+                                                                  }
+                                                              });
+
+                                                              $("#sale_payment_method").change(function () {
+                                                                  if ($(this).val() == "Cash") {
+                                                                      $("#sale_card_fields_container").addClass("hidden");
+                                                                      $("#sale_cash_field_container").removeClass("hidden");
+                                                                      $("#sale_change_field_container").removeClass("hidden");
+                                                                      var processId = setInterval(function () {
+                                                                          if ($("#sale_cash").is(":focus")) {
+                                                                              clearInterval(processId);
+                                                                          } else {
+                                                                              $("#sale_cash").focus();
+                                                                          }
+                                                                      }, 0);
+                                                                  } else {
+                                                                      $("#sale_card_fields_container").removeClass("hidden");
+                                                                      $("#sale_bank_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                                                                      $("#sale_cash_field_container").addClass("hidden");
+                                                                      $("#sale_change_field_container").addClass("hidden");
+                                                                  }
+                                                                  $($(".stepContainer")[0]).css("height", "100%");
+                                                              });
+
+                                                              $('#search-sale-product-btn').on('click', function () {
+                                                                  bootboxDialogForm = bootbox
+                                                                          .dialog({
+                                                                              title: 'Search Product',
+                                                                              message: $('#searchSaleProductForm'),
+                                                                              show: false, /* We will show it manually later */
+                                                                              onEscape: true
+                                                                          }).on('shown.bs.modal', function () {
+                                                                      $('#searchSaleProductForm')
+                                                                              .show();
+                                                                      $("#sale_product_code").focus();
+                                                                      $("#sale_product_code").val("");
+                                                                      $("#sale_product_color_field_container").html("");
+                                                                      $("#sale_product_size_field_container").html("");
+                                                                      $("#modal_form_btn_add_product").addClass("hidden");
+                                                                  }).on('hide.bs.modal', function (e) {
+                                                                      $('#searchSaleProductForm').hide().appendTo('body');
+                                                                      var processId = setInterval(function () {
+                                                                          if ($("#barcode").is(":focus")) {
+                                                                              clearInterval(processId);
+                                                                          } else {
+                                                                              $("#barcode").focus();
+                                                                          }
+                                                                      }, 0);
+                                                                  }).modal('show');
+                                                              });
+
+                                                              $('#sale_product_code').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $.get("/sales/get_product_colors", {
+                                                                          sale_product_code: $("#sale_product_code").val().trim()
+                                                                      });
+                                                                      return false;
+                                                                  }
+                                                              });
+
+                                                              $('#modal_form_btn_add_product').click(function () {
+                                                                  if ($("#sale_product_code").val().trim() == "" || $("#sale_product_color").val().trim() == "" || $("#sale_product_size").val().trim() == "")
+                                                                      bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                                                  else
+                                                                      $.get("/sales/get_product", {
+                                                                          sale_product_code: $("#sale_product_code").val().trim(),
+                                                                          sale_product_color: $("#sale_product_color").val().trim(),
+                                                                          sale_product_size: $("#sale_product_size").val().trim()
+                                                                      });
+                                                              });
+
+                                                        <% if @member.present? %>
+                                                                $("#member-name").html("<%= @member.name %>");
+                                                                $("#member-address").html("<%= @member.address %>");
+                                                                $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+                                                                $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+                                                                $("#member-email").html("<%= @member.email %>");
+                                                                $("#member-identifier").html("<%= @member.member_id %>");
+                                                                $("#member-info").removeClass("hidden");
+                                                        <% end %>
+
+                                                              // hapus duplikat form modal untuk mencari product
+                                                              if ($('.search-sale-product-form').length > 1)
+                                                                  $('#searchSaleProductForm').remove();
+
+                                                              $("#payment_form_total_sale").html($("#total-sale").html());
+
+                                                        <% if @sale.gift_event_id.present? && @sale.gift_event_gift_type.eql?("Discount") %>
+                                                                $("#sale_gift_event_discount_field").toCurrency({
+                                                                    precision: 2, // decimal precision
+                                                                    delimiter: ".", // thousands delimiter
+                                                                    separator: ",", // decimal separator
+                                                                    unit: "Rp", // unit
+                                                                    format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                                                    negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                                                                });
+                                                                var saleSubtotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                if (isNaN(saleSubtotal))
+                                                                    saleSubtotal = 0;
+
+                                                                var saleDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                if (isNaN(saleDiscount))
+                                                                    saleDiscount = 0;
+
+                                                                var totalAfterDiscount = saleSubtotal - saleDiscount;
+                                                                $("#payment_form_total_sale_after_discount").html(totalAfterDiscount);
+                                                                $("#payment_form_total_sale_after_discount").toCurrency({
+                                                                    precision: 2, // decimal precision
+                                                                    delimiter: ".", // thousands delimiter
+                                                                    separator: ",", // decimal separator
+                                                                    unit: "Rp", // unit
+                                                                    format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                                                    negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                                                                });
+                                                        <% end %>
+
+                                                              if ($("#sale_cash").val().trim() != "") {
+                                                                  var cashValue = parseFloat($("#sale_cash").val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(cashValue))
+                                                                      cashValue = 0;
+
+                                                                  var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(saleTotal))
+                                                                      saleTotal = 0;
+
+                                                                  var giftEventDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
+                                                                      giftEventDiscount = 0;
+
+                                                                  var moneyChange = cashValue - (saleTotal - giftEventDiscount);
+                                                                  $("#payment_form_sale_change").html(moneyChange);
+                                                                  $("#payment_form_sale_change").toCurrency({
+                                                                      precision: 2, // decimal precision
+                                                                      delimiter: ".", // thousands delimiter
+                                                                      separator: ",", // decimal separator
+                                                                      unit: "Rp", // unit
+                                                                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                                                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                                                                  });
+                                                              }
+                                                              if ($("#sale_gift_event_discount_field").is(":visible")) {
+                                                                  var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(saleTotal))
+                                                                      saleTotal = 0;
+
+                                                                  var giftEventDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                  if (isNaN(giftEventDiscount))
+                                                                      giftEventDiscount = 0;
+
+                                                                  var totalAfterDiscount = saleTotal - giftEventDiscount;
+                                                                  $("#payment_form_total_sale_after_discount").html(totalAfterDiscount);
+                                                                  $("#payment_form_total_sale_after_discount").toCurrency({
+                                                                      precision: 2, // decimal precision
+                                                                      delimiter: ".", // thousands delimiter
+                                                                      separator: ",", // decimal separator
+                                                                      unit: "Rp", // unit
+                                                                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                                                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                                                                  });
+                                                              }
+                                                        <% if @sale.payment_method.eql?("Card") %>
+                                                                $("#sale_bank_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                                                        <% end %>
+
+                                                              $('#sale_cash').keypress(function (e) {
+                                                                  var key = e.which;
+                                                                  if (key == 13)  // the enter key code
+                                                                  {
+                                                                      $(this).blur();
+                                                                      $(".actionBar > .buttonFinish").click();
+                                                                      return false;
+                                                                  }
+                                                              });
+                                                              $("#btn-change-gift-item-gift-event").click(function () {
+                                                                  bootboxDialogFormGiftEvent = bootbox
+                                                                          .dialog({
+                                                                              title: 'Add Gift',
+                                                                              message: $('#addSaleGiftForm'),
+                                                                              show: false, /* We will show it manually later */
+                                                                              onEscape: true
+                                                                          }).on('shown.bs.modal', function () {
+                                                                      $('#addSaleGiftForm')
+                                                                              .show();
+                                                                      $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                                                                      $('#discount_product').val('').trigger('chosen:updated');
+                                                                      $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
+                                                                      $(".gift-event-product-search-fields").addClass("hidden");
+                                                                      $("#modal_form_btn_add_event_gift_product").addClass("hidden");
+                                                                      $("#sale_event_gift_product_color_field_container").html("");
+                                                                      $("#sale_event_gift_product_size_field_container").html("");
+                                                                  }).on('hide.bs.modal', function (e) {
+                                                                      $('#addSaleGiftForm').hide().appendTo('body');
+                                                                  }).modal('show');
+                                                              });
+                                                              $("#btn-change-discount-gift-event").click(function () {
+                                                                  bootboxDialogFormGiftEvent = bootbox
+                                                                          .dialog({
+                                                                              title: 'Add Gift',
+                                                                              message: $('#addSaleGiftForm'),
+                                                                              show: false, /* We will show it manually later */
+                                                                              onEscape: true
+                                                                          }).on('shown.bs.modal', function () {
+                                                                      $('#addSaleGiftForm')
+                                                                              .show();
+                                                                      $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                                                                      $('#discount_product').val('').trigger('chosen:updated');
+                                                                      $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
+                                                                      $(".gift-event-product-search-fields").addClass("hidden");
+                                                                      $("#modal_form_btn_add_event_gift_product").addClass("hidden");
+                                                                      $("#sale_event_gift_product_color_field_container").html("");
+                                                                      $("#sale_event_gift_product_size_field_container").html("");
+                                                                  }).on('hide.bs.modal', function (e) {
+                                                                      $('#addSaleGiftForm').hide().appendTo('body');
+                                                                  }).modal('show');
+                                                              });
+                                                              
+                                                          });
+                                                        </script>
+                                                      <% end %>

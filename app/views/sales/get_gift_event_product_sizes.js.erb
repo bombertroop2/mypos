@@ -1,0 +1,7 @@
+<% if @product_sizes.blank? %>    
+  var box = bootbox.alert({message: "No records found",size: 'small'});
+<% else %>
+  $("#sale_event_gift_product_size_field_container").html("<%= j(render(partial: "sale_gift_event_product_sizes_field")) %>");
+  $("#sale_gift_event_product_size").attr("data-placeholder", "Select").chosen("destroy").chosen();
+  $("#modal_form_btn_add_event_gift_product").removeClass("hidden");
+<% end %>

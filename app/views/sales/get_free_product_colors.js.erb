@@ -1,0 +1,11 @@
+<% if @product_colors.present? %>
+  $("#sale_product_bogo_color_field_container_<%= params[:product_row_index] %>").html("<%= j(render(partial: "sale_bogo_product_colors_field", locals: {product_row_index: params[:product_row_index], product_colors: @product_colors, product_code: params[:sale_bogo_product_code], product_barcode_id: params[:product_barcode_id]})) %>");
+<% else %>
+  $("#sale_product_bogo_color_field_container_<%= params[:product_row_index] %>").html("");
+  var box = bootbox.alert({message: "No colors found",size: 'small'});
+  box.on("hidden.bs.modal", function () { 
+    $("#bogo_product_code_<%= params[:product_row_index] %>").focus();
+  });
+<% end %>
+$("#sale_product_bogo_size_field_container_<%= params[:product_row_index] %>").html("");
+$("#modal_form_btn_add_bogo_product_<%= params[:product_row_index] %>").addClass("hidden");

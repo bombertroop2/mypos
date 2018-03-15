@@ -1,0 +1,11 @@
+<%#= fields_for "sale[sale_products_attributes][#{sale_product.product_barcode_id}]", sale_product do |sale_product_fields| %>
+<%= fields_for "sale[sale_products_attributes][#{form_fields_index}]", sale_product do |sale_product_fields| %>
+  <%= sale_product_fields.hidden_field :product_barcode_id %>
+  <%= sale_product_fields.hidden_field :event_id %>
+  <%= sale_product_fields.hidden_field :free_product_id %>
+  <!--
+    <div class="form-group<%#= control_group_error(sale_product_fields.object, :quantity) %>">
+  <%#= sale_product_fields.text_field :quantity, class: "form-control sale-product-quantity-fields", style: "width: 75px; text-align: center", id: "sale-product-quantity-#{sale_product.product_barcode_id}" %>
+  <%#= error_help_text(sale_product_fields.object, :quantity) %>
+      </div>-->
+<% end %>

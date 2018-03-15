@@ -1,0 +1,47 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Sales</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Member</th>
+      <th>Transaction time</th>
+      <th>Bank</th>
+      <th>Payment type</th>
+      <th>Total</th>
+      <th>Trace number</th>
+      <th>Card number</th>
+      <th>Cash</th>
+      <th>Change</th>
+      <th>Transaction number</th>
+      <th>Cashier opening</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @sales.each do |sale| %>
+      <tr>
+        <td><%= sale.member %></td>
+        <td><%= sale.transaction_time %></td>
+        <td><%= sale.bank %></td>
+        <td><%= sale.payment_type %></td>
+        <td><%= sale.total %></td>
+        <td><%= sale.trace_number %></td>
+        <td><%= sale.card_number %></td>
+        <td><%= sale.cash %></td>
+        <td><%= sale.change %></td>
+        <td><%= sale.transaction_number %></td>
+        <td><%= sale.cashier_opening %></td>
+        <td><%= link_to 'Show', sale %></td>
+        <td><%= link_to 'Edit', edit_sale_path(sale) %></td>
+        <td><%= link_to 'Destroy', sale, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Sale', new_sale_path %>

@@ -219,6 +219,9 @@
                                                     <% if can? :read, CashierOpening %>
                                                       <li><%= link_to "Closing", cashier_openings_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :manage, Sale %>
+                                                      <li><%= link_to "Sale", new_sale_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -689,9 +692,9 @@
                           $("#filter_shift").val($("#filter-shift").val());
                           $(".smart-listing-controls").submit();
                       });
-        <% if notice.present? %>
-                        bootbox.alert({message: "<%= notice %>", size: 'small'});
-        <% end %>
+        <%# if notice.present? %>
+                      //bootbox.alert({message: "<%#= notice %>", size: 'small'});
+        <%# end %>
       <% elsif controller_name.eql?("cash_disbursements") %>
                       $("#search-cash-disbursement-btn").click(function () {
                           $("#filter_date").val($("#filter-date").val());
@@ -717,6 +720,250 @@
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {
                             return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("sales") %>
+                      $("#menu_toggle").click();
+                      $("#member-id").focus();
+                      $(window).on("keydown", function (e) {
+                          if (e.ctrlKey && e.altKey && e.which === 49)
+                              $("#list-step-1").click();
+                          else if (e.ctrlKey && e.altKey && e.which === 50)
+                              $("#list-step-2").click();
+                          else if (e.ctrlKey && e.altKey && e.which === 51)
+                              $("#list-step-3").click();
+                          else if (e.altKey && e.which === 83 && $("#step-2").is(":visible"))
+                              $("#search-sale-product-btn").click();
+                          else if (e.shiftKey && e.altKey && e.which === 39)
+                              $(".actionBar > .buttonNext").click();
+                          else if (e.shiftKey && e.altKey && e.which === 37)
+                              $(".actionBar > .buttonPrevious").click();
+                          else if (e.shiftKey && e.altKey && e.which === 40)
+                              $(".actionBar > .buttonFinish").click();
+                      });
+
+                      $('#sale_cash').autoNumeric('init');
+                      $('#sale_pay').autoNumeric('init');
+
+                      $('#sale_cash').keyup(function () {
+                          var cashValue = parseFloat($(this).val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                          if (isNaN(cashValue))
+                              cashValue = 0;
+
+                          var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'))
+                          if (isNaN(saleTotal))
+                              saleTotal = 0;
+
+                          var giftEventDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                          if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
+                              giftEventDiscount = 0;
+
+                          var moneyChange = cashValue - (saleTotal - giftEventDiscount);
+                          $("#payment_form_sale_change").html(moneyChange);
+                          $("#payment_form_sale_change").toCurrency({
+                              precision: 2, // decimal precision
+                              delimiter: ".", // thousands delimiter
+                              separator: ",", // decimal separator
+                              unit: "Rp", // unit
+                              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                          });
+                      });
+
+
+                      $("#search-member-btn").click(function () {
+                          $("#member-id").blur();
+                          $.get("/sales/get_member", {
+                              member_id: $("#member-id").val().trim()
+                          });
+
+                      });
+
+                      $("#search-barcode-btn").click(function () {
+                          $("#barcode").blur();
+                          $.get("/sales/get_product", {
+                              barcode: $("#barcode").val().trim()
+                          });
+
+                      });
+
+                      $('#member-id').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#search-member-btn").click();
+                              return false;
+                          }
+                      });
+
+                      $('#barcode').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#search-barcode-btn").click();
+                              return false;
+                          }
+                      });
+
+                      $('#sale_card_number').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#sale_trace_number").focus();
+                              return false;
+                          }
+                      });
+
+                      $('#sale_trace_number').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#sale_pay").focus();
+                              return false;
+                          }
+                      });
+
+                      $('#sale_pay').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $(".actionBar > .buttonFinish").click();
+
+                              return false;
+                          }
+                      });
+
+                      $("#sale_payment_method").change(function () {
+                          if ($(this).val() == "Cash") {
+                              $("#sale_card_fields_container").addClass("hidden");
+                              $("#sale_cash_field_container").removeClass("hidden");
+                              $("#sale_change_field_container").removeClass("hidden");
+                              var processId = setInterval(function () {
+                                  if ($("#sale_cash").is(":focus")) {
+                                      clearInterval(processId);
+                                  } else {
+                                      $("#sale_cash").focus();
+                                  }
+                              }, 0);
+                          } else {
+                              $("#sale_card_fields_container").removeClass("hidden");
+                              $("#sale_bank_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                              $("#sale_cash_field_container").addClass("hidden");
+                              $("#sale_change_field_container").addClass("hidden");
+                          }
+                          $($(".stepContainer")[0]).css("height", "100%");
+                      });
+
+
+                      $('#search-sale-product-btn').on('click', function () {
+                          bootboxDialogForm = bootbox
+                                  .dialog({
+                                      title: 'Search Product',
+                                      message: $('#searchSaleProductForm'),
+                                      show: false, /* We will show it manually later */
+                                      onEscape: true
+                                  }).on('shown.bs.modal', function () {
+                              $('#searchSaleProductForm')
+                                      .show();
+                              $("#sale_product_code").focus();
+                              $("#sale_product_code").val("");
+                              $("#sale_product_color_field_container").html("");
+                              $("#sale_product_size_field_container").html("");
+                              $("#modal_form_btn_add_product").addClass("hidden");
+                          }).on('hide.bs.modal', function (e) {
+                              $('#searchSaleProductForm').hide().appendTo('body');
+                              var processId = setInterval(function () {
+                                  if ($("#barcode").is(":focus")) {
+                                      clearInterval(processId);
+                                  } else {
+                                      $("#barcode").focus();
+                                  }
+                              }, 0);
+                          }).modal('show');
+                      });
+
+                      $('#sale_product_code').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $.get("/sales/get_product_colors", {
+                                  sale_product_code: $("#sale_product_code").val().trim()
+                              });
+                              return false;
+                          }
+                      });
+                      $('#modal_form_btn_add_product').click(function () {
+                          if ($("#sale_product_code").val().trim() == "" || $("#sale_product_color").val().trim() == "" || $("#sale_product_size").val().trim() == "")
+                              bootbox.alert({message: "Please fill out the field above", size: "small"});
+                          else
+                              $.get("/sales/get_product", {
+                                  sale_product_code: $("#sale_product_code").val().trim(),
+                                  sale_product_color: $("#sale_product_color").val().trim(),
+                                  sale_product_size: $("#sale_product_size").val().trim()
+                              });
+                      });
+                      $('#sale_cash').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $(".actionBar > .buttonFinish").click();
+                              return false;
+                          }
+                      });
+
+                      $("#btn-change-gift-item-gift-event").click(function () {
+                          bootboxDialogFormGiftEvent = bootbox
+                                  .dialog({
+                                      title: 'Add Gift',
+                                      message: $('#addSaleGiftForm'),
+                                      show: false, /* We will show it manually later */
+                                      onEscape: true
+                                  }).on('shown.bs.modal', function () {
+                              $('#addSaleGiftForm')
+                                      .show();
+                              $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                              $('#discount_product').val('').trigger('chosen:updated');
+                              $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
+                              $(".gift-event-product-search-fields").addClass("hidden");
+                              $("#modal_form_btn_add_event_gift_product").addClass("hidden");
+                              $("#sale_event_gift_product_color_field_container").html("");
+                              $("#sale_event_gift_product_size_field_container").html("");
+                          }).on('hide.bs.modal', function (e) {
+                              $('#addSaleGiftForm').hide().appendTo('body');
+                          }).modal('show');
+                      });
+
+                      $("#btn-change-discount-gift-event").click(function () {
+                          bootboxDialogFormGiftEvent = bootbox
+                                  .dialog({
+                                      title: 'Add Gift',
+                                      message: $('#addSaleGiftForm'),
+                                      show: false, /* We will show it manually later */
+                                      onEscape: true
+                                  }).on('shown.bs.modal', function () {
+                              $('#addSaleGiftForm')
+                                      .show();
+                              $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                              $('#discount_product').val('').trigger('chosen:updated');
+                              $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
+                              $(".gift-event-product-search-fields").addClass("hidden");
+                              $("#modal_form_btn_add_event_gift_product").addClass("hidden");
+                              $("#sale_event_gift_product_color_field_container").html("");
+                              $("#sale_event_gift_product_size_field_container").html("");
+                          }).on('hide.bs.modal', function (e) {
+                              $('#addSaleGiftForm').hide().appendTo('body');
+                          }).modal('show');
+                      });
+
+        <% unless @cashier_opened %>
+                        bootbox.alert({
+                            message: 'Please open the cashier first',
+                            size: 'small',
+                            callback: function () {
+                                window.location = '<%= new_cashier_opening_path %>';
+                            }
                         });
         <% end %>
       <% end %>

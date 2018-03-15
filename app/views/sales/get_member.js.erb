@@ -1,0 +1,19 @@
+<% if @member.nil? %>    
+  var box = bootbox.alert({message: "No records found",size: 'small'});
+  box.on("hidden.bs.modal", function () { 
+  $("#member-id").focus();
+  });
+  $("#member-info").addClass("hidden");
+  $("#sale_member_id").val("");
+<% else %>
+  $("#member-name").html("<%= @member.name %>");
+  $("#member-address").html("<%= @member.address %>");
+  $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+  $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+  $("#member-email").html("<%= @member.email %>");
+  $("#member-identifier").html("<%= @member.member_id %>");
+  $("#member-info").removeClass("hidden");
+  $("#member-id").focus();
+  $("#sale_member_id").val("<%= @member.id %>");
+<% end %>
+$($(".stepContainer")[0]).css("height", "100%");

@@ -69,10 +69,14 @@ class EventsController < ApplicationController
     begin
       @valid = @event.save
       unless @valid
-        @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
-        @brands = Brand.select(:id, :code, :name).order(:code)
-        @goods_types = GoodsType.select(:id, :code, :name).order(:code)
-        @models = Model.select(:id, :code, :name).order(:code)
+        if @event.errors[:base].present?
+          render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});"
+        else
+          @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+          @brands = Brand.select(:id, :code, :name).order(:code)
+          @goods_types = GoodsType.select(:id, :code, :name).order(:code)
+          @models = Model.select(:id, :code, :name).order(:code)
+        end
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
