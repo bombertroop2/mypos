@@ -1,11 +1,30 @@
+include SmartListing::Helper::ControllerExtensions
 class SalesController < ApplicationController
+  helper SmartListing::Helper
   load_and_authorize_resource
   before_action :set_sale, only: [:show, :edit, :update, :destroy]
 
   # GET /sales
   # GET /sales.json
   def index
-    @sales = Sale.all
+    like_command = if Rails.env.eql?("production")
+      "ILIKE"
+    else
+      "LIKE"
+    end
+    
+    if params[:filter_date].present?
+      splitted_start_time_range = params[:filter_date].split("-")
+      start_start_time = Time.zone.parse splitted_start_time_range[0].strip
+      end_start_time = Time.zone.parse splitted_start_time_range[1].strip
+    end
+
+    warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
+    sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+    sales_scope = sales_scope.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date].present?
+    sales_scope = sales_scope.where(["transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
+    sales_scope = sales_scope.where(["payment_method = ?", params[:filter_payment_method]]) if params[:filter_payment_method].present?
+    @sales = smart_listing_create(:sales, sales_scope, partial: 'sales/listing', default_sort: {transaction_time: "DESC"})
   end
 
   # GET /sales/1
@@ -126,7 +145,7 @@ class SalesController < ApplicationController
       #      StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").select(:id, "sizes.size AS product_size", "common_fields.name", "colors_product_colors.name AS color_name").first
       StockDetail.joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).where(["price_lists.effective_date <= ?", Date.current]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").select(:id, "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").order("price_lists.effective_date DESC").first
     else
-#      StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: :color], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"products.code" => params[:sale_bogo_product_code].upcase, size_id: params[:sale_bogo_product_size], color_id: params[:sale_bogo_product_color]).where("stock_details.color_id = product_colors.color_id").select(:id, "sizes.size AS product_size", "common_fields.name", "colors_product_colors.name AS color_name").first
+      #      StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: :color], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"products.code" => params[:sale_bogo_product_code].upcase, size_id: params[:sale_bogo_product_size], color_id: params[:sale_bogo_product_color]).where("stock_details.color_id = product_colors.color_id").select(:id, "sizes.size AS product_size", "common_fields.name", "colors_product_colors.name AS color_name").first
       StockDetail.joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"products.code" => params[:sale_bogo_product_code].upcase, size_id: params[:sale_bogo_product_size], color_id: params[:sale_bogo_product_color]).where(["price_lists.effective_date <= ?", Date.current]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").select(:id, "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").order("price_lists.effective_date DESC").first
     end
 

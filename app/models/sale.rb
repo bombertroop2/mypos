@@ -22,7 +22,7 @@ class Sale < ApplicationRecord
   accepts_nested_attributes_for :sale_products
   
   before_validation :remove_card_details, if: proc{|sale| sale.payment_method.eql?("Cash")}
-    before_validation :remove_cash_details, if: proc{|sale| sale.payment_method.eql?("Card")}
+    before_validation :remove_cash_details, :set_pay, if: proc{|sale| sale.payment_method.eql?("Card")}
       before_validation :remove_gift_event_product, if: proc{|sale| sale.gift_event_gift_type.eql?("Discount")}
 
         validate :member_available, if: proc {|sale| sale.member_id.present?}
@@ -50,6 +50,10 @@ class Sale < ApplicationRecord
                                     after_create :create_listing_stock
   
                                     private
+                                    
+                                    def set_pay
+                                      self.pay = total
+                                    end
                               
                                     def remove_gift_event_product
                                       self.gift_event_product_id = nil

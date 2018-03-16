@@ -77,6 +77,7 @@ module ApplicationHelper
     return true if can? :manage, CashierOpening
     return true if can? :read, CashDisbursement
     return true if can? :manage, Sale
+    return true if can? :read, Sale
   end
 
   def goods_in_transit_active?

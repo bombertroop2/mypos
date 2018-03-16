@@ -222,6 +222,9 @@
                                                     <% if can? :manage, Sale %>
                                                       <li><%= link_to "Sale", new_sale_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, Sale %>
+                                                      <li><%= link_to "Sales", sales_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -723,7 +726,16 @@
                         });
         <% end %>
       <% elsif controller_name.eql?("sales") %>
-                      $("#menu_toggle").click();
+        <% unless action_name.eql?("index") %>
+                        $("#menu_toggle").click();
+        <% else %>
+                        $("#search-sale-btn").click(function () {
+                            $("#filter_payment_method").val($("#filter-payment-method").val());
+                            $("#filter_date").val($("#filter-sale-transaction-time").val());
+                            $("#filter_string").val($("#filter-string").val());
+                            $(".smart-listing-controls").submit();
+                        });
+        <% end %>
                       $("#member-id").focus();
                       $(window).on("keydown", function (e) {
                           if (e.ctrlKey && e.altKey && e.which === 49)
@@ -957,7 +969,7 @@
                           }).modal('show');
                       });
 
-        <% unless @cashier_opened %>
+        <% if !@cashier_opened && !action_name.eql?("index") %>
                         bootbox.alert({
                             message: 'Please open the cashier first',
                             size: 'small',

@@ -233,5 +233,22 @@ $(function () {
         }
     });
 
+    $('#filter-sale-transaction-time').daterangepicker(
+            {
+                locale: {
+                    format: 'DD/MM/YYYY HH:mm'
+                },
+                opens: "left",
+                autoUpdateInput: false,
+                timePicker: true,
+                timePicker24Hour: true
+            });
+    $('#filter-sale-transaction-time').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm') + ' - ' + picker.endDate.format('DD/MM/YYYY HH:mm'));
+    });
+
+    $('#filter-sale-transaction-time').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+    });
 
 });

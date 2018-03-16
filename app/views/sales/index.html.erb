@@ -1,47 +1,25 @@
-<p id="notice"><%= notice %></p>
+<div class="page-header">
+    <h1>Sales</h1>
+</div>
 
-<h1>Sales</h1>
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" id="filter-string" class="form-control" placeholder="Transaction number">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-sale-transaction-time" placeholder="Transaction time" style="width: 256px !important">
+    </div>
+    <div class="form-group">
+        <%= select_tag "payment_method", options_for_select(Sale::PAYMENT_METHODS), {prompt: "Payment method", class: "form-control", id: "filter-payment-method"} %>
+      </div>
+    <button id="search-sale-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Member</th>
-      <th>Transaction time</th>
-      <th>Bank</th>
-      <th>Payment type</th>
-      <th>Total</th>
-      <th>Trace number</th>
-      <th>Card number</th>
-      <th>Cash</th>
-      <th>Change</th>
-      <th>Transaction number</th>
-      <th>Cashier opening</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @sales.each do |sale| %>
-      <tr>
-        <td><%= sale.member %></td>
-        <td><%= sale.transaction_time %></td>
-        <td><%= sale.bank %></td>
-        <td><%= sale.payment_type %></td>
-        <td><%= sale.total %></td>
-        <td><%= sale.trace_number %></td>
-        <td><%= sale.card_number %></td>
-        <td><%= sale.cash %></td>
-        <td><%= sale.change %></td>
-        <td><%= sale.transaction_number %></td>
-        <td><%= sale.cashier_opening %></td>
-        <td><%= link_to 'Show', sale %></td>
-        <td><%= link_to 'Edit', edit_sale_path(sale) %></td>
-        <td><%= link_to 'Destroy', sale, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
-
-<%= link_to 'New Sale', new_sale_path %>
+<div class="hidden">
+    <%= smart_listing_controls_for(:sales, {class: "form-inline text-right"}) do %>
+    <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
+    <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+    <%= text_field_tag :filter_payment_method, '', class: "search form-control", autocomplete: :off %>
+      <% end %>
+  </div>
+  <%= smart_listing_render(:sales) %>

@@ -203,7 +203,7 @@
                                                   <%= error_help_text(@sale, :trace_number) %>
                                               </div>
                                           </div>
-                                          <div class="form-group<%= control_group_error(@sale, :pay) %>">
+                                          <div class="hidden form-group<%= control_group_error(@sale, :pay) %>">
                                               <%= f.label :pay, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
                                                 <div class="col-md-6 col-sm-6 col-xs-12">
                                                     <%= f.text_field :pay, class: "form-control", "data-a-sep" => ".",
@@ -235,7 +235,7 @@
                                                                   <%= error_help_text(@sale, :trace_number) %>
                                                               </div>
                                                           </div>
-                                                          <div class="form-group<%= control_group_error(@sale, :pay) %>">
+                                                          <div class="hidden form-group<%= control_group_error(@sale, :pay) %>">
                                                               <%= f.label :pay, class: "control-label col-md-3 col-sm-3 col-xs-12" %>
                                                                 <div class="col-md-6 col-sm-6 col-xs-12">
                                                                     <%= f.text_field :pay, class: "form-control", "data-a-sep" => ".",
