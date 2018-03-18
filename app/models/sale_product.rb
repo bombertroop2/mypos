@@ -6,6 +6,7 @@ class SaleProduct < ApplicationRecord
   belongs_to :product_barcode
   belongs_to :free_product, class_name: "StockDetail", foreign_key: :free_product_id
   belongs_to :price_list
+  belongs_to :event
 
   # hapus event_id apabila event gift, cukup di parent Sale
   before_validation :add_quantity
@@ -15,7 +16,7 @@ class SaleProduct < ApplicationRecord
     validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |sp| sp.quantity.present? }
       validates :quantity, numericality: {less_than_or_equal_to: :stock_quantity, only_integer: true}, if: proc { |sp| sp.quantity.present? }
         validates :free_product_id, presence: true, if: proc{|sp| sp.event_id.present? && sp.event_type.eql?("Buy 1 Get 1 Free")}
-        validates :price_list_id, presence: true, unless: proc{|sp| sp.event_type.eql?("Special Price")}
+        validates :price_list_id, presence: true#, unless: proc{|sp| sp.event_type.eql?("Special Price")}
 
           before_create :update_total
           after_create :update_stock

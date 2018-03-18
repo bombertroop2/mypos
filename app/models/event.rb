@@ -5,6 +5,7 @@ class Event < ApplicationRecord
 
   has_many :event_warehouses, dependent: :destroy
   has_many :event_general_products, dependent: :destroy
+  has_many :sale_products
   
   before_validation :remove_white_space, :upcase_code
   validates :code, :name, :start_date_time, :end_date_time, :event_type, presence: true

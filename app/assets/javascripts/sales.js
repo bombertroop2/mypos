@@ -236,15 +236,16 @@ $(function () {
     $('#filter-sale-transaction-time').daterangepicker(
             {
                 locale: {
-                    format: 'DD/MM/YYYY HH:mm'
+                    format: 'DD/MM/YYYY HH:mm:ss'
                 },
                 opens: "left",
                 autoUpdateInput: false,
                 timePicker: true,
-                timePicker24Hour: true
+                timePicker24Hour: true,
+                timePickerSeconds: true
             });
     $('#filter-sale-transaction-time').on('apply.daterangepicker', function (ev, picker) {
-        $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm') + ' - ' + picker.endDate.format('DD/MM/YYYY HH:mm'));
+        $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm:ss') + ' - ' + picker.endDate.format('DD/MM/YYYY HH:mm:ss'));
     });
 
     $('#filter-sale-transaction-time').on('cancel.daterangepicker', function (ev, picker) {

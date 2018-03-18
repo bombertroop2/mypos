@@ -282,7 +282,7 @@ class SalesController < ApplicationController
     params[:sale][:sale_products_attributes].each do |key, value|
       if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
         if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
-          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"]
+          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"], price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
         else
           params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"], price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
         end
@@ -313,7 +313,16 @@ class SalesController < ApplicationController
   
   # Use callbacks to share common setup or constraints between actions.
   def set_sale
-    @sale = Sale.find(params[:id])
+    @sale = Sale.joins("LEFT JOIN members on members.id = sales.member_id").
+      joins("LEFT JOIN banks on banks.id = sales.bank_id").
+      joins("LEFT JOIN stock_details on sales.gift_event_product_id = stock_details.id").
+      joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
+      joins("LEFT JOIN products on stock_products.product_id = products.id").
+      joins("LEFT JOIN common_fields on common_fields.id = products.brand_id AND common_fields.type IN ('Brand')").
+      joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
+      joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
+      joins("LEFT JOIN events ON events.id = sales.gift_event_id").
+      select(:id, "members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id").where(id: params[:id]).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

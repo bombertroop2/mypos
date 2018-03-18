@@ -830,7 +830,8 @@
                           var key = e.which;
                           if (key == 13)  // the enter key code
                           {
-                              $("#sale_pay").focus();
+                              $(this).blur();
+                              $(".actionBar > .buttonFinish").click();
                               return false;
                           }
                       });
