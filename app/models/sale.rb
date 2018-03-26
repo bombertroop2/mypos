@@ -1,5 +1,5 @@
 class Sale < ApplicationRecord
-  attr_accessor :warehouse_id, :cashier_id, :pay, :gift_event_gift_type, :gift_event_discount_amount
+  attr_accessor :warehouse_id, :cashier_id, :pay, :gift_event_gift_type, :gift_event_discount_amount, :attr_print_receipt
   
   belongs_to :member
   belongs_to :bank
@@ -31,7 +31,7 @@ class Sale < ApplicationRecord
           validates :gift_event_gift_type, presence: true, if: proc{|sale| sale.gift_event_id.present?}
             validate :payment_method_available
             validate :gift_option_available, if: proc{|sale| sale.gift_event_id.present?}
-              validate :is_cashier_opened
+              validate :is_cashier_opened, unless: proc{|sale| sale.attr_print_receipt}
               validate :transaction_open, :transaction_after_beginning_stock_added
               validates :cash, presence: true, if: proc{|sale| sale.payment_method.eql?("Cash")}
                 validates :cash, numericality: {greater_than_or_equal_to: :sale_total}, if: proc { |sale| sale.cash.is_a?(Numeric) && sale.cash.present? && sale.payment_method.eql?("Cash") }

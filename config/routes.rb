@@ -12,6 +12,9 @@ Rails.application.routes.draw do
       get "get_gift_event_product_colors"
       get "get_gift_event_product_sizes"
     end
+    member do
+      get "print"
+    end
   end
   resources :members
   resources :banks, except: :show

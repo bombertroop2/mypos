@@ -32,6 +32,20 @@ class SalesController < ApplicationController
   def show
   end
 
+  def print
+    @sale = Sale.joins(cashier_opening: [warehouse: :sales_promotion_girls]).
+      joins("LEFT JOIN members on members.id = sales.member_id").
+      joins("LEFT JOIN banks on banks.id = sales.bank_id").
+      joins("LEFT JOIN stock_details on sales.gift_event_product_id = stock_details.id").
+      joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
+      joins("LEFT JOIN products on stock_products.product_id = products.id").
+      joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
+      joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
+      joins("LEFT JOIN events ON events.id = sales.gift_event_id").
+      select(:id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+      where(id: params[:id]).where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
+  end
+
   # GET /sales/new
   def new
     session.delete("sale")
@@ -313,7 +327,8 @@ class SalesController < ApplicationController
   
   # Use callbacks to share common setup or constraints between actions.
   def set_sale
-    @sale = Sale.joins("LEFT JOIN members on members.id = sales.member_id").
+    @sale = Sale.joins(cashier_opening: [warehouse: :sales_promotion_girls]).
+      joins("LEFT JOIN members on members.id = sales.member_id").
       joins("LEFT JOIN banks on banks.id = sales.bank_id").
       joins("LEFT JOIN stock_details on sales.gift_event_product_id = stock_details.id").
       joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
@@ -322,7 +337,8 @@ class SalesController < ApplicationController
       joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
       joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
       joins("LEFT JOIN events ON events.id = sales.gift_event_id").
-      select(:id, "members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id").where(id: params[:id]).first
+      select(:id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+      where(id: params[:id]).where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

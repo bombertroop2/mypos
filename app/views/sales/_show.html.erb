@@ -89,7 +89,7 @@
       joins("LEFT JOIN sizes free_products_sizes ON stock_details.size_id = free_products_sizes.id").
       joins("LEFT JOIN common_fields free_products_colors ON free_products_colors.id = stock_details.color_id AND free_products_colors.type IN ('Color')").
       joins("LEFT JOIN events ON events.id = sale_products.event_id").
-      select(:total, "product_barcodes.barcode", "brands_products.name AS product_name", "products.code AS product_code", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "free_products_brands.name AS free_product_name", "free_products_colors.name AS free_product_color_name", "free_products_sizes.size AS free_product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "events.event_type AS sale_event_type", "sale_products.total AS subtotal") %>
+      select("product_barcodes.barcode", "brands_products.name AS product_name", "products.code AS product_code", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "free_products_brands.name AS free_product_name", "free_products_colors.name AS free_product_color_name", "free_products_sizes.size AS free_product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "events.event_type AS sale_event_type", "sale_products.total AS subtotal") %>
 
     <table class="table table-striped">
         <thead>
