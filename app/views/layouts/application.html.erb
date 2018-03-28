@@ -252,6 +252,9 @@
                                                     <% if can? :read, Member %>
                                                       <li><%= link_to "Members", members_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :manage, Company %>
+                                                      <li><%= link_to "Companies", companies_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
