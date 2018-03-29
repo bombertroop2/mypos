@@ -48,12 +48,8 @@ class UsersController < ApplicationController
     else
       sales_promotion_girl = SalesPromotionGirl.joins(:warehouse).select("sales_promotion_girls.id, sales_promotion_girls.name, gender, mobile_phone, role").where(id: params[:user][:sales_promotion_girl_id]).first
       if sales_promotion_girl.user.blank?
-        @user = User.new(name: sales_promotion_girl.name, gender: sales_promotion_girl.gender,
-          mobile_phone: sales_promotion_girl.mobile_phone, role: sales_promotion_girl.role,
-          email: params[:user][:email], sales_promotion_girl_id: params[:user][:sales_promotion_girl_id],
-          username: params[:user][:username], password: params[:user][:password],
-          password_confirmation: params[:user][:password_confirmation], active: params[:user][:active],
-          creating_spg_user: true)
+        params[:user].merge! name: sales_promotion_girl.name, gender: sales_promotion_girl.gender, mobile_phone: sales_promotion_girl.mobile_phone, role: sales_promotion_girl.role, creating_spg_user: true
+        @user = User.new(user_params)
         if !@user.save
           if @user.errors.messages[:base].present?
             render js: "bootbox.alert({message: \"#{@user.errors.messages[:base].join("<br/>")}\",size: 'small'});"
@@ -146,7 +142,7 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params[:user].permit(:sales_promotion_girl_id, :name, :gender, :mobile_phone, :role, :email, :password, :password_confirmation, :username, :active,
+    params[:user].permit(:sales_promotion_girl_id, :name, :gender, :mobile_phone, :role, :email, :password, :password_confirmation, :username, :active, :creating_spg_user,
       user_menus_attributes: [:id, :name, :ability])
   end
 end
