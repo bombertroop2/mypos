@@ -5,6 +5,7 @@ class Ability
     # Define abilities for the passed in user here. For example:
     #
     user ||= User.new # guest user (not logged in)
+    showroom_present = Warehouse.joins(:sales_promotion_girls).select("1 AS one").where(is_active: true, warehouse_type: "showroom", :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
     if user.has_role? :superadmin
       can :manage, :all
       cannot :manage, CashierOpening
@@ -86,12 +87,12 @@ class Ability
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
           elsif class_name.eql?("Cashier")
-            if user.has_role? :cashier
+            if user.has_role?(:cashier) && !user.new_record? && showroom_present
               can ability, CashierOpening
               can ability, CashDisbursement
             end
           elsif class_name.eql?("Sale")
-            if user.has_role?(:cashier) && !user.new_record? && Warehouse.joins(:sales_promotion_girls).select("1 AS one").where(is_active: true, warehouse_type: "showroom", :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present?
+            if user.has_role?(:cashier) && !user.new_record? && showroom_present
               can ability, Sale
             end
           elsif class_name.eql?("Member")
