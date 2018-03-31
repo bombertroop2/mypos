@@ -91,6 +91,7 @@ Rails.application.routes.draw do
     collection do
       get "generate_ob_detail"
       get "inventory_receipts"
+      get "search_do"
     end
     member do
       get "receive"      

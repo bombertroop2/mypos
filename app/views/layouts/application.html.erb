@@ -391,6 +391,25 @@
                             return false;
                         });
         <% end %>
+
+        <% if action_name.eql?("inventory_receipts") %>
+                        $("#do_ob_number").focus();
+                        $("#do_ob_number").keypress(function (e) {
+                            var key = e.which;
+                            if (key == 13)  // the enter key code
+                            {
+                                $(this).blur();
+                                $("#btn-receive-searched-do").click();
+                                return false;
+                            }
+                        });
+                        $("#btn-receive-searched-do").click(function () {
+                            $.get("/shipments/search_do", {
+                                do_ob_number: $("#do_ob_number").val().trim()
+                            });
+                            $("#do_ob_number").val('');
+                        });
+        <% end %>
       <% elsif controller_name.eql?("cost_prices") %>
                       $("#search-cost-btn").click(function () {
                           $("#filter_effective_date").val($("#filter-effective-date").val());

@@ -65,7 +65,8 @@ class Ability
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :index, :inventory_receipts, :show, to: :read_action
-            can [:read_action, :receive], class_name.gsub(/\s+/, "").constantize
+            can :read_action, class_name.gsub(/\s+/, "").constantize
+            can [:receive, :search_do], class_name.gsub(/\s+/, "").constantize if ability.eql?(:manage)
           elsif class_name.eql?("Stock Mutation")
             if ability.eql?(:read)
               alias_action :index, :show, to: :read_store_to_store_mutations

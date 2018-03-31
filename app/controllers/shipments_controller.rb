@@ -123,21 +123,21 @@ class ShipmentsController < ApplicationController
     end
   end
   
-#  def edit
-#    @shipment.delivery_date = @shipment.delivery_date.strftime("%d/%m/%Y")
-#  end
-#  
-#  def update
-#    add_additional_params_for_edit
-#    @valid = @shipment.update(edit_shipment_params)
-#    if @shipment.errors[:base].present?
-#      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
-#    elsif @shipment.errors[:"shipment_products.base"].present?
-#      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.base"].join("<br/>")}\",size: 'small'});"
-#    elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present?
-#      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>")}\",size: 'small'});"
-#    end
-#  end
+  #  def edit
+  #    @shipment.delivery_date = @shipment.delivery_date.strftime("%d/%m/%Y")
+  #  end
+  #  
+  #  def update
+  #    add_additional_params_for_edit
+  #    @valid = @shipment.update(edit_shipment_params)
+  #    if @shipment.errors[:base].present?
+  #      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
+  #    elsif @shipment.errors[:"shipment_products.base"].present?
+  #      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.base"].join("<br/>")}\",size: 'small'});"
+  #    elsif @shipment.errors[:"shipment_products.shipment_product_items.base"].present?
+  #      render js: "bootbox.alert({message: \"#{@shipment.errors[:"shipment_products.shipment_product_items.base"].join("<br/>")}\",size: 'small'});"
+  #    end
+  #  end
 
   # DELETE /shipments/1
   # DELETE /shipments/1.json
@@ -188,7 +188,20 @@ class ShipmentsController < ApplicationController
       render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join}\",size: 'small'});"
     end
   end
-
+  
+  def search_do
+    @shipments = if current_user.has_non_spg_role?
+      Shipment.select(:id).joins(:order_booking).where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
+    else
+      Shipment.select(:id).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
+    end
+    
+    # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number
+    if @shipments.length == 0 || @shipments.length > 1
+      render js: "var box = bootbox.alert({message: \"No records found\",size: 'small'});box.on(\"hidden.bs.modal\", function () {$(\"#do_ob_number\").focus();});"
+    end
+  end
+  
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_shipment
