@@ -1,18 +1,6 @@
 <td colspan="4">
     <div style="padding-top: 20px"></div>
     <%= form_for(@color, remote: true, html: {class: "form-horizontal"}) do |f| %>
-        <!--
-        <% if @color.errors.any? %>
-                      <div id="error_explanation">
-                        <h2><%= pluralize(@color.errors.count, "error") %> prohibited this color from being saved:</h2>
-
-                        <ul>
-          <% @color.errors.full_messages.each do |message| %>
-                                      <li><%= message %></li>
-          <% end %>
-                        </ul>
-                      </div>
-        <% end %>-->
 
         <div class="form-group<%= control_group_error(@color, :code) %>">
             <%= f.label :code, class: "col-sm-2 control-label" %>
@@ -43,3 +31,24 @@
                       </div>
                     <% end %>
                 </td>
+
+                <script>
+                  $(function () {
+                      $('#color_code').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#color_name").focus();
+                              return false;
+                          }
+                      });
+                      $('#color_name').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#color_description").focus();
+                              return false;
+                          }
+                      });
+                  });
+                </script>
