@@ -30,6 +30,46 @@
     </dl>
 
     <dl class="dl-horizontal">
+        <dt>Gross sales</dt>
+        <dd><%= number_to_currency(@cashier_opening.gross_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Net sales</dt>
+        <dd><%= number_to_currency(@cashier_opening.net_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Total cash payment</dt>
+        <dd><%= number_to_currency(@cashier_opening.cash_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Total card payment</dt>
+        <dd><%= number_to_currency(@cashier_opening.card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Total debit card payment</dt>
+        <dd><%= number_to_currency(@cashier_opening.debit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Total credit card payment</dt>
+        <dd><%= number_to_currency(@cashier_opening.credit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Total quantity</dt>
+        <dd><%= @cashier_opening.total_quantity %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Total gift quantity</dt>
+        <dd><%= @cashier_opening.total_gift_quantity %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
         <dt>Closed at</dt>
         <dd><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></dd>
     </dl>

@@ -16,7 +16,7 @@ class SaleProduct < ApplicationRecord
     validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |sp| sp.quantity.present? }
       validates :quantity, numericality: {less_than_or_equal_to: :stock_quantity, only_integer: true}, if: proc { |sp| sp.quantity.present? }
         validates :free_product_id, presence: true, if: proc{|sp| sp.event_id.present? && sp.event_type.eql?("Buy 1 Get 1 Free")}
-        validates :price_list_id, presence: true#, unless: proc{|sp| sp.event_type.eql?("Special Price")}
+          validates :price_list_id, presence: true#, unless: proc{|sp| sp.event_type.eql?("Special Price")}
 
           before_create :update_total
           after_create :update_stock
@@ -32,7 +32,7 @@ class SaleProduct < ApplicationRecord
           end
         
           def update_total
-            if event_id.blank? || (event_id.present? && event_type.eql?("Buy 1 Get 1 Free"))
+            if event_id.blank? || (event_id.present? && (event_type.eql?("Buy 1 Get 1 Free") || event_type.eql?("Special Price") || event_type.eql?("Gift")))
               self.total = quantity * effective_price.to_f
             elsif event_id.present? && event_type.eql?("Discount(%)")
               if first_plus_discount.present? && second_plus_discount.present?
@@ -43,8 +43,6 @@ class SaleProduct < ApplicationRecord
               end
             elsif event_id.present? && event_type.eql?("Discount(Rp)")
               self.total = effective_price.to_f * quantity - cash_discount.to_f
-            elsif event_id.present? && (event_type.eql?("Special Price") || event_type.eql?("Gift"))
-              self.total = effective_price.to_f * quantity
             end
           end
       

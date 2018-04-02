@@ -30,7 +30,7 @@ class CashierOpeningsController < ApplicationController
   # GET /cashier_openings/1.json
   def show
     @cashier_opening = CashierOpening.joins(:warehouse).where(id: params[:id]).
-      select("code, name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at").first
+      select("code, name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, net_sales, gross_sales, cash_payment, card_payment, debit_card_payment, credit_card_payment, total_quantity, total_gift_quantity").first
   end
 
   # GET /cashier_openings/new
@@ -82,8 +82,10 @@ class CashierOpeningsController < ApplicationController
   end
   
   def close
-    if @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)      
-      SendEmailJob.perform_later(@cashier_opening.id, "closing report")
+    @cashier_opening.with_lock do
+      if @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)      
+        SendEmailJob.perform_later(@cashier_opening.id, "closing report")
+      end
     end
   end
 
