@@ -1,0 +1,96 @@
+<table cellspacing="0" border="1" style="border-color: #DDDDDD;border-style: solid;border-collapse: collapse">
+    <tr>
+        <td style="padding-top: 10px;padding-bottom: 20px;padding-right: 20px;padding-left: 20px">
+            <table width="100%">
+                <tr>
+                    <td colspan="2"><%= image_tag image_url("DUOS.jpg", host: "http://duos.herokuapp.com") %></td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2"><strong>CASH DISBURSEMENT REPORT</strong></td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>Store</td>
+                                <td>:</td>
+                                <td><%= "#{@cashier_opening.code} - #{@cashier_opening.name}" %></td>
+                            </tr>
+                            <tr>
+                                <td>Opened By</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.cashier_name %></td>
+                            </tr>
+                            <tr>
+                                <td>Station</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.station %></td>
+                            </tr>
+                            <tr>
+                                <td>Shift</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.shift %></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>Opened At</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                            </tr>
+                            <tr>
+                                <td>Closed At</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></td>
+                            </tr>
+                            <tr>
+                                <td>Beginning Cash</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.beginning_cash, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Cash On Hand</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.cash_balance, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2">
+                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
+                            <tbody>
+                                <tr style="text-align: center;color: white" bgcolor="#00FF00">
+                                    <td><strong>No.</strong></td>
+                                    <td><strong>Description</strong></td>
+                                    <td><strong>Price/Amount</strong></td>
+                                </tr>
+                                <% sum = 0 %>
+                                <% @cashier_opening.cash_disbursements.each_with_index do |cash_disbursement, index| %>
+                                  <% sum += cash_disbursement.price %>
+                                  <tr align="center">
+                                      <td style="vertical-align: middle"><%= index.succ %></td>
+                                      <td style="vertical-align: middle"><%= cash_disbursement.description %></td>
+                                      <td style="vertical-align: middle; text-align: right"><%= number_to_currency(cash_disbursement.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                  </tr>
+                                <% end %>
+                            </tbody>
+                            <tfoot bgcolor="#42B549" style="color: white">
+                                <tr>
+                                    <td colspan="2" align="right"><strong>Sum</strong></td>
+                                    <td align="right"><strong><%= number_to_currency(sum,
+                                              :separator => ",",
+                                              :delimiter => ".",
+                                              :unit => "Rp",
+                                              :precision => 2) %></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </td>
+                </tr>                    
+            </table>
+        </td>
+    </tr>
+</table>

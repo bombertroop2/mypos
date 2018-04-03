@@ -3,6 +3,7 @@ class Email < ApplicationRecord
 
   TYPES = [
     ["Account Payable Officer", "Account Payable Officer"],
+    ["Account Receivable Officer", "Account Receivable Officer"],
     ["Sales Officer", "Sales Officer"],
     ["All", "All"]
   ]
@@ -15,6 +16,10 @@ class Email < ApplicationRecord
 
   def self.account_payable_officers
     where("email_type = 'Account Payable Officer' OR email_type = 'All'").select(:address)
+  end
+
+  def self.account_receivable_officers
+    where("email_type = 'Account Receivable Officer' OR email_type = 'All'").select(:address)
   end
 
   def self.sales_officers
