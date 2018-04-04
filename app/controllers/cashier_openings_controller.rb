@@ -84,8 +84,8 @@ class CashierOpeningsController < ApplicationController
   def close
     @cashier_opening.with_lock do
       if @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)      
-#        SendEmailJob.perform_later(@cashier_opening.id, "closing report")
-        SendEmailJob.perform_later(@cashier_opening.id, "cash disbursement report")
+        SendEmailJob.perform_later(@cashier_opening.id, "cash disbursement report and sales general summary")
+        SendEmailJob.perform_later(@cashier_opening.id, "sales general summary")
       end
     end
   end

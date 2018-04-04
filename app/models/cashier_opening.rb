@@ -32,7 +32,7 @@ class CashierOpening < ApplicationRecord
                 private
               
                 def calculate_total_sales
-                  sale_products = SaleProduct.joins(:price_list, sale: :cashier_opening).
+                  sale_products = SaleProduct.joins(:price_list, :sale).
                     joins("LEFT JOIN banks ON sales.bank_id = banks.id").
                     joins("LEFT JOIN events ON sale_products.event_id = events.id").
                     joins("LEFT JOIN events gift_events ON sales.gift_event_id = gift_events.id").

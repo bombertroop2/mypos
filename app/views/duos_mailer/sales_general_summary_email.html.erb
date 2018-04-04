@@ -1,0 +1,201 @@
+<table cellspacing="0" border="1" style="border-color: #DDDDDD;border-style: solid;border-collapse: collapse">
+    <tr>
+        <td style="padding-top: 10px;padding-bottom: 20px;padding-right: 20px;padding-left: 20px">
+            <table width="100%">
+                <tr>
+                    <td colspan="2"><%= image_tag image_url("DUOS.jpg", host: "http://duos.herokuapp.com") %></td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2"><strong>GENERAL SALES SUMMARY</strong></td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>Store</td>
+                                <td>:</td>
+                                <td><%= "#{@cashier_opening.code} - #{@cashier_opening.name}" %></td>
+                            </tr>
+                            <tr>
+                                <td>Station</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.station %></td>
+                            </tr>
+                            <tr>
+                                <td>Shift</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.shift %></td>
+                            </tr>
+                            <tr>
+                                <td>Gross Sales</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.gross_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Total Quantity</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.total_quantity %></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>Opened By</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.cashier_name %></td>
+                            </tr>
+                            <tr>
+                                <td>Opened At</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                            </tr>
+                            <tr>
+                                <td>Closed At</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></td>
+                            </tr>
+                            <tr>
+                                <td>Net Sales</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.net_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Total Gift Quantity</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.total_gift_quantity %></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2">
+                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
+                            <tbody>
+                                <tr style="text-align: center;color: white" bgcolor="#00FF00">
+                                    <td><strong>Event</strong></td>
+                                    <td><strong>Quantity</strong></td>
+                                    <td><strong>Gross</strong></td>
+                                    <td><strong>Net</strong></td>
+                                </tr>
+                                <% sale_products = SaleProduct.joins(:price_list, :sale).
+                                  joins("LEFT JOIN events ON sale_products.event_id = events.id").
+                                  joins("LEFT JOIN events gift_events ON sales.gift_event_id = gift_events.id").
+                                  where(["sales.cashier_opening_id = ?", @cashier_opening.id]).
+                                  select(:sale_id, :quantity, "sale_products.total AS subtotal", :event_id, "sales.gift_event_id", "price_lists.price AS article_price", "events.event_type AS article_event_type", "gift_events.discount_amount AS store_discount_amount", "sales.gift_event_product_id", "events.code AS article_event_code", "gift_events.code AS store_event_code") %>
+                                <% sale_types = {} %>
+                                <% sale_products.each do |sale_product| %>
+                                  <% if sale_product.event_id.blank? && sale_product.gift_event_id.blank? %>
+                                    <% if sale_types["normal"].nil? %>
+                                      <% sale_types["normal"] = {} %>
+                                      <% sale_types["normal"]["quantity"] = 1 %>
+                                      <% sale_types["normal"]["gross"] = sale_product.article_price %>
+                                      <% sale_types["normal"]["net"] = sale_product.subtotal %>
+                                    <% else %>
+                                      <% sale_types["normal"]["quantity"] += 1 %>
+                                      <% sale_types["normal"]["gross"] += sale_product.article_price %>
+                                      <% sale_types["normal"]["net"] += sale_product.subtotal %>
+                                    <% end %>
+                                  <% elsif sale_product.gift_event_id.blank? %>
+                                    <% if sale_types[sale_product.article_event_code].nil? %>
+                                      <% sale_types[sale_product.article_event_code] = {} %>
+                                      <% if sale_product.article_event_type.eql?("Buy 1 Get 1 Free") %>
+                                        <% sale_types[sale_product.article_event_code]["quantity"] = 2 %>
+                                      <% else %>
+                                        <% sale_types[sale_product.article_event_code]["quantity"] = 1 %>
+                                      <% end %>
+                                      <% sale_types[sale_product.article_event_code]["gross"] = sale_product.article_price %>
+                                      <% sale_types[sale_product.article_event_code]["net"] = sale_product.subtotal %>
+                                    <% else %>
+                                      <% if sale_product.article_event_type.eql?("Buy 1 Get 1 Free") %>
+                                        <% sale_types[sale_product.article_event_code]["quantity"] += 2 %>
+                                      <% else %>
+                                        <% sale_types[sale_product.article_event_code]["quantity"] += 1 %>
+                                      <% end %>
+                                      <% sale_types[sale_product.article_event_code]["gross"] += sale_product.article_price %>
+                                      <% sale_types[sale_product.article_event_code]["net"] += sale_product.subtotal %>
+                                    <% end %>
+                                  <% else %>
+                                    <% if sale_types[sale_product.store_event_code].nil? %>
+                                      <% sale_types[sale_product.store_event_code] = {} %>
+                                      <% if sale_product.gift_event_product_id.present? %>
+                                        <% sale_types[sale_product.store_event_code]["quantity"] = 1 %>
+                                        <% sale_types[sale_product.store_event_code]["gift_quantity"] = 1 %>
+                                        <% sale_types[sale_product.store_event_code]["sale_ids"] = [] %>
+                                        <% sale_types[sale_product.store_event_code]["sale_ids"] << sale_product.sale_id %>
+                                      <% else %>
+                                        <% sale_types[sale_product.store_event_code]["quantity"] = 1 %>
+                                        <% sale_types[sale_product.store_event_code]["store_discount_amount"] = sale_product.store_discount_amount %>
+                                        <% sale_types[sale_product.store_event_code]["sale_ids"] = [] %>
+                                        <% sale_types[sale_product.store_event_code]["sale_ids"] << sale_product.sale_id %>
+                                      <% end %>
+                                      <% sale_types[sale_product.store_event_code]["gross"] = sale_product.article_price %>
+                                      <% sale_types[sale_product.store_event_code]["net"] = sale_product.subtotal %>
+                                    <% else %>
+                                      <% if sale_product.gift_event_product_id.present? %>
+                                        <% sale_types[sale_product.store_event_code]["quantity"] += 1 %>
+                                        <% unless sale_types[sale_product.store_event_code]["sale_ids"].include? sale_product.sale_id %>
+                                          <% unless sale_types[sale_product.store_event_code]["gift_quantity"].blank? %>                                
+                                            <% sale_types[sale_product.store_event_code]["gift_quantity"] += 1 %>
+                                          <% else %>
+                                            <% sale_types[sale_product.store_event_code]["gift_quantity"] = 1 %>
+                                          <% end %>
+                                          <% sale_types[sale_product.store_event_code]["sale_ids"] << sale_product.sale_id %>
+                                        <% else %>
+                                          <% sale_types[sale_product.store_event_code]["gift_quantity"] = 1 if sale_types[sale_product.store_event_code]["gift_quantity"].blank? %>
+                                        <% end %>
+                                      <% else %>
+                                        <% sale_types[sale_product.store_event_code]["quantity"] += 1 %>
+                                        <% unless sale_types[sale_product.store_event_code]["sale_ids"].include? sale_product.sale_id %>
+                                          <% unless sale_types[sale_product.store_event_code]["store_discount_amount"].blank? %>                                
+                                            <% sale_types[sale_product.store_event_code]["store_discount_amount"] += sale_product.store_discount_amount %>
+                                          <% else %>                              
+                                            <% sale_types[sale_product.store_event_code]["store_discount_amount"] = sale_product.store_discount_amount %>
+                                          <% end %>                              
+                                          <% sale_types[sale_product.store_event_code]["sale_ids"] << sale_product.sale_id %>
+                                        <% else %>
+                                          <% sale_types[sale_product.store_event_code]["store_discount_amount"] = sale_product.store_discount_amount if sale_types[sale_product.store_event_code]["store_discount_amount"].blank? %>
+                                        <% end %>
+                                      <% end %>
+                                      <% sale_types[sale_product.store_event_code]["gross"] += sale_product.article_price %>
+                                      <% sale_types[sale_product.store_event_code]["net"] += sale_product.subtotal %>
+                                    <% end %>
+                                  <% end %>
+                                <% end %>
+
+                                <% total_quantity = 0 %>
+                                <% total_gross = 0 %>
+                                <% total_net = 0 %>
+
+                                <% sale_types.each do |k,v| %>
+                                  <% if k.eql?("normal") %>
+                                    <% event_name = "Normal" %>
+                                  <% else %>
+                                    <% event_name = k %>
+                                  <% end %>
+                                  <tr>
+                                      <td><%= event_name %></td>
+                                      <td style="vertical-align: middle; text-align: right"><%= v["quantity"].to_i + v["gift_quantity"].to_i %></td>
+                                      <td style="vertical-align: middle; text-align: right"><%= number_to_currency(v["gross"], :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                      <td style="vertical-align: middle; text-align: right"><%= number_to_currency(v["net"].to_f - v["store_discount_amount"].to_f, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                  </tr>
+                                  <% total_quantity += (v["quantity"].to_i + v["gift_quantity"].to_i) %>
+                                  <% total_gross += v["gross"].to_f %>
+                                  <% total_net += v["net"].to_f - v["store_discount_amount"].to_f %>
+                                <% end %>
+                            </tbody>
+                            <tfoot bgcolor="#42B549" style="color: white">
+                                <tr>
+                                    <td align="right"><strong>Sum</strong></td>
+                                    <td align="right"><strong><%= total_quantity %></strong></td>
+                                    <td align="right"><strong><%= number_to_currency(total_gross, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></strong></td>
+                                    <td align="right"><strong><%= number_to_currency(total_net, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </td>
+                </tr>                    
+            </table>
+        </td>
+    </tr>
+</table>
