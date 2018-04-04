@@ -36,6 +36,16 @@
                                 <td>:</td>
                                 <td><%= @cashier_opening.total_quantity %></td>
                             </tr>
+                            <tr>
+                                <td>Total Gift Quantity</td>
+                                <td>:</td>
+                                <td><%= @cashier_opening.total_gift_quantity %></td>
+                            </tr>
+                            <tr>
+                                <td>Total Cash Payment</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.cash_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
                         </table>
                     </td>
                     <td>
@@ -61,9 +71,19 @@
                                 <td><%= number_to_currency(@cashier_opening.net_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                             <tr>
-                                <td>Total Gift Quantity</td>
+                                <td>Total Card Payment</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.total_gift_quantity %></td>
+                                <td><%= number_to_currency(@cashier_opening.card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Total Debit Card Payment</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.debit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Total Credit Card Payment</td>
+                                <td>:</td>
+                                <td><%= number_to_currency(@cashier_opening.credit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                         </table>
                     </td>
