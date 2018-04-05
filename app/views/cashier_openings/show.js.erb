@@ -1,4 +1,8 @@
 <%= smart_listing_item :cashiers, :edit, @cashier_opening, "cashier_openings/show" %>
-<% if params[:print_report].present? %>
-  print("<%= @cashier_opening.id %>");
-<% end %>
+$("#reports-container").html("<%= j(render(partial: "cash_disbursement_report")) %>");
+$("#reports-container").append("<%= j(render(partial: "closing_report")) %>");
+
+
+<%# if params[:print_report].present? %>
+//print("<%#= @cashier_opening.id %>");
+<%# end %>

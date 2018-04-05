@@ -1,7 +1,14 @@
-function print(cashierOpeningId) {
-    $("#sales_summary_report_" + cashierOpeningId).show();
-    $("#sales_summary_report_" + cashierOpeningId).print();
-    $("#sales_summary_report_" + cashierOpeningId).hide();
+function printCashDisbursementReport() {
+    $("#cash_disbursement_report").show();
+    $("#cash_disbursement_report").print();
+    $("#cash_disbursement_report").hide();
+    return false;
+}
+
+function printClosingReport() {
+    $("#closing_report").show();
+    $("#closing_report").print();
+    $("#closing_report").hide();
     return false;
 }
 

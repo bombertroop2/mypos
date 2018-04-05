@@ -3,7 +3,12 @@
   $("#cashier-opening-closed-at-<%= @cashier_opening.id %>").html("");
   bootbox.alert({message: "<%= @cashier_opening.errors[:base].join("<br/>") %>",size: 'small'});
 <% else %>
-  $.get("/cashier_openings/<%= @cashier_opening.id %>",{
-  print_report: true
-  });
+  $("#reports-container").html("<%= j(render(partial: "cash_disbursement_report")) %>");
+  $("#cash_disbursement_report").show();
+  $("#cash_disbursement_report").print();
+  $("#cash_disbursement_report").remove();
+  $("#reports-container").html("<%= j(render(partial: "closing_report")) %>");
+  $("#closing_report").show();
+  $("#closing_report").print();
+  $("#closing_report").remove();
 <% end %>
