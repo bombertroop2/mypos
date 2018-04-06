@@ -208,22 +208,22 @@
                                             </li>
                                           <% end %>
                                           <% if cashier_menu_active? %>
-                                            <li><a><i class="fa fa-calculator"></i> Cashier <span class="fa fa-chevron-down"></span></a>
+                                            <li><a><i class="fa fa-calculator"></i> Point of Sale <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :manage, CashierOpening %>
-                                                      <li><%= link_to "Opening", new_cashier_opening_path, method: :get %></li>
+                                                      <li><%= link_to "Cashier Opening", new_cashier_opening_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, CashDisbursement %>
                                                       <li><%= link_to "Cash Disbursements", cash_disbursements_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, CashierOpening %>
-                                                      <li><%= link_to "Closing", cashier_openings_path, method: :get %></li>
+                                                      <li><%= link_to "Cashiers", cashier_openings_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :manage, Sale %>
-                                                      <li><%= link_to "Sale", new_sale_path, method: :get %></li>
+                                                      <li><%= link_to "Make a Sale", new_sale_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, Sale %>
-                                                      <li><%= link_to "Sales", sales_path, method: :get %></li>
+                                                      <li><%= link_to "Listing Sales", sales_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
