@@ -224,10 +224,10 @@
                                                       <li><%= link_to "Cash Disbursements", cash_disbursements_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, CashierOpening %>
-                                                      <li><%= link_to "Cashiers", cashier_openings_path, method: :get %></li>
+                                                      <li><%= link_to "Cashier Closing", cashier_openings_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :manage, Sale %>
-                                                      <li><%= link_to "Make a Sale", new_sale_path, method: :get %></li>
+                                                      <li><%= link_to "Sale Entry", new_sale_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, Sale %>
                                                       <li><%= link_to "Listing Sales", sales_path, method: :get %></li>

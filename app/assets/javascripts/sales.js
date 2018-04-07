@@ -235,17 +235,21 @@ $(function () {
 
     $('#filter-sale-transaction-time').daterangepicker(
             {
+//                locale: {
+//                    format: 'DD/MM/YYYY HH:mm:ss'
+//                },
                 locale: {
-                    format: 'DD/MM/YYYY HH:mm:ss'
+                    format: 'DD/MM/YYYY'
                 },
                 opens: "left",
-                autoUpdateInput: false,
+                autoUpdateInput: false/*,
                 timePicker: true,
                 timePicker24Hour: true,
-                timePickerSeconds: true
+                timePickerSeconds: true*/
             });
     $('#filter-sale-transaction-time').on('apply.daterangepicker', function (ev, picker) {
-        $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm:ss') + ' - ' + picker.endDate.format('DD/MM/YYYY HH:mm:ss'));
+//        $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm:ss') + ' - ' + picker.endDate.format('DD/MM/YYYY HH:mm:ss'));
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
     });
 
     $('#filter-sale-transaction-time').on('cancel.daterangepicker', function (ev, picker) {
