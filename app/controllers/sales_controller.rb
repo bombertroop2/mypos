@@ -3,7 +3,7 @@ class SalesController < ApplicationController
   helper SmartListing::Helper
   load_and_authorize_resource
   before_action :set_sale, only: [:show, :edit, :update, :destroy]
-  skip_before_action :verify_authenticity_token, only: :print
+#  skip_before_action :verify_authenticity_token, only: :print
 
   # GET /sales
   # GET /sales.json
