@@ -7,7 +7,7 @@
         <input type="text" id="filter-string" class="form-control" placeholder="Transaction number">
     </div>
     <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-sale-transaction-time" placeholder="Transaction date" style="width: 300px !important">
+        <input type="text" class="form-control" readonly="true" id="filter-sale-transaction-time" placeholder="Transaction date" style="width: 200px !important">
     </div>
     <div class="form-group">
         <%= select_tag "payment_method", options_for_select(Sale::PAYMENT_METHODS), {prompt: "Payment method", class: "form-control", id: "filter-payment-method"} %>
