@@ -1,4 +1,9 @@
 <table width="100%" id="receipt_doc" class="hidden">
+    <% unless params[:update_sale_row].eql?("false") %>
+      <tr>
+          <td colspan="4" style="text-align: center">(reprint)</td>
+      </tr>
+    <% end %>
     <tr>
         <td colspan="4" style="text-align: center"><%= @sale.warehouse_name %></td>
     </tr>
