@@ -32,7 +32,7 @@
       joins("LEFT JOIN common_fields free_products_colors ON free_products_colors.id = stock_details.color_id AND free_products_colors.type IN ('Color')").
       joins("LEFT JOIN events ON events.id = sale_products.event_id").
       select("products.code AS product_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "free_products.code AS free_product_code", "free_products_colors.name AS free_product_color_name", "free_products_sizes.size AS free_product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "events.event_type AS sale_event_type", "SUM(sale_products.total) AS subtotal", "SUM(sale_products.quantity) AS product_quantity").
-      group(:product_barcode_id, :free_product_id, "product_code", "color_name") %>
+      group(:product_barcode_id, :free_product_id, "product_code", "color_name", "product_size") %>
     <% total_quantity = 0 %>
     <% sale_products.each do |sale_product| %>
       <% if sale_product.sale_event_type.eql?("Special Price") && sale_product.special_price.present? %>
