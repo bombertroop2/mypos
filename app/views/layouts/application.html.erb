@@ -51,7 +51,14 @@
                                   </div>
                                   <div class="profile_info">
                                       <span>Welcome,</span>
-                                      <h2><%= current_user.name %></h2>
+                                      <h2>
+                                          <% warehouse_name = Warehouse.joins(:sales_promotion_girls).select("warehouses.name AS warehouse_name").where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id).first.warehouse_name rescue nil %>
+                                          <% if warehouse_name.present? %>
+                                            <%= "#{current_user.name} - #{warehouse_name}" %>
+                                          <% else %>
+                                            <%= current_user.name %>
+                                          <% end %>
+                                      </h2>
                                   </div>
                               </div>
                               <!-- /menu profile quick info -->
@@ -247,7 +254,7 @@
                                                       <li><%= link_to "Fiscal Reopening/Closing", fiscal_years_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, Bank %>
-                                                      <li><%= link_to "Bank Master", banks_path, method: :get %></li>
+                                                      <li><%= link_to "Banks", banks_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, Member %>
                                                       <li><%= link_to "Members", members_path, method: :get %></li>
