@@ -3,6 +3,7 @@ class SalesController < ApplicationController
   helper SmartListing::Helper
   load_and_authorize_resource
   before_action :set_sale, only: [:show, :edit, :update, :destroy]
+  skip_before_action :verify_authenticity_token, only: :print
 
   # GET /sales
   # GET /sales.json
@@ -15,8 +16,8 @@ class SalesController < ApplicationController
     
     if params[:filter_date].present?
       splitted_start_time_range = params[:filter_date].split("-")
-#      start_start_time = Time.zone.parse splitted_start_time_range[0].strip
-#      end_start_time = Time.zone.parse splitted_start_time_range[1].strip
+      #      start_start_time = Time.zone.parse splitted_start_time_range[0].strip
+      #      end_start_time = Time.zone.parse splitted_start_time_range[1].strip
       start_start_time = Date.parse splitted_start_time_range[0].strip
       end_start_time = Date.parse splitted_start_time_range[1].strip
     end
