@@ -1,5 +1,5 @@
 <% if @product_colors.blank? %>    
-  var box = bootbox.alert({message: "No records found",size: 'small'});
+  var box = bootbox.alert({message: "Color is not available",size: 'small'});
     box.on("hidden.bs.modal", function () { 
       $("#sale_event_gift_product_code").focus();
     });

@@ -1,5 +1,5 @@
 <% if @product.nil? %>    
-  var box = bootbox.alert({message: "No records found",size: 'small'});
+  var box = bootbox.alert({message: "Product is not available",size: 'small'});
   <% if params[:barcode] %>
     box.on("hidden.bs.modal", function () { 
       $("#barcode").focus();
