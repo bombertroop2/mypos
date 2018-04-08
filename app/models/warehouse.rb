@@ -28,10 +28,10 @@ class Warehouse < ApplicationRecord
   has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
-  validates :code, length: {minimum: 3, maximum: 4}, if: Proc.new {|warehouse| warehouse.code.present?}
+  validates :code, length: {maximum: 9}, if: Proc.new {|warehouse| warehouse.code.present?}
     validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
       :area_manager_available, :region_available, :price_code_available, :type_available,
-      :warehouse_type_not_changed
+      :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid
     validates :code, uniqueness: true
 
     before_validation :upcase_code, :strip_string_values
@@ -66,6 +66,25 @@ class Warehouse < ApplicationRecord
 
       private
       
+      def code_not_invalid
+        unless code.eql?("-")
+          if code.include?(" ")
+            errors.add(:code, "is not valid")
+          else
+            splitted_code = code.split("-") 
+            if splitted_code.length != 2
+              errors.add(:code, "is not valid")
+            else
+              errors.add(:code, "is not valid") if splitted_code[0].length < 3 || splitted_code[1].length < 3 || splitted_code[0].length > 4 || splitted_code[1].length > 4
+            end
+          end
+        end
+      end
+      
+      def code_not_emptied
+        errors.add(:code, "can't be blank") if code.eql?("-")
+      end
+      
       def empty_messages
         self.first_message = self.second_message = self.third_message = self.fourth_message = self.fifth_message = ""
       end
@@ -75,7 +94,7 @@ class Warehouse < ApplicationRecord
       end
 
       def strip_string_values
-        self.code = code.strip
+        self.code = code.gsub("_"," ").strip
       end
     
       def area_manager_available

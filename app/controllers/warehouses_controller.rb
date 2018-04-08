@@ -34,6 +34,10 @@ class WarehousesController < ApplicationController
 
   # GET /warehouses/1/edit
   def edit
+    splitted_code = @warehouse.code.split("-")
+    first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
+    second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
+    @warehouse.code = "#{first_code}-#{second_code}"
   end
 
   # POST /warehouses
@@ -42,9 +46,14 @@ class WarehousesController < ApplicationController
     @warehouse = Warehouse.new(warehouse_params)
     
     begin
-      if @warehouse.save
+      if @created = @warehouse.save
         @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
         @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+      else
+        splitted_code = @warehouse.code.split("-")
+        first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
+        second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
+        @warehouse.code = "#{first_code}-#{second_code}"
       end
     rescue ActiveRecord::RecordNotUnique => e
       flash[:alert] = "That code has already been taken"
@@ -58,7 +67,7 @@ class WarehousesController < ApplicationController
     begin
       supervisor_id_was = @warehouse.supervisor_id_was
       region_id_was = @warehouse.region_id_was
-      if @warehouse.update(warehouse_params)
+      if @updated = @warehouse.update(warehouse_params)
         #cek apakah supervisor diganti
         unless supervisor_id_was.to_s.eql?(params[:warehouse][:supervisor_id])
           @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
@@ -68,6 +77,11 @@ class WarehousesController < ApplicationController
         unless region_id_was.to_s.eql?(params[:warehouse][:region_id])
           @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
         end
+      else
+        splitted_code = @warehouse.code.split("-")
+        first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
+        second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
+        @warehouse_code = "#{first_code}-#{second_code}"
       end
     rescue ActiveRecord::RecordNotUnique => e
       flash[:alert] = "That code has already been taken"
