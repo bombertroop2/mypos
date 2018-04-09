@@ -40,7 +40,7 @@ class EventsController < ApplicationController
 
   # GET /events/new
   def new
-    @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+    @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
     @event = Event.new
     @brands = Brand.select(:id, :code, :name).order(:code)
     @goods_types = GoodsType.select(:id, :code, :name).order(:code)
@@ -51,7 +51,7 @@ class EventsController < ApplicationController
   def edit
     @event.start_date_time = @event.start_date_time.strftime("%d/%m/%Y %H:%M")
     @event.end_date_time = @event.end_date_time.strftime("%d/%m/%Y %H:%M")
-    @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+    @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
     @brands = Brand.select(:id, :code, :name).order(:code)
     @goods_types = GoodsType.select(:id, :code, :name).order(:code)
     @models = Model.select(:id, :code, :name).order(:code)
@@ -72,7 +72,7 @@ class EventsController < ApplicationController
         if @event.errors[:base].present?
           render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});"
         else
-          @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+          @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
           @brands = Brand.select(:id, :code, :name).order(:code)
           @goods_types = GoodsType.select(:id, :code, :name).order(:code)
           @models = Model.select(:id, :code, :name).order(:code)
@@ -81,7 +81,7 @@ class EventsController < ApplicationController
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
       @event.errors.messages[:code] = ["has already been taken"]
-      @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+      @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
       @brands = Brand.select(:id, :code, :name).order(:code)
       @goods_types = GoodsType.select(:id, :code, :name).order(:code)
       @models = Model.select(:id, :code, :name).order(:code)
@@ -99,7 +99,7 @@ class EventsController < ApplicationController
       @valid = @event.update(event_params)
       unless @valid
         unless @event.errors[:base].present?
-          @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+          @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
           @brands = Brand.select(:id, :code, :name).order(:code)
           @goods_types = GoodsType.select(:id, :code, :name).order(:code)
           @models = Model.select(:id, :code, :name).order(:code)
@@ -110,7 +110,7 @@ class EventsController < ApplicationController
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
       @event.errors.messages[:code] = ["has already been taken"]
-      @warehouses = Warehouse.select(:id, :code, :name).actived.not_central.order(:code)
+      @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
       @brands = Brand.select(:id, :code, :name).order(:code)
       @goods_types = GoodsType.select(:id, :code, :name).order(:code)
       @models = Model.select(:id, :code, :name).order(:code)
@@ -134,7 +134,7 @@ class EventsController < ApplicationController
       Event.new
     end
     warehouse_ids = params[:warehouse_ids].split(",")
-    warehouses = Warehouse.where(id: warehouse_ids).actived.not_central.select(:id, :code, :name)
+    warehouses = Warehouse.where(id: warehouse_ids).actived.showroom.select(:id, :code, :name)
     
     unless @event.new_record?
       @event_warehouses = []

@@ -64,6 +64,10 @@ class Warehouse < ApplicationRecord
         where("warehouse_type <> 'central'")
       end
 
+      def self.showroom
+        where("warehouse_type = 'showroom'")
+      end
+
       private
       
       def code_not_invalid
