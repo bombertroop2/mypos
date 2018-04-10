@@ -50,5 +50,8 @@
                               return false;
                           }
                       });
+                      $('#color_code').on("input", function () {
+                          $(this).val($(this).val().replace(/ /g, ""));
+                      });
                   });
                 </script>

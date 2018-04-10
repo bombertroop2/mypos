@@ -48,3 +48,10 @@
                         </div>
                       <% end %>
                   </td>
+                  <script>
+                    $(function () {
+                        $('#size_group_code').on("input", function () {
+                            $(this).val($(this).val().replace(/ /g, ""));
+                        });
+                    });
+                  </script>

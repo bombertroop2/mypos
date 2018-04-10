@@ -27,7 +27,7 @@ class Color < CommonField
   end
 
   def upcase_code
-    self.code = code.upcase
+    self.code = code.upcase.gsub(" ","")
   end
   
   def code_not_changed
