@@ -3,15 +3,15 @@
     <%= form_for(@supervisor, remote: true, url: (@supervisor.new_record? ? area_managers_path : area_manager_path(@supervisor)), html: {class: "form-horizontal"}) do |f| %>
         <!--
         <% if @supervisor.errors.any? %>
-                              <div id="error_explanation">
-                                  <h2><%= pluralize(@supervisor.errors.count, "error") %> prohibited this supervisor from being saved:</h2>
+                                  <div id="error_explanation">
+                                      <h2><%= pluralize(@supervisor.errors.count, "error") %> prohibited this supervisor from being saved:</h2>
 
-                                  <ul>
+                                      <ul>
           <% @supervisor.errors.full_messages.each do |message| %>
-                                                          <li><%= message %></li>
+                                                                  <li><%= message %></li>
           <% end %>
-                                  </ul>
-                              </div>
+                                      </ul>
+                                  </div>
         <% end %>
         -->
         <div class="form-group<%= control_group_error(@supervisor, :code) %>">
@@ -75,6 +75,10 @@
                                       elm: document.getElementById('supervisor_mobile_phone'),
                                       format: '____________'
                                   });
+                                  $('#supervisor_code').on("input", function () {
+                                      $(this).val($(this).val().replace(/ /g, ""));
+                                  });
+
                               });
 
                             </script>

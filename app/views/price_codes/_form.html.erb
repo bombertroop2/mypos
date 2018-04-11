@@ -3,15 +3,15 @@
     <%= form_for(@price_code, remote: true, html: {class: "form-horizontal"}) do |f| %>
         <!--
         <% if @price_code.errors.any? %>
-                        <div id="error_explanation">
-                          <h2><%= pluralize(@price_code.errors.count, "error") %> prohibited this price code from being saved:</h2>
+                          <div id="error_explanation">
+                            <h2><%= pluralize(@price_code.errors.count, "error") %> prohibited this price code from being saved:</h2>
 
-                          <ul>
+                            <ul>
           <% @price_code.errors.full_messages.each do |message| %>
-                                        <li><%= message %></li>
+                                            <li><%= message %></li>
           <% end %>
-                          </ul>
-                        </div>
+                            </ul>
+                          </div>
         <% end %>
         -->
         <div class="form-group<%= control_group_error(@price_code, :code) %>">
@@ -42,3 +42,10 @@
                       </div>
                     <% end %>
                 </td>
+                <script>
+                  $(function () {
+                      $('#price_code_code').on("input", function () {
+                          $(this).val($(this).val().replace(/ /g, ""));
+                      });
+                  });
+                </script>

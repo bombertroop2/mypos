@@ -51,6 +51,6 @@ class Courier < ApplicationRecord
   end
   
   def upcase_code
-    self.code = code.upcase    
+    self.code = code.upcase.gsub(" ","")
   end
 end
