@@ -9,7 +9,7 @@ class Company < ApplicationRecord
   private
   
   def upcase_code
-    self.code = code.upcase
+    self.code = code.upcase.gsub(" ","")
   end
   
   def strip_field_values

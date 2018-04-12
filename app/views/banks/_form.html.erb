@@ -4,7 +4,7 @@
         <div class="form-group<%= control_group_error(@bank, :code) %>">
             <%= f.label :code, class: "col-sm-2 control-label" %>
               <div class="col-sm-10">
-                  <%= f.text_field :code, class: "form-control upcase", onkeyup: "nospaces(this)" %>
+                  <%= f.text_field :code, class: "form-control upcase" %>
                     <%= error_help_text(@bank, :code) %>
                 </div>
 
@@ -39,5 +39,8 @@
                 <script>
                   $(function () {
                       $("#bank_card_type").attr("data-placeholder", "Please select type").chosen();
+                      $('#bank_code').on("input", function () {
+                          $(this).val($(this).val().replace(/ /g, ""));
+                      });
                   });
                 </script>

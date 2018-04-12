@@ -41,7 +41,7 @@ class Bank < ApplicationRecord
   end
   
   def upcase_code    
-    self.code = code.upcase
+    self.code = code.upcase.gsub(" ","")
   end
   
   def strip_fields

@@ -4,7 +4,7 @@
     <div class="form-group<%= control_group_error(@event, :code) %>">
         <%= f.label :code, class: "col-sm-3 control-label" %>
           <div class="col-sm-9">
-              <%= f.text_field :code, class: "form-control upcase inputs" %>
+              <%= f.text_field :code, class: "form-control upcase inputs", id: "event_code_gift" %>
                 <%= error_help_text(@event, :code) %>
             </div>
 
@@ -328,6 +328,9 @@
                                               return false;
                                           });
                                           $('.event-gift-money-fields').autoNumeric('init');
+                                          $('#event_code_gift').on("input", function () {
+                                              $(this).val($(this).val().replace(/ /g, ""));
+                                          });
 
                                       });
                                     </script>  
