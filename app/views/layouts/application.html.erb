@@ -235,14 +235,21 @@
                                                 </ul>
                                             </li>
                                           <% end %>
+                                          <% if event_menu_active? %>
+                                            <li><a><i class="fa fa-calendar-check-o"></i> Events <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Event %>
+                                                      <li><%= link_to "Showroom Events", events_path, method: :get %></li>
+                                                      <li><%= link_to "Counter Events", events_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
                                           <% if setting_menu_active? %>
                                             <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :read, Email %>
                                                       <li><%= link_to "Emails", emails_path, method: :get %></li>
-                                                    <% end %>
-                                                    <% if can? :read, Event %>
-                                                      <li><%= link_to "Events", events_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, User %>
                                                       <li><%= link_to "Users", users_path, method: :get %></li>
