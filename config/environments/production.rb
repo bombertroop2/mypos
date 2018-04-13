@@ -84,7 +84,7 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
   
-  config.action_mailer.default_url_options = { host: 'duos.herokuapp.com' }
+  config.action_mailer.default_url_options = { host: 'one-s.herokuapp.com' }
   
   config.action_mailer.delivery_method = :smtp
   # SMTP settings for gmail
@@ -100,5 +100,5 @@ Rails.application.configure do
   
   #  config.web_socket_server_url = "wss://duos.herokuapp.com/cable"
 
-  config.action_cable.allowed_request_origins = [ 'https://duos.herokuapp.com', 'http://duos.herokuapp.com' ]
+  config.action_cable.allowed_request_origins = [ 'https://one-s.herokuapp.com', 'http://one-s.herokuapp.com' ]
 end
