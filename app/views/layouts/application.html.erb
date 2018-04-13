@@ -19,6 +19,11 @@
                 <% opened_menu_name = "Delivery Order Receipts" %>
               <% elsif params[:controller].eql?("fiscal_years") %>
                 <% opened_menu_name = "Fiscal Reopening/Closing" %>
+              <% elsif params[:controller].eql?("events") %>
+                <% if action_name.eql?("index") %>
+                  <% opened_menu_name = "Showroom Events" %>
+                <% else %>
+                <% end %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -240,7 +245,7 @@
                                                 <ul class="nav child_menu">
                                                     <% if can? :read, Event %>
                                                       <li><%= link_to "Showroom Events", events_path, method: :get %></li>
-                                                      <li><%= link_to "Counter Events", events_path, method: :get %></li>
+                                                      <li><%= link_to "Counter Events", "javascript:void(0)", method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
