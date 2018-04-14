@@ -76,6 +76,7 @@ class SalesPromotionGirl < ApplicationRecord
 
   def create_identifier
     spg_collections = warehouse.sales_promotion_girls
-    self.identifier = spg_collections.count.eql?(0) ? "#{warehouse.code}00001" : spg_collections.order("id DESC").limit(1).pluck(:identifier).join.succ
+    warehouse_code = warehouse.code.split("-")[0]
+    self.identifier = spg_collections.count.eql?(0) ? "#{warehouse_code}00001" : spg_collections.order("id DESC").limit(1).pluck(:identifier).join.succ
   end
 end

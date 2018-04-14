@@ -84,7 +84,7 @@
                     <th>Price/Amount</th>
                 </tr>
                 <% sum = 0 %>
-                <% @cashier_opening.cash_disbursements.each_with_index do |cash_disbursement, index| %>
+                <% @cashier_opening.cash_disbursements.select(:price, :description).each_with_index do |cash_disbursement, index| %>
                   <% sum += cash_disbursement.price %>
                   <tr>
                       <td><%= index + 1 %></td>

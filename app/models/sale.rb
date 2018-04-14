@@ -310,12 +310,13 @@ class Sale < ApplicationRecord
     
                                     def generate_transaction_number
                                       warehouse = Warehouse.select(:id, :code).where(id: @warehouse_id).first
+                                      warehouse_code = warehouse.code.split("-")[0]
                                       last_transaction = warehouse.sales.select(:transaction_number).last
                                       if last_transaction.nil?
-                                        new_number = "#{warehouse.code}0000000001"
+                                        new_number = "#{warehouse_code}0000000001"
                                       else
-                                        seq_number = last_transaction.transaction_number.split("#{warehouse.code}").last
-                                        new_number = "#{warehouse.code}#{seq_number.succ}"
+                                        seq_number = last_transaction.transaction_number.split("#{warehouse_code}").last
+                                        new_number = "#{warehouse_code}#{seq_number.succ}"
                                       end
                                       self.transaction_number = new_number
                                     end

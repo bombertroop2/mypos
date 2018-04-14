@@ -449,7 +449,8 @@ class StockMutation < ApplicationRecord
                                           "RGO"
                                         end
           
-                                        warehouse_code = Warehouse.select(:code).where(id: origin_warehouse_id).first.code
+                                        full_warehouse_code = Warehouse.select(:code).where(id: origin_warehouse_id).first.code
+                                        warehouse_code = full_warehouse_code.split("-")[0]
                                         today = Date.current
                                         current_month = today.month.to_s.rjust(2, '0')
                                         current_year = today.strftime("%y").rjust(2, '0')
