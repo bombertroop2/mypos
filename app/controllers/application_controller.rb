@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!#, except: [:show, :index]
   before_action :configure_permitted_parameters, if: :devise_controller?
     before_action :invalidate_simultaneous_user_session, unless: proc {|c| c.controller_name.eql?('sessions') and c.action_name.eql?('create') }
-      before_action :get_notifications, if: :user_signed_in?
+      before_action :get_notifications, :set_time_zone, if: :user_signed_in?
     
         rescue_from CanCan::AccessDenied do |exception|
           #      flash[:alert] = exception.message
@@ -26,6 +26,14 @@ class ApplicationController < ActionController::Base
           #      else
           #        stored_location_for(resource) || request.referer || root_path
           #      end
+          geo_details = Geocoder.search current_user.current_sign_in_ip
+          if geo_details.length == 0
+            timezone_name = "Jakarta"
+          else
+            timezone_name = geo_details.first.data["time_zone"] rescue "Jakarta"
+          end
+          current_user.timezone_name = timezone_name
+          current_user.save validate: false
           root_path
         end
     
@@ -34,7 +42,7 @@ class ApplicationController < ActionController::Base
         end
   
         protected
-
+        
         def configure_permitted_parameters
           added_attrs = [:username, :email, :password, :password_confirmation, :remember_me]
           devise_parameter_sanitizer.permit :sign_up, keys: added_attrs
@@ -42,6 +50,12 @@ class ApplicationController < ActionController::Base
         end
   
         private
+
+        def set_time_zone
+          Time.zone = current_user.timezone_name
+        rescue Exception => e
+          Time.zone = "Jakarta"
+        end
         
         def invalidate_simultaneous_user_session
           sign_out_and_redirect(current_user) if current_user && session[:sign_in_token] != current_user.current_sign_in_token
