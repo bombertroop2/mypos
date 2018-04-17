@@ -35,7 +35,7 @@ class Ability
             can :manage, Shipment
             can :manage, StockMutation
           else
-            can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Cashier") && !user_menu.eql?("Sale") && !user_menu.eql?("Company")
+            can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
           end
         end
       end
@@ -87,13 +87,10 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif class_name.eql?("Cashier")
+          elsif user_menu.name.eql?("Point of Sale")
             if user.has_role?(:cashier) && !user.new_record? && showroom_present
               can ability, CashierOpening
               can ability, CashDisbursement
-            end
-          elsif class_name.eql?("Sale")
-            if user.has_role?(:cashier) && !user.new_record? && showroom_present
               can ability, Sale
             end
           elsif class_name.eql?("Member")
@@ -183,7 +180,7 @@ class Ability
             else
               can ability, FiscalYear
             end
-          elsif class_name.eql?("Cashier") || class_name.eql?("Sale") || class_name.eql?("Company")
+          elsif class_name.eql?("Point of Sale") || class_name.eql?("Company")
           elsif ability && !user.has_role?(:accountant)
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user.has_role?(:accountant)
