@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class CashDisbursementsController < ApplicationController
   helper SmartListing::Helper
-  load_and_authorize_resource
+  authorize_resource
   before_action :set_cash_disbursement, only: [:show, :edit, :update, :destroy]
 
   # GET /cash_disbursements

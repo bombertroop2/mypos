@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class ListingStocksController < ApplicationController
+  authorize_resource
   helper SmartListing::Helper
-  load_and_authorize_resource
   before_action :set_listing_stock, only: [:show, :edit, :update, :destroy]
 
   # GET /listing_stocks

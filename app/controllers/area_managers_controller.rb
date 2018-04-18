@@ -1,6 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class AreaManagersController < ApplicationController
-  load_and_authorize_resource class: Supervisor
+  authorize_resource class: Supervisor
   before_action :set_area_manager, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
 

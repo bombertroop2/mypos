@@ -1,8 +1,8 @@
 include SmartListing::Helper::ControllerExtensions
 class ModelsController < ApplicationController
-  load_and_authorize_resource
-  before_action :set_model, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
+  authorize_resource
+  before_action :set_model, only: [:show, :edit, :update, :destroy]
 
   # GET /models
   # GET /models.json

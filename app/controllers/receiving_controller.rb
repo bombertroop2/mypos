@@ -1,6 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class ReceivingController < ApplicationController
-  load_and_authorize_resource class: ReceivedPurchaseOrder, except: [:get_purchase_order, :receive_products_from_purchase_order]
+  authorize_resource class: ReceivedPurchaseOrder, except: [:get_purchase_order, :receive_products_from_purchase_order]
     helper SmartListing::Helper
     before_action :set_purchase_order, only: [:get_purchase_order, :receive_products_from_purchase_order]
     before_action :set_received_order, only: :show
@@ -101,7 +101,7 @@ class ReceivingController < ApplicationController
         end
       rescue ActiveRecord::RecordNotUnique => e
         @do_number_not_unique = true
-#        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
+        #        @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").where("status = 'Open' OR status = 'Partial'")
         received_purchase_order = @purchase_order.received_purchase_orders.select{|rpo| rpo.new_record?}.first
         @colors = []
         @sizes = []

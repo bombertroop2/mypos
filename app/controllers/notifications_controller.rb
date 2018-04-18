@@ -1,8 +1,8 @@
 include SmartListing::Helper::ControllerExtensions
 class NotificationsController < ApplicationController
-  load_and_authorize_resource
-  before_action :set_notification, only: [:show, :destroy]
   helper SmartListing::Helper
+  authorize_resource
+  before_action :set_notification, only: [:show, :destroy]
 
   def notify_user
     params[:notification_ids].split(",").each do |notification_id|

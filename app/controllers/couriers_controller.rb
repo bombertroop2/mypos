@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class CouriersController < ApplicationController
-  load_and_authorize_resource
   helper SmartListing::Helper
+  authorize_resource
   before_action :set_courier, only: [:show, :edit, :update, :destroy]
 
   # GET /couriers

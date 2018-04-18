@@ -1,8 +1,8 @@
 include SmartListing::Helper::ControllerExtensions
 class WarehousesController < ApplicationController
-  load_and_authorize_resource
-  before_action :set_warehouse, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
+  authorize_resource
+  before_action :set_warehouse, only: [:show, :edit, :update, :destroy]
 
   # GET /warehouses
   # GET /warehouses.json

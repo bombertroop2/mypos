@@ -1,6 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class PurchaseReturnsController < ApplicationController
-  load_and_authorize_resource
+  authorize_resource
   helper SmartListing::Helper
   before_action :set_purchase_return, only: [:show, :edit, :update, :destroy]
 

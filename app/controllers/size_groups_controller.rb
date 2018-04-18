@@ -1,8 +1,8 @@
 include SmartListing::Helper::ControllerExtensions
 class SizeGroupsController < ApplicationController
-  load_and_authorize_resource
-  before_action :set_size_group, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
+  authorize_resource
+  before_action :set_size_group, only: [:show, :edit, :update, :destroy]
 
   # GET /size_groups
   # GET /size_groups.json

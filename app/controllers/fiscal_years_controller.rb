@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class FiscalYearsController < ApplicationController
-  load_and_authorize_resource
   helper SmartListing::Helper
+  authorize_resource
   before_action :set_fiscal_year, only: [:show, :edit, :update, :destroy]
   before_action :add_year_to_child, only: [:create, :update]
 

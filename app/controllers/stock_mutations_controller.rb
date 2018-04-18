@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class StockMutationsController < ApplicationController
-  load_and_authorize_resource
   helper SmartListing::Helper
+  authorize_resource
   before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit,
     :update, :destroy, :edit_store_to_warehouse, :update_store_to_warehouse,
     :delete_store_to_warehouse, :approve]

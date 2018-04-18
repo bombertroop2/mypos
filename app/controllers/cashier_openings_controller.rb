@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class CashierOpeningsController < ApplicationController
   helper SmartListing::Helper
-  load_and_authorize_resource
+  authorize_resource
   before_action :set_cashier_opening, only: [:edit, :update, :destroy]
 
   # GET /cashier_openings

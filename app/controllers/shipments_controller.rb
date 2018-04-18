@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
-  load_and_authorize_resource except: :create
   helper SmartListing::Helper
+  authorize_resource except: :create
   before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive]
 
   # GET /shipments

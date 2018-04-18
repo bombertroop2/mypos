@@ -1,8 +1,8 @@
 include SmartListing::Helper::ControllerExtensions
 class SalesPromotionGirlsController < ApplicationController
-  load_and_authorize_resource
-  before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
   helper SmartListing::Helper
+  authorize_resource
+  before_action :set_sales_promotion_girl, only: [:show, :edit, :update, :destroy]
 
   # GET /sales_promotion_girls
   # GET /sales_promotion_girls.json

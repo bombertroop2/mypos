@@ -1,5 +1,5 @@
 class AvailableMenusController < ApplicationController
-  load_and_authorize_resource except: :create
+  authorize_resource
 
   # GET /available_menus/new
   def new
@@ -19,7 +19,7 @@ class AvailableMenusController < ApplicationController
       params[:available_menus].each do |available_menu_index|
         AvailableMenu.destroy_all if array_index == 0
         available_menu = AvailableMenu.new(available_menu_params(params[:available_menus][available_menu_index]))
-        authorize! :manage, available_menu
+        #        authorize! :manage, available_menu
         unless available_menu.save
           invalid = true
           redirect_to new_available_menu_url, alert: 'Some of menus are invalid.'
