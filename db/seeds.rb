@@ -69,31 +69,31 @@ end
 #  Warehouse.create code: "GDP", name: "Gudang Pusat", address: "Jakarta", is_active: true, supervisor_id: Supervisor.first.id, region_id: Region.first.id, price_code_id: PriceCode.first.id, warehouse_type: "central"
 #end
 
-if BeginningStock.count(:id) == 0
-  Stock.all.each do |stock|
-    beginning_stock = BeginningStock.new year: Date.current.year, warehouse_id: stock.warehouse_id
-    beginning_stock_month = beginning_stock.beginning_stock_months.build month: Date.current.month
-    stock.stock_products.each do |stock_product|    
-      beginning_stock_product = beginning_stock_month.beginning_stock_products.build product_id: stock_product.product_id
-      stock_product.stock_details.each do |stock_detail|      
-        beginning_stock_product.beginning_stock_product_details.build color_id: stock_detail.color_id, size_id: stock_detail.size_id, quantity: stock_detail.quantity
-      end
-    end
-    beginning_stock.save
-  end
-end
-
-if Stock.count(:id) == 0
-  BeginningStock.all.each do |beginning_stock|
-    stock = Stock.new warehouse_id: beginning_stock.warehouse_id
-    beginning_stock.beginning_stock_months.each do |beginning_stock_month|
-      beginning_stock_month.beginning_stock_products.each do |beginning_stock_product|
-        stock_product = stock.stock_products.build product_id: beginning_stock_product.product_id
-        beginning_stock_product.beginning_stock_product_details.each do |beginning_stock_product_detail|
-          stock_product.stock_details.build size_id: beginning_stock_product_detail.size_id, color_id: beginning_stock_product_detail.color_id, quantity: beginning_stock_product_detail.quantity
-        end
-      end
-    end
-    stock.save
-  end
-end
+#if BeginningStock.count(:id) == 0
+#  Stock.all.each do |stock|
+#    beginning_stock = BeginningStock.new year: Date.current.year, warehouse_id: stock.warehouse_id
+#    beginning_stock_month = beginning_stock.beginning_stock_months.build month: Date.current.month
+#    stock.stock_products.each do |stock_product|    
+#      beginning_stock_product = beginning_stock_month.beginning_stock_products.build product_id: stock_product.product_id
+#      stock_product.stock_details.each do |stock_detail|      
+#        beginning_stock_product.beginning_stock_product_details.build color_id: stock_detail.color_id, size_id: stock_detail.size_id, quantity: stock_detail.quantity
+#      end
+#    end
+#    beginning_stock.save
+#  end
+#end
+#
+#if Stock.count(:id) == 0
+#  BeginningStock.all.each do |beginning_stock|
+#    stock = Stock.new warehouse_id: beginning_stock.warehouse_id
+#    beginning_stock.beginning_stock_months.each do |beginning_stock_month|
+#      beginning_stock_month.beginning_stock_products.each do |beginning_stock_product|
+#        stock_product = stock.stock_products.build product_id: beginning_stock_product.product_id
+#        beginning_stock_product.beginning_stock_product_details.each do |beginning_stock_product_detail|
+#          stock_product.stock_details.build size_id: beginning_stock_product_detail.size_id, color_id: beginning_stock_product_detail.color_id, quantity: beginning_stock_product_detail.quantity
+#        end
+#      end
+#    end
+#    stock.save
+#  end
+#end
