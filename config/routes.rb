@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :counter_events
   resources :companies
   resources :sales, except: [:edit, :update, :destroy] do
     collection do
