@@ -142,43 +142,7 @@
     if ($(".discount-fields").length > 0)
       $(".discount-fields").numeric();
 
-    $("#submit-btn").click(function () {
-      if ($("#listing-warehouse-details").html().trim() == "") {
-        bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-        return false;
-      } else {
-        if ($(".counter_event_warehouse_id_fields").length > 0) {
-          var valid = true;
-          $(".counter_event_warehouse_id_fields").each(function () {
-            if ($("#counter_event_counter_event_warehouses_attributes_" + $(this).val() + "_select_different_products").is(':checked')) {
-              if ($("#counter_event_product_fields_container_" + $(this).val()).length == 0) {
-                valid = false;
-                return false;
-              } else if ($("#counter_event_product_fields_container_" + $(this).val()).html().trim() == "") {
-                valid = false;
-                return false;
-              }
-            } else
-            if ($("#counter_event_general_product_fields_container_percentage_discount").length == 0) {
-              valid = false;
-              return false;
-            } else if ($("#counter_event_general_product_fields_container_percentage_discount").html().trim() == "") {
-              valid = false;
-              return false;
-            }
-          });
-          if (!valid) {
-            bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
-            return false;
-          } else
-          return true;
-        } else {
-          bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-          return false;
-        }
-
-      }
-    });
+    
     <% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
     <% unless counter_event_warehouse._destroy %>
     var e = jQuery.counter_event("click");

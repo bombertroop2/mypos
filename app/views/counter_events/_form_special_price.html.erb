@@ -19,7 +19,7 @@
 <div class="form-group<%= control_group_error(@counter_event, :start_time) %>">
   <%= f.label :start_time, "Start time", class: "col-sm-2 control-label" %>
   <div class="col-sm-10">
-    <%= f.text_field :start_time, size: 10, readonly: true, class: "form-control", id: "counter_event_start_date_time_special_price" %>
+    <%= f.text_field :start_time, size: 10, readonly: true, class: "form-control", id: "counter_event_start_time_special_price" %>
     <%= error_help_text(@counter_event, :start_time) %>
   </div>
 </div>
@@ -27,7 +27,7 @@
 <div class="form-group<%= control_group_error(@counter_event, :end_time) %>">
   <%= f.label :end_time, "End time", class: "col-sm-2 control-label" %>
   <div class="col-sm-10">
-    <%= f.text_field :end_time, size: 10, readonly: true, class: "form-control", id: "counter_event_end_date_time_special_price" %>
+    <%= f.text_field :end_time, size: 10, readonly: true, class: "form-control", id: "counter_event_end_time_special_price" %>
     <%= error_help_text(@counter_event, :end_time) %>
   </div>
 </div>
@@ -71,7 +71,7 @@
 
 <div id="listing-warehouse-details-sp">
   <% if action_name.eql?("create") || !@counter_event.new_record? %>
-  <%= render partial: "../events/warehouse_form", locals: {counter_event_type: "special price"} %>
+  <%= render partial: "warehouse_form", locals: {counter_event_type: "special price"} %>
   <% end %>
 </div>
 
@@ -85,12 +85,12 @@
 
 <script type="text/javascript">
   $(function () {
-    $("#counter_event_start_date_time_special_price").datetimepicker({
+    $("#counter_event_start_time_special_price").datetimepicker({
       format: "dd/mm/yyyy hh:ii",
       autoclose: true,
       minuteStep: 1
     });
-    $("#counter_event_end_date_time_special_price").datetimepicker({
+    $("#counter_event_end_time_special_price").datetimepicker({
       format: "dd/mm/yyyy hh:ii",
       autoclose: true,
       minuteStep: 1
@@ -113,69 +113,7 @@
       scrollCollapse: true
     });
 
-    $("#generate_counter_event_warehouse_form_special_price").click(function (e) {
-      if (counter_eventWarehousesSpecialPriceDataTable.rows('.selected').data().length == 0) {
-        e.prcounter_eventDefault();
-        bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
-      } else {
-        var warehouseIds = [];
-        $.each(counter_eventWarehousesSpecialPriceDataTable.rows('.selected')[0], function (index, value) {
-          warehouseIds.push(counter_eventWarehousesSpecialPriceDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
-        });
-        <% if @counter_event.new_record? %>
-        $.get("/counter_events/generate_warehouse_form", {
-          warehouse_ids: warehouseIds.join(","),
-          counter_event_type: "special price"
-        });
-        <% else %>
-        $.get("/counter_events/generate_warehouse_form", {
-          warehouse_ids: warehouseIds.join(","),
-          counter_event_type: "special price",
-          counter_event_id: "<%= @counter_event.id %>"
-        });
-        <% end %>
-      }
-
-    });
-
-    $("#submit-btn-special-price").click(function () {
-      if ($("#listing-warehouse-details-sp").html().trim() == "") {
-        bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-        return false;
-      } else {
-        if ($(".counter_event_warehouse_id_fields_special_price").length > 0) {
-          var valid = true;
-          $(".counter_event_warehouse_id_fields_special_price").each(function () {
-            if ($("#counter_event_counter_event_warehouses_attributes_" + $(this).val() + "_select_different_products_special_price").is(':checked')) {
-              if ($("#counter_event_product_fields_container_" + $(this).val() + "_special_price").length == 0) {
-                valid = false;
-                return false;
-              } else if ($("#counter_event_product_fields_container_" + $(this).val() + "_special_price").html().trim() == "") {
-                valid = false;
-                return false;
-              }
-            } else
-            if ($("#counter_event_general_product_fields_container_special_price").length == 0) {
-              valid = false;
-              return false;
-            } else if ($("#counter_event_general_product_fields_container_special_price").html().trim() == "") {
-              valid = false;
-              return false;
-            }
-          });
-          if (!valid) {
-            bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
-            return false;
-          } else
-          return true;
-        } else {
-          bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-          return false;
-        }
-
-      }
-    });
-
+    
     <% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
     <% unless counter_event_warehouse._destroy %>
     var e = jQuery.counter_event("click");
@@ -185,67 +123,7 @@
     <% end %>
     $('#counter_event_special_price').autoNumeric('init');
 
-    $("#add-btn-general-products-special-price").click(function () {
-      var productIds = [];
-      $(".counter_event-general-products-product-id-fields-special-price").each(function () {
-        var attrId = $(this).attr('id');
-        productIds.push(attrId.split("_")[5]);
-      });
-      var addProductParams = {};
-      <% if @counter_event.new_record? %>
-      addProductParams = {
-        brand_id: $("#brand_general_products_special_price").val(),
-        goods_type_id: $("#goods_type_general_products_special_price").val(),
-        model_id: $("#model_general_products_special_price").val(),
-        selected_product_ids: productIds.join(","),
-        counter_event_type: "special price"
-      };
-      <% else %>
-      addProductParams = {
-        brand_id: $("#brand_general_products_special_price").val(),
-        goods_type_id: $("#goods_type_general_products_special_price").val(),
-        model_id: $("#model_general_products_special_price").val(),
-        selected_product_ids: productIds.join(","),
-        counter_event_type: "special price",
-        counter_event_id: "<%= @counter_event.id %>"
-      };
-      <% end %>
-      $.get("/counter_events/add_general_products", addProductParams);
-      $("#brand_general_products_special_price").prop('selectedIndex', 0);
-      $("#goods_type_general_products_special_price").prop('selectedIndex', 0);
-      $("#model_general_products_special_price").prop('selectedIndex', 0);
-      return false;
-    });
-
-    $("#add-btn-by-code-general-products-special-price").click(function () {
-      if ($("#code_general_products_special_price").val().trim() == "")
-        bootbox.alert({message: "Please fill out the field above", size: "small"});
-      else {
-        var productIds = [];
-        $(".counter_event-general-products-product-id-fields-special-price").each(function () {
-          var attrId = $(this).attr('id');
-          productIds.push(attrId.split("_")[5]);
-        });
-        var addProductParams = {};
-        <% if @counter_event.new_record? %>
-        addProductParams = {
-          product_code: $("#code_general_products_special_price").val(),
-          selected_product_ids: productIds.join(","),
-          counter_event_type: "special price"
-        };
-        <% else %>
-        addProductParams = {
-          product_code: $("#code_general_products_special_price").val(),
-          selected_product_ids: productIds.join(","),
-          counter_event_type: "special price",
-          counter_event_id: "<%= @counter_event.id %>"
-        };
-        <% end %>
-        $.get("/counter_events/add_general_products", addProductParams);
-        $("#code_general_products_special_price").val("");
-      }
-      return false;
-    });
+    
     $('#counter_event_code_special_price').on("input", function () {
       $(this).val($(this).val().replace(/ /g, ""));
     });

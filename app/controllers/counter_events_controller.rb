@@ -24,11 +24,11 @@ class CounterEventsController < ApplicationController
       end_end_time = Time.zone.parse splitted_end_time_range[1].strip
     end
 
-    counter_events_scope = CounterEvent.select(:id, :code, :name, :start_date_time, :end_date_time)
+    counter_events_scope = CounterEvent.all
     counter_events_scope = counter_events_scope.where(["code #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(counter_events_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string]
-    counter_events_scope = counter_events_scope.where(["start_date_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
-    counter_events_scope = counter_events_scope.where(["end_date_time BETWEEN ? AND ?", start_end_time, end_end_time]) if params[:filter_event_end_time].present?
+    counter_events_scope = counter_events_scope.where(["start_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
+    counter_events_scope = counter_events_scope.where(["end_time BETWEEN ? AND ?", start_end_time, end_end_time]) if params[:filter_event_end_time].present?
     @counter_events = smart_listing_create(:counter_events, counter_events_scope, partial: 'counter_events/listing', default_sort: {id: "desc"})
   end
 
@@ -45,6 +45,9 @@ class CounterEventsController < ApplicationController
 
   # GET /counter_events/1/edit
   def edit
+    @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
+    @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
+    @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
   end
 
   # POST /counter_events
@@ -55,24 +58,18 @@ class CounterEventsController < ApplicationController
     puts counter_event_params
 
     begin
-      @valid = @event.save
+      @valid = @counter_event.save
       unless @valid
-        if @event.errors[:base].present?
-          render js: "bootbox.alert({message: \"#{@event.errors[:base].join("<br/>")}\",size: 'small'});"
+        if @counter_event.errors[:base].present?
+          render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
         else
-          @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
-          @brands = Brand.select(:id, :code, :name).order(:code)
-          @goods_types = GoodsType.select(:id, :code, :name).order(:code)
-          @models = Model.select(:id, :code, :name).order(:code)
+          @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)          
         end
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
-      @event.errors.messages[:code] = ["has already been taken"]
-      @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
-      @brands = Brand.select(:id, :code, :name).order(:code)
-      @goods_types = GoodsType.select(:id, :code, :name).order(:code)
-      @models = Model.select(:id, :code, :name).order(:code)
+      @counter_event.errors.messages[:code] = ["has already been taken"]
+      @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)      
     end
   end
 

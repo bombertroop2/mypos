@@ -10,7 +10,7 @@
               <li role="presentation" class="active"><a href="#discount_percentage" aria-controls="discount_percentage" role="tab" data-toggle="tab">Discount(%)</a></li>
               <li role="presentation"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>
             <% else %>
-              <% if @counter_event.first_plus_discount.present? %>
+              <% if @counter_event.first_discount.present? %>
                 <li role="presentation" class="active"><a href="#discount_percentage" aria-controls="discount_percentage" role="tab" data-toggle="tab">Discount(%)</a></li>
               <% elsif @counter_event.special_price.present? %>
                 <li role="presentation" class="active"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>              
@@ -32,7 +32,7 @@
                   </div>
               </div>              
             <% else %>
-              <% if @counter_event.first_plus_discount.present? %>
+              <% if @counter_event.first_discount.present? %>
                 <div role="tabpanel" class="tab-pane fade in active" id="discount_percentage" style="padding-top: 20px">
                     <div id="form_container_disc_percentage">
                         <%= render "form_discount_percentage" %>

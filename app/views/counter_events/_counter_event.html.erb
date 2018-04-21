@@ -1,15 +1,15 @@
-<td><%= counter_event.code %></td>
-<td><%= counter_event.name %></td>
-<td><%= counter_event.start_date_time.strftime("%d/%m/%Y %H:%M") %></td>
-<td><%= counter_event.end_date_time.strftime("%d/%m/%Y %H:%M") %></td>
-<td><%= counter_event.first_discount %></td>
-<td><%= counter_event.second_discount %></td>
-<td><%= counter_event.special_price %></td>
+<td><%= object.code %></td>
+<td><%= object.name %></td>
+<td><%= object.start_time.strftime("%d/%m/%Y %H:%M") %></td>
+<td><%= object.end_time.strftime("%d/%m/%Y %H:%M") %></td>
+<td><%= object.first_discount %></td>
+<td><%= object.second_discount %></td>
+<td><%= object.special_price %></td>
 
 
 <td class="actions" style="text-align: right">
-    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, counter_event, data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:manage, Event) && (counter_event.start_date_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_event_path(counter_event), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, Event), content_tag(:i, "", :class => "glyphicon glyphicon-off"), generate_activation_form_event_path(counter_event), :remote => true, method: :get, title: "Activate/Deactivate" ) %>
-      <%= link_to_if(can?(:manage, Event) && (counter_event.start_date_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), counter_event, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>      
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, CounterEvent) && (object.start_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_counter_event_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
+      <%= link_to_if(can?(:manage, CounterEvent), content_tag(:i, "", :class => "glyphicon glyphicon-off"), generate_activation_form_event_path(object), :remote => true, method: :get, title: "Activate/Deactivate" ) %>
+      <%= link_to_if(can?(:manage, CounterEvent) && (object.start_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>      
   </td>
