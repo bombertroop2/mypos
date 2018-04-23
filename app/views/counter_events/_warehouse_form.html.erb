@@ -1,14 +1,6 @@
 <% event_type = event_type rescue nil %>
 <% event_type = params[:event_type] rescue nil if event_type.nil? %>
-<% if action_name.eql?("edit") %>
-<% event_warehouses = @event.event_warehouses.select(:id, :warehouse_id, :code, :name, :select_different_products).joins(:warehouse) %>
-<% elsif action_name.eql?("update") %>
-<% event_warehouses = @event.event_warehouses %>
-<% elsif !@event.new_record? %>
-<% event_warehouses = @event_warehouses %>
-<% else %>
-<% event_warehouses = @event.event_warehouses %>
-<% end %>
+
 <% event_warehouses.each do |event_warehouse| %>
 <% if action_name.eql?("edit") %>
 <% event_warehouse.wrhs_code = event_warehouse.code %>
@@ -22,16 +14,12 @@
 <%= fields_for "event[event_warehouses_attributes][#{event_warehouse.warehouse_id}]", event_warehouse do |event_warehouse_fields| %>
 <%= event_warehouse_fields.hidden_field :id unless event_warehouse_fields.object.new_record? %>
 <% if !event_warehouse_fields.object.new_record? && (event_warehouse_fields.object.remove || event_warehouse_fields.object._destroy) %>
-<%= event_warehouse_fields.hidden_field :_destroy, value: true %>
+  <%= event_warehouse_fields.hidden_field :_destroy, value: true %>
 <% else %>
-<% if event_type.present? && event_type.eql?("cash discount") %>
-<% event_warehouse_id_fields_class_name = "event_warehouse_id_fields_cash_discount" %>
-<% elsif event_type.present? && event_type.eql?("special price") %>
-<% event_warehouse_id_fields_class_name = "event_warehouse_id_fields_special_price" %>
-<% elsif event_type.present? && event_type.eql?("buy one get one") %>
-<% event_warehouse_id_fields_class_name = "event_warehouse_id_fields_buy_one_get_one" %>
+<% if event_type.present? && event_type.eql?("special price") %>
+  <% event_warehouse_id_fields_class_name = "event_warehouse_id_fields_special_price" %>
 <% else %>
-<% event_warehouse_id_fields_class_name = "event_warehouse_id_fields" %>
+  <% event_warehouse_id_fields_class_name = "event_warehouse_id_fields" %>
 <% end %>
 <%= event_warehouse_fields.hidden_field :warehouse_id, class: event_warehouse_id_fields_class_name %>
 <%= event_warehouse_fields.hidden_field :wrhs_code %>
@@ -44,22 +32,16 @@
         <h2><%= "#{event_warehouse.wrhs_code} - #{event_warehouse.wrhs_name}" %></h2>
         <div class="navbar-right">
           <% if !event_warehouse_fields.object.new_record? %>                      
-          <%= event_warehouse_fields.check_box :_destroy %> Delete
+            <%= event_warehouse_fields.check_box :_destroy %> Delete
           <% end %>
-          <% if event_type.present? && event_type.eql?("cash discount") %>
-          <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_cash_discount" %>
-          <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-cash-discount" %>
-          <% elsif event_type.present? && event_type.eql?("special price") %>
-          <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_special_price" %>
-          <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-special-price" %>
-          <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-          <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_buy_one_get_one" %>
-          <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-buy-one-get-one" %>
+          <% if event_type.present? && event_type.eql?("special price") %>
+            <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_special_price" %>
+            <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-special-price" %>
           <% else %>
-          <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products" %>
-          <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-percentage-discount" %>
+            <% select_different_products_field_id = "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products" %>
+            <% select_different_products_field_class_name = "event-warehouse-select-different-products-fields-percentage-discount" %>
           <% end %>
-          <%= event_warehouse_fields.check_box :select_different_products, class: select_different_products_field_class_name, id: select_different_products_field_id %> Select different products
+            <%= event_warehouse_fields.check_box :select_different_products, class: select_different_products_field_class_name, id: select_different_products_field_id %> Select different products
         </div>
         <div class="clearfix"></div>
       </div>
@@ -228,84 +210,8 @@
 
       <script type="text/javascript">
         $(function () {
-          <% if event_type.present? && event_type.eql?("cash discount") %>
-          $(".add-buttons-cash-discount").click(function () {
-            var warehouseId = $(this).attr("id").split("-")[2];
-            var productIds = [];
-            $(".event-products-" + warehouseId + "-product-id-fields-cash-discount").each(function () {
-              var attrId = $(this).attr('id');
-              productIds.push(attrId.split("_")[8]);
-            });
-            var addProductParams = {};
-            <% if @event.new_record? %>
-            addProductParams = {
-              warehouse_id: warehouseId,
-              brand_id: $("#brand_" + warehouseId + "_cash_discount").val(),
-              goods_type_id: $("#goods_type_" + warehouseId + "_cash_discount").val(),
-              model_id: $("#model_" + warehouseId + "_cash_discount").val(),
-              selected_product_ids: productIds.join(","),
-              event_type: "cash discount"
-            };
-            <% else %>
-            addProductParams = {
-              warehouse_id: warehouseId,
-              brand_id: $("#brand_" + warehouseId + "_cash_discount").val(),
-              goods_type_id: $("#goods_type_" + warehouseId + "_cash_discount").val(),
-              model_id: $("#model_" + warehouseId + "_cash_discount").val(),
-              selected_product_ids: productIds.join(","),
-              event_type: "cash discount",
-              event_id: "<%= @event.id %>"
-            };
-            <% end %>
-            $.get("/events/add_products", addProductParams);
-            $("#brand_" + warehouseId + "_cash_discount").prop('selectedIndex', 0);
-            $("#goods_type_" + warehouseId + "_cash_discount").prop('selectedIndex', 0);
-            $("#model_" + warehouseId + "_cash_discount").prop('selectedIndex', 0);
-            return false;
-          });
 
-          $(".add-buttons-by-code-cash-discount").click(function () {
-            var warehouseId = $(this).attr("id").split("-")[2];
-            if ($("#code_" + warehouseId + "_cash_discount").val().trim() == "")
-              bootbox.alert({message: "Please fill out the field above", size: "small"});
-            else {
-              var productIds = [];
-              $(".event-products-" + warehouseId + "-product-id-fields-cash-discount").each(function () {
-                var attrId = $(this).attr('id');
-                productIds.push(attrId.split("_")[8]);
-              });
-              var addProductParams = {};
-              <% if @event.new_record? %>
-              addProductParams = {
-                warehouse_id: warehouseId,
-                product_code: $("#code_" + warehouseId + "_cash_discount").val(),
-                selected_product_ids: productIds.join(","),
-                event_type: "cash discount"
-              };
-              <% else %>
-              addProductParams = {
-                warehouse_id: warehouseId,
-                product_code: $("#code_" + warehouseId + "_cash_discount").val(),
-                selected_product_ids: productIds.join(","),
-                event_type: "cash discount",
-                event_id: "<%= @event.id %>"
-              };
-              <% end %>
-              $.get("/events/add_products", addProductParams);
-              $("#code_" + warehouseId + "_cash_discount").val("");
-            }
-            return false;
-          });
-
-          $(".event-warehouse-select-different-products-fields-cash-discount").click(function () {
-            var warehouseId = $(this).attr("id").split("_")[4];
-            if ($(this).is(":checked"))
-              $("#event-warehouse-" + warehouseId + "-form-container-cash-discount").removeClass("hidden");
-            else {
-              $("#event-warehouse-" + warehouseId + "-form-container-cash-discount").addClass("hidden");
-            }
-          });
-          <% elsif event_type.present? && event_type.eql?("special price") %>
+          <% if event_type.present? && event_type.eql?("special price") %>
           $(".add-buttons-special-price").click(function () {
             var warehouseId = $(this).attr("id").split("-")[2];
             var productIds = [];
@@ -314,7 +220,7 @@
               productIds.push(attrId.split("_")[8]);
             });
             var addProductParams = {};
-            <% if @event.new_record? %>
+            <% if @counter_event.new_record? %>
             addProductParams = {
               warehouse_id: warehouseId,
               brand_id: $("#brand_" + warehouseId + "_special_price").val(),
@@ -331,7 +237,7 @@
               model_id: $("#model_" + warehouseId + "_special_price").val(),
               selected_product_ids: productIds.join(","),
               event_type: "special price",
-              event_id: "<%= @event.id %>"
+              event_id: "<%= @counter_event.id %>"
             };
             <% end %>
             $.get("/events/add_products", addProductParams);
@@ -351,7 +257,7 @@
                 productIds.push(attrId.split("_")[8]);
               });
               var addProductParams = {};
-              <% if @event.new_record? %>
+              <% if @counter_event.new_record? %>
               addProductParams = {
                 warehouse_id: warehouseId,
                 product_code: $("#code_" + warehouseId + "_special_price").val(),
@@ -364,7 +270,7 @@
                 product_code: $("#code_" + warehouseId + "_special_price").val(),
                 selected_product_ids: productIds.join(","),
                 event_type: "special price",
-                event_id: "<%= @event.id %>"
+                event_id: "<%= @counter_event.id %>"
               };
               <% end %>
               $.get("/events/add_products", addProductParams);
@@ -380,82 +286,7 @@
             else {
               $("#event-warehouse-" + warehouseId + "-form-container-special-price").addClass("hidden");
             }
-          });
-          <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-          $(".add-buttons-buy-one-get-one").click(function () {
-            var warehouseId = $(this).attr("id").split("-")[2];
-            var productIds = [];
-            $(".event-products-" + warehouseId + "-product-id-fields-buy-one-get-one").each(function () {
-              var attrId = $(this).attr('id');
-              productIds.push(attrId.split("_")[8]);
-            });
-            var addProductParams = {};
-            <% if @event.new_record? %>
-            addProductParams = {
-              warehouse_id: warehouseId,
-              brand_id: $("#brand_" + warehouseId + "_buy_one_get_one").val(),
-              goods_type_id: $("#goods_type_" + warehouseId + "_buy_one_get_one").val(),
-              model_id: $("#model_" + warehouseId + "_buy_one_get_one").val(),
-              selected_product_ids: productIds.join(","),
-              event_type: "buy one get one"
-            };
-            <% else %>
-            addProductParams = {
-              warehouse_id: warehouseId,
-              brand_id: $("#brand_" + warehouseId + "_buy_one_get_one").val(),
-              goods_type_id: $("#goods_type_" + warehouseId + "_buy_one_get_one").val(),
-              model_id: $("#model_" + warehouseId + "_buy_one_get_one").val(),
-              selected_product_ids: productIds.join(","),
-              event_type: "buy one get one",
-              event_id: "<%= @event.id %>"
-            };
-            <% end %>
-            $.get("/events/add_products", addProductParams);
-            $("#brand_" + warehouseId + "_buy_one_get_one").prop('selectedIndex', 0);
-            $("#goods_type_" + warehouseId + "_buy_one_get_one").prop('selectedIndex', 0);
-            $("#model_" + warehouseId + "_buy_one_get_one").prop('selectedIndex', 0);
-            return false;
-          });
-          $(".add-buttons-by-code-buy-one-get-one").click(function () {
-            var warehouseId = $(this).attr("id").split("-")[2];
-            if ($("#code_" + warehouseId + "_buy_one_get_one").val().trim() == "")
-              bootbox.alert({message: "Please fill out the field above", size: "small"});
-            else {
-              var productIds = [];
-              $(".event-products-" + warehouseId + "-product-id-fields-buy-one-get-one").each(function () {
-                var attrId = $(this).attr('id');
-                productIds.push(attrId.split("_")[8]);
-              });
-              var addProductParams = {};
-              <% if @event.new_record? %>
-              addProductParams = {
-                warehouse_id: warehouseId,
-                product_code: $("#code_" + warehouseId + "_buy_one_get_one").val(),
-                selected_product_ids: productIds.join(","),
-                event_type: "buy one get one"
-              };
-              <% else %>
-              addProductParams = {
-                warehouse_id: warehouseId,
-                product_code: $("#code_" + warehouseId + "_buy_one_get_one").val(),
-                selected_product_ids: productIds.join(","),
-                event_type: "buy one get one",
-                event_id: "<%= @event.id %>"
-              };
-              <% end %>
-              $.get("/events/add_products", addProductParams);
-              $("#code_" + warehouseId + "_buy_one_get_one").val("");
-            }
-            return false;
-          });
-          $(".event-warehouse-select-different-products-fields-buy-one-get-one").click(function () {
-            var warehouseId = $(this).attr("id").split("_")[4];
-            if ($(this).is(":checked"))
-              $("#event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").removeClass("hidden");
-            else {
-              $("#event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").addClass("hidden");
-            }
-          });
+          });        
           <% else %>
           $(".add-buttons").click(function () {
             var warehouseId = $(this).attr("id").split("-")[2];
@@ -465,7 +296,7 @@
               productIds.push(attrId.split("_")[8]);
             });
             var addProductParams = {};
-            <% if @event.new_record? %>
+            <% if @counter_event.new_record? %>
             addProductParams = {
               warehouse_id: warehouseId,
               brand_id: $("#brand_" + warehouseId).val(),
@@ -482,7 +313,7 @@
               model_id: $("#model_" + warehouseId).val(),
               selected_product_ids: productIds.join(","),
               event_type: "",
-              event_id: "<%= @event.id %>"
+              event_id: "<%= @counter_event.id %>"
             };
             <% end %>
             $.get("/events/add_products", addProductParams);
@@ -503,7 +334,7 @@
                 productIds.push(attrId.split("_")[8]);
               });
               var addProductParams = {};
-              <% if @event.new_record? %>
+              <% if @counter_event.new_record? %>
               addProductParams = {
                 warehouse_id: warehouseId,
                 product_code: $("#code_" + warehouseId).val(),
@@ -516,7 +347,7 @@
                 product_code: $("#code_" + warehouseId).val(),
                 selected_product_ids: productIds.join(","),
                 event_type: "",
-                event_id: "<%= @event.id %>"
+                event_id: "<%= @counter_event.id %>"
               };
               <% end %>
               $.get("/events/add_products", addProductParams);

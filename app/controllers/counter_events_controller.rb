@@ -30,6 +30,7 @@ class CounterEventsController < ApplicationController
     counter_events_scope = counter_events_scope.where(["start_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
     counter_events_scope = counter_events_scope.where(["end_time BETWEEN ? AND ?", start_end_time, end_end_time]) if params[:filter_event_end_time].present?
     @counter_events = smart_listing_create(:counter_events, counter_events_scope, partial: 'counter_events/listing', default_sort: {id: "desc"})
+
   end
 
   # GET /counter_events/1
@@ -40,14 +41,14 @@ class CounterEventsController < ApplicationController
   # GET /counter_events/new
   def new
     @counter_event = CounterEvent.new
-    @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
+    @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)
   end
 
   # GET /counter_events/1/edit
   def edit
     @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
     @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
-    @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)
+    @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)
   end
 
   # POST /counter_events
@@ -63,27 +64,34 @@ class CounterEventsController < ApplicationController
         if @counter_event.errors[:base].present?
           render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
         else
-          @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)          
+          @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
         end
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
       @counter_event.errors.messages[:code] = ["has already been taken"]
-      @warehouses = Warehouse.select(:id, :code, :name).actived.showroom.order(:code)      
+      @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)      
     end
   end
 
   # PATCH/PUT /counter_events/1
   # PATCH/PUT /counter_events/1.json
   def update
-    respond_to do |format|
-      if @counter_event.update(counter_event_params)
-        format.html { redirect_to @counter_event, notice: 'Counter event was successfully updated.' }
-        format.json { render :show, status: :ok, location: @counter_event }
-      else
-        format.html { render :edit }
-        format.json { render json: @counter_event.errors, status: :unprocessable_entity }
+    params[:counter_event][:special_price] = params[:counter_event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:counter_event][:special_price].present?
+    
+    begin
+      @valid = @counter_event.update(counter_event_params)
+      unless @valid
+        unless @counter_event.errors[:base].present?
+          @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
+        else
+          render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
+        end
       end
+    rescue ActiveRecord::RecordNotUnique => e
+      @valid = false
+      @counter_event.errors.messages[:code] = ["has already been taken"]
+      @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)      
     end
   end
 
