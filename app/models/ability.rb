@@ -97,7 +97,7 @@ class Ability
             end
           elsif class_name.eql?("Member")
             can ability, Member
-          elsif class_name.eql?("ReceivedPurchaseOrder")
+          elsif class_name.eql?("ReceivedPurchaseOrder") || class_name.eql?("PurchaseOrder")
           else
             can :read, class_name.gsub(/\s+/, "").constantize unless class_name.eql?("Company")
           end        
