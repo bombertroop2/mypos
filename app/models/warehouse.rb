@@ -68,6 +68,10 @@ class Warehouse < ApplicationRecord
         where("warehouse_type = 'showroom'")
       end
 
+      def self.counter
+        where("warehouse_type = 'counter'")
+      end
+
       private
       
       def code_not_invalid

@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       get "get_replacement_product"
     end
   end
+  resources :counter_events
   resources :companies
   resources :sales, except: [:edit, :update, :destroy] do
     collection do

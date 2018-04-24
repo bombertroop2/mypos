@@ -248,7 +248,7 @@
                                                 <ul class="nav child_menu">
                                                     <% if can? :read, Event %>
                                                       <li><%= link_to "Showroom Events", events_path, method: :get %></li>
-                                                      <li><%= link_to "Counter Events", "javascript:void(0)", method: :get %></li>
+                                                      <li><%= link_to "Counter Events", counter_events_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>

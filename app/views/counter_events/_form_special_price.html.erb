@@ -1,0 +1,131 @@
+<%= form_for(@counter_event, remote: true, html: {class: "form-horizontal"}) do |f| %>
+
+<div class="form-group<%= control_group_error(@counter_event, :code) %>">
+  <%= f.label :code, class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_special_price" %>
+    <%= error_help_text(@counter_event, :code) %>
+  </div>
+
+</div>
+<div class="form-group<%= control_group_error(@counter_event, :name) %>">
+  <%= f.label :name, class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :name, class: "form-control inputs" %>
+    <%= error_help_text(@counter_event, :name) %>
+  </div>
+</div>
+
+<div class="form-group<%= control_group_error(@counter_event, :start_time) %>">
+  <%= f.label :start_time, "Start time", class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :start_time, size: 10, readonly: true, class: "form-control", id: "counter_event_start_time_special_price" %>
+    <%= error_help_text(@counter_event, :start_time) %>
+  </div>
+</div>
+
+<div class="form-group<%= control_group_error(@counter_event, :end_time) %>">
+  <%= f.label :end_time, "End time", class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :end_time, size: 10, readonly: true, class: "form-control", id: "counter_event_end_time_special_price" %>
+    <%= error_help_text(@counter_event, :end_time) %>
+  </div>
+</div>
+
+<div class="form-group<%= control_group_error(@counter_event, :special_price) %>">
+  <%= f.label :special_price, "Price", class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :special_price, "data-a-sep" => ".",
+    "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
+    <%= error_help_text(@counter_event, :special_price) %>
+  </div>
+</div>
+
+
+
+<div class="form-group">
+  <label class="col-sm-2 control-label">Warehouses</label>
+  <div class="col-sm-10">
+    <table id="listing_event_warehouses_table_special_price" class="display">
+      <thead>
+        <tr>
+          <th></th>
+          <th id="code_th_sp">Code</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @warehouses.each do |warehouse| %>
+        <tr id="warehouse_<%= warehouse.id %>_special_price">
+          <td></td>
+          <td><%= warehouse.code %></td>
+          <td><%= warehouse.name %></td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <a class="btn btn-default active" id="generate_counter_event_warehouse_form_special_price" style="float: right;margin-top: 10px;">Generate form</a>
+  </div>
+</div>
+
+<div id="listing-warehouse-details-sp">
+  <% if action_name.eql?("create") || !@counter_event.new_record? %>
+  <%= render partial: "warehouse_form", locals: {counter_event_type: "special price"} %>
+  <% end %>
+</div>
+
+<div class="form-group">
+  <div class="col-sm-offset-2 col-sm-10">
+    <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
+    <button class="btn btn-link cancel">Cancel</button>
+  </div>
+</div>
+<% end %>
+
+<script type="text/javascript">
+  $(function () {
+    $("#counter_event_start_time_special_price").datetimepicker({
+      format: "dd/mm/yyyy hh:ii",
+      autoclose: true,
+      minuteStep: 1
+    });
+    $("#counter_event_end_time_special_price").datetimepicker({
+      format: "dd/mm/yyyy hh:ii",
+      autoclose: true,
+      minuteStep: 1
+    });
+    var counter_eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
+      order: [1, 'asc'],
+      dom: 'T<"clear">lfrtip',
+      columns: [
+      {data: null, defaultContent: '', orderable: false},
+      {data: 'code'},
+      {data: 'name'}
+      ],
+      tableTools: {
+        sRowSelect: 'os',
+        aButtons: ['select_all', 'select_none']
+      },
+      paging: false,
+      info: false,
+      scrollY: "250px",
+      scrollCollapse: true
+    });
+
+    
+    <% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
+    <% unless counter_event_warehouse._destroy %>
+    var e = jQuery.counter_event("click");
+    e.ctrlKey = true;
+    $("#warehouse_<%= counter_event_warehouse.warehouse_id %>_special_price").find("td:first-child").trigger(e);
+    <% end %>
+    <% end %>
+    $('#counter_event_special_price').autoNumeric('init');
+
+    
+    $('#counter_event_code_special_price').on("input", function () {
+      $(this).val($(this).val().replace(/ /g, ""));
+    });
+  });
+</script>  
