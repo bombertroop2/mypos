@@ -1,6 +1,7 @@
 <%= form_for(@counter_event, remote: true, html: {class: "form-horizontal"}) do |f| %>
 
 <div class="form-group<%= control_group_error(@counter_event, :code) %>">
+
   <%= f.label :code, class: "col-sm-2 control-label" %>
   <div class="col-sm-10">
     <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_special_price" %>
@@ -57,15 +58,15 @@
 
       <tbody>
         <% @warehouses.each do |warehouse| %>
-        <tr id="warehouse_<%= warehouse.id %>_special_price">
-          <td></td>
-          <td><%= warehouse.code %></td>
-          <td><%= warehouse.name %></td>
-        </tr>
+          <tr id="warehouse_<%= warehouse.id %>_special_price">
+            <td></td>
+            <td><%= warehouse.code %></td>
+            <td><%= warehouse.name %></td>
+          </tr>
         <% end %>
       </tbody>
     </table>
-    <a class="btn btn-default active" id="generate_counter_event_warehouse_form_special_price" style="float: right;margin-top: 10px;">Generate form</a>
+    
   </div>
 </div>
 
@@ -85,16 +86,12 @@
 
 <script type="text/javascript">
   $(function () {
-    $("#counter_event_start_time_special_price").datetimepicker({
+    $("#counter_event_start_time_special_price, #counter_event_end_time_special_price").datetimepicker({
       format: "dd/mm/yyyy hh:ii",
       autoclose: true,
       minuteStep: 1
     });
-    $("#counter_event_end_time_special_price").datetimepicker({
-      format: "dd/mm/yyyy hh:ii",
-      autoclose: true,
-      minuteStep: 1
-    });
+    
     var counter_eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
       order: [1, 'asc'],
       dom: 'T<"clear">lfrtip',
@@ -112,6 +109,11 @@
       scrollY: "250px",
       scrollCollapse: true
     });
+    var warehouse_ids = [];
+    $('#listing_event_warehouses_table_special_price tbody').on( 'click', 'tr', function () {
+        warehouse_ids.push(counter_eventWarehousesSpecialPriceDataTable.row( this ).data()["code"])
+    } );
+    
 
     
     <% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
@@ -122,6 +124,15 @@
     <% end %>
     <% end %>
     $('#counter_event_special_price').autoNumeric('init');
+
+    $("form").submit( function(e) {
+      warehouse_ids = $.unique( warehouse_ids );
+      $('<input />').attr('type', 'hidden')
+          .attr('name', "warehouse_ids")
+          .attr('value', warehouse_ids)
+          .appendTo('form');
+      return true;
+    });
 
     
     $('#counter_event_code_special_price').on("input", function () {

@@ -1,3 +1,11 @@
 class CounterEvent < ApplicationRecord
 	has_many :counter_event_warehouses
+	
+	def set_warehouses(w_ids)
+		counter_event_warehouses.destroy_all
+		warehouse_ids = Warehouse.where(code: w_ids.split(", ")).pluck(:id)
+		arr = warehouse_ids.map {|x| {counter_event_id: id, warehouse_id: x}}
+		p arr
+		CounterEventWarehouse.create(arr)
+	end
 end
