@@ -42,7 +42,7 @@ module ApplicationHelper
   
   def booking_control_menu_active?
     return true if can? :read, OrderBooking
-    return true if can? :read_action, Shipment
+    return true if can? :read_action_for_staff, Shipment
     return true if can? :read, Courier
   end
   
@@ -82,6 +82,8 @@ module ApplicationHelper
     return true if can? :read, CashDisbursement
     return true if can? :manage, Sale
     return true if can? :read, Sale
+#    return true if can? :manage, SalesReturn
+#    return true if can? :read, SalesReturn
   end
 
   def goods_in_transit_active?

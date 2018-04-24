@@ -11,7 +11,7 @@ class Ability
       cannot :manage, CashierOpening
       cannot :manage, CashDisbursement
       cannot :manage, Sale
-#      cannot :manage, SalesReturn
+      #      cannot :manage, SalesReturn
     elsif user.has_role? :administrator
       (User::MENUS.clone << "User").each do |user_menu|
         if user_menu.eql?("User") || AvailableMenu.select("1 AS one").where(active: true, name: user_menu).present?
@@ -60,12 +60,12 @@ class Ability
           else
             user_menu.name
           end
-          if class_name.eql?("Supervisor")
-            can :read, class_name.gsub(/\s+/, "").constantize
-            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+          if class_name.eql?("Supervisor") || class_name.eql?("Warehouse") || class_name.eql?("Region") || class_name.eql?("ReceivedPurchaseOrder") || class_name.eql?("Purchase Order") || class_name.eql?("Vendor") || class_name.eql?("Purchase Return") || class_name.eql?("Courier") || class_name.eql?("Event") || class_name.eql?("Email") || class_name.eql?("Bank")
+            #            can :read, class_name.gsub(/\s+/, "").constantize
+            #            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
-            alias_action :index, :inventory_receipts, :show, to: :read_action
+            alias_action :inventory_receipts, :show, to: :read_action
             can :read_action, class_name.gsub(/\s+/, "").constantize
             can [:receive, :search_do], class_name.gsub(/\s+/, "").constantize if ability.eql?(:manage)
           elsif class_name.eql?("Stock Mutation")
@@ -93,11 +93,10 @@ class Ability
               can ability, CashierOpening
               can ability, CashDisbursement
               can ability, Sale
-#              can ability, SalesReturn
+              #              can ability, SalesReturn
             end
           elsif class_name.eql?("Member")
             can ability, Member
-          elsif class_name.eql?("ReceivedPurchaseOrder") || class_name.eql?("Purchase Order")
           else
             can :read, class_name.gsub(/\s+/, "").constantize unless class_name.eql?("Company")
           end        
@@ -136,16 +135,16 @@ class Ability
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, to: :undelete_action
-            alias_action :index, :inventory_receipts, :show, to: :read_action
+            alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
             alias_action :edit, :update, :destroy, to: :edit_action
             if ability.eql?(:manage) && user.roles.first.name.eql?("staff")
-              can [:read_action, :undelete_action], class_name.gsub(/\s+/, "").constantize
+              can [:read_action_for_staff, :undelete_action], class_name.gsub(/\s+/, "").constantize
             elsif user.roles.first.name.eql?("staff") || user.has_role?(:accountant)
-              can :read_action, class_name.gsub(/\s+/, "").constantize
+              can :read_action_for_staff, class_name.gsub(/\s+/, "").constantize
             elsif ability.eql?(:read) && user.roles.first.name.eql?("manager")
-              can :read_action, class_name.gsub(/\s+/, "").constantize
+              can :read_action_for_staff, class_name.gsub(/\s+/, "").constantize
             elsif user.roles.first.name.eql?("manager")
-              can [:read_action, :undelete_action, :edit_action], class_name.gsub(/\s+/, "").constantize
+              can [:read_action_for_staff, :undelete_action, :edit_action], class_name.gsub(/\s+/, "").constantize
             end
           elsif (class_name.eql?("Product") || class_name.eql?("Purchase Order")) && !user.has_managerial_role?
             # cegah staff untuk manage product

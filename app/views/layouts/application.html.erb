@@ -156,7 +156,7 @@
                                                     <% if can? :read, OrderBooking %>
                                                       <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
                                                     <% end %>                          
-                                                    <% if can? :read_action, Shipment %>
+                                                    <% if can? :read_action_for_staff, Shipment %>
                                                       <li><%= link_to "Shipments", shipments_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, Courier %>
@@ -237,6 +237,9 @@
                                                     <% if can? :read, Sale %>
                                                       <li><%= link_to "Listing Sales", sales_path, method: :get %></li>
                                                     <% end %>
+                                                    <%# if can? :read, SalesReturn %>
+                                                      <!--<li><%#= link_to "Sales Returns", sales_returns_path, method: :get %></li>-->
+                                                    <%# end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -400,7 +403,9 @@
                           $("#filter_delivery_date").val($("#filter-delivery-date").val());
                           $("#filter_received_date").val($("#filter-received-date").val());
                           $("#filter_string").val($("#filter-string").val());
-                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+        <% if current_user.has_non_spg_role? %>
+                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+        <% end %>
                           $(".smart-listing-controls").submit();
                       });
         <% if cannot?(:undelete_action, Shipment) %>
@@ -620,7 +625,9 @@
                           $("#filter_plan_date").val($("#filter-plan-date").val());
                           $("#filter_string").val($("#filter-string").val());
                           $("#filter_status").val($("#filter-status").val());
-                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+        <% if current_user.has_non_spg_role? %>
+                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+        <% end %>
                           $(".smart-listing-controls").submit();
                       });
         <% if cannot? :manage, OrderBooking %>
@@ -665,7 +672,9 @@
                         $("#search-shipment-btn").click(function () {
                             $("#filter_delivery_date").val($("#filter-delivery-date-git").val());
                             $("#filter_string").val($("#filter-string").val());
-                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+          <% if current_user.has_non_spg_role? %>
+                              $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+          <% end %>
                             $(".smart-listing-controls").submit();
                         });
         <% elsif action_name.eql?("returned_goods") %>
@@ -766,6 +775,20 @@
                             return false;
                         });
         <% end %>
+      <%# elsif controller_name.eql?("sales_returns") %>
+                      /*$("#menu_toggle").click();
+                      $("#search-sales-return-btn").click(function () {
+                          $("#filter_date").val($("#filter-sales-return-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+        <%# if cannot?(:manage, SalesReturn) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });*/
+        <%# end %>
       <% elsif controller_name.eql?("sales") %>
         <% unless action_name.eql?("index") %>
                         $("#menu_toggle").click();
