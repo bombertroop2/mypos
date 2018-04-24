@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :sales_returns, except: [:edit, :update, :destroy] do
+    collection do
+      get "search_receipt"
+      get "get_replacement_product"
+    end
+  end
   resources :companies
   resources :sales, except: [:edit, :update, :destroy] do
     collection do
@@ -163,6 +169,7 @@ Rails.application.routes.draw do
       #      get 'receive'
       #      post 'receive'
       get 'close'
+      get 'print'
     end
   end
   resources :products do
