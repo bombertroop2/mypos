@@ -2,17 +2,18 @@
 <% event_type = params[:event_type] rescue nil if event_type.nil? %>
 
 <% event_warehouses.each do |event_warehouse| %>
-<% if action_name.eql?("edit") %>
-<% event_warehouse.wrhs_code = event_warehouse.code %>
-<% event_warehouse.wrhs_name = event_warehouse.name %>
-<% event_products = event_warehouse.event_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
-<% elsif action_name.eql?("update") %>
-<% event_warehouse.wrhs_code = event_warehouse.warehouse.code %>
-<% event_warehouse.wrhs_name = event_warehouse.warehouse.name %>
-<% event_products = event_warehouse.event_products %>
-<% end %>
+  <% if action_name.eql?("edit") %>
+    <% event_warehouse.wrhs_code = event_warehouse.code %>
+    <% event_warehouse.wrhs_name = event_warehouse.name %>
+    <% event_products = event_warehouse.event_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+  <% elsif action_name.eql?("update") %>
+    <% event_warehouse.wrhs_code = event_warehouse.warehouse.code %>
+    <% event_warehouse.wrhs_name = event_warehouse.warehouse.name %>
+    <% event_products = event_warehouse.event_products %>
+  <% end %>
+
 <%= fields_for "event[event_warehouses_attributes][#{event_warehouse.warehouse_id}]", event_warehouse do |event_warehouse_fields| %>
-<%= event_warehouse_fields.hidden_field :id unless event_warehouse_fields.object.new_record? %>
+  <%= event_warehouse_fields.hidden_field :id unless event_warehouse_fields.object.new_record? %>
 <% if !event_warehouse_fields.object.new_record? && (event_warehouse_fields.object.remove || event_warehouse_fields.object._destroy) %>
   <%= event_warehouse_fields.hidden_field :_destroy, value: true %>
 <% else %>

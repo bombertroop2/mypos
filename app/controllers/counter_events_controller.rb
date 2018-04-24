@@ -47,7 +47,7 @@ class CounterEventsController < ApplicationController
   # GET /counter_events/1/edit
   def edit
     @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
-    @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
+    @counter_event.end_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
     @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)
   end
 
@@ -56,16 +56,17 @@ class CounterEventsController < ApplicationController
   def create
     params[:counter_event][:special_price] = params[:counter_event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:counter_event][:special_price].present?    
     @counter_event = CounterEvent.new(counter_event_params)
-    puts counter_event_params
-
+    
     begin
       @valid = @counter_event.save
-      unless @valid
+      if !@valid
         if @counter_event.errors[:base].present?
           render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
         else
           @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
         end
+      else
+        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
@@ -81,12 +82,14 @@ class CounterEventsController < ApplicationController
     
     begin
       @valid = @counter_event.update(counter_event_params)
-      unless @valid
+      if !@valid
         unless @counter_event.errors[:base].present?
           @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
         else
           render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
         end
+      else
+        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
