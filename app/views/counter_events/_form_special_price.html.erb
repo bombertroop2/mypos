@@ -110,22 +110,36 @@
       scrollCollapse: true
     });
     var warehouse_ids = [];
-    $('#listing_event_warehouses_table_special_price tbody').on( 'click', 'tr', function () {
-        warehouse_ids.push(counter_eventWarehousesSpecialPriceDataTable.row( this ).data()["code"])
-    } );
     
-
+     
+    var selectedColorFields = <%= @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
     
-    <% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
-    <% unless counter_event_warehouse._destroy %>
-    var e = jQuery.counter_event("click");
-    e.ctrlKey = true;
-    $("#warehouse_<%= counter_event_warehouse.warehouse_id %>_special_price").find("td:first-child").trigger(e);
-    <% end %>
-    <% end %>
+    $.each(selectedColorFields, function (index, value) {
+      var selectedColorId = selectedColorFields[index];
+      if (selectedColorId != "") {
+          var e = jQuery.Event("click");
+          e.ctrlKey = true;
+          var clickRowProcessId = setInterval(function () {
+              if (!$("#warehouse_" + selectedColorId + "_special_price").hasClass("DTTT_selected") || !$("#warehouse_" + selectedColorId + "_special_price").hasClass("selected")) {
+                  $("#warehouse_" + selectedColorId + "_special_price").find("td:first-child").trigger(e);
+              } else
+                  clearInterval(clickRowProcessId);
+          }, 0);
+        }
+    });
+    
     $('#counter_event_special_price').autoNumeric('init');
 
     $("form").submit( function(e) {
+
+    var w_ids = <%= @warehouses.pluck(:id) %>;
+    $.each(w_ids, function (index, value) {
+      var whs = w_ids[index];
+      if ($("#warehouse_" + whs + "_special_price").hasClass("DTTT_selected") || $("#warehouse_" + whs +"_special_price").hasClass("selected")) {
+          warehouse_ids.push(whs);
+      }         
+    });
+
       warehouse_ids = $.unique( warehouse_ids );
       $('<input />').attr('type', 'hidden')
           .attr('name', "warehouse_ids")
