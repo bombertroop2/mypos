@@ -1,0 +1,309 @@
+<div class="col-md-12 col-sm-12 col-xs-12" style="min-height: 700px">
+	<div class="x_panel">
+		<div class="x_title">
+			<h2>Sale <small>new transaction</small></h2>                
+			<div class="clearfix"></div>
+		</div>
+		<div class="x_content">
+
+
+			<!-- Smart Wizard -->
+			<div id="wizard" class="form_wizard wizard_horizontal">
+				<ul class="wizard_steps anchor">
+
+					<li>
+						<a href="#step-2" class="selected" isdone="1" rel="2" id="list-step-2">
+							<span class="step_no">2</span>
+	           <span class="step_descr">Product form</span>
+	            </a>
+	          </li>
+	          <li>
+	          	<a href="#step-3"  isdone="1" rel="3" id="list-step-3">
+	          		<span class="step_no">3</span>
+	            <span class="step_descr">Payment form</span>
+	            </a>
+	          </li>                      
+	        </ul>
+	        <div class="stepContainer" style="height: 54px; overflow-x: hidden;"><div class="stepContainer content" style="overflow-x: visible !important;" id="stepContainer">
+	        	<form class="form-horizontal" id="new_sale" action="/sales" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="✓">
+	        		
+	        		<div id="step-2" class="content" style="display:block">
+	        			<div class="form-group">
+	        				<label class="control-label col-md-3 col-sm-3 col-xs-12" for="barcode">Barcode</label>
+	        				<div class="col-md-6 col-sm-6 col-xs-12">
+	        					<div class="input-group">
+	        						<input type="text" id="barcode2" class="form-control col-md-7 col-xs-12" style="width: 100%">
+	        						<span class="input-group-btn">
+	        							<button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="search-barcode-btn2">
+	        								<span class="glyphicon glyphicon-plus"></span> Add
+	        							</button>
+	        							<button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="search-sale-product-btn">
+	        								<span class="glyphicon glyphicon-search"></span> Search
+	        							</button>
+	        						</span>
+	        					</div>
+	        				</div>
+	        			</div>
+	        			<div id="listing-purchased-products" style="display: none">
+	        				<div id="listing_purchased_products_table_wrapper" class="dataTables_wrapper"><div class="DTTT_container"></div><div class="clear"></div><table id="listing_purchased_products_table" class="display dataTable" style="width: 100%" role="grid">
+        <thead>
+            <tr role="row"><th class="sorting_disabled" rowspan="1" colspan="1" style="width: 123px;">Barcode</th><th class="sorting_disabled" rowspan="1" colspan="1" style="width: 185px;">Product</th><th class="sorting_disabled" rowspan="1" colspan="1" style="width: 98px;">Color</th><th class="sorting_disabled" rowspan="1" colspan="1" style="width: 75px;">Size</th><th class="sorting_disabled" rowspan="1" colspan="1" style="width: 147px;">Price</th><th class="sorting_disabled" rowspan="1" colspan="1" style="width: 129px;"></th></tr>
+        </thead>
+        <tfoot>
+            <tr><th colspan="4" style="text-align:right" rowspan="1">Total:</th><th id="total-sale" rowspan="1" colspan="1">Rp120.000,00</th><th rowspan="1" colspan="1"></th></tr>
+        </tfoot>
+        <tbody>
+      </tbody>
+    </table></div>
+	        			</div>
+	        			<div id="searchSaleProductForm" class="form-horizontal search-sale-product-form" style="display: none;">
+	        				<div class="form-group">
+	        					<label class="col-xs-3 control-label">Product Code</label>
+	        					<div class="col-xs-5">
+	        						<input type="text" name="sale_product_code" id="sale_product_code" value="" class="form-control upcase">
+	        					</div>
+	        				</div>
+
+	        				<div id="sale_product_color_field_container">
+
+	        				</div>
+
+	        				<div id="sale_product_size_field_container">
+
+	        				</div>
+
+	        				<div class="form-group">
+	        					<div class="col-xs-5 col-xs-offset-3">
+	        						<button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_product">
+	        							<span class="glyphicon glyphicon-plus"></span> Add
+	        						</button>
+	        					</div>
+	        				</div>
+	        			</div>
+	        		</div>
+	        		<div id="step-3" class="content" style="display: none;">
+	        			<div class="form-group">
+	        				<label class="control-label col-md-3 col-sm-3 col-xs-12" for="sale_payment_method">Payment method</label>
+	        				<div class="col-md-6 col-sm-6 col-xs-12">
+	        					<select class="form-control" style="width: 100%" name="sale[payment_method]" id="sale_payment_method"><option value=""></option>
+	        						<option value="Cash">Cash</option>
+	        						<option value="Card">Card</option></select>
+
+	        					</div>
+	        				</div>
+	        				<div class="form-group hidden" id="sale_gift_event_gift_item">
+	        					<label class="control-label col-md-3 col-sm-3 col-xs-12">Gift Item</label>
+	        					<div class="col-md-6 col-sm-6 col-xs-12">
+	        						<div class="input-group" style="margin-bottom: 0px">
+	        							<span class="form-control" style="width: 100%;cursor: not-allowed" id="payment_form_gift_item_field"></span>
+	        							<span class="input-group-btn">
+	        								<button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="btn-change-gift-item-gift-event">
+	        									<span class="glyphicon glyphicon-edit"></span> Change
+	        								</button>
+	        							</span>
+	        						</div>                                
+	        					</div>
+	        				</div>
+	        				<div class="form-group hidden" id="sale_cash_field_container">
+	        					<label class="control-label col-md-3 col-sm-3 col-xs-12" for="sale_cash">Cash</label>
+	        					<div class="col-md-6 col-sm-6 col-xs-12">
+	        						<input class="form-control" data-a-sep="." data-a-dec="," data-a-sign="Rp" style="width: 100%;text-align: right" type="text" name="sale[cash]" id="sale_cash">
+
+	        					</div>
+	        				</div>
+	        				<div class="form-group">
+	        					<label class="control-label col-md-3 col-sm-3 col-xs-12" id="sale_total_label" for="sale_total">Total</label>
+	        					<div class="col-md-6 col-sm-6 col-xs-12">
+	        						<span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_total_sale"></span>
+	        					</div>
+	        				</div>
+	        				<div class="form-group hidden" id="sale_gift_event_discount_field_layout">
+	        					<label class="control-label col-md-3 col-sm-3 col-xs-12">Discount</label>
+	        					<div class="col-md-6 col-sm-6 col-xs-12">
+	        						<div class="input-group" style="margin-bottom: 0px">
+	        							<span class="input-group-btn">
+	        								<button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="btn-change-discount-gift-event">
+	        									<span class="glyphicon glyphicon-edit"></span> Change
+	        								</button>
+	        							</span>
+	        							<span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="sale_gift_event_discount_field"></span>
+	        						</div>                                
+	        					</div>
+	        				</div>
+	        				<div class="form-group hidden" id="sale_gift_event_total_after_discount_field_layout">
+	        					<label class="control-label col-md-3 col-sm-3 col-xs-12">Total</label>
+	        					<div class="col-md-6 col-sm-6 col-xs-12">
+	        						<span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_total_sale_after_discount"></span>
+	        					</div>
+	        				</div>
+	        				<div id="sale_card_fields_container" class="hidden">
+	        					<div class="form-group">
+	        						<label class="col-md-3 col-sm-3 col-xs-12 control-label" for="sale_bank_id">Bank</label>
+	        						<div class="col-md-6 col-sm-6 col-xs-12">
+	        							<select class="form-control" style="width: 100%" name="sale[bank_id]" id="sale_bank_id"><option value=""></option>
+	        								<option value="1">BNI - Bni 46 (Credit)</option></select>
+
+	        							</div>
+	        						</div>
+	        						<div class="form-group">
+	        							<label class="control-label col-md-3 col-sm-3 col-xs-12" for="sale_card_number">Card number</label>
+	        							<div class="col-md-6 col-sm-6 col-xs-12">
+	        								<input class="form-control" style="width: 100%" type="text" name="sale[card_number]" id="sale_card_number">
+
+	        							</div>
+	        						</div>
+	        						<div class="form-group">
+	        							<label class="control-label col-md-3 col-sm-3 col-xs-12" for="sale_trace_number">Trace number</label>
+	        							<div class="col-md-6 col-sm-6 col-xs-12">
+	        								<input class="form-control" style="width: 100%" type="text" name="sale[trace_number]" id="sale_trace_number">
+
+	        							</div>
+	        						</div>
+	        						<div class="hidden form-group">
+	        							<label class="control-label col-md-3 col-sm-3 col-xs-12" for="sale_pay">Pay</label>
+	        							<div class="col-md-6 col-sm-6 col-xs-12">
+	        								<input class="form-control" data-a-sep="." data-a-dec="," data-a-sign="Rp" style="width: 100%;text-align: right" type="text" name="sale[pay]" id="sale_pay">
+
+	        							</div>
+	        						</div>
+	        					</div>
+	        					<div class="form-group hidden" id="sale_change_field_container">
+	        						<label class="control-label col-md-3 col-sm-3 col-xs-12" for="sale_change">Change</label>
+	        						<div class="col-md-6 col-sm-6 col-xs-12">
+	        							<span class="form-control" style="width: 100%;cursor: not-allowed;text-align: right" id="payment_form_sale_change"></span>
+	        						</div>
+	        					</div>
+	        				</div>
+
+	        				<input type="hidden" name="sale[gift_event_gift_type]" id="sale_gift_event_gift_type">
+
+	        			</form>
+
+	        		</div></div>
+	        	</div>
+	        		<!-- End SmartWizard Content -->
+
+	        		<div id="addSaleGiftForm" class="form-horizontal add-sale-gift-form" style="display: none;">
+	        			<div class="form-group">
+	        				<label class="col-sm-3 control-label">Discount/Product</label>
+	        				<div class="col-sm-9">
+	        					<select name="discount_product" id="discount_product" class="form-control" style="width: 100%;"><option value="" label=" "></option><option value="Discount">Discount</option>
+	        						<option value="Product">Product</option></select>
+	        					</div>
+	        				</div>
+	        				<div class="form-group hidden" id="sale_event_gift_discount_amount_field_layout">
+	        					<label class="col-sm-3 control-label">Discount</label>
+	        					<div class="col-sm-9">
+	        						<span class="form-control" style="width: 100%;cursor: not-allowed" id="sale_event_gift_discount_amount"></span>
+	        					</div>
+	        				</div>
+
+	        				<div class="form-group gift-event-product-search-fields hidden">
+	        					<label class="col-sm-3 control-label">Barcode</label>
+	        					<div class="col-sm-9">
+	        						<div class="input-group">
+	        							<input type="text" id="gift_event_product_barcode" class="form-control" style="width: 100%">
+	        							<span class="input-group-btn">
+	        								<button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="gift-event-search-barcode-btn">
+	        									<span class="glyphicon glyphicon-plus"></span> Add
+	        								</button>
+	        							</span>
+	        						</div>
+	        					</div>
+	        				</div>
+
+
+	        				<div class="form-group hidden gift-event-product-search-fields">
+	        					<label class="col-sm-3 control-label">Product Code</label>
+	        					<div class="col-sm-9">
+	        						<input type="text" id="sale_event_gift_product_code" name="sale_event_gift_product_code" class="form-control upcase" style="width: 100%">
+	        					</div>
+	        				</div>
+
+	        				<div id="sale_event_gift_product_color_field_container" class="gift-event-product-search-fields">
+
+	        				</div>
+
+	        				<div id="sale_event_gift_product_size_field_container" class="gift-event-product-search-fields">
+
+	        				</div>
+
+	        				<div class="form-group">
+	        					<div class="col-xs-5 col-xs-offset-3">
+	        						<button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_event_gift_product">
+	        							<span class="glyphicon glyphicon-plus"></span> Add
+	        						</button>
+	        					</div>
+	        				</div>
+	        			</div>
+	        		</div>
+	        	</div>
+	        </div>
+
+<% content_for :bottom_assets do %>
+<script type="text/javascript">
+	
+  $(function () {
+    $("#search-barcode-btn2").click(function () {
+    	if($("#barcode2").val() == "0000001"){
+                            $("#barcode2").blur();
+                            $.get("/fake_consignment_sale/get_product.js", {
+                                barcode: $("#barcode2").val().trim()
+                            });
+
+    	}else{
+    		bootbox.alert({message: "Product is not available", size: "small"});    		
+    	}        
+    });
+
+$('#search-sale-product-btn').on('click', function () {
+                            bootboxDialogForm = bootbox
+                                    .dialog({
+                                        title: 'Search Product',
+                                        message: $('#searchSaleProductForm'),
+                                        show: false, /* We will show it manually later */
+                                        onEscape: true
+                                    }).on('shown.bs.modal', function () {
+                                $('#searchSaleProductForm')
+                                        .show();
+                                $("#sale_product_code").focus();
+                                $("#sale_product_code").val("");
+                                $("#sale_product_color_field_container").html("");
+                                $("#sale_product_size_field_container").html("");
+                                $("#modal_form_btn_add_product").addClass("hidden");
+                            }).on('hide.bs.modal', function (e) {
+                                $('#searchSaleProductForm').hide().appendTo('body');
+                                var processId = setInterval(function () {
+                                    if ($("#barcode").is(":focus")) {
+                                        clearInterval(processId);
+                                    } else {
+                                        $("#barcode").focus();
+                                    }
+                                }, 0);
+                            }).modal('show');
+                        });
+
+                        $('#sale_product_code').keypress(function (e) {
+                            var key = e.which;
+                            if (key == 13)  // the enter key code
+                            {
+                                $.get("/sales/get_product_colors", {
+                                    sale_product_code: $("#sale_product_code").val().trim()
+                                });
+                                return false;
+                            }
+                        });
+                        $('#modal_form_btn_add_product').click(function () {
+                            if ($("#sale_product_code").val().trim() == "" || $("#sale_product_color").val().trim() == "" || $("#sale_product_size").val().trim() == "")
+                                bootbox.alert({message: "Please fill out the field above", size: "small"});
+                            else
+                                $.get("/sales/get_product", {
+                                    sale_product_code: $("#sale_product_code").val().trim(),
+                                    sale_product_color: $("#sale_product_color").val().trim(),
+                                    sale_product_size: $("#sale_product_size").val().trim()
+                                });
+                        });
+    
+  });
+</script>	        
+<% end %>
