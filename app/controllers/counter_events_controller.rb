@@ -116,6 +116,6 @@ class CounterEventsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def counter_event_params
-      params.require(:counter_event).permit(:code, :name, :start_time, :end_time, :first_discount, :second_discount, :special_price)
+      params.require(:counter_event).permit(:code, :name, :start_time, :end_time, :first_discount, :second_discount, :special_price, :margin, :participation)
     end
 end

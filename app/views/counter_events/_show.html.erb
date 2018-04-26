@@ -1,0 +1,57 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Type</dt>
+        <dd><%= object.first_discount.present? ? "Discount(%)"  : "Special Price" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Code</dt>
+        <dd><%= object.code %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Name</dt>
+        <dd><%= object.name %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Start time</dt>
+        <dd><%= object.start_time.strftime("%d/%m/%Y %H:%M") %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>End time</dt>
+        <dd><%= object.end_time.strftime("%d/%m/%Y %H:%M") %></dd>
+    </dl>
+
+    <% if object.first_discount.present? %>
+      <dl class="dl-horizontal">
+          <dt>First discount</dt>
+          <dd><%= object.first_discount %>%</dd>
+      </dl>
+
+      <% if object.second_discount.present? %>
+        <dl class="dl-horizontal">
+            <dt>Second discount</dt>
+            <dd><%= object.second_discount %>%</dd>
+        </dl>
+      <% end %>    
+      <dl class="dl-horizontal">
+            <dt>Margin</dt>
+            <dd><%= object.margin %></dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>Participation</dt>
+            <dd><%= object.participation %></dd>
+        </dl>
+    <% elsif object.special_price.present? %>
+      <dl class="dl-horizontal">
+          <dt>Special price</dt>
+          <dd><%= number_to_currency(object.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>    
+    <% end %>
