@@ -280,6 +280,14 @@
                                                 </ul>
                                             </li>
                                           <% end %>
+                                            <li><a><i class="fa fa-calculator"></i> Consignment Sale <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                      <li><%= link_to "Sale Entry", 'fake_consignment_sale/sale_entry' %></li>
+                                                    
+                                                      <li><%= link_to "Listing Sales", 'fake_consignment_sale/listing_sale' %></li>
+                                                    
+                                                </ul>
+                                            </li>
                                       </ul>
                                   </div>
                                   <!--<div class="menu_section">
@@ -1105,5 +1113,7 @@
                   </div>
               </div>
             <% end %>
+
+            <%= yield :bottom_assets %>
         </body>
     </html>

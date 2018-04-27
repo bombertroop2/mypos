@@ -5,6 +5,10 @@ Rails.application.routes.draw do
       get "get_replacement_product"
     end
   end
+  get 'fake_consignment_sale/sale_entry'
+  get 'fake_consignment_sale/get_product'
+  get 'fake_consignment_sale/listing_sale'
+
   resources :counter_events
   resources :companies
   resources :sales, except: [:edit, :update, :destroy] do

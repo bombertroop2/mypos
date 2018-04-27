@@ -1,0 +1,27 @@
+console.log('logger')
+$("#listing-purchased-products table tbody").append("<%= j(render(partial: "table")) %>");
+$(".stepContainer").css("height", "100%");
+  $("#barcode2").focus();
+  $("#listing-purchased-products").show();
+
+var sum = 0;
+// iterate through each td based on class and add the values
+$(".p_price").each(function() {
+
+    var value = $(this).text().replace('Rp', '').replace('.', '').replace(',00', '');
+    // add only if the value is number
+    if(!isNaN(value) && value.length != 0) {
+        sum += parseFloat(value);
+    }
+});
+
+$("#total-sale").text(sum)
+
+$("#total-sale").toCurrency({
+                                precision: 2, // decimal precision
+                                delimiter: ".", // thousands delimiter
+                                separator: ",", // decimal separator
+                                unit: "Rp", // unit
+                                format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                            });
