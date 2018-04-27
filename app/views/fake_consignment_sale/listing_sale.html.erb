@@ -1,2 +1,190 @@
-<h1>FakeConsignmentSale#listing_sale</h1>
-<p>Find me in app/views/fake_consignment_sale/listing_sale.html.erb</p>
+<div class="page-header">
+    <h1>Sales</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" id="filter-string" class="form-control" placeholder="Transaction number">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-sale-transaction-time" placeholder="Transaction date" style="width: 200px !important">
+    </div>
+    
+    <button id="search-sale-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+</div>
+
+<div class="smart-listing" id="sales" data-item-count="18"><div class="loading"></div><div class="content"><table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-sales-thead">
+        <tr>
+            <th class="col-md-4">
+<a class="sortable" data-attr="transaction_number" data-remote="true" href="/sales?_method=get&amp;sales_smart_listing%5Bpage%5D=&amp;sales_smart_listing%5Bper_page%5D=10&amp;sales_smart_listing%5Bsort%5D%5Btransaction_number%5D=asc">
+  Transaction Number
+    <span class="glyphicon glyphicon-resize-vertical"></span>
+</a></th>
+            <th class="col-md-3">
+<a class="sortable" data-attr="transaction_time" data-remote="true" href="/sales?_method=get&amp;sales_smart_listing%5Bpage%5D=&amp;sales_smart_listing%5Bper_page%5D=10&amp;sales_smart_listing%5Bsort%5D%5Btransaction_time%5D=asc">
+  Transaction Date
+    <span class="glyphicon glyphicon-resize-vertical"></span>
+</a></th>
+            <th class="col-md-3">
+<a class="sortable" data-attr="total" data-remote="true" href="/sales?_method=get&amp;sales_smart_listing%5Bpage%5D=&amp;sales_smart_listing%5Bper_page%5D=10&amp;sales_smart_listing%5Bsort%5D%5Btotal%5D=asc">
+  Total
+    <span class="glyphicon glyphicon-resize-vertical"></span>
+</a></th>
+            <th class="col-md-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+          <tr class="editable" data-id="106">
+              <td>WBIP-F00105180000018</td>
+<td>16/04/2018</td>
+
+<td>Rp150.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="105">
+              <td>WBIP-F00105180000017</td>
+<td>15/04/2018</td>
+
+<td>Rp150.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="104">
+              <td>WBIP-F00105180000016</td>
+<td>31/03/2018</td>
+
+<td>Rp112.500,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="103">
+              <td>WBIP-F00105180000015</td>
+<td>31/03/2018</td>
+
+<td>Rp112.500,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="102">
+              <td>WBIP-F00105180000014</td>
+<td>31/03/2018</td>
+
+<td>Rp225.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="101">
+              <td>WBIP-F00105180000013</td>
+<td>31/03/2018</td>
+
+<td>Rp225.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="100">
+              <td>WBIP-F00105180000012</td>
+<td>31/03/2018</td>
+
+<td>Rp300.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="99">
+              <td>WBIP-F00105180000011</td>
+<td>31/03/2018</td>
+
+<td>Rp300.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="98">
+              <td>WBIP-F00105180000010</td>
+<td>31/03/2018</td>
+
+<td>Rp300.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+          <tr class="editable" data-id="97">
+              <td>WBIP-F00105180000009</td>
+<td>31/03/2018</td>
+
+<td>Rp300.000,00</td>
+<td class="actions" style="text-align: right">
+    <a  title="Show" class="showone"><i class="glyphicon glyphicon-share-alt"></i></a>    
+    <a title="Show"><i class="glyphicon glyphicon-ok"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-remove"></i></a>    
+    <a  title="Show"><i class="glyphicon glyphicon-trash"></i></a>    
+</td>
+
+          </tr>
+    </tbody>
+</table>
+  
+</div></div>
+
+  <% content_for :bottom_assets do %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-sales-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-sales-thead").show();
+      }
+  }, 0);
+
+  $("a.showone").click(function(){
+  	$("tr[data-id='106']").html('<td colspan="5"> <button type="button" class="close cancel" aria-label="Close"> <span aria-hidden="true">×</span> </button> <div style="padding-top: 20px"></div> <dl class="dl-horizontal"> <dt>Transaction Number</dt> <dd>WBIP-F00105180000017</dd> </dl> <dl class="dl-horizontal"> <dt>Transaction Date</dt> <dd>16/04/2018</dd> </dl><dl class="dl-horizontal"> <dt>Event</dt> <dd>Special Price: Rp100.000,00</dd> </dl> <dl class="dl-horizontal"> <dt>Total</dt> <dd>Rp100.000,00</dd> </dl> <table class="table table-striped"> <thead> <tr> <th>No.</th> <th>Barcode</th> <th>Product</th> <th>Color</th> <th>Size</th> <th>Price</th><th>Subtotal</th> </tr> </thead> <tbody> <tr> <td style="vertical-align: middle">1</td> <td style="vertical-align: middle">0000113</td> <td>ZETAN - Adidas</td> <td>RD - Red</td> <td>3</td> <td>Rp150.000,00</td><td> Rp150.000,00 </td> </tr> </thead> <tbody> <tr> <td style="vertical-align: middle">1</td> <td style="vertical-align: middle">0000113</td> <td>Kodda - Adidas</td> <td>RD - Red</td> <td>3</td> <td>Rp150.000,00</td><td> Rp150.000,00 </td> </tr> <tr> <td style="vertical-align: middle">2</td> <td style="vertical-align: middle">0000113</td> <td>Jambore - Adidas</td> <td>RD - Red</td> <td>3</td> <td>Rp200.000,00</td><td> Rp200.000,00 </td> </tr> <tr> <td style="vertical-align: middle">1</td> <td style="vertical-align: middle">0000113</td> <td>Gotche - Adidas</td> <td>RD - Red</td> <td>3</td> <td>Rp135.000,00</td><td> Rp135.000,00 </td> </tr> <tr> <td style="vertical-align: middle">1</td> <td style="vertical-align: middle">0000113</td> <td>World Cup - Adidas</td> <td>RD - Red</td> <td>3</td> <td>Rp125.000,00</td><td> Rp125.000,00 </td> </tr> </tbody> </table> </td>');
+  });
+	
+
+
+</script>
+<% end %>
