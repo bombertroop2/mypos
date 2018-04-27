@@ -78,6 +78,7 @@
                                         <td><strong>Unit Cost</strong></td>
                                         <td><strong>Total Cost</strong></td>
                                     </tr>
+                                    <% total_qty_all_products = 0 %>
                                     <% @purchase_order.purchase_order_products.joins([product: :brand], :cost_list).includes(:purchase_order_details_selected_columns, :color_selected_columns, :size_selected_columns).select("name, cost, purchase_order_products.id, products.code AS product_code").each_with_index do |po_product, idx| %>
                                       <% total_quantity = 0 %>
                                       <% product_sizes = po_product.size_selected_columns.distinct %>
@@ -141,10 +142,15 @@
                                               <% end %>
                                           </td>
                                       </tr>
+                                      <% total_qty_all_products += total_quantity %>
                                     <% end %>
 
                                 </tbody>
                                 <tfoot>
+                                    <tr>
+                                        <td colspan="5" align="right"><strong>Total Quantity</strong></td>
+                                        <td align="right"><%= total_qty_all_products if current_user.has_managerial_role? %></td>
+                                    </tr>
                                     <tr>
                                         <td colspan="5" align="right"><strong>Gross Amount</strong></td>
                                         <td align="right"><%= number_to_currency(@purchase_order.order_value,

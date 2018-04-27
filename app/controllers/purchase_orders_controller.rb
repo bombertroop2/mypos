@@ -3,7 +3,7 @@ class PurchaseOrdersController < ApplicationController
   helper SmartListing::Helper
   authorize_resource
   before_action :populate_combobox_list, :populate_products, only: [:new, :edit]
-  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :close]
+  before_action :set_purchase_order, only: [:show, :edit, :update, :destroy, :close, :print]
 
   # GET /purchase_orders
   # GET /purchase_orders.json
@@ -28,6 +28,9 @@ class PurchaseOrdersController < ApplicationController
   # GET /purchase_orders/1
   # GET /purchase_orders/1.json
   def show
+  end
+
+  def print
   end
 
   # GET /purchase_orders/new

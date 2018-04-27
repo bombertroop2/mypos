@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  resources :sales_returns, except: [:edit, :update, :destroy] do
+    collection do
+      get "search_receipt"
+      get "get_replacement_product"
+    end
+  end
+  get 'fake_consignment_sale/sale_entry'
   get 'consignments/new' => 'fake_consignment_sale#sale_entry'
   get 'fake_consignment_sale/get_product'
   get 'consignments' => 'fake_consignment_sale#listing_sale'
@@ -168,6 +175,7 @@ Rails.application.routes.draw do
       #      get 'receive'
       #      post 'receive'
       get 'close'
+      get 'print'
     end
   end
   resources :products do

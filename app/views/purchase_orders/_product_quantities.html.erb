@@ -1,3 +1,4 @@
+<% number = 1 %>
 <% @purchase_order.purchase_order_products.each do |pop| %>
   <% if pop.new_record? || action_name.eql?("edit") || (action_name.eql?("update") && !pop._destroy) %>
     <% if pop.errors and pop.errors.messages[:base] %>
@@ -5,15 +6,19 @@
     <% end %>
     <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= pop.product_id %>" style="table-layout: fixed;width: 100%">
         <tr style="text-align: center">
-            <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
-            <td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>
+            <td style="vertical-align: middle;width: 4% !important;"><strong>No.</strong></td>
+            <td style="vertical-align: middle;width: 18% !important;"><strong>Product code</strong></td>
+            <td style="vertical-align: middle;width: 18% !important;"><strong>Cost</strong></td>
             <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
         </tr>    
         <tr style="text-align: center">
-            <td style="vertical-align: middle;width: 20% !important;">
+            <td style="vertical-align: middle;width: 4% !important;">
+                <%= number %>
+            </td>
+            <td style="vertical-align: middle;width: 18% !important;">
                 <%= "#{pop.prdct_code} - #{pop.prdct_name}" %>
             </td>
-            <td style="vertical-align: middle;width: 20% !important;" id="product_table_cost_<%= pop.product_id %>">
+            <td style="vertical-align: middle;width: 18% !important;" id="product_table_cost_<%= pop.product_id %>">
                 <%= number_to_currency((pop.po_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
             </td>
             <td style="width: auto !important;">                
@@ -93,6 +98,7 @@
                 });
               </script>
           </table>
+          <% number += 1 %>
         <% else %>
           <% pop_field_name = create_product_array_variable_name(pop, pop.product_id) %>
           <%= fields_for pop_field_name, pop do |pop_form| %>
