@@ -6,8 +6,9 @@ Rails.application.routes.draw do
     end
   end
   get 'fake_consignment_sale/sale_entry'
+  get 'consignments/new' => 'fake_consignment_sale#sale_entry'
   get 'fake_consignment_sale/get_product'
-  get 'fake_consignment_sale/listing_sale'
+  get 'consignments' => 'fake_consignment_sale#listing_sale'
 
   resources :counter_events
   resources :companies
