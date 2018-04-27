@@ -88,4 +88,13 @@ module ApplicationHelper
     return true if can? :read_shipment_goods, Shipment
     return true if can? :read_mutation_goods, StockMutation
   end
+
+  def render_table_with_type(type)
+    partial_name = type || "normal"
+    render partial: "table_#{partial_name}"
+  end
+
+  def is_selected(params_type, type) 
+    'selected' if params_type.eql?(type)
+  end
 end
