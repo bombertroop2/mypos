@@ -151,8 +151,10 @@
 					discount_two = value[1];
 
 					discount_one_res = (ori_price * discount_one / 100);
+                                        var priceAfterFirstDisc = ori_price - discount_one_res; 
+					var discount_two_res = (priceAfterFirstDisc * discount_two / 100);
 
-					var sum = ori_price - (discount_one_res + (discount_one_res * discount_two / 100));
+					var sum = priceAfterFirstDisc - discount_two_res;
 
 					$(this).parent().find(".p_price").text( parseFloat(sum));
 
