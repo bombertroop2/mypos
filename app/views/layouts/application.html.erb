@@ -17,6 +17,8 @@
                 <% end %>
               <% elsif params[:controller].eql?("shipments") && action_name.eql?("inventory_receipts") %>
                 <% opened_menu_name = "Delivery Order Receipts" %>
+              <% elsif params[:controller].eql?("fake_consignment_sale") %>
+                <% opened_menu_name = "Consignments" %>
               <% elsif params[:controller].eql?("fiscal_years") %>
                 <% opened_menu_name = "Fiscal Reopening/Closing" %>
               <% elsif params[:controller].eql?("events") %>
@@ -775,9 +777,9 @@
                         $('#new-item-btn').click(function (e) {
                             return false;
                         });
-        <% end %>
+        <% end %>/*
       <%# elsif controller_name.eql?("sales_returns") %>
-                      /*$("#menu_toggle").click();
+                      $("#menu_toggle").click();
                       $("#search-sales-return-btn").click(function () {
                           $("#filter_date").val($("#filter-sales-return-date").val());
                           $("#filter_string").val($("#filter-string").val());
@@ -788,8 +790,8 @@
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {
                             return false;
-                        });*/
-        <%# end %>
+                        });
+        <%# end %>*/
       <% elsif controller_name.eql?("sales") %>
         <% unless action_name.eql?("index") %>
                         $("#menu_toggle").click();
