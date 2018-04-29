@@ -5,7 +5,7 @@ class Member < ApplicationRecord
 
   before_validation :strip_string_values
 
-  validates :name, :address, :gender, presence: true
+  validates :name, :address, :gender, :mobile_phone, :email, presence: true
   validates :mobile_phone, uniqueness: true, if: proc {|mbr| mbr.mobile_phone.present?}
     validates :email, uniqueness: true, if: proc {|mbr| mbr.email.present?}
       validate :gender_available
