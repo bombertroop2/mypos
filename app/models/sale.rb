@@ -127,7 +127,6 @@ class Sale < ApplicationRecord
                                         def create_stock_movement(warehouse_id, product_id, color_id, size_id, transaction_date, quantity)
                                           stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                           stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
-                                          puts "HIJI"
 
                                           if stock_movement.new_record?                    
                                             stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
