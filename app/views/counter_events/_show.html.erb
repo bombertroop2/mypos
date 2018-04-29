@@ -43,15 +43,23 @@
       <% end %>    
       <dl class="dl-horizontal">
             <dt>Margin</dt>
-            <dd><%= object.margin %></dd>
+            <dd><%= object.margin %>%</dd>
         </dl>
         <dl class="dl-horizontal">
             <dt>Participation</dt>
-            <dd><%= object.participation %></dd>
+            <dd><%= object.participation %>%</dd>
         </dl>
     <% elsif object.special_price.present? %>
       <dl class="dl-horizontal">
           <dt>Special price</dt>
           <dd><%= number_to_currency(object.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
       </dl>    
+      <dl class="dl-horizontal">
+            <dt>Margin</dt>
+            <dd><%= object.margin %>%</dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>Participation</dt>
+            <dd><%= object.participation %>%</dd>
+        </dl>
     <% end %>

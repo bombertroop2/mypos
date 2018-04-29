@@ -147,15 +147,16 @@
         }
     });
 
-     $("form").submit( function(e) {
+     $("#form_container_disc_percentage form").submit( function(e) {
 
-    var selectedColorFields = <%= @warehouses.pluck(:id) %>;
+    var selectedColorFields = <%= @counter_event.new_record? ? @warehouses.pluck(:id) : @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
     $.each(selectedColorFields, function (index, value) {
       var selectedColorId = selectedColorFields[index];
       if ($("#warehouse_" + selectedColorId).hasClass("DTTT_selected") || $("#warehouse_" + selectedColorId).hasClass("selected")) {
           warehouse_ids.push(selectedColorId);
       } 
     });
+    console.log(warehouse_ids)
     
       warehouse_ids = $.unique( warehouse_ids );
       $('<input />').attr('type', 'hidden')
