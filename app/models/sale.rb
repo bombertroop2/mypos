@@ -127,6 +127,7 @@ class Sale < ApplicationRecord
                                         def create_stock_movement(warehouse_id, product_id, color_id, size_id, transaction_date, quantity)
                                           stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                           stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
+                                          puts "HIJI"
 
                                           if stock_movement.new_record?                    
                                             stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
@@ -135,7 +136,6 @@ class Sale < ApplicationRecord
                                             beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                             beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
                                             if beginning_stock.nil? || beginning_stock < 1
-                                              puts "HIJI"
                                               throw :abort
                                             end
                                             stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
@@ -151,7 +151,6 @@ class Sale < ApplicationRecord
                                               beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                               beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
                                               if beginning_stock.nil? || beginning_stock < 1
-                                                puts "DUA"
                                                 throw :abort
                                               end
                                               stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
@@ -166,7 +165,6 @@ class Sale < ApplicationRecord
                                                 beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                 beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
                                                 if beginning_stock.nil? || beginning_stock < 1
-                                                  puts "TILU"
                                                   throw :abort
                                                 end
                                                 stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
@@ -180,7 +178,6 @@ class Sale < ApplicationRecord
                                                   beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                   beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
                                                   if beginning_stock.nil? || beginning_stock < 1
-                                                    puts "OPAT"
                                                     throw :abort
                                                   end
                                                   stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
@@ -194,7 +191,6 @@ class Sale < ApplicationRecord
                                                     beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                     beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
                                                     if beginning_stock.nil? || beginning_stock < 1
-                                                    puts "LIMA"
                                                       throw :abort
                                                     end
                                                     stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
