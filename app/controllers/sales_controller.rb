@@ -3,7 +3,7 @@ class SalesController < ApplicationController
   helper SmartListing::Helper
   authorize_resource
   before_action :set_sale, only: [:show, :edit, :update, :destroy]
-#  skip_before_action :verify_authenticity_token, only: :print
+  #  skip_before_action :verify_authenticity_token, only: :print
 
   # GET /sales
   # GET /sales.json
@@ -140,9 +140,23 @@ class SalesController < ApplicationController
     if @product
       current_time = Time.current
       warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-      if (@store_event = Event.joins(event_warehouses: :event_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, true, true, true]).order("events.created_at DESC").first).nil?
-        @store_event = Event.joins(:event_warehouses, :event_general_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, false, true, true]).order("events.created_at DESC").first
+      
+      event_specific_product = Event.joins(event_warehouses: :event_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, true, true, true]).order("events.created_at DESC").first
+      event_general_product = Event.joins(:event_warehouses, :event_general_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, false, true, true]).order("events.created_at DESC").first
+      if event_specific_product.nil? && event_general_product.present?
+        @store_event = event_general_product
+      elsif event_specific_product.present? && event_general_product.nil?
+        @store_event = event_specific_product
+      elsif event_specific_product.present? && event_general_product.present?
+        if event_specific_product.created_at >= event_general_product.created_at
+          @store_event = event_specific_product
+        else          
+          @store_event = event_general_product
+        end
+      else
+        @store_event = nil
       end
+
       gift_event = Event.joins(:event_warehouses).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Gift'", current_time, current_time, warehouse_id, true, true]).order("events.created_at DESC").first
       if @store_event.present? && gift_event.present? && gift_event.created_at > @store_event.created_at
         @store_event = gift_event
