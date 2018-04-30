@@ -1,9 +1,12 @@
 class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
+  
+  # JANGAN LUPA SKIP BEFORE ACTION BARU UNTUK incompatible_browsers_controller
+  
   protect_from_forgery with: :exception, prepend: true
   
-  before_action :authenticate_user!#, except: [:show, :index]
+  before_action :browser_supported, :authenticate_user!#, except: [:show, :index]
   before_action :configure_permitted_parameters, if: :devise_controller?
     before_action :invalidate_simultaneous_user_session, unless: proc {|c| c.controller_name.eql?('sessions') and c.action_name.eql?('create') }
       before_action :get_notifications, :set_time_zone, if: :user_signed_in?
@@ -50,6 +53,17 @@ class ApplicationController < ActionController::Base
         end
   
         private
+        
+        def browser_supported
+          browser = Browser.new(request.user_agent)
+          if !browser.chrome? && !browser.firefox?
+            unless request.xhr?
+              redirect_to incompatible_browsers_index_path
+            else
+              render js: "window.location = '#{incompatible_browsers_index_url}'"
+            end
+          end
+        end
 
         def set_time_zone
           Time.zone = current_user.timezone_name

@@ -1,8 +1,12 @@
 Rails.application.routes.draw do
+  get 'incompatible_browsers/index'
+
   resources :sales_returns, except: [:edit, :update, :destroy] do
     collection do
       get "search_receipt"
       get "get_replacement_product"
+      get "get_replacement_product_colors"
+      get "get_replacement_product_sizes"
     end
   end
   get 'fake_consignment_sale/sale_entry'
