@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class CashierOpeningsController < ApplicationController
   helper SmartListing::Helper
   authorize_resource
-  before_action :set_cashier_opening, only: [:edit, :update, :destroy]
+  before_action :set_cashier_opening, only: [:edit, :update, :destroy, :close]
 
   # GET /cashier_openings
   # GET /cashier_openings.json
