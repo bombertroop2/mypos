@@ -44,6 +44,13 @@
         <dt>Type</dt>
         <dd><%= object.warehouse_type.titleize %></dd>
     </dl>
+
+    <% if object.sku.present? %>
+      <dl class="dl-horizontal">
+          <dt>SKU</dt>
+          <dd><%= object.sku %></dd>
+      </dl>
+    <% end %>
     <% if @warehouse.warehouse_type.eql?("showroom") %>
       <dl class="dl-horizontal">
           <dt>First message</dt>

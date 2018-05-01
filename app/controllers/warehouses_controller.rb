@@ -56,8 +56,15 @@ class WarehousesController < ApplicationController
         @warehouse.code = "#{first_code}-#{second_code}"
       end
     rescue ActiveRecord::RecordNotUnique => e
-      flash[:alert] = "That code has already been taken"
-      render js: "window.location = '#{warehouses_url}'"
+      splitted_code = @warehouse.code.split("-")
+      first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
+      second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
+      @warehouse.code = "#{first_code}-#{second_code}"
+      if e.cause.to_s.include?("code")      
+        @warehouse.errors.messages[:code] = ["has already been taken"]
+      else
+        @warehouse.errors.messages[:sku] = ["has already been taken"]
+      end
     end
   end
 
@@ -84,8 +91,15 @@ class WarehousesController < ApplicationController
         @warehouse_code = "#{first_code}-#{second_code}"
       end
     rescue ActiveRecord::RecordNotUnique => e
-      flash[:alert] = "That code has already been taken"
-      render js: "window.location = '#{warehouses_url}'"
+      splitted_code = @warehouse.code.split("-")
+      first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
+      second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
+      @warehouse_code = "#{first_code}-#{second_code}"
+      if e.cause.to_s.include?("code")      
+        @warehouse.errors.messages[:code] = ["has already been taken"]
+      else
+        @warehouse.errors.messages[:sku] = ["has already been taken"]
+      end
     end
   end
 
@@ -104,11 +118,11 @@ class WarehousesController < ApplicationController
   def set_warehouse
     @warehouse = Warehouse.joins(:supervisor, :region, :price_code).where(id: params[:id]).
       select("warehouses.id, warehouses.code, warehouses.name, warehouses.address, is_active, supervisors.name AS supervisor_name, common_fields.code AS region_code, price_codes_warehouses.code AS price_code_code, warehouse_type, supervisor_id, region_id, price_code_id").
-      select(:first_message, :second_message, :third_message, :fourth_message, :fifth_message).first
+      select(:first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def warehouse_params
-    params.require(:warehouse).permit(:code, :name, :address, :is_active, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message)
+    params.require(:warehouse).permit(:code, :name, :address, :is_active, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku)
   end
 end

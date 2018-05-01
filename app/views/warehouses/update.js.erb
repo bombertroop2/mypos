@@ -1,7 +1,7 @@
 <% if @updated %>
   <%= smart_listing_item :warehouses, :update, @warehouse, "warehouses/warehouse" %>
 <% else %>
-  <%= smart_listing_item :warehouses, :update, @warehouse, "warehouses/form" %>
+  $("#form_container").html("<%= j(render(partial: "form_detail")) %>")
 <% end %>
 
 <% if @new_supervisor_name.present? %>
