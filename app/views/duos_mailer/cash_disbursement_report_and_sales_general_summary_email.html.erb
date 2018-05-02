@@ -60,9 +60,9 @@
                 </tr>
                 <tr>
                     <td align="center" colspan="2">
-                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
+                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: black;border-style: solid;border-collapse: collapse" width="100%">
                             <tbody>
-                                <tr style="text-align: center;color: white" bgcolor="#00FF00">
+                                <tr style="text-align: center" bgcolor="#ffa500">
                                     <td><strong>No.</strong></td>
                                     <td><strong>Description</strong></td>
                                     <td><strong>Price/Amount</strong></td>
@@ -77,7 +77,7 @@
                                   </tr>
                                 <% end %>
                             </tbody>
-                            <tfoot bgcolor="#42B549" style="color: white">
+                            <tfoot>
                                 <tr>
                                     <td colspan="2" align="right"><strong>Sum</strong></td>
                                     <td align="right"><strong><%= number_to_currency(sum,
@@ -187,9 +187,9 @@
                 </tr>
                 <tr>
                     <td align="center" colspan="2">
-                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
+                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: black;border-style: solid;border-collapse: collapse" width="100%">
                             <tbody>
-                                <tr style="text-align: center;color: white" bgcolor="#00FF00">
+                                <tr style="text-align: center" bgcolor="#ffa500">
                                     <td><strong>Event</strong></td>
                                     <td><strong>Quantity</strong></td>
                                     <td><strong>Gross</strong></td>
@@ -301,7 +301,7 @@
                                   <% total_net += v["net"].to_f - v["store_discount_amount"].to_f %>
                                 <% end %>
                             </tbody>
-                            <tfoot bgcolor="#42B549" style="color: white">
+                            <tfoot>
                                 <tr>
                                     <td align="right"><strong>Sum</strong></td>
                                     <td align="right"><strong><%= total_quantity %></strong></td>
