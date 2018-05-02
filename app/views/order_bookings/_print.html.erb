@@ -1,0 +1,140 @@
+<table width="100%" id="pn_print_doc">
+    <tr>
+        <td colspan="2"><strong><%= Company.display_name %></strong></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2"><strong>PICKING NOTE</strong></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2"><%= @order_booking.number %></td>
+    </tr>
+    <tr>
+        <td style="width: 50%" valign="top">
+            <table class="table-condensed">
+                <tr>
+                    <td>Warehouse From</td>
+                    <td>:</td>
+                    <td><%= "#{@order_booking.origin_warehouse.code} - #{@order_booking.origin_warehouse.name}" %></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">Address</td>
+                    <td style="vertical-align: top">:</td>
+                    <td><%= @order_booking.origin_warehouse.address %></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Plan Date</td>
+                    <td>:</td>
+                    <td><%= @order_booking.plan_date.strftime("%d/%m/%Y") %></td>
+                </tr>
+                <tr>
+                    <td>Printed Date</td>
+                    <td>:</td>
+                    <td><%= @order_booking.print_date.strftime("%d/%m/%Y") rescue "" %></td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>:</td>
+                    <td><%= @order_booking.status %></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">Note</td>
+                    <td style="vertical-align: top">:</td>
+                    <td><%= @order_booking.note %></td>
+                </tr>
+            </table>
+        </td>
+        <td style="width: 50%" valign="top" align="right">
+            <table class="table-condensed">
+                <tr>
+                    <td>Warehouse To</td>
+                    <td>:</td>
+                    <td><%= "#{@order_booking.destination_warehouse.code} - #{@order_booking.destination_warehouse.name}" %></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">Address</td>
+                    <td style="vertical-align: top">:</td>
+                    <td><%= @order_booking.destination_warehouse.address %></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2">
+            <table class="table table-condensed table-bordered">
+                <tbody>
+                    <tr style="text-align: center">
+                        <td><strong>No</strong></td>
+                        <td><strong>Article Code</strong></td>
+                        <td><strong>Quantity</strong></td>
+                        <td><strong>Quantity Per Article</strong></td>
+                    </tr>
+                    <% @order_booking.order_booking_products.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code").each_with_index do |order_booking_product, idx| %>
+                      <% product_sizes = order_booking_product.sizes %>
+                      <% product_colors = order_booking_product.colors %>
+                      <tr align="center">
+                          <td style="vertical-align: middle"><%= idx.succ %></td>
+                          <td style="vertical-align: middle"><%= "#{order_booking_product.prdct_code} - #{order_booking_product.name}" %></td>
+                          <td style="vertical-align: middle">
+                              <table class="table table-condensed table-bordered">
+                                  <tbody>
+                                      <!--
+                                      <tr>
+                                          <td colspan="2" rowspan="2"></td>
+                                          <td align="center" colspan="<%#= product_sizes.length %>">Sizes</td>
+                                      </tr>-->
+                                      <tr>
+                                          <td></td>
+                                          <% product_sizes.each do |size| %>
+                                            <td align="center" align="center" style="vertical-align: middle"><%= size.size %></td>
+                                          <% end %>
+                                          <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
+                                      </tr>
+                                      <% product_colors.each_with_index do |color, idx| %>
+                                        <tr align="center">
+    <%# if idx == 0 %>
+                                              <!--<td style="vertical-align: middle" rowspan="<%#= product_colors.length %>">Colors</td>-->
+    <%# end %>
+                                            <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                            <% qty_per_color = 0 %>
+                                            <% product_sizes.each do |size| %>
+                                              <% order_booking_product_item = order_booking_product.order_booking_product_items.where(size_id: size.id, color_id: color.id).select(:quantity).first %>
+                                              <td align="center" style="vertical-align: middle">
+                                                  <% if order_booking_product_item %>
+                                                    <% qty_per_color += order_booking_product_item.quantity %>
+                                                    <%= order_booking_product_item.quantity %>
+                                                  <% end %>
+                                              </td>
+                                            <% end %>
+                                            <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
+                                        </tr>
+                                      <% end %>
+                                  </tbody>
+                              </table>
+                          </td>
+                          <td align="right" style="vertical-align: middle"><%= order_booking_product.quantity %></td>
+                      </tr>
+                    <% end %>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" align="right"><strong>Total Quantity</strong></td>
+                        <td align="right"><%= @order_booking.quantity %></td>
+                    </tr>
+                </tfoot>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>Created by</td>
+        <td style="text-align: right">Approved by</td>
+    </tr>
+    <tr>
+        <td style="padding-top: 50px"><%= @order_booking.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+        <td style="text-align: right"></td>
+    </tr>
+</table>
