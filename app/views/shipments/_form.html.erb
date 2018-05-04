@@ -6,7 +6,7 @@
     <div class="form-horizontal">
         <div class="form-group">
             <label class="col-sm-2 control-label">Delivery date</label>
-            <div class="col-sm-10">
+            <div class="col-sm-10" style="margin-top: -14px">
                 <%= text_field_tag :delivery_date, "", size: 10, readonly: true, class: "form-control" %>
               </div>
           </div>
@@ -94,6 +94,6 @@
               dateFormat: "dd/mm/yy"
           });
 
-
+          $("#listing_order_bookings_table_wrapper > .DTTT_container").css("position", "absolute");
       });
     </script>
