@@ -23,59 +23,60 @@ class Event < ApplicationRecord
                     validates :minimum_purchase_amount, presence: true, if: proc{|event| event.event_type.strip.eql?("Gift")}
                       validates :minimum_purchase_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.minimum_purchase_amount.present? }
                         validates :discount_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? }
-                          validate :editable, on: :update, unless: proc {|event| event.event_activation.eql?("true")}
-                            validate :activable, on: :update, if: proc {|event| event.event_activation.eql?("true")}
-#                              validate :activable, on: :create
-                              accepts_nested_attributes_for :event_warehouses, allow_destroy: true
-                              accepts_nested_attributes_for :event_general_products, allow_destroy: true
+                          validates :discount_amount, numericality: {less_than_or_equal_to: proc {|event| event.minimum_purchase_amount}}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? && event.minimum_purchase_amount.present? }
+                            validate :editable, on: :update, unless: proc {|event| event.event_activation.eql?("true")}
+                              validate :activable, on: :update, if: proc {|event| event.event_activation.eql?("true")}
+                                #                              validate :activable, on: :create
+                                accepts_nested_attributes_for :event_warehouses, allow_destroy: true
+                                accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
-                              before_destroy :deletable, :delete_tracks
+                                before_destroy :deletable, :delete_tracks
                             
-                              private
+                                private
                             
-                              def activable
-                                unless new_record?
-                                  if is_active_changed? && persisted?
-                                    cashier_opened = false
-                                    event_warehouses.select(:warehouse_id).each do |event_warehouse|
-                                      cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
-                                      break
+                                def activable
+                                  unless new_record?
+                                    if is_active_changed? && persisted?
+                                      cashier_opened = false
+                                      event_warehouses.select(:warehouse_id).each do |event_warehouse|
+                                        cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
+                                        break
+                                      end
+                                      errors.add(:base, "Please close some cashiers and try again") if cashier_opened
                                     end
-                                    errors.add(:base, "Please close some cashiers and try again") if cashier_opened
-                                  end
-                                else
-                                  if start_date_time.present? && end_date_time.present?
-                                    cashier_opened = false
-                                    event_warehouses.each do |event_warehouse|
-                                      cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
-                                      break
+                                  else
+                                    if start_date_time.present? && end_date_time.present?
+                                      cashier_opened = false
+                                      event_warehouses.each do |event_warehouse|
+                                        cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date]).present?
+                                        break
+                                      end
+                                      errors.add(:base, "Please close some cashiers and try again") if cashier_opened
                                     end
-                                    errors.add(:base, "Please close some cashiers and try again") if cashier_opened
                                   end
                                 end
-                              end
                             
-                              def deletable
-                                if start_date_time <= Time.current
-                                  errors.add(:base, "The record cannot be deleted")
-                                  throw :abort
+                                def deletable
+                                  if start_date_time <= Time.current
+                                    errors.add(:base, "The record cannot be deleted")
+                                    throw :abort
+                                  end
                                 end
-                              end
                           
-                              def editable
-                                errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
-                              end
+                                def editable
+                                  errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
+                                end
                     
-                              def delete_tracks
-                                audits.destroy_all
-                              end
+                                def delete_tracks
+                                  audits.destroy_all
+                                end
   
-                              def remove_white_space
-                                self.code = code.strip
-                                self.name = name.strip
-                              end
+                                def remove_white_space
+                                  self.code = code.strip
+                                  self.name = name.strip
+                                end
 
-                              def upcase_code
-                                self.code = code.upcase.gsub(" ","")
+                                def upcase_code
+                                  self.code = code.upcase.gsub(" ","")
+                                end
                               end
-                            end
