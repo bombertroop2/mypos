@@ -32,5 +32,12 @@
     window.location = '<%= new_sale_path %>?print_receipt=<%= @sale.id %>';
   <% else %>
     $("#stepContainer").html("<%= j(render(partial: "wizard_form")) %>");
+    <% if @sale.errors.details.keys.include?(:member_id) %>
+      $("#list-step-1").click();
+    <% elsif @sale.errors.details.keys.include?(:payment_method) || @sale.errors.details.keys.include?(:bank_id) || @sale.errors.details.keys.include?(:trace_number) || @sale.errors.details.keys.include?(:card_number) || @sale.errors.details.keys.include?(:cash) || @sale.errors.details.keys.include?(:gift_event_id) || @sale.errors.details.keys.include?(:gift_event_product_id) %>
+      $("#list-step-3").click();
+    <% else %>
+      $("#list-step-2").click();
+    <% end %>
   <% end %>
 <% end %>

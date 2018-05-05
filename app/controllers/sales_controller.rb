@@ -83,8 +83,7 @@ class SalesController < ApplicationController
 
       begin
         begin
-          if @valid = @sale.save
-          else
+          unless @valid = @sale.save
             if @sale.errors[:base].present?
               render js: "bootbox.alert({message: \"#{@sale.errors[:base].join("<br/>")}\",size: 'small'});"
             elsif @sale.errors[:"sale_products.base"].present?
