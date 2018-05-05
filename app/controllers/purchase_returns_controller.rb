@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class PurchaseReturnsController < ApplicationController
   authorize_resource
   helper SmartListing::Helper
-  before_action :set_purchase_return, only: [:show, :edit, :update, :destroy]
+  before_action :set_purchase_return, only: [:show, :edit, :update, :destroy, :print]
 
   # GET /purchase_returns
   # GET /purchase_returns.json
@@ -21,6 +21,9 @@ class PurchaseReturnsController < ApplicationController
   # GET /purchase_returns/1
   # GET /purchase_returns/1.json
   def show
+  end
+  
+  def print    
   end
 
   # GET /purchase_returns/new
@@ -271,7 +274,11 @@ class PurchaseReturnsController < ApplicationController
   
   # Use callbacks to share common setup or constraints between actions.
   def set_purchase_return
-    @purchase_return = PurchaseReturn.find(params[:id])
+    @purchase_return = PurchaseReturn.
+      joins("LEFT JOIN purchase_orders on purchase_returns.purchase_order_id = purchase_orders.id").
+      joins("LEFT JOIN direct_purchases on purchase_returns.direct_purchase_id = direct_purchases.id").
+      joins("INNER JOIN vendors ON vendors.id = purchase_orders.vendor_id OR vendors.id = direct_purchases.vendor_id").
+      select("purchase_returns.*", "vendors.name").find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

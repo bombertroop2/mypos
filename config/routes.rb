@@ -159,6 +159,9 @@ Rails.application.routes.draw do
       post 'create_direct_purchase_return'
       get 'filter_purchase_records'
     end    
+    member do
+      get 'print'
+    end
   end
   resources :stocks, only: :index
   devise_for :users, only: :sessions

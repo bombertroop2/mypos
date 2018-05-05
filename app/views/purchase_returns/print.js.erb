@@ -1,0 +1,5 @@
+$("#print_doc_container").html("<%= j(render(partial: "print")) %>");
+$("#pr_print_doc").removeClass("hidden");
+$("#pr_print_doc").print();
+$("#pr_print_doc").addClass("hidden");
+<%= smart_listing_item :purchase_returns, :update, @purchase_return, "purchase_returns/purchase_return" %>

@@ -2,4 +2,5 @@
 <td id="pr-vendor-name-<%= object.id %>"><%= object.name rescue "" %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, PurchaseReturn), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_purchase_return_path(object), :remote => true, :method => :get, title: "Print" ) %>
 </td>
