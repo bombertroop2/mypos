@@ -4,7 +4,7 @@ class StockMutationsController < ApplicationController
   authorize_resource
   before_action :set_stock_mutation, only: [:show, :show_store_to_warehouse_mutation, :edit,
     :update, :destroy, :edit_store_to_warehouse, :update_store_to_warehouse,
-    :delete_store_to_warehouse, :approve]
+    :delete_store_to_warehouse, :approve, :print_rolling_doc, :print_return_doc]
 
   # GET /stock_mutations
   # GET /stock_mutations.json
@@ -693,6 +693,14 @@ class StockMutationsController < ApplicationController
     elsif @stock_mutation.errors[:received_date].present?
       render js: "bootbox.alert({message: \"Receive date #{@stock_mutation.errors[:received_date].join}\",size: 'small'});"
     end
+  end
+  
+  def print_rolling_doc
+    
+  end
+
+  def print_return_doc
+    
   end
 
   private

@@ -8,11 +8,13 @@
 <td class="actions" style="text-align: right">
     <% unless object.destination_warehouse.warehouse_type.eql?("central") %>
       <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, stock_mutation_path(object), data: {remote: true}, title: "Show" %>
+      <%= link_to_if(can?(:manage_store_to_store_mutation, StockMutation), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_rolling_doc_stock_mutation_path(object), :remote => true, :method => :get, title: "Print" ) %>
       <%= link_to_if(can?(:approve, StockMutation) && object.approved_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-ok"), approve_stock_mutation_path(object), :remote => true, :method => :get, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Approve" ) %>
       <%= link_to_if(can?(:manage_store_to_store_mutation, StockMutation) && object.approved_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_stock_mutation_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
         <%= link_to_if(can?(:manage_store_to_store_mutation, StockMutation) && object.approved_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
       <% else %>
         <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, show_store_to_warehouse_mutation_stock_mutations_path(id: object.id), data: {remote: true}, title: "Show" %>
+        <%= link_to_if(can?(:manage_store_to_warehouse_mutation, StockMutation), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_return_doc_stock_mutation_path(object), :remote => true, :method => :get, title: "Print" ) %>
     <%#= link_to_if(can?(:manage_store_to_warehouse_mutation, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_store_to_warehouse_stock_mutation_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
         <%= link_to_if(can?(:manage_store_to_warehouse_mutation, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), delete_store_to_warehouse_stock_mutation_path(object), :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
       <% end %>

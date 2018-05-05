@@ -88,6 +88,8 @@ Rails.application.routes.draw do
       get "show_store_to_warehouse_receipt"
       get "receive"
       get "receive_to_warehouse"
+      get "print_rolling_doc"
+      get "print_return_doc"
       #      patch "update_store_to_warehouse"
       delete "delete_store_to_warehouse"
     end

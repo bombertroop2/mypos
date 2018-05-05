@@ -1,0 +1,5 @@
+$("#print_doc_container").html("<%= j(render(partial: "print_return_doc")) %>");
+$("#stw_print_doc").removeClass("hidden");
+$("#stw_print_doc").print();
+$("#stw_print_doc").addClass("hidden");
+<%= smart_listing_item :stock_mutations, :update, @stock_mutation, "stock_mutations/stock_mutation" %>

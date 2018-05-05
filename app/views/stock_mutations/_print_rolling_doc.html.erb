@@ -1,0 +1,137 @@
+<% require 'barby'
+require 'barby/barcode/code_128'
+require 'barby/outputter/png_outputter'
+full_path = Rails.root.join("public", "stock_mutation_barcode.png")
+barcode = Barby::Code128B.new(@stock_mutation.number)
+blob = Barby::PngOutputter.new(barcode).to_png
+#File.open(full_path, 'w') { |f| f.write barcode.to_png(:margin => 3, :xdim => 2, :height => 55) }
+File.open(full_path, 'wb') { |f| f.write blob }
+%>
+<table width="100%" id="sts_print_doc">
+    <tr>
+        <td colspan="3"><strong><%= Company.display_name %></strong></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="3"><strong>STOCK MUTATION</strong></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="3"><%= @stock_mutation.number %></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="3"><%= image_tag "/stock_mutation_barcode.png", height: "100px" %></td>
+    </tr>
+    <tr>
+        <td style="width: 50%" valign="top">
+            <table class="table-condensed">
+                <tr>
+                    <td>Warehouse From</td>
+                    <td>:</td>
+                    <td><%= "#{@stock_mutation.origin_warehouse.code} - #{@stock_mutation.origin_warehouse.name}" %></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">Address</td>
+                    <td style="vertical-align: top">:</td>
+                    <td><%= @stock_mutation.origin_warehouse.address %></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Delivery Date</td>
+                    <td>:</td>
+                    <td><%= @stock_mutation.delivery_date.strftime("%d/%m/%Y") %></td>
+                </tr>
+                <tr>
+                    <td>Courier</td>
+                    <td>:</td>
+                    <td><%= @stock_mutation.courier.code %> - <%= @stock_mutation.courier.name %></td>
+                </tr>
+            </table>
+        </td>
+        <td></td>
+        <td style="width: 50%" valign="top" align="right">
+            <table class="table-condensed">
+                <tr>
+                    <td>Warehouse To</td>
+                    <td>:</td>
+                    <td><%= "#{@stock_mutation.destination_warehouse.code} - #{@stock_mutation.destination_warehouse.name}" %></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">Address</td>
+                    <td style="vertical-align: top">:</td>
+                    <td><%= @stock_mutation.destination_warehouse.address %></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" colspan="3">
+            <table class="table table-condensed table-bordered">
+                <tbody>
+                    <tr style="text-align: center">
+                        <td><strong>No</strong></td>
+                        <td><strong>Article Code</strong></td>
+                        <td><strong>Quantity</strong></td>
+                        <td><strong>Quantity Per Article</strong></td>
+                    </tr>
+                    <% @stock_mutation.stock_mutation_products.select(:id, :quantity, :product_id).each_with_index do |stock_mutation_product, idx| %>
+  <%# order_booking_product = OrderBookingProduct.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code").where(id: shipment_product.order_booking_product_id).first %>
+                      <% product_sizes = stock_mutation_product.sizes %>
+                      <% product_colors = stock_mutation_product.colors %>
+                      <% stock_mutation_product_items = stock_mutation_product.stock_mutation_product_items %>
+                      <tr align="center">
+                          <td style="vertical-align: middle"><%= idx.succ %></td>
+                          <td style="vertical-align: middle"><%= "#{stock_mutation_product.product.code} - #{stock_mutation_product.product.brand.name}" %></td>
+                          <td style="vertical-align: middle">
+                              <table class="table table-condensed table-bordered">
+                                  <tbody>
+                                      <tr>
+                                          <td></td>
+                                          <% product_sizes.each do |size| %>
+                                            <td align="center" style="vertical-align: middle"><%= size.size %></td>
+                                          <% end %>
+                                          <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
+                                      </tr>
+                                      <% product_colors.each_with_index do |color, idx| %>
+                                        <tr align="center">
+                                            <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                            <% qty_per_color = 0 %>
+                                            <% product_sizes.each do |size| %>
+                                              <% stock_mutation_product_item = stock_mutation_product_items.select(:quantity).where("size_id = #{size.id} AND color_id = #{color.id}").first %>
+                                              <td align="center" style="vertical-align: middle">
+                                                  <% if stock_mutation_product_item %>
+                                                    <% qty_per_color += stock_mutation_product_item.quantity %>
+                                                    <%= stock_mutation_product_item.quantity %>
+                                                  <% end %>
+                                              </td>
+                                            <% end %>
+                                            <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
+                                        </tr>
+                                      <% end %>
+                                  </tbody>
+                              </table>
+                          </td>
+                          <td align="right" style="vertical-align: middle"><%= stock_mutation_product.quantity %></td>
+                      </tr>
+                    <% end %>
+                    <tr>
+                        <td colspan="3" align="right"><strong>Total Quantity</strong></td>
+                        <td align="right"><%= @stock_mutation.quantity %></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>Created by</td>
+        <td style="text-align: center">Driver</td>
+        <td style="text-align: right">Recipient</td>
+    </tr>
+    <tr>
+        <td style="padding-top: 50px"><%= @stock_mutation.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+        <td style="text-align: center"></td>
+        <td style="text-align: right"></td>
+    </tr>
+</table>
