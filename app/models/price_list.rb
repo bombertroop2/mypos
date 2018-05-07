@@ -24,7 +24,7 @@ class PriceList < ApplicationRecord
               #            before_create :create_product_detail, if: proc {|price_list| price_list.product_detail_is_not_existed_yet && price_list.user_is_adding_new_price}
               #  before_destroy :get_parent
               before_destroy :prevent_user_delete_last_record, if: proc {|price_list| price_list.user_is_deleting_from_child}
-                before_destroy :delete_tracks
+                before_destroy :prevent_user_delete_record_when_cashier_open, :delete_tracks
                 #  after_destroy :delete_parent
                 
                 def cost=(value)
@@ -33,6 +33,16 @@ class PriceList < ApplicationRecord
                 end
           
                 private
+                
+                def prevent_user_delete_record_when_cashier_open
+                  current_date = Date.current
+                  product_detail = ProductDetail.select(:product_id, :price_code_id).where(id: product_detail_id).first
+                  cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.price_code_id = ?", current_date, product_detail.product_id, product_detail.price_code_id]).present?
+                  if current_date >= effective_date && cashier_opened
+                    errors.add(:base, "Sorry, you can't delete a record, because sales is currently running")
+                    throw :abort
+                  end
+                end
 
                 def delete_tracks
                   audits.destroy_all
@@ -65,7 +75,18 @@ class PriceList < ApplicationRecord
                 end
 
                 def price_not_changed
-                  errors.add(:price, "change is not allowed!") if price_changed? && persisted? && sale_product_relation.present?
+                  if price_changed? && persisted?
+                    if sale_product_relation.present?
+                      errors.add(:price, "change is not allowed!")
+                    else
+                      current_date = Date.current
+                      product_detail = ProductDetail.select(:product_id, :price_code_id).where(id: product_detail_id).first
+                      cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.price_code_id = ?", current_date, product_detail.product_id, product_detail.price_code_id]).present?
+                      if current_date >= effective_date && cashier_opened
+                        errors.add(:price, "change is not allowed because sales is currently running")
+                      end
+                    end
+                  end
                 end
 
                 def product_detail_id_not_changed

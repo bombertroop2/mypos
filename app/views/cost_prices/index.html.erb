@@ -1,5 +1,14 @@
 <div class="page-header"><h1>Costs</h1></div>
 
+<% if alert %>
+  <div class="alert alert-warning alert-dismissible fade in" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+      </button>
+      <%= alert %>
+  </div>                            
+<% end %>
+
 <div id="search-form-container" class="form-inline text-right">
     <div class="form-group">
         <input type="text" class="form-control" readonly="true" id="filter-effective-date" placeholder="Effective date">
