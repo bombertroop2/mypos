@@ -113,6 +113,7 @@ Rails.application.routes.draw do
     end
     member do
       get "receive"      
+      get "print"      
     end
   end
   resources :couriers, except: :show

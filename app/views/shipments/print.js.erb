@@ -1,0 +1,5 @@
+$("#print_doc_container").html("<%= j(render(partial: "print")) %>");
+$("#shipment_print_doc").removeClass("hidden");
+$("#shipment_print_doc").print();
+$("#shipment_print_doc").addClass("hidden");
+<%= smart_listing_item :shipments, :update, @shipment, "shipments/shipment" %>

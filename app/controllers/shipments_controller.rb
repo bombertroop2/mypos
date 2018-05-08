@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
   helper SmartListing::Helper
   authorize_resource except: :create
-  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive]
+  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive, :print]
 
   # GET /shipments
   # GET /shipments.json
@@ -69,6 +69,9 @@ class ShipmentsController < ApplicationController
   # GET /shipments/1
   # GET /shipments/1.json
   def show
+  end
+
+  def print
   end
 
   # GET /shipments/new

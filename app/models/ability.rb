@@ -134,7 +134,7 @@ class Ability
             end
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
-            alias_action :new, :create, :generate_ob_detail, to: :undelete_action
+            alias_action :new, :create, :generate_ob_detail, :print, to: :undelete_action
             alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
             alias_action :edit, :update, :destroy, to: :edit_action
             if ability.eql?(:manage) && user.roles.first.name.eql?("staff")
