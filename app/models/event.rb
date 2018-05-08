@@ -23,7 +23,7 @@ class Event < ApplicationRecord
                     validates :minimum_purchase_amount, presence: true, if: proc{|event| event.event_type.strip.eql?("Gift")}
                       validates :minimum_purchase_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.minimum_purchase_amount.present? }
                         validates :discount_amount, numericality: {greater_than: 0}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? }
-                          validates :discount_amount, numericality: {less_than_or_equal_to: proc {|event| event.minimum_purchase_amount}}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? && event.minimum_purchase_amount.present? }
+                          validates :discount_amount, numericality: {less_than: proc {|event| event.minimum_purchase_amount}}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? && event.minimum_purchase_amount.present? }
                             validate :editable, on: :update, unless: proc {|event| event.event_activation.eql?("true")}
                               validate :activable, on: :update, if: proc {|event| event.event_activation.eql?("true")}
                                 #                              validate :activable, on: :create

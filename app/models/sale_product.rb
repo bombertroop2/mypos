@@ -9,7 +9,7 @@ class SaleProduct < ApplicationRecord
   belongs_to :event
 
   # hapus event_id apabila event gift, cukup di parent Sale
-  before_validation :add_quantity
+  before_validation :add_quantity, :update_total
   before_validation :remove_event_id, if: proc{|sp| sp.event_type.eql?("Gift")}
 
     validates :quantity, presence: true
@@ -17,8 +17,8 @@ class SaleProduct < ApplicationRecord
       validates :quantity, numericality: {less_than_or_equal_to: :stock_quantity, only_integer: true}, if: proc { |sp| sp.quantity.present? }
         validates :free_product_id, presence: true, if: proc{|sp| sp.event_id.present? && sp.event_type.eql?("Buy 1 Get 1 Free")}
           validates :price_list_id, presence: true#, unless: proc{|sp| sp.event_type.eql?("Special Price")}
+          validates :total, numericality: {greater_than: 0}
 
-          before_create :update_total
           after_create :update_stock
         
           private
