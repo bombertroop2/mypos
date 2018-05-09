@@ -17,6 +17,7 @@ class EventWarehouse < ApplicationRecord
 
   validates :warehouse_id, presence: true
   validate :activable, on: :update
+  validate :warehouse_is_active
 
   before_destroy :delete_tracks
 
@@ -25,9 +26,14 @@ class EventWarehouse < ApplicationRecord
 
   private
   
+  def warehouse_is_active
+    errors.add(:base, "Sorry, warehouse is not active") if Warehouse.select("1 AS one").where(id: warehouse_id).where(["warehouses.is_active = ?", true]).blank?
+  end
+
+  
   def activable
     if is_active_changed? && persisted?
-      cashier_opened = CashierOpening.select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ?", warehouse_id, Date.current, event.start_date_time.to_date, event.end_date_time.to_date]).present?
+      cashier_opened = CashierOpening.joins(:warehouse).select("1 AS one").where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ? AND warehouses.is_active = ?", warehouse_id, Date.current, event.start_date_time.to_date, event.end_date_time.to_date, true]).present?
       errors.add(:base, "Please close some cashiers and try again") if cashier_opened
     end
   end

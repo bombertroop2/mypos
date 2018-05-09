@@ -138,7 +138,7 @@ class EventsController < ApplicationController
     
     unless @event.new_record?
       @event_warehouses = []
-      event_warehouses = @event.event_warehouses.joins(:warehouse).select(:id, :warehouse_id, :code, :name, :select_different_products)
+      event_warehouses = @event.event_warehouses.joins(:warehouse).select(:id, :warehouse_id, :code, :name, :select_different_products).where(["warehouses.is_active = ?", true])
       event_warehouses.each do |ew|
         unless warehouse_ids.include?(ew.warehouse_id.to_s)
           ew.remove = true
@@ -222,7 +222,7 @@ class EventsController < ApplicationController
       @event_warehouse = if @event.new_record?
         @event.event_warehouses.build warehouse_id: params[:warehouse_id]
       else
-        ew = @event.event_warehouses.where(warehouse_id: params[:warehouse_id]).select(:id, :warehouse_id).first
+        ew = @event.event_warehouses.joins(:warehouse).where(warehouse_id: params[:warehouse_id]).where(["warehouses.is_active = ?", true]).select(:id, :warehouse_id).first
         if ew.blank?
           @event.event_warehouses.build warehouse_id: params[:warehouse_id]
         else
