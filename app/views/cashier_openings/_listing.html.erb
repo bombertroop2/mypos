@@ -1,7 +1,7 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
     <thead id="listing-cashiers-thead">
         <tr>
-            <th class="col-md-4"><%= smart_listing.sortable "Opened At", "created_at" %></th>
+            <th class="col-md-4"><%= smart_listing.sortable "Opened At", "cashier_openings.created_at" %></th>
             <th class="col-md-1"><%= smart_listing.sortable "Station", "station" %></th>
             <th class="col-md-1"><%= smart_listing.sortable "Shift", "shift" %></th>
             <th class="col-md-4"><%= smart_listing.sortable "Closed At", "closed_at" %></th>

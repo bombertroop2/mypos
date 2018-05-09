@@ -13,6 +13,7 @@ class CashierOpening < ApplicationRecord
         validates :station, uniqueness: { scope: [:warehouse_id, :open_date, :shift], message: "has already been opened" }, if: proc{|co| !co.update_cash_balance && !co.closing_cashier}
           validate :station_available, :shift_available, :second_shift_allowable, :today_cashier_openable, if: proc{|co| !co.update_cash_balance && !co.closing_cashier}
             validate :closable, if: proc{|co| co.closing_cashier}
+              validate :warehouse_is_open, on: :create
 
               before_create :set_cash_balance
               before_update :calculate_total_sales, if: proc{|co| co.closing_cashier}
@@ -30,6 +31,10 @@ class CashierOpening < ApplicationRecord
     
 
                 private
+                
+                def warehouse_is_open
+                  errors.add(:base, "Sorry, warehouse is not active") if Warehouse.select("1 AS one").where(id: warehouse_id).where(["warehouses.is_active = ?", true]).blank?
+                end
               
                 def calculate_total_sales
                   sale_products = SaleProduct.joins(:price_list, :sale).
@@ -139,7 +144,11 @@ class CashierOpening < ApplicationRecord
             
                 def closable
                   self.closed_at = open_date.end_of_day if open_date != Date.current
-                  errors.add(:base, "Sorry, cashier cannot be closed") if opened_by != user_id || closed_at_was.present?
+                  if Warehouse.select("1 AS one").where(id: warehouse_id).where(["warehouses.is_active = ?", true]).blank?
+                    errors.add(:base, "Sorry, warehouse is not active")
+                  else
+                    errors.add(:base, "Sorry, cashier cannot be closed") if opened_by != user_id || closed_at_was.present?
+                  end
                 end
     
                 def set_cash_balance
@@ -147,11 +156,11 @@ class CashierOpening < ApplicationRecord
                 end
     
                 def today_cashier_openable
-                  errors.add(:base, "Previous cashier is open, please close it first") if CashierOpening.select("1 AS one").where(warehouse_id: warehouse_id).where("closed_at IS NULL").where(["open_date <> ?", @current_date]).where("opened_by = #{opened_by}").present?
+                  errors.add(:base, "Previous cashier is open, please close it first") if CashierOpening.joins(:warehouse).select("1 AS one").where(warehouse_id: warehouse_id).where("closed_at IS NULL").where(["open_date <> ? AND warehouses.is_active = ?", @current_date, true]).where("opened_by = #{opened_by}").present?
                 end
     
                 def second_shift_allowable      
-                  first_shift = CashierOpening.select(:closed_at).where(warehouse_id: warehouse_id, station: station, shift: "1", open_date: @current_date).first
+                  first_shift = CashierOpening.joins(:warehouse).select(:closed_at).where(warehouse_id: warehouse_id, station: station, shift: "1", open_date: @current_date).where(["warehouses.is_active = ?", true]).first
                   errors.add(:shift, "is not allowed!") if shift.eql?("2") && station.present? && (first_shift.blank? || first_shift.closed_at.nil?)
                 end
     

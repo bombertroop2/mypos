@@ -19,17 +19,17 @@ class CashierOpeningsController < ApplicationController
       end_date = splitted_date_range[1].strip.to_date.end_of_day
     end
     warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    cashiers_scope = CashierOpening.select(:id, :station, :created_at, :shift, :closed_at).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
-    cashiers_scope = cashiers_scope.where(["created_at BETWEEN ? AND ?", start_date, end_date]) if params[:filter_opened_at].present?
+    cashiers_scope = CashierOpening.joins(:warehouse).select(:id, :station, "cashier_openings.created_at", :shift, :closed_at).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}").where(["warehouses.is_active = ?", true])
+    cashiers_scope = cashiers_scope.where(["cashier_openings.created_at BETWEEN ? AND ?", start_date, end_date]) if params[:filter_opened_at].present?
     cashiers_scope = cashiers_scope.where(["station = ?", params[:filter_station]]) if params[:filter_station].present?
     cashiers_scope = cashiers_scope.where(["shift = ?", params[:filter_shift]]) if params[:filter_shift].present?
-    @cashiers = smart_listing_create(:cashiers, cashiers_scope, partial: 'cashier_openings/listing', default_sort: {created_at: "DESC"})
+    @cashiers = smart_listing_create(:cashiers, cashiers_scope, partial: 'cashier_openings/listing', default_sort: {:"cashier_openings.created_at" => "DESC"})
   end
 
   # GET /cashier_openings/1
   # GET /cashier_openings/1.json
   def show
-    @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: params[:id], :"warehouses.warehouse_type" => "showroom").
+    @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: params[:id], :"warehouses.warehouse_type" => "showroom").where(["warehouses.is_active = ?", true]).
       select("sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, net_sales, gross_sales, cash_payment, card_payment, debit_card_payment, credit_card_payment, total_quantity, total_gift_quantity").first
   end
 
@@ -95,7 +95,7 @@ class CashierOpeningsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_cashier_opening
-    @cashier_opening = CashierOpening.find(params[:id])
+    @cashier_opening = CashierOpening.joins(:warehouse).select("cashier_openings.*").where(["warehouses.is_active = ?", true]).find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
