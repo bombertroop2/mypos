@@ -60,13 +60,13 @@
           <% elsif stock_transaction.transaction_type.eql?("PR") %>
             <% total_qty -= stock_transaction.quantity %>
           <% elsif stock_transaction.transaction_type.eql?("DO") %>
-            <% if @warehouse.warehouse_type.eql?("central") %>
+            <% if stock_transaction.warehouse_type.eql?("central") %>
               <% total_qty -= stock_transaction.quantity %>
             <% else %>
               <% total_qty += stock_transaction.quantity %>
             <% end %>
           <% elsif stock_transaction.transaction_type.eql?("RW") %>
-            <% if @warehouse.warehouse_type.eql?("central") %>
+            <% if stock_transaction.warehouse_type.eql?("central") %>
               <% total_qty += stock_transaction.quantity %>
             <% else %>
               <% total_qty -= stock_transaction.quantity %>

@@ -13,11 +13,14 @@ class ListingStocksController < ApplicationController
       "LIKE"
     end
     listing_stock_transactions_scope = if params[:filter_warehouse].present?
-      @warehouse = Warehouse.select(:warehouse_type).where(id: params[:filter_warehouse]).first
       splitted_date = params[:filter_listing_transaction_date].split(" - ")
-      ListingStockTransaction.joins(listing_stock_product_detail: [:color, :size, listing_stock: [product: :brand]]).select(:transaction_date, :transaction_number, :transaction_type, :quantity).select("products.code AS product_code, brands_products.name AS product_name, common_fields.code AS color_code, common_fields.name AS color_name, size").where(["transaction_date BETWEEN ? AND ? AND warehouse_id = ?", splitted_date[0].to_date, splitted_date[1].to_date, params[:filter_warehouse]])
+      ListingStockTransaction.
+        joins(listing_stock_product_detail: [:color, :size, listing_stock: [:warehouse, product: :brand]]).
+        select(:transaction_date, :transaction_number, :transaction_type, :quantity).
+        select("products.code AS product_code, brands_products.name AS product_name, common_fields.code AS color_code, common_fields.name AS color_name, size, warehouses.warehouse_type").
+        where(["transaction_date BETWEEN ? AND ? AND warehouse_id = ? AND warehouses.is_active = ?", splitted_date[0].to_date, splitted_date[1].to_date, params[:filter_warehouse], true])
     else
-      listing_stock_transactions_scope = ListingStockTransaction.none
+      ListingStockTransaction.none
     end
     
     listing_stock_transactions_scope = if params[:listing_stock_transactions_smart_listing].present? && params[:listing_stock_transactions_smart_listing][:sort].present?
