@@ -47,7 +47,10 @@ class SaleProduct < ApplicationRecord
           end
       
           def stock_quantity
-            @sd = StockDetail.joins(:size, stock_product: [product: [product_colors: :product_barcodes], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => sales_promotion_girl_id, :"product_barcodes.id" => product_barcode_id).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").select(:id, :quantity, :booked_quantity, :barcode).first
+            @sd = StockDetail.joins(:size, stock_product: [product: [product_colors: :product_barcodes], stock: [warehouse: :sales_promotion_girls]]).
+              where(:"sales_promotion_girls.id" => sales_promotion_girl_id, :"product_barcodes.id" => product_barcode_id, :"warehouses.is_active" => true).
+              where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+              select(:id, :quantity, :booked_quantity, :barcode).first
             @barcode = @sd.barcode
             @sd.quantity.to_i - @sd.booked_quantity.to_i
           end

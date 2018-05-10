@@ -102,7 +102,7 @@ class Sale < ApplicationRecord
                                         end
         
                                         def is_cashier_opened
-                                          @co = CashierOpening.select(:id, :warehouse_id).where(warehouse_id: warehouse_id).where("closed_at IS NULL").where(["open_date = ?", Date.current]).where("opened_by = #{cashier_id}").first
+                                          @co = CashierOpening.joins(:warehouse).select(:id, :warehouse_id).where(warehouse_id: warehouse_id).where("closed_at IS NULL").where(["open_date = ? AND warehouses.is_active = ?", Date.current, true]).where("opened_by = #{cashier_id}").first
                                           if @co.present?
                                             @warehouse_id = @co.warehouse_id
                                           else
