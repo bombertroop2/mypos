@@ -51,9 +51,10 @@ class OrderBookingProduct < ApplicationRecord
     end
       
     def product_available
-      errors.add(:base, "Some products do not exist!") if Product.joins(stock_products: :stock).
+      errors.add(:base, "Some products do not exist!") if Product.joins(stock_products: [stock: :warehouse]).
         where(id: product_id).
         where("stocks.warehouse_id = #{origin_warehouse_id}").
+        where(["warehouses.is_active = ?", true]).
         select("1 AS one").blank?
     end
     

@@ -26,8 +26,9 @@ class OrderBookingProductItem < ApplicationRecord
               unless new_record?
                 unless @stock_item.present?
                   product_id = order_booking_product.product_id
-                  stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
+                  stock_item = StockDetail.joins(stock_product: [stock: :warehouse]).select(:id, :quantity, :booked_quantity).
                     where(size_id: size_id, color_id: color_id).
+                    where(["warehouses.is_active = ?", true]).
                     where("stock_products.product_id = #{product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
                   self.available_for_booking_quantity = stock_item.quantity - (stock_item.booked_quantity - quantity_was)
                 else
@@ -45,8 +46,10 @@ class OrderBookingProductItem < ApplicationRecord
             end
             
             def update_stock_and_booked_quantity
-              stock_item = StockDetail.joins(stock_product: :stock).select(:id, :booked_quantity, :quantity).
-                where(size_id: size_id, color_id: color_id).where("stock_products.product_id = #{order_booking_product.product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
+              stock_item = StockDetail.joins(stock_product: [stock: :warehouse]).select(:id, :booked_quantity, :quantity).
+                where(size_id: size_id, color_id: color_id).
+                where("stock_products.product_id = #{order_booking_product.product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").
+                where(["warehouses.is_active = ?", true]).first
               if shipping
                 booked_quantity = stock_item.booked_quantity - quantity
                 last_quantity = stock_item.quantity - available_quantity
@@ -63,8 +66,10 @@ class OrderBookingProductItem < ApplicationRecord
                 self.available_for_booking_quantity = available_quantity = @stock_item.quantity - @stock_item.booked_quantity
                 errors.add(:quantity, "cannot be greater than #{available_quantity}") if quantity > available_quantity
               elsif quantity_changed? && persisted?
-                @stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
+                @stock_item = StockDetail.joins(stock_product: [stock: :warehouse]).
+                  select(:id, :quantity, :booked_quantity).
                   where(size_id: size_id, color_id: color_id).
+                  where(["warehouses.is_active = ?", true]).
                   where("stock_products.product_id = #{product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
                 available_quantity = @stock_item.quantity - (@stock_item.booked_quantity - quantity_was)
                 errors.add(:quantity, "cannot be greater than #{available_quantity}") if quantity > available_quantity
@@ -73,8 +78,9 @@ class OrderBookingProductItem < ApplicationRecord
 
             def item_available
               if new_record? || ((size_id_changed? || color_id_changed?) && persisted?)
-                @stock_item = StockDetail.joins(stock_product: :stock).select(:id, :quantity, :booked_quantity).
+                @stock_item = StockDetail.joins(stock_product: [stock: :warehouse]).select(:id, :quantity, :booked_quantity).
                   where(size_id: size_id, color_id: color_id).
+                  where(["warehouses.is_active = ?", true]).
                   where("stock_products.product_id = #{product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
                 errors.add(:base, "Not able to order selected items") if @stock_item.blank?
               end
@@ -90,8 +96,11 @@ class OrderBookingProductItem < ApplicationRecord
                   @stock_item.update_attribute :booked_quantity, total_booked_quantity
                 end
               else
-                stock_item = StockDetail.joins(stock_product: :stock).select(:id, :booked_quantity).
-                  where(size_id: size_id, color_id: color_id).where("stock_products.product_id = #{order_booking_product.product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
+                stock_item = StockDetail.joins(stock_product: [stock: :warehouse]).
+                  select(:id, :booked_quantity).
+                  where(size_id: size_id, color_id: color_id).
+                  where(["warehouses.is_active = ?", true]).
+                  where("stock_products.product_id = #{order_booking_product.product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").first
                 booked_quantity = stock_item.booked_quantity - quantity
                 stock_item.update_attribute :booked_quantity, booked_quantity
               end

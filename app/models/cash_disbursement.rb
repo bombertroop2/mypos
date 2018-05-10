@@ -4,12 +4,16 @@ class CashDisbursement < ApplicationRecord
   belongs_to :cashier_opening
 
   validates :description, :price, presence: true
-  validate :cashier_open
+  validate :warehouse_is_active, :cashier_open
   validates :price, numericality: {greater_than: 0, less_than_or_equal_to: :cash_balance}, if: proc { |cd| cd.price.present? && cd.cashier.present? }
 
     before_create :update_cash_balance, :set_cashier_opening_id
 
     private
+    
+    def warehouse_is_active
+      errors.add(:base, "Sorry, warehouse is not active") if Warehouse.joins(sales_promotion_girls: :user).select("1 AS one").where(:"users.id" => user_id).where(["warehouses.is_active = ?", true]).blank?
+    end
     
     def set_cashier_opening_id
       self.cashier_opening_id = cashier.id
@@ -24,7 +28,7 @@ class CashDisbursement < ApplicationRecord
     end
     
     def cashier_open
-      self.cashier = CashierOpening.joins(:warehouse).select(:id, :cash_balance).where(opened_by: user_id, open_date: Date.current).where("closed_at IS NULL").where(["warehouses.is_active = ?", true]).first
+      self.cashier = CashierOpening.select(:id, :cash_balance).where(opened_by: user_id, open_date: Date.current).where("closed_at IS NULL").first
       errors.add(:base, "Please open cashier first") if cashier.blank?
     end
   end  

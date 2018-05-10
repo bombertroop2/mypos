@@ -95,7 +95,7 @@ class CashierOpeningsController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_cashier_opening
-    @cashier_opening = CashierOpening.joins(:warehouse).select("cashier_openings.*").where(["warehouses.is_active = ?", true]).find(params[:id])
+    @cashier_opening = CashierOpening.find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

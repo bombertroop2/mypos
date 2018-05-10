@@ -90,7 +90,7 @@ class OrderBooking < ApplicationRecord
           end
     
           def origin_warehouse_available
-            errors.add(:origin_warehouse_id, "does not exist!") if (new_record? || (origin_warehouse_id_changed? && persisted?)) && origin_warehouse_id.present? && Warehouse.central.where(id: origin_warehouse_id).select("1 AS one").blank?
+            errors.add(:origin_warehouse_id, "does not exist!") if (new_record? || (origin_warehouse_id_changed? && persisted?)) && origin_warehouse_id.present? && Warehouse.central.actived.where(id: origin_warehouse_id).select("1 AS one").blank?
           end
 
           def destination_warehouse_available
@@ -98,7 +98,7 @@ class OrderBooking < ApplicationRecord
           end
     
           def generate_number
-            full_warehouse_code = Warehouse.select(:code).where(id: destination_warehouse_id).first.code
+            full_warehouse_code = Warehouse.select(:code).where(id: destination_warehouse_id, is_active: true).first.code
             warehouse_code = full_warehouse_code.split("-")[0]
             today = Date.current
             current_month = today.month.to_s.rjust(2, '0')
