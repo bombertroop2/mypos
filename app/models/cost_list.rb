@@ -34,7 +34,7 @@ class CostList < ApplicationRecord
                 
                 def prevent_user_delete_record_when_cashier_open
                   current_date = Date.current
-                  cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ?", current_date, product_id]).present?
+                  cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.is_active = ?", current_date, product_id, true]).present?
                   if current_date >= effective_date && cashier_opened
                     errors.add(:base, "Sorry, you can't delete a record, because sales is currently running")
                     throw :abort
@@ -61,7 +61,7 @@ class CostList < ApplicationRecord
                 
                 def effective_date_not_added
                   current_date = Date.current
-                  cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ?", current_date, product_id]).present?
+                  cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.is_active = ?", current_date, product_id, true]).present?
                   errors.add(:effective_date, "addition is not allowed because sales is currently running") if current_date == effective_date && cashier_opened
                 end
   
@@ -71,7 +71,7 @@ class CostList < ApplicationRecord
                       errors.add(:effective_date, "change is not allowed!")
                     else
                       current_date = Date.current
-                      cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ?", current_date, product_id]).present?
+                      cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.is_active = ?", current_date, product_id, true]).present?
                       if (current_date == effective_date || current_date == effective_date_was) && cashier_opened
                         errors.add(:effective_date, "change is not allowed because sales is currently running")
                       end
