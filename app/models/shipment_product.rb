@@ -21,14 +21,16 @@ class ShipmentProduct < ApplicationRecord
   end
   
   def product_available
-    if new_record? && OrderBookingProduct.joins(:order_booking).
+    if new_record? && OrderBookingProduct.joins(order_booking: [:origin_warehouse, :destination_warehouse]).
         where(id: order_booking_product_id, order_booking_id: order_booking_id).
         where(:"order_bookings.status" => "P").
+        where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
         select("1 AS one").blank?
       errors.add(:base, "Some products do not exist!")
-    elsif !new_record? && OrderBookingProduct.joins(:order_booking).
+    elsif !new_record? && OrderBookingProduct.joins(order_booking: [:origin_warehouse, :destination_warehouse]).
         where(id: order_booking_product_id, order_booking_id: order_booking_id).
         where(:"order_bookings.status" => "F").
+        where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
         select("1 AS one").blank?
       errors.add(:base, "Some products do not exist!")
     end

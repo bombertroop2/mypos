@@ -12,7 +12,7 @@ class CashDisbursement < ApplicationRecord
     private
     
     def warehouse_is_active
-      errors.add(:base, "Sorry, warehouse is not active") if Warehouse.joins(sales_promotion_girls: :user).select("1 AS one").where(:"users.id" => user_id).where(["warehouses.is_active = ?", true]).blank?
+      errors.add(:base, "Sorry, warehouse is not active") if user_id.present? && Warehouse.joins(sales_promotion_girls: :user).select("1 AS one").where(:"users.id" => user_id).where(["warehouses.is_active = ?", true]).blank?
     end
     
     def set_cashier_opening_id

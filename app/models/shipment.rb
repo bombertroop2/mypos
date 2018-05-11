@@ -14,7 +14,7 @@ class Shipment < ApplicationRecord
   validates :delivery_date, :courier_id, :order_booking_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc {|shpmnt| shpmnt.order_booking.created_at.to_date}, message: 'must be after or equal to creation date of order booking' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.order_booking_id.present?}
     validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && !shpmnt.receiving_inventory}
-      validate :courier_available, :order_booking_available#, :check_min_quantity
+      validate :warehouse_is_active, :courier_available, :order_booking_available#, :check_min_quantity
       validate :editable, on: :update, unless: proc{|shpmnt| shpmnt.receiving_inventory}
         validate :order_booking_not_changed, on: :update, if: proc{|shipment| shipment.order_booking_id_changed?}
           validates :received_date, presence: true, if: proc{|shpmnt| shpmnt.receiving_inventory}
@@ -32,6 +32,21 @@ class Shipment < ApplicationRecord
 
 
                         private
+                        
+                        def warehouse_is_active
+                          if order_booking_id.present?
+                            @order_booking = OrderBooking.select(:id, :status, :origin_warehouse_id, :destination_warehouse_id).where(id: order_booking_id).first
+                            if @order_booking.present?
+                              origin_warehouse = Warehouse.select(:id).where(id: @order_booking.origin_warehouse_id, is_active: true).first
+                              if origin_warehouse.blank?
+                                errors.add(:base, "Sorry, origin warehouse is not active")
+                              else
+                                @destination_warehouse = Warehouse.select(:id, :code).where(id: @order_booking.destination_warehouse_id, is_active: true).first
+                                errors.add(:base, "Sorry, destination warehouse is not active") if @destination_warehouse.blank?
+                              end
+                            end
+                          end
+                        end
                         
                         def create_listing_stock(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, shipment_product, shipment_product_item)
                           transaction = Shipment.select(:delivery_order_number).where(id: shipment_product.shipment_id).first
@@ -153,8 +168,13 @@ class Shipment < ApplicationRecord
                         end
                     
                         def load_goods_to_destination_warehouse
-                          stock = Stock.select(:id).where(warehouse_id: order_booking.destination_warehouse_id).first
-                          stock = Stock.new warehouse_id: order_booking.destination_warehouse_id if stock.blank?
+                          destination_warehouse_id = if @order_booking.present?
+                            @order_booking.destination_warehouse_id
+                          else
+                            order_booking.destination_warehouse_id
+                          end
+                          stock = Stock.select(:id).where(warehouse_id: destination_warehouse_id).first
+                          stock = Stock.new warehouse_id: destination_warehouse_id if stock.blank?
                           if stock.new_record?
                             shipment_products.select(:id, :order_booking_product_id, :shipment_id).each do |shipment_product|
                               product_id = shipment_product.order_booking_product.product_id
@@ -164,8 +184,8 @@ class Shipment < ApplicationRecord
                                   size_id = shipment_product_item.order_booking_product_item.size_id
                                   color_id = shipment_product_item.order_booking_product_item.color_id
                                   stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-                                  create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
-                                  create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
+                                  create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                  create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                 end
                               end
                             end
@@ -181,8 +201,8 @@ class Shipment < ApplicationRecord
                                     size_id = shipment_product_item.order_booking_product_item.size_id
                                     color_id = shipment_product_item.order_booking_product_item.color_id
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity
-                                    create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
-                                    create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
+                                    create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                    create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                   end
                                 end
                                 stock_product.save
@@ -194,16 +214,16 @@ class Shipment < ApplicationRecord
                                     stock_detail = stock_product.stock_details.select{|stock_detail| stock_detail.size_id == size_id && stock_detail.color_id == color_id}.first
                                     stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity if stock_detail.blank?
                                     if stock_detail.new_record?                                      
-                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
-                                      create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
+                                      create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                      create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                       stock_detail.save
                                     else
                                       stock_detail.with_lock do
                                         stock_detail.quantity += shipment_product_item.quantity
                                         stock_detail.save
                                       end
-                                      create_stock_movement(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity)
-                                      create_listing_stock(product_id, color_id, size_id, order_booking.destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
+                                      create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity)
+                                      create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                     end
                                   end
                                 end
@@ -236,8 +256,13 @@ class Shipment < ApplicationRecord
                         end
       
                         def notify_store
+                          destination_warehouse = if @destination_warehouse.present?
+                            @destination_warehouse
+                          else
+                            order_booking.destination_warehouse
+                          end
                           notification = Notification.new(event: "New Notification", body: "Shipment #{delivery_order_number} will arrive soon")
-                          order_booking.destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
+                          destination_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
                             notification.recipients.build user_id: sales_promotion_girl.user_id, notified: false, read: false
                           end
                           notification.save
@@ -265,7 +290,14 @@ class Shipment < ApplicationRecord
                         end
     
                         def order_booking_available
-                          errors.add(:order_booking_id, "does not exist!") if (new_record? || (order_booking_id_changed? && persisted?)) && order_booking_id.present? && OrderBooking.where(id: order_booking_id).printed.select("1 AS one").blank?
+                          if (new_record? || (order_booking_id_changed? && persisted?)) && order_booking_id.present?
+                            is_ob_printed = if @order_booking.present?
+                              @order_booking.status.eql?("P")
+                            else
+                              OrderBooking.where(id: order_booking_id).printed.select("1 AS one").present?
+                            end
+                            errors.add(:order_booking_id, "does not exist!") unless is_ob_printed
+                          end
                         end
   
                         def child_blank(attributed)
@@ -283,7 +315,18 @@ class Shipment < ApplicationRecord
                         #      end
     
                         def generate_do_number
-                          full_warehouse_code = Warehouse.select(:code).where(id: order_booking.destination_warehouse_id).first.code
+                          destination_warehouse_id = if @order_booking.present?
+                            @order_booking.destination_warehouse_id
+                          else
+                            order_booking.destination_warehouse_id
+                          end
+                          
+                          full_warehouse_code = if @destination_warehouse.present?
+                            @destination_warehouse.code
+                          else
+                            Warehouse.select(:code).where(id: destination_warehouse_id, is_active: true).first.code
+                          end
+                          
                           warehouse_code = full_warehouse_code.split("-")[0]
                           today = Date.current
                           current_month = today.month.to_s.rjust(2, '0')

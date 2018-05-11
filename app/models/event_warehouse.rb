@@ -27,7 +27,8 @@ class EventWarehouse < ApplicationRecord
   private
   
   def warehouse_is_active
-    errors.add(:base, "Sorry, warehouse is not active") if Warehouse.select("1 AS one").where(id: warehouse_id).where(["warehouses.is_active = ?", true]).blank?
+    warehouse_id = self.warehouse_id rescue nil
+    errors.add(:base, "Sorry, warehouse is not active") if warehouse_id.present? && Warehouse.select("1 AS one").where(id: warehouse_id).where(["warehouses.is_active = ?", true]).blank?
   end
 
   

@@ -28,7 +28,7 @@ class ShipmentProductItem < ApplicationRecord
         product_id = order_booking_product.product_id
         color_id = order_booking_product_item.color_id
         size_id = order_booking_product_item.size_id
-        warehouse_id = OrderBooking.select(:origin_warehouse_id).where(id: order_booking_product.order_booking_id).first.origin_warehouse_id
+        warehouse_id = OrderBooking.joins(:origin_warehouse, :destination_warehouse).select(:origin_warehouse_id).where(id: order_booking_product.order_booking_id, :"warehouses.is_active" => true, :"destination_warehouses_order_bookings.is_active" => true).first.origin_warehouse_id
         shipment_product = ShipmentProduct.select(:shipment_id).where(id: shipment_product_id).first
         shipment = Shipment.select(:delivery_date).where(id: shipment_product.shipment_id).first
         transaction_date = shipment.delivery_date
@@ -61,16 +61,18 @@ class ShipmentProductItem < ApplicationRecord
   
       def item_available
         @order_booking_product_item = if new_record?
-          OrderBookingProductItem.joins(order_booking_product: :order_booking).
+          OrderBookingProductItem.joins(order_booking_product: [order_booking: [:origin_warehouse, :destination_warehouse]]).
             where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
             where(:"order_bookings.status" => "P").
             where(:"order_bookings.id" => order_booking_id).
+            where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
             select(:quantity).first
         else
-          OrderBookingProductItem.joins(order_booking_product: :order_booking).
+          OrderBookingProductItem.joins(order_booking_product: [order_booking: [:origin_warehouse, :destination_warehouse]]).
             where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
             where(:"order_bookings.status" => "F").
             where(:"order_bookings.id" => order_booking_id).
+            where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
             select(:quantity).first
         end
         errors.add(:base, "Not able to deliver selected items") if @order_booking_product_item.blank?
@@ -94,7 +96,7 @@ class ShipmentProductItem < ApplicationRecord
       
       def create_listing_stock
         shipment_product = ShipmentProduct.select(:shipment_id).where(id: shipment_product_id).first
-        transaction = Shipment.select(:delivery_order_number).where(id: shipment_product.shipment_id).first
+        transaction = Shipment.joins(order_booking: [:origin_warehouse, :destination_warehouse]).select(:delivery_order_number).where(id: shipment_product.shipment_id, :"warehouses.is_active" => true, :"destination_warehouses_order_bookings.is_active" => true).first
         listing_stock = ListingStock.select(:id).where(warehouse_id: @warehouse_id, product_id: @product_id).first
         listing_stock = ListingStock.new warehouse_id: @warehouse_id, product_id: @product_id if listing_stock.blank?
         if listing_stock.new_record?                    
@@ -119,7 +121,7 @@ class ShipmentProductItem < ApplicationRecord
         order_booking_product_item = OrderBookingProductItem.select(:size_id, :color_id).where(id: order_booking_product_item_id).first
         @color_id = color_id = order_booking_product_item.color_id
         @size_id = size_id = order_booking_product_item.size_id
-        @warehouse_id = warehouse_id = OrderBooking.select(:origin_warehouse_id).where(id: order_booking_id).first.origin_warehouse_id
+        @warehouse_id = warehouse_id = OrderBooking.joins(:origin_warehouse, :destination_warehouse).select(:origin_warehouse_id).where(id: order_booking_id, :"warehouses.is_active" => true, :"destination_warehouses_order_bookings.is_active" => true).first.origin_warehouse_id
         @transaction_date = transaction_date = shipment_product.shipment.delivery_date
         stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
         stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
