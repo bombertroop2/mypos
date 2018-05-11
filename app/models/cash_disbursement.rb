@@ -28,7 +28,7 @@ class CashDisbursement < ApplicationRecord
     end
     
     def cashier_open
-      self.cashier = CashierOpening.select(:id, :cash_balance).where(opened_by: user_id, open_date: Date.current).where("closed_at IS NULL").first
+      self.cashier = CashierOpening.select(:id, :cash_balance).joins(:warehouse).where(opened_by: user_id, open_date: Date.current, :"warehouses.is_active" => true).where("closed_at IS NULL").first
       errors.add(:base, "Please open cashier first") if cashier.blank?
     end
   end  
