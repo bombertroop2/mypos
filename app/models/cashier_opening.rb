@@ -13,7 +13,7 @@ class CashierOpening < ApplicationRecord
         validates :station, uniqueness: { scope: [:warehouse_id, :open_date, :shift], message: "has already been opened" }, if: proc{|co| !co.update_cash_balance && !co.closing_cashier}
           validate :station_available, :shift_available, :second_shift_allowable, :today_cashier_openable, if: proc{|co| !co.update_cash_balance && !co.closing_cashier}
             validate :closable, if: proc{|co| co.closing_cashier}
-              validate :warehouse_is_open, on: :create
+              validate :warehouse_is_open
 
               before_create :set_cash_balance
               before_update :calculate_total_sales, if: proc{|co| co.closing_cashier}
@@ -38,11 +38,11 @@ class CashierOpening < ApplicationRecord
                 end
               
                 def calculate_total_sales
-                  sale_products = SaleProduct.joins(:price_list, :sale).
+                  sale_products = SaleProduct.joins(:price_list, sale: [cashier_opening: :warehouse]).
                     joins("LEFT JOIN banks ON sales.bank_id = banks.id").
                     joins("LEFT JOIN events ON sale_products.event_id = events.id").
                     joins("LEFT JOIN events gift_events ON sales.gift_event_id = gift_events.id").
-                    where(["sales.cashier_opening_id = ?", id]).
+                    where(["sales.cashier_opening_id = ? AND warehouses.is_active = ?", id, true]).
                     select(:sale_id, :quantity, "sale_products.total AS subtotal", :event_id, "sales.gift_event_id", "sales.payment_method", "banks.card_type", "price_lists.price AS article_price", "events.event_type AS article_event_type", "gift_events.discount_amount AS store_discount_amount", "sales.gift_event_product_id").
                     order("sale_id")
 
