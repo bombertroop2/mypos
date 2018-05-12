@@ -45,7 +45,7 @@ class DirectPurchase < ApplicationRecord
                     private
                     
                     def transaction_after_beginning_stock_added
-                      listing_stock_transaction = ListingStockTransaction.select(:transaction_date).where(transaction_type: "BS").first
+                      listing_stock_transaction = ListingStockTransaction.select(:transaction_date).joins(listing_stock_product_detail: [listing_stock: :warehouse]).where(transaction_type: "BS", :"warehouses.is_active" => true).first
                       errors.add(:base, "Sorry, you can't receive article on #{receiving_date.strftime("%d/%m/%Y")}") if listing_stock_transaction.transaction_date > receiving_date
                     end
                     
