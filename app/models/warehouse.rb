@@ -35,6 +35,7 @@ class Warehouse < ApplicationRecord
         :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid
 
       before_validation :upcase_code, :strip_string_values
+      before_validation :activate_warehouse, on: :create
       before_validation :delete_sku_value, unless: proc{|warehouse| warehouse.warehouse_type.eql?("counter")}
         before_save :empty_messages, unless: proc{|warehouse| warehouse.warehouse_type.eql?("showroom")}
           before_destroy :delete_tracks
@@ -74,6 +75,11 @@ class Warehouse < ApplicationRecord
           end
 
           private
+          
+          # untuk sekarang asumsikan warehouse selalu aktif
+          def activate_warehouse
+            self.is_active = true
+          end
           
           def delete_sku_value
             self.sku = nil

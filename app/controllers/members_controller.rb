@@ -37,10 +37,10 @@ class MembersController < ApplicationController
   # POST /members
   # POST /members.json
   def create
-    recreate = false
     @member = Member.new(member_params)
     begin
       begin
+        recreate = false
         @valid = @member.save
       rescue ActiveRecord::RecordNotUnique => e
         recreate = true

@@ -79,10 +79,10 @@ class SalesController < ApplicationController
 
       params[:sale].merge! total: @total
       @sale = Sale.new(sale_params)
-      recreate = false
 
       begin
         begin
+          recreate = false
           unless @valid = @sale.save
             if @sale.errors[:base].present?
               render js: "bootbox.alert({message: \"#{@sale.errors[:base].join("<br/>")}\",size: 'small'});"
