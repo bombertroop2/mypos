@@ -37,11 +37,11 @@ class PriceList < ApplicationRecord
                   
                   def discount_event_amount
                     product_det = ProductDetail.select(:product_id, :price_code_id).where(id: product_detail_id).first
-                    event = Event.joins(event_warehouses: [:event_products, :warehouse]).select(:cash_discount).where(["DATE(start_date_time) <= ? AND DATE(end_date_time) >= ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ?", effective_date, effective_date, product_det.product_id, true, true, true, product_det.price_code_id]).first
+                    event = Event.joins(event_warehouses: [:event_products, :warehouse]).select(:cash_discount).where(["DATE(start_date_time) <= ? AND DATE(end_date_time) >= ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ? AND warehouses.is_active = ?", effective_date, effective_date, product_det.product_id, true, true, true, product_det.price_code_id, true]).first
                     if event.present?
                       event.cash_discount
                     else
-                      event = Event.joins(:event_general_products, event_warehouses: :warehouse).select(:cash_discount).where(["DATE(start_date_time) <= ? AND DATE(end_date_time) >= ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ?", effective_date, effective_date, product_det.product_id, false, true, true, product_det.price_code_id]).first
+                      event = Event.joins(:event_general_products, event_warehouses: :warehouse).select(:cash_discount).where(["DATE(start_date_time) <= ? AND DATE(end_date_time) >= ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ? AND warehouses.is_active = ?", effective_date, effective_date, product_det.product_id, false, true, true, product_det.price_code_id, true]).first
                       if event.present?
                         event.cash_discount
                       else
@@ -53,7 +53,7 @@ class PriceList < ApplicationRecord
                   def prevent_user_delete_record_when_cashier_open
                     current_date = Date.current
                     product_detail = ProductDetail.select(:product_id, :price_code_id).where(id: product_detail_id).first
-                    cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.price_code_id = ?", current_date, product_detail.product_id, product_detail.price_code_id]).present?
+                    cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.price_code_id = ? AND warehouses.is_active = ?", current_date, product_detail.product_id, product_detail.price_code_id, true]).present?
                     if current_date >= effective_date && cashier_opened
                       errors.add(:base, "Sorry, you can't delete a record, because sales is currently running")
                       throw :abort
@@ -97,7 +97,7 @@ class PriceList < ApplicationRecord
                       else
                         current_date = Date.current
                         product_detail = ProductDetail.select(:product_id, :price_code_id).where(id: product_detail_id).first
-                        cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.price_code_id = ?", current_date, product_detail.product_id, product_detail.price_code_id]).present?
+                        cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.price_code_id = ? AND warehouses.is_active = ?", current_date, product_detail.product_id, product_detail.price_code_id, true]).present?
                         if current_date >= effective_date && cashier_opened
                           errors.add(:price, "change is not allowed because sales is currently running")
                         end
