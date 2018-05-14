@@ -4,7 +4,7 @@
       <div class="form-group">
           <%= label_tag "product_id", "Product", class: "col-sm-2 control-label" %>
             <div class="col-sm-10">
-                <span class="form-control"><%= "#{@product.code} - #{@product.name}" %></span>
+                <span class="form-control" readonly="readoly" style="cursor: not-allowed"><%= "#{@product.code} - #{@product.name}" %></span>
             </div>
         </div>
       <% end %>

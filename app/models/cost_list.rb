@@ -67,15 +67,15 @@ class CostList < ApplicationRecord
   
                 def fields_not_changed
                   if effective_date_changed? && persisted?
-                    if created_purchase_order.present? || direct_purchase_product.present?
-                      errors.add(:effective_date, "change is not allowed!")
-                    else
-                      current_date = Date.current
-                      cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.is_active = ?", current_date, product_id, true]).present?
-                      if (current_date == effective_date || current_date == effective_date_was) && cashier_opened
-                        errors.add(:effective_date, "change is not allowed because sales is currently running")
-                      end
-                    end
+                    #                    if created_purchase_order.present? || direct_purchase_product.present?
+                    errors.add(:effective_date, "change is not allowed!")
+                    #                    else
+                    #                      current_date = Date.current
+                    #                      cashier_opened = CashierOpening.joins(warehouse: [stock: :stock_products]).select("1 AS one").where(["closed_at IS NULL AND open_date = ? AND stock_products.product_id = ? AND warehouses.is_active = ?", current_date, product_id, true]).present?
+                    #                      if (current_date == effective_date || current_date == effective_date_was) && cashier_opened
+                    #                        errors.add(:effective_date, "change is not allowed because sales is currently running")
+                    #                      end
+                    #                    end
                   end
                   errors.add(:cost, "change is not allowed!") if cost_changed? && persisted? && (created_purchase_order.present? || direct_purchase_product.present?)
                   errors.add(:product_id, "change is not allowed!") if product_id_changed? && persisted? && (created_purchase_order.present? || direct_purchase_product.present?)

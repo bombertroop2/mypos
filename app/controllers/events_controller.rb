@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class EventsController < ApplicationController
   helper SmartListing::Helper
   authorize_resource
-  before_action :set_event, only: [:show, :edit, :update, :destroy, :generate_activation_form]
+  before_action :set_event, only: [:show, :edit, :update, :destroy, :generate_activation_form, :activate_deactivate]
 
   # GET /events
   # GET /events.json
