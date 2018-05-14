@@ -197,7 +197,7 @@ class Product < ApplicationRecord
   end
   
   def size_group_not_changed
-    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted? && (order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1 || stock_mutation_product_relation.present?)
+    errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted?# && (order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1 || stock_mutation_product_relation.present?)
   end
         
   def check_item
