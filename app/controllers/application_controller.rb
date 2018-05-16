@@ -12,11 +12,10 @@ class ApplicationController < ActionController::Base
       before_action :get_notifications, :set_time_zone, if: :user_signed_in?
     
         rescue_from CanCan::AccessDenied do |exception|
-          #      flash[:alert] = exception.message
-          flash[:alert] = "You are not authorized to perform this action."
           unless request.xhr?
-            redirect_to root_path
+            redirect_to root_url, alert: "You are not authorized to perform this action."
           else
+            flash[:alert] = 'You are not authorized to perform this action.'
             render js: "window.location = '#{root_url}'"
           end
         end
