@@ -14,7 +14,17 @@ Rails.application.routes.draw do
   get 'fake_consignment_sale/get_product'
   get 'consignments' => 'fake_consignment_sale#listing_sale'
 
-  resources :counter_events
+  resources :counter_events do    
+    collection do
+      get "generate_warehouse_form"
+      get "add_products"
+      get "add_general_products"
+    end
+    member do
+      get "generate_activation_form"
+      patch "activate_deactivate"
+    end
+  end
   resources :companies
   resources :sales, except: [:edit, :update, :destroy] do
     collection do

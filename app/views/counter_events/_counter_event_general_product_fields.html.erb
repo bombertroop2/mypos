@@ -1,0 +1,67 @@
+<% if action_name.eql?("edit") %>
+  <% counter_event_general_product.prdct_code = counter_event_general_product.product_code %>
+  <% counter_event_general_product.prdct_name = counter_event_general_product.product_name %>
+<% end %>
+<%= fields_for "counter_event[counter_event_general_products_attributes][#{counter_event_general_product.product_id}]", counter_event_general_product do |counter_event_general_product_fields| %>
+  <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+    <% unless counter_event_general_product_fields.object.new_record? %>
+      <%= counter_event_general_product_fields.hidden_field :id, id: "cash_discount_counter_event_general_product_id_#{counter_event_general_product.product_id}" %>
+      <%= counter_event_general_product_fields.hidden_field :_destroy, id: "cash_discount_counter_event_general_product_destroy_#{counter_event_general_product.product_id}" %>
+    <% end %>
+    <% general_product_fields_class_name = "" %>
+    <% unless @counter_event.new_record? %>
+      <% general_product_fields_class_name = " counter_event-general-products-fields-cash-discount" %>
+    <% end %>
+    <%= counter_event_general_product_fields.hidden_field :product_id, class: "counter_event-general-products-#{counter_event_general_product.product_id}-cash-discount#{general_product_fields_class_name} counter_event-general-products-product-id-fields-cash-discount" %>
+      <%= counter_event_general_product_fields.hidden_field :prdct_code, class: "counter_event-general-products-#{counter_event_general_product.product_id}-cash-discount#{general_product_fields_class_name}" %>
+        <%= counter_event_general_product_fields.hidden_field :prdct_name, class: "counter_event-general-products-#{counter_event_general_product.product_id}-cash-discount#{general_product_fields_class_name}" %>
+        <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+          <% unless counter_event_general_product_fields.object.new_record? %>
+            <%= counter_event_general_product_fields.hidden_field :id, id: "special_price_counter_event_general_product_id_#{counter_event_general_product.product_id}" %>
+            <%= counter_event_general_product_fields.hidden_field :_destroy, id: "special_price_counter_event_general_product_destroy_#{counter_event_general_product.product_id}" %>
+          <% end %>
+          <% general_product_fields_class_name = "" %>
+          <% unless @counter_event.new_record? %>
+            <% general_product_fields_class_name = " counter_event-general-products-fields-special-price" %>
+          <% end %>
+          <%= counter_event_general_product_fields.hidden_field :product_id, class: "counter_event-general-products-#{counter_event_general_product.product_id}-special-price#{general_product_fields_class_name} counter_event-general-products-product-id-fields-special-price" %>
+            <%= counter_event_general_product_fields.hidden_field :prdct_code, class: "counter_event-general-products-#{counter_event_general_product.product_id}-special-price#{general_product_fields_class_name}" %>
+              <%= counter_event_general_product_fields.hidden_field :prdct_name, class: "counter_event-general-products-#{counter_event_general_product.product_id}-special-price#{general_product_fields_class_name}" %>
+              <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                <% unless counter_event_general_product_fields.object.new_record? %>
+                  <%= counter_event_general_product_fields.hidden_field :id, id: "buy_one_get_one_counter_event_general_product_id_#{counter_event_general_product.product_id}" %>
+                  <%= counter_event_general_product_fields.hidden_field :_destroy, id: "buy_one_get_one_counter_event_general_product_destroy_#{counter_event_general_product.product_id}" %>
+                <% end %>
+                <% general_product_fields_class_name = "" %>
+                <% unless @counter_event.new_record? %>
+                  <% general_product_fields_class_name = " counter_event-general-products-fields-buy-one-get-one" %>
+                <% end %>
+                <%= counter_event_general_product_fields.hidden_field :product_id, class: "counter_event-general-products-#{counter_event_general_product.product_id}-buy-one-get-one#{general_product_fields_class_name} counter_event-general-products-product-id-fields-buy-one-get-one" %>
+                  <%= counter_event_general_product_fields.hidden_field :prdct_code, class: "counter_event-general-products-#{counter_event_general_product.product_id}-buy-one-get-one#{general_product_fields_class_name}" %>
+                    <%= counter_event_general_product_fields.hidden_field :prdct_name, class: "counter_event-general-products-#{counter_event_general_product.product_id}-buy-one-get-one#{general_product_fields_class_name}" %>
+                    <% elsif counter_event_type.present? && counter_event_type.eql?("gift") %>
+                      <% unless counter_event_general_product_fields.object.new_record? %>
+                        <%= counter_event_general_product_fields.hidden_field :id, id: "gift_counter_event_general_product_id_#{counter_event_general_product.product_id}" %>
+                        <%= counter_event_general_product_fields.hidden_field :_destroy, id: "gift_counter_event_general_product_destroy_#{counter_event_general_product.product_id}", class: "counter_event-general-products-destroy-fields-gift" %>
+                        <% end %>
+                        <% general_product_fields_class_name = "" %>
+                        <% unless @counter_event.new_record? %>
+                          <% general_product_fields_class_name = " counter_event-general-products-fields-gift" %>
+                        <% end %>
+                        <%= counter_event_general_product_fields.hidden_field :product_id, class: "counter_event-general-products-#{counter_event_general_product.product_id}-gift#{general_product_fields_class_name} counter_event-general-products-product-id-fields-gift" %>
+                          <%= counter_event_general_product_fields.hidden_field :prdct_code, class: "counter_event-general-products-#{counter_event_general_product.product_id}-gift#{general_product_fields_class_name}" %>
+                            <%= counter_event_general_product_fields.hidden_field :prdct_name, class: "counter_event-general-products-#{counter_event_general_product.product_id}-gift#{general_product_fields_class_name}" %>
+                            <% else %>
+                              <% unless counter_event_general_product_fields.object.new_record? %>
+                                <%= counter_event_general_product_fields.hidden_field :id %>
+                                <%= counter_event_general_product_fields.hidden_field :_destroy %>
+                              <% end %>
+                              <% general_product_fields_class_name = "" %>
+                              <% unless @counter_event.new_record? %>
+                                <% general_product_fields_class_name = " counter_event-general-products-fields-percentage-discount" %>
+                              <% end %>
+                              <%= counter_event_general_product_fields.hidden_field :product_id, class: "counter_event-general-products-#{counter_event_general_product.product_id}-percentage-discount#{general_product_fields_class_name} counter_event-general-products-product-id-fields-percentage-discount" %>
+                                <%= counter_event_general_product_fields.hidden_field :prdct_code, class: "counter_event-general-products-#{counter_event_general_product.product_id}-percentage-discount#{general_product_fields_class_name}" %>
+                                  <%= counter_event_general_product_fields.hidden_field :prdct_name, class: "counter_event-general-products-#{counter_event_general_product.product_id}-percentage-discount#{general_product_fields_class_name}" %>
+                                  <% end %>
+                                <% end %>

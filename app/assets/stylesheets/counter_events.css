@@ -1,0 +1,105 @@
+#listing_counter_event_warehouses_table_filter label {
+    font-weight: normal;
+}
+
+#listing_counter_event_warehouses_table tr td:first-child {
+    text-align: center;
+}
+
+#listing_counter_event_warehouses_table tr td:first-child:before {
+    content: "\f096"; /* fa-square-o */
+    font-family: FontAwesome;
+}
+
+#listing_counter_event_warehouses_table tr.selected td:first-child:before {
+    content: "\f046"; /* fa-check-square-o */
+}
+
+#listing_counter_event_warehouses_table_wrapper .DTTT_container {
+    position: absolute
+}
+
+#listing_counter_event_warehouses_table_discount_cash_filter label {
+    font-weight: normal;
+}
+
+#listing_counter_event_warehouses_table_discount_cash tr td:first-child {
+    text-align: center;
+}
+
+#listing_counter_event_warehouses_table_discount_cash tr td:first-child:before {
+    content: "\f096"; /* fa-square-o */
+    font-family: FontAwesome;
+}
+
+#listing_counter_event_warehouses_table_discount_cash tr.selected td:first-child:before {
+    content: "\f046"; /* fa-check-square-o */
+}
+
+#listing_counter_event_warehouses_table_discount_cash_wrapper .DTTT_container {
+    position: absolute
+}
+
+#listing_counter_event_warehouses_table_special_price_filter label {
+    font-weight: normal;
+}
+
+#listing_counter_event_warehouses_table_special_price tr td:first-child {
+    text-align: center;
+}
+
+#listing_counter_event_warehouses_table_special_price tr td:first-child:before {
+    content: "\f096"; /* fa-square-o */
+    font-family: FontAwesome;
+}
+
+#listing_counter_event_warehouses_table_special_price tr.selected td:first-child:before {
+    content: "\f046"; /* fa-check-square-o */
+}
+
+#listing_counter_event_warehouses_table_special_price_wrapper .DTTT_container {
+    position: absolute
+}
+
+#listing_counter_event_warehouses_table_buy_one_get_one_filter label {
+    font-weight: normal;
+}
+
+#listing_counter_event_warehouses_table_buy_one_get_one tr td:first-child {
+    text-align: center;
+}
+
+#listing_counter_event_warehouses_table_buy_one_get_one tr td:first-child:before {
+    content: "\f096"; /* fa-square-o */
+    font-family: FontAwesome;
+}
+
+#listing_counter_event_warehouses_table_buy_one_get_one tr.selected td:first-child:before {
+    content: "\f046"; /* fa-check-square-o */
+}
+
+#listing_counter_event_warehouses_table_buy_one_get_one_wrapper .DTTT_container {
+    position: absolute
+}
+
+#listing_counter_event_warehouses_table_gift_filter label {
+    font-weight: normal;
+}
+
+#listing_counter_event_warehouses_table_gift tr td:first-child {
+    text-align: center;
+}
+
+#listing_counter_event_warehouses_table_gift tr td:first-child:before {
+    content: "\f096"; /* fa-square-o */
+    font-family: FontAwesome;
+}
+
+#listing_counter_event_warehouses_table_gift tr.selected td:first-child:before {
+    content: "\f046"; /* fa-check-square-o */
+}
+
+#listing_counter_event_warehouses_table_gift_wrapper .DTTT_container {
+    position: absolute
+}
+

@@ -1,2 +1,15 @@
-<%= smart_listing_item :counter_events, :create, @counter_event, 
-                       @counter_event.valid? ? "counter_events/counter_event" : "counter_events/form" %>
+<% if @valid %>
+  <%= smart_listing_item :counter_events, :create, @counter_event, "counter_events/counter_event" %>
+<% else %>
+  <% if params[:counter_event][:counter_event_type].strip.eql?("Discount(%)") %>
+    $("#form_container_disc_percentage").html("<%= j(render(partial: "form_discount_percentage")) %>");
+  <% elsif params[:counter_event][:counter_event_type].strip.eql?("Discount(Rp)") %>
+    $("#form_container_discount_cash").html("<%= j(render(partial: "form_discount_cash")) %>");
+  <% elsif params[:counter_event][:counter_event_type].strip.eql?("Special Price") %>
+    $("#form_container_special_price").html("<%= j(render(partial: "form_special_price")) %>");
+  <% elsif params[:counter_event][:counter_event_type].strip.eql?("Buy 1 Get 1 Free") %>
+    $("#form_container_buy_one_get_one_free").html("<%= j(render(partial: "form_buy_one_get_one")) %>");
+  <% elsif params[:counter_event][:counter_event_type].strip.eql?("Gift") %>
+    $("#form_container_reward").html("<%= j(render(partial: "form_gift")) %>");
+  <% end %>
+<% end %>

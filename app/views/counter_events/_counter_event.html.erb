@@ -6,7 +6,7 @@
 
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:manage, CounterEvent) && (object.start_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_counter_event_path(object), :remote => true, class: :edit, method: :get, title: "Edit", data: {"turbolinks-track" => true} ) %>
+    <%= link_to_if(can?(:manage, CounterEvent) && (object.start_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_counter_counter_event_path(object), :remote => true, class: :edit, method: :get, title: "Edit", data: {"turbolinks-track" => true} ) %>
       
       <%= link_to_if(can?(:manage, CounterEvent) && (object.start_time > Time.current), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>      
   </td>

@@ -6,7 +6,7 @@
 
     <dl class="dl-horizontal">
         <dt>Type</dt>
-        <dd><%= object.first_discount.present? ? "Discount(%)"  : "Special Price" %></dd>
+        <dd><%= object.counter_event_type %></dd>
     </dl>
 
     <dl class="dl-horizontal">
@@ -21,45 +21,124 @@
 
     <dl class="dl-horizontal">
         <dt>Start time</dt>
-        <dd><%= object.start_time.strftime("%d/%m/%Y %H:%M") %></dd>
+        <dd><%= object.start_date_time.strftime("%d/%m/%Y %H:%M") %></dd>
     </dl>
 
     <dl class="dl-horizontal">
         <dt>End time</dt>
-        <dd><%= object.end_time.strftime("%d/%m/%Y %H:%M") %></dd>
+        <dd><%= object.end_date_time.strftime("%d/%m/%Y %H:%M") %></dd>
     </dl>
 
-    <% if object.first_discount.present? %>
+    <% if object.first_plus_discount.present? %>
       <dl class="dl-horizontal">
           <dt>First discount</dt>
-          <dd><%= object.first_discount %>%</dd>
+          <dd><%= object.first_plus_discount %>%</dd>
       </dl>
 
-      <% if object.second_discount.present? %>
+      <% if object.second_plus_discount.present? %>
         <dl class="dl-horizontal">
             <dt>Second discount</dt>
-            <dd><%= object.second_discount %>%</dd>
+            <dd><%= object.second_plus_discount %>%</dd>
         </dl>
-      <% end %>    
+      <% end %>
+    <% elsif object.cash_discount.present? %>
       <dl class="dl-horizontal">
-            <dt>Margin</dt>
-            <dd><%= object.margin %>%</dd>
-        </dl>
-        <dl class="dl-horizontal">
-            <dt>Participation</dt>
-            <dd><%= object.participation %>%</dd>
-        </dl>
+          <dt>Discount amount</dt>
+          <dd><%= number_to_currency(object.cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>
     <% elsif object.special_price.present? %>
       <dl class="dl-horizontal">
           <dt>Special price</dt>
           <dd><%= number_to_currency(object.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
-      </dl>    
+      </dl>
+    <% elsif object.counter_event_type.eql?("Gift") %>
       <dl class="dl-horizontal">
-            <dt>Margin</dt>
-            <dd><%= object.margin %>%</dd>
-        </dl>
+          <dt>Min. purchase amount</dt>
+          <dd><%= number_to_currency(object.minimum_purchase_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>
+      <% if object.discount_amount.present? %>
         <dl class="dl-horizontal">
-            <dt>Participation</dt>
-            <dd><%= object.participation %>%</dd>
+            <dt>Discount amount</dt>
+            <dd><%= number_to_currency(object.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
         </dl>
+
+      <% end %>    
     <% end %>
+
+    <dl class="dl-horizontal">
+        <dt>Active</dt>
+        <dd><%= object.is_active.to_s %></dd>
+    </dl>
+
+    <% counter_event_warehouses = object.counter_event_warehouses.joins(:warehouse).includes(counter_event_products: [product: :brand]).select(:id, :code, :name, :select_different_products) %>
+    <% if counter_event_warehouses.length > 0 %>
+      <table class="table table-striped">
+          <thead>
+              <tr>
+                  <th>No.</th>
+                  <th>Warehouse</th>
+                  <% if object.counter_event_type.eql?("Gift") %>
+                    <th>Gift items</th>
+                  <% else %>
+                    <th>Product</th>
+                  <% end %>
+              </tr>
+          </thead>
+          <tbody>
+              <% counter_event_warehouses.each_with_index do |counter_event_warehouse, index| %>
+                <tr>
+                    <td style="vertical-align: middle"><%= index + 1 %></td>
+                    <td style="vertical-align: middle"><%= "#{counter_event_warehouse.code} - #{counter_event_warehouse.name}" %></td>
+                    <td>
+                        <% if counter_event_warehouse.select_different_products? %>
+                          <% counter_event_products = counter_event_warehouse.counter_event_products %>
+                          <% if counter_event_products.length > 0 %>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% counter_event_products.each_with_index do |counter_event_product, ep_index| %>
+                                      <tr>
+                                          <td><%= ep_index + 1 %></td>
+                                          <td><%= counter_event_product.product.code %></td>
+                                          <td><%= counter_event_product.product.brand.name %></td>
+                                      </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                          <% end %>
+                        <% else %>
+                          <% counter_event_general_products = object.counter_event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+                          <% if counter_event_general_products.length > 0 %>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% counter_event_general_products.each_with_index do |counter_event_general_product, egp_index| %>
+                                      <tr>
+                                          <td><%= egp_index + 1 %></td>
+                                          <td><%= counter_event_general_product.product_code %></td>
+                                          <td><%= counter_event_general_product.product_name %></td>
+                                      </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                          <% end %>
+                        <% end %>
+                    </td>
+                </tr>
+              <% end %>
+          </tbody>
+      </table>
+    <% end %>
+</td>
