@@ -1,0 +1,6 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label">Color</label>
+    <div class="col-sm-9">
+        <%= select_tag "replacement_product_color", options_from_collection_for_select(@replacement_product_colors, :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 100%"} %>
+      </div>
+  </div>

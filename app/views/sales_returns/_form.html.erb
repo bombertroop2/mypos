@@ -1,0 +1,136 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="receipt_number">Receipt number</label>
+            <div class="col-sm-10" style="margin-top: -14px">
+                <div class="form-inline">
+                    <input class="form-control upcase" type="text" name="receipt_number" id="receipt_number">
+                    <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_search_receipt">
+                        <span class="glyphicon glyphicon-search"></span> Search
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        <div class="form-group">
+            <!--<span class="col-sm-2"></span>
+            <div class="col-sm-10">-->
+            <div id="listing_sales_products_container">
+            </div>
+            <!--</div>-->
+
+        </div>
+        <hr style="display: block;margin-top: 0.5em;margin-bottom: 0.5em;margin-left: auto;margin-right: auto;border-style: inset;border-width: 1px">
+        <div id="detail_form_container">
+        </div>
+
+    </div>
+    <div id="replacement-product-form" class="form-horizontal replacement-product-forms" style="display: none;">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Barcode</label>
+            <div class="col-sm-9">
+                <div class="input-group">
+                    <input type="text" id="replacement_product_barcode" class="form-control replacement_product_barcode" style="width: 100%">
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-primary search-barcode-btn-replacement-product" style="margin-bottom: 0px !important" id="search-barcode-btn-replacement-product">
+                            <span class="glyphicon glyphicon-plus"></span> Add
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Product Code</label>
+            <div class="col-sm-9">
+                <input type="text" id="replacement_product_code" name="replacement_product_code" class="form-control upcase replacement_product_code" style="width: 100%">
+            </div>
+        </div>
+
+        <div id="replacement_product_color_field_container">
+
+        </div>
+
+        <div id="replacement_product_size_field_container">
+
+        </div>
+
+        <div class="form-group">
+            <div class="col-xs-5 col-xs-offset-3">
+                <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_replacement_product">
+                    <span class="glyphicon glyphicon-plus"></span> Add
+                </button>
+            </div>
+        </div>
+    </div>
+</td>
+
+
+<script>
+  $(function () {
+      $('#receipt_number').keypress(function (e) {
+          var key = e.which;
+          if (key == 13)  // the enter key code
+          {
+              $("#btn_search_receipt").click();
+              return false;
+          }
+      });
+      $('#receipt_number').on("input", function () {
+          $(this).val($(this).val().replace(/ /g, ""));
+      });
+      $("#btn_search_receipt").click(function () {
+          $.get("/sales_returns/search_receipt", {
+              receipt_number: $("#receipt_number").val()
+          });
+      });
+
+      $('#replacement_product_barcode').keypress(function (e) {
+          var key = e.which;
+          if (key == 13)  // the enter key code
+          {
+              $(this).blur();
+              $("#search-barcode-btn-replacement-product").click();
+              return false;
+          }
+      });
+
+      $("#search-barcode-btn-replacement-product").click(function () {
+          $.get("/sales_returns/get_replacement_product", {
+              barcode: $("#replacement_product_barcode").val().trim(),
+              sale_product_id: saleProductId,
+              receipt_number: receiptNumber
+          });
+
+      });
+
+      $("#replacement_product_code").keypress(function (e) {
+          var key = e.which;
+          if (key == 13)  // the enter key code
+          {
+              $(this).blur();
+              $.get("/sales_returns/get_replacement_product_colors", {
+                  replacement_product_code: $("#replacement_product_code").val().trim()
+              });
+              return false;
+          }
+      });
+
+      $('#modal_form_btn_add_replacement_product').click(function () {
+          if ($("#replacement_product_code").val().trim() == "" || $("#replacement_product_color").val().trim() == "" || $("#replacement_product_size").val().trim() == "")
+              bootbox.alert({message: "Please fill out the field above", size: "small"});
+          else
+              $.get("/sales_returns/get_replacement_product", {
+                  sale_product_id: saleProductId,
+                  receipt_number: receiptNumber,
+                  replacement_product_code: $("#replacement_product_code").val().trim(),
+                  replacement_product_color: $("#replacement_product_color").val().trim(),
+                  replacement_product_size: $("#replacement_product_size").val().trim()
+              });
+      });
+  });
+</script>

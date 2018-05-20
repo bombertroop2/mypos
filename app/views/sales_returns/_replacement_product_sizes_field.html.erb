@@ -1,0 +1,6 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label">Size</label>
+    <div class="col-sm-9">
+        <%= select_tag "replacement_product_size", options_from_collection_for_select(@replacement_product_sizes, :id, :size), {include_blank: true, class: "form-control", style: "width: 100%"} %>
+      </div>
+  </div>

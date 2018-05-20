@@ -1,0 +1,5 @@
+$("#receipt-container").html("<%= j(render(partial: "receipt")) %>");
+$("#receipt_doc").print();
+$("#receipt-container").html("");
+<%= smart_listing_item :sales_returns, :create, @sales_return, "sales_returns/sales_return" %>
+$("#returned-receipt-number-<%= @sales_return.id %>").html("<%= @returned_receipt_number %>");

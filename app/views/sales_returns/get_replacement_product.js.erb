@@ -1,0 +1,45 @@
+<% if @replacement_product.present? %>
+  if(bootboxDialogFormReplacementProduct != null)
+    bootboxDialogFormReplacementProduct.modal("hide");
+  salesReturnProductDataTables.row($("#sale_product_<%= params[:sale_product_id] %>")).remove().draw();
+  if($("#detail_form_container").html().trim() == ""){
+    <% session["sales_return"] ||= {} %>
+    <% session["sales_return"]["#{@replacement_product.id}"] ||= {} %>
+    <% if @store_event.present? %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"] ||= {} %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["id"] = @store_event.id %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["event_type"] = @store_event.event_type %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["first_plus_discount"] = @store_event.first_plus_discount %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["second_plus_discount"] = @store_event.second_plus_discount %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["cash_discount"] = @store_event.cash_discount %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["special_price"] = @store_event.special_price %>
+    <% end %>
+    <% session["sales_return"]["#{@replacement_product.id}"]["effective_price"] = @replacement_product.price %>
+    <% session["sales_return"]["#{@replacement_product.id}"]["stock_detail_id"] = @replacement_product.stock_detail_id %>
+    <% session["sales_return"]["#{@replacement_product.id}"]["price_list_id"] = @replacement_product.price_list_id %>
+    $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
+  }else{
+    if($("input:hidden[value='<%= @replacement_product.id %>']").length == 0){
+      <% session["sales_return"] ||= {} %>
+      <% session["sales_return"]["#{@replacement_product.id}"] ||= {} %>
+      <% if @store_event.present? %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"] ||= {} %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["id"] = @store_event.id %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["event_type"] = @store_event.event_type %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["first_plus_discount"] = @store_event.first_plus_discount %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["second_plus_discount"] = @store_event.second_plus_discount %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["cash_discount"] = @store_event.cash_discount %>
+        <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["special_price"] = @store_event.special_price %>
+      <% end %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["effective_price"] = @replacement_product.price %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["stock_detail_id"] = @replacement_product.stock_detail_id %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["price_list_id"] = @replacement_product.price_list_id %>
+    }
+    $("#listing-returned-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_returned_products")) %>");
+  }
+<% else %>
+  var box = bootbox.alert({message: "Product is not available",size: 'small'});
+  box.on("hidden.bs.modal", function () { 
+    $("#replacement_product_barcode").focus();
+  });
+<% end %>

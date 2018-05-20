@@ -1,0 +1,162 @@
+<% total = 0 %>
+<%= fields_for "sales_return[sales_return_products_attributes][#{@sales_return_product.sale_product_id}]", @sales_return_product do |sales_return_product_fields| %>  
+  <tr>
+      <td>
+          <%= sales_return_product_fields.hidden_field :sale_product_id %>
+          <strong>Returned Product</strong>
+      </td>
+      <td><%= @returned_product.barcode %></td>
+      <td><%= "#{@returned_product.product_code} - #{@returned_product.brand_name}" %></td>
+      <td><%= "#{@returned_product.color_code} - #{@returned_product.color_name}" %></td>
+      <td><%= @returned_product.product_size %></td>
+      <td style="text-align: right"><%= number_to_currency(@returned_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+      <td>
+          <%= "#{@returned_product.event_first_plus_discount}% + #{@returned_product.event_second_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.present? %>
+          <%= "#{@returned_product.event_first_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.blank? %>
+          <%= number_to_currency(@returned_product.event_cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @returned_product.event_cash_discount.present? %>
+          <%= "Special price: #{number_to_currency(@returned_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @returned_product.special_price.present? %>
+      </td>
+      <td style="text-align: right"><%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+  </tr>
+  <% total = @returned_product.total %>
+  <tr>
+      <td><strong>Replacement Product</strong></td>
+      <td><%= @replacement_product.barcode %></td>
+      <td><%= "#{@replacement_product.product_code} - #{@replacement_product.brand_name}" %></td>
+      <td><%= "#{@replacement_product.color_code} - #{@replacement_product.color_name}" %></td>
+      <td><%= @replacement_product.product_size %></td>
+      <td style="text-align: right">
+          <!-- apabila barang retur dan pengganti sama maka pakai harga barang retur -->
+          <% if @returned_product.barcode == @replacement_product.barcode %>
+            <%= number_to_currency(@returned_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+          <% else %>
+            <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+          <% end %>
+      </td>
+      <td>
+          <!-- apabila barang retur dan pengganti sama maka pakai event barang retur -->
+          <% if @returned_product.barcode == @replacement_product.barcode %>
+            <%= "#{@returned_product.event_first_plus_discount}% + #{@returned_product.event_second_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.present? %>
+            <%= "#{@returned_product.event_first_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.blank? %>
+            <%= number_to_currency(@returned_product.event_cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @returned_product.event_cash_discount.present? %>
+            <%= "Special price: #{number_to_currency(@returned_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @returned_product.special_price.present? %>
+          <% else %>
+            <% if @store_event.present? %>
+              <%= "#{@store_event.first_plus_discount}% + #{@store_event.second_plus_discount}%" if @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present? %>
+              <%= "#{@store_event.first_plus_discount}%" if @store_event.first_plus_discount.present? && @store_event.second_plus_discount.blank? %>
+              <%= number_to_currency(@store_event.cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @store_event.cash_discount.present? %>
+              <%= "Special price: #{number_to_currency(@store_event.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @store_event.special_price.present? %>
+            <% end %>
+          <% end %>
+      </td>
+      <td style="text-align: right">
+          <!-- apabila barang retur dan pengganti sama maka pakai subtotal barang retur -->
+          <% if @returned_product.barcode == @replacement_product.barcode %>
+            <%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+            <% total -= @returned_product.total %>
+          <% else %>
+            <!-- apabila barang retur dan pengganti berbeda dan keduanya tidak mengikuti event -->
+            <% if @returned_product.event_first_plus_discount.blank? && @returned_product.event_cash_discount.blank? && @returned_product.special_price.blank? && @store_event.blank? %>
+              <% if @returned_product.price == @replacement_product.price %>
+                <%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                <% total -= @returned_product.total %>
+              <% else %>
+                <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                <% total = @replacement_product.price - total %>
+              <% end %>
+              <!-- apabila barang retur dan pengganti berbeda dan barang retur mengikuti event -->
+            <% elsif (@returned_product.event_first_plus_discount.present? || @returned_product.event_cash_discount.present? || @returned_product.special_price.blank?) && @store_event.blank? %>
+              <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+              <% total = @replacement_product.price - total %>
+              <!-- apabila barang retur dan pengganti berbeda dan barang penggati mengikuti event -->
+            <% elsif @returned_product.event_first_plus_discount.blank? && @returned_product.event_cash_discount.blank? && @returned_product.special_price.blank? && @store_event.present? %>
+              <% subtotal = if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present?
+                first_discounted_subtotal = @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                first_discounted_subtotal - first_discounted_subtotal * @store_event.second_plus_discount / 100
+                elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present?
+                @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present?
+                @store_event.special_price
+                elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present?
+                @replacement_product.price - @store_event.cash_discount
+                end %>
+              <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+              <% total = subtotal - total %>
+              <!-- apabila barang retur dan pengganti berbeda dan keduanya mengikuti event -->
+            <% elsif (@returned_product.event_first_plus_discount.present? || @returned_product.event_cash_discount.present? || @returned_product.special_price.present?) && @store_event.present? %>
+              <% subtotal = if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present?
+                first_discounted_subtotal = @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                first_discounted_subtotal - first_discounted_subtotal * @store_event.second_plus_discount / 100
+                elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present?
+                @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present?
+                @store_event.special_price
+                elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present?
+                @replacement_product.price - @store_event.cash_discount
+                end %>
+              <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+              <% total = subtotal - total %>
+            <% end %>
+          <% end %>
+      </td>
+  </tr>
+  <tr>
+      <td colspan="8">
+          <div class="form-group<%= control_group_error(sales_return_product_fields.object, :reason) %>">
+              <div class="form-inline">
+                  <%= sales_return_product_fields.label :reason, class: "control-label" %>
+                    <%= sales_return_product_fields.select :reason, options_for_select(SalesReturnProduct::REASONS, sales_return_product_fields.object.reason), {include_blank: true}, {class: "form-control"} %>
+                  </div>
+                  <%= error_help_text(sales_return_product_fields.object, :reason) %>
+
+              </div>
+          </td>
+      </tr>
+    <% end %>
+
+    <%= fields_for "sales_return[sale_attributes][sale_products_attributes][#{DateTime.now.strftime("%Q")}]", @sale_product do |sale_product_fields| %>
+      <%= sale_product_fields.hidden_field :product_barcode_id %>
+      <%= sale_product_fields.hidden_field :event_id %>
+      <%= sale_product_fields.hidden_field :returned_product_id %>
+    <% end %>
+    <script>
+      $(function () {
+          var subtotal = parseFloat("<%= total %>");
+          var total = parseFloat($("#total-sales-return").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+          if (isNaN(total))
+              total = 0;
+          if (isNaN(subtotal))
+              subtotal = 0;
+          $("#total-sales-return").html(total + subtotal);
+          $("#total-sales-return").toCurrency({
+              precision: 2, // decimal precision
+              delimiter: ".", // thousands delimiter
+              separator: ",", // decimal separator
+              unit: "Rp", // unit
+              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+          });
+          $("#payment_form_total_sale").html($("#total-sales-return").html());
+          if ($("#sales_return_sale_attributes_cash").val().trim() != "") {
+              var cashValue = parseFloat($("#sales_return_sale_attributes_cash").val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+              if (isNaN(cashValue))
+                  cashValue = 0;
+
+              var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+              if (isNaN(saleTotal))
+                  saleTotal = 0;
+
+              var moneyChange = cashValue - saleTotal;
+              $("#payment_form_sale_change").html(moneyChange);
+              $("#payment_form_sale_change").toCurrency({
+                  precision: 2, // decimal precision
+                  delimiter: ".", // thousands delimiter
+                  separator: ",", // decimal separator
+                  unit: "Rp", // unit
+                  format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                  negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+              });
+          }
+          $("#sales_return_sales_return_products_attributes_<%= @sales_return_product.sale_product_id %>_reason").attr("data-placeholder", "Please select").chosen();
+      });
+    </script>

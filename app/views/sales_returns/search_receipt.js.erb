@@ -1,0 +1,30 @@
+<% if @sale_products.present? %>
+  <% if @sale_products.first.returned_sale_id.present? %>
+    var box = bootbox.alert({message: "Sorry, receipt <%= params[:receipt_number] %> is already returned",size: 'small'});
+    box.on("hidden.bs.modal", function () { 
+      $("#receipt_number").focus();
+    });
+  <% elsif @sale_products.first.gift_event_id.blank? %>
+    <% transaction_time = @sale_products.first.transaction_time.to_datetime.in_time_zone Time.zone.name %>
+    <% if (Time.current - transaction_time) / 1.hour >= 74 %>
+      var box = bootbox.alert({message: "Sorry, receipt <%= params[:receipt_number] %> has expired",size: 'small'});
+      box.on("hidden.bs.modal", function () { 
+        $("#receipt_number").focus();
+      });
+    <% else %>
+      <% session.delete("sales_return") %>
+      $("#listing_sales_products_container").html("<%= j(render(partial: "sale_products")) %>");
+      $("#detail_form_container").html("");
+    <% end %>
+  <% else %>
+    var box = bootbox.alert({message: "Sorry, receipt <%= params[:receipt_number] %> can't be returned because it has event(Gift)",size: 'small'});
+    box.on("hidden.bs.modal", function () { 
+      $("#receipt_number").focus();
+    });
+  <% end %>
+<% else %>
+  var box = bootbox.alert({message: "No receipts found",size: 'small'});
+  box.on("hidden.bs.modal", function () { 
+    $("#receipt_number").focus();
+  });
+<% end %>

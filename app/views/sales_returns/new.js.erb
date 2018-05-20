@@ -1,0 +1,4 @@
+// hapus replacement product form yang lama sebelum buat yang baru
+if($("#replacement-product-form").length > 0)
+  $("#replacement-product-form").remove();
+<%= smart_listing_item :sales_returns, :new, @sales_return, "sales_returns/form" %>

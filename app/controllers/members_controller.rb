@@ -38,6 +38,7 @@ class MembersController < ApplicationController
   # POST /members.json
   def create
     @member = Member.new(member_params)
+    recreate = false
     begin
       begin
         recreate = false

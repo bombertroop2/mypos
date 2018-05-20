@@ -1,0 +1,349 @@
+<%= form_for(@sales_return, remote: true) do |f| %>
+  <%= f.hidden_field :sale_id %>
+  <div class="form-group">
+      <%= f.label :attr_receipt_number, class: "col-sm-2 control-label", value: "Receipt number" %>
+        <div class="col-sm-10">
+            <%= f.text_field :attr_receipt_number, class: "form-control upcase", readonly: true %>
+          </div>
+
+      </div>
+      <table style="width: 100%" class="table" id="listing-returned-products-table">
+          <thead>
+              <tr>
+                  <th></th>
+                  <th style="text-align: center">Barcode</th>
+                  <th style="text-align: center">Product</th>
+                  <th style="text-align: center">Color</th>
+                  <th style="text-align: center">Size</th>
+                  <th style="text-align: center">Price</th>
+                  <th style="text-align: center">Event</th>
+                  <th style="text-align: center">Subtotal</th>
+              </tr>
+          </thead>
+          <tbody>
+              <% total = 0 %>
+              <%= f.fields_for :sales_return_products do |sales_return_product_fields| %>
+                <%= sales_return_product_fields.hidden_field :sale_product_id %>
+                <tr>
+                    <td><strong>Returned Product</strong></td>
+                    <td><%= @returned_product.barcode %></td>
+                    <td><%= "#{@returned_product.product_code} - #{@returned_product.brand_name}" %></td>
+                    <td><%= "#{@returned_product.color_code} - #{@returned_product.color_name}" %></td>
+                    <td><%= @returned_product.product_size %></td>
+                    <td style="text-align: right"><%= number_to_currency(@returned_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                    <td>
+                        <%= "#{@returned_product.event_first_plus_discount}% + #{@returned_product.event_second_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.present? %>
+                        <%= "#{@returned_product.event_first_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.blank? %>
+                        <%= number_to_currency(@returned_product.event_cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @returned_product.event_cash_discount.present? %>
+                        <%= "Special price: #{number_to_currency(@returned_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @returned_product.special_price.present? %>
+                    </td>
+                    <td style="text-align: right"><%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                </tr>
+                <% total = @returned_product.total %>
+                <tr>
+                    <td><strong>Replacement Product</strong></td>
+                    <td><%= @replacement_product.barcode %></td>
+                    <td><%= "#{@replacement_product.product_code} - #{@replacement_product.brand_name}" %></td>
+                    <td><%= "#{@replacement_product.color_code} - #{@replacement_product.color_name}" %></td>
+                    <td><%= @replacement_product.product_size %></td>
+                    <td style="text-align: right">
+                        <!-- apabila barang retur dan pengganti sama maka pakai harga barang retur -->
+                        <% if @returned_product.barcode == @replacement_product.barcode %>
+                          <%= number_to_currency(@returned_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                        <% else %>
+                          <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                        <% end %>
+                    </td>
+                    <td>
+                        <!-- apabila barang retur dan pengganti sama maka pakai event barang retur -->
+                        <% if @returned_product.barcode == @replacement_product.barcode %>
+                          <%= "#{@returned_product.event_first_plus_discount}% + #{@returned_product.event_second_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.present? %>
+                          <%= "#{@returned_product.event_first_plus_discount}%" if @returned_product.event_first_plus_discount.present? && @returned_product.event_second_plus_discount.blank? %>
+                          <%= number_to_currency(@returned_product.event_cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @returned_product.event_cash_discount.present? %>
+                          <%= "Special price: #{number_to_currency(@returned_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @returned_product.special_price.present? %>
+                        <% else %>
+                          <% if @store_event.present? %>
+                            <%= "#{@store_event.first_plus_discount}% + #{@store_event.second_plus_discount}%" if @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present? %>
+                            <%= "#{@store_event.first_plus_discount}%" if @store_event.first_plus_discount.present? && @store_event.second_plus_discount.blank? %>
+                            <%= number_to_currency(@store_event.cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @store_event.cash_discount.present? %>
+                            <%= "Special price: #{number_to_currency(@store_event.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @store_event.special_price.present? %>
+                          <% end %>
+                        <% end %>
+                    </td>
+                    <td style="text-align: right">
+                        <!-- apabila barang retur dan pengganti sama maka pakai subtotal barang retur -->
+                        <% if @returned_product.barcode == @replacement_product.barcode %>
+                          <%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                          <% total -= @returned_product.total %>
+                        <% else %>
+                          <!-- apabila barang retur dan pengganti berbeda dan keduanya tidak mengikuti event -->
+                          <% if @returned_product.event_first_plus_discount.blank? && @returned_product.event_cash_discount.blank? && @returned_product.special_price.blank? && @store_event.blank? %>
+                            <% if @returned_product.price == @replacement_product.price %>
+                              <%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                              <% total -= @returned_product.total %>
+                            <% else %>
+                              <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                              <% total = @replacement_product.price - total %>
+                            <% end %>
+                            <!-- apabila barang retur dan pengganti berbeda dan barang retur mengikuti event -->
+                          <% elsif (@returned_product.event_first_plus_discount.present? || @returned_product.event_cash_discount.present? || @returned_product.special_price.blank?) && @store_event.blank? %>
+                            <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                            <% total = @replacement_product.price - total %>
+                            <!-- apabila barang retur dan pengganti berbeda dan barang penggati mengikuti event -->
+                          <% elsif @returned_product.event_first_plus_discount.blank? && @returned_product.event_cash_discount.blank? && @returned_product.special_price.blank? && @store_event.present? %>
+                            <% subtotal = if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present?
+                              first_discounted_subtotal = @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                              first_discounted_subtotal - first_discounted_subtotal * @store_event.second_plus_discount / 100
+                              elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present?
+                              @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                              elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present?
+                              @store_event.special_price
+                              elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present?
+                              @replacement_product.price - @store_event.cash_discount
+                              end %>
+                            <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                            <% total = subtotal - total %>
+                            <!-- apabila barang retur dan pengganti berbeda dan keduanya mengikuti event -->
+                          <% elsif (@returned_product.event_first_plus_discount.present? || @returned_product.event_cash_discount.present? || @returned_product.special_price.present?) && @store_event.present? %>
+                            <% subtotal = if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present?
+                              first_discounted_subtotal = @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                              first_discounted_subtotal - first_discounted_subtotal * @store_event.second_plus_discount / 100
+                              elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present?
+                              @replacement_product.price - @replacement_product.price * @store_event.first_plus_discount / 100
+                              elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present?
+                              @store_event.special_price
+                              elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present?
+                              @replacement_product.price - @store_event.cash_discount
+                              end %>
+                            <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                            <% total = subtotal - total %>
+                          <% end %>
+                        <% end %>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="8">
+                        <div class="form-group<%= control_group_error(sales_return_product_fields.object, :reason) %>">
+                            <div class="form-inline">
+                                <%= sales_return_product_fields.label :reason, class: "control-label" %>
+                                  <%= sales_return_product_fields.select :reason, options_for_select(SalesReturnProduct::REASONS, sales_return_product_fields.object.reason), {include_blank: true}, {class: "form-control"} %>
+                                </div>
+                                <%= error_help_text(sales_return_product_fields.object, :reason) %>
+
+                            </div>
+                        </td>
+                    </tr>
+                  <% end %>
+              </tbody>
+              <tfoot>
+                  <tr>
+                      <th colspan="7" style="text-align:right">Total:</th>
+                      <th id="total-sales-return" style="text-align: right"><%= number_to_currency(total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></th>
+                  </tr>
+              </tfoot>
+          </table>
+          <%= f.fields_for :sale do |sale_fields| %>
+            <%= sale_fields.fields_for :sale_products do |sale_product_fields| %>
+              <%= sale_product_fields.hidden_field :product_barcode_id %>
+              <%= sale_product_fields.hidden_field :event_id %>
+              <%= sale_product_fields.hidden_field :returned_product_id %>
+            <% end %>
+            <div class="form-group<%= control_group_error(sale_fields.object, :payment_method) %>">
+                <%= sale_fields.label :payment_method, class: "control-label col-sm-2" %>
+                  <div class="col-sm-10">
+                      <%= sale_fields.select :payment_method, options_for_select(Sale::PAYMENT_METHODS, sale_fields.object.payment_method), {include_blank: true}, {class: "form-control"} %>
+                        <%= error_help_text(sale_fields.object, :payment_method) %>
+                    </div>
+                </div>
+                <% if action_name.eql?("create") && sale_fields.object.payment_method.eql?("Cash") %>
+                  <div class="form-group<%= control_group_error(sale_fields.object, :cash) %>" id="sale_cash_field_container">
+                      <%= sale_fields.label :cash, class: "control-label col-sm-2" %>
+                        <div class="col-sm-10">
+                            <%= sale_fields.text_field :cash, class: "form-control", "data-a-sep" => ".",
+                                "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align: right" %>
+                              <%= error_help_text(sale_fields.object, :cash) %>
+                          </div>
+                      </div>
+                    <% else %>
+                      <div class="form-group hidden<%= control_group_error(sale_fields.object, :cash) %>" id="sale_cash_field_container">
+                          <%= sale_fields.label :cash, class: "control-label col-sm-2" %>
+                            <div class="col-sm-10">
+                                <%= sale_fields.text_field :cash, class: "form-control", "data-a-sep" => ".",
+                                    "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align: right" %>
+                                  <%= error_help_text(sale_fields.object, :cash) %>
+                              </div>
+                          </div>
+                        <% end %>
+                        <div class="form-group">
+                            <%= f.label :total, class: "control-label col-sm-2", id: "sale_total_label" %>
+                              <div class="col-sm-10">
+                                  <span class="form-control" style="cursor: not-allowed;text-align: right" id="payment_form_total_sale"></span>
+                              </div>
+                          </div>
+                          <% if action_name.eql?("create") && sale_fields.object.payment_method.eql?("Card") %>
+                            <div id="sale_card_fields_container">
+                                <div class="form-group<%= control_group_error(sale_fields.object, :bank_id) %>">
+                                    <%= sale_fields.label :bank_id, class: "control-label col-sm-2" %>
+                                      <div class="col-sm-10">
+                                          <%= sale_fields.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', sale_fields.object.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                            <%= error_help_text(sale_fields.object, :bank_id) %>
+                                        </div>
+                                    </div>
+                                    <div class="form-group<%= control_group_error(sale_fields.object, :card_number) %>">
+                                        <%= sale_fields.label :card_number, class: "control-label col-sm-2" %>
+                                          <div class="col-sm-10">
+                                              <%= sale_fields.text_field :card_number, class: "form-control" %>
+                                                <%= error_help_text(sale_fields.object, :card_number) %>
+                                            </div>
+                                        </div>
+                                        <div class="form-group<%= control_group_error(sale_fields.object, :trace_number) %>">
+                                            <%= sale_fields.label :trace_number, class: "control-label col-sm-2" %>
+                                              <div class="col-sm-10">
+                                                  <%= sale_fields.text_field :trace_number, class: "form-control" %>
+                                                    <%= error_help_text(sale_fields.object, :trace_number) %>
+                                                </div>
+                                            </div>
+                                            <div class="hidden form-group<%= control_group_error(sale_fields.object, :pay) %>">
+                                                <%= sale_fields.label :pay, class: "control-label col-sm-2" %>
+                                                  <div class="col-sm-10">
+                                                      <%= sale_fields.text_field :pay, class: "form-control", "data-a-sep" => ".",
+                                                          "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align: right" %>
+                                                        <%= error_help_text(sale_fields.object, :pay) %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          <% else %>
+                                            <div id="sale_card_fields_container" class="hidden">
+                                                <div class="form-group<%= control_group_error(sale_fields.object, :bank_id) %>">
+                                                    <%= sale_fields.label :bank_id, class: "control-label col-sm-2" %>
+                                                      <div class="col-sm-10">
+                                                          <%= sale_fields.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', sale_fields.object.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                                            <%= error_help_text(sale_fields.object, :bank_id) %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group<%= control_group_error(sale_fields.object, :card_number) %>">
+                                                        <%= sale_fields.label :card_number, class: "control-label col-sm-2" %>
+                                                          <div class="col-sm-10">
+                                                              <%= sale_fields.text_field :card_number, class: "form-control" %>
+                                                                <%= error_help_text(sale_fields.object, :card_number) %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group<%= control_group_error(sale_fields.object, :trace_number) %>">
+                                                            <%= sale_fields.label :trace_number, class: "control-label col-sm-2" %>
+                                                              <div class="col-sm-10">
+                                                                  <%= sale_fields.text_field :trace_number, class: "form-control" %>
+                                                                    <%= error_help_text(sale_fields.object, :trace_number) %>
+                                                                </div>
+                                                            </div>
+                                                            <div class="hidden form-group<%= control_group_error(sale_fields.object, :pay) %>">
+                                                                <%= sale_fields.label :pay, class: "control-label col-sm-2" %>
+                                                                  <div class="col-sm-10">
+                                                                      <%= sale_fields.text_field :pay, class: "form-control", "data-a-sep" => ".",
+                                                                          "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align: right" %>
+                                                                        <%= error_help_text(sale_fields.object, :pay) %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                          <% end %>
+                                                          <% if action_name.eql?("create") && sale_fields.object.payment_method.eql?("Cash") %>
+                                                            <div class="form-group" id="sale_change_field_container">
+                                                                <%= f.label :change, class: "control-label col-sm-2" %>
+                                                                  <div class="col-sm-10">
+                                                                      <span class="form-control" style="cursor: not-allowed;text-align: right" id="payment_form_sale_change"></span>
+                                                                  </div>
+                                                              </div>                                          
+                                                            <% else %>
+                                                              <div class="form-group hidden" id="sale_change_field_container">
+                                                                  <%= f.label :change, class: "control-label col-sm-2" %>
+                                                                    <div class="col-sm-10">
+                                                                        <span class="form-control" style="cursor: not-allowed;text-align: right" id="payment_form_sale_change"></span>
+                                                                    </div>
+                                                                </div>
+                                                              <% end %>
+
+                                                            <% end %>
+                                                            <div class="form-group">
+                                                                <div class="col-sm-offset-2 col-sm-10">
+                                                                    <%= f.submit "Save", class: "btn btn-primary", id: "btn_save_sales_return" %>
+                                                                      <button class="btn btn-link cancel">Cancel</button>
+                                                                  </div>
+                                                              </div>
+                                                            <% end %>
+
+                                                            <script>
+                                                              $(function () {
+                                                                  $("#sales_return_sale_attributes_payment_method").attr("data-placeholder", "Please select").chosen();
+                                                                  $("#sales_return_sales_return_products_attributes_0_reason").attr("data-placeholder", "Please select").chosen();
+                                                                  $("#sales_return_sale_attributes_payment_method").change(function () {
+                                                                      if ($(this).val() == "Cash") {
+                                                                          $("#sale_card_fields_container").addClass("hidden");
+                                                                          $("#sale_cash_field_container").removeClass("hidden");
+                                                                          $("#sale_change_field_container").removeClass("hidden");
+                                                                          var processId = setInterval(function () {
+                                                                              if ($("#sale_cash").is(":focus")) {
+                                                                                  clearInterval(processId);
+                                                                              } else {
+                                                                                  $("#sale_cash").focus();
+                                                                              }
+                                                                          }, 0);
+                                                                      } else {
+                                                                          $("#sale_card_fields_container").removeClass("hidden");
+                                                                          $("#sales_return_sale_attributes_bank_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                                                                          $("#sale_cash_field_container").addClass("hidden");
+                                                                          $("#sale_change_field_container").addClass("hidden");
+                                                                      }
+                                                                  });
+                                                                  $("#payment_form_total_sale").html($("#total-sales-return").html());
+                                                                  $('#sales_return_sale_attributes_cash').autoNumeric('init');
+                                                                  $('#sales_return_sale_attributes_cash').keyup(function () {
+                                                                      var cashValue = parseFloat($(this).val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                      if (isNaN(cashValue))
+                                                                          cashValue = 0;
+
+                                                                      var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                                                                      if (isNaN(saleTotal))
+                                                                          saleTotal = 0;
+
+                                                                      var moneyChange = cashValue - saleTotal;
+                                                                      $("#payment_form_sale_change").html(moneyChange);
+                                                                      $("#payment_form_sale_change").toCurrency({
+                                                                          precision: 2, // decimal precision
+                                                                          delimiter: ".", // thousands delimiter
+                                                                          separator: ",", // decimal separator
+                                                                          unit: "Rp", // unit
+                                                                          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                                                                          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                                                                      });
+                                                                  });
+                                                                  $('#sales_return_sale_attributes_cash').keypress(function (e) {
+                                                                      var key = e.which;
+                                                                      if (key == 13)  // the enter key code
+                                                                      {
+                                                                          $(this).blur();
+                                                                          $("#btn_save_sales_return").click();
+                                                                          return false;
+                                                                      }
+                                                                  });
+                                                                  $("#btn_save_sales_return").click(function () {
+                                                                      bootbox.confirm({
+                                                                          message: "Once you create transaction, you'll not be able to change or delete it</br>Are you sure?",
+                                                                          buttons: {
+                                                                              confirm: {
+                                                                                  label: '<i class="fa fa-check"></i> Confirm'
+                                                                              },
+                                                                              cancel: {
+                                                                                  label: '<i class="fa fa-times"></i> Cancel'
+                                                                              }
+                                                                          },
+                                                                          callback: function (result) {
+                                                                              if (result) {
+                                                                                  $("body").css('padding-right', '0px');
+                                                                                  $("#new_sales_return").submit();
+                                                                              }
+                                                                          },
+                                                                          size: "small"
+                                                                      });
+                                                                      return false;
+                                                                  });
+                                                              });
+                                                            </script>

@@ -1,7 +1,8 @@
-<td><%= object.code %></td>
-<td><%= object.name %></td>
-<td><%= object.description %></td>
+<td><%= object.document_number %></td>
+<td id="returned-receipt-number-<%= object.id %>"><%= object.transaction_number rescue nil %></td>
+<td><%= object.created_at.strftime("%d/%m/%Y") %></td>
+<td><%= object.total_return_quantity %></td>
+<td><%= number_to_currency(object.total_return, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
 <td class="actions" style="text-align: right">
-    <%= link_to_if(can?(:manage, Brand), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_brand_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, Brand) && !object.product_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
-  </td>
+    <%= link_to_if(can?(:read, SalesReturn), content_tag(:i, "", :class => "glyphicon glyphicon-share-alt"), sales_return_path(object), :remote => true, :method => :get, title: "Show" ) %>
+</td>

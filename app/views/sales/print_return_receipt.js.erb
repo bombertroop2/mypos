@@ -1,0 +1,6 @@
+$("#receipt-container").html("<%= j(render(partial: "receipt_return")) %>");
+$("#receipt_doc").removeClass("hidden");
+$("#receipt_doc").print();
+$("#receipt_doc").addClass("hidden");
+<% @sale.attr_print_receipt = true %>
+<%= smart_listing_item :sales, :update, @sale, "sales/sale" %>

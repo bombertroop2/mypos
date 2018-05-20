@@ -1,28 +1,30 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
-    <thead id="listing-brand-thead">
+    <thead id="listing-sales-return-thead">
         <tr>
-            <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
-            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
-            <th class="col-md-5"><%= smart_listing.sortable "Description", "description" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Number", "document_number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Receipt Number", "sales.transaction_number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Date", "sales_returns.created_at" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Quantity", "total_return_quantity" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Total", "total_return" %></th>
             <th class="col-md-1"></th>
         </tr>
     </thead>
     <tbody>
-        <% smart_listing.collection.each do |brand| %>
-          <tr class="editable" data-id="<%= brand.id %>">
-              <%= smart_listing.render object: brand, partial: "brands/brand", locals: {object: brand} %>
+        <% smart_listing.collection.each do |sales_return| %>
+          <tr class="editable" data-id="<%= sales_return.id %>">
+              <%= smart_listing.render object: sales_return, partial: "sales_returns/sales_return", locals: {object: sales_return} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 4, link: new_brand_path %>
+        <%= smart_listing.item_new colspan: 6, link: new_sales_return_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>
 <script>
   var processId = setInterval(function () {
-      if ($("#listing-brand-thead").is(":visible")) {
+      if ($("#listing-sales-return-thead").is(":visible")) {
           clearInterval(processId);
       } else {
-          $("#listing-brand-thead").show();
+          $("#listing-sales-return-thead").show();
       }
   }, 0);
 </script>

@@ -1,12 +1,13 @@
 class SaleProduct < ApplicationRecord
   attr_accessor :sales_promotion_girl_id, :event_type, :effective_price,
-    :first_plus_discount, :second_plus_discount, :cash_discount
+    :first_plus_discount, :second_plus_discount, :cash_discount, :attr_returned_sale_id
   
   belongs_to :sale
   belongs_to :product_barcode
   belongs_to :free_product, class_name: "StockDetail", foreign_key: :free_product_id
   belongs_to :price_list
   belongs_to :event
+  belongs_to :returned_product, class_name: "SaleProduct", foreign_key: :returned_product_id
 
   # hapus event_id apabila event gift, cukup di parent Sale
   before_validation :add_quantity, :update_total
@@ -18,10 +19,20 @@ class SaleProduct < ApplicationRecord
         validates :free_product_id, presence: true, if: proc{|sp| sp.event_id.present? && sp.event_type.eql?("Buy 1 Get 1 Free")}
           validates :price_list_id, presence: true#, unless: proc{|sp| sp.event_type.eql?("Special Price")}
           validates :total, numericality: {greater_than: 0}
+          validate :returned_product_exist
 
           after_create :update_stock
         
           private
+          
+          def returned_product_exist
+            returned_product = SaleProduct.
+              joins(:sale).
+              where(id: returned_product_id, :"sales.id" => attr_returned_sale_id).
+              select("1 AS one").
+              first
+            errors.add(:returned_product_id, "doesn't exist") if returned_product.blank?
+          end
           
           def add_quantity
             self.quantity = 1

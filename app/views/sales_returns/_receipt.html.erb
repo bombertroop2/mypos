@@ -1,0 +1,186 @@
+<table width="100%" id="receipt_doc">
+    <tr>
+        <td colspan="4" style="text-align: center"><%= @sale.warehouse_name %></td>
+    </tr>
+    <tr>
+        <td colspan="4" style="text-align: center"><%= @sale.warehouse_address %></td>
+    </tr>
+    <tr>
+        <td colspan="4" style="text-align: center"><%= @sale.transaction_number %></td>
+    </tr>
+    <tr>
+        <td colspan="4" style="border: none;border-top: 1px;border-top-style: dashed"></td>
+    </tr>
+    <tr style="white-space: nowrap">
+        <td colspan="2"><%= @sale.transaction_time.strftime("%d/%m/%Y") %><br><%= @sale.transaction_time.strftime("%H:%M:%S") %></td>
+        <td colspan="2" style="text-align: right"><%= @sale.cashier_identifier %><br><%= @sale.cashier_name %></td>
+    </tr>
+    <tr>
+        <td colspan="4" style="border: none;border-top: 1px;border-top-style: dashed"></td>
+    </tr>
+    <% sale_products = @sale.sale_products.            
+      joins(:price_list, product_barcode: [:size, product_color: [:color, :product]], returned_product: [:price_list, product_barcode: [:size, product_color: [:color, :product]]]).
+      joins("LEFT JOIN events ON events.id = sale_products.event_id").
+      joins("LEFT JOIN events returned_products_events ON returned_products_events.id = returned_products_sale_products.event_id").
+      select("products_product_colors.code AS returned_product_code", "colors_product_colors.name AS returned_product_color_name", "sizes_product_barcodes.size AS returned_product_size", "price_lists_sale_products.price AS returned_product_price", "returned_products_events.first_plus_discount AS returned_product_first_plus_discount", "returned_products_events.second_plus_discount AS returned_product_second_plus_discount", "returned_products_events.cash_discount AS returned_product_cash_discount", "returned_products_events.special_price AS returned_product_special_price", "returned_products_events.event_type AS returned_product_event_type", "SUM(returned_products_sale_products.total) AS returned_product_subtotal", "SUM(returned_products_sale_products.quantity) AS returned_product_quantity").
+      select("products.code AS product_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "events.event_type AS sale_event_type", "SUM(sale_products.total) AS subtotal", "SUM(sale_products.quantity) AS product_quantity").
+      group(:product_barcode_id, "returned_products_sale_products.product_barcode_id", "returned_product_code", "returned_product_color_name", "returned_product_size", "returned_product_price", "returned_product_first_plus_discount", "returned_product_second_plus_discount", "returned_product_cash_discount", "returned_product_special_price", "returned_product_event_type", "product_code", "color_name", "product_size", "price_lists.price", "sale_first_plus_discount", "sale_second_plus_discount", "sale_cash_discount", "events.special_price", "sale_event_type") %>
+    <% total_quantity = 0 %>
+    <% sale_products.each do |sale_product| %>
+      <% if sale_product.sale_event_type.eql?("Special Price") && sale_product.special_price.present? %>
+        <% price = sale_product.special_price %>
+      <% else %>
+        <% price = sale_product.price %>
+      <% end %>
+
+      <% if (sale_product.sale_event_type.eql?("Discount(Rp)") && sale_product.sale_cash_discount.present?) || (sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present? && sale_product.sale_second_plus_discount.present?) || (sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present?) %>
+        <% subtotal = sale_product.product_quantity * price %>
+      <% else %>
+        <% subtotal = sale_product.subtotal %>
+      <% end %>
+      <tr>
+          <td><%= "#{sale_product.product_code}/#{sale_product.color_name}/#{sale_product.product_size}" %>&nbsp;</td>
+          <td style="text-align: right"><%= sale_product.product_quantity %>&nbsp;</td>
+          <td style="text-align: right"><%= number_to_currency(price, :delimiter => ".", :unit => "", :precision => 0) %>&nbsp;</td>
+          <td style="text-align: right"><%= number_to_currency(subtotal, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+      <% if sale_product.sale_event_type.eql?("Discount(Rp)") && sale_product.sale_cash_discount.present? %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(sale_product.sale_cash_discount * sale_product.product_quantity, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% elsif sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present? && sale_product.sale_second_plus_discount.present? %>
+        <% first_disc_in_money = subtotal * sale_product.sale_first_plus_discount / 100 %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount(<%= "#{sale_product.sale_first_plus_discount}%" %>)&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(first_disc_in_money, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+        <% second_disc_in_money = (subtotal - first_disc_in_money) * sale_product.sale_second_plus_discount / 100 %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount(<%= "#{sale_product.sale_second_plus_discount}%" %>)&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(second_disc_in_money, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% elsif sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present? %>
+        <% first_disc_in_money = subtotal * sale_product.sale_first_plus_discount / 100 %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount(<%= "#{sale_product.sale_first_plus_discount}%" %>)&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(first_disc_in_money, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% end %>
+      <% total_quantity += sale_product.product_quantity %>
+
+      <% if sale_product.returned_product_event_type.eql?("Special Price") && sale_product.returned_product_special_price.present? %>
+        <% returned_product_price = sale_product.returned_product_special_price %>
+      <% else %>
+        <% returned_product_price = sale_product.returned_product_price %>
+      <% end %>
+
+      <% if (sale_product.returned_product_event_type.eql?("Discount(Rp)") && sale_product.returned_product_cash_discount.present?) || (sale_product.returned_product_event_type.eql?("Discount(%)") && sale_product.returned_product_first_plus_discount.present? && sale_product.returned_product_second_plus_discount.present?) || (sale_product.returned_product_event_type.eql?("Discount(%)") && sale_product.returned_product_first_plus_discount.present?) %>
+        <% returned_product_subtotal = sale_product.returned_product_quantity * returned_product_price %>
+      <% else %>
+        <% returned_product_subtotal = sale_product.returned_product_subtotal %>
+      <% end %>
+
+      <tr>
+          <td><%= "#{sale_product.returned_product_code}/#{sale_product.returned_product_color_name}/#{sale_product.returned_product_size}" %> (return)&nbsp;</td>
+          <td style="text-align: right"><%= sale_product.returned_product_quantity %>&nbsp;</td>
+          <td style="text-align: right"><%= number_to_currency(returned_product_price, :delimiter => ".", :unit => "", :precision => 0) %>&nbsp;</td>
+          <td style="text-align: right"><%= number_to_currency(returned_product_subtotal, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+      <% if sale_product.returned_product_event_type.eql?("Discount(Rp)") && sale_product.returned_product_cash_discount.present? %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(sale_product.returned_product_cash_discount * sale_product.returned_product_quantity, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% elsif sale_product.returned_product_event_type.eql?("Discount(%)") && sale_product.returned_product_first_plus_discount.present? && sale_product.returned_product_second_plus_discount.present? %>
+        <% first_disc_in_money = returned_product_subtotal * sale_product.returned_product_first_plus_discount / 100 %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount(<%= "#{sale_product.returned_product_first_plus_discount}%" %>)&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(first_disc_in_money, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+        <% second_disc_in_money = (returned_product_subtotal - first_disc_in_money) * sale_product.returned_product_second_plus_discount / 100 %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount(<%= "#{sale_product.returned_product_second_plus_discount}%" %>)&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(second_disc_in_money, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% elsif sale_product.returned_product_event_type.eql?("Discount(%)") && sale_product.returned_product_first_plus_discount.present? %>
+        <% first_disc_in_money = returned_product_subtotal * sale_product.returned_product_first_plus_discount / 100 %>
+        <tr>
+            <td colspan="3" style="text-align: right">Discount(<%= "#{sale_product.returned_product_first_plus_discount}%" %>)&nbsp;</td>
+            <td style="text-align: right"><%= number_to_currency(first_disc_in_money, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% end %>
+    <% end %>
+    <tr>
+        <td colspan="4" style="border: none;border-top: 1px;border-top-style: dashed"></td>
+    </tr>
+    <% total_label = "Total" %>
+    <% total_value = @sale.total - @sale.total_return %>
+    <tr style="white-space: nowrap">
+        <td>Item Count</td>
+        <td style="text-align: right"><%= total_quantity %>&nbsp;</td>
+        <td style="text-align: right"><%= total_label %>&nbsp;</td>
+        <td style="text-align: right"><%= number_to_currency(total_value, :delimiter => ".", :unit => "", :precision => 0) %></td>
+    </tr>
+    <% if @sale.payment_method.eql?("Card") %>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Cashless&nbsp;</td>
+          <td style="text-align: right;"><%= number_to_currency(total_value, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Change&nbsp;</td>
+          <td style="text-align: right">0</td>
+      </tr>
+    <% else %>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Cash&nbsp;</td>
+          <td style="text-align: right"><%= number_to_currency(@sale.cash, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Change&nbsp;</td>
+          <td style="text-align: right"><%= number_to_currency(@sale.change, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+    <% end %>
+    <% if @sale.payment_method.eql?("Card") %>
+      <tr style="white-space: nowrap">
+          <td>Bank&nbsp;</td>
+          <td colspan="3"><%= "#{@sale.bank_code} - #{@sale.bank_name}" %></td>
+      </tr>
+      <tr style="white-space: nowrap">
+          <td>Card Type&nbsp;</td>
+          <td colspan="3"><%= @sale.card_type %></td>
+      </tr>
+      <tr style="white-space: nowrap">
+          <td>Trace Number&nbsp;</td>
+          <td colspan="3"><%= @sale.trace_number %></td>
+      </tr>
+    <% end %>
+    <tr>
+        <td colspan="4" style="border: none;border-top: 1px;border-top-style: dashed"></td>
+    </tr>
+    <% if @sale.first_message.present? %>
+      <tr>
+          <td colspan="4" style="text-align: center"><%= @sale.first_message %></td>
+      </tr>
+    <% end %>
+    <% if @sale.second_message.present? %>
+      <tr>
+          <td colspan="4" style="text-align: center"><%= @sale.second_message %></td>
+      </tr>
+    <% end %>
+    <% if @sale.third_message.present? %>
+      <tr>
+          <td colspan="4" style="text-align: center"><%= @sale.third_message %></td>
+      </tr>
+    <% end %>
+    <% if @sale.fourth_message.present? %>
+      <tr>
+          <td colspan="4" style="text-align: center"><%= @sale.fourth_message %></td>
+      </tr>
+    <% end %>
+    <% if @sale.fifth_message.present? %>
+      <tr>
+          <td colspan="4" style="text-align: center"><%= @sale.fifth_message %></td>
+      </tr>
+    <% end %>
+</table>

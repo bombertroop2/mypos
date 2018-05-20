@@ -11,7 +11,7 @@ class Ability
       cannot :manage, CashierOpening
       cannot :manage, CashDisbursement
       cannot :manage, Sale
-      #      cannot :manage, SalesReturn
+      cannot :manage, SalesReturn
     elsif user.has_role? :administrator
       (User::MENUS.clone << "User").each do |user_menu|
         if user_menu.eql?("User") || AvailableMenu.select("1 AS one").where(active: true, name: user_menu).present?
@@ -93,7 +93,7 @@ class Ability
               can ability, CashierOpening
               can ability, CashDisbursement
               can ability, Sale
-              #              can ability, SalesReturn
+              can ability, SalesReturn
             end
           elsif class_name.eql?("Member")
             can ability, Member

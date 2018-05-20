@@ -1,0 +1,2 @@
+module SalesReturnsHelper
+end

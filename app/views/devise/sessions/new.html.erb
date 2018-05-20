@@ -29,7 +29,7 @@
                             </form>-->
 
 
-<%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: {style: "display: none"}) do |f| %>
   <h1>Login Form</h1>
   <%= f.label :login, class: "sr-only" %>
     <%= f.text_field :login, autofocus: true, class: "form-control", placeholder: "Email or Username" %>
@@ -39,11 +39,11 @@
 
           <!--
           <% if devise_mapping.rememberable? -%>
-                            <div class="checkbox">
-                                <label
+                              <div class="checkbox">
+                                  <label
             <%= f.check_box :remember_me %> Remember me
-                            </label>
-                            </div>
+                              </label>
+                              </div>
           <% end -%>-->
 
           <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
@@ -60,3 +60,4 @@
         <% end %>
 
         <%= render "devise/shared/links" %>
+

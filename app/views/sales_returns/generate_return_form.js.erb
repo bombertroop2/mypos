@@ -1,0 +1,8 @@
+<% if @sales_return.present? %>
+  $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>")
+<% else %>
+  var box = bootbox.alert({message: "No receipts found",size: 'small'});
+  box.on("hidden.bs.modal", function () { 
+    $("#receipt_number").focus();
+  });
+<% end %>

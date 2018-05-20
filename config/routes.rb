@@ -41,6 +41,7 @@ Rails.application.routes.draw do
     end
     member do
       get "print"
+      get "print_return_receipt"
     end
   end
   resources :members

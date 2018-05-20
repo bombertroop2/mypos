@@ -1,0 +1,69 @@
+<table width="100%" id="listing_sale_products" class="display">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Net Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th colspan="3"></th>
+        </tr>
+    </tfoot>
+
+    <tbody>
+        <% @sale_products.each do |sale_product| %>
+          <tr id="sale_product_<%= sale_product.id %>">
+              <td><%= "#{sale_product.product_code}/#{sale_product.product_color}/#{sale_product.product_size}" %></td>
+              <td><%= number_to_currency(sale_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+              <td style="text-align: right">          
+                  <button type="button" class="btn btn-danger" id="btn-return-sale-product-<%= sale_product.id %>" style="margin-bottom: 2px !important">Return</button>
+              </td>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+
+<script>
+  $(function () {
+      salesReturnProductDataTables = $('#listing_sale_products').DataTable({
+          ordering: false,
+          dom: 'T<"clear">lrtip',
+          columns: [
+              {data: 'product detail'},
+              {data: 'price'},
+              {data: 'return_button'}
+          ],
+          tableTools: {
+              aButtons: []
+          },
+          paging: false,
+          info: false
+      });
+<% @sale_products.each do |sale_product| %>
+        $("#btn-return-sale-product-<%= sale_product.id %>").click(function () {
+            saleProductId = "<%= sale_product.id %>";
+            receiptNumber = "<%= params[:receipt_number].upcase %>";
+            bootboxDialogFormReplacementProduct = bootbox
+                    .dialog({
+                        title: 'Add Replacement Product for ' + $("#sale_product_" + saleProductId).children("td").eq(0).html(),
+                        message: $('#replacement-product-form'),
+                        show: false, // We will show it manually later 
+                        onEscape: true
+                    }).on('shown.bs.modal', function () {
+                $('#replacement-product-form')
+                        .show();
+                $("#replacement_product_barcode").focus();
+                $("#replacement_product_barcode").val("");
+                $("#replacement_product_code").val("");
+                $("#replacement_product_color_field_container").html("");
+                $("#replacement_product_size_field_container").html("");
+                $("#modal_form_btn_add_replacement_product").addClass("hidden");
+            }).on('hide.bs.modal', function (e) {
+                $('#replacement-product-form').hide().appendTo('body');
+            }).modal('show');
+        });
+<% end %>
+  });
+</script>

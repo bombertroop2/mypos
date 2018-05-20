@@ -23,7 +23,7 @@ class SalesController < ApplicationController
     end
 
     warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+    sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
     sales_scope = sales_scope.where(["DATE(transaction_time) BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date].present?
     sales_scope = sales_scope.where(["transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     sales_scope = sales_scope.where(["payment_method = ?", params[:filter_payment_method]]) if params[:filter_payment_method].present?
@@ -45,8 +45,20 @@ class SalesController < ApplicationController
       joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
       joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
       joins("LEFT JOIN events ON events.id = sales.gift_event_id").
-      select(:id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
-      where(id: params[:id]).where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
+      select(:id, :sales_return_id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+      where(sales_return_id: nil).
+      where(id: params[:id]).
+      where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
+  end
+  
+  def print_return_receipt
+    @sale = Sale.joins(:returned_document, cashier_opening: [warehouse: :sales_promotion_girls]).
+      joins("LEFT JOIN members on members.id = sales.member_id").
+      joins("LEFT JOIN banks on banks.id = sales.bank_id").
+      select(:id, :gift_event_id, :sales_return_id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message, sales_returns.total_return").
+      where("sales_return_id IS NOT NULL").
+      where(id: params[:id]).
+      where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
   end
 
   # GET /sales/new
@@ -80,6 +92,8 @@ class SalesController < ApplicationController
       params[:sale].merge! total: @total
       @sale = Sale.new(sale_params)
 
+      recreate = false
+      recreate_counter = 1
       begin
         begin
           recreate = false
@@ -93,8 +107,15 @@ class SalesController < ApplicationController
             end
           end
         rescue ActiveRecord::RecordNotUnique => e
-          recreate = true
+          if recreate_counter < 3
+            recreate = true
+            recreate_counter += 1
+          else
+            recreate = false
+            render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+          end
         rescue Exception => e
+          recreate = false
           render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
         end
       end while recreate

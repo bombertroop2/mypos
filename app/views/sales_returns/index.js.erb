@@ -1,6 +1,6 @@
-<%= smart_listing_update(:brands) %>
+<%= smart_listing_update(:sales_returns) %>
 
-<% if cannot?(:manage, Brand) %>
+<% if cannot?(:manage, SalesReturn) %>
   $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
   $('#new-item-btn').unbind("click");
   $('#new-item-btn').click(function (e) {
