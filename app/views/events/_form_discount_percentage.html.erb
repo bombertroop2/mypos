@@ -296,6 +296,17 @@
                                               return false;
                                           });
 
+                                          $('#code_general_products_percentage_discount').keypress(function (e) {
+                                              var key = e.which;
+                                              if (key == 13)  // the enter key code
+                                              {
+                                                  if ($("#code_general_products_percentage_discount").val().trim() != "") {
+                                                      $("#add-btn-by-code-percentage-discount").click();
+                                                  }
+                                                  return false;
+                                              }
+                                          });
+
                                           $("#add-btn-by-code-percentage-discount").click(function () {
                                               if ($("#code_general_products_percentage_discount").val().trim() == "")
                                                   bootbox.alert({message: "Please fill out the field above", size: "small"});

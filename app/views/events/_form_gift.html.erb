@@ -298,6 +298,17 @@
                                               return false;
                                           });
 
+                                          $('#code_general_products_gift').keypress(function (e) {
+                                              var key = e.which;
+                                              if (key == 13)  // the enter key code
+                                              {
+                                                  if ($("#code_general_products_gift").val().trim() != "") {
+                                                      $("#add-btn-by-code-general-products-gift").click();
+                                                  }
+                                                  return false;
+                                              }
+                                          });
+
                                           $("#add-btn-by-code-general-products-gift").click(function () {
                                               if ($("#code_general_products_gift").val().trim() == "")
                                                   bootbox.alert({message: "Please fill out the field above", size: "small"});

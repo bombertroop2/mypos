@@ -289,6 +289,17 @@
                                           return false;
                                       });
 
+                                      $('#code_general_products_special_price').keypress(function (e) {
+                                          var key = e.which;
+                                          if (key == 13)  // the enter key code
+                                          {
+                                              if ($("#code_general_products_special_price").val().trim() != "") {
+                                                  $("#add-btn-by-code-general-products-special-price").click();
+                                              }
+                                              return false;
+                                          }
+                                      });
+
                                       $("#add-btn-by-code-general-products-special-price").click(function () {
                                           if ($("#code_general_products_special_price").val().trim() == "")
                                               bootbox.alert({message: "Please fill out the field above", size: "small"});
