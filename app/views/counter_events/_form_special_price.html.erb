@@ -1,325 +1,167 @@
 <%= form_for(@counter_event, remote: true, html: {class: "form-horizontal"}) do |f| %>
-    <%= hidden_field_tag "counter_event_type", "special price" %>
-    <%= f.hidden_field :counter_event_type, value: "Special Price" %>
-    <div class="form-group<%= control_group_error(@counter_event, :code) %>">
-        <%= f.label :code, class: "col-sm-2 control-label" %>
-          <div class="col-sm-10">
-              <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_special_price" %>
-                <%= error_help_text(@counter_event, :code) %>
-            </div>
 
-        </div>
-        <div class="form-group<%= control_group_error(@counter_event, :name) %>">
-            <%= f.label :name, class: "col-sm-2 control-label" %>
-              <div class="col-sm-10">
-                  <%= f.text_field :name, class: "form-control inputs" %>
-                    <%= error_help_text(@counter_event, :name) %>
-                </div>
-            </div>
+<div class="form-group<%= control_group_error(@counter_event, :code) %>">
 
-            <div class="form-group<%= control_group_error(@counter_event, :start_date_time) %>">
-                <%= f.label :start_date_time, "Start time", class: "col-sm-2 control-label" %>
-                  <div class="col-sm-10">
-                      <%= f.text_field :start_date_time, size: 10, readonly: true, class: "form-control", id: "counter_event_start_date_time_special_price" %>
-                        <%= error_help_text(@counter_event, :start_date_time) %>
-                    </div>
-                </div>
+  <%= f.label :code, class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_special_price" %>
+    <%= error_help_text(@counter_event, :code) %>
+  </div>
 
-                <div class="form-group<%= control_group_error(@counter_event, :end_date_time) %>">
-                    <%= f.label :end_date_time, "End time", class: "col-sm-2 control-label" %>
-                      <div class="col-sm-10">
-                          <%= f.text_field :end_date_time, size: 10, readonly: true, class: "form-control", id: "counter_event_end_date_time_special_price" %>
-                            <%= error_help_text(@counter_event, :end_date_time) %>
-                        </div>
-                    </div>
+</div>
+<div class="form-group<%= control_group_error(@counter_event, :name) %>">
+  <%= f.label :name, class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :name, class: "form-control inputs" %>
+    <%= error_help_text(@counter_event, :name) %>
+  </div>
+</div>
 
-                    <div class="form-group<%= control_group_error(@counter_event, :special_price) %>">
-                        <%= f.label :special_price, "Price", class: "col-sm-2 control-label" %>
-                          <div class="col-sm-10">
-                              <%= f.text_field :special_price, "data-a-sep" => ".",
-                                "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
-                                <%= error_help_text(@counter_event, :special_price) %>
-                            </div>
-                        </div>
+<div class="form-group<%= control_group_error(@counter_event, :start_time) %>">
+  <%= f.label :start_time, "Start time", class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :start_time, size: 10, readonly: true, class: "form-control", id: "counter_event_start_time_special_price" %>
+    <%= error_help_text(@counter_event, :start_time) %>
+  </div>
+</div>
 
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Product</label>
-                            <div class="col-sm-10">
-                                <div class="x_panel">
-                                    <div class="x_content">                        
+<div class="form-group<%= control_group_error(@counter_event, :end_time) %>">
+  <%= f.label :end_time, "End time", class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :end_time, size: 10, readonly: true, class: "form-control", id: "counter_event_end_time_special_price" %>
+    <%= error_help_text(@counter_event, :end_time) %>
+  </div>
+</div>
 
-                                        <div>
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist">
-                                                <li role="presentation" class="active"><a href="#add_general_products_by_bgm_special_price" aria-controls="add_general_products_by_bgm_special_price" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
-                                                <li role="presentation"><a href="#add_general_products_by_code_special_price" aria-controls="add_general_products_by_code_special_price" role="tab" data-toggle="tab">Add products by code</a></li>
-                                            </ul>
+<div class="form-group<%= control_group_error(@counter_event, :special_price) %>">
+  <%= f.label :special_price, "Price", class: "col-sm-2 control-label" %>
+  <div class="col-sm-10">
+    <%= f.text_field :special_price, "data-a-sep" => ".",
+    "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control" %>
+    <%= error_help_text(@counter_event, :special_price) %>
+  </div>
+</div>
+<div class="form-group<%= control_group_error(@counter_event, :margin) %>">
+    <%= f.label :margin, "Margin", class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.text_field :margin, size: 10, class: "form-control quantity-fields discount-fields" %>
+      <%= error_help_text(@counter_event, :margin) %>
+    </div>
+  </div>
 
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_special_price" style="padding-top: 20px">
-                                                    <div class="form-group">
-                                                        <label class="control-label col-sm-3" for="brand">Brand</label>
-                                                        <div class="col-sm-9">
-                                                            <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_special_price"} %>
-                                                          </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                          <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
-                                                          <div class="col-sm-9">
-                                                              <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_special_price"} %>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label class="control-label col-sm-3" for="model">Model</label>
-                                                            <div class="col-sm-9">
-                                                                <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_special_price"} %>
-                                                              </div>
-                                                          </div>
-                                                          <div class="form-group">
-                                                              <div class="col-sm-offset-3 col-sm-9">
-                                                                  <button type="submit" class="btn btn-success" id="add-btn-general-products-special-price">Add</button>
-                                                              </div>
-                                                          </div>
-                                                      </div>
-                                                      <div role="tabpanel" class="tab-pane fade" id="add_general_products_by_code_special_price" style="padding-top: 20px">
-                                                          <div class="form-group">
-                                                              <label class="control-label col-sm-3" for="code">Code</label>
-                                                              <div class="col-sm-9">
-                                                                  <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_special_price"} %>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-sm-offset-3 col-sm-9">
-                                                                    <button type="submit" class="btn btn-success" id="add-btn-by-code-general-products-special-price">Add</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div id="listing-general-products-special-price">
-                                                        <% if action_name.eql?("edit") %>
-                                                          <% counter_event_general_products = @counter_event.counter_event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
-                                                        <% else %>
-                                                          <% counter_event_general_products = @counter_event.counter_event_general_products %>
-                                                        <% end %>
-                                                        <% if counter_event_general_products.present? %>                        
-                                                          <%= render partial: "listing_general_products", locals: {counter_event_general_products: counter_event_general_products, counter_event_type: "special price"} %>
-                                                        <% end %>
-                                                    </div>
-                                                </div>                    
+   <div class="form-group<%= control_group_error(@counter_event, :participation) %>">
+    <%= f.label :participation, "Participation", class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.text_field :participation, size: 10, class: "form-control quantity-fields discount-fields" %>
+      <%= error_help_text(@counter_event, :participation) %>
+    </div>
+  </div>
 
-                                                <div class="ln_solid"></div>
 
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">Warehouses</label>
-                                    <div class="col-sm-10">
-                                        <table id="listing_counter_event_warehouses_table_special_price" class="display">
-                                            <thead>
-                                                <tr>
-                                                    <th></th>
-                                                    <th id="code_th_sp">Code</th>
-                                                    <th>Name</th>
-                                                </tr>
-                                            </thead>
+<div class="form-group">
+  <label class="col-sm-2 control-label">Warehouses</label>
+  <div class="col-sm-10">
+    <table id="listing_event_warehouses_table_special_price" class="display">
+      <thead>
+        <tr>
+          <th></th>
+          <th id="code_th_sp">Code</th>
+          <th>Name</th>
+        </tr>
+      </thead>
 
-                                            <tbody>
-                                                <% @warehouses.each do |warehouse| %>
-                                                  <tr id="warehouse_<%= warehouse.id %>_special_price">
-                                                      <td></td>
-                                                      <td><%= warehouse.code %></td>
-                                                      <td><%= warehouse.name %></td>
-                                                  </tr>
-                                                <% end %>
-                                            </tbody>
-                                        </table>
-                                        <a class="btn btn-default active" id="generate_counter_event_warehouse_form_special_price" style="float: right;margin-top: 10px;">Generate form</a>
-                                    </div>
-                                </div>
+      <tbody>
+        <% @warehouses.each do |warehouse| %>
+          <tr id="warehouse_<%= warehouse.id %>_special_price">
+            <td></td>
+            <td><%= warehouse.code %></td>
+            <td><%= warehouse.name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    
+  </div>
+</div>
 
-                                <div id="listing-warehouse-details-sp">
-                                    <% if action_name.eql?("create") || !@counter_event.new_record? %>
-                                      <%= render partial: "warehouse_form", locals: {counter_event_type: "special price"} %>
-                                    <% end %>
-                                </div>
 
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
-                                      </div>
-                                  </div>
-                                <% end %>
 
-                                <script type="text/javascript">
-                                  $(function () {
-                                      $("#counter_event_start_date_time_special_price").datetimepicker({
-                                          format: "dd/mm/yyyy hh:ii",
-                                          autoclose: true,
-                                          minuteStep: 1
-                                      });
-                                      $("#counter_event_end_date_time_special_price").datetimepicker({
-                                          format: "dd/mm/yyyy hh:ii",
-                                          autoclose: true,
-                                          minuteStep: 1
-                                      });
-                                      var counter_eventWarehousesSpecialPriceDataTable = $('#listing_counter_event_warehouses_table_special_price').DataTable({
-                                          order: [1, 'asc'],
-                                          dom: 'T<"clear">lfrtip',
-                                          columns: [
-                                              {data: null, defaultContent: '', orderable: false},
-                                              {data: 'code'},
-                                              {data: 'name'}
-                                          ],
-                                          tableTools: {
-                                              sRowSelect: 'os',
-                                              aButtons: ['select_all', 'select_none']
-                                          },
-                                          paging: false,
-                                          info: false,
-                                          scrollY: "250px",
-                                          scrollCollapse: true
-                                      });
+<div class="form-group">
+  <div class="col-sm-offset-2 col-sm-10">
+    <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
+    <button class="btn btn-link cancel">Cancel</button>
+  </div>
+</div>
+<% end %>
 
-                                      $("#generate_counter_event_warehouse_form_special_price").click(function (e) {
-                                          if (counter_eventWarehousesSpecialPriceDataTable.rows('.selected').data().length == 0) {
-                                              e.prcounter_eventDefault();
-                                              bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
-                                          } else {
-                                              var warehouseIds = [];
-                                              $.each(counter_eventWarehousesSpecialPriceDataTable.rows('.selected')[0], function (index, value) {
-                                                  warehouseIds.push(counter_eventWarehousesSpecialPriceDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
-                                              });
-                                <% if @counter_event.new_record? %>
-                                                $.get("/counter_events/generate_warehouse_form", {
-                                                    warehouse_ids: warehouseIds.join(","),
-                                                    counter_event_type: "special price"
-                                                });
-                                <% else %>
-                                                $.get("/counter_events/generate_warehouse_form", {
-                                                    warehouse_ids: warehouseIds.join(","),
-                                                    counter_event_type: "special price",
-                                                    counter_event_id: "<%= @counter_event.id %>"
-                                                });
-                                <% end %>
-                                          }
+<script type="text/javascript">
+  $(function () {
+    $("#counter_event_start_time_special_price, #counter_event_end_time_special_price").datetimepicker({
+      format: "dd/mm/yyyy hh:ii",
+      autoclose: true,
+      minuteStep: 1
+    });
+    
+    var counter_eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
+      order: [1, 'asc'],
+      dom: 'T<"clear">lfrtip',
+      columns: [
+      {data: null, defaultContent: '', orderable: false},
+      {data: 'code'},
+      {data: 'name'}
+      ],
+      tableTools: {
+        sRowSelect: 'os',
+        aButtons: ['select_all', 'select_none']
+      },
+      paging: false,
+      info: false,
+      scrollY: "250px",
+      scrollCollapse: true
+    });
+    var warehouse_ids = [];
+    
+     
+    var selectedColorFields = <%= @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
+    
+    $.each(selectedColorFields, function (index, value) {
+      var selectedColorId = selectedColorFields[index];
+      if (selectedColorId != "") {
+          var e = jQuery.Event("click");
+          e.ctrlKey = true;
+          var clickRowProcessId = setInterval(function () {
+              if (!$("#warehouse_" + selectedColorId + "_special_price").hasClass("DTTT_selected") || !$("#warehouse_" + selectedColorId + "_special_price").hasClass("selected")) {
+                  $("#warehouse_" + selectedColorId + "_special_price").find("td:first-child").trigger(e);
+              } else
+                  clearInterval(clickRowProcessId);
+          }, 0);
+        }
+    });
+    
+    $('#counter_event_special_price').autoNumeric('init');
 
-                                      });
+    $("#form_container_special_price form").submit( function(e) {
 
-                                      $("#submit-btn-special-price").click(function () {
-                                          if ($("#listing-warehouse-details-sp").html().trim() == "") {
-                                              bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-                                              return false;
-                                          } else {
-                                              if ($(".counter_event_warehouse_id_fields_special_price").length > 0) {
-                                                  var valid = true;
-                                                  $(".counter_event_warehouse_id_fields_special_price").each(function () {
-                                                      if ($("#counter_event_counter_event_warehouses_attributes_" + $(this).val() + "_select_different_products_special_price").is(':checked')) {
-                                                          if ($("#counter_event_product_fields_container_" + $(this).val() + "_special_price").length == 0) {
-                                                              valid = false;
-                                                              return false;
-                                                          } else if ($("#counter_event_product_fields_container_" + $(this).val() + "_special_price").html().trim() == "") {
-                                                              valid = false;
-                                                              return false;
-                                                          }
-                                                      } else
-                                                      if ($("#counter_event_general_product_fields_container_special_price").length == 0) {
-                                                          valid = false;
-                                                          return false;
-                                                      } else if ($("#counter_event_general_product_fields_container_special_price").html().trim() == "") {
-                                                          valid = false;
-                                                          return false;
-                                                      }
-                                                  });
-                                                  if (!valid) {
-                                                      bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
-                                                      return false;
-                                                  } else
-                                                      return true;
-                                              } else {
-                                                  bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-                                                  return false;
-                                              }
+    var w_ids = <%= @counter_event.new_record? ? @warehouses.pluck(:id) : @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
+    $.each(w_ids, function (index, value) {
+      var whs = w_ids[index];
+      if ($("#warehouse_" + whs + "_special_price").hasClass("DTTT_selected") || $("#warehouse_" + whs +"_special_price").hasClass("selected")) {
+          warehouse_ids.push(whs);
+      }         
+    });
 
-                                          }
-                                      });
+      warehouse_ids = $.unique( warehouse_ids );
+      $('<input />').attr('type', 'hidden')
+          .attr('name', "warehouse_ids")
+          .attr('value', warehouse_ids)
+          .appendTo('form');
+      return true;
+    });
 
-                                <% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
-                                  <% unless counter_event_warehouse._destroy %>
-                                          var e = jQuery.CounterEvent("click");
-                                          e.ctrlKey = true;
-                                          $("#warehouse_<%= counter_event_warehouse.warehouse_id %>_special_price").find("td:first-child").trigger(e);
-                                  <% end %>
-                                <% end %>
-                                      $('#counter_event_special_price').autoNumeric('init');
-
-                                      $("#add-btn-general-products-special-price").click(function () {
-                                          var productIds = [];
-                                          $(".counter_event-general-products-product-id-fields-special-price").each(function () {
-                                              var attrId = $(this).attr('id');
-                                              productIds.push(attrId.split("_")[5]);
-                                          });
-                                          var addProductParams = {};
-                                <% if @counter_event.new_record? %>
-                                            addProductParams = {
-                                                brand_id: $("#brand_general_products_special_price").val(),
-                                                goods_type_id: $("#goods_type_general_products_special_price").val(),
-                                                model_id: $("#model_general_products_special_price").val(),
-                                                selected_product_ids: productIds.join(","),
-                                                counter_event_type: "special price"
-                                            };
-                                <% else %>
-                                            addProductParams = {
-                                                brand_id: $("#brand_general_products_special_price").val(),
-                                                goods_type_id: $("#goods_type_general_products_special_price").val(),
-                                                model_id: $("#model_general_products_special_price").val(),
-                                                selected_product_ids: productIds.join(","),
-                                                counter_event_type: "special price",
-                                                counter_event_id: "<%= @counter_event.id %>"
-                                            };
-                                <% end %>
-                                          $.get("/counter_events/add_general_products", addProductParams);
-                                          $("#brand_general_products_special_price").prop('selectedIndex', 0);
-                                          $("#goods_type_general_products_special_price").prop('selectedIndex', 0);
-                                          $("#model_general_products_special_price").prop('selectedIndex', 0);
-                                          return false;
-                                      });
-
-                                      $("#add-btn-by-code-general-products-special-price").click(function () {
-                                          if ($("#code_general_products_special_price").val().trim() == "")
-                                              bootbox.alert({message: "Please fill out the field above", size: "small"});
-                                          else {
-                                              var productIds = [];
-                                              $(".counter_event-general-products-product-id-fields-special-price").each(function () {
-                                                  var attrId = $(this).attr('id');
-                                                  productIds.push(attrId.split("_")[5]);
-                                              });
-                                              var addProductParams = {};
-                                <% if @counter_event.new_record? %>
-                                                addProductParams = {
-                                                    product_code: $("#code_general_products_special_price").val(),
-                                                    selected_product_ids: productIds.join(","),
-                                                    counter_event_type: "special price"
-                                                };
-                                <% else %>
-                                                addProductParams = {
-                                                    product_code: $("#code_general_products_special_price").val(),
-                                                    selected_product_ids: productIds.join(","),
-                                                    counter_event_type: "special price",
-                                                    counter_event_id: "<%= @counter_event.id %>"
-                                                };
-                                <% end %>
-                                              $.get("/counter_events/add_general_products", addProductParams);
-                                              $("#code_general_products_special_price").val("");
-                                          }
-                                          return false;
-                                      });
-                                      $('#counter_event_code_special_price').on("input", function () {
-                                          $(this).val($(this).val().replace(/ /g, ""));
-                                      });
-                                  });
-                                </script>  
+    
+    $('#counter_event_code_special_price').on("input", function () {
+      $(this).val($(this).val().replace(/ /g, ""));
+    });
+  });
+</script>  

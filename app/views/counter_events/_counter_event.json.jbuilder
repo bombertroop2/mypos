@@ -1,0 +1,2 @@
+json.extract! counter_event, :id, :code, :name, :start_time, :end_time, :first_discount, :second_discount, :special_price, :created_at, :updated_at
+json.url counter_event_url(counter_event, format: :json)

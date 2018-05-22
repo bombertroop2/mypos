@@ -1,12 +1,1 @@
-<% if @deleted %>
-  window.location = '<%= counter_events_path %>';
-<% else %>
-  <% if @counter_event.errors.present? && @counter_event.errors.messages[:base].present? %>
-    var bbox = bootbox.alert({message: "<%= @counter_event.errors.messages[:base].join("<br/>") %>",size: 'small'});
-    bbox.on("hidden.bs.modal", function () { 
-      window.location = '<%= counter_events_path %>';
-    });
-  <% else %>
-    <%= smart_listing_item :counter_events, :update, @counter_event, "counter_events/counter_event" %>
-  <% end %>
-<% end %>
+<%= smart_listing_item :counter_events, :destroy, @counter_event %>

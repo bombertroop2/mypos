@@ -1,26 +1,20 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
     <thead id="listing-counter_event-thead">
         <tr>
-            <th class="col-md-2"><%= smart_listing.sortable "Type", "counter_event_type" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Code", "code" %></th>
             <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "Start time", "start_date_time" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "End time", "end_date_time" %></th>
-            <th class="col-md-1"></th>
+            <th class="col-md-5"><%= smart_listing.sortable "Start time", "start_time" %></th>
+            <th class="col-md-5"><%= smart_listing.sortable "End time", "end_time" %></th>            
+            <th class="col-md-5"></th>
         </tr>
     </thead>
     <tbody>
-        <% last_counter_event_type = "" %>
         <% smart_listing.collection.each do |counter_event| %>
-          <% unless last_counter_event_type.eql?(counter_event.counter_event_type) %>
-            <% total_type = smart_listing.collection.select{|evnt| evnt.counter_event_type.eql?(counter_event.counter_event_type)}.length %>
-          <% end %>
           <tr class="editable" data-id="<%= counter_event.id %>">
-              <%= smart_listing.render object: counter_event, partial: "counter_events/counter_event", locals: {object: counter_event, last_counter_event_type: last_counter_event_type, total_type: total_type} %>
+              <%= smart_listing.render counter_event: counter_event, partial: "counter_events/counter_event", locals: {object: counter_event} %>
           </tr>
-          <% last_counter_event_type = counter_event.counter_event_type %>
         <% end %>
-        <%= smart_listing.item_new colspan: 6, link: new_counter_event_path %>
+        <%= smart_listing.item_new colspan: 8, link: new_counter_event_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>
