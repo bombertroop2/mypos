@@ -1,0 +1,332 @@
+<%= form_for(@counter_event, remote: true, html: {class: "form-horizontal"}) do |f| %>
+<%= hidden_field_tag "counter_event_type", "" %>
+<%= f.hidden_field :counter_event_type, value: "Discount(%)" %>
+<div class="form-group<%= control_group_error(@counter_event, :code) %>">
+    <%= f.label :code, class: "col-sm-2 control-label" %>
+      <div class="col-sm-10">
+          <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_discount_percentage" %>
+            <%= error_help_text(@counter_event, :code) %>
+        </div>
+    </div>
+
+    <div class="form-group<%= control_group_error(@counter_event, :name) %>">
+      <%= f.label :name, class: "col-sm-2 control-label" %>
+      <div class="col-sm-10">
+        <%= f.text_field :name, class: "form-control inputs" %>
+        <%= error_help_text(@counter_event, :name) %>
+      </div>
+    </div>
+
+    <div class="form-group<%= control_group_error(@counter_event, :start_date_time) %>">
+      <%= f.label :start_date_time, "Start time", class: "col-sm-2 control-label" %>
+        <div class="col-sm-10">
+          <%= f.text_field :start_date_time, size: 10, readonly: true, class: "form-control" %>
+          <%= error_help_text(@counter_event, :start_date_time) %>
+      </div>
+    </div>
+
+    <div class="form-group<%= control_group_error(@counter_event, :end_date_time) %>">
+      <%= f.label :end_date_time, "End time", class: "col-sm-2 control-label" %>
+        <div class="col-sm-10">
+          <%= f.text_field :end_date_time, size: 10, readonly: true, class: "form-control" %>
+          <%= error_help_text(@counter_event, :end_date_time) %>
+        </div>
+    </div>
+
+    <div class="form-group<%= control_group_error(@counter_event, :first_plus_discount) %>">
+      <%= f.label :first_plus_discount, "First discount", class: "col-sm-2 control-label" %>
+      <div class="col-sm-10">
+        <%= f.text_field :first_plus_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
+        <%= error_help_text(@counter_event, :first_plus_discount) %>
+      </div>
+    </div>
+
+    <div class="form-group<%= control_group_error(@counter_event, :second_plus_discount) %>">
+      <%= f.label :second_plus_discount, "Second discount", class: "col-sm-2 control-label" %>
+      <div class="col-sm-10">
+        <%= f.text_field :second_plus_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
+        <%= error_help_text(@counter_event, :second_plus_discount) %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">Product</label>
+      <div class="col-sm-10">
+        <div class="x_panel">
+          <div class="x_content">                        
+            <div>
+              <!-- Nav tabs -->
+              <ul class="nav nav-tabs" role="tablist">
+                  <li role="presentation" class="active"><a href="#add_general_products_by_bgm_percentage_discount" aria-controls="add_general_products_by_bgm_percentage_discount" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
+                  <li role="presentation"><a href="#add_general_products_by_code_percentage_discount" aria-controls="add_general_products_by_code_percentage_discount" role="tab" data-toggle="tab">Add products by code</a></li>
+              </ul>
+
+                      <!-- Tab panes -->
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_percentage_discount" style="padding-top: 20px">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="brand">Brand</label>
+                        <div class="col-sm-9">
+                            <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_percentage_discount"} %>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
+                          <div class="col-sm-9">
+                              <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_percentage_discount"} %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="model">Model</label>
+                            <div class="col-sm-9">
+                                <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_percentage_discount"} %>
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <div class="col-sm-offset-3 col-sm-9">
+                                  <button type="submit" class="btn btn-success" id="add-btn-percentage-discount">Add</button>
+                              </div>
+                          </div>
+                      </div>
+                      <div role="tabpanel" class="tab-pane fade" id="add_general_products_by_code_percentage_discount" style="padding-top: 20px">
+                          <div class="form-group">
+                              <label class="control-label col-sm-3" for="code">Code</label>
+                              <div class="col-sm-9">
+                                  <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_percentage_discount"} %>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-9">
+                                    <button type="submit" class="btn btn-success" id="add-btn-by-code-percentage-discount">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="listing-general-products-percentage-discount">
+                        <% if action_name.eql?("edit") %>
+                          <% counter_event_general_products = @counter_event.counter_event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+                        <% else %>
+                          <% counter_event_general_products = @counter_event.counter_event_general_products %>
+                        <% end %>
+                        <% if counter_event_general_products.present? %>                        
+                          <%= render partial: "listing_general_products", locals: {counter_event_general_products: counter_event_general_products} %>
+                        <% end %>
+                    </div>
+                  </div>                    
+
+                  <div class="ln_solid"></div>
+
+                </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="form-group">
+          <label class="col-sm-2 control-label">Warehouses</label>
+          <div class="col-sm-10">
+              <table id="listing_counter_event_warehouses_table" class="display">
+                  <thead>
+                      <tr>
+                          <th></th>
+                          <th>Code</th>
+                          <th>Name</th>
+                      </tr>
+                  </thead>
+
+                  <tbody>
+                      <% @warehouses.each do |warehouse| %>
+                        <tr id="warehouse_<%= warehouse.id %>">
+                            <td></td>
+                            <td><%= warehouse.code %></td>
+                            <td><%= warehouse.name %></td>
+                        </tr>
+                      <% end %>
+                  </tbody>
+              </table>
+              <a class="btn btn-default active" id="generate_counter_event_percentage_warehouse_form" style="float: right;margin-top: 10px;">Generate form</a>
+          </div>
+      </div>
+
+      <div id="listing-warehouse-details">
+          <% if action_name.eql?("create") || !@counter_event.new_record? %>
+            <%= render(partial: "warehouse_form") %>    
+          <% end %>      
+      </div>
+
+      <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+              <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn" %>
+                <button class="btn btn-link cancel">Cancel</button>
+            </div>
+        </div>
+      <% end %>
+
+<script type="text/javascript">
+$(function () {
+    $("#counter_event_start_date_time").datetimepicker({
+        format: "dd/mm/yyyy hh:ii",
+        autoclose: true,
+        minuteStep: 1
+    });
+    $("#counter_event_end_date_time").datetimepicker({
+        format: "dd/mm/yyyy hh:ii",
+        autoclose: true,
+        minuteStep: 1
+    });
+    var counter_eventWarehousesDataTable = $('#listing_counter_event_warehouses_table').DataTable({
+        order: [1, 'asc'],
+        dom: 'T<"clear">lfrtip',
+        columns: [
+            {data: null, defaultContent: '', orderable: false},
+            {data: 'code'},
+            {data: 'name'}
+        ],
+        tableTools: {
+            sRowSelect: 'os',
+            /*sRowSelector: 'td:first-child',*/
+            aButtons: ['select_all', 'select_none']
+        },
+        paging: false,
+        info: false,
+        scrollY: "250px",
+        scrollCollapse: true
+    });
+    $("#generate_counter_event_percentage_warehouse_form").click(function (e) {
+        if (counter_eventWarehousesDataTable.rows('.selected').data().length == 0) {
+            e.prcounter_eventDefault();
+            bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+        } else {
+            var warehouseIds = [];
+            $.each(counter_eventWarehousesDataTable.rows('.selected')[0], function (index, value) {
+                warehouseIds.push(counter_eventWarehousesDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+            });
+<% if @counter_event.new_record? %>
+              $.get("/counter_events/generate_warehouse_form", {
+                  warehouse_ids: warehouseIds.join(","),
+                  counter_event_type: ""
+              });
+<% else %>
+              $.get("/counter_events/generate_warehouse_form", {
+                  warehouse_ids: warehouseIds.join(","),
+                  counter_event_type: "",
+                  counter_event_id: "<%= @counter_event.id %>"
+              });
+<% end %>
+        }
+
+    });
+    if ($(".discount-fields").length > 0)
+        $(".discount-fields").numeric();
+
+    $("#submit-btn").click(function () {
+        if ($("#listing-warehouse-details").html().trim() == "") {
+            bootbox.alert({message: "Please generate warehouse form", size: 'small'});
+            return false;
+        } else {
+            if ($(".counter_event_warehouse_id_fields").length > 0) {
+                var valid = true;
+                $(".counter_event_warehouse_id_fields").each(function () {
+                    if ($("#counter_event_counter_event_warehouses_attributes_" + $(this).val() + "_select_different_products").is(':checked')) {
+                        if ($("#counter_event_product_fields_container_" + $(this).val()).length == 0) {
+                            valid = false;
+                            return false;
+                        } else if ($("#counter_event_product_fields_container_" + $(this).val()).html().trim() == "") {
+                            valid = false;
+                            return false;
+                        }
+                    } else
+                    if ($("#counter_event_general_product_fields_container_percentage_discount").length == 0) {
+                        valid = false;
+                        return false;
+                    } else if ($("#counter_event_general_product_fields_container_percentage_discount").html().trim() == "") {
+                        valid = false;
+                        return false;
+                    }
+                });
+                if (!valid) {
+                    bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
+                    return false;
+                } else
+                    return true;
+            } else {
+                bootbox.alert({message: "Please generate warehouse form", size: 'small'});
+                return false;
+            }
+
+          }
+      });
+<% @counter_event.counter_event_warehouses.each do |counter_event_warehouse| %>
+  <% unless counter_event_warehouse._destroy %>
+          var e = jQuery.CounterEvent("click");
+          e.ctrlKey = true;
+          $("#warehouse_<%= counter_event_warehouse.warehouse_id %>").find("td:first-child").trigger(e);
+  <% end %>
+<% end %>
+
+      $("#add-btn-percentage-discount").click(function () {
+          var productIds = [];
+          $(".counter_event-general-products-product-id-fields-percentage-discount").each(function () {
+              var attrId = $(this).attr('id');
+              productIds.push(attrId.split("_")[5]);
+          });
+          var addProductParams = {};
+<% if @counter_event.new_record? %>
+            addProductParams = {
+                brand_id: $("#brand_general_products_percentage_discount").val(),
+                goods_type_id: $("#goods_type_general_products_percentage_discount").val(),
+                model_id: $("#model_general_products_percentage_discount").val(),
+                selected_product_ids: productIds.join(","),
+                counter_event_type: ""
+            };
+<% else %>
+            addProductParams = {
+                brand_id: $("#brand_general_products_percentage_discount").val(),
+                goods_type_id: $("#goods_type_general_products_percentage_discount").val(),
+                model_id: $("#model_general_products_percentage_discount").val(),
+                selected_product_ids: productIds.join(","),
+                counter_event_type: "",
+                counter_event_id: "<%= @counter_event.id %>"
+            };
+<% end %>
+          $.get("/counter_events/add_general_products", addProductParams);
+          $("#brand_general_products_percentage_discount").prop('selectedIndex', 0);
+          $("#goods_type_general_products_percentage_discount").prop('selectedIndex', 0);
+          $("#model_general_products_percentage_discount").prop('selectedIndex', 0);
+          return false;
+      });
+
+      $("#add-btn-by-code-percentage-discount").click(function () {
+          if ($("#code_general_products_percentage_discount").val().trim() == "")
+              bootbox.alert({message: "Please fill out the field above", size: "small"});
+          else {
+              var productIds = [];
+              $(".counter_event-general-products-product-id-fields-percentage-discount").each(function () {
+                  var attrId = $(this).attr('id');
+                  productIds.push(attrId.split("_")[5]);
+              });
+              var addProductParams = {};
+<% if @counter_event.new_record? %>
+                addProductParams = {
+                    product_code: $("#code_general_products_percentage_discount").val(),
+                    selected_product_ids: productIds.join(","),
+                    counter_event_type: ""
+                };
+<% else %>
+                addProductParams = {
+                    product_code: $("#code_general_products_percentage_discount").val(),
+                    selected_product_ids: productIds.join(","),
+                    counter_event_type: "",
+                    counter_event_id: "<%= @counter_event.id %>"
+                };
+<% end %>
+              $.get("/counter_events/add_general_products", addProductParams);
+              $("#code_general_products_percentage_discount").val("");
+          }
+          return false;
+      });
+
+      $('#counter_event_code_discount_percentage').on("input", function () {
+          $(this).val($(this).val().replace(/ /g, ""));
+      });
+  });
+</script>  

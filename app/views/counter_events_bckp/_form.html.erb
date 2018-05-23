@@ -1,0 +1,69 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <% if @counter_event.new_record? %>
+              <li role="presentation" class="active"><a href="#discount_percentage" aria-controls="discount_percentage" role="tab" data-toggle="tab">Discount(%)</a></li>              
+              <li role="presentation"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>
+              
+            <% else %>
+              <% if @counter_event.first_plus_discount.present? %>
+                <li role="presentation" class="active"><a href="#discount_percentage" aria-controls="discount_percentage" role="tab" data-toggle="tab">Discount(%)</a></li>              
+              <% elsif @counter_event.special_price.present? %>
+                <li role="presentation" class="active"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>              
+              <% end %>
+            <% end %>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <% if @counter_event.new_record? %>
+              <div role="tabpanel" class="tab-pane fade in active" id="discount_percentage" style="padding-top: 20px">
+                  <div id="form_container_disc_percentage">
+                      <%= render "form_discount_percentage" %>
+                  </div>
+              </div>
+              <div role="tabpanel" class="tab-pane fade" id="special_price" style="padding-top: 20px">
+                  <div id="form_container_special_price">
+                      <%= render "form_special_price" %>
+                  </div>
+              </div>
+            <% else %>
+              <% if @counter_event.first_plus_discount.present? %>
+                <div role="tabpanel" class="tab-pane fade in active" id="discount_percentage" style="padding-top: 20px">
+                    <div id="form_container_disc_percentage">
+                        <%= render "form_discount_percentage" %>
+                    </div>
+                </div>              
+              <% elsif @counter_event.special_price.present? %>
+                <div role="tabpanel" class="tab-pane fade in active" id="special_price" style="padding-top: 20px">
+                    <div id="form_container_special_price">
+                        <%= render "form_special_price" %>
+                    </div>
+                </div>              
+              <% end %>
+            <% end %>
+        </div>
+    </div>                         
+</td>
+
+<script type="text/javascript">
+  $(function () {
+// funny solution for silly bug
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+          var target = $(e.target).attr("href"); // activated tab
+
+          if (target == "#discount_cash" && ($('#listing_counter_event_warehouses_table_discount_cash').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_counter_event_warehouses_table_discount_cash').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+              $("#code_th_cash_discount").click();
+              $("#code_th_cash_discount").click();
+          } else if (target == "#special_price" && ($('#listing_counter_event_warehouses_table_special_price').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_counter_event_warehouses_table_special_price').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+              $("#code_th_sp").click();
+              $("#code_th_sp").click();          
+          }
+      });
+  });
+</script>  

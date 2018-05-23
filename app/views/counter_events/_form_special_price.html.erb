@@ -1,5 +1,6 @@
 <%= form_for(@counter_event, remote: true, html: {class: "form-horizontal"}) do |f| %>
-
+<%= hidden_field_tag "counter_event_type", "special price" %>
+<%= f.hidden_field :counter_event_type, value: "Special Price" %>
 <div class="form-group<%= control_group_error(@counter_event, :code) %>">
 
   <%= f.label :code, class: "col-sm-2 control-label" %>

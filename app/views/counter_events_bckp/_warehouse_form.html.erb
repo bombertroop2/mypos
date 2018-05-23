@@ -1,0 +1,538 @@
+<% counter_event_type = counter_event_type rescue nil %>
+<% counter_event_type = params[:counter_event_type] rescue nil if counter_event_type.nil? %>
+<% if action_name.eql?("edit") %>
+  <% counter_event_warehouses = @counter_event.counter_event_warehouses.select(:id, :warehouse_id, :code, :name, :select_different_products).joins(:warehouse) %>
+<% elsif action_name.eql?("update") %>
+  <% counter_event_warehouses = @counter_event.counter_event_warehouses %>
+<% elsif !@counter_event.new_record? %>
+  <% counter_event_warehouses = @counter_event_warehouses %>
+<% else %>
+  <% counter_event_warehouses = @counter_event.counter_event_warehouses %>
+<% end %>
+<% counter_event_warehouses.each do |counter_event_warehouse| %>
+  <% if action_name.eql?("edit") %>
+    <% counter_event_warehouse.wrhs_code = counter_event_warehouse.code %>
+    <% counter_event_warehouse.wrhs_name = counter_event_warehouse.name %>
+    <% counter_event_products = counter_event_warehouse.counter_event_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+  <% elsif action_name.eql?("update") %>
+    <% counter_event_warehouse.wrhs_code = counter_event_warehouse.warehouse.code %>
+    <% counter_event_warehouse.wrhs_name = counter_event_warehouse.warehouse.name %>
+    <% counter_event_products = counter_event_warehouse.counter_event_products %>
+  <% end %>
+  <%= fields_for "counter_event[counter_event_warehouses_attributes][#{counter_event_warehouse.warehouse_id}]", counter_event_warehouse do |counter_event_warehouse_fields| %>
+    <%= counter_event_warehouse_fields.hidden_field :id unless counter_event_warehouse_fields.object.new_record? %>
+    <% if !counter_event_warehouse_fields.object.new_record? && (counter_event_warehouse_fields.object.remove || counter_event_warehouse_fields.object._destroy) %>
+      <%= counter_event_warehouse_fields.hidden_field :_destroy, value: true %>
+    <% else %>
+      <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+        <% counter_event_warehouse_id_fields_class_name = "counter_event_warehouse_id_fields_cash_discount" %>
+      <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+        <% counter_event_warehouse_id_fields_class_name = "counter_event_warehouse_id_fields_special_price" %>
+      <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+        <% counter_event_warehouse_id_fields_class_name = "counter_event_warehouse_id_fields_buy_one_get_one" %>
+      <% else %>
+        <% counter_event_warehouse_id_fields_class_name = "counter_event_warehouse_id_fields" %>
+      <% end %>
+      <%= counter_event_warehouse_fields.hidden_field :warehouse_id, class: counter_event_warehouse_id_fields_class_name %>
+        <%= counter_event_warehouse_fields.hidden_field :wrhs_code %>
+        <%= counter_event_warehouse_fields.hidden_field :wrhs_name %>
+        <div class="form-group">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-10">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2><%= "#{counter_event_warehouse.wrhs_code} - #{counter_event_warehouse.wrhs_name}" %></h2>
+                        <div class="navbar-right">
+                            <% if !counter_event_warehouse_fields.object.new_record? %>                      
+                              <%= counter_event_warehouse_fields.check_box :_destroy %> Delete
+                            <% end %>
+                            <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                              <% select_different_products_field_id = "counter_event_counter_event_warehouses_attributes_#{counter_event_warehouse.warehouse_id}_select_different_products_cash_discount" %>
+                              <% select_different_products_field_class_name = "counter_event-warehouse-select-different-products-fields-cash-discount" %>
+                            <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                              <% select_different_products_field_id = "counter_event_counter_event_warehouses_attributes_#{counter_event_warehouse.warehouse_id}_select_different_products_special_price" %>
+                              <% select_different_products_field_class_name = "counter_event-warehouse-select-different-products-fields-special-price" %>
+                            <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                              <% select_different_products_field_id = "counter_event_counter_event_warehouses_attributes_#{counter_event_warehouse.warehouse_id}_select_different_products_buy_one_get_one" %>
+                              <% select_different_products_field_class_name = "counter_event-warehouse-select-different-products-fields-buy-one-get-one" %>
+                            <% else %>
+                              <% select_different_products_field_id = "counter_event_counter_event_warehouses_attributes_#{counter_event_warehouse.warehouse_id}_select_different_products" %>
+                              <% select_different_products_field_class_name = "counter_event-warehouse-select-different-products-fields-percentage-discount" %>
+                            <% end %>
+                            <%= counter_event_warehouse_fields.check_box :select_different_products, class: select_different_products_field_class_name, id: select_different_products_field_id %> Select different products
+                          </div>
+                          <div class="clearfix"></div>
+                      </div>
+                      <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                        <% x_content_id = "counter_event-warehouse-#{counter_event_warehouse.warehouse_id}-form-container-cash-discount" %>
+                      <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                        <% x_content_id = "counter_event-warehouse-#{counter_event_warehouse.warehouse_id}-form-container-special-price" %>
+                      <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                        <% x_content_id = "counter_event-warehouse-#{counter_event_warehouse.warehouse_id}-form-container-buy-one-get-one" %>
+                      <% else %>
+                        <% x_content_id = "counter_event-warehouse-#{counter_event_warehouse.warehouse_id}-form-container-percentage-discount" %>
+                      <% end %>
+                      <div class="x_content<%= " hidden" unless counter_event_warehouse.select_different_products? %>" id="<%= x_content_id %>">
+
+                          <div>
+                              <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                <% tab_id_bgm = "add_products_by_bgm_#{counter_event_warehouse.warehouse_id}_cash_discount" %>
+                                <% tab_id_code = "add_products_by_code_#{counter_event_warehouse.warehouse_id}_cash_discount" %>
+                              <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                <% tab_id_bgm = "add_products_by_bgm_#{counter_event_warehouse.warehouse_id}_special_price" %>
+                                <% tab_id_code = "add_products_by_code_#{counter_event_warehouse.warehouse_id}_special_price" %>
+                              <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                <% tab_id_bgm = "add_products_by_bgm_#{counter_event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                <% tab_id_code = "add_products_by_code_#{counter_event_warehouse.warehouse_id}_buy_one_get_one" %>
+                              <% else %>
+                                <% tab_id_bgm = "add_products_by_bgm_#{counter_event_warehouse.warehouse_id}" %>
+                                <% tab_id_code = "add_products_by_code_#{counter_event_warehouse.warehouse_id}" %>
+                              <% end %>
+                              <!-- Nav tabs -->
+                              <ul class="nav nav-tabs" role="tablist">
+                                  <li role="presentation" class="active"><a href="#<%= tab_id_bgm %>" aria-controls="<%= tab_id_bgm %>" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
+                                  <li role="presentation"><a href="#<%= tab_id_code %>" aria-controls="<%= tab_id_code %>" role="tab" data-toggle="tab">Add products by code</a></li>
+                              </ul>
+
+                              <!-- Tab panes -->
+                              <div class="tab-content">
+                                  <div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_bgm %>" style="padding-top: 20px">
+                                      <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                        <% brand_field_id = "brand_#{counter_event_warehouse.warehouse_id}_cash_discount" %>
+                                      <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                        <% brand_field_id = "brand_#{counter_event_warehouse.warehouse_id}_special_price" %>
+                                      <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                        <% brand_field_id = "brand_#{counter_event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                      <% else %>
+                                        <% brand_field_id = "brand_#{counter_event_warehouse.warehouse_id}" %>
+                                      <% end %>
+                                      <div class="form-group">
+                                          <label class="control-label col-sm-3" for="brand">Brand</label>
+                                          <div class="col-sm-9">
+                                              <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: brand_field_id} %>
+                                            </div>
+                                        </div>
+                                        <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                          <% goods_type_field_id = "goods_type_#{counter_event_warehouse.warehouse_id}_cash_discount" %>
+                                        <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                          <% goods_type_field_id = "goods_type_#{counter_event_warehouse.warehouse_id}_special_price" %>
+                                        <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                          <% goods_type_field_id = "goods_type_#{counter_event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                        <% else %>
+                                          <% goods_type_field_id = "goods_type_#{counter_event_warehouse.warehouse_id}" %>
+                                        <% end %>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
+                                            <div class="col-sm-9">
+                                                <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: goods_type_field_id} %>
+                                              </div>
+                                          </div>
+                                          <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                            <% model_field_id = "model_#{counter_event_warehouse.warehouse_id}_cash_discount" %>
+                                          <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                            <% model_field_id = "model_#{counter_event_warehouse.warehouse_id}_special_price" %>
+                                          <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                            <% model_field_id = "model_#{counter_event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                          <% else %>
+                                            <% model_field_id = "model_#{counter_event_warehouse.warehouse_id}" %>
+                                          <% end %>
+                                          <div class="form-group">
+                                              <label class="control-label col-sm-3" for="model">Model</label>
+                                              <div class="col-sm-9">
+                                                  <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: model_field_id} %>
+                                                </div>
+                                            </div>
+                                            <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                              <% button_bgm_class = "add-buttons-cash-discount" %>
+                                              <% button_bgm_id = "add-btn-#{counter_event_warehouse.warehouse_id}-cash-discount" %>
+                                            <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                              <% button_bgm_class = "add-buttons-special-price" %>
+                                              <% button_bgm_id = "add-btn-#{counter_event_warehouse.warehouse_id}-special-price" %>
+                                            <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                              <% button_bgm_class = "add-buttons-buy-one-get-one" %>
+                                              <% button_bgm_id = "add-btn-#{counter_event_warehouse.warehouse_id}-buy-one-get-one" %>
+                                            <% else %>
+                                              <% button_bgm_class = "add-buttons" %>
+                                              <% button_bgm_id = "add-btn-#{counter_event_warehouse.warehouse_id}" %>
+                                            <% end %>
+                                            <div class="form-group">
+                                                <div class="col-sm-offset-3 col-sm-9">
+                                                    <button type="submit" class="btn btn-success <%= button_bgm_class %>" id="<%= button_bgm_id %>">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div role="tabpanel" class="tab-pane fade" id="<%= tab_id_code %>" style="padding-top: 20px">
+                                            <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                              <% text_field_id = "code_#{counter_event_warehouse.warehouse_id}_cash_discount" %>
+                                            <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                              <% text_field_id = "code_#{counter_event_warehouse.warehouse_id}_special_price" %>
+                                            <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                              <% text_field_id = "code_#{counter_event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                            <% else %>
+                                              <% text_field_id = "code_#{counter_event_warehouse.warehouse_id}" %>
+                                            <% end %>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="code">Code</label>
+                                                <div class="col-sm-9">
+                                                    <%= text_field_tag "code", "", {class: "form-control", id: text_field_id} %>
+                                                  </div>
+                                              </div>
+                                              <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                                <% button_code_class = "add-buttons-by-code-cash-discount" %>
+                                                <% button_code_id = "add-btn-#{counter_event_warehouse.warehouse_id}-by-code-cash-discount" %>
+                                              <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                                <% button_code_class = "add-buttons-by-code-special-price" %>
+                                                <% button_code_id = "add-btn-#{counter_event_warehouse.warehouse_id}-by-code-special-price" %>
+                                              <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                                <% button_code_class = "add-buttons-by-code-buy-one-get-one" %>
+                                                <% button_code_id = "add-btn-#{counter_event_warehouse.warehouse_id}-by-code-buy-one-get-one" %>
+                                              <% else %>
+                                                <% button_code_class = "add-buttons-by-code" %>
+                                                <% button_code_id = "add-btn-#{counter_event_warehouse.warehouse_id}-by-code" %>
+                                              <% end %>
+                                              <div class="form-group">
+                                                  <div class="col-sm-offset-3 col-sm-9">
+                                                      <button type="submit" class="btn btn-success <%= button_code_class %>" id="<%= button_code_id %>">Add</button>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                        <div id="listing-warehouse-<%= counter_event_warehouse.warehouse_id %>-products-cash-discount">
+                                          <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                            <div id="listing-warehouse-<%= counter_event_warehouse.warehouse_id %>-products-special-price">
+                                              <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                                <div id="listing-warehouse-<%= counter_event_warehouse.warehouse_id %>-products-buy-one-get-one">
+                                                  <% else %>
+                                                    <div id="listing-warehouse-<%= counter_event_warehouse.warehouse_id %>-products">
+                                                      <% end %>
+                                                      <%# if counter_event_warehouse.select_different_products %>
+                                                        <% if (action_name.eql?("edit") && counter_event_products.length > 0) || action_name.eql?("update") %>
+                                                          <%= render partial: "listing_warehouse_products", locals: {counter_event_warehouse: counter_event_warehouse, counter_event_products: counter_event_products, counter_event_type: counter_event_type} %>
+                                                        <% elsif counter_event_warehouse.counter_event_products.present? %>
+                                                          <%= render partial: "listing_warehouse_products", locals: {counter_event_warehouse: counter_event_warehouse, counter_event_type: counter_event_type} %>
+                                                        <%# end %>
+                                                      <% end %>
+                                                  </div>
+                                              </div>                    
+
+                                              <div class="ln_solid"></div>
+
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+
+                        <script type="text/javascript">
+                          $(function () {
+            <% if counter_event_type.present? && counter_event_type.eql?("cash discount") %>
+                                $(".add-buttons-cash-discount").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    var productIds = [];
+                                    $(".counter_event-products-" + warehouseId + "-product-id-fields-cash-discount").each(function () {
+                                        var attrId = $(this).attr('id');
+                                        productIds.push(attrId.split("_")[8]);
+                                    });
+                                    var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId + "_cash_discount").val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId + "_cash_discount").val(),
+                                          model_id: $("#model_" + warehouseId + "_cash_discount").val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "cash discount"
+                                      };
+              <% else %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId + "_cash_discount").val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId + "_cash_discount").val(),
+                                          model_id: $("#model_" + warehouseId + "_cash_discount").val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "cash discount",
+                                          counter_event_id: "<%= @counter_event.id %>"
+                                      };
+              <% end %>
+                                    $.get("/counter_events/add_products", addProductParams);
+                                    $("#brand_" + warehouseId + "_cash_discount").prop('selectedIndex', 0);
+                                    $("#goods_type_" + warehouseId + "_cash_discount").prop('selectedIndex', 0);
+                                    $("#model_" + warehouseId + "_cash_discount").prop('selectedIndex', 0);
+                                    return false;
+                                });
+
+                                $(".add-buttons-by-code-cash-discount").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    if ($("#code_" + warehouseId + "_cash_discount").val().trim() == "")
+                                        bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                    else {
+                                        var productIds = [];
+                                        $(".counter_event-products-" + warehouseId + "-product-id-fields-cash-discount").each(function () {
+                                            var attrId = $(this).attr('id');
+                                            productIds.push(attrId.split("_")[8]);
+                                        });
+                                        var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId + "_cash_discount").val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "cash discount"
+                                          };
+              <% else %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId + "_cash_discount").val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "cash discount",
+                                              counter_event_id: "<%= @counter_event.id %>"
+                                          };
+              <% end %>
+                                        $.get("/counter_events/add_products", addProductParams);
+                                        $("#code_" + warehouseId + "_cash_discount").val("");
+                                    }
+                                    return false;
+                                });
+
+                                $(".counter_event-warehouse-select-different-products-fields-cash-discount").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-cash-discount").removeClass("hidden");
+                                    else {
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-cash-discount").addClass("hidden");
+                                    }
+                                });
+            <% elsif counter_event_type.present? && counter_event_type.eql?("special price") %>
+                                $(".add-buttons-special-price").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    var productIds = [];
+                                    $(".counter_event-products-" + warehouseId + "-product-id-fields-special-price").each(function () {
+                                        var attrId = $(this).attr('id');
+                                        productIds.push(attrId.split("_")[8]);
+                                    });
+                                    var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId + "_special_price").val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId + "_special_price").val(),
+                                          model_id: $("#model_" + warehouseId + "_special_price").val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "special price"
+                                      };
+              <% else %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId + "_special_price").val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId + "_special_price").val(),
+                                          model_id: $("#model_" + warehouseId + "_special_price").val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "special price",
+                                          counter_event_id: "<%= @counter_event.id %>"
+                                      };
+              <% end %>
+                                    $.get("/counter_events/add_products", addProductParams);
+                                    $("#brand_" + warehouseId + "_special_price").prop('selectedIndex', 0);
+                                    $("#goods_type_" + warehouseId + "_special_price").prop('selectedIndex', 0);
+                                    $("#model_" + warehouseId + "_special_price").prop('selectedIndex', 0);
+                                    return false;
+                                });
+                                $(".add-buttons-by-code-special-price").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    if ($("#code_" + warehouseId + "_special_price").val().trim() == "")
+                                        bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                    else {
+                                        var productIds = [];
+                                        $(".counter_event-products-" + warehouseId + "-product-id-fields-special-price").each(function () {
+                                            var attrId = $(this).attr('id');
+                                            productIds.push(attrId.split("_")[8]);
+                                        });
+                                        var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId + "_special_price").val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "special price"
+                                          };
+              <% else %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId + "_special_price").val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "special price",
+                                              counter_event_id: "<%= @counter_event.id %>"
+                                          };
+              <% end %>
+                                        $.get("/counter_events/add_products", addProductParams);
+                                        $("#code_" + warehouseId + "_special_price").val("");
+                                    }
+                                    return false;
+                                });
+
+                                $(".counter_event-warehouse-select-different-products-fields-special-price").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-special-price").removeClass("hidden");
+                                    else {
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-special-price").addClass("hidden");
+                                    }
+                                });
+            <% elsif counter_event_type.present? && counter_event_type.eql?("buy one get one") %>
+                                $(".add-buttons-buy-one-get-one").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    var productIds = [];
+                                    $(".counter_event-products-" + warehouseId + "-product-id-fields-buy-one-get-one").each(function () {
+                                        var attrId = $(this).attr('id');
+                                        productIds.push(attrId.split("_")[8]);
+                                    });
+                                    var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId + "_buy_one_get_one").val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId + "_buy_one_get_one").val(),
+                                          model_id: $("#model_" + warehouseId + "_buy_one_get_one").val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "buy one get one"
+                                      };
+              <% else %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId + "_buy_one_get_one").val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId + "_buy_one_get_one").val(),
+                                          model_id: $("#model_" + warehouseId + "_buy_one_get_one").val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "buy one get one",
+                                          counter_event_id: "<%= @counter_event.id %>"
+                                      };
+              <% end %>
+                                    $.get("/counter_events/add_products", addProductParams);
+                                    $("#brand_" + warehouseId + "_buy_one_get_one").prop('selectedIndex', 0);
+                                    $("#goods_type_" + warehouseId + "_buy_one_get_one").prop('selectedIndex', 0);
+                                    $("#model_" + warehouseId + "_buy_one_get_one").prop('selectedIndex', 0);
+                                    return false;
+                                });
+                                $(".add-buttons-by-code-buy-one-get-one").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    if ($("#code_" + warehouseId + "_buy_one_get_one").val().trim() == "")
+                                        bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                    else {
+                                        var productIds = [];
+                                        $(".counter_event-products-" + warehouseId + "-product-id-fields-buy-one-get-one").each(function () {
+                                            var attrId = $(this).attr('id');
+                                            productIds.push(attrId.split("_")[8]);
+                                        });
+                                        var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId + "_buy_one_get_one").val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "buy one get one"
+                                          };
+              <% else %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId + "_buy_one_get_one").val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "buy one get one",
+                                              counter_event_id: "<%= @counter_event.id %>"
+                                          };
+              <% end %>
+                                        $.get("/counter_events/add_products", addProductParams);
+                                        $("#code_" + warehouseId + "_buy_one_get_one").val("");
+                                    }
+                                    return false;
+                                });
+                                $(".counter_event-warehouse-select-different-products-fields-buy-one-get-one").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").removeClass("hidden");
+                                    else {
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-buy-one-get-one").addClass("hidden");
+                                    }
+                                });
+            <% else %>
+                                $(".add-buttons").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    var productIds = [];
+                                    $(".counter_event-products-" + warehouseId + "-product-id-fields").each(function () {
+                                        var attrId = $(this).attr('id');
+                                        productIds.push(attrId.split("_")[8]);
+                                    });
+                                    var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId).val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId).val(),
+                                          model_id: $("#model_" + warehouseId).val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: ""
+                                      };
+              <% else %>
+                                      addProductParams = {
+                                          warehouse_id: warehouseId,
+                                          brand_id: $("#brand_" + warehouseId).val(),
+                                          goods_type_id: $("#goods_type_" + warehouseId).val(),
+                                          model_id: $("#model_" + warehouseId).val(),
+                                          selected_product_ids: productIds.join(","),
+                                          counter_event_type: "",
+                                          counter_event_id: "<%= @counter_event.id %>"
+                                      };
+              <% end %>
+                                    $.get("/counter_events/add_products", addProductParams);
+                                    $("#brand_" + warehouseId).prop('selectedIndex', 0);
+                                    $("#goods_type_" + warehouseId).prop('selectedIndex', 0);
+                                    $("#model_" + warehouseId).prop('selectedIndex', 0);
+                                    return false;
+                                });
+
+                                $(".add-buttons-by-code").click(function () {
+                                    var warehouseId = $(this).attr("id").split("-")[2];
+                                    if ($("#code_" + warehouseId).val().trim() == "")
+                                        bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                    else {
+                                        var productIds = [];
+                                        $(".counter_event-products-" + warehouseId + "-product-id-fields").each(function () {
+                                            var attrId = $(this).attr('id');
+                                            productIds.push(attrId.split("_")[8]);
+                                        });
+                                        var addProductParams = {};
+              <% if @counter_event.new_record? %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId).val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: ""
+                                          };
+              <% else %>
+                                          addProductParams = {
+                                              warehouse_id: warehouseId,
+                                              product_code: $("#code_" + warehouseId).val(),
+                                              selected_product_ids: productIds.join(","),
+                                              counter_event_type: "",
+                                              counter_event_id: "<%= @counter_event.id %>"
+                                          };
+              <% end %>
+                                        $.get("/counter_events/add_products", addProductParams);
+                                        $("#code_" + warehouseId).val("");
+                                    }
+                                    return false;
+                                });
+
+                                $(".counter_event-warehouse-select-different-products-fields-percentage-discount").click(function () {
+                                    var warehouseId = $(this).attr("id").split("_")[4];
+                                    if ($(this).is(":checked"))
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-percentage-discount").removeClass("hidden");
+                                    else {
+                                        $("#counter_event-warehouse-" + warehouseId + "-form-container-percentage-discount").addClass("hidden");
+                                    }
+                                });
+            <% end %>
+                          });
+                        </script>

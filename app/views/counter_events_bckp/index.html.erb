@@ -1,0 +1,26 @@
+<div class="page-header">
+    <h1>CounterEvents</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" id="filter-string" class="form-control" placeholder="Code/Name">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-counter_event-start-time" placeholder="Start time" style="width: 256px !important">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-counter_event-end-time" placeholder="End time" style="width: 256px !important">
+    </div>
+    <button id="search-counter_event-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+</div>
+
+
+<div class="hidden">
+    <%= smart_listing_controls_for(:counter_events, {class: "form-inline text-right"}) do %>
+        <%= text_field_tag :filter_counter_event_start_time, '', class: "search form-control", autocomplete: :off %>
+          <%= text_field_tag :filter_counter_event_end_time, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+            <% end %>
+        </div>
+        <%= smart_listing_render(:counter_events) %>
