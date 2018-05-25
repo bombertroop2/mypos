@@ -57,8 +57,8 @@ class CounterEventsController < ApplicationController
     remove_warehouse_products
     params[:counter_event][:special_price] = params[:counter_event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:counter_event][:special_price].present?    
     @counter_event = CounterEvent.new(counter_event_params)
-    if params[:warehouse_ids].split(", ").blank?
-      render js: "bootbox.alert({message: \"Please select atleast 1 warehouse below.\",size: 'small'});" and return
+    if params[:warehouse_ids].split(",").blank?
+      render js: "bootbox.alert({message: \"Please select at least 1 warehouse.\",size: 'small'});" and return
     end
     begin
       @valid = @counter_event.save

@@ -18,7 +18,7 @@ class CounterEvent < ApplicationRecord
 	
 	def set_warehouses(w_ids)
 		counter_event_warehouses.destroy_all
-		warehouse_ids = w_ids.split(", ")
+		warehouse_ids = w_ids.split(",")
 		arr = warehouse_ids.map {|x| {counter_event_id: id, warehouse_id: x}}
 		
 		CounterEventWarehouse.create(arr)
