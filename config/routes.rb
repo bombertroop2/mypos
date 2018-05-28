@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :customers
   get 'incompatible_browsers/index'
 
   resources :sales_returns, except: [:edit, :update, :destroy] do

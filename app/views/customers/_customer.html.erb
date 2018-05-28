@@ -1,0 +1,10 @@
+<td><%= object.code %></td>
+<td><%= object.name %></td>
+<td><%= remove_empty_space_from_phone_number(object.phone) %></td>
+<td><%= remove_empty_space_from_phone_number(object.facsimile) %></td>
+<td><%= object.email %></td>
+<td class="actions" style="text-align: right">
+  <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, customer_path(object), data: {remote: true}, title: "Show" %>
+  <%= link_to_if(can?(:manage, Customer), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_customer_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
+    <%= link_to_if(can?(:manage, Customer), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+</td>

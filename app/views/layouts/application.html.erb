@@ -101,6 +101,9 @@
                                                       <% if can? :read, Product %>
                                                         <li><%= link_to "Products", products_path, method: :get %></li>
                                                       <% end %>
+                                                      <% if can? :read, User %>
+                                                        <li><%= link_to "Customers", customers_path, method: :get %></li>
+                                                      <% end %>
                                                   </ul>
                                               </li>
                                             <% end %>

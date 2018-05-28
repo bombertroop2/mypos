@@ -1,0 +1,143 @@
+<td colspan="6">
+  <div style="padding-top: 20px"></div>
+  <%= form_for(@customer, remote: true, html: {class: "form-horizontal"}) do |f| %>
+
+  <div class="form-group<%= control_group_error(@customer, :code) %>">
+    <%= f.label :code, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.text_field :code, class: "form-control upcase inputs", tabindex: "1" %>
+      <%= error_help_text(@customer, :code) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :name) %>">
+    <%= f.label :name, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.text_field :name, class: "form-control inputs", tabindex: "2" %>
+      <%= error_help_text(@customer, :name) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :address) %>">
+    <%= f.label :address, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.text_area :address, rows: 6, tabindex: "3", class: "form-control" %>
+      <%= error_help_text(@customer, :address) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :phone) %>">
+    <%= f.label :phone, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.telephone_field :phone, class: "inputs form-control", tabindex: "4", size: 10 %>
+      <%= error_help_text(@customer, :phone) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :facsimile) %>">
+    <%= f.label :facsimile, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.telephone_field :facsimile, class: "form-control inputs", tabindex: "5", size: 10 %>
+      <%= error_help_text(@customer, :facsimile) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :email) %>">
+    <%= f.label :email, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.email_field :email, class: "form-control inputs", tabindex: "6" %>
+      <%= error_help_text(@customer, :email) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :pic_name) %>">
+    <%= f.label :pic_name, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.text_field :pic_name, class: "form-control inputs", tabindex: "7" %>
+      <%= error_help_text(@customer, :pic_name) %>
+    </div>
+  </div>
+  
+  <div class="form-group<%= control_group_error(@customer, :pic_mobile_phone) %>">
+    <%= f.label :pic_mobile_phone, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.telephone_field :pic_mobile_phone, class: "form-control inputs", tabindex: "9", size: 12 %>
+      <%= error_help_text(@customer, :pic_mobile_phone) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :pic_email) %>">
+    <%= f.label :pic_email, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.email_field :pic_email, class: "form-control inputs", tabindex: "10" %>
+      <%= error_help_text(@customer, :pic_email) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :terms_of_payment) %>">
+    <%= f.label :terms_of_payment, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.number_field :terms_of_payment, class: "form-control inputs", tabindex: "11" %>
+      <%= error_help_text(@customer, :terms_of_payment) %>
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :is_taxable_entrepreneur) %>" id="taxable_entrepreneur" <% if @customer.is_taxable_entrepreneur %>style="display: none"<% end %>>
+    <label class="col-sm-2 control-label"></label>
+    <div class="col-sm-10">
+      <%= f.check_box :is_taxable_entrepreneur %> Taxable entrepreneur
+    </div>
+  </div>
+  <div class="form-group<%= control_group_error(@customer, :value_added_tax) %>" id="value_added_tax" <% unless @customer.is_taxable_entrepreneur %>style="display: none"<% end %>>
+    <%= f.label :value_added_tax, class: "col-sm-2 control-label" %>
+    <div class="col-sm-10">
+      <%= f.select :value_added_tax, options_for_select(Customer::VAT, @customer.value_added_tax), {prompt: true}, {tabindex: "12", class: "form-control inputs"} %>
+      <%= error_help_text(@customer, :value_added_tax) %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <%= f.submit "Save", class: "btn btn-primary" %>
+      <button class="btn btn-link cancel">Cancel</button>
+    </div>
+  </div>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    MaskedInput({
+      elm: document.getElementById('customer_phone'),
+      format: '____-_______',
+      separator: '-'
+    });
+    MaskedInput({
+      elm: document.getElementById('customer_facsimile'),
+      format: '____-_______',
+      separator: '-'
+    });
+    MaskedInput({
+      elm: document.getElementById('customer_pic_phone'),
+      format: '____-_______',
+      separator: '-'
+    });
+    MaskedInput({
+      elm: document.getElementById('customer_pic_mobile_phone'),
+      format: '____________'
+    });
+    if ($("#taxable_entrepreneur").length > 0) {
+      $(document).unbind("keydown");
+      $(document).keydown(function (e) {
+        if (e.keyCode == 116 && e.ctrlKey) {
+          $("#taxable_entrepreneur").toggle();
+          return false;
+        }
+      });
+
+      $("#customer_is_taxable_entrepreneur").unbind("click");
+      $("#customer_is_taxable_entrepreneur").click(function () {
+                                                    // $this will contain a reference to the checkbox   
+                                                    if ($(this).is(':checked')) {
+                                                      $("#value_added_tax").show();
+                                                    } else {
+                                                      $("#value_added_tax").hide();
+                                                    }
+                                                  });
+    }
+    $('#customer_code').on("input", function () {
+      $(this).val($(this).val().replace(/ /g, ""));
+    });
+  });
+</script>
