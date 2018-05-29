@@ -1,5 +1,16 @@
 Rails.application.routes.draw do
   resources :customers
+  resources :consignment_sales, except: [:edit, :update] do
+    collection do
+      get "get_product"
+      get "get_product_colors"
+      get "get_product_sizes"
+    end
+    member do
+      get "approve"
+      get "unapprove"
+    end
+  end
   get 'incompatible_browsers/index'
 
   resources :sales_returns, except: [:edit, :update, :destroy] do
@@ -10,10 +21,10 @@ Rails.application.routes.draw do
       get "get_replacement_product_sizes"
     end
   end
-  get 'fake_consignment_sale/sale_entry'
-  get 'consignments/new' => 'fake_consignment_sale#sale_entry'
-  get 'fake_consignment_sale/get_product'
-  get 'consignments' => 'fake_consignment_sale#listing_sale'
+  #  get 'fake_consignment_sale/sale_entry'
+  #  get 'consignments/new' => 'fake_consignment_sale#sale_entry'
+  #  get 'fake_consignment_sale/get_product'
+  #  get 'consignments' => 'fake_consignment_sale#listing_sale'
 
   resources :counter_events do    
     collection do
@@ -183,6 +194,7 @@ Rails.application.routes.draw do
   resources :users do
     collection do
       get "generate_spg_user_form"
+      get "get_area_manager_info"
     end
   end    
   

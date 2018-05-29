@@ -1,8 +1,10 @@
 <% if @invalid %>
-  <% if params[:user][:sales_promotion_girl_id].blank? %>
+  <% if params[:user][:sales_promotion_girl_id].blank? && !params[:user][:supervisor_id] %>
     $("#non_spg_form_container").html('<%= j(render(partial: "non_spg_form")) %>');
-  <% else %>
+  <% elsif params[:user][:sales_promotion_girl_id].present? %>
     $("#spg_form_container").html('<%= j(render(partial: "spg_form")) %>');
+  <% else %>
+    $("#area_manager_form_container").html('<%= j(render(partial: "area_manager_form")) %>');
   <% end %>
 <% else %>
   <%= smart_listing_item :users, :create, @user, "users/user" %>

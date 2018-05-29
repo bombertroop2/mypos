@@ -1,8 +1,10 @@
 <% if @invalid %>
   <% if User::NON_SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
     $("#non_spg_form_container").html('<%= j(render(partial: "non_spg_form")) %>');
-  <% else %>
+  <% elsif User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
     $("#spg_form_container").html('<%= j(render(partial: "spg_form")) %>');
+  <% else %>
+    $("#area_manager_form_container").html('<%= j(render(partial: "area_manager_form")) %>');
   <% end %>
 <% else %>
   <%= smart_listing_item :users, :update, @user, "users/user" %>

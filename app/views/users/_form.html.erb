@@ -4,11 +4,14 @@
     <ul class="nav nav-tabs" role="tablist">
         <% if !@user.new_record? && User::NON_SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
           <li role="presentation" class="active"><a href="#non_spg_tab" aria-controls="non_spg_tab" role="tab" data-toggle="tab">Non-SPG</a></li>
-        <% elsif !@user.new_record? %>
+        <% elsif !@user.new_record? && User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
           <li role="presentation"><a href="#spg_tab" aria-controls="spg_tab" role="tab" data-toggle="tab">SPG</a></li>
+        <% elsif !@user.new_record? %>
+          <li role="presentation"><a href="#area_manager_tab" aria-controls="area_manager_tab" role="tab" data-toggle="tab">Area Manager</a></li>
         <% else %>
           <li role="presentation" class="active"><a href="#non_spg_tab" aria-controls="non_spg_tab" role="tab" data-toggle="tab">Non-SPG</a></li>
           <li role="presentation"><a href="#spg_tab" aria-controls="spg_tab" role="tab" data-toggle="tab">SPG</a></li>
+          <li role="presentation"><a href="#area_manager_tab" aria-controls="area_manager_tab" role="tab" data-toggle="tab">Area Manager</a></li>
         <% end %>
     </ul>
     <!-- tab panes -->
@@ -19,16 +22,27 @@
                   <%= render "non_spg_form" %>
               </div>
           </div>
-        <% elsif !@user.new_record? %>
+      <% elsif !@user.new_record? && User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
           <div role="tabpanel" class="tab-pane fade" id="spg_tab" style="padding-top: 20px">
               <div id="spg_form_container">
                   <%= render "spg_form" %>
+              </div>
+          </div>
+      <% elsif !@user.new_record? %>
+          <div role="tabpanel" class="tab-pane fade" id="area_manager_tab" style="padding-top: 20px">
+              <div id="area_manager_form_container">
+                  <%= render "area_manager_form" %>
               </div>
           </div>
         <% else %>
           <div role="tabpanel" class="tab-pane fade in active" id="non_spg_tab" style="padding-top: 20px">
               <div id="non_spg_form_container">
                   <%= render "non_spg_form" %>
+              </div>
+          </div>
+          <div role="tabpanel" class="tab-pane fade in active" id="area_manager_tab" style="padding-top: 20px">
+              <div id="area_manager_form_container">
+                  <%= render "area_manager_form" %>
               </div>
           </div>
           <div role="tabpanel" class="tab-pane fade" id="spg_tab" style="padding-top: 20px">
@@ -80,8 +94,10 @@
     $(function () {
   <% if !@user.new_record? && User::NON_SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
           $('.nav-tabs a[href="#non_spg_tab"]').tab('show');
-  <% elsif !@user.new_record? %>
+  <% elsif !@user.new_record? && User::SPG_ROLES.select{|a, b| b.eql?(@user.roles.first.name)}.present? %>
           $('.nav-tabs a[href="#spg_tab"]').tab('show');
+  <% elsif !@user.new_record? %>
+          $('.nav-tabs a[href="#area_manager_tab"]').tab('show');
   <% else %>
           var spgDataTable = null
 

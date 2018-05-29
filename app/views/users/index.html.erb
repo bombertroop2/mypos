@@ -9,7 +9,7 @@
       <div class="form-group">
           <% non_spg_roles = User::NON_SPG_ROLES.clone %>
           <% non_spg_roles.shift unless current_user.has_role?(:superadmin) %>
-          <%= select_tag "role", options_for_select(non_spg_roles + User::SPG_ROLES), {prompt: "Role", class: "form-control", id: "filter-role"} %>
+          <%= select_tag "role", options_for_select(non_spg_roles + User::SPG_ROLES + [["Area Manager", "area_manager"]]), {prompt: "Role", class: "form-control", id: "filter-role"} %>
         </div>
         <div class="form-group">
             <input type="text" id="filter-string" class="form-control" placeholder="Name">

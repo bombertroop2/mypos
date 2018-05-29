@@ -3,6 +3,7 @@ class Supervisor < ApplicationRecord
   has_many :sales_promotion_girls, through: :warehouses
   has_many :warehouses, dependent: :restrict_with_error
   has_one :warehouse_relation, -> {select("1 AS one")}, class_name: "Warehouse"
+  has_one :user, dependent: :destroy
 
   validates :code, :name, :address, :mobile_phone, presence: true
   validates :code, :mobile_phone, uniqueness: true
@@ -14,6 +15,10 @@ class Supervisor < ApplicationRecord
     before_validation :upcase_code, :replace_underline_from_mobile_phone, :strip_string_values
     
     before_destroy :delete_tracks
+    
+    def code_and_name
+      "#{code} - #{name}"
+    end
 
     private
     
