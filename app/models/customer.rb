@@ -3,13 +3,11 @@ class Customer < ApplicationRecord
 	before_validation :strip_string_values
 
 	validates :code, presence: true, uniqueness: true
-	validates :name, :address, :terms_of_payment, presence: true
-	validates :value_added_tax, presence: true, if: proc {|customer| customer.is_taxable_entrepreneur}
-  #  validates :email, uniqueness: true, if: proc {|customer| customer.email.present?}
-  #    validates :pic_email, uniqueness: true, if: proc {|customer| customer.pic_email.present?}
+	validates :name, :address, :terms_of_payment, :limit_value, presence: true
+	validates :value_added_tax, presence: true, if: proc {|customer| customer.is_taxable_entrepreneur}  
   validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|customer| customer.terms_of_payment.present?}
   validate :code_not_changed, :vat_available
-
+	validates :limit_value, numericality: {greater_than: 0}, if: proc { |cost_list| cost_list.cost.is_a?(Numeric) }
 
   VAT = [
   	["Include", "include"],
