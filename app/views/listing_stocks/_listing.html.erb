@@ -79,6 +79,8 @@
             <% total_qty -= stock_transaction.quantity %>
           <% elsif stock_transaction.transaction_type.eql?("RET") %>
             <% total_qty += stock_transaction.quantity %>
+          <% elsif stock_transaction.transaction_type.eql?("SLK") %>
+            <% total_qty -= stock_transaction.quantity %>
           <% end %>
           <tr class="editable" data-id="<%#= brand.id %>">
               <% unless last_transaction_date == stock_transaction.transaction_date %>

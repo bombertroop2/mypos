@@ -1,0 +1,16 @@
+<% if @product_colors.present? %> 
+  <% if params[:warehouse_id].blank? %>
+    <% warehouse_id = nil %>
+  <% else %>
+    <% warehouse_id = params[:warehouse_id] %>
+  <% end %>
+  $("#consale_product_color_field_container").html("<%= j(render(partial: "product_colors_field", locals: {product_colors: @product_colors, product_code: params[:product_code], warehouse_id: warehouse_id})) %>");
+<% else %>
+  $("#consale_product_color_field_container").html("");
+  var box = bootbox.alert({message: "No colors found",size: 'small'});
+  box.on("hidden.bs.modal", function () { 
+    $("#consale_product_code").focus();
+  });
+<% end %>
+$("#consale_product_size_field_container").html("");
+$("#modal_form_btn_add_product_consale").addClass("hidden");

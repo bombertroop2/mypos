@@ -1,0 +1,28 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-consale-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Transaction Number", "transaction_number" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Transaction Date", "transaction_date" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Total", "total" %></th>
+            <th class="col-md-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |consignment_sale| %>
+          <tr class="editable" data-id="<%= consignment_sale.id %>">
+              <%= smart_listing.render object: consignment_sale, partial: "consignment_sales/consignment_sale", locals: {object: consignment_sale} %>
+          </tr>
+        <% end %>
+        <%#= smart_listing.item_new colspan: 4, link: new_brand_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-consale-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-consale-thead").show();
+      }
+  }, 0);
+</script>

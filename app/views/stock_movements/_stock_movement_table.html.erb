@@ -2,10 +2,10 @@
     <table class="table table-bordered table-condensed">
         <thead>
             <tr>
-                <th class="text-center" colspan="14">Stock Movement Report</th>
+                <th class="text-center" colspan="15">Stock Movement Report</th>
             </tr>
             <tr>
-                <th class="text-center" colspan="14"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
+                <th class="text-center" colspan="15"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
             </tr>
             <tr>
                 <th class="text-center" rowspan="2">Article</th>
@@ -20,6 +20,7 @@
                 <th class="text-center" colspan="2">Rolling</th>
                 <th class="text-center" rowspan="2">Sales</th>
                 <th class="text-center" rowspan="2">Return</th>
+                <th class="text-center" rowspan="2">SLK</th>
                 <th class="text-center" rowspan="2">Ending Stock</th>
             </tr>
             <tr>
@@ -68,6 +69,7 @@
                   <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_delivered rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_sold_quantity rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_sales_return_quantity_received rescue 0 %></td>
+                  <td class="text-right"><%= stock_movement_transaction.total_consignment_sold_quantity rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.ending_stock %></td>
               </tr>
               <% last_product_code = stock_movement_transaction.product_code %>

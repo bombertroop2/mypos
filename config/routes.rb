@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       get "get_product"
       get "get_product_colors"
       get "get_product_sizes"
+      get "get_events"
     end
     member do
       get "approve"

@@ -1,0 +1,4 @@
+var box = bootbox.alert({message: "Transaction was successfully created",size: 'small'});
+box.on("hidden.bs.modal", function () { 
+  window.location = "<%= new_consignment_sale_url %>";
+});

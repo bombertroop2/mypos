@@ -1,0 +1,2 @@
+module ConsignmentSalesHelper
+end

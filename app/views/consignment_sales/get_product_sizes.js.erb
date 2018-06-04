@@ -1,0 +1,13 @@
+<% if @product_sizes.present? %>
+  <% if params[:warehouse_id].blank? %>
+    <% warehouse_id = nil %>
+  <% else %>
+    <% warehouse_id = params[:warehouse_id] %>
+  <% end %>
+  $("#consale_product_size_field_container").html("<%= j(render(partial: "product_sizes_field", locals: {product_sizes: @product_sizes, product_code: params[:product_code], product_color: params[:product_color], warehouse_id: warehouse_id})) %>");
+  $("#modal_form_btn_add_product_consale").removeClass("hidden");
+<% else %>
+  $("#consale_product_size_field_container").html("");
+  $("#modal_form_btn_add_product_consale").addClass("hidden");
+  bootbox.alert({message: "No sizes found",size: 'small'});
+<% end %>

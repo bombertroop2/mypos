@@ -1,0 +1,27 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label">Color</label>
+    <div class="col-sm-9">
+        <%= select_tag "consale_product_color", options_from_collection_for_select(product_colors, :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 100%"} %>
+      </div>
+  </div>
+
+  <script>
+    $(function () {
+        $("#consale_product_color").attr("data-placeholder", "Select").chosen();
+        $("#consale_product_color").change(function () {
+  <% if warehouse_id.present? %>
+              $.get("/consignment_sales/get_product_sizes", {
+                  product_code: "<%= product_code %>",
+                  product_color: $("#consale_product_color").val().trim(),
+                  warehouse_id: "<%= warehouse_id %>"
+              });
+  <% else %>
+              $.get("/consignment_sales/get_product_sizes", {
+                  product_code: "<%= product_code %>",
+                  product_color: $("#consale_product_color").val().trim()
+              });
+  <% end %>
+        });
+
+    });
+  </script>

@@ -1,0 +1,29 @@
+<div class="page-header">
+    <h1>Sales</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <% if current_user.has_non_spg_role? %>
+      <div class="form-group">
+          <%= select_tag "counter_warehouse", options_from_collection_for_select(@counters, :id, "code_and_name"), {prompt: "Counter", class: "form-control", id: "filter-counter-warehouse"} %>
+        </div>
+      <% end %>
+      <div class="form-group">
+          <input type="text" id="filter-string" class="form-control" placeholder="Transaction number">
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-consale-transaction-date" placeholder="Transaction date">
+      </div>
+      <button id="search-consale-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+  </div>
+
+  <div class="hidden">
+      <%= smart_listing_controls_for(:consignment_sales, {class: "form-inline text-right"}) do %>
+          <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+              <% if current_user.has_non_spg_role? %>
+                <%= text_field_tag :filter_counter_warehouse, '', class: "search form-control", autocomplete: :off %>
+                <% end %>
+              <% end %>
+          </div>
+          <%= smart_listing_render(:consignment_sales) %>

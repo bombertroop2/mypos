@@ -5,7 +5,6 @@ class Ability
     # Define abilities for the passed in user here. For example:
     #
     user ||= User.new # guest user (not logged in)
-    showroom_present = Warehouse.joins(:sales_promotion_girls).select("1 AS one").where(is_active: true, warehouse_type: "showroom", :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
     if user.has_role? :superadmin
       can :manage, :all
       cannot :manage, CashierOpening
@@ -29,6 +28,8 @@ class Ability
             "ListingStock"
           elsif user_menu.eql?("Bank Master")
             "Bank"
+          elsif user_menu.eql?("Consignment")
+            "ConsignmentSale"
           else
             user_menu
           end
@@ -89,11 +90,19 @@ class Ability
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
           elsif user_menu.name.eql?("Point of Sale")
+            showroom_present = Warehouse.joins(:sales_promotion_girls).select("1 AS one").where(is_active: true, warehouse_type: "showroom", :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
             if user.has_role?(:cashier) && !user.new_record? && showroom_present
               can ability, CashierOpening
               can ability, CashDisbursement
               can ability, Sale
               can ability, SalesReturn
+            end
+          elsif user_menu.name.eql?("Consignment")
+            counter_present = Warehouse.joins(:sales_promotion_girls).counter.select("1 AS one").where(is_active: true, :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
+            if (user.has_role?(:supervisor) || user.has_role?(:spg) || user.has_role?(:cashier)) && counter_present
+              can ability, ConsignmentSale
+              cannot :approve, ConsignmentSale
+              cannot :unapprove, ConsignmentSale
             end
           elsif class_name.eql?("Member")
             can ability, Member
@@ -121,10 +130,12 @@ class Ability
             "ListingStock"
           elsif user_menu.name.eql?("Bank Master")
             "Bank"
+          elsif user_menu.name.eql?("Consignment")
+            "ConsignmentSale"
           else
             user_menu.name
           end
-          if ability && class_name.eql?("Supervisor")
+          if ability && class_name.eql?("Supervisor") && !user.has_role?(:area_manager)
             unless user.has_role?(:accountant)
               can ability, class_name.gsub(/\s+/, "").constantize
               can :get_warehouses, class_name.gsub(/\s+/, "").constantize
@@ -132,7 +143,7 @@ class Ability
               can :read, class_name.gsub(/\s+/, "").constantize
               can :get_warehouses, class_name.gsub(/\s+/, "").constantize
             end
-          elsif class_name.eql?("Shipment")
+          elsif class_name.eql?("Shipment") && !user.has_role?(:area_manager)
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, :print, to: :undelete_action
             alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
@@ -148,11 +159,11 @@ class Ability
             end
           elsif (class_name.eql?("Product") || class_name.eql?("Purchase Order")) && !user.has_managerial_role?
             # cegah staff untuk manage product
-            can :read, class_name.gsub(/\s+/, "").constantize
+            can :read, class_name.gsub(/\s+/, "").constantize if !user.has_role?(:area_manager)
           elsif class_name.eql?("CostList") && !user.has_managerial_role?
             # cegah staff untuk manage Cost dan Price
-            can :read, class_name.gsub(/\s+/, "").constantize
-          elsif class_name.eql?("Stock Mutation")
+            can :read, class_name.gsub(/\s+/, "").constantize if !user.has_role?(:area_manager)
+          elsif class_name.eql?("Stock Mutation") && !user.has_role?(:area_manager)
             if ability.eql?(:read) || user.has_role?(:accountant)
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
@@ -167,23 +178,27 @@ class Ability
               alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
               can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts, :receive_to_warehouse], class_name.gsub(/\s+/, "").constantize
             end
-          elsif class_name.eql?("Goods In Transit")
+          elsif class_name.eql?("Goods In Transit") && !user.has_role?(:area_manager)
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
           elsif class_name.eql?("Account Payable") && user.has_role?(:staff)
             can :read, AccountPayable
-          elsif class_name.eql?("Account Payable")
+          elsif class_name.eql?("Account Payable") && !user.has_role?(:area_manager)
             can ability, AccountPayable
-          elsif class_name.eql?("FiscalYear")
+          elsif class_name.eql?("FiscalYear") && !user.has_role?(:area_manager)
             if user.has_role?(:staff)
               can :read, FiscalYear
             else
               can ability, FiscalYear
             end
           elsif class_name.eql?("Point of Sale") || class_name.eql?("Company")
-          elsif ability && !user.has_role?(:accountant)
+          elsif class_name.eql?("ConsignmentSale")
+            if user.has_role?(:area_manager) && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type = 'counter' AND warehouses.is_active = ?", true]).present?
+              can ability, ConsignmentSale
+            end
+          elsif ability && !user.has_role?(:accountant) && !user.has_role?(:area_manager)
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user.has_role?(:accountant)
             can :read, class_name.gsub(/\s+/, "").constantize

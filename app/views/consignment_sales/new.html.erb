@@ -1,0 +1,85 @@
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Sale<small>new transaction</small></h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <%= form_for(@consignment_sale, remote: true, html: {class: "form-horizontal"}) do |f| %>
+                    <% if current_user.has_non_spg_role? %>    
+                      <div class="form-group<%= control_group_error(@consignment_sale, :warehouse_id) %>">
+                          <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>
+                            <div class="col-sm-10">
+                                <%= f.select :warehouse_id, options_from_collection_for_select(@counters, 'id', 'code_and_name', @consignment_sale.warehouse_id.to_s), {include_blank: true, class: "form-control", style: "width: 25%"} %>
+                                  <%= error_help_text(@consignment_sale, :warehouse_id) %>
+                              </div>
+                          </div>
+                        <% end %>
+                        <div class="form-group<%= control_group_error(@consignment_sale, :transaction_date) %>">
+                            <%= f.label :transaction_date, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.text_field :transaction_date, readonly: true, class: "form-control", style: "width: 25%;z-index: 2;position: relative" %>
+                                    <%= error_help_text(@consignment_sale, :transaction_date) %>
+                                </div>
+
+                            </div>
+
+                            <div id="consale-event-field-container"></div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="barcode">Barcode</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group">
+                                        <input type="text" id="consale_barcode" class="form-control" style="width: 100%">
+                                        <span class="input-group-btn" style="width: auto">
+                                            <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="search-barcode-btn-consale">
+                                                <span class="glyphicon glyphicon-plus"></span> Add
+                                            </button>
+                                            <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="search-consale-product-btn">
+                                                <span class="glyphicon glyphicon-search"></span> Search
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="detail_form_container">
+                            </div>
+
+                            <div class="ln_solid"></div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <%= f.submit "Create", class: "btn btn-primary", id: "consignment_sale_submit_button" %>
+                                  </div>
+                              </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchConsaleProductForm" class="form-horizontal search-consale-product-form" style="display: none;">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Product Code</label>
+                    <div class="col-sm-9">
+                        <%= text_field_tag "consale_product_code", "", class: "form-control upcase", style: "width: 100% !important" %>
+                      </div>
+                  </div>
+
+                  <div id="consale_product_color_field_container">
+
+                  </div>
+
+                  <div id="consale_product_size_field_container">
+
+                  </div>
+
+                  <div class="form-group">
+                      <div class="col-xs-5 col-xs-offset-3">
+                          <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_product_consale">
+                              <span class="glyphicon glyphicon-plus"></span> Add
+                          </button>
+                      </div>
+                  </div>
+              </div>

@@ -1,0 +1,100 @@
+<% current_miliseconds = DateTime.now.strftime("%Q") %>
+<%= fields_for "consignment_sale[consignment_sale_products_attributes][#{current_miliseconds}]", @consignment_sale_product do |consignment_sale_product_fields| %>    
+  <tr id="consale-products-<%= current_miliseconds %>">
+      <td style="vertical-align: middle">
+          <%= consignment_sale_product_fields.hidden_field :product_barcode_id %>
+          <%= consignment_sale_product_fields.hidden_field :price_list_id %>
+          <%= @product.barcode %></td>
+      <td style="vertical-align: middle"><%= "#{@product.product_code} - #{@product.brand_name}" %></td>
+      <td style="vertical-align: middle"><%= "#{@product.color_code} - #{@product.color_name}" %></td>
+      <td style="vertical-align: middle"><%= @product.product_size %></td>
+      <td style="vertical-align: middle;text-align: right"><%= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+      <td style="vertical-align: middle">
+          <% if params[:counter_event_id].present? && @product.counter_event_type.present? %>
+            <% if @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? && @product.second_discount.present? %>  
+              <%= "#{@product.first_discount}% + #{@product.second_discount}%" %>
+            <% elsif @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? %>
+              <%= "#{@product.first_discount}%" %>
+            <% elsif @product.counter_event_type.eql?("Special Price") && @product.special_price.present? %>
+              <%= "Special price: #{number_to_currency(@product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %>
+            <% end %>
+          <% end %>
+      </td>
+      <td style="vertical-align: middle;text-align: right">
+          <% if params[:counter_event_id].present? && @product.counter_event_type.present? %>
+            <% if @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? && @product.second_discount.present? %>
+              <% first_discounted_subtotal = @product.price - @product.price * @product.first_discount / 100 %>
+              <%= number_to_currency((first_discounted_subtotal - first_discounted_subtotal * @product.second_discount / 100), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+            <% elsif @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? %>
+              <%= number_to_currency((@product.price - @product.price * @product.first_discount / 100), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+            <% elsif @product.counter_event_type.eql?("Special Price") && @product.special_price.present? %>
+              <%= number_to_currency(@product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+            <% end %>
+          <% else %>
+            <%= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+          <% end %>
+      </td>
+      <td style="vertical-align: middle;text-align: right"><button type="button" class="btn btn-danger" id="btn-delete-consale-product-<%= current_miliseconds %>">Delete</button></td>
+  </tr>
+<% end %>
+
+<script>
+  $(function () {
+      $("#btn-delete-consale-product-<%= current_miliseconds %>").click(function () {
+          var currentMiliseconds = $(this).attr("id").split("-")[4];
+          $("#consale-products-" + currentMiliseconds).remove();
+          if ($('#listing-consale-products-table tbody>tr').length == 0)
+              $("#detail_form_container").html("");
+          else {
+              var totalSale = 0;
+
+              $("#listing-consale-products-table > tbody > tr").each(function () {
+                  var subtotal = 0;
+                  if ($(this).children("td").eq(6).length > 0) {
+                      var subtotalNumeric = $(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+                      if (!isNaN(subtotalNumeric))
+                          subtotal = parseFloat(subtotalNumeric);
+                  }
+                  totalSale = totalSale + subtotal;
+              });
+
+              $("#total-consale").html(totalSale);
+
+              $("#total-consale").toCurrency({
+                  precision: 2, // decimal precision
+                  delimiter: ".", // thousands delimiter
+                  separator: ",", // decimal separator
+                  unit: "Rp", // unit
+                  format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                  negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+              });
+
+          }
+      });
+
+      var totalSale = 0;
+
+      $("#listing-consale-products-table > tbody > tr").each(function () {
+          var subtotal = 0;
+          if ($(this).children("td").eq(6).length > 0) {
+              var subtotalNumeric = $(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+              if (!isNaN(subtotalNumeric))
+                  subtotal = parseFloat(subtotalNumeric);
+          }
+          totalSale = totalSale + subtotal;
+      });
+
+      $("#total-consale").html(totalSale);
+
+      $("#total-consale").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+
+
+  });
+</script>

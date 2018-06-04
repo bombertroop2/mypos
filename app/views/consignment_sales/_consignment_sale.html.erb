@@ -1,0 +1,9 @@
+<td><%= object.transaction_number %></td>
+<td><%= object.transaction_date.strftime("%d/%m/%Y") %></td>
+<td><%= number_to_currency(object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to_if(can?(:read, ConsignmentSale), content_tag(:i, "", :class => "glyphicon glyphicon-share-alt"), consignment_sale_path(object), :remote => true, :method => :get, title: "Show" ) %>
+    <%= link_to_if(can?(:approve, ConsignmentSale) && !object.approved, content_tag(:i, "", :class => "glyphicon glyphicon-ok"), approve_consignment_sale_path(object), :remote => true, :method => :get, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Approve" ) %>
+    <%= link_to_if(can?(:unapprove, ConsignmentSale) && object.approved, content_tag(:i, "", :class => "glyphicon glyphicon-remove"), unapprove_consignment_sale_path(object), :remote => true, :method => :get, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Unapprove" ) %>
+    <%= link_to_if(can?(:manage, ConsignmentSale) && !object.approved, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+</td>

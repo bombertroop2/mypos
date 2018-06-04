@@ -1,0 +1,15 @@
+<div class="form-group">
+    <%= label :consignment_sale, :counter_event_id, "Event", class: "col-sm-2 control-label" %>
+      <div class="col-sm-10">
+          <%= select :consignment_sale, :counter_event_id, options_from_collection_for_select(@events, 'id', 'code_and_name', @consignment_sale.counter_event_id.to_s), {include_blank: true}, {class: "form-control", style: "width: 25%"} %>
+        </div>
+
+    </div>
+
+    <script>
+      $(function () {
+          $("#consignment_sale_counter_event_id").change(function () {
+              $("#detail_form_container").html("");
+          });
+      });
+    </script>

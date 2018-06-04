@@ -200,6 +200,18 @@
                                                   </ul>
                                               </li>
                                             <% end %>
+                                            <% if consignment_menu_active? %>
+                                              <li><a><i class="fa fa-calculator"></i> Consignments <span class="fa fa-chevron-down"></span></a>
+                                                  <ul class="nav child_menu">
+                                                      <% if can? :manage, ConsignmentSale %>
+                                                        <li><%= link_to "Sale Entry", new_consignment_sale_path, method: :get %></li>
+                                                      <% end %>
+                                                      <% if can? :read, ConsignmentSale %>
+                                                        <li><%= link_to "Listing Sales", consignment_sales_path, method: :get %></li>
+                                                      <% end %>
+                                                  </ul>
+                                              </li>
+                                            <% end %>
                                             <% if report_menu_active? || goods_in_transit_active? %>
                                               <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
                                                   <ul class="nav child_menu">

@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Transaction date:</strong>
+  <%= @consignment_sale.transaction_date %>
+</p>
+
+<p>
+  <strong>Approved:</strong>
+  <%= @consignment_sale.approved %>
+</p>
+
+<p>
+  <strong>Transaction number:</strong>
+  <%= @consignment_sale.transaction_number %>
+</p>
+
+<p>
+  <strong>Total:</strong>
+  <%= @consignment_sale.total %>
+</p>
+
+<p>
+  <strong>Sales promotion girl:</strong>
+  <%= @consignment_sale.sales_promotion_girl %>
+</p>
+
+<%= link_to 'Edit', edit_consignment_sale_path(@consignment_sale) %> |
+<%= link_to 'Back', consignment_sales_path %>

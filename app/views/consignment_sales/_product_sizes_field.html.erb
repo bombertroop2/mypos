@@ -1,0 +1,57 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label">Size</label>
+    <div class="col-sm-9">
+        <%= select_tag "consale_product_size", options_from_collection_for_select(product_sizes, :id, :size), {include_blank: true, class: "form-control", style: "width: 100%"} %>
+      </div>
+  </div>
+
+  <script>
+    $(function () {
+        $("#consale_product_size").attr("data-placeholder", "Select").chosen();
+        $("#modal_form_btn_add_product_consale").unbind();
+        $("#modal_form_btn_add_product_consale").click(function () {
+            if ($("#consignment_sale_transaction_date").val().trim() == "")
+                bootbox.alert({message: "Please fill in transaction date first", size: 'small'});
+            else {
+  <% if warehouse_id.present? %>
+                  if ($("#consignment_sale_counter_event_id").length > 0 && $("#consignment_sale_counter_event_id").val().trim() != "") {
+                      $.get("/consignment_sales/get_product", {
+                          product_code: "<%= product_code %>",
+                          product_color: "<%= product_color %>",
+                          product_size: $("#consale_product_size").val().trim(),
+                          transaction_date: $("#consignment_sale_transaction_date").val().trim(),
+                          warehouse_id: "<%= warehouse_id %>",
+                          counter_event_id: $("#consignment_sale_counter_event_id").val().trim()
+                      });
+                  } else {
+                      $.get("/consignment_sales/get_product", {
+                          product_code: "<%= product_code %>",
+                          product_color: "<%= product_color %>",
+                          product_size: $("#consale_product_size").val().trim(),
+                          transaction_date: $("#consignment_sale_transaction_date").val().trim(),
+                          warehouse_id: "<%= warehouse_id %>"
+                      });
+                  }
+  <% else %>
+                  if ($("#consignment_sale_counter_event_id").length > 0 && $("#consignment_sale_counter_event_id").val().trim() != "") {
+                      $.get("/consignment_sales/get_product", {
+                          product_code: "<%= product_code %>",
+                          product_color: "<%= product_color %>",
+                          product_size: $("#consale_product_size").val().trim(),
+                          transaction_date: $("#consignment_sale_transaction_date").val().trim(),
+                          counter_event_id: $("#consignment_sale_counter_event_id").val().trim()
+                      });
+                  } else {
+                      $.get("/consignment_sales/get_product", {
+                          product_code: "<%= product_code %>",
+                          product_color: "<%= product_color %>",
+                          product_size: $("#consale_product_size").val().trim(),
+                          transaction_date: $("#consignment_sale_transaction_date").val().trim()
+                      });
+                  }
+  <% end %>
+            }
+        });
+
+    });
+  </script>

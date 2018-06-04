@@ -87,7 +87,7 @@ class User < ApplicationRecord
                     end
             
                     def has_non_spg_role?
-                      has_role?(:staff) || has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) || has_role?(:accountant)
+                      has_role?(:staff) || has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) || has_role?(:accountant) || has_role?(:area_manager)
                     end
 
                     private

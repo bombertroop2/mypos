@@ -7,7 +7,9 @@ class PriceList < ApplicationRecord
 
   belongs_to :product_detail
   has_many :sale_products, dependent: :restrict_with_error  
+  has_many :consignment_sale_products, dependent: :restrict_with_error  
   has_one :sale_product_relation, -> {select("1 AS one")}, class_name: "SaleProduct"
+  has_one :consignment_sale_product_relation, -> {select("1 AS one")}, class_name: "ConsignmentSaleProduct"
     
   attr_reader :cost
   
@@ -96,7 +98,7 @@ class PriceList < ApplicationRecord
 
                   def price_not_changed
                     if price_changed? && persisted?
-                      if sale_product_relation.present?
+                      if sale_product_relation.present? || consignment_sale_product_relation.present?
                         errors.add(:price, "change is not allowed!")
                       else
                         current_date = Date.current
@@ -110,7 +112,7 @@ class PriceList < ApplicationRecord
                   end
 
                   def product_detail_id_not_changed
-                    errors.add(:product_detail_id, "change is not allowed!") if product_detail_id_changed? && persisted? && sale_product_relation.present?
+                    errors.add(:product_detail_id, "change is not allowed!") if product_detail_id_changed? && persisted? && (sale_product_relation.present? || consignment_sale_product_relation.present?)
                   end
         
             

@@ -1,0 +1,6 @@
+<% if @events.present? %>
+  $("#consale-event-field-container").html("<%= j(render(partial: "events_field")) %>");
+  $("#consignment_sale_counter_event_id").attr("data-placeholder", "Select").chosen();
+<% else %>
+  $("#consale-event-field-container").html("");
+<% end %>

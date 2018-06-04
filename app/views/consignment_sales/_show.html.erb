@@ -1,0 +1,92 @@
+<td colspan="4">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <% if current_user.has_non_spg_role? %>
+      <dl class="dl-horizontal">
+          <dt>Warehouse</dt>
+          <dd><%= "#{object.code || object.sales_promotion_girls_warehouses_code} - #{object.name || object.sales_promotion_girls_warehouses_name}" %></dd>
+      </dl>
+    <% end %>
+
+    <dl class="dl-horizontal">
+        <dt>Transaction Number</dt>
+        <dd><%= object.transaction_number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Transaction Date</dt>
+        <dd><%= object.transaction_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <% event = nil %>
+    <% if object.counter_event_type.present? %>
+      <% if object.counter_event_type.eql?("Discount(%)") && object.first_discount.present? && object.second_discount.present? %>
+        <% event = "#{object.first_discount}% + #{object.second_discount}%" %>
+      <% elsif object.counter_event_type.eql?("Discount(%)") && object.first_discount.present? %>                    
+        <% event = "#{object.first_discount}%" %>
+      <% elsif object.counter_event_type.eql?("Special Price") && object.special_price.present? %>
+        <% event = "Special price: #{number_to_currency(object.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %>
+      <% end %>
+    <% end %>
+    <% if event.present? %>
+      <dl class="dl-horizontal">
+          <dt>Event</dt>
+          <dd><%= event %></dd>
+      </dl>
+    <% end %>
+
+    <% sale_products = object.consignment_sale_products.
+      joins(:price_list, product_barcode: [:size, product_color: [:color, [product: :brand]]]).
+      select("product_barcodes.barcode", "brands_products.name AS product_name", "products.code AS product_code", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "consignment_sale_products.total AS subtotal") %>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Barcode</th>
+                <th>Product</th>
+                <th>Color</th>
+                <th>Size</th>
+                <th>Price</th>
+                <th>Event</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% sale_products.each_with_index do |sale_product, index| %>
+              <tr>
+                  <td style="vertical-align: middle"><%= index + 1 %></td>
+                  <td style="vertical-align: middle"><%= sale_product.barcode %></td>
+                  <td><%= "#{sale_product.product_code} - #{sale_product.product_name}" %></td>
+                  <td><%= "#{sale_product.color_code} - #{sale_product.color_name}" %></td>
+                  <td><%= sale_product.product_size %></td>
+                  <td style="text-align: right"><%= number_to_currency(sale_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                  <td>
+                      <% if object.counter_event_type.present? %>
+                        <% if object.counter_event_type.eql?("Discount(%)") && object.first_discount.present? && object.second_discount.present? %>
+                          <%= "#{object.first_discount}% + #{object.second_discount}%" %>
+                        <% elsif object.counter_event_type.eql?("Discount(%)") && object.first_discount.present? %>                    
+                          <%= "#{object.first_discount}%" %>
+                        <% elsif object.counter_event_type.eql?("Special Price") && object.special_price.present? %>
+                          <%= "Special price: #{number_to_currency(object.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %>
+                        <% end %>
+                      <% end %>
+                  </td>
+                  <td style="text-align: right">
+                      <%= number_to_currency(sale_product.subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                  </td>
+              </tr>
+            <% end %>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7" style="text-align: right">Total</td>
+                <td style="text-align: right"><%= number_to_currency(object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+            </tr>
+        </tfoot>
+    </table>
+
+</td>

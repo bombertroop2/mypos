@@ -86,6 +86,11 @@ module ApplicationHelper
     return true if can? :read, SalesReturn
   end
 
+  def consignment_menu_active?
+    return true if can? :read, ConsignmentSale
+    return true if can? :manage, ConsignmentSale
+  end
+
   def goods_in_transit_active?
     return true if can? :read_shipment_goods, Shipment
     return true if can? :read_mutation_goods, StockMutation
