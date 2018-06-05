@@ -54,23 +54,24 @@ class CounterEventsController < ApplicationController
   # POST /counter_events
   # POST /counter_events.json
   def create
-    remove_warehouse_products
     params[:counter_event][:special_price] = params[:counter_event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:counter_event][:special_price].present?    
     @counter_event = CounterEvent.new(counter_event_params)
     if params[:warehouse_ids].split(",").blank?
       render js: "bootbox.alert({message: \"Please select at least 1 warehouse.\",size: 'small'});" and return
     end
     begin
+      params[:warehouse_ids].split(",").each do |warehouse_id|        
+        @counter_event.counter_event_warehouses.build warehouse_id: warehouse_id.strip
+      end
       @valid = @counter_event.save
       if !@valid
-        if @counter_event.errors[:base].present?
-          
+        if @counter_event.errors[:base].present?          
           render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
         else
           @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
         end
-      else
-        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
+        #      else
+        #        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
@@ -113,28 +114,14 @@ class CounterEventsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_counter_event
-      @counter_event = CounterEvent.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_counter_event
+    @counter_event = CounterEvent.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def counter_event_params
-      params.require(:counter_event).permit(:code, :name, :start_time, :end_time, :first_discount, :second_discount, :special_price, :margin, :participation, :counter_event_type)
-    end
-
-    def remove_warehouse_products
-      params[:counter_event][:counter_event_warehouses_attributes].each do |key, value|
-        if params[:counter_event][:counter_event_warehouses_attributes][key][:select_different_products].eql?("0")
-          params[:counter_event][:counter_event_warehouses_attributes][key][:counter_event_products_attributes].each do |ep_key, ep_value|
-            if params[:counter_event][:counter_event_warehouses_attributes][key][:counter_event_products_attributes][ep_key][:id].present?
-              params[:counter_event][:counter_event_warehouses_attributes][key][:counter_event_products_attributes][ep_key][:_destroy] = "true"
-            else
-              params[:counter_event][:counter_event_warehouses_attributes][key][:counter_event_products_attributes].delete ep_key
-            end
-          end if params[:counter_event][:counter_event_warehouses_attributes][key][:counter_event_products_attributes].present?
-        end
-      end if params[:counter_event][:counter_event_warehouses_attributes].present?
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def counter_event_params
+    params.require(:counter_event).permit(:code, :name, :start_time, :end_time, :first_discount, :second_discount, :special_price, :margin, :participation, :counter_event_type)
+  end
 
 end

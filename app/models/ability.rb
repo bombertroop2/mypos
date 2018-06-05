@@ -36,6 +36,9 @@ class Ability
           if class_name.eql?("Goods In Transit")
             can :manage, Shipment
             can :manage, StockMutation
+          elsif class_name.eql?("Event")
+            can :manage, Event
+            can :manage, CounterEvent
           else
             can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
           end
@@ -142,6 +145,20 @@ class Ability
             else
               can :read, class_name.gsub(/\s+/, "").constantize
               can :get_warehouses, class_name.gsub(/\s+/, "").constantize
+            end
+          elsif class_name.eql?("Event")
+            if !user.has_role?(:area_manager) 
+              if user.has_role?(:accountant)
+                unless ability.eql?(:none)
+                  can :read, Event
+                  can :read, CounterEvent
+                end
+              else
+                unless ability.eql?(:none)
+                  can ability, Event
+                  can ability, CounterEvent
+                end
+              end
             end
           elsif class_name.eql?("Shipment") && !user.has_role?(:area_manager)
             # cegah non manager keatas untuk menghapus shipment

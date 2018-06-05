@@ -55,13 +55,10 @@
 // funny solution for silly bug
       $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
           var target = $(e.target).attr("href") // activated tab
-          if (target == "#discount_cash" && ($('#listing_event_warehouses_table_discount_cash').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_event_warehouses_table_discount_cash').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
-              $("#code_th_cash_discount").click();
-              $("#code_th_cash_discount").click();
-          } else if (target == "#special_price" && ($('#listing_event_warehouses_table_special_price').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_event_warehouses_table_special_price').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+          if (target == "#special_price" && ($('#listing_event_warehouses_table_special_price').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_event_warehouses_table_special_price').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
               $("#code_th_sp").click();
               $("#code_th_sp").click();
-          } 
+          }
       });
   });
 </script>  

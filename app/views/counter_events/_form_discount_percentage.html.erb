@@ -1,176 +1,176 @@
 <%= form_for(@counter_event, remote: true, html: {class: "form-horizontal"}) do |f| %>
-<%= hidden_field_tag "counter_event_type", "" %>
-<%= f.hidden_field :counter_event_type, value: "Discount(%)" %>
-  <div class="form-group<%= control_group_error(@counter_event, :code) %>">
-    <%= f.label :code, class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_discount_percentage" %>
-      <%= error_help_text(@counter_event, :code) %>
-    </div>
-  </div>
+    <%= hidden_field_tag "counter_event_type", "" %>
+    <%= f.hidden_field :counter_event_type, value: "Discount(%)" %>
+    <div class="form-group<%= control_group_error(@counter_event, :code) %>">
+        <%= f.label :code, class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.text_field :code, class: "form-control upcase inputs", id: "counter_event_code_discount_percentage" %>
+                <%= error_help_text(@counter_event, :code) %>
+            </div>
+        </div>
 
-  <div class="form-group<%= control_group_error(@counter_event, :name) %>">
-    <%= f.label :name, class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :name, class: "form-control inputs" %>
-      <%= error_help_text(@counter_event, :name) %>
-    </div>
-  </div>
+        <div class="form-group<%= control_group_error(@counter_event, :name) %>">
+            <%= f.label :name, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :name, class: "form-control inputs" %>
+                    <%= error_help_text(@counter_event, :name) %>
+                </div>
+            </div>
 
-  <div class="form-group<%= control_group_error(@counter_event, :start_time) %>">
-    <%= f.label :start_time, "Start time", class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :start_time, size: 10, readonly: true, class: "form-control" %>
-      <%= error_help_text(@counter_event, :start_time) %>
-    </div>
-  </div>
+            <div class="form-group<%= control_group_error(@counter_event, :start_time) %>">
+                <%= f.label :start_time, "Start time", class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :start_time, size: 10, readonly: true, class: "form-control" %>
+                        <%= error_help_text(@counter_event, :start_time) %>
+                    </div>
+                </div>
 
-  <div class="form-group<%= control_group_error(@counter_event, :end_time) %>">
-    <%= f.label :end_time, "End time", class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :end_time, size: 10, readonly: true, class: "form-control" %>
-      <%= error_help_text(@counter_event, :end_time) %>
-    </div>
-  </div>
+                <div class="form-group<%= control_group_error(@counter_event, :end_time) %>">
+                    <%= f.label :end_time, "End time", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :end_time, size: 10, readonly: true, class: "form-control" %>
+                            <%= error_help_text(@counter_event, :end_time) %>
+                        </div>
+                    </div>
 
-  <div class="form-group<%= control_group_error(@counter_event, :first_discount) %>">
-    <%= f.label :first_discount, "First discount", class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :first_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
-      <%= error_help_text(@counter_event, :first_discount) %>
-    </div>
-  </div>
+                    <div class="form-group<%= control_group_error(@counter_event, :first_discount) %>">
+                        <%= f.label :first_discount, "First discount", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_field :first_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
+                                <%= error_help_text(@counter_event, :first_discount) %>
+                            </div>
+                        </div>
 
-  <div class="form-group<%= control_group_error(@counter_event, :second_discount) %>">
-    <%= f.label :second_discount, "Second discount", class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
-      <%= error_help_text(@counter_event, :second_discount) %>
-    </div>
-  </div>
+                        <div class="form-group<%= control_group_error(@counter_event, :second_discount) %>">
+                            <%= f.label :second_discount, "Second discount", class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields" %>
+                                    <%= error_help_text(@counter_event, :second_discount) %>
+                                </div>
+                            </div>
 
-  <div class="form-group<%= control_group_error(@counter_event, :margin) %>">
-    <%= f.label :margin, "Margin", class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :margin, size: 10, class: "form-control quantity-fields discount-fields" %>
-      <%= error_help_text(@counter_event, :margin) %>
-    </div>
-  </div>
+                            <div class="form-group<%= control_group_error(@counter_event, :margin) %>">
+                                <%= f.label :margin, "Margin", class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.text_field :margin, size: 10, class: "form-control quantity-fields discount-fields" %>
+                                        <%= error_help_text(@counter_event, :margin) %>
+                                    </div>
+                                </div>
 
-   <div class="form-group<%= control_group_error(@counter_event, :participation) %>">
-    <%= f.label :participation, "Participation", class: "col-sm-2 control-label" %>
-    <div class="col-sm-10">
-      <%= f.text_field :participation, size: 10, class: "form-control quantity-fields discount-fields" %>
-      <%= error_help_text(@counter_event, :participation) %>
-    </div>
-  </div>
+                                <div class="form-group<%= control_group_error(@counter_event, :participation) %>">
+                                    <%= f.label :participation, "Participation", class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.text_field :participation, size: 10, class: "form-control quantity-fields discount-fields" %>
+                                            <%= error_help_text(@counter_event, :participation) %>
+                                        </div>
+                                    </div>
 
-  
 
-  <div class="form-group">
-    <label class="col-sm-2 control-label">Warehouses</label>
-    <div class="col-sm-10">
-      <table id="listing_event_warehouses_table" class="display">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Code</th>
-            <th>Name</th>
-          </tr>
-        </thead>
 
-        <tbody>
-          <% @warehouses.each do |warehouse| %>
-          <tr id="warehouse_<%= warehouse.id %>">
-            <td></td>
-            <td><%= warehouse.code %></td>
-            <td><%= warehouse.name %></td>
-          </tr>
-          <% end %>
-        </tbody>
-      </table>
-      
-    </div>
-  </div>
-  
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Warehouses</label>
+                                        <div class="col-sm-10">
+                                            <table id="listing_event_warehouses_table" class="display">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Code</th>
+                                                        <th>Name</th>
+                                                    </tr>
+                                                </thead>
 
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn" %>
-      <button class="btn btn-link cancel">Cancel</button>
-    </div>
-  </div>
-<% end %>
+                                                <tbody>
+                                                    <% @warehouses.each do |warehouse| %>
+                                                      <tr id="warehouse_<%= warehouse.id %>">
+                                                          <td></td>
+                                                          <td><%= warehouse.code %></td>
+                                                          <td><%= warehouse.name %></td>
+                                                      </tr>
+                                                    <% end %>
+                                                </tbody>
+                                            </table>
 
-<script type="text/javascript">
-  $(function () {
-    $("#counter_event_start_time, #counter_event_end_time").datetimepicker({
-      format: "dd/mm/yyyy hh:ii",
-      autoclose: true,
-      minuteStep: 1
-    });
-    
-    var counter_eventWarehousesDataTable = $('#listing_event_warehouses_table').DataTable({
-      order: [1, 'asc'],
-      dom: 'T<"clear">lfrtip',
-      columns: [
-      {data: null, defaultContent: '', orderable: false},
-      {data: 'code'},
-      {data: 'name'}
-      ],
-      tableTools: {
-        sRowSelect: 'os',
-        /*sRowSelector: 'td:first-child',*/
-        aButtons: ['select_all', 'select_none']
-      },
-      paging: false,
-      info: false,
-      scrollY: "250px",
-      scrollCollapse: true
-    });
-    
-    if ($(".discount-fields").length > 0)
-      $(".discount-fields").numeric();
+                                        </div>
+                                    </div>
 
-    var warehouse_ids = [];
 
-    var selectedColorFields = <%= @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
-    $.each(selectedColorFields, function (index, value) {
-      var selectedColorId = selectedColorFields[index];
-      if (selectedColorId != "") {
-          var e = jQuery.Event("click");
-          e.ctrlKey = true;
-          var clickRowProcessId = setInterval(function () {
-              if (!$("#warehouse_" + selectedColorId).hasClass("DTTT_selected") || !$("#warehouse_" + selectedColorId).hasClass("selected")) {
-                  $("#warehouse_" + selectedColorId).find("td:first-child").trigger(e);
-              } else
-                  clearInterval(clickRowProcessId);
-          }, 0);
-        }
-    });
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn" %>
+                                              <button class="btn btn-link cancel">Cancel</button>
+                                          </div>
+                                      </div>
+                                    <% end %>
 
-     $("#form_container_disc_percentage form").submit( function(e) {
+                                    <script type="text/javascript">
+                                      $(function () {
+                                          $("#counter_event_start_time, #counter_event_end_time").datetimepicker({
+                                              format: "dd/mm/yyyy hh:ii",
+                                              autoclose: true,
+                                              minuteStep: 1
+                                          });
 
-    var selectedColorFields = <%= @counter_event.new_record? ? @warehouses.pluck(:id) : @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
-    $.each(selectedColorFields, function (index, value) {
-      var selectedColorId = selectedColorFields[index];
-      if ($("#warehouse_" + selectedColorId).hasClass("DTTT_selected") || $("#warehouse_" + selectedColorId).hasClass("selected")) {
-          warehouse_ids.push(selectedColorId);
-      } 
-    });
-    console.log(warehouse_ids)
-    
-      warehouse_ids = $.unique( warehouse_ids );
-      $('<input />').attr('type', 'hidden')
-          .attr('name', "warehouse_ids")
-          .attr('value', warehouse_ids)
-          .appendTo('form');
-      return true;
-    });
-    
+                                          var counter_eventWarehousesDataTable = $('#listing_event_warehouses_table').DataTable({
+                                              order: [1, 'asc'],
+                                              dom: 'T<"clear">lfrtip',
+                                              columns: [
+                                                  {data: null, defaultContent: '', orderable: false},
+                                                  {data: 'code'},
+                                                  {data: 'name'}
+                                              ],
+                                              tableTools: {
+                                                  sRowSelect: 'os',
+                                                  /*sRowSelector: 'td:first-child',*/
+                                                  aButtons: ['select_all', 'select_none']
+                                              },
+                                              paging: false,
+                                              info: false,
+                                              scrollY: "250px",
+                                              scrollCollapse: true
+                                          });
 
-    $('#counter_event_code_discount_percentage').on("input", function () {
-      $(this).val($(this).val().replace(/ /g, ""));
-    });
-  });
-</script>  
+                                          if ($(".discount-fields").length > 0)
+                                              $(".discount-fields").numeric();
+
+                                          var warehouse_ids = [];
+
+                                          var selectedColorFields = <%= @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
+                                          $.each(selectedColorFields, function (index, value) {
+                                              var selectedColorId = selectedColorFields[index];
+                                              if (selectedColorId != "") {
+                                                  var e = jQuery.Event("click");
+                                                  e.ctrlKey = true;
+                                                  var clickRowProcessId = setInterval(function () {
+                                                      if (!$("#warehouse_" + selectedColorId).hasClass("DTTT_selected") || !$("#warehouse_" + selectedColorId).hasClass("selected")) {
+                                                          $("#warehouse_" + selectedColorId).find("td:first-child").trigger(e);
+                                                      } else
+                                                          clearInterval(clickRowProcessId);
+                                                  }, 0);
+                                              }
+                                          });
+
+                                          $("#form_container_disc_percentage form").submit(function (e) {
+
+                                              var selectedColorFields = <%= @counter_event.new_record? ? @warehouses.pluck(:id) : @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
+                                              $.each(selectedColorFields, function (index, value) {
+                                                  var selectedColorId = selectedColorFields[index];
+                                                  if ($("#warehouse_" + selectedColorId).hasClass("DTTT_selected") || $("#warehouse_" + selectedColorId).hasClass("selected")) {
+                                                      warehouse_ids.push(selectedColorId);
+                                                  }
+                                              });
+                                              console.log(warehouse_ids)
+
+                                              warehouse_ids = $.unique(warehouse_ids);
+                                              $('<input />').attr('type', 'hidden')
+                                                      .attr('name', "warehouse_ids")
+                                                      .attr('value', warehouse_ids)
+                                                      .appendTo('form');
+                                              return true;
+                                          });
+
+
+                                          $('#counter_event_code_discount_percentage').on("input", function () {
+                                              $(this).val($(this).val().replace(/ /g, ""));
+                                          });
+                                      });
+                                    </script>  

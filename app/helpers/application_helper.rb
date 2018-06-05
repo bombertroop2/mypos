@@ -74,6 +74,7 @@ module ApplicationHelper
 
   def event_menu_active?
     return true if can? :read, Event
+    return true if can? :read, CounterEvent
   end
 
   def cashier_menu_active?
