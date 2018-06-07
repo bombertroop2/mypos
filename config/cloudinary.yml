@@ -1,0 +1,19 @@
+---
+development:
+  cloud_name: dejmkp2cn
+  api_key: '413996984119535'
+  api_secret: 1rrbCoSqyK52XOOs3nSLOz9_p48
+  enhance_image_tag: true
+  static_image_support: false
+production:
+  cloud_name: dejmkp2cn
+  api_key: '413996984119535'
+  api_secret: 1rrbCoSqyK52XOOs3nSLOz9_p48
+  enhance_image_tag: true
+  static_image_support: true
+test:
+  cloud_name: dejmkp2cn
+  api_key: '413996984119535'
+  api_secret: 1rrbCoSqyK52XOOs3nSLOz9_p48
+  enhance_image_tag: true
+  static_image_support: false
