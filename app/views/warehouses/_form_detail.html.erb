@@ -55,7 +55,7 @@
                                         <%= error_help_text(@warehouse, :warehouse_type) %>
                                     </div>
                                 </div>
-                                <% if @warehouse.warehouse_type.eql?("counter") %>
+                                <% if @warehouse.warehouse_type.present? && @warehouse.warehouse_type.include?("ctr") %>
                                   <% hidden_class_name = "" %>
                                 <% else %>
                                   <% hidden_class_name = " hidden" %>
@@ -118,7 +118,7 @@
                                                         <% end %>
 
                                                               $("#warehouse_warehouse_type").change(function () {
-                                                                  if ($(this).val() == "counter")
+                                                                  if ($(this).val().trim().indexOf("ctr") >= 0)
                                                                       $("#sku_field").removeClass("hidden");
                                                                   else
                                                                       $("#sku_field").addClass("hidden");

@@ -31,7 +31,7 @@ class Warehouse < ApplicationRecord
   has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
-  validates :sku, presence: true, if: proc{|warehouse| warehouse.warehouse_type.eql?("counter")}
+  validates :sku, presence: true, if: proc{|warehouse| warehouse.warehouse_type.present? && warehouse.warehouse_type.include?("ctr")}
     validates :code, length: {maximum: 9}, if: Proc.new {|warehouse| warehouse.code.present?}
       validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
         :area_manager_available, :region_available, :price_code_available, :type_available,
@@ -39,14 +39,19 @@ class Warehouse < ApplicationRecord
 
       before_validation :upcase_code, :strip_string_values
       before_validation :activate_warehouse, on: :create
-      before_validation :delete_sku_value, unless: proc{|warehouse| warehouse.warehouse_type.eql?("counter")}
+      before_validation :delete_sku_value, if: proc{|warehouse| warehouse.warehouse_type.present? && !warehouse.warehouse_type.include?("ctr")}
         before_save :empty_messages, unless: proc{|warehouse| warehouse.warehouse_type.eql?("showroom")}
           before_destroy :delete_tracks
 
           TYPES = [
             ["Central", "central"],
-            ["Counter", "counter"],
-            ["Showroom", "showroom"]
+            ["Showroom", "showroom"],
+            ["CTR Matahari", "ctr_matahari"],
+            ["CTR Ramayana", "ctr_ramayana"],
+            ["CTR Non Ramayana", "ctr_non_ramayana"],
+            ["CTR SOGO", "ctr_sogo"],
+            ["CTR Metro", "ctr_metro"],
+            ["CTR Uniqlo", "ctr_uniqlo"]
           ]
     
           def code_and_name
@@ -74,7 +79,7 @@ class Warehouse < ApplicationRecord
           end
 
           def self.counter
-            where("warehouse_type = 'counter'")
+            where("warehouse_type LIKE 'ctr%'")
           end
 
           private

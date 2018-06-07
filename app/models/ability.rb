@@ -212,7 +212,7 @@ class Ability
             end
           elsif class_name.eql?("Point of Sale") || class_name.eql?("Company")
           elsif class_name.eql?("ConsignmentSale")
-            if user.has_role?(:area_manager) && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type = 'counter' AND warehouses.is_active = ?", true]).present?
+            if user.has_role?(:area_manager) && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
               can ability, ConsignmentSale
             end
           elsif ability && !user.has_role?(:accountant) && !user.has_role?(:area_manager)

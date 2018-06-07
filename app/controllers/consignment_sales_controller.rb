@@ -54,12 +54,12 @@ class ConsignmentSalesController < ApplicationController
             joins(:warehouse).
             joins(:user).
             where(:"sales_promotion_girls.warehouse_id" => params[:filter_counter_warehouse]).
-            where(["warehouses.warehouse_type = 'counter' AND warehouses.is_active = ? AND warehouses.supervisor_id = ?", true, current_user.supervisor_id]).
+            where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ? AND warehouses.supervisor_id = ?", true, current_user.supervisor_id]).
             map(&:user_id).
             uniq
           ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved).
             joins("LEFT JOIN warehouses ON consignment_sales.warehouse_id = warehouses.id").
-            joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR (consignment_sales.warehouse_id = ? AND warehouses.warehouse_type = 'counter' AND warehouses.is_active = ?)", user_ids, params[:filter_counter_warehouse], true]).distinct
+            joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR (consignment_sales.warehouse_id = ? AND warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?)", user_ids, params[:filter_counter_warehouse], true]).distinct
         end
       end
     end
@@ -228,7 +228,7 @@ class ConsignmentSalesController < ApplicationController
               where(barcode: params[:barcode]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
               where(["effective_date <= ?", params[:transaction_date].to_date]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter' AND warehouses.supervisor_id = ?", params[:warehouse_id], current_user.supervisor_id]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%' AND warehouses.supervisor_id = ?", params[:warehouse_id], current_user.supervisor_id]).
               select(:id, :barcode).
               select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
               order("effective_date DESC").
@@ -238,7 +238,7 @@ class ConsignmentSalesController < ApplicationController
               where(barcode: params[:barcode]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
               where(["effective_date <= ?", params[:transaction_date].to_date]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter' AND warehouses.supervisor_id = ?", params[:warehouse_id], current_user.supervisor_id]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%' AND warehouses.supervisor_id = ?", params[:warehouse_id], current_user.supervisor_id]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
               select(:id, :barcode).
               select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
@@ -252,7 +252,7 @@ class ConsignmentSalesController < ApplicationController
               where(barcode: params[:barcode]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
               where(["effective_date <= ?", params[:transaction_date].to_date]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter'", params[:warehouse_id]]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:warehouse_id]]).
               select(:id, :barcode).
               select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
               order("effective_date DESC").
@@ -262,7 +262,7 @@ class ConsignmentSalesController < ApplicationController
               where(barcode: params[:barcode]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
               where(["effective_date <= ?", params[:transaction_date].to_date]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter'", params[:warehouse_id]]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:warehouse_id]]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
               select(:id, :barcode).
               select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
@@ -302,7 +302,7 @@ class ConsignmentSalesController < ApplicationController
           if params[:counter_event_id].blank?
             ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: :warehouse]]]).
               where(:"warehouses.id" => params[:warehouse_id], size_id: params[:product_size]).
-              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type = 'counter'").
+              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type LIKE 'ctr%'").
               where(["effective_date <= ? AND warehouses.supervisor_id = ?", params[:transaction_date].to_date, current_user.supervisor_id]).
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               select(:id, :barcode).
@@ -312,7 +312,7 @@ class ConsignmentSalesController < ApplicationController
           else
             ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: [counter_event_warehouses: :counter_event]]]]]).
               where(:"warehouses.id" => params[:warehouse_id], size_id: params[:product_size]).
-              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type = 'counter'").
+              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type LIKE 'ctr%'").
               where(["effective_date <= ? AND warehouses.supervisor_id = ?", params[:transaction_date].to_date, current_user.supervisor_id]).
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
@@ -326,7 +326,7 @@ class ConsignmentSalesController < ApplicationController
           if params[:counter_event_id].blank?
             ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: :warehouse]]]).
               where(:"warehouses.id" => params[:warehouse_id], size_id: params[:product_size]).
-              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type = 'counter'").
+              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type LIKE 'ctr%'").
               where(["effective_date <= ?", params[:transaction_date].to_date]).
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               select(:id, :barcode).
@@ -336,7 +336,7 @@ class ConsignmentSalesController < ApplicationController
           else
             ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: [counter_event_warehouses: :counter_event]]]]]).
               where(:"warehouses.id" => params[:warehouse_id], size_id: params[:product_size]).
-              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type = 'counter'").
+              where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND warehouses.warehouse_type LIKE 'ctr%'").
               where(["effective_date <= ?", params[:transaction_date].to_date]).
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
@@ -369,14 +369,14 @@ class ConsignmentSalesController < ApplicationController
           select(:id, :code, :name).
           where(["products.code = ? AND warehouses.supervisor_id = ?", params[:product_code].upcase, current_user.supervisor_id]).
           where(:"warehouses.id" => params[:warehouse_id]).
-          where("stock_details.color_id = common_fields.id AND warehouses.warehouse_type = 'counter'").
+          where("stock_details.color_id = common_fields.id AND warehouses.warehouse_type LIKE 'ctr%'").
           distinct
       else
         Color.joins(product_colors: [product: [stock_products: [:stock_details, stock: :warehouse]]]).
           select(:id, :code, :name).
           where(["products.code = ?", params[:product_code].upcase]).
           where(:"warehouses.id" => params[:warehouse_id]).
-          where("stock_details.color_id = common_fields.id AND warehouses.warehouse_type = 'counter'").
+          where("stock_details.color_id = common_fields.id AND warehouses.warehouse_type LIKE 'ctr%'").
           distinct
       end
     end
@@ -396,14 +396,14 @@ class ConsignmentSalesController < ApplicationController
           select(:id, :size).
           where(["products.code = ? AND product_colors.color_id = ? AND warehouses.supervisor_id = ?", params[:product_code].upcase, params[:product_color], current_user.supervisor_id]).
           where(:"warehouses.id" => params[:warehouse_id]).
-          where("stock_details.color_id = product_colors.color_id AND stock_details.size_id = sizes.id AND warehouses.warehouse_type = 'counter'").
+          where("stock_details.color_id = product_colors.color_id AND stock_details.size_id = sizes.id AND warehouses.warehouse_type LIKE 'ctr%'").
           order(:size_order)
       else
         Size.joins(size_group: [products: [:product_colors, stock_products: [:stock_details, stock: :warehouse]]]).
           select(:id, :size).
           where(["products.code = ? AND product_colors.color_id = ?", params[:product_code].upcase, params[:product_color]]).
           where(:"warehouses.id" => params[:warehouse_id]).
-          where("stock_details.color_id = product_colors.color_id AND stock_details.size_id = sizes.id AND warehouses.warehouse_type = 'counter'").
+          where("stock_details.color_id = product_colors.color_id AND stock_details.size_id = sizes.id AND warehouses.warehouse_type LIKE 'ctr%'").
           order(:size_order)
       end
     end
@@ -472,7 +472,7 @@ class ConsignmentSalesController < ApplicationController
               where(id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
               where(["effective_date <= ? AND warehouses.supervisor_id = ?", params[:consignment_sale][:transaction_date].to_date, current_user.supervisor_id]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter'", params[:consignment_sale][:warehouse_id]]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:consignment_sale][:warehouse_id]]).
               select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
               order("effective_date DESC").
               first
@@ -481,7 +481,7 @@ class ConsignmentSalesController < ApplicationController
               where(id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
               where(["effective_date <= ? AND warehouses.supervisor_id = ?", params[:consignment_sale][:transaction_date].to_date, current_user.supervisor_id]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter'", params[:consignment_sale][:warehouse_id]]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:consignment_sale][:warehouse_id]]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:consignment_sale][:transaction_date].to_date, params[:consignment_sale][:transaction_date].to_date, params[:consignment_sale][:counter_event_id], true, true]).
               select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
               select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
@@ -494,7 +494,7 @@ class ConsignmentSalesController < ApplicationController
               where(id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
               where(["effective_date <= ?", params[:consignment_sale][:transaction_date].to_date]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter'", params[:consignment_sale][:warehouse_id]]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:consignment_sale][:warehouse_id]]).
               select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
               order("effective_date DESC").
               first
@@ -503,7 +503,7 @@ class ConsignmentSalesController < ApplicationController
               where(id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
               where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
               where(["effective_date <= ?", params[:consignment_sale][:transaction_date].to_date]).
-              where(["warehouses.id = ? AND warehouses.warehouse_type = 'counter'", params[:consignment_sale][:warehouse_id]]).
+              where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:consignment_sale][:warehouse_id]]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:consignment_sale][:transaction_date].to_date, params[:consignment_sale][:transaction_date].to_date, params[:consignment_sale][:counter_event_id], true, true]).
               select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
               select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
