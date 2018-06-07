@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
-
+ruby "2.2.3"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '5.0.0'
 # Use sqlite3 as the database for Active Record
-#gem 'sqlite3'
+# gem 'sqlite3'
 gem 'pg'
 
 gem 'rails_12factor', group: :production
@@ -29,8 +29,6 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'cocoon'
 
 gem 'date_validator'
-
-gem 'carrierwave'
 
 gem 'rmagick'
 
@@ -93,4 +91,6 @@ group :development do
   
 end
 
-ruby "2.2.3"
+
+gem 'carrierwave'
+gem 'cloudinary'
