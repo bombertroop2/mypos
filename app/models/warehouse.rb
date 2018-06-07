@@ -145,7 +145,22 @@ class Warehouse < ApplicationRecord
 
           def is_area_manager_valid_to_supervise_this_warehouse?
             warehouse_types = Warehouse.where(supervisor_id: supervisor_id).pluck(:warehouse_type)
-            errors.add(:supervisor_id, "should manage the warehouse with type #{warehouse_types.first}") if !warehouse_types.include?(warehouse_type) && warehouse_types.present?
+            if warehouse_types.present? && warehouse_type.present?
+              # hapus duplikat elemen dan replace type yang mengandung prefix ctr_ ke counter
+              replaced_warehouse_types = warehouse_types.map do |wt|
+                if wt.include?("ctr")
+                  "counter"
+                else
+                  wt
+                end
+              end.uniq    
+              # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
+              if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
+                errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
+              else
+                errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?(warehouse_type)
+              end
+            end
           end
 
           def upcase_code
