@@ -10,13 +10,41 @@
     });
   <% end %>
 <% else %>
-  if(bootboxDialogFormConsale != null)
-    bootboxDialogFormConsale.modal("hide");
-  if($("#detail_form_container").html().trim() == ""){
-    $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
+  // hitung jumlah barang yang telah ditambahkan plus 1 (1 adalah barang yang baru ditambah)
+  var addedQty = $('input[value="<%= @product.id %>"]').length + 1;
+  var qtyOnHand = <%= @product.quantity %>;
+  var unapprovedQty = <%= @product.unapproved_quantity %>;
+  if(qtyOnHand < 1){
+    var box = bootbox.alert({message: "Sorry, product <%= @product.barcode %> is temporarily out of stock",size: 'small'});
+    <% if params[:barcode] %>
+      box.on("hidden.bs.modal", function () { 
+        $("#consale_barcode").focus();
+      });
+    <% else %>
+      box.on("hidden.bs.modal", function () { 
+        $("#sale_product_code").focus();
+      });
+    <% end %>
+  }else if(qtyOnHand - unapprovedQty < addedQty){
+    var box = bootbox.alert({message: "Sorry, product <%= @product.barcode %> is temporarily out of stock",size: 'small'});
+    <% if params[:barcode] %>
+      box.on("hidden.bs.modal", function () { 
+        $("#consale_barcode").focus();
+      });
+    <% else %>
+      box.on("hidden.bs.modal", function () { 
+        $("#sale_product_code").focus();
+      });
+    <% end %>
   }else{
-    $("#listing-consale-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_products")) %>");
+    if(bootboxDialogFormConsale != null)
+      bootboxDialogFormConsale.modal("hide");
+    if($("#detail_form_container").html().trim() == ""){
+      $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
+    }else{
+      $("#listing-consale-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_products")) %>");
+    }
+    $("#consale_barcode").focus();
   }
-  $("#consale_barcode").focus();
 <% end %>
 $("#consale_barcode").val("");

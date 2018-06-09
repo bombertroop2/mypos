@@ -52,10 +52,12 @@
                 <th>Size</th>
                 <th>Price</th>
                 <th>Event</th>
-                <th>Subtotal</th>
+                <th>Qty</th>
+                <th>Net</th>
             </tr>
         </thead>
         <tbody>
+            <% total_qty = 0 %>
             <% sale_products.each_with_index do |sale_product, index| %>
               <tr>
                   <td style="vertical-align: middle"><%= index + 1 %></td>
@@ -75,15 +77,18 @@
                         <% end %>
                       <% end %>
                   </td>
+                  <td style="text-align: right">1</td>
                   <td style="text-align: right">
                       <%= number_to_currency(sale_product.subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                   </td>
               </tr>
+              <% total_qty += 1 %>
             <% end %>
         </tbody>
         <tfoot>
             <tr>
                 <td colspan="7" style="text-align: right">Total</td>
+                <td style="text-align: right"><%= total_qty %></td>
                 <td style="text-align: right"><%= number_to_currency(object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
             </tr>
         </tfoot>

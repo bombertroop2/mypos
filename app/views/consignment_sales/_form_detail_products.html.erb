@@ -20,6 +20,7 @@
             <% end %>
           <% end %>
       </td>
+      <td style="vertical-align: middle;text-align: right">1</td>
       <td style="vertical-align: middle;text-align: right">
           <% if params[:counter_event_id].present? && @product.counter_event_type.present? %>
             <% if @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? && @product.second_discount.present? %>
@@ -47,18 +48,28 @@
               $("#detail_form_container").html("");
           else {
               var totalSale = 0;
+              var totalQty = 0;
 
               $("#listing-consale-products-table > tbody > tr").each(function () {
                   var subtotal = 0;
-                  if ($(this).children("td").eq(6).length > 0) {
-                      var subtotalNumeric = $(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+                  if ($(this).children("td").eq(7).length > 0) {
+                      var subtotalNumeric = $(this).children("td").eq(7).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
                       if (!isNaN(subtotalNumeric))
                           subtotal = parseFloat(subtotalNumeric);
                   }
                   totalSale = totalSale + subtotal;
+
+                  var qty = 0;
+                  if ($(this).children("td").eq(6).length > 0) {
+                      var qtyNumeric = $(this).children("td").eq(6).html().trim();
+                      if (!isNaN(qtyNumeric))
+                          qty = parseInt(qtyNumeric);
+                  }
+                  totalQty = totalQty + qty;
               });
 
               $("#total-consale").html(totalSale);
+              $("#total-consale-qty").html(totalQty);
 
               $("#total-consale").toCurrency({
                   precision: 2, // decimal precision
@@ -73,18 +84,28 @@
       });
 
       var totalSale = 0;
+      var totalQty = 0;
 
       $("#listing-consale-products-table > tbody > tr").each(function () {
           var subtotal = 0;
-          if ($(this).children("td").eq(6).length > 0) {
-              var subtotalNumeric = $(this).children("td").eq(6).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+          if ($(this).children("td").eq(7).length > 0) {
+              var subtotalNumeric = $(this).children("td").eq(7).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
               if (!isNaN(subtotalNumeric))
                   subtotal = parseFloat(subtotalNumeric);
           }
           totalSale = totalSale + subtotal;
+
+          var qty = 0;
+          if ($(this).children("td").eq(6).length > 0) {
+              var qtyNumeric = $(this).children("td").eq(6).html().trim();
+              if (!isNaN(qtyNumeric))
+                  qty = parseInt(qtyNumeric);
+          }
+          totalQty = totalQty + qty;
       });
 
       $("#total-consale").html(totalSale);
+      $("#total-consale-qty").html(totalQty);
 
       $("#total-consale").toCurrency({
           precision: 2, // decimal precision

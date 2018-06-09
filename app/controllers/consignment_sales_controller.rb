@@ -206,7 +206,7 @@ class ConsignmentSalesController < ApplicationController
             where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
             where(["effective_date <= ?", params[:transaction_date].to_date]).
             select(:id, :barcode).
-            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
             order("effective_date DESC").
             first
         else
@@ -216,7 +216,7 @@ class ConsignmentSalesController < ApplicationController
             where(["effective_date <= ?", params[:transaction_date].to_date]).
             where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
             select(:id, :barcode).
-            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
             select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
             order("effective_date DESC").
             first
@@ -230,7 +230,7 @@ class ConsignmentSalesController < ApplicationController
               where(["effective_date <= ?", params[:transaction_date].to_date]).
               where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%' AND warehouses.supervisor_id = ?", params[:warehouse_id], current_user.supervisor_id]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               order("effective_date DESC").
               first
           else
@@ -241,7 +241,7 @@ class ConsignmentSalesController < ApplicationController
               where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%' AND warehouses.supervisor_id = ?", params[:warehouse_id], current_user.supervisor_id]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
               order("effective_date DESC").
               first
@@ -254,7 +254,7 @@ class ConsignmentSalesController < ApplicationController
               where(["effective_date <= ?", params[:transaction_date].to_date]).
               where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:warehouse_id]]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               order("effective_date DESC").
               first
           else
@@ -265,7 +265,7 @@ class ConsignmentSalesController < ApplicationController
               where(["warehouses.id = ? AND warehouses.warehouse_type LIKE 'ctr%'", params[:warehouse_id]]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
               order("effective_date DESC").
               first
@@ -281,7 +281,7 @@ class ConsignmentSalesController < ApplicationController
             where(["effective_date <= ?", params[:transaction_date].to_date]).
             where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
             select(:id, :barcode).
-            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
             order("effective_date DESC").
             first
         else
@@ -292,7 +292,7 @@ class ConsignmentSalesController < ApplicationController
             where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
             where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
             select(:id, :barcode).
-            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+            select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
             select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
             order("effective_date DESC").
             first
@@ -306,7 +306,7 @@ class ConsignmentSalesController < ApplicationController
               where(["effective_date <= ? AND warehouses.supervisor_id = ?", params[:transaction_date].to_date, current_user.supervisor_id]).
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               order("effective_date DESC").
               first
           else
@@ -317,7 +317,7 @@ class ConsignmentSalesController < ApplicationController
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
               order("effective_date DESC").
               first
@@ -330,7 +330,7 @@ class ConsignmentSalesController < ApplicationController
               where(["effective_date <= ?", params[:transaction_date].to_date]).
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               order("effective_date DESC").
               first
           else
@@ -341,7 +341,7 @@ class ConsignmentSalesController < ApplicationController
               where(["product_colors.color_id = ? AND products.code = ?", params[:product_color], params[:product_code].upcase]).
               where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
               select(:id, :barcode).
-              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+              select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
               select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
               order("effective_date DESC").
               first
