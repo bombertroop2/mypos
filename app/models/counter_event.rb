@@ -1,9 +1,10 @@
 class CounterEvent < ApplicationRecord
-  attr_accessor :event_activation
+  attr_accessor :event_activation # ==> ga dipake
 
   audited on: [:create, :update]
 
   has_many :counter_event_warehouses, dependent: :destroy
+  has_many :consignment_sales, dependent: :restrict_with_error
                 
   before_validation :remove_white_space, :upcase_code
   
