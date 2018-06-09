@@ -23,44 +23,51 @@ class CounterEvent < ApplicationRecord
   
                   accepts_nested_attributes_for :counter_event_warehouses, allow_destroy: true
                 
-                  before_destroy :deletable, :delete_tracks
+                  before_update :delete_old_warehouses, unless: proc{|ce| ce.event_activation.eql?("true")}
+                    before_destroy :deletable, :delete_tracks
 	
-                  # ga kepake ????
-                  def set_warehouses(w_ids)
-                    counter_event_warehouses.destroy_all
-                    warehouse_ids = w_ids.split(",")
-                    arr = warehouse_ids.map {|x| {counter_event_id: id, warehouse_id: x}}
+                    # ga kepake ????
+                    def set_warehouses(w_ids)
+                      counter_event_warehouses.destroy_all
+                      warehouse_ids = w_ids.split(",")
+                      arr = warehouse_ids.map {|x| {counter_event_id: id, warehouse_id: x}}
 		
-                    CounterEventWarehouse.create(arr)
-                  end
+                      CounterEventWarehouse.create(arr)
+                    end
   
-                  def code_and_name
-                    "#{code} - #{name}"
-                  end
+                    def code_and_name
+                      "#{code} - #{name}"
+                    end
 
-                  private
+                    private
                   
-                  def delete_tracks
-                    audits.destroy_all
-                  end
+                    def delete_old_warehouses
+                      counter_event_warehouses.select(:id).each do |counter_event_warehouse|
+                        counter_event_warehouse.destroy if !counter_event_warehouse.new_record?
+                      end
+                    end
+                  
+                    def delete_tracks
+                      audits.destroy_all
+                    end
                     
-                  def deletable
-                    if start_time <= Time.current
-                      errors.add(:base, "The record cannot be deleted")
-                      throw :abort
+                    def deletable
+                      if start_time <= Time.current
+                        errors.add(:base, "The record cannot be deleted")
+                        throw :abort
+                      end
+                    end
+
+                    def editable
+                      errors.add(:base, "The record cannot be edited") if start_time <= Time.current
+                    end
+
+                    def remove_white_space
+                      self.code = code.strip
+                      self.name = name.strip
+                    end
+
+                    def upcase_code
+                      self.code = code.upcase.gsub(" ","")
                     end
                   end
-
-                  def editable
-                    errors.add(:base, "The record cannot be edited") if start_time <= Time.current
-                  end
-
-                  def remove_white_space
-                    self.code = code.strip
-                    self.name = name.strip
-                  end
-
-                  def upcase_code
-                    self.code = code.upcase.gsub(" ","")
-                  end
-                end

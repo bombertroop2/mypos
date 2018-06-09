@@ -47,7 +47,7 @@ class CounterEventsController < ApplicationController
   # GET /counter_events/1/edit
   def edit
     @counter_event.start_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
-    @counter_event.end_time = @counter_event.start_time.strftime("%d/%m/%Y %H:%M")
+    @counter_event.end_time = @counter_event.end_time.strftime("%d/%m/%Y %H:%M")
     @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)
   end
 
@@ -85,6 +85,12 @@ class CounterEventsController < ApplicationController
   def update
     params[:counter_event][:special_price] = params[:counter_event][:special_price].gsub("Rp","").gsub(".","").gsub(",",".").gsub("-","") if params[:counter_event][:special_price].present?
     
+    if params[:warehouse_ids].split(",").blank?
+      render js: "bootbox.alert({message: \"Please select at least 1 warehouse.\",size: 'small'});" and return
+    end
+    params[:warehouse_ids].split(",").each do |warehouse_id|        
+      @counter_event.counter_event_warehouses.build warehouse_id: warehouse_id.strip
+    end
     begin
       @valid = @counter_event.update(counter_event_params)
       if !@valid
@@ -93,8 +99,8 @@ class CounterEventsController < ApplicationController
         else
           render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
         end
-      else
-        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
+        #      else
+        #        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
       end
     rescue ActiveRecord::RecordNotUnique => e
       @valid = false
@@ -106,10 +112,10 @@ class CounterEventsController < ApplicationController
   # DELETE /counter_events/1
   # DELETE /counter_events/1.json
   def destroy
-    @counter_event.destroy
-    respond_to do |format|
-      format.html { redirect_to counter_events_url, notice: 'Counter event was successfully destroyed.' }
-      format.json { head :no_content }
+    unless @counter_event.destroy
+      @deleted = false
+    else
+      @deleted = true
     end
   end
 

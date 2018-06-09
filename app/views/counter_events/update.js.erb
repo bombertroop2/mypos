@@ -1,2 +1,9 @@
-<%= smart_listing_item :counter_events, :update, @counter_event, 
-                       @counter_event.valid? ? "counter_events/counter_event" : "counter_events/form" %>
+<% unless @valid %>
+  <% if params[:counter_event][:counter_event_type].strip.eql?("Discount(%)") %>
+    $("#form_container_disc_percentage").html("<%= j(render(partial: "form_discount_percentage")) %>");
+  <% elsif params[:counter_event][:counter_event_type].strip.eql?("Special Price") %>
+    $("#form_container_special_price").html("<%= j(render(partial: "form_special_price")) %>");
+  <% end %>
+<% else %>
+  <%= smart_listing_item :counter_events, :update, @counter_event, "counter_events/counter_event" %>
+<% end %>
