@@ -414,15 +414,17 @@
 
               <script>
                 $(function () {
-      <% @notifications.each do |notification| %>
-                      $("#notification_<%= notification.id %>").click(function () {
-                          $.get("/notifications/<%= notification.id %>").done(function (data) {
-                              bootbox.alert({
-                                  title: "Notification",
-                                  message: data
-                              });
-                          });
-                      });
+      <% unless controller_name.eql?("incompatible_browsers") %>
+        <% @notifications.each do |notification| %>
+                        $("#notification_<%= notification.id %>").click(function () {
+                            $.get("/notifications/<%= notification.id %>").done(function (data) {
+                                bootbox.alert({
+                                    title: "Notification",
+                                    message: data
+                                });
+                            });
+                        });
+        <% end %>
       <% end %>
       <% if controller_name.eql?("shipments") %>
                       $("#search-shipment-btn").click(function () {
