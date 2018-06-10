@@ -9,7 +9,8 @@ class ApplicationController < ActionController::Base
   before_action :browser_supported, :authenticate_user!#, except: [:show, :index]
   before_action :configure_permitted_parameters, if: :devise_controller?
     before_action :invalidate_simultaneous_user_session, unless: proc {|c| c.controller_name.eql?('sessions') and c.action_name.eql?('create') }
-      before_action :get_notifications, :set_time_zone, if: :user_signed_in?
+      before_action :get_notifications, if: :user_signed_in?
+        around_action :set_time_zone
     
         rescue_from CanCan::AccessDenied do |exception|
           unless request.xhr?
@@ -65,9 +66,17 @@ class ApplicationController < ActionController::Base
         end
 
         def set_time_zone
-          Time.zone = current_user.timezone_name
-        rescue Exception => e
-          Time.zone = "Jakarta"
+          begin
+            old_time_zone = Time.zone
+            begin
+              Time.zone = current_user.timezone_name if user_signed_in?
+            rescue Exception => e
+              Time.zone = "Jakarta"
+            end
+            yield
+          ensure
+            Time.zone = old_time_zone
+          end
         end
         
         def invalidate_simultaneous_user_session

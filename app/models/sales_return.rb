@@ -28,7 +28,7 @@ class SalesReturn < ApplicationRecord
       select("sales.transaction_time, cashier_openings.warehouse_id, warehouses.code AS warehouse_code, sales.gift_event_id, sales_returns.sale_id AS returned_sale_id").
       where(["sales.id = ? AND warehouses.is_active = ?", sale_id, true]).
       where(:"sales_promotion_girls.id" => attr_spg_id).first
-    transaction_time = @sale.transaction_time.to_datetime.in_time_zone Time.zone.name
+    transaction_time = @sale.transaction_time
     if ((Time.current - transaction_time) / 1.hour >= 74) || @sale.gift_event_id.present? || @sale.returned_sale_id.present?
       @sale = nil
     end
