@@ -97,3 +97,4 @@ end
 
 gem 'carrierwave'
 gem 'cloudinary'
+gem 'sidekiq-scheduler'

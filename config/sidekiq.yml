@@ -1,0 +1,5 @@
+
+:schedule:
+  hello_world:
+    class: HelloWorld
+    every: '10s'
