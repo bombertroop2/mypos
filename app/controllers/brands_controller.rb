@@ -11,14 +11,14 @@ class BrandsController < ApplicationController
     else
       "LIKE"
     end
-    User.with_advisory_lock("TAI") do
-      brands_scope = Brand.select(:id, :code, :name, :description)
-      brands_scope = brands_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
-        or(brands_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
-        or(brands_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
-      @brands = smart_listing_create(:brands, brands_scope, partial: 'brands/listing', default_sort: {code: "asc"})
+    Brand.with_advisory_lock("TAI") do
       sleep 10
     end
+    brands_scope = Brand.select(:id, :code, :name, :description)
+    brands_scope = brands_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(brands_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(brands_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @brands = smart_listing_create(:brands, brands_scope, partial: 'brands/listing', default_sort: {code: "asc"})
   end
 
   # GET /brands/1
