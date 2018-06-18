@@ -63,6 +63,8 @@ gem 'geocoder'
 
 gem "browser"
 
+gem 'with_advisory_lock'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
