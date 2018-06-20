@@ -1,0 +1,118 @@
+<td colspan="4">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <dl class="dl-horizontal">
+        <dt>Transaction Number</dt>
+        <dd><%= object.transaction_number %></dd>
+    </dl>
+
+    <%= form_for(@consignment_sale, remote: true, html: {class: "form-horizontal", id: "edit_consignment_sale"}) do |f| %>
+        <div id="detail_form_container">
+        </div>
+        <table style="width: 100%" class="table table-striped" id="listing-consale-products-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center">Barcode</th>
+                    <th style="text-align: center">Product</th>
+                    <th style="text-align: center">Color</th>
+                    <th style="text-align: center">Size</th>
+                    <!--                    
+                                        <th style="text-align: center">Price</th>
+                                        <th style="text-align: center">Event</th>
+                                        <th style="text-align: center">Qty</th>
+                                        <th style="text-align: center">Net</th>
+                    -->
+                    <th style="text-align: center">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%= f.fields_for :consignment_sale_products do |consignment_sale_product_form| %>
+                  <% product_barcode = consignment_sale_product_form.object.product_barcode %>
+                  <% product_color = product_barcode.product_color %>
+                  <% product = product_color.product %>
+                  <% color = product_color.color %>
+                  <% barcode = product_barcode.barcode %>
+                  <% product_code = product.code %>
+                  <% brand_name = product.brand.name %>
+                  <% color_code = color.code %>
+                  <% color_name = color.name %>
+                  <% product_size = product_barcode.size.size %>
+                  <tr>
+                      <td style="vertical-align: middle"><%= barcode %></td>
+                      <td style="vertical-align: middle"><%= "#{product_code} - #{brand_name}" %></td>
+                      <td style="vertical-align: middle"><%= "#{color_code} - #{color_name}" %></td>
+                      <td style="vertical-align: middle"><%= product_size %></td>
+                      <!--
+                      <td style="vertical-align: middle;text-align: right"><%#= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                      <td style="vertical-align: middle">
+      <%# if params[:counter_event_id].present? && @product.counter_event_type.present? %>
+      <%# if @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? && @product.second_discount.present? %>  
+      <%#= "#{@product.first_discount}% + #{@product.second_discount}%" %>
+      <%# elsif @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? %>
+      <%#= "#{@product.first_discount}%" %>
+      <%# elsif @product.counter_event_type.eql?("Special Price") && @product.special_price.present? %>
+      <%#= "Special price: #{number_to_currency(@product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %>
+      <%# end %>
+      <%# end %>
+                      </td>
+                      <td style="vertical-align: middle;text-align: right">1</td>
+                      <td style="vertical-align: middle;text-align: right">
+      <%# if params[:counter_event_id].present? && @product.counter_event_type.present? %>
+      <%# if @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? && @product.second_discount.present? %>
+      <%# first_discounted_subtotal = @product.price - @product.price * @product.first_discount / 100 %>
+      <%#= number_to_currency((first_discounted_subtotal - first_discounted_subtotal * @product.second_discount / 100), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+      <%# elsif @product.counter_event_type.eql?("Discount(%)") && @product.first_discount.present? %>
+      <%#= number_to_currency((@product.price - @product.price * @product.first_discount / 100), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+      <%# elsif @product.counter_event_type.eql?("Special Price") && @product.special_price.present? %>
+      <%#= number_to_currency(@product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+      <%# end %>
+      <%# else %>
+      <%#= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+      <%# end %>
+                      </td>-->
+                      <td style="vertical-align: middle;text-align: center"><%= consignment_sale_product_form.check_box :_destroy %></td>
+                  </tr>
+                <% end %>
+            </tbody>
+            <!--<tfoot>
+                <tr>
+                    <td colspan="6" style="text-align: right">Total</td>
+                    <td id="total-consale-qty" style="text-align: right"></td>
+                    <td id="total-consale" style="text-align: right"></td>
+                    <td></td>
+                </tr>
+            </tfoot>-->
+        </table>
+
+        <%= f.submit "Save", class: "btn btn-primary", id: "consignment_sale_save_button", style: "float: right" %>
+        <% end %>
+
+    </td>
+
+    <script>
+      $(function () {
+          $("#consignment_sale_save_button").click(function () {
+              bootbox.confirm({
+                  message: "Once you delete products, you'll not be able to add them back</br>Are you sure?",
+                  buttons: {
+                      confirm: {
+                          label: '<i class="fa fa-check"></i> Confirm'
+                      },
+                      cancel: {
+                          label: '<i class="fa fa-times"></i> Cancel'
+                      }
+                  },
+                  callback: function (result) {
+                      if (result) {
+                          $("body").css('padding-right', '0px');
+                          $("#edit_consignment_sale").submit();
+                      }
+                  },
+                  size: "small"
+              });
+              return false;
+          });
+      });
+    </script>

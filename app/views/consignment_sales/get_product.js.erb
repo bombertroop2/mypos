@@ -37,14 +37,80 @@
       });
     <% end %>
   }else{
-    if(bootboxDialogFormConsale != null)
-      bootboxDialogFormConsale.modal("hide");
-    if($("#detail_form_container").html().trim() == ""){
-      $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
-    }else{
-      $("#listing-consale-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_products")) %>");
+    <% # hitung total stok receiving DO di tanggal setelah tanggal transaksi penjualan
+    shipment_items = ShipmentProductItem.
+      joins(order_booking_product_item: [order_booking_product: :order_booking], shipment_product: :shipment).
+      where(["order_booking_product_items.size_id = ? AND order_booking_product_items.color_id = ?", @product.product_size_id, @product.product_color_id]).
+      where(["order_booking_products.product_id = ?", @product.product_id]).
+      where(["order_bookings.destination_warehouse_id = ?", @product.warehouse_id]).
+      where(["shipments.received_date > ?", params[:transaction_date].to_date]).
+      select(:quantity, "shipments.received_date").order("shipments.received_date ASC") %>
+  
+    <% # hitung total stok rolling in di tanggal setelah tanggal transaksi penjualan
+    stock_mutation_product_items = StockMutationProductItem.
+      joins(stock_mutation_product: :stock_mutation).
+      where(["stock_mutation_product_items.size_id = ? AND stock_mutation_product_items.color_id = ?", @product.product_size_id, @product.product_color_id]).
+      where(["stock_mutation_products.product_id = ?", @product.product_id]).
+      where(["stock_mutations.destination_warehouse_id = ?", @product.warehouse_id]).
+      where(["stock_mutations.received_date > ?", params[:transaction_date].to_date]).
+      select(:quantity, "stock_mutations.received_date").order("stock_mutations.received_date ASC")
+    %>
+    var doQtyOnHand = <%= shipment_items.present? ? shipment_items.sum(&:quantity) : 0 %>;
+    var mutationQtyOnHand = <%= stock_mutation_product_items.present? ? stock_mutation_product_items.sum(&:quantity) : 0 %>;
+    // QOH sebelum DO dan mutation masuk di tanggal sesudah tanggal transaksi penjualan
+    var finalQtyOnHand = qtyOnHand - (doQtyOnHand + mutationQtyOnHand);
+    // apabila di tanggal transaksi qty on hand < added qty
+    if(finalQtyOnHand < addedQty){
+      var box = bootbox.alert({message: "Sorry, available quantity of product <%= @product.barcode %> on <%= params[:transaction_date] %> is "+finalQtyOnHand,size: 'small'});
+      <% if params[:barcode] %>
+        box.on("hidden.bs.modal", function () { 
+          $("#consale_barcode").focus();
+        });
+      <% else %>
+        box.on("hidden.bs.modal", function () { 
+          $("#sale_product_code").focus();
+        });
+      <% end %>
+    }else{    
+      if(doQtyOnHand > 0 || mutationQtyOnHand > 0){
+        // htung jumlah barang yang sudah dipesan dari tanggal transaksi pnjualan ke belakang
+        <% booked_quantity = ConsignmentSaleProduct.joins(:consignment_sale).
+          where(["consignment_sale_products.product_barcode_id = ? AND consignment_sales.approved = ? AND consignment_sales.transaction_date <= ? AND consignment_sales.warehouse_id = ?", @product.id, false, params[:transaction_date].to_date, @product.warehouse_id]).
+          size rescue 0 %>
+        var bookedQty = <%= booked_quantity %>;
+        if(finalQtyOnHand - bookedQty < addedQty){
+          var box = bootbox.alert({message: "Sorry, product <%= @product.barcode %> on <%= params[:transaction_date] %> is temporarily out of stock",size: 'small'});
+          <% if params[:barcode] %>
+            box.on("hidden.bs.modal", function () { 
+              $("#consale_barcode").focus();
+            });
+          <% else %>
+            box.on("hidden.bs.modal", function () { 
+              $("#sale_product_code").focus();
+            });
+          <% end %>
+        }else{
+          if(bootboxDialogFormConsale != null)
+            bootboxDialogFormConsale.modal("hide");
+          if($("#detail_form_container").html().trim() == ""){
+            $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
+          }else{
+            $("#listing-consale-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_products")) %>");
+          }
+          $("#consale_barcode").focus();
+        }
+      }else{
+        if(bootboxDialogFormConsale != null)
+          bootboxDialogFormConsale.modal("hide");
+        if($("#detail_form_container").html().trim() == ""){
+          $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
+        }else{
+          $("#listing-consale-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_products")) %>");
+        }
+        $("#consale_barcode").focus();
+      }
+
     }
-    $("#consale_barcode").focus();
   }
 <% end %>
 $("#consale_barcode").val("");

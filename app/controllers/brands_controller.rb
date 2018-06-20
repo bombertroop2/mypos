@@ -6,10 +6,6 @@ class BrandsController < ApplicationController
   # GET /brands
   # GET /brands.json
   def index
-    Brand.with_table_lock do
-      puts "MEMEK"
-      sleep 10
-    end
     like_command = if Rails.env.eql?("production")
       "ILIKE"
     else

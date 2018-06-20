@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resources :customers
-  resources :consignment_sales, except: [:edit, :update] do
+  resources :consignment_sales do
     collection do
       get "get_product"
       get "get_product_colors"
@@ -136,8 +136,9 @@ Rails.application.routes.draw do
       get "search_do"
     end
     member do
-      get "receive"      
-      get "print"      
+      get "receive"
+      get "unreceive"
+      get "print"
     end
   end
   resources :couriers, except: :show
