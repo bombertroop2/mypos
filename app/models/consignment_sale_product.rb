@@ -1,22 +1,32 @@
 class ConsignmentSaleProduct < ApplicationRecord
   attr_accessor :attr_warehouse_id, :attr_barcode, :attr_delete_by_admin, :attr_delete_by_am,
-    :attr_transaction_date, :attr_parent_id
+    :attr_transaction_date, :attr_parent_id, :attr_delete_products, :attr_warehouse_code
   
   belongs_to :consignment_sale
   belongs_to :product_barcode
   belongs_to :price_list
   
+  before_create :yesterday_transaction_exist
   after_create :next_transaction_not_created, :add_afs
   before_destroy :record_has_correct_parent, :delete_afs
   
   private
   
+  def yesterday_transaction_exist
+    consignment_sales = ConsignmentSale.joins(:consignment_sale_products).
+      where(["consignment_sales.transaction_number LIKE ? AND consignment_sale_products.product_barcode_id = ?", "#{attr_warehouse_code}%", product_barcode_id]).
+      select(:transaction_date)
+    if consignment_sales.present?
+      raise "Please create a transaction before #{attr_transaction_date} which contain product #{attr_barcode} first" if consignment_sales.select{|cs| cs.transaction_date == attr_transaction_date.to_date - 1}.blank? && consignment_sales.select{|cs| cs.transaction_date == attr_transaction_date.to_date}.blank?
+    end                
+  end              
+  
   def record_has_correct_parent    
-    raise "Record does not exist!" if attr_parent_id != consignment_sale_id
+    raise "Record does not exist!" if attr_parent_id != consignment_sale_id && attr_delete_products
   end
     
   def next_transaction_not_created
-    raise "Please delete all transactions which contain product #{attr_barcode} after #{attr_transaction_date.to_date.strftime("%d/%m/%Y")} first" if ConsignmentSale.select("1 AS one").joins(:consignment_sale_products).where(["consignment_sales.transaction_date > ? AND consignment_sales.warehouse_id = ? AND consignment_sale_products.product_barcode_id = ?", attr_transaction_date.to_date, attr_warehouse_id, product_barcode_id]).present?
+    raise "Please delete all transactions after #{attr_transaction_date.to_date.strftime("%d/%m/%Y")} which contain product #{attr_barcode} first" if ConsignmentSale.select("1 AS one").joins(:consignment_sale_products).where(["consignment_sales.transaction_date > ? AND consignment_sales.warehouse_id = ? AND consignment_sale_products.product_barcode_id = ?", attr_transaction_date.to_date, attr_warehouse_id, product_barcode_id]).present?
   end
   
   def add_afs

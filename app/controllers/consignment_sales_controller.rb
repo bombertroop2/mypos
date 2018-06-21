@@ -164,7 +164,7 @@ class ConsignmentSalesController < ApplicationController
           end
           params[:consignment_sale][:consignment_sale_products_attributes].each do |key, value|
             if params[:consignment_sale][:consignment_sale_products_attributes][key][:_destroy].eql?("1")
-              params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_warehouse_id: warehouse_id
+              params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_warehouse_id: warehouse_id, attr_delete_products: true
             end
           end
         else
@@ -178,13 +178,13 @@ class ConsignmentSalesController < ApplicationController
             end
             params[:consignment_sale][:consignment_sale_products_attributes].each do |key, value|
               if params[:consignment_sale][:consignment_sale_products_attributes][key][:_destroy].eql?("1")
-                params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_delete_by_am: true
+                params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_delete_by_am: true, attr_delete_products: true
               end
             end
           else
             params[:consignment_sale][:consignment_sale_products_attributes].each do |key, value|
               if params[:consignment_sale][:consignment_sale_products_attributes][key][:_destroy].eql?("1")
-                params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_delete_by_admin: true
+                params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_delete_by_admin: true, attr_delete_products: true
               end
             end
           end
@@ -613,7 +613,7 @@ class ConsignmentSalesController < ApplicationController
         product.price
       end
       params[:consignment_sale][:consignment_sale_products_attributes][key][:price_list_id] = product.price_list_id
-      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! total: subtotal, attr_warehouse_id: @warehouse_id, attr_barcode: product.barcode, attr_transaction_date: params[:consignment_sale][:transaction_date]
+      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! total: subtotal, attr_warehouse_id: @warehouse_id, attr_barcode: product.barcode, attr_transaction_date: params[:consignment_sale][:transaction_date], attr_warehouse_code: @warehouse_code
       total += subtotal
     end if params[:consignment_sale][:consignment_sale_products_attributes].present?
     params[:consignment_sale].merge! total: total
@@ -623,7 +623,7 @@ class ConsignmentSalesController < ApplicationController
     unless current_user.has_non_spg_role?
       spg = SalesPromotionGirl.joins(:warehouse).select(:warehouse_id, "warehouses.code").where(id: current_user.sales_promotion_girl_id).first
       @warehouse_id = spg.warehouse_id
-      warehouse_code = spg.code
+      @warehouse_code = spg.code
     else
       warehouse = if current_user.has_role?(:area_manager)
         Warehouse.select(:id, :code).where(id: params[:consignment_sale][:warehouse_id], supervisor_id: current_user.supervisor_id).first
@@ -631,9 +631,9 @@ class ConsignmentSalesController < ApplicationController
         Warehouse.select(:id, :code).where(id: params[:consignment_sale][:warehouse_id]).first
       end
       @warehouse_id = warehouse.id
-      warehouse_code = warehouse.code
+      @warehouse_code = warehouse.code
     end
-    params[:consignment_sale].merge! attr_warehouse_code: warehouse_code
+    params[:consignment_sale].merge! attr_warehouse_code: @warehouse_code
   end
   
   # Use callbacks to share common setup or constraints between actions.
