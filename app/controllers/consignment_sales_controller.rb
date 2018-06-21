@@ -103,8 +103,11 @@ class ConsignmentSalesController < ApplicationController
   # POST /consignment_sales.json
   def create
     add_additional_params_to_consignment_sales
-    calculate_total
+    unless params[:consignment_sale][:no_sale].eql?("true")
+      calculate_total
+    end
     @consignment_sale = ConsignmentSale.new(consignment_sale_params)
+    @consignment_sale.warehouse_id = @warehouse_id if params[:consignment_sale][:no_sale].eql?("true")
     @consignment_sale.attr_create_by_admin = unless current_user.has_non_spg_role?
       false
     else
@@ -613,7 +616,7 @@ class ConsignmentSalesController < ApplicationController
         product.price
       end
       params[:consignment_sale][:consignment_sale_products_attributes][key][:price_list_id] = product.price_list_id
-      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! total: subtotal, attr_warehouse_id: @warehouse_id, attr_barcode: product.barcode, attr_transaction_date: params[:consignment_sale][:transaction_date], attr_warehouse_code: @warehouse_code
+      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! total: subtotal, attr_warehouse_id: @warehouse_id, attr_barcode: product.barcode, attr_transaction_date: params[:consignment_sale][:transaction_date]
       total += subtotal
     end if params[:consignment_sale][:consignment_sale_products_attributes].present?
     params[:consignment_sale].merge! total: total
@@ -645,10 +648,10 @@ class ConsignmentSalesController < ApplicationController
   def consignment_sale_params
     unless action_name.eql?("update")
       unless current_user.has_non_spg_role?
-        params.require(:consignment_sale).permit(:counter_event_id, :total, :attr_warehouse_code, :transaction_date,
+        params.require(:consignment_sale).permit(:no_sale, :counter_event_id, :total, :attr_warehouse_code, :transaction_date,
           consignment_sale_products_attributes: [:product_barcode_id, :price_list_id, :total, :attr_warehouse_id, :attr_barcode, :attr_transaction_date])
       else
-        params.require(:consignment_sale).permit(:counter_event_id, :total, :attr_warehouse_code, :transaction_date, :warehouse_id,
+        params.require(:consignment_sale).permit(:no_sale, :counter_event_id, :total, :attr_warehouse_code, :transaction_date, :warehouse_id,
           consignment_sale_products_attributes: [:product_barcode_id, :price_list_id, :total, :attr_warehouse_id, :attr_barcode, :attr_transaction_date])
       end
     else

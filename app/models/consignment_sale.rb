@@ -14,7 +14,7 @@ class ConsignmentSale < ApplicationRecord
     validate :transaction_after_beginning_stock_added, if: proc{|sale| !sale.attr_delete_products && Company.where(import_beginning_stock: true).select("1 AS one").present?}
       validate :record_not_updated, :record_belongs_to_me, if: proc{|cs| cs.attr_delete_products}, on: :update
 
-        before_create :generate_number
+        before_create :yesterday_transaction_exist, :generate_number
         before_destroy :record_not_deleted, :delete_tracks
         after_update :update_stock_and_afs, unless: proc{|cs| cs.attr_delete_products}
           after_update :create_listing_stock, if: proc{|cs| !cs.approved_was && cs.approved && !cs.attr_delete_products}
@@ -23,6 +23,15 @@ class ConsignmentSale < ApplicationRecord
               accepts_nested_attributes_for :consignment_sale_products, allow_destroy: true
   
               private
+              
+              def yesterday_transaction_exist
+                consignment_sales = ConsignmentSale.
+                  where(["transaction_number LIKE ? OR (no_sale = ? AND warehouse_id = ?)", "#{attr_warehouse_code}%", true, warehouse_id]).
+                  select(:transaction_date)
+                if consignment_sales.present?
+                  raise "Please create a transaction before #{transaction_date.strftime("%d/%m/%Y")} first" if consignment_sales.select{|cs| cs.transaction_date == transaction_date - 1}.blank? && consignment_sales.select{|cs| cs.transaction_date == transaction_date}.blank?
+                end                
+              end              
               
               def record_belongs_to_me
                 if attr_user_ids.present?
@@ -239,7 +248,7 @@ class ConsignmentSale < ApplicationRecord
               end
  
               def product_is_exist
-                errors.add(:base, "Please insert at least one product per transaction!") if consignment_sale_products.blank?
+                errors.add(:base, "Please insert at least one product per transaction!") if consignment_sale_products.blank? && !no_sale
               end  
   
               def transaction_date_not_blank
