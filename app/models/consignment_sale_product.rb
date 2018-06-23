@@ -1,6 +1,6 @@
 class ConsignmentSaleProduct < ApplicationRecord
   attr_accessor :attr_warehouse_id, :attr_barcode, :attr_delete_by_admin, :attr_delete_by_am,
-    :attr_transaction_date, :attr_parent_id, :attr_delete_products
+    :attr_transaction_date, :attr_parent_id, :attr_delete_products, :attr_no_sale
   
   belongs_to :consignment_sale
   belongs_to :product_barcode

@@ -30,11 +30,11 @@ class ConsignmentSalesController < ApplicationController
     consignment_sales_scope = unless current_user.has_non_spg_role?
       warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
       user_ids = SalesPromotionGirl.select("users.id AS user_id").joins(:user).where(:"sales_promotion_girls.warehouse_id" => warehouse_id).map(&:user_id).uniq
-      ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id = ?", user_ids, warehouse_id]).distinct
+      ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id = ?", user_ids, warehouse_id]).distinct
     else
       if params[:filter_counter_warehouse].blank?
         unless current_user.has_role?(:area_manager)
-          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved)
+          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale)
         else
           warehouse_ids = unless request.xhr?
             @counters.pluck(:id)
@@ -42,12 +42,12 @@ class ConsignmentSalesController < ApplicationController
             current_user.supervisor.warehouses.pluck(:id)
           end
           user_ids = SalesPromotionGirl.select("users.id AS user_id").joins(:user).where(:"sales_promotion_girls.warehouse_id" => warehouse_ids).map(&:user_id).uniq
-          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id IN (?)", user_ids, warehouse_ids]).distinct
+          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id IN (?)", user_ids, warehouse_ids]).distinct
         end
       else
         unless current_user.has_role?(:area_manager)
           user_ids = SalesPromotionGirl.select("users.id AS user_id").joins(:user).where(:"sales_promotion_girls.warehouse_id" => params[:filter_counter_warehouse]).map(&:user_id).uniq
-          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id = ?", user_ids, params[:filter_counter_warehouse]]).distinct
+          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id = ?", user_ids, params[:filter_counter_warehouse]]).distinct
         else
           user_ids = SalesPromotionGirl.
             select("users.id AS user_id").
@@ -57,7 +57,7 @@ class ConsignmentSalesController < ApplicationController
             where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ? AND warehouses.supervisor_id = ?", true, current_user.supervisor_id]).
             map(&:user_id).
             uniq
-          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved).
+          ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).
             joins("LEFT JOIN warehouses ON consignment_sales.warehouse_id = warehouses.id").
             joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR (consignment_sales.warehouse_id = ? AND warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?)", user_ids, params[:filter_counter_warehouse], true]).distinct
         end
@@ -102,10 +102,11 @@ class ConsignmentSalesController < ApplicationController
   # POST /consignment_sales
   # POST /consignment_sales.json
   def create
-    add_additional_params_to_consignment_sales
-    unless params[:consignment_sale][:no_sale].eql?("true")
-      calculate_total
-    end
+    add_additional_params_to_consignment_sales    
+    calculate_total unless params[:consignment_sale][:no_sale].eql?("true")
+    params[:consignment_sale][:consignment_sale_products_attributes].each do |key, value|
+      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_no_sale: params[:consignment_sale][:no_sale]
+    end if params[:consignment_sale][:consignment_sale_products_attributes].present?
     @consignment_sale = ConsignmentSale.new(consignment_sale_params)
     @consignment_sale.warehouse_id = @warehouse_id if params[:consignment_sale][:no_sale].eql?("true")
     @consignment_sale.attr_create_by_admin = unless current_user.has_non_spg_role?
@@ -649,10 +650,10 @@ class ConsignmentSalesController < ApplicationController
     unless action_name.eql?("update")
       unless current_user.has_non_spg_role?
         params.require(:consignment_sale).permit(:no_sale, :counter_event_id, :total, :attr_warehouse_code, :transaction_date,
-          consignment_sale_products_attributes: [:product_barcode_id, :price_list_id, :total, :attr_warehouse_id, :attr_barcode, :attr_transaction_date])
+          consignment_sale_products_attributes: [:product_barcode_id, :price_list_id, :total, :attr_warehouse_id, :attr_barcode, :attr_transaction_date, :attr_no_sale])
       else
         params.require(:consignment_sale).permit(:no_sale, :counter_event_id, :total, :attr_warehouse_code, :transaction_date, :warehouse_id,
-          consignment_sale_products_attributes: [:product_barcode_id, :price_list_id, :total, :attr_warehouse_id, :attr_barcode, :attr_transaction_date])
+          consignment_sale_products_attributes: [:product_barcode_id, :price_list_id, :total, :attr_warehouse_id, :attr_barcode, :attr_transaction_date, :attr_no_sale])
       end
     else
       if current_user.has_role?(:area_manager)

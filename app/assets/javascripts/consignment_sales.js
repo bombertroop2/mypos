@@ -82,24 +82,60 @@ $(function () {
     });
 
     $("#consignment_sale_submit_button").click(function () {
-        bootbox.confirm({
-            message: "Once you create transaction, you'll not be able to change it</br>Are you sure?",
-            buttons: {
-                confirm: {
-                    label: '<i class="fa fa-check"></i> Confirm'
+        if ($("#consignment_sale_transaction_date").val().trim() == "")
+            bootbox.alert({message: "Please fill in transaction date first", size: 'small'});
+        else if ($("#consignment_sale_warehouse_id").length > 0 && $("#consignment_sale_warehouse_id").val().trim() == "")
+            bootbox.alert({message: "Please select warehouse first", size: 'small'});
+        else {
+            bootbox.confirm({
+                message: "Once you create transaction, you'll not be able to change it</br>Are you sure?",
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Confirm'
+                    },
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> Cancel'
+                    }
                 },
-                cancel: {
-                    label: '<i class="fa fa-times"></i> Cancel'
-                }
-            },
-            callback: function (result) {
-                if (result) {
-                    $("body").css('padding-right', '0px');
-                    $("#new_consignment_sale").submit();
-                }
-            },
-            size: "small"
-        });
+                callback: function (result) {
+                    if (result) {
+                        $("body").css('padding-right', '0px');
+                        $("#consignment_sale_no_sale").val("false");
+                        $("#new_consignment_sale").submit();
+                    }
+                },
+                size: "small"
+            });
+        }
+        return false;
+    });
+
+    $("#consignment_sale_no_sale_button").click(function () {
+        if ($("#consignment_sale_transaction_date").val().trim() == "")
+            bootbox.alert({message: "Please fill in transaction date first", size: 'small'});
+        else if ($("#consignment_sale_warehouse_id").length > 0 && $("#consignment_sale_warehouse_id").val().trim() == "")
+            bootbox.alert({message: "Please select warehouse first", size: 'small'});
+        else {
+            bootbox.confirm({
+                message: "Once you create transaction, you'll not be able to change it</br>Are you sure?",
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Confirm'
+                    },
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> Cancel'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        $("body").css('padding-right', '0px');
+                        $("#consignment_sale_no_sale").val("true");
+                        $("#new_consignment_sale").submit();
+                    }
+                },
+                size: "small"
+            });
+        }
         return false;
     });
 

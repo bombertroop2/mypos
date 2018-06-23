@@ -7,6 +7,7 @@
             </div>
             <div class="x_content">
                 <%= form_for(@consignment_sale, remote: true, html: {class: "form-horizontal"}) do |f| %>
+                    <%= f.hidden_field :no_sale %>
                     <% if current_user.has_non_spg_role? %>    
                       <div class="form-group<%= control_group_error(@consignment_sale, :warehouse_id) %>">
                           <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>
@@ -50,36 +51,37 @@
                             <div class="ln_solid"></div>
                             <!--<div class="form-group">
                                 <div class="col-sm-offset-2 col-sm-10">-->
-                                    <%= f.submit "Create", class: "btn btn-primary", id: "consignment_sale_submit_button", style: "float: right" %>
-<!--                                  </div>
-                              </div>-->
-                            <% end %>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="searchConsaleProductForm" class="form-horizontal search-consale-product-form" style="display: none;">
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Product Code</label>
-                    <div class="col-sm-9">
-                        <%= text_field_tag "consale_product_code", "", class: "form-control upcase", style: "width: 100% !important" %>
-                      </div>
-                  </div>
-
-                  <div id="consale_product_color_field_container">
-
-                  </div>
-
-                  <div id="consale_product_size_field_container">
-
-                  </div>
-
-                  <div class="form-group">
-                      <div class="col-xs-5 col-xs-offset-3">
-                          <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_product_consale">
-                              <span class="glyphicon glyphicon-plus"></span> Add
-                          </button>
+                            <%= f.submit "No Sale", class: "btn btn-danger", id: "consignment_sale_no_sale_button", style: "float: right" %>
+                              <%= f.submit "Create", class: "btn btn-primary", id: "consignment_sale_submit_button", style: "float: right" %>
+                                <!--                                  </div>
+                                                              </div>-->
+                              <% end %>
+                          </div>
                       </div>
                   </div>
               </div>
+
+              <div id="searchConsaleProductForm" class="form-horizontal search-consale-product-form" style="display: none;">
+                  <div class="form-group">
+                      <label class="col-sm-3 control-label">Product Code</label>
+                      <div class="col-sm-9">
+                          <%= text_field_tag "consale_product_code", "", class: "form-control upcase", style: "width: 100% !important" %>
+                        </div>
+                    </div>
+
+                    <div id="consale_product_color_field_container">
+
+                    </div>
+
+                    <div id="consale_product_size_field_container">
+
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-xs-5 col-xs-offset-3">
+                            <button type="button" class="btn btn-primary hidden" id="modal_form_btn_add_product_consale">
+                                <span class="glyphicon glyphicon-plus"></span> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
