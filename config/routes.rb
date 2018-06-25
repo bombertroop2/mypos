@@ -116,6 +116,7 @@ Rails.application.routes.draw do
       get "print_return_doc"
       #      patch "update_store_to_warehouse"
       delete "delete_store_to_warehouse"
+      get "change_receive_date"
     end
   end
   #  resources :shipment_receipts, except: [:edit, :update, :destroy] do
@@ -137,7 +138,7 @@ Rails.application.routes.draw do
     end
     member do
       get "receive"
-      get "unreceive"
+      get "change_receive_date"
       get "print"
     end
   end

@@ -73,12 +73,12 @@ class StockMutationsController < ApplicationController
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date).
+        :destination_warehouse_id, :approved_date, :is_receive_date_changed).
         where("warehouse_type <> 'central'")
     else
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date).
+        :destination_warehouse_id, :approved_date, :is_receive_date_changed).
         where("warehouse_type <> 'central' AND destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -672,7 +672,7 @@ class StockMutationsController < ApplicationController
         where(id: params[:id]).first
     end
     @stock_mutation.with_lock do
-      @stock_mutation.update(received_date: params[:receive_date], receiving_inventory_to_store: true)      
+      @stock_mutation.update(received_date: params[:receive_date], receiving_inventory_to_store: true)
     end
     if @stock_mutation.errors[:base].present?
       render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
@@ -701,6 +701,31 @@ class StockMutationsController < ApplicationController
 
   def print_return_doc
     
+  end
+  
+  def change_receive_date
+    @stock_mutation = if current_user.has_non_spg_role?
+      StockMutation.joins(:destination_warehouse).
+        select("stock_mutations.*").
+        where("warehouse_type <> 'central'").where(id: params[:id]).first
+    else
+      StockMutation.joins(:destination_warehouse).
+        select("stock_mutations.*").
+        where("warehouse_type <> 'central' AND destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
+        where(id: params[:id]).first
+    end
+
+    @updated = false
+    @stock_mutation.with_lock do
+      @updated = @stock_mutation.update(received_date: params[:receive_date], attr_change_receive_date: true)
+    end
+    if !@updated
+      if @stock_mutation.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @stock_mutation.errors[:received_date].present?
+        render js: "bootbox.alert({message: \"Receive date #{@stock_mutation.errors[:received_date].join("<br/>")}\",size: 'small'});"
+      end
+    end
   end
 
   private

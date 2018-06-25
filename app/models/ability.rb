@@ -162,7 +162,7 @@ class Ability
             end
           elsif class_name.eql?("Shipment") && !user.has_role?(:area_manager)
             # cegah non manager keatas untuk menghapus shipment
-            alias_action :new, :create, :generate_ob_detail, :print, to: :undelete_action
+            alias_action :new, :create, :generate_ob_detail, :print, :change_receive_date, to: :undelete_action
             alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
             alias_action :edit, :update, :destroy, to: :edit_action
             if ability.eql?(:manage) && user.roles.first.name.eql?("staff")
@@ -190,7 +190,7 @@ class Ability
             else
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
-              alias_action :new, :create, :get_products, :generate_form, :edit, :update, :destroy, :print_rolling_doc, to: :manage_store_to_store_mutation
+              alias_action :new, :create, :get_products, :generate_form, :edit, :update, :destroy, :print_rolling_doc, :change_receive_date, to: :manage_store_to_store_mutation
               alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
               alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
               can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts, :receive_to_warehouse], class_name.gsub(/\s+/, "").constantize

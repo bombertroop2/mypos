@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
   helper SmartListing::Helper
   authorize_resource except: :create
-  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive, :print]
+  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive, :print, :change_receive_date]
 
   # GET /shipments
   # GET /shipments.json
@@ -54,9 +54,9 @@ class ShipmentsController < ApplicationController
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking)
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking)
     else
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(shipments_scope.where(["shipments.quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -188,7 +188,7 @@ class ShipmentsController < ApplicationController
     if @shipment.errors[:base].present?
       render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
     elsif @shipment.errors[:received_date].present?
-      render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join}\",size: 'small'});"
+      render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
     end
   end
   
@@ -202,6 +202,20 @@ class ShipmentsController < ApplicationController
     # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number
     if @shipments.length == 0 || @shipments.length > 1
       render js: "var box = bootbox.alert({message: \"No records found\",size: 'small'});box.on(\"hidden.bs.modal\", function () {$(\"#do_ob_number\").focus();});"
+    end
+  end
+  
+  def change_receive_date
+    @updated = false
+    @shipment.with_lock do
+      @updated = @shipment.update(received_date: params[:receive_date], attr_change_receive_date: true)
+    end
+    if !@updated
+      if @shipment.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @shipment.errors[:received_date].present?
+        render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
+      end
     end
   end
   
