@@ -121,6 +121,7 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (1.8.6)
+    jwt (2.1.0)
     kaminari (1.1.1)
       activesupport (>= 4.1.0)
       kaminari-actionview (= 1.1.1)
@@ -294,6 +295,7 @@ DEPENDENCIES
   geocoder
   jbuilder (~> 2.0)
   jquery-rails
+  jwt
   mailgun-ruby (~> 1.1.4)
   pg (~> 0.18)
   puma

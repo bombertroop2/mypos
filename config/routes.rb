@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  namespace :api, defaults: { format: :json } do
+    devise_for :users, only: :sessions
+  end
+
   resources :customers
   resources :consignment_sales do
     collection do
