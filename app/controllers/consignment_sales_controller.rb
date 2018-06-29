@@ -471,7 +471,11 @@ class ConsignmentSalesController < ApplicationController
   end
   
   def approve
-    @consignment_sale.attr_supervisor_id = current_user.supervisor_id if current_user.has_role?(:area_manager)
+    if current_user.has_role?(:area_manager)
+      @consignment_sale.attr_supervisor_id = current_user.supervisor_id
+    else
+      @consignment_sale.attr_spg_warehouse_id = current_user.sales_promotion_girl.warehouse_id
+    end
     begin
       unless @consignment_sale.update(approved: true)
         render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"
@@ -482,7 +486,11 @@ class ConsignmentSalesController < ApplicationController
   end
 
   def unapprove
-    @consignment_sale.attr_supervisor_id = current_user.supervisor_id if current_user.has_role?(:area_manager)
+    if current_user.has_role?(:area_manager)
+      @consignment_sale.attr_supervisor_id = current_user.supervisor_id
+    else
+      @consignment_sale.attr_spg_warehouse_id = current_user.sales_promotion_girl.warehouse_id
+    end
     begin
       unless @consignment_sale.update(approved: false)
         render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"

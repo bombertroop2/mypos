@@ -11,6 +11,7 @@ class Ability
       cannot :manage, CashDisbursement
       cannot :manage, Sale
       cannot :manage, SalesReturn
+      cannot [:approve, :unapprove], ConsignmentSale
     elsif user.has_role? :administrator
       (User::MENUS.clone << "User").each do |user_menu|
         if user_menu.eql?("User") || AvailableMenu.select("1 AS one").where(active: true, name: user_menu).present?
@@ -39,6 +40,9 @@ class Ability
           elsif class_name.eql?("Event")
             can :manage, Event
             can :manage, CounterEvent
+          elsif class_name.eql?("ConsignmentSale")
+            can :manage, ConsignmentSale
+            cannot [:approve, :unapprove], ConsignmentSale
           else
             can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
           end
@@ -102,10 +106,8 @@ class Ability
             end
           elsif user_menu.name.eql?("Consignment")
             counter_present = Warehouse.joins(:sales_promotion_girls).counter.select("1 AS one").where(is_active: true, :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
-            if (user.has_role?(:supervisor) || user.has_role?(:spg) || user.has_role?(:cashier)) && counter_present
+            if counter_present
               can ability, ConsignmentSale
-              cannot :approve, ConsignmentSale
-              cannot :unapprove, ConsignmentSale
             end
           elsif class_name.eql?("Member")
             can ability, Member

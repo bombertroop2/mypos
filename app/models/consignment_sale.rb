@@ -152,6 +152,7 @@ class ConsignmentSale < ApplicationRecord
                               where(["consignment_sale_products.id = ?", consignment_sale_product.id]).
                               where("audits.action = 'create'").
                               where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND stocks.warehouse_id = sales_promotion_girls.warehouse_id").
+                              where(["warehouses.id = ?", attr_spg_warehouse_id]).
                               select(:id, :unapproved_quantity, :quantity).first
                           end
                         else
@@ -162,11 +163,15 @@ class ConsignmentSale < ApplicationRecord
                               where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
                               select(:id, :unapproved_quantity, :quantity).first
                           else
-                            StockDetail.joins(stock_product: [product: [product_colors: :product_barcodes], stock: :warehouse]).
-                              where(:"product_barcodes.id" => consignment_sale_product.product_barcode_id, :"warehouses.is_active" => true).
-                              where(["stocks.warehouse_id = ?", warehouse_id]).
-                              where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
-                              select(:id, :unapproved_quantity, :quantity).first
+                            if attr_spg_warehouse_id != warehouse_id                              
+                              StockDetail.none.first
+                            else
+                              StockDetail.joins(stock_product: [product: [product_colors: :product_barcodes], stock: :warehouse]).
+                                where(:"product_barcodes.id" => consignment_sale_product.product_barcode_id, :"warehouses.is_active" => true).
+                                where(["stocks.warehouse_id = ?", warehouse_id]).
+                                where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+                                select(:id, :unapproved_quantity, :quantity).first
+                            end
                           end
                         end
                         if sd.present?
@@ -201,6 +206,7 @@ class ConsignmentSale < ApplicationRecord
                               where(["consignment_sale_products.id = ?", consignment_sale_product.id]).
                               where("audits.action = 'create'").
                               where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND stocks.warehouse_id = sales_promotion_girls.warehouse_id").
+                              where(["warehouses.id = ?", attr_spg_warehouse_id]).
                               select(:id, :unapproved_quantity, :quantity).first
                           end
                         else
@@ -211,11 +217,15 @@ class ConsignmentSale < ApplicationRecord
                               where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
                               select(:id, :unapproved_quantity, :quantity).first
                           else
-                            StockDetail.joins(stock_product: [product: [product_colors: :product_barcodes], stock: :warehouse]).
-                              where(:"product_barcodes.id" => consignment_sale_product.product_barcode_id, :"warehouses.is_active" => true).
-                              where(["stocks.warehouse_id = ?", warehouse_id]).
-                              where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
-                              select(:id, :unapproved_quantity, :quantity).first
+                            if attr_spg_warehouse_id != warehouse_id
+                              StockDetail.none.first
+                            else
+                              StockDetail.joins(stock_product: [product: [product_colors: :product_barcodes], stock: :warehouse]).
+                                where(:"product_barcodes.id" => consignment_sale_product.product_barcode_id, :"warehouses.is_active" => true).
+                                where(["stocks.warehouse_id = ?", warehouse_id]).
+                                where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+                                select(:id, :unapproved_quantity, :quantity).first
+                            end
                           end
                         end
                         if sd.present?
