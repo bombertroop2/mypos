@@ -3,9 +3,12 @@ class Api::ApplicationController < ActionController::Base
 
   respond_to :json
   
-  before_action :underscore_params!
   before_action :configure_permitted_parameters, if: :devise_controller?
     before_action :authenticate_user
+    
+    rescue_from CanCan::AccessDenied do |exception|
+      render json: { status: false, message: "You are not authorized to perform this action." }, status: :unauthorized
+    end
     
     private
 
@@ -28,8 +31,16 @@ class Api::ApplicationController < ActionController::Base
     end
     
     def authenticate_user!(options = {})
-      head :unauthorized unless signed_in?
+      unless signed_in?
+        head :unauthorized
+      else
+        if current_user.has_non_spg_role? || (current_user.sales_promotion_girl_id.present? && current_user.sales_promotion_girl.warehouse.warehouse_type.include?("ctr"))
+        else
+          head :unauthorized
+        end
+      end
     end
+  
 
     def current_user
       @current_user ||= super || User.find(@current_user_id)

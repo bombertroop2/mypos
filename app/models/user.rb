@@ -83,11 +83,11 @@ class User < ApplicationRecord
                     end
   
                     def has_managerial_role?
-                      has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) 
+                      roles.select("1 AS one").where(["(roles.name = ? OR roles.name = ? OR roles.name = ?) AND roles.resource_type IS NULL AND roles.resource_id IS NULL", "manager", "administrator", "superadmin"]).present?
                     end
             
                     def has_non_spg_role?
-                      has_role?(:staff) || has_role?(:manager) || has_role?(:administrator) || has_role?(:superadmin) || has_role?(:accountant) || has_role?(:area_manager)
+                      roles.select("1 AS one").where(["(roles.name = ? OR roles.name = ? OR roles.name = ? OR roles.name = ? OR roles.name = ? OR roles.name = ?) AND roles.resource_type IS NULL AND roles.resource_id IS NULL", "staff", "manager", "administrator", "superadmin", "accountant", "area_manager"]).present?
                     end
                     
                     def generate_jwt

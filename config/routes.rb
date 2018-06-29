@@ -1,5 +1,18 @@
 Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
+    resources :consignment_sales do
+      collection do
+        get "get_events"
+      end
+    end
+    resources :shipments, except: [:edit, :update] do    
+      collection do
+        get "inventory_receipts"
+      end
+      member do
+        get "receive"
+      end
+    end
     devise_for :users, only: :sessions
   end
 
