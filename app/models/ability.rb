@@ -5,16 +5,18 @@ class Ability
     # Define abilities for the passed in user here. For example:
     #
     user ||= User.new # guest user (not logged in)
-    if user.has_role? :superadmin
+    user_roles = user.roles.pluck :name
+    if user_roles.include? "superadmin"
       can :manage, :all
       cannot :manage, CashierOpening
       cannot :manage, CashDisbursement
       cannot :manage, Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
-    elsif user.has_role? :administrator
+    elsif user_roles.include? "administrator"
+      available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
-        if user_menu.eql?("User") || AvailableMenu.select("1 AS one").where(active: true, name: user_menu).present?
+        if user_menu.eql?("User") || available_menus.include?(user_menu)
           class_name = if user_menu.eql?("Area Manager")
             "Supervisor"
           elsif user_menu.eql?("Stock Balance")
@@ -49,9 +51,10 @@ class Ability
         end
       end
       can :manage, Notification
-    elsif user.roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user.roles.first.name)}.present?
+    elsif user_roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user_roles.first)}.present?
+      available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present? && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing")
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -68,7 +71,12 @@ class Ability
           else
             user_menu.name
           end
-          if class_name.eql?("Supervisor") || class_name.eql?("Warehouse") || class_name.eql?("Region") || class_name.eql?("ReceivedPurchaseOrder") || class_name.eql?("Purchase Order") || class_name.eql?("Vendor") || class_name.eql?("Customer") || class_name.eql?("Purchase Return") || class_name.eql?("Courier") || class_name.eql?("Event") || class_name.eql?("Email") || class_name.eql?("Bank")
+          if class_name.eql?("Supervisor") || class_name.eql?("Warehouse") ||
+              class_name.eql?("Region") || class_name.eql?("ReceivedPurchaseOrder") ||
+              class_name.eql?("Purchase Order") || class_name.eql?("Vendor") ||
+              class_name.eql?("Customer") || class_name.eql?("Purchase Return") ||
+              class_name.eql?("Courier") || class_name.eql?("Event") ||
+              class_name.eql?("Email") || class_name.eql?("Bank")
             #            can :read, class_name.gsub(/\s+/, "").constantize
             #            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
@@ -98,7 +106,7 @@ class Ability
             can :read_mutation_goods, StockMutation
           elsif user_menu.name.eql?("Point of Sale")
             showroom_present = Warehouse.joins(:sales_promotion_girls).select("1 AS one").where(is_active: true, warehouse_type: "showroom", :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
-            if user.has_role?(:cashier) && !user.new_record? && showroom_present
+            if user_roles.include?("cashier") && !user.new_record? && showroom_present
               can ability, CashierOpening
               can ability, CashDisbursement
               can ability, Sale
@@ -118,8 +126,9 @@ class Ability
       end
       can :manage, Notification
     else
+      available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && AvailableMenu.select("1 AS one").where(active: true, name: user_menu.name).present?
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name)
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -140,8 +149,8 @@ class Ability
           else
             user_menu.name
           end
-          if ability && class_name.eql?("Supervisor") && !user.has_role?(:area_manager)
-            unless user.has_role?(:accountant)
+          if ability && class_name.eql?("Supervisor") && !user_roles.include?("area_manager")
+            unless user_roles.include?("accountant")
               can ability, class_name.gsub(/\s+/, "").constantize
               can :get_warehouses, class_name.gsub(/\s+/, "").constantize
             else
@@ -149,8 +158,8 @@ class Ability
               can :get_warehouses, class_name.gsub(/\s+/, "").constantize
             end
           elsif class_name.eql?("Event")
-            if !user.has_role?(:area_manager) 
-              if user.has_role?(:accountant)
+            if !user_roles.include?("area_manager") 
+              if user_roles.include?("accountant")
                 unless ability.eql?(:none)
                   can :read, Event
                   can :read, CounterEvent
@@ -162,28 +171,28 @@ class Ability
                 end
               end
             end
-          elsif class_name.eql?("Shipment") && !user.has_role?(:area_manager)
+          elsif class_name.eql?("Shipment") && !user_roles.include?("area_manager")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, :print, :change_receive_date, to: :undelete_action
             alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
             alias_action :edit, :update, :destroy, to: :edit_action
-            if ability.eql?(:manage) && user.roles.first.name.eql?("staff")
+            if ability.eql?(:manage) && user_roles.first.eql?("staff")
               can [:read_action_for_staff, :undelete_action], class_name.gsub(/\s+/, "").constantize
-            elsif user.roles.first.name.eql?("staff") || user.has_role?(:accountant)
+            elsif user_roles.first.eql?("staff") || user_roles.include?("accountant")
               can :read_action_for_staff, class_name.gsub(/\s+/, "").constantize
-            elsif ability.eql?(:read) && user.roles.first.name.eql?("manager")
+            elsif ability.eql?(:read) && user_roles.first.eql?("manager")
               can :read_action_for_staff, class_name.gsub(/\s+/, "").constantize
-            elsif user.roles.first.name.eql?("manager")
+            elsif user_roles.first.eql?("manager")
               can [:read_action_for_staff, :undelete_action, :edit_action], class_name.gsub(/\s+/, "").constantize
             end
           elsif (class_name.eql?("Product") || class_name.eql?("Purchase Order")) && !user.has_managerial_role?
             # cegah staff untuk manage product
-            can :read, class_name.gsub(/\s+/, "").constantize if !user.has_role?(:area_manager)
+            can :read, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
           elsif class_name.eql?("CostList") && !user.has_managerial_role?
             # cegah staff untuk manage Cost dan Price
-            can :read, class_name.gsub(/\s+/, "").constantize if !user.has_role?(:area_manager)
-          elsif class_name.eql?("Stock Mutation") && !user.has_role?(:area_manager)
-            if ability.eql?(:read) || user.has_role?(:accountant)
+            can :read, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
+          elsif class_name.eql?("Stock Mutation") && !user_roles.include?("area_manager")
+            if ability.eql?(:read) || user_roles.include?("accountant")
               alias_action :index, :show, to: :read_store_to_store_mutations
               alias_action :index_store_to_warehouse_mutation, :show_store_to_warehouse_mutation, to: :read_store_to_warehouse_mutations
               alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
@@ -197,29 +206,29 @@ class Ability
               alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
               can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts, :receive_to_warehouse], class_name.gsub(/\s+/, "").constantize
             end
-          elsif class_name.eql?("Goods In Transit") && !user.has_role?(:area_manager)
+          elsif class_name.eql?("Goods In Transit") && !user_roles.include?("area_manager")
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif class_name.eql?("Account Payable") && user.has_role?(:staff)
+          elsif class_name.eql?("Account Payable") && user_roles.include?("staff")
             can :read, AccountPayable
-          elsif class_name.eql?("Account Payable") && !user.has_role?(:area_manager)
+          elsif class_name.eql?("Account Payable") && !user_roles.include?("area_manager")
             can ability, AccountPayable
-          elsif class_name.eql?("FiscalYear") && !user.has_role?(:area_manager)
-            if user.has_role?(:staff)
+          elsif class_name.eql?("FiscalYear") && !user_roles.include?("area_manager")
+            if user_roles.include?("staff")
               can :read, FiscalYear
             else
               can ability, FiscalYear
             end
           elsif class_name.eql?("Point of Sale") || class_name.eql?("Company")
           elsif class_name.eql?("ConsignmentSale")
-            if user.has_role?(:area_manager) && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
+            if user_roles.include?("area_manager") && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
               can ability, ConsignmentSale
             end
-          elsif ability && !user.has_role?(:accountant) && !user.has_role?(:area_manager)
+          elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
-          elsif ability && user.has_role?(:accountant)
+          elsif ability && user_roles.include?("accountant")
             can :read, class_name.gsub(/\s+/, "").constantize
           end        
         end        

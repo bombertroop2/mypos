@@ -1,5 +1,13 @@
 Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
+    resources :stock_mutations do
+      collection do
+        get "store_to_store_inventory_receipts"
+      end
+      member do
+        get "receive"
+      end
+    end
     resources :consignment_sales do
       collection do
         get "get_events"
