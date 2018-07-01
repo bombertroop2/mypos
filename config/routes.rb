@@ -11,6 +11,11 @@ Rails.application.routes.draw do
     resources :consignment_sales do
       collection do
         get "get_events"
+        get "get_product"
+      end
+      member do
+        get "approve"
+        get "unapprove"
       end
     end
     resources :shipments, except: [:edit, :update] do    

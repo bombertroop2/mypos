@@ -80,11 +80,11 @@ function BootboxContentStoreToWarehouse() {
     return object;
 }
 
-function receiveStoreToStoreInventory(stockMutationId) {
+function receiveStoreToStoreInventory(stockMutationId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: BootboxContentStoreToStore,
-        title: "Receive inventory?",
+        title: "Receive inventory "+docNumber+" ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'
@@ -106,11 +106,11 @@ function receiveStoreToStoreInventory(stockMutationId) {
     });
 }
 
-function changeReceiveStoreToStoreInventoryDate(stockMutationId) {
+function changeReceiveStoreToStoreInventoryDate(stockMutationId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: changeReceiveDateBootboxContentStoreToStore,
-        title: "Change receive date?",
+        title: "Change receive date ("+docNumber+") ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'
@@ -132,11 +132,11 @@ function changeReceiveStoreToStoreInventoryDate(stockMutationId) {
     });
 }
 
-function receiveStoreToWarehouseInventory(stockMutationId) {
+function receiveStoreToWarehouseInventory(stockMutationId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: BootboxContentStoreToWarehouse,
-        title: "Receive inventory?",
+        title: "Receive inventory "+docNumber+" ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'

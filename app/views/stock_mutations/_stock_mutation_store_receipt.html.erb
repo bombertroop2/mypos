@@ -5,6 +5,6 @@
 <td><%= object.quantity %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, show_store_to_store_receipt_stock_mutation_path(id: object.id), data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:receive, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveStoreToStoreInventory('#{object.id}')", title: "Receive" ) %>
-    <%= link_to_if(can?(:change_receive_date, StockMutation) && object.received_date.present? && !object.is_receive_date_changed, content_tag(:i, "", :class => "glyphicon glyphicon-calendar"), "javascript:changeReceiveStoreToStoreInventoryDate('#{object.id}')", title: "Change receive date" ) %>
+    <%= link_to_if(can?(:receive, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveStoreToStoreInventory('#{object.id}', '#{object.number}')", title: "Receive" ) %>
+    <%= link_to_if(can?(:change_receive_date, StockMutation) && object.received_date.present? && !object.is_receive_date_changed, content_tag(:i, "", :class => "glyphicon glyphicon-calendar"), "javascript:changeReceiveStoreToStoreInventoryDate('#{object.id}', '#{object.number}')", title: "Change receive date" ) %>
 </td>

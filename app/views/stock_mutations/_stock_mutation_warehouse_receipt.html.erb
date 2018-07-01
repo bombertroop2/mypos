@@ -4,5 +4,5 @@
 <td><%= object.quantity %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, show_store_to_warehouse_receipt_stock_mutation_path(id: object.id), data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:receive_to_warehouse, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveStoreToWarehouseInventory('#{object.id}')", title: "Receive" ) %>
+    <%= link_to_if(can?(:receive_to_warehouse, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveStoreToWarehouseInventory('#{object.id}', '#{object.number}')", title: "Receive" ) %>
 </td>

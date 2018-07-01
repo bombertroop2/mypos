@@ -4,6 +4,6 @@
 <td id="total-quantity-<%= object.id %>"><%= object.quantity %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, shipment_path(object), data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:receive, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveInventory('#{object.id}')", title: "Receive" ) %>
-    <%= link_to_if(can?(:change_receive_date, Shipment) && object.received_date.present? && !object.is_receive_date_changed, content_tag(:i, "", :class => "glyphicon glyphicon-calendar"), "javascript:changeReceiveInventoryDate('#{object.id}')", title: "Change receive date" ) %>
+    <%= link_to_if(can?(:receive, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveInventory('#{object.id}', '#{object.delivery_order_number}')", title: "Receive" ) %>
+    <%= link_to_if(can?(:change_receive_date, Shipment) && object.received_date.present? && !object.is_receive_date_changed, content_tag(:i, "", :class => "glyphicon glyphicon-calendar"), "javascript:changeReceiveInventoryDate('#{object.id}', '#{object.delivery_order_number}')", title: "Change receive date" ) %>
 </td>

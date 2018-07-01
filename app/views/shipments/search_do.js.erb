@@ -1,6 +1,6 @@
 var box = bootbox.confirm({
     message: BootboxContent,
-    title: "Receive inventory?",
+    title: "Receive inventory <%= @shipments.first.delivery_order_number %> ?",
     buttons: {
         cancel: {
             label: '<i class="fa fa-times"></i> Cancel'

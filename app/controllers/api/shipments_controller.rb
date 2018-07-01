@@ -36,7 +36,7 @@ class Api::ShipmentsController < Api::ApplicationController
     #    else
     #      Shipment.select(:id).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
     #    end
-    @delivery_orders = Shipment.select(:id).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
+    @delivery_orders = Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
     
     # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number (tapi sekarang 1 DO = 1 OB)
     if @delivery_orders.length == 0 || @delivery_orders.length > 1

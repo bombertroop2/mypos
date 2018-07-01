@@ -64,11 +64,11 @@ function changeReceiveDateBootboxContent() {
     return object;
 }
 
-function receiveInventory(shipmentId) {
+function receiveInventory(shipmentId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: BootboxContent,
-        title: "Receive inventory?",
+        title: "Receive inventory "+docNumber+" ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'
@@ -90,11 +90,11 @@ function receiveInventory(shipmentId) {
     });
 }
 
-function changeReceiveInventoryDate(shipmentId) {
+function changeReceiveInventoryDate(shipmentId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: changeReceiveDateBootboxContent,
-        title: "Change receive date?",
+        title: "Change receive date ("+docNumber+") ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'
