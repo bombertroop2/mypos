@@ -34,7 +34,8 @@ class Api::ApplicationController < ActionController::Base
       unless signed_in?
         head :unauthorized
       else
-        if current_user.has_non_spg_role? || (current_user.sales_promotion_girl_id.present? && current_user.sales_promotion_girl.warehouse.warehouse_type.include?("ctr"))
+        #        if current_user.has_non_spg_role? || (current_user.sales_promotion_girl_id.present? && current_user.sales_promotion_girl.warehouse.warehouse_type.include?("ctr"))
+        if current_user.sales_promotion_girl_id.present? && current_user.sales_promotion_girl.warehouse.warehouse_type.include?("ctr")
         else
           head :unauthorized
         end

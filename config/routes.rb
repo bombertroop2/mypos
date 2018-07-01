@@ -16,6 +16,7 @@ Rails.application.routes.draw do
     resources :shipments, except: [:edit, :update] do    
       collection do
         get "inventory_receipts"
+        get "search_do"
       end
       member do
         get "receive"
