@@ -1,1 +1,19 @@
 <%= smart_listing_update(:stock_mutations) %>
+
+$("#mutation_number").focus();
+$("#mutation_number").keypress(function (e) {
+    var key = e.which;
+    if (key == 13)  // the enter key code
+    {
+        $(this).blur();
+        $("#btn-receive-searched-sm").click();
+        return false;
+    }
+});
+$("#btn-receive-searched-sm").click(function () {
+    $.get("/stock_mutations/search", {
+        mutation_number: $("#mutation_number").val().trim()
+    });
+    $("#mutation_number").val('');
+});
+

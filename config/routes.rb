@@ -135,6 +135,7 @@ Rails.application.routes.draw do
       get "store_to_store_inventory_receipts"
       get "store_to_warehouse_inventory_receipts"
       post "create_store_to_warehouse_mutation"
+      get "search"
     end
     member do
       get "approve"

@@ -1,0 +1,25 @@
+var box = bootbox.confirm({
+    message: BootboxContentStoreToStore,
+    title: "Receive inventory <%= @stock_mutation.number %> ?",
+    buttons: {
+        cancel: {
+            label: '<i class="fa fa-times"></i> Cancel'
+        },
+        confirm: {
+            label: '<i class="fa fa-check"></i> Confirm'
+        }
+    },
+    callback: function (result) {
+        if (result && !$("#popup-receive-date").val() == "") {
+            $("body").css('padding-right', '0px');
+            $.get("/stock_mutations/<%= @stock_mutation.id %>/receive", {
+                receive_date: $("#popup-receive-date").val()
+            });
+        } else if (result && $("#popup-receive-date").val() == "")
+            return false;
+    },
+    size: "small"
+});
+box.on("hidden.bs.modal", function () {
+    $("#mutation_number").focus();
+});

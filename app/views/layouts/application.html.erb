@@ -544,6 +544,24 @@
                             return false;
                         });
         <% end %>
+        <% if action_name.eql?("store_to_store_inventory_receipts") && can?(:receive, StockMutation) %>
+                        $("#mutation_number").focus();
+                        $("#mutation_number").keypress(function (e) {
+                            var key = e.which;
+                            if (key == 13)  // the enter key code
+                            {
+                                $(this).blur();
+                                $("#btn-receive-searched-sm").click();
+                                return false;
+                            }
+                        });
+                        $("#btn-receive-searched-sm").click(function () {
+                            $.get("/stock_mutations/search", {
+                                mutation_number: $("#mutation_number").val().trim()
+                            });
+                            $("#mutation_number").val('');
+                        });
+        <% end %>
       <% elsif controller_name.eql?("brands") %>
         <% if cannot?(:manage, Brand) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});

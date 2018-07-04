@@ -17,6 +17,14 @@
         <% end %>
     </tbody>
 </table>
+<% if can? :receive, StockMutation %>
+  <div class="form-inline text-right">
+      <div class="form-group">
+          <input type="text" id="mutation_number" class="form-control" placeholder="Mutation number">
+      </div>
+      <button id="btn-receive-searched-sm" type="submit" class="btn btn-primary" style="margin-bottom: 0px;margin-right: 0px"><span class="glyphicon glyphicon-download-alt"></span></button>
+  </div>
+<% end %>
 <%= smart_listing.paginate %>
 <script>
   var processId = setInterval(function () {

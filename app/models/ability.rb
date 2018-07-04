@@ -97,7 +97,7 @@ class Ability
                 :create_store_to_warehouse_mutation, :generate_form, :edit_store_to_warehouse,
                 :update_store_to_warehouse, :delete_store_to_warehouse, :get_products, :print_return_doc, to: :manage_store_to_warehouse_mutation
               alias_action :store_to_store_inventory_receipts, :show_store_to_store_receipt, to: :read_store_to_store_inventory_receipts
-              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :manage_store_to_warehouse_mutation, :approve, :receive, :read_store_to_store_inventory_receipts], class_name.gsub(/\s+/, "").constantize
+              can [:read_store_to_store_mutations, :read_store_to_warehouse_mutations, :manage_store_to_warehouse_mutation, :approve, :receive, :read_store_to_store_inventory_receipts, :search], class_name.gsub(/\s+/, "").constantize
             end
           elsif class_name.eql?("Goods In Transit")
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods

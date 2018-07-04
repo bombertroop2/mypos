@@ -727,6 +727,30 @@ class StockMutationsController < ApplicationController
       end
     end
   end
+  
+  def search    
+    @stock_mutation = if current_user.sales_promotion_girl_id.blank?
+      StockMutation.joins(:destination_warehouse).
+        select(:id, :number).
+        where("warehouse_type <> 'central'").
+        where("approved_date IS NOT NULL").
+        where(received_date: nil).
+        where(number: params[:mutation_number]).       
+        first
+    else
+      StockMutation.joins(:destination_warehouse).
+        select(:id, :number).
+        where("warehouse_type <> 'central' AND destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
+        where("approved_date IS NOT NULL").
+        where(received_date: nil).
+        where(number: params[:mutation_number]).
+        first
+    end
+    
+    if @stock_mutation.blank?
+      render js: "var box = bootbox.alert({message: \"No records found\",size: 'small'});box.on(\"hidden.bs.modal\", function () {$(\"#mutation_number\").focus();});"
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
