@@ -3,6 +3,7 @@ Rails.application.routes.draw do
     resources :stock_mutations do
       collection do
         get "store_to_store_inventory_receipts"
+        get "search"
       end
       member do
         get "receive"

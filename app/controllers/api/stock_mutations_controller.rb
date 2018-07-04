@@ -65,5 +65,21 @@ class Api::StockMutationsController < Api::ApplicationController
       render json: { status: false, message: "No records found" }, status: :unprocessable_entity
     end
   end
+  
+  def search    
+    stock_mutation = StockMutation.joins(:destination_warehouse).
+      select(:id, :number).
+      where("warehouse_type <> 'central' AND destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
+      where("approved_date IS NOT NULL").
+      where(received_date: nil).
+      where(number: params[:mutation_number]).
+      first
+    
+    if stock_mutation.blank?
+      render json: { status: false, message: "No records found" }, status: :unprocessable_entity
+    else
+      render json: { status: true, stock_mutation: stock_mutation }
+    end
+  end
 
 end

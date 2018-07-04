@@ -12,7 +12,7 @@ class StockMutation < ApplicationRecord
   accepts_nested_attributes_for :stock_mutation_products, allow_destroy: true
 
   validates :delivery_date, :courier_id, :origin_warehouse_id, :destination_warehouse_id, presence: true
-  validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && !shpmnt.receiving_inventory_to_store && !shpmnt.receiving_inventory_to_warehouse && !shpmnt.attr_change_receive_date}
+  validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.delivery_date_changed? && !shpmnt.receiving_inventory_to_store && !shpmnt.receiving_inventory_to_warehouse && !shpmnt.attr_change_receive_date}
     validate :courier_available, :origin_warehouse_available
     validate :destination_warehouse_available, unless: proc {|sm| sm.receiving_inventory_to_warehouse}
       validate :editable, on: :update, if: proc{|sm| !sm.approving_mutation && !sm.receiving_inventory_to_store && !sm.receiving_inventory_to_warehouse && !sm.attr_change_receive_date}
