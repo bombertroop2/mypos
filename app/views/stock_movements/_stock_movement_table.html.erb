@@ -2,10 +2,10 @@
     <table class="table table-bordered table-condensed">
         <thead>
             <tr>
-                <th class="text-center" colspan="15">Stock Movement Report</th>
+                <th class="text-center" colspan="16">Stock Movement Report</th>
             </tr>
             <tr>
-                <th class="text-center" colspan="15"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
+                <th class="text-center" colspan="16"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
             </tr>
             <tr>
                 <th class="text-center" rowspan="2">Article</th>
@@ -22,6 +22,7 @@
                 <th class="text-center" rowspan="2">Return</th>
                 <th class="text-center" rowspan="2">SLK</th>
                 <th class="text-center" rowspan="2">Ending Stock</th>
+                <th class="text-center" rowspan="2">Gross Value</th>
             </tr>
             <tr>
                 <th class="text-center">In</th>
@@ -32,6 +33,7 @@
             <% last_product_code = "" %>
             <% last_color_code = "" %>
             <% @stock_movement_transactions.each do |stock_movement_transaction| %>
+              <% product_first_price = PriceList.select(:price).joins(:product_detail).where(["product_details.size_id = ? AND product_details.product_id = ? AND product_details.price_code_id = ?", stock_movement_transaction.size_id, stock_movement_transaction.product_id, @warehouse.price_code_id]).order(:effective_date).first.price %>
               <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
                 <% total_product = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code)}.length %>
                 <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
@@ -71,6 +73,11 @@
                   <td class="text-right"><%= stock_movement_transaction.total_sales_return_quantity_received rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.total_consignment_sold_quantity rescue 0 %></td>
                   <td class="text-right"><%= stock_movement_transaction.ending_stock %></td>
+                  <td class="text-right"><%= number_to_currency(stock_movement_transaction.ending_stock * product_first_price,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
               </tr>
               <% last_product_code = stock_movement_transaction.product_code %>
               <% last_color_code = stock_movement_transaction.color_code %>
