@@ -746,6 +746,7 @@
                         });
         <% end %>
       <% elsif controller_name.eql?("stock_movements") %>
+                      $("#menu_toggle").click();
                       $("#search-btn").click(function () {
                           if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
                               bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
@@ -767,6 +768,7 @@
                           }
                       });
       <% elsif controller_name.eql?("listing_stocks") %>
+                      $("#menu_toggle").click();
                       $("#search-btn").click(function () {
                           if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
                               bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
