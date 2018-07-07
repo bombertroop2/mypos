@@ -12,7 +12,6 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require turbolinks
 //= require cocoon
 //= require smart_listing
 //= require vendors
@@ -43,7 +42,7 @@
 //});
 
 var openingNotification = false;
-$(document).on('turbolinks:load', function () {
+$(window).on('load', function () {
     $('.inputs').bind('keypress', function (event) {
         if (event.which === 13) {
             $('[tabindex=' + (+this.tabIndex + 1) + ']').focus();

@@ -48,7 +48,7 @@ function selectProductRow() {
 //        selectProductRow();
 //});
 
-$(document).on('turbolinks:load', function () {
+$(window).on('load', function () {
     var productsDataTable = $('#listing_products_table').DataTable({
         order: [0, 'asc'],
         dom: 'T<"clear">lfrtip',
