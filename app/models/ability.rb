@@ -118,7 +118,7 @@ class Ability
               can ability, ConsignmentSale
             end
           elsif class_name.eql?("Member")
-            can ability, Member
+            can :read, Member
           else
             can :read, class_name.gsub(/\s+/, "").constantize unless class_name.eql?("Company")
           end        
@@ -225,6 +225,12 @@ class Ability
           elsif class_name.eql?("ConsignmentSale")
             if user_roles.include?("area_manager") && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
               can ability, ConsignmentSale
+            end
+          elsif class_name.eql?("Member")
+            if user_roles.include?("area_manager") || user_roles.include?("accountant")
+              can :read, Member
+            else
+              can ability, Member
             end
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize

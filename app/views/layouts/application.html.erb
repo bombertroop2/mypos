@@ -570,6 +570,14 @@
                             return false;
                         });
         <% end %>
+      <% elsif controller_name.eql?("members") %>
+        <% if cannot?(:manage, Member) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% elsif controller_name.eql?("goods_types") %>
         <% if cannot? :manage, GoodsType %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
