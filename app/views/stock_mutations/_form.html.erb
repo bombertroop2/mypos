@@ -32,7 +32,11 @@
     <% if @stock_mutation.mutation_type.eql?("store to warehouse") %>
       <% url = create_store_to_warehouse_mutation_stock_mutations_path %>
     <% else %>
-      <% url = stock_mutations_path %>
+      <% if action_name.eql?("edit") || action_name.eql?("update") %>
+        <% url = stock_mutation_path(@stock_mutation) %>
+      <% else %>
+        <% url = stock_mutations_path %>
+      <% end %>
     <% end %>
     <%= form_for(@stock_mutation, url: url, remote: true, html: {class: "form-horizontal"}) do |f| %>
         <%= f.hidden_field :mutation_type %>
@@ -108,6 +112,15 @@
 
                           <script>
                             $(function () {
+                                $("#stock_mutation_product_code").keypress(function (e) {
+                                    var key = e.which;
+                                    if (key == 13)  // the enter key code
+                                    {
+                                        $("#btn_add_product").click();
+                                        return false;
+                                    }
+                                });
+
                                 $("#stock_mutation_origin_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
                                 $("#stock_mutation_destination_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
                                 $("#stock_mutation_courier_id").attr("data-placeholder", "Please select courier").chosen();

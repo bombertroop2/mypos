@@ -102,6 +102,14 @@
                               $("#order_booking_origin_warehouse_id").change(function () {
                                   $("#warehouse_product_items_form_container").html("");
                               });
+                              $("#order_booking_product_code").keypress(function (e) {
+                                  var key = e.which;
+                                  if (key == 13)  // the enter key code
+                                  {
+                                      $("#btn_add_product").click();
+                                      return false;
+                                  }
+                              });
                               $("#btn_add_product").click(function () {
 
                                   if ($("#order_booking_origin_warehouse_id").val().trim() == "")
