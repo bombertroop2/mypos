@@ -9,7 +9,12 @@
         <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
         <div class="form-group<%= control_group_error(@purchase_order, :vendor_id) %>">
             <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
-              <div class="col-sm-10">
+              <% if @purchase_order.new_record? %>
+                <% style_attr = "" %>
+              <% else %>
+                <% style_attr = " style=\"margin-top: -14px\"".html_safe %>
+              <% end %>
+            <div class="col-sm-10"<%= style_attr %>>
                   <%= f.select :vendor_id, options_from_collection_for_select(@suppliers, 'id', 'name', @purchase_order.vendor_id.to_s), {prompt: 'Select Vendor'}, {class: "form-control"} %>
                     <%= error_help_text(@purchase_order, :vendor_id) %>
                 </div>
@@ -134,7 +139,7 @@
                                         ],
                                         tableTools: {
                                             sRowSelect: 'os',
-                                            sRowSelector: 'td:first-child',
+                                            //sRowSelector: 'td:first-child',
                                             aButtons: ['select_all', 'select_none']
                                         },
                                         paging: false,

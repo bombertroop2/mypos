@@ -289,7 +289,7 @@ class SalesReturnsController < ApplicationController
     end #if params[:sales_return][:sales_return_products_attributes].present?
     
     params[:sales_return][:sale_attributes][:sale_products_attributes].each do |key, value|
-      params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! attr_returned_sale_id: params[:sales_return][:sale_id]
+      params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! attr_returned_sale_id: params[:sales_return][:sale_id], attr_returning_sale: true
       if session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
         if session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
           params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"], price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
