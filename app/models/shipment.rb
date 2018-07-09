@@ -13,7 +13,7 @@ class Shipment < ApplicationRecord
     
   validates :delivery_date, :courier_id, :order_booking_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc {|shpmnt| shpmnt.order_booking.created_at.to_date}, message: 'must be after or equal to creation date of order booking' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.order_booking_id.present? && !shpmnt.attr_change_receive_date}
-    validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
+    validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.delivery_date_changed? && !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
       validate :warehouse_is_active, :courier_available, :order_booking_available#, :check_min_quantity
       validate :editable, on: :update, if: proc{|shpmnt| !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
         validate :order_booking_not_changed, on: :update, if: proc{|shipment| shipment.order_booking_id_changed?}
@@ -292,7 +292,7 @@ class Shipment < ApplicationRecord
                               end
       
                               def editable
-                                errors.add(:base, "The record cannot be edited") if received_date.present?
+                                errors.add(:base, "The record cannot be edited") if received_date.present? && !is_document_printed_changed?
                               end
       
                               def notify_store
@@ -319,7 +319,7 @@ class Shipment < ApplicationRecord
                               end
       
                               def deletable
-                                if received_date.present?
+                                if received_date.present? || is_document_printed
                                   errors.add(:base, "The record cannot be deleted")
                                   throw :abort
                                 end 

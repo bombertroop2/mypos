@@ -23,9 +23,9 @@ class ShipmentsController < ApplicationController
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking)
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed).joins(:order_booking)
     else
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(shipments_scope.where(["shipments.quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -72,6 +72,7 @@ class ShipmentsController < ApplicationController
   end
 
   def print
+    @shipment.update(is_document_printed: true)
   end
 
   # GET /shipments/new
