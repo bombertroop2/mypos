@@ -1,7 +1,7 @@
 namespace :import do
   desc "Import Regions from Excel"
   task regions: :environment do 
-    workbook = Creek::Book.new '/home/yopi/Downloads/import region table format.xlsx'
+    workbook = Creek::Book.new Rails.root.join("public", "import region table format.xlsx").to_s
     worksheets = workbook.sheets
 
     worksheets.each do |worksheet|
