@@ -65,6 +65,8 @@ gem "browser"
 
 gem 'jwt'
 
+gem 'creek'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
