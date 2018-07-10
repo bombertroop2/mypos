@@ -74,7 +74,11 @@ class Product < ApplicationRecord
   TARGETS = [
     ["Normal", "normal"],
     ["Special Price", "special price"],
-    ["Sale", "sale"]
+    ["Sale", "sale"],
+    ["Discount 20%", "discount 20%"],
+    ["Discount 50%", "discount 50%"],
+    ["Discount 60%", "discount 60%"],
+    ["Discount 70%", "discount 70%"]
   ]
 
   ADDITIONAL_INFORMATIONS = [
