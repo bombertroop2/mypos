@@ -117,13 +117,19 @@ namespace :import do
     workbook = Creek::Book.new Rails.root.join("public", "import model table format.xlsx").to_s
     worksheets = workbook.sheets
 
+    existed_models = []
     worksheets.each do |worksheet|
       worksheet.rows.each_with_index do |row, idx|
         if row.present? && idx > 1
-          model = Model.new code: row["A#{idx + 1}"], name: row["B#{idx + 1}"], type: row["C#{idx + 1}"], description: row["D#{idx + 1}"]
-          model.save
+          if Model.select("1 AS one").where(code: row["A#{idx + 1}"]).present?
+            existed_models << row["A#{idx + 1}"]
+          else
+            model = Model.new code: row["A#{idx + 1}"], name: row["B#{idx + 1}"], type: row["C#{idx + 1}"], description: row["D#{idx + 1}"]
+            model.save
+          end
         end
       end
     end
+    puts "Existed models => #{existed_models.to_sentence}"
   end
 end
