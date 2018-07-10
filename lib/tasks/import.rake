@@ -76,4 +76,24 @@ namespace :import do
       end
     end
   end
+
+  desc "Import Vendors from Excel"
+  task vendors: :environment do 
+    workbook = Creek::Book.new Rails.root.join("public", "import vendors table format.xlsx").to_s
+    worksheets = workbook.sheets
+
+    worksheets.each do |worksheet|
+      worksheet.rows.each_with_index do |row, idx|
+        if row.present? && idx > 1
+          is_taxable_entrepreneur = if row["E#{idx + 1}"].to_i == 1
+            true
+          else
+            false
+          end
+          vendor = Vendor.new code: row["A#{idx + 1}"], name: row["B#{idx + 1}"], address: row["C#{idx + 1}"], terms_of_payment: row["D#{idx + 1}"].to_i, is_taxable_entrepreneur: is_taxable_entrepreneur, value_added_tax: row["F#{idx + 1}"], phone: row["G#{idx + 1}"], facsimile: row["H#{idx + 1}"], email: row["I#{idx + 1}"], pic_name: row["J#{idx + 1}"], pic_phone: row["K#{idx + 1}"], pic_mobile_phone: row["L#{idx + 1}"], pic_email: row["M#{idx + 1}"]
+          vendor.save
+        end
+      end
+    end
+  end
 end
