@@ -111,4 +111,19 @@ namespace :import do
       end
     end
   end
+
+  desc "Import Models from Excel"
+  task models: :environment do 
+    workbook = Creek::Book.new Rails.root.join("public", "import model table format.xlsx").to_s
+    worksheets = workbook.sheets
+
+    worksheets.each do |worksheet|
+      worksheet.rows.each_with_index do |row, idx|
+        if row.present? && idx > 1
+          model = Model.new code: row["A#{idx + 1}"], name: row["B#{idx + 1}"], type: row["C#{idx + 1}"], description: row["D#{idx + 1}"]
+          model.save
+        end
+      end
+    end
+  end
 end
