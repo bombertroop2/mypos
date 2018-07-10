@@ -76,6 +76,11 @@ class Product < ApplicationRecord
     ["Special Price", "special price"],
     ["Sale", "sale"]
   ]
+
+  ADDITIONAL_INFORMATIONS = [
+    ["TH", "TH"],
+    ["NA", "NA"]
+  ]
   
   def code_and_brand
     "#{code} - #{brand_name}"

@@ -182,14 +182,14 @@ class ProductsController < ApplicationController
   def set_product
     @product = Product.joins(:brand, :vendor, :model, :goods_type).
       where(id: params[:id]).
-      select("products.id, products.code, products.description, common_fields.name AS brand_name, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id").first
+      select("products.id, products.code, products.description, common_fields.name AS brand_name, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id, products.additional_information").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
       :target, :model_id,# :effective_date,
-      :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
+      :goods_type_id, :image, :image_cache, :remove_image, :size_group_id, :additional_information,
       product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product, :size_group_id,
         price_lists_attributes: [:id, :price, :user_is_adding_new_price, :cost, :product_id]],
       cost_lists_attributes: [:id, :cost, :is_user_creating_product],
