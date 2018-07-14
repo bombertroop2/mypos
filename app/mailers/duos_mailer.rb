@@ -30,6 +30,13 @@ class DuosMailer < ApplicationMailer
     send_email("no-reply@#{company_code}.com", recipient, 'General Sales Summary', render_to_string(template: "duos_mailer/sales_general_summary_email"))
   end
 
+  def import_data_email(type, errors, xls_error_index)
+    @type = type
+    @errors = errors
+    @xls_error_index = xls_error_index
+    send_email("no-reply@1s.com", "bombertroop@gmail.com", type, render_to_string(template: "duos_mailer/import_data_email"))
+  end
+
   private
   
   def send_email(from, to, subject, html)
