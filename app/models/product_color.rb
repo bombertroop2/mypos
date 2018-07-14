@@ -5,18 +5,18 @@ class ProductColor < ApplicationRecord
   belongs_to :color
   has_many :product_barcodes, dependent: :destroy
   
-  attr_accessor :code, :name, :selected_color_id
+  attr_accessor :code, :name, :selected_color_id, :attr_importing_data
   
   validates :color_id, presence: true
   validate :color_available
-  validate :color_not_added, on: :create
+  validate :color_not_added, on: :create, unless: proc{|pc| pc.attr_importing_data}
   
   before_destroy :prevent_deleting_if_po_is_created,
     :prevent_deleting_if_direct_purchase_is_created,
     :prevent_deleting_if_order_booking_is_created, :delete_tracks,
     :prevent_deleting_if_stock_mutation_is_created
   
-  after_create :create_barcode
+  after_create :create_barcode, unless: proc{|pc| pc.attr_importing_data}
 
   private
   

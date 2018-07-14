@@ -15,12 +15,12 @@ class CostList < ApplicationRecord
     validates :product_id, presence: true, unless: proc{|cost_list| cost_list.is_user_creating_product}
       validates :cost, numericality: true, if: proc { |cost_list| cost_list.cost.present? }
         validates :cost, numericality: {greater_than: 0}, if: proc { |cost_list| cost_list.cost.is_a?(Numeric) }
-          validates :effective_date, date: {after_or_equal_to: Proc.new { Date.current }, message: 'must be after or equal to today' }, if: proc {|cost_list| cost_list.effective_date.present? && cost_list.effective_date_changed?}
+          validates :effective_date, date: {after_or_equal_to: Proc.new { Date.current }, message: 'must be after or equal to today' }, if: proc {|cost_list| cost_list.effective_date.present? && cost_list.effective_date_changed? && !cost_list.attr_importing_data}
             validates :effective_date, uniqueness: {scope: :product_id}, if: proc {|cost_list| cost_list.effective_date.present?}
               validate :fields_not_changed
               validate :effective_date_not_added, on: :create
   
-              attr_accessor :is_user_creating_product, :user_is_deleting_from_child
+              attr_accessor :is_user_creating_product, :user_is_deleting_from_child, :attr_importing_data
           
               before_destroy :prevent_user_delete_last_record, if: proc {|cost_list| cost_list.user_is_deleting_from_child}
                 before_destroy :prevent_user_delete_record_when_cashier_open, :prevent_delete_if_purchase_order_created, :prevent_delete_if_direct_purchase_created, :delete_tracks

@@ -1,4 +1,5 @@
 class Product < ApplicationRecord
+  attr_accessor :attr_importing_data
   audited on: [:create, :update]
   has_associated_audits
   #  attr_accessor :effective_date
@@ -52,7 +53,7 @@ class Product < ApplicationRecord
   validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
-  validate :check_item, on: :create
+  validate :check_item, on: :create, unless: proc{|product| product.attr_importing_data}
   validate :brand_available, :sex_available, :vendor_available, :target_available,
     :model_available, :goods_type_available, :size_group_available
   #  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
@@ -184,7 +185,7 @@ class Product < ApplicationRecord
         false
       end
     end
-    errors.add(:base, "Product must have at least one color!") unless valid
+    errors.add(:base, "Product must have at least one color!") if !valid && !attr_importing_data
   end
   
   

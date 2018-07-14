@@ -1,7 +1,8 @@
 class PriceList < ApplicationRecord
   attr_accessor :product_id, :size_id, :price_code_id, :user_is_adding_new_price,
     :user_is_updating_price, :user_is_deleting_from_child,
-    :user_is_adding_price_from_cost_prices_page, :turn_off_date_validation, :editable_record
+    :user_is_adding_price_from_cost_prices_page, :turn_off_date_validation, :editable_record,
+    :attr_importing_data
 
   audited associated_with: :product_detail, on: [:create, :update], only: [:effective_date, :price, :product_detail_id]
 
@@ -13,15 +14,15 @@ class PriceList < ApplicationRecord
     
   attr_reader :cost
   
-  before_validation :set_effective_date, if: proc {|price_list| price_list.user_is_adding_new_price}
+  before_validation :set_effective_date, if: proc {|price_list| price_list.user_is_adding_new_price && !price_list.attr_importing_data}
   
     validates :price, numericality: {greater_than_or_equal_to: 1}, if: proc { |price_list| price_list.price.is_a?(Numeric) && price_list.price.present? }
       validates :price, numericality: {greater_than: :discount_event_amount, message: "must be greater than %{count} (Discount(Rp))"}, if: proc { |price_list| price_list.user_is_adding_price_from_cost_prices_page || (price_list.price_changed? && price_list.persisted?) }
         validates :effective_date, :price, :cost, presence: true        
         validates :product_detail_id, presence: true, if: proc {|price_list| !price_list.user_is_adding_new_price && !price_list.user_is_adding_price_from_cost_prices_page}
-          validates :effective_date, date: {after_or_equal_to: Proc.new { Date.current }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation}
+          validates :effective_date, date: {after_or_equal_to: Proc.new { Date.current }, message: 'must be after or equal to today' }, if: proc {|price_list| price_list.effective_date.present? && price_list.effective_date_changed? && !price_list.turn_off_date_validation && !price_list.attr_importing_data}
             validates :effective_date, uniqueness: {scope: :product_detail_id}, if: proc {|price_list| price_list.effective_date.present?}
-              validate :price_greater_or_equal_to_cost, if: proc {|price_list| price_list.price.present? && price_list.cost.present?}
+              validate :price_greater_or_equal_to_cost, if: proc {|price_list| price_list.price.present? && price_list.cost.present? && !price_list.attr_importing_data}
                 validate :effective_date_not_changed, :price_not_changed, :product_detail_id_not_changed
           
                 #            before_create :create_product_detail, if: proc {|price_list| price_list.product_detail_is_not_existed_yet && price_list.user_is_adding_new_price}
