@@ -28,12 +28,16 @@ class ImportDataJob < ApplicationJob
                 product = Product.new code: row["A#{idx + 1}"].strip, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: (row["I#{idx + 1}"].present? ? row["I#{idx + 1}"].strip : nil)
                 product.attr_importing_data = true
                 unless product.save
-                  ImportDataEmailJob.perform_later("import product", product.errors.inspect, "invalid index => #{idx}")
+                  puts product.errors.inspect
+                  puts "invalid index => #{idx}"
+                  #                  ImportDataEmailJob.perform_later("import product", product.errors.inspect, "invalid index => #{idx}")
                   error = true
                   break
                 end
               rescue Exception => e
-                ImportDataEmailJob.perform_later("import product", e.inspect, "invalid index => #{idx}, brand id => #{brand_id}, sex => #{sex}, vendor_id => #{vendor_id}, target => #{target}, model_id => #{model_id}, goods_type_id => #{goods_type_id}, size_group_id => #{size_group_id}")
+                puts e.inspect
+                puts "invalid index => #{idx}, brand id => #{brand_id}, sex => #{sex}, vendor_id => #{vendor_id}, target => #{target}, model_id => #{model_id}, goods_type_id => #{goods_type_id}, size_group_id => #{size_group_id}"
+                #                ImportDataEmailJob.perform_later("import product", e.inspect, "invalid index => #{idx}, brand id => #{brand_id}, sex => #{sex}, vendor_id => #{vendor_id}, target => #{target}, model_id => #{model_id}, goods_type_id => #{goods_type_id}, size_group_id => #{size_group_id}")
                 error = true
                 break
               end
@@ -43,8 +47,8 @@ class ImportDataJob < ApplicationJob
         end
         if error
           raise ActiveRecord::Rollback
-        else
-          ImportDataEmailJob.perform_later("import product", nil, nil)
+          #        else
+          #          ImportDataEmailJob.perform_later("import product", nil, nil)
         end
       end
     end
