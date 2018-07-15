@@ -65,24 +65,24 @@ class ImportDataJob < ApplicationJob
             if row.present? && idx > 1
               begin          
                 product = Product.select(:id, :size_group_id).where(code: row["B#{idx + 1}"].strip).first
-                if product.present?
-                  size_group_id = product.size_group_id
-                  size_id = Size.select(:id).where(size: row["A#{idx + 1}"].to_s.strip.split(".")[0], size_group_id: size_group_id).first.id
-                  product_id = product.id
-                  price_code_id = PriceCode.select(:id).where(code: row["C#{idx + 1}"].strip).first.id
-                  #                  if ProductDetail.select("1 AS one").where(size_id: size_id, product_id: product_id, price_code_id: price_code_id).blank?
-                  product_detail = ProductDetail.new size_id: size_id, product_id: product_id, price_code_id: price_code_id
-                  product_detail.size_group_id = size_group_id
-                  product_detail.user_is_adding_new_product = true
-                  product_detail.attr_importing_data = true
-                  unless product_detail.save
-                    puts product_detail.errors.inspect
-                    puts "invalid index => #{idx}"
-                    error = true
-                    break
-                  end
-                  #                  end
+                #                if product.present?
+                size_group_id = product.size_group_id
+                size_id = Size.select(:id).where(size: row["A#{idx + 1}"].to_s.strip.split(".")[0], size_group_id: size_group_id).first.id
+                product_id = product.id
+                price_code_id = PriceCode.select(:id).where(code: row["C#{idx + 1}"].strip).first.id
+                #                  if ProductDetail.select("1 AS one").where(size_id: size_id, product_id: product_id, price_code_id: price_code_id).blank?
+                product_detail = ProductDetail.new size_id: size_id, product_id: product_id, price_code_id: price_code_id
+                product_detail.size_group_id = size_group_id
+                product_detail.user_is_adding_new_product = true
+                product_detail.attr_importing_data = true
+                unless product_detail.save
+                  puts product_detail.errors.inspect
+                  puts "invalid index => #{idx}"
+                  error = true
+                  break
                 end
+                #                  end
+                #                end
               rescue Exception => e
                 puts e.inspect
                 puts "invalid index => #{idx}, size id => #{size_id}, product_id => #{product_id}, size_group_id => #{size_group_id}, price_code_id => #{price_code_id}"
