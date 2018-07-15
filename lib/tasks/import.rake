@@ -239,44 +239,6 @@ namespace :import do
     end
   end
     
-  desc "Import Product Colors from Excel"
-  task product_colors: :environment do
-    workbook = Creek::Book.new Rails.root.join("public", "import product color table format.xlsx").to_s
-    worksheets = workbook.sheets
-
-    error_row = ""
-    ActiveRecord::Base.transaction do
-      worksheets.each do |worksheet|
-        worksheet.rows.each_with_index do |row, idx|
-          product_id = 0
-          color_id = 0
-          if row.present? && idx > 1
-            begin
-              product_id = Product.select(:id).where(code: row["A#{idx + 1}"]).first.id
-              color_id = Color.select(:id).where(code: row["B#{idx + 1}"]).first.id
-              product_color = ProductColor.new product_id: product_id, color_id: color_id
-              product_color.attr_importing_data = true
-              unless product_color.save
-                puts product_color.errors.inspect
-                error_row = "invalid index => #{idx}"
-                break
-              end
-            rescue Exception => e
-              puts e.inspect
-              error_row = "invalid index => #{idx}, product_id => #{product_id}, color_id => #{color_id}"
-              break
-            end
-          end
-        end
-        break if error_row.present?
-      end
-      if error_row.present?
-        puts error_row
-        raise ActiveRecord::Rollback
-      end
-    end
-  end  
-  
   desc "Import Product Barcode from Excel"
   task product_barcodes: :environment do
     workbook = Creek::Book.new Rails.root.join("public", "import product barcode table format.xlsx").to_s
