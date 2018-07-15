@@ -243,6 +243,48 @@ class ImportDataJob < ApplicationJob
           raise ActiveRecord::Rollback
         end
       end
+    elsif type.eql?("product prices")
+      workbook = Creek::Book.new Rails.root.join("public", "import price list table format.xlsx").to_s
+      worksheets = workbook.sheets
+
+      error = false
+      ActiveRecord::Base.transaction do
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|
+            product_detail_id = 0
+            product_id = 0
+            cost = 0
+            if row.present? && idx > 1
+              begin
+                product_detail = ProductDetail.select(:id, :product_id).joins(:size, :product, :price_code).where(["sizes.size_group_id = products.size_group_id AND sizes.size = ? AND products.code = ? AND common_fields.code = ?", row["A#{idx + 1}"].to_s.strip.split(".")[0], row["B#{idx + 1}"], row["C#{idx + 1}"]]).first
+                product_detail_id = product_detail.id
+                product_id = product_detail.product_id
+                price = row["E#{idx + 1}"] <= 0 ? 1 : row["E#{idx + 1}"]
+                effective_date = row["D#{idx + 1}"].strftime("%d/%m/%Y").to_date
+                cost = CostList.select(:cost).where(["effective_date = ? AND product_id = ?", effective_date, product_id]).first.cost
+                price_list = PriceList.new effective_date: effective_date, price: price, product_detail_id: product_detail_id
+                price_list.attr_importing_data = true
+                price_list.cost = cost
+                unless price_list.save
+                  puts price_list.errors.inspect
+                  puts "invalid index => #{idx}"
+                  error = true
+                  break
+                end
+              rescue Exception => e
+                puts e.inspect
+                puts "invalid index => #{idx}, product_detail_id => #{product_detail_id}, product_id => #{product_id}, cost => #{cost}"
+                error = true
+                break
+              end
+            end
+          end
+          break if error
+        end
+        if error
+          raise ActiveRecord::Rollback
+        end
+      end
     end
   end
 end
