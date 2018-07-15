@@ -370,6 +370,65 @@ class ImportDataJob < ApplicationJob
           raise ActiveRecord::Rollback
         end
       end
+    elsif type.eql?("product barcodes")
+      start_from = step * 10000 - 10000 + 2 + step - 1
+      end_at = step * 10000 + 2 + step - 1
+      error = false
+      error_messages = []
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "import product barcode table format.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|
+            if row.present? && idx >= start_from && idx <= end_at
+              product_color_id = 0
+              size_group_id = 0
+              size_id = 0
+              begin
+                product_color = ProductColor.select(:id, "products.size_group_id").joins(:product, :color).where(["products.code = ? AND common_fields.code = ?", row["A#{idx + 1}"], row["B#{idx + 1}"]]).first
+                product_color_id = product_color.id
+                size_group_id = product_color.size_group_id
+                size_id = Size.select(:id).where(size: row["C#{idx + 1}"], size_group_id: size_group_id).first.id
+                barcode = if row["D#{idx + 1}"].blank?
+                  pb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                  if pb.present?
+                    "1S#{pb.barcode.split("1S")[1].succ}"
+                  else
+                    "1S00001"
+                  end
+                elsif ProductBarcode.select("1 AS one").where(barcode: row["D#{idx + 1}"]).blank?
+                  row["D#{idx + 1}"]
+                else
+                  pb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                  if pb.present?
+                    "1S#{pb.barcode.split("1S")[1].succ}"
+                  else
+                    "1S00001"
+                  end
+                end
+                product_barcode = ProductBarcode.new product_color_id: product_color_id, size_id: size_id, barcode: barcode
+                unless product_barcode.save
+                  error_messages << product_barcode.errors.inspect
+                  error_messages << "invalid index => #{idx}"
+                  error = true
+                end
+              rescue Exception => e
+                error_messages << e.inspect
+                error_messages << "invalid index => #{idx}, product_color_id => #{product_color_id}, size_group_id => #{size_group_id}, size_id => #{size_id}"
+                error = true
+              end
+            end
+          end
+        end
+        if error
+          error_messages.each_with_index do |error_message, idx|
+            puts "#{idx+1}. #{error_message}"
+          end
+          raise ActiveRecord::Rollback
+        end
+      end
+
     end
   end
 end
