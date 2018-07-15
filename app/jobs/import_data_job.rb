@@ -282,7 +282,7 @@ class ImportDataJob < ApplicationJob
           end
         end
         if error
-          error_messages.each do |error_message, idx|
+          error_messages.each_with_index do |error_message, idx|
             puts "#{idx+1}. #{error_message}"
           end
           raise ActiveRecord::Rollback
@@ -325,7 +325,46 @@ class ImportDataJob < ApplicationJob
           end
         end
         if error
-          error_messages.each do |error_message, idx|
+          error_messages.each_with_index do |error_message, idx|
+            puts "#{idx+1}. #{error_message}"
+          end
+          raise ActiveRecord::Rollback
+        end
+      end
+    elsif type.eql?("product colors")
+      start_from = step * 10000 - 10000 + 2 + step - 1
+      end_at = step * 10000 + 2 + step - 1
+      error = false
+      error_messages = []
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "import product color table format.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|
+            if row.present? && idx >= start_from && idx <= end_at
+              product_id = 0
+              color_id = 0
+              begin
+                product_id = Product.select(:id).where(code: row["A#{idx + 1}"]).first.id
+                color_id = Color.select(:id).where(code: row["B#{idx + 1}"]).first.id
+                product_color = ProductColor.new product_id: product_id, color_id: color_id
+                product_color.attr_importing_data = true
+                unless product_color.save
+                  error_messages << product_color.errors.inspect
+                  error_messages << "invalid index => #{idx}"
+                  error = true
+                end
+              rescue Exception => e
+                error_messages << e.inspect
+                error_messages << "invalid index => #{idx}, product_id => #{product_id}, color_id => #{color_id}"
+                error = true
+              end
+            end
+          end
+        end
+        if error
+          error_messages.each_with_index do |error_message, idx|
             puts "#{idx+1}. #{error_message}"
           end
           raise ActiveRecord::Rollback
