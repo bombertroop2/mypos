@@ -1,7 +1,7 @@
 class ImportDataJob < ApplicationJob
   queue_as :default
 
-  def perform(type)
+  def perform(type, step=1)
     if type.eql?("product")
       error = false
       ActiveRecord::Base.transaction do
@@ -244,17 +244,20 @@ class ImportDataJob < ApplicationJob
         end
       end
     elsif type.eql?("product prices")
+      start_from = step * 10000 - 10000 + 2 + step - 1
+      end_at = step * 10000 + 2 + step - 1
       workbook = Creek::Book.new Rails.root.join("public", "import price list table format.xlsx").to_s
       worksheets = workbook.sheets
 
       error = false
+      error_messages = []
       ActiveRecord::Base.transaction do
         worksheets.each do |worksheet|
           worksheet.rows.each_with_index do |row, idx|
-            product_detail_id = 0
-            product_id = 0
-            cost = 0
-            if row.present? && idx > 1
+            if row.present? && idx >= start_from && idx <= end_at
+              product_detail_id = 0
+              product_id = 0
+              cost = 0
               begin
                 product_detail = ProductDetail.select(:id, :product_id).joins(:size, :product, :price_code).where(["sizes.size_group_id = products.size_group_id AND sizes.size = ? AND products.code = ? AND common_fields.code = ?", row["A#{idx + 1}"].to_s.strip.split(".")[0], row["B#{idx + 1}"], row["C#{idx + 1}"]]).first
                 product_detail_id = product_detail.id
@@ -266,22 +269,22 @@ class ImportDataJob < ApplicationJob
                 price_list.attr_importing_data = true
                 price_list.cost = cost
                 unless price_list.save
-                  puts price_list.errors.inspect
-                  puts "invalid index => #{idx}"
+                  error_messages << price_list.errors.inspect
+                  error_messages << "invalid index => #{idx}"
                   error = true
-                  break
                 end
               rescue Exception => e
-                puts e.inspect
-                puts "invalid index => #{idx}, product_detail_id => #{product_detail_id}, product_id => #{product_id}, cost => #{cost}"
+                error_messages << e.inspect
+                error_messages << "invalid index => #{idx}, product_detail_id => #{product_detail_id}, product_id => #{product_id}, cost => #{cost}"
                 error = true
-                break
               end
             end
           end
-          break if error
         end
         if error
+          error_messages.each do |error_message, idx|
+            puts "#{idx+1}. #{error_message}"
+          end
           raise ActiveRecord::Rollback
         end
       end
