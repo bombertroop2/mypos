@@ -51,6 +51,96 @@ class ImportDataJob < ApplicationJob
           #          ImportDataEmailJob.perform_later("import product", nil, nil)
         end
       end
+    elsif type.eql?("product detail")
+      error = false
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "import product detail table format.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|          
+            size_id = 0
+            product_id = 0
+            price_code_id = 0
+            if row.present? && idx > 1
+              begin          
+                product = Product.select(:id, :size_group_id).where(code: row["B#{idx + 1}"].strip).first
+                if product.present?
+                  size_group_id = product.size_group_id
+                  size_id = Size.select(:id).where(size: row["A#{idx + 1}"].to_s.strip.split(".")[0], size_group_id: size_group_id).first.id
+                  product_id = product.id
+                  price_code_id = PriceCode.select(:id).where(code: row["C#{idx + 1}"].strip).first.id
+                  #                  if ProductDetail.select("1 AS one").where(size_id: size_id, product_id: product_id, price_code_id: price_code_id).blank?
+                  product_detail = ProductDetail.new size_id: size_id, product_id: product_id, price_code_id: price_code_id
+                  product_detail.size_group_id = size_group_id
+                  product_detail.user_is_adding_new_product = true
+                  product_detail.attr_importing_data = true
+                  unless product_detail.save
+                    puts product_detail.errors.inspect
+                    puts "invalid index => #{idx}"
+                    error = true
+                    break
+                  end
+                  #                  end
+                end
+              rescue Exception => e
+                puts e.inspect
+                puts "invalid index => #{idx}, size id => #{size_id}, product_id => #{product_id}, size_group_id => #{size_group_id}, price_code_id => #{price_code_id}"
+                error = true
+                break
+              end
+            end
+          end
+          break if error
+        end
+        if error
+          raise ActiveRecord::Rollback
+        end
+      end
+    elsif type.eql?("product detail bag. 2")
+      error = false
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "daftar product detail yang di skip.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|          
+            size_id = 0
+            product_id = 0
+            price_code_id = 0
+            if row.present? && idx > 1
+              begin          
+                product = Product.select(:id, :size_group_id).where(code: row["B#{idx + 1}"].strip).first
+                if product.present?
+                  size_group_id = product.size_group_id
+                  size_id = Size.select(:id).where(size: row["A#{idx + 1}"].to_s.strip.split(".")[0], size_group_id: size_group_id).first.id
+                  product_id = product.id
+                  price_code_id = PriceCode.select(:id).where(code: row["C#{idx + 1}"].strip).first.id
+                  product_detail = ProductDetail.new size_id: size_id, product_id: product_id, price_code_id: price_code_id
+                  product_detail.size_group_id = size_group_id
+                  product_detail.user_is_adding_new_product = true
+                  product_detail.attr_importing_data = true
+                  unless product_detail.save
+                    puts product_detail.errors.inspect
+                    puts "invalid index => #{idx}"
+                    error = true
+                    break
+                  end
+                end
+              rescue Exception => e
+                puts e.inspect
+                puts "invalid index => #{idx}, size id => #{size_id}, product_id => #{product_id}, size_group_id => #{size_group_id}, price_code_id => #{price_code_id}"
+                error = true
+                break
+              end
+            end
+          end
+          break if error
+        end
+        if error
+          raise ActiveRecord::Rollback
+        end
+      end
     end
   end
 end
