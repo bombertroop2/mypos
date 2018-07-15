@@ -175,6 +175,41 @@ class ImportDataJob < ApplicationJob
           raise ActiveRecord::Rollback
         end
       end
+    elsif type.eql?("product costs bag. 2")
+      error = false
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "missing costs.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|
+            product_id = 0
+            if row.present? && idx > 1
+              begin
+                product_id = Product.select(:id).where(code: row["A#{idx + 1}"]).first.id
+                cost_list = CostList.new effective_date: row["B#{idx + 1}"].strftime("%d/%m/%Y").to_date, cost: row["C#{idx + 1}"], product_id: product_id
+                cost_list.attr_importing_data = true
+                unless cost_list.save
+                  puts cost_list.errors.inspect
+                  puts "invalid index => #{idx}"
+                  error = true
+                  break
+                end
+              rescue Exception => e
+                puts e.inspect
+                puts "invalid index => #{idx}, product_id => #{product_id}"
+                error = true
+                break
+              end
+            end
+          end
+          break if error
+        end
+        if error
+          raise ActiveRecord::Rollback
+        end
+      end
+
     end
   end
 end
