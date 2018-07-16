@@ -62,8 +62,6 @@ class WarehousesController < ApplicationController
       @warehouse.code = "#{first_code}-#{second_code}"
       if e.cause.to_s.include?("code")      
         @warehouse.errors.messages[:code] = ["has already been taken"]
-      else
-        @warehouse.errors.messages[:sku] = ["has already been taken"]
       end
     end
   end
@@ -97,8 +95,6 @@ class WarehousesController < ApplicationController
       @warehouse_code = "#{first_code}-#{second_code}"
       if e.cause.to_s.include?("code")      
         @warehouse.errors.messages[:code] = ["has already been taken"]
-      else
-        @warehouse.errors.messages[:sku] = ["has already been taken"]
       end
     end
   end
