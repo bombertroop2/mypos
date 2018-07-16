@@ -41,7 +41,12 @@ class ProductDetail < ApplicationRecord
       def create_barcode
         product.product_colors.select(:id).each do |product_color|
           if product_color.product_barcodes.where(size_id: size_id).select("1 AS one").blank?
-            barcode = ProductBarcode.select(:barcode).order("barcode DESC").first.barcode.succ rescue "0000001"
+            pb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+            barcode = if pb.present?
+              "1S#{pb.barcode.split("1S")[1].succ}"
+            else
+              "1S00001"
+            end
             product_barcode = product_color.product_barcodes.build size_id: size_id, barcode: barcode
             product_barcode.save
           end

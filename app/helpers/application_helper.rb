@@ -1,6 +1,6 @@
 module ApplicationHelper    
   def remove_empty_space_from_phone_number(number)
-    number.gsub("_", "") rescue nil
+    number.gsub("_", "").gsub(" ", "") rescue nil
   end
   
   def control_group_error(model, field_name)

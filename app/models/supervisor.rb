@@ -31,7 +31,7 @@ class Supervisor < ApplicationRecord
     end
     
     def replace_underline_from_mobile_phone
-      self.mobile_phone = mobile_phone.gsub("_", "")
+      self.mobile_phone = mobile_phone.gsub("_", "").gsub(" ", "")
     end
     
     def code_not_changed
