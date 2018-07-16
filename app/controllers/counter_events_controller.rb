@@ -59,25 +59,25 @@ class CounterEventsController < ApplicationController
     if params[:warehouse_ids].split(",").blank?
       render js: "bootbox.alert({message: \"Please select at least 1 warehouse.\",size: 'small'});" and return
     end
-    begin
-      params[:warehouse_ids].split(",").each do |warehouse_id|        
-        @counter_event.counter_event_warehouses.build warehouse_id: warehouse_id.strip
-      end
-      @valid = @counter_event.save
-      if !@valid
-        if @counter_event.errors[:base].present?          
-          render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
-        else
-          @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
-        end
-        #      else
-        #        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
-      end
-    rescue ActiveRecord::RecordNotUnique => e
-      @valid = false
-      @counter_event.errors.messages[:code] = ["has already been taken"]
-      @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)      
+    #    begin
+    params[:warehouse_ids].split(",").each do |warehouse_id|        
+      @counter_event.counter_event_warehouses.build warehouse_id: warehouse_id.strip
     end
+    @valid = @counter_event.save
+    if !@valid
+      if @counter_event.errors[:base].present?          
+        render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
+      else
+        @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
+      end
+      #      else
+      #        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
+    end
+    #    rescue ActiveRecord::RecordNotUnique => e
+    #      @valid = false
+    #      @counter_event.errors.messages[:code] = ["has already been taken"]
+    #      @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)      
+    #    end
   end
 
   # PATCH/PUT /counter_events/1
@@ -91,22 +91,22 @@ class CounterEventsController < ApplicationController
     params[:warehouse_ids].split(",").each do |warehouse_id|        
       @counter_event.counter_event_warehouses.build warehouse_id: warehouse_id.strip
     end
-    begin
-      @valid = @counter_event.update(counter_event_params)
-      if !@valid
-        unless @counter_event.errors[:base].present?
-          @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
-        else
-          render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
-        end
-        #      else
-        #        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
+    #    begin
+    @valid = @counter_event.update(counter_event_params)
+    if !@valid
+      unless @counter_event.errors[:base].present?
+        @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)          
+      else
+        render js: "bootbox.alert({message: \"#{@counter_event.errors[:base].join("<br/>")}\",size: 'small'});"
       end
-    rescue ActiveRecord::RecordNotUnique => e
-      @valid = false
-      @counter_event.errors.messages[:code] = ["has already been taken"]
-      @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)      
+      #      else
+      #        @counter_event.set_warehouses(params[:warehouse_ids]) if params[:warehouse_ids]
     end
+    #    rescue ActiveRecord::RecordNotUnique => e
+    #      @valid = false
+    #      @counter_event.errors.messages[:code] = ["has already been taken"]
+    #      @warehouses = Warehouse.select(:id, :code, :name).actived.counter.order(:code)      
+    #    end
   end
 
   # DELETE /counter_events/1

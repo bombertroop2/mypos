@@ -9,7 +9,9 @@ class CounterEvent < ApplicationRecord
   before_validation :remove_white_space, :upcase_code
   
 	validates :code, :name, :start_time, :end_time, :counter_event_type, presence: true
-	validates :counter_event_type, inclusion: { in: ["Discount(%)", "Special Price"],
+  validate :different_type_not_added
+  validate :same_range_not_added
+  validates :counter_event_type, inclusion: { in: ["Discount(%)", "Special Price"],
     message: "%{value} is not a valid type" }
   validates :first_discount, presence: true, if: proc{|counter_event| counter_event.counter_event_type.strip.eql?("Discount(%)")}
     validates :start_time, date: {after_or_equal_to: proc {Time.current}, message: 'must be after or equal to current time' }, if: proc{|evnt| evnt.start_time.present? && evnt.start_time_changed?}
@@ -41,6 +43,15 @@ class CounterEvent < ApplicationRecord
                     end
 
                     private
+                    
+                    def same_range_not_added
+                      errors.add(:start_time, "has already been taken") if code.present? && start_time.present? && (code_changed? || start_time_changed?) && CounterEvent.select("1 AS one").where(["code = ? AND DATE(start_time) <= ? AND DATE(end_time) >= ? AND counter_event_type = ?", code, start_time.to_date, start_time.to_date, counter_event_type]).present?
+                      errors.add(:end_time, "has already been taken") if code.present? && end_time.present? && (code_changed? || end_time_changed?) && CounterEvent.select("1 AS one").where(["code = ? AND DATE(start_time) <= ? AND DATE(end_time) >= ? AND counter_event_type = ?", code, end_time.to_date, end_time.to_date, counter_event_type]).present?
+                    end
+                    
+                    def different_type_not_added
+                      errors.add(:code, "has already been taken") if code.present? && code_changed? && CounterEvent.select("1 AS one").where(["code = ? AND counter_event_type <> ?", code, counter_event_type]).present?
+                    end
                   
                     def delete_old_warehouses
                       counter_event_warehouses.select(:id).each do |counter_event_warehouse|
