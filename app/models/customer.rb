@@ -40,7 +40,7 @@ class Customer < ApplicationRecord
 
 
   def upcase_code
-  	self.code = code.upcase.gsub(" ","")
+  	self.code = code.upcase.gsub(" ","").gsub("\t","")
   end
 
   def code_not_changed

@@ -123,7 +123,7 @@ class Warehouse < ApplicationRecord
 
           def strip_string_values
             self.code = code.gsub("_"," ").strip
-            self.sku = sku.gsub(" ","") if sku.present?
+            self.sku = sku.gsub(" ","").gsub("\t","") if sku.present?
           end
     
           def area_manager_available

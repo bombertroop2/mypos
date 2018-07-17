@@ -41,7 +41,7 @@ class SizeGroup < ApplicationRecord
   #  end
 
   def upcase_code
-    self.code = code.upcase.gsub(" ","")
+    self.code = code.upcase.gsub(" ","").gsub("\t","")
   end
   
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code

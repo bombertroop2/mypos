@@ -77,6 +77,6 @@ class Event < ApplicationRecord
                                 end
 
                                 def upcase_code
-                                  self.code = code.upcase.gsub(" ","")
+                                  self.code = code.upcase.gsub(" ","").gsub("\t","")
                                 end
                               end
