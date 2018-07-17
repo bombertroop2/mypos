@@ -472,6 +472,96 @@ class ImportDataJob < ApplicationJob
           raise ActiveRecord::Rollback
         end
       end
+    elsif type.eql?("counter event")
+      start_from = step * 10000 - 10000 + 2 + step - 1
+      end_at = step * 10000 + 2 + step - 1
+      error = false
+      error_messages = []
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "import counter event table format.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|
+            if row.present? && idx >= start_from && idx <= end_at
+              begin
+                hash_params = if row["G#{idx + 1}"].strip.eql?("%")
+                  counter_event_type = "Discount(%)"
+                  second_discount = if row["I#{idx + 1}"] == 0
+                    nil
+                  else
+                    row["I#{idx + 1}"]
+                  end
+                  name = if row["B#{idx + 1}"].present?
+                    row["B#{idx + 1}"]
+                  else
+                    row["A#{idx + 1}"]
+                  end
+                  {code: row["A#{idx + 1}"], name: name, start_time: row["C#{idx + 1}"].to_date, end_time: row["D#{idx + 1}"].to_date, first_discount: row["H#{idx + 1}"], second_discount: second_discount, margin: row["E#{idx + 1}"], participation: row["F#{idx + 1}"], counter_event_type: counter_event_type}
+                else
+                  counter_event_type = ""
+                  {}
+                end
+                counter_event = CounterEvent.new hash_params
+                counter_event.attr_importing_data = true
+                unless counter_event.save
+                  error_messages << counter_event.errors.inspect
+                  error_messages << "invalid index => #{idx}"
+                  error = true
+                end
+              rescue Exception => e
+                error_messages << e.inspect
+                error_messages << "invalid index => #{idx}"
+                error = true
+              end
+            end
+          end
+        end
+        if error
+          error_messages.each_with_index do |error_message, idx|
+            puts "#{idx+1}. #{error_message}"
+          end
+          raise ActiveRecord::Rollback
+        end
+      end
+    elsif type.eql?("counter event warehouse")
+      start_from = step * 10000 - 10000 + 2 + step - 1
+      end_at = step * 10000 + 2 + step - 1
+      error = false
+      error_messages = []
+      ActiveRecord::Base.transaction do
+        workbook = Creek::Book.new Rails.root.join("public", "import counter event warehouse table format.xlsx").to_s
+        worksheets = workbook.sheets
+
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|
+            if row.present? && idx >= start_from && idx <= end_at
+              counter_event_id = 0
+              warehouse_id = 0
+              begin
+                counter_event_id = CounterEvent.select(:id).where(["code = ? AND start_time = ? AND end_time = ?", row["A#{idx + 1}"].upcase.gsub(" ","").gsub("\t",""), row["C#{idx + 1}"].to_time, row["D#{idx + 1}"].to_time]).first.id
+                warehouse_id = Warehouse.select(:id).where(code: row["B#{idx + 1}"]).first.id
+                counter_event_warehouse = CounterEventWarehouse.new counter_event_id: counter_event_id, warehouse_id: warehouse_id
+                unless counter_event_warehouse.save
+                  error_messages << counter_event_warehouse.errors.inspect
+                  error_messages << "invalid index => #{idx}"
+                  error = true
+                end
+              rescue Exception => e
+                error_messages << e.inspect
+                error_messages << "invalid index => #{idx}, counter_event_id => #{counter_event_id}, warehouse_id => #{warehouse_id}"
+                error = true
+              end
+            end
+          end
+        end
+        if error
+          error_messages.each_with_index do |error_message, idx|
+            puts "#{idx+1}. #{error_message}"
+          end
+          raise ActiveRecord::Rollback
+        end
+      end
     end
   end
 end

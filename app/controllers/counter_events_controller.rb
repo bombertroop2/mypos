@@ -25,8 +25,8 @@ class CounterEventsController < ApplicationController
     end
 
     counter_events_scope = CounterEvent.all
-    counter_events_scope = counter_events_scope.where(["code #{like_command} ?", "%"+params[:filter_string]+"%"]).
-      or(counter_events_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string]
+    counter_events_scope = counter_events_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(counter_events_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     counter_events_scope = counter_events_scope.where(["start_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_event_start_time].present?
     counter_events_scope = counter_events_scope.where(["end_time BETWEEN ? AND ?", start_end_time, end_end_time]) if params[:filter_event_end_time].present?
     @counter_events = smart_listing_create(:counter_events, counter_events_scope, partial: 'counter_events/listing', default_sort: {id: "desc"})
