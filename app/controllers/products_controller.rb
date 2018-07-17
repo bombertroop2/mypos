@@ -187,11 +187,17 @@ class ProductsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
+    pl_attributes = if action_name.eql?("create")
+      [:id, :price, :user_is_adding_new_price, :cost, :product_id, :attr_product_additional_information]
+    else
+      [:id, :price, :user_is_adding_new_price, :cost, :product_id]
+    end
+    
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
       :target, :model_id,# :effective_date,
       :goods_type_id, :image, :image_cache, :remove_image, :size_group_id, :additional_information,
       product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product, :size_group_id,
-        price_lists_attributes: [:id, :price, :user_is_adding_new_price, :cost, :product_id]],
+        price_lists_attributes: pl_attributes],
       cost_lists_attributes: [:id, :cost, :is_user_creating_product],
       product_colors_attributes: [:id, :selected_color_id, :color_id, :code, :name, :_destroy]
     )
@@ -236,6 +242,7 @@ class ProductsController < ApplicationController
           end
         end
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = cost
+        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! attr_product_additional_information: params[:product][:additional_information]
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:product_id] = params[:id] if action.eql?("update")
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?
