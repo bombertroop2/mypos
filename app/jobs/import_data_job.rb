@@ -539,7 +539,7 @@ class ImportDataJob < ApplicationJob
               counter_event_id = 0
               warehouse_id = 0
               begin
-                counter_event_id = CounterEvent.select(:id).where(["code = ? AND start_time = ? AND end_time = ?", row["A#{idx + 1}"].upcase.gsub(" ","").gsub("\t",""), row["C#{idx + 1}"].to_time, row["D#{idx + 1}"].to_time]).first.id
+                counter_event_id = CounterEvent.select(:id).where(["code = ? AND start_time = ? AND end_time = ?", row["A#{idx + 1}"].upcase.gsub(" ","").gsub("\t",""), Time.zone.parse(row["C#{idx + 1}"]), Time.zone.parse(row["D#{idx + 1}"])]).first.id
                 warehouse_id = Warehouse.select(:id).where(code: row["B#{idx + 1}"]).first.id
                 counter_event_warehouse = CounterEventWarehouse.new counter_event_id: counter_event_id, warehouse_id: warehouse_id
                 unless counter_event_warehouse.save
