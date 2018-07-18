@@ -29,7 +29,7 @@ class CostPricesController < ApplicationController
     end
 
     def new
-      @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
+      #      @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
       @cost = CostList.new
     end
 
@@ -39,7 +39,7 @@ class CostPricesController < ApplicationController
       convert_cost_price_to_numeric
       params[:product].delete :id
       unless @product.update(product_params)
-        @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
+        #        @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
         @price_codes = PriceCode.select(:id, :code).order :code
         size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
         @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
@@ -107,19 +107,23 @@ class CostPricesController < ApplicationController
     end
   
     def generate_form
-      @product = Product.where(id: params[:product_id]).
+      @product = Product.where(code: params[:product_code].strip.upcase).
         select("id, size_group_id").first
-      @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
-      @price_codes = PriceCode.select(:id, :code).order :code
-      @product.cost_lists.build
-      @sizes.each do |size|
-        @price_codes.each do |price_code|
-          product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == price_code.id}.first
-          unless product_detail
-            product_detail = @product.product_details.build size_id: size.id, price_code_id: price_code.id
-          end
-          product_detail.price_lists.build
-        end 
+      if @product.blank?
+        render js: "var box = bootbox.alert({message: \"No records found\",size: 'small'});box.on(\"hidden.bs.modal\", function () {$(\"#product_code\").focus();});"
+      else
+        @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
+        @price_codes = PriceCode.select(:id, :code).order :code
+        @product.cost_lists.build
+        @sizes.each do |size|
+          @price_codes.each do |price_code|
+            product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == price_code.id}.first
+            unless product_detail
+              product_detail = @product.product_details.build size_id: size.id, price_code_id: price_code.id
+            end
+            product_detail.price_lists.build
+          end 
+        end
       end
     end
   
