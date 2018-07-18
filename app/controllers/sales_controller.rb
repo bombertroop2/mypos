@@ -18,13 +18,13 @@ class SalesController < ApplicationController
       splitted_start_time_range = params[:filter_date].split("-")
       #      start_start_time = Time.zone.parse splitted_start_time_range[0].strip
       #      end_start_time = Time.zone.parse splitted_start_time_range[1].strip
-      start_start_time = Date.parse splitted_start_time_range[0].strip
-      end_start_time = Date.parse splitted_start_time_range[1].strip
+      start_start_time = Time.zone.parse(splitted_start_time_range[0].strip)
+      end_start_time = Time.zone.parse(splitted_start_time_range[1].strip).end_of_day
     end
 
     warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
     sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
-    sales_scope = sales_scope.where(["DATE(transaction_time) BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date].present?
+    sales_scope = sales_scope.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date].present?
     sales_scope = sales_scope.where(["transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     sales_scope = sales_scope.where(["payment_method = ?", params[:filter_payment_method]]) if params[:filter_payment_method].present?
     @sales = smart_listing_create(:sales, sales_scope, partial: 'sales/listing', default_sort: {transaction_time: "DESC"})

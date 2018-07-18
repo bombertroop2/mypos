@@ -41,11 +41,11 @@ class PriceList < ApplicationRecord
                   def discount_event_amount
                     if product_detail_id.present?
                       product_det = ProductDetail.select(:product_id, :price_code_id).where(id: product_detail_id).first
-                      event = Event.joins(event_warehouses: [:event_products, :warehouse]).select(:cash_discount).where(["DATE(start_date_time) <= ? AND DATE(end_date_time) >= ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ? AND warehouses.is_active = ?", effective_date, effective_date, product_det.product_id, true, true, true, product_det.price_code_id, true]).first
+                      event = Event.joins(event_warehouses: [:event_products, :warehouse]).select(:cash_discount).where(["start_date_time <= ? AND end_date_time >= ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ? AND warehouses.is_active = ?", effective_date.end_of_day, effective_date.beginning_of_day, product_det.product_id, true, true, true, product_det.price_code_id, true]).order("events.created_at DESC").first
                       if event.present?
                         event.cash_discount
                       else
-                        event = Event.joins(:event_general_products, event_warehouses: :warehouse).select(:cash_discount).where(["DATE(start_date_time) <= ? AND DATE(end_date_time) >= ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ? AND warehouses.is_active = ?", effective_date, effective_date, product_det.product_id, false, true, true, product_det.price_code_id, true]).first
+                        event = Event.joins(:event_general_products, event_warehouses: :warehouse).select(:cash_discount).where(["start_date_time <= ? AND end_date_time >= ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Discount(Rp)' AND warehouses.price_code_id = ? AND warehouses.is_active = ?", effective_date.end_of_day, effective_date.beginning_of_day, product_det.product_id, false, true, true, product_det.price_code_id, true]).order("events.created_at DESC").first
                         if event.present?
                           event.cash_discount
                         else

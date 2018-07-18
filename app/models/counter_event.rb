@@ -47,8 +47,8 @@ class CounterEvent < ApplicationRecord
                       private
                     
                       def same_range_not_added
-                        errors.add(:start_time, "has already been taken") if code.present? && start_time.present? && (code_changed? || start_time_changed?) && CounterEvent.select("1 AS one").where(["code = ? AND DATE(start_time) <= ? AND DATE(end_time) >= ? AND counter_event_type = ?", code, start_time.to_date, start_time.to_date, counter_event_type]).present?
-                        errors.add(:end_time, "has already been taken") if code.present? && end_time.present? && (code_changed? || end_time_changed?) && CounterEvent.select("1 AS one").where(["code = ? AND DATE(start_time) <= ? AND DATE(end_time) >= ? AND counter_event_type = ?", code, end_time.to_date, end_time.to_date, counter_event_type]).present?
+                        errors.add(:start_time, "has already been taken") if code.present? && start_time.present? && (code_changed? || start_time_changed?) && CounterEvent.select("1 AS one").where(["code = ? AND start_time <= ? AND end_time >= ? AND counter_event_type = ?", code, start_time.end_of_day, start_time.beginning_of_day, counter_event_type]).present?
+                        errors.add(:end_time, "has already been taken") if code.present? && end_time.present? && (code_changed? || end_time_changed?) && CounterEvent.select("1 AS one").where(["code = ? AND start_time <= ? AND end_time >= ? AND counter_event_type = ?", code, end_time.end_of_day, end_time.beginning_of_day, counter_event_type]).present?
                       end
                     
                       def different_type_not_added

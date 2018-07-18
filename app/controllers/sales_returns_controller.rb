@@ -15,14 +15,14 @@ class SalesReturnsController < ApplicationController
     
     if params[:filter_date].present?
       splitted_date_range = params[:filter_date].split("-")
-      start_date = Date.parse splitted_date_range[0].strip
-      end_date = Date.parse splitted_date_range[1].strip
+      start_date = Time.zone.parse(splitted_date_range[0].strip)
+      end_date = Time.zone.parse(splitted_date_range[1].strip).end_of_day
     end
 
     sales_returns_scope = SalesReturn.joins(:returned_receipt).select(:id, :total_return, :total_return_quantity, :document_number, :created_at).select("sales.transaction_number")
     sales_returns_scope = sales_returns_scope.where(["document_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(sales_returns_scope.where(["sales.transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string]
-    sales_returns_scope = sales_returns_scope.where(["DATE(sales_returns.created_at) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_date].present?
+    sales_returns_scope = sales_returns_scope.where(["sales_returns.created_at BETWEEN ? AND ?", start_date, end_date]) if params[:filter_date].present?
     smart_listing_create(:sales_returns, sales_returns_scope, partial: 'sales_returns/listing', default_sort: {:"sales_returns.created_at" => "desc"})
   end
 
