@@ -1,0 +1,60 @@
+
+<%
+table_id = if params[:type].present? && params[:type].eql?("discount percentage")
+  "listing-added-warehouses-table"
+  elsif params[:type].present?
+  "listing-added-warehouses-table-special-price"
+  elsif @counter_event.counter_event_type.eql?("Discount(%)")
+  "listing-added-warehouses-table"
+  else
+  "listing-added-warehouses-table-special-price"
+  end
+class_name = if params[:type].present? && params[:type].eql?("discount percentage")
+  "warehouse_ids_discount_percentage"
+  elsif params[:type].present?
+  "warehouse_ids_special_price"
+  elsif @counter_event.counter_event_type.eql?("Discount(%)")
+  "warehouse_ids_discount_percentage"
+  else
+  "warehouse_ids_special_price"
+  end
+%>
+<table style="width: 100%" class="table" id="<%= table_id %>">
+    <thead>
+        <tr>
+            <th style="text-align: center">No.</th>
+            <th style="text-align: center">Code</th>
+            <th style="text-align: center">Name</th>
+            <th style="text-align: center">Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if action_name.eql?("create") || action_name.eql?("edit") || action_name.eql?("update") %>
+          <% row_number = 1 %>
+          <%= parent.fields_for :counter_event_warehouses do |counter_event_warehouse_fields| %>
+            <tr>
+                <td style="text-align: center;vertical-align: middle"><%= row_number %></td>
+                <td style="text-align: center;vertical-align: middle"><%= counter_event_warehouse_fields.object.warehouse.code %></td>
+                <td style="text-align: center;vertical-align: middle"><%= counter_event_warehouse_fields.object.warehouse.name %></td>
+                <td style="text-align: center;vertical-align: middle">
+                    <%= counter_event_warehouse_fields.hidden_field :warehouse_id, class: class_name %>
+                      <%= counter_event_warehouse_fields.check_box :_destroy %>
+                  </td>
+              </tr>
+              <% row_number += 1 %>
+            <% end %>
+          <% else %>
+            <tr>
+                <td style="text-align: center;vertical-align: middle">1</td>
+                <td style="text-align: center;vertical-align: middle"><%= @warehouse.code %></td>
+                <td style="text-align: center;vertical-align: middle"><%= @warehouse.name %></td>
+                <td style="text-align: center;vertical-align: middle">
+                    <%= fields_for "counter_event[counter_event_warehouses_attributes][#{DateTime.now.strftime("%Q")}]", @counter_event_warehouse do |counter_event_warehouse_fields| %>
+                      <%= counter_event_warehouse_fields.hidden_field :warehouse_id, class: class_name %>
+                        <%= counter_event_warehouse_fields.check_box :_destroy %>
+                      <% end %>
+                  </td>
+              </tr>
+            <% end %>
+        </tbody>
+    </table>

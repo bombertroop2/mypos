@@ -64,6 +64,7 @@ Rails.application.routes.draw do
       get "generate_warehouse_form"
       get "add_products"
       get "add_general_products"
+      get "get_warehouse"
     end
     member do
       get "generate_activation_form"

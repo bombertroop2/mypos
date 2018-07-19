@@ -61,9 +61,9 @@
 
 
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">Warehouses</label>
+                                    <label class="col-sm-2 control-label">Warehouses code</label>
                                     <div class="col-sm-10">
-                                        <table id="listing_event_warehouses_table_special_price" class="display">
+                                        <!--<table id="listing_event_warehouses_table_special_price" class="display">
                                             <thead>
                                                 <tr>
                                                     <th></th>
@@ -73,101 +73,151 @@
                                             </thead>
 
                                             <tbody>
-                                                <% @warehouses.each do |warehouse| %>
-                                                  <tr id="warehouse_<%= warehouse.id %>_special_price">
+                                <%# @warehouses.each do |warehouse| %>
+                                                  <tr id="warehouse_<%#= warehouse.id %>_special_price">
                                                       <td></td>
-                                                      <td><%= warehouse.code %></td>
-                                                      <td><%= warehouse.name %></td>
+                                                      <td><%#= warehouse.code %></td>
+                                                      <td><%#= warehouse.name %></td>
                                                   </tr>
-                                                <% end %>
+                                <%# end %>
                                             </tbody>
                                         </table>
-
-                                    </div>
-                                </div>
-
-
-
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
+                                        -->
+                                        <div class="form-inline">
+                                            <%= text_field_tag :warehouse_code_special_price, "", maxlength: 9, size: 13, style: "width: auto", class: "upcase form-control" %>
+                                              <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_warehouse_special_price">
+                                                  <span class="glyphicon glyphicon-plus"></span> Add
+                                              </button>
+                                              <!--
+                                                <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_all_product">
+                                                    <span class="glyphicon glyphicon-plus"></span> Add All
+                                                </button>-->
+                                          </div>
                                       </div>
                                   </div>
-                                <% end %>
 
-                                <script type="text/javascript">
-                                  $(function () {
-                                      $("#counter_event_start_time_special_price, #counter_event_end_time_special_price").datetimepicker({
-                                          format: "dd/mm/yyyy hh:ii",
-                                          autoclose: true,
-                                          minuteStep: 1
-                                      });
+                                  <div class="form-group">
+                                      <label class="col-sm-2 control-label"></label>
+                                      <div class="col-sm-10">
+                                          <div id="added_warehouses_container_special_price">
+                                              <% if action_name.eql?("create") || action_name.eql?("edit") || action_name.eql?("update") %>
+                                                <%= render partial: "warehouses_table", locals: {parent: f} %>
+                                              <% end %>
+                                          </div>
+                                      </div>
+                                  </div>
 
-                                      var counter_eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
-                                          order: [1, 'asc'],
-                                          dom: 'T<"clear">lfrtip',
-                                          columns: [
-                                              {data: null, defaultContent: '', orderable: false},
-                                              {data: 'code'},
-                                              {data: 'name'}
-                                          ],
-                                          tableTools: {
-                                              sRowSelect: 'os',
-                                              aButtons: ['select_all', 'select_none']
-                                          },
-                                          paging: false,
-                                          info: false,
-                                          scrollY: "250px",
-                                          scrollCollapse: true
-                                      });
-                                      var warehouse_ids = [];
+                                  <div class="form-group">
+                                      <div class="col-sm-offset-2 col-sm-10">
+                                          <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
+                                            <button class="btn btn-link cancel">Cancel</button>
+                                        </div>
+                                    </div>
+                                  <% end %>
 
+                                  <script type="text/javascript">
+                                    $(function () {
+                                        $("#counter_event_start_time_special_price, #counter_event_end_time_special_price").datetimepicker({
+                                            format: "dd/mm/yyyy hh:ii",
+                                            autoclose: true,
+                                            minuteStep: 1
+                                        });
+                                        /*
+                                         var counter_eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
+                                         order: [1, 'asc'],
+                                         dom: 'T<"clear">lfrtip',
+                                         columns: [
+                                         {data: null, defaultContent: '', orderable: false},
+                                         {data: 'code'},
+                                         {data: 'name'}
+                                         ],
+                                         tableTools: {
+                                         sRowSelect: 'os',
+                                         aButtons: ['select_all', 'select_none']
+                                         },
+                                         paging: false,
+                                         info: false,
+                                         scrollY: "250px",
+                                         scrollCollapse: true
+                                         });
+                                         var warehouse_ids = [];
+       
+       
+                                         var selectedColorFields = <%#= @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
+       
+                                         $.each(selectedColorFields, function (index, value) {
+                                         var selectedColorId = selectedColorFields[index];
+                                         if (selectedColorId != "") {
+                                         var e = jQuery.Event("click");
+                                         e.ctrlKey = true;
+                                         var clickRowProcessId = setInterval(function () {
+                                         if (!$("#warehouse_" + selectedColorId + "_special_price").hasClass("DTTT_selected") || !$("#warehouse_" + selectedColorId + "_special_price").hasClass("selected")) {
+                                         $("#warehouse_" + selectedColorId + "_special_price").find("td:first-child").trigger(e);
+                                         } else
+                                         clearInterval(clickRowProcessId);
+                                         }, 0);
+                                         }
+                                         });
+                                         */
+                                        $('#counter_event_special_price').autoNumeric('init');
+                                        /*
+                                         $("#form_container_special_price form").submit(function (e) {
+       
+                                         var w_ids = <%#= @warehouses.pluck(:id) %>;
+                                         $.each(w_ids, function (index, value) {
+                                         var whs = w_ids[index];
+                                         if ($("#warehouse_" + whs + "_special_price").hasClass("DTTT_selected") || $("#warehouse_" + whs + "_special_price").hasClass("selected")) {
+                                         warehouse_ids.push(whs);
+                                         }
+                                         });
+       
+                                         warehouse_ids = $.unique(warehouse_ids);
+                                         $('<input />').attr('type', 'hidden')
+                                         .attr('name', "warehouse_ids")
+                                         .attr('value', warehouse_ids)
+                                         .appendTo('form');
+                                         return true;
+                                         });
+                                         */
 
-                                      var selectedColorFields = <%= @counter_event.counter_event_warehouses.pluck(:warehouse_id) %>;
+                                        $("#btn_add_warehouse_special_price").click(function () {
+                                            if ($('#warehouse_code_special_price').val().trim() != "") {
+                                                $('#warehouse_code_special_price').blur();
+                                  <% if @counter_event.new_record? %>
+                                                  $.get("/counter_events/get_warehouse", {
+                                                      warehouse_code: $('#warehouse_code_special_price').val().trim(),
+                                                      type: "special price"
+                                                  });
+                                  <% else %>
+                                                  $.get("/counter_events/get_warehouse", {
+                                                      warehouse_code: $('#warehouse_code_special_price').val().trim(),
+                                                      type: "special price",
+                                                      counter_event_id: "<%= @counter_event.id %>"
+                                                  });
+                                  <% end %>
+                                            }
+                                        });
 
-                                      $.each(selectedColorFields, function (index, value) {
-                                          var selectedColorId = selectedColorFields[index];
-                                          if (selectedColorId != "") {
-                                              var e = jQuery.Event("click");
-                                              e.ctrlKey = true;
-                                              var clickRowProcessId = setInterval(function () {
-                                                  if (!$("#warehouse_" + selectedColorId + "_special_price").hasClass("DTTT_selected") || !$("#warehouse_" + selectedColorId + "_special_price").hasClass("selected")) {
-                                                      $("#warehouse_" + selectedColorId + "_special_price").find("td:first-child").trigger(e);
-                                                  } else
-                                                      clearInterval(clickRowProcessId);
-                                              }, 0);
-                                          }
-                                      });
+                                        $('#warehouse_code_special_price').keypress(function (e) {
+                                            var key = e.which;
+                                            if (key == 13)  // the enter key code
+                                            {
+                                                $("#btn_add_warehouse_special_price").click();
+                                                return false;
+                                            }
+                                        });
 
-                                      $('#counter_event_special_price').autoNumeric('init');
+                                        $('#warehouse_code_special_price').on("input", function () {
+                                            $(this).val($(this).val().replace(/ /g, ""));
+                                        });
 
-                                      $("#form_container_special_price form").submit(function (e) {
+                                        $('#counter_event_code_special_price').on("input", function () {
+                                            $(this).val($(this).val().replace(/ /g, ""));
+                                        });
 
-                                          var w_ids = <%= @warehouses.pluck(:id) %>;
-                                          $.each(w_ids, function (index, value) {
-                                              var whs = w_ids[index];
-                                              if ($("#warehouse_" + whs + "_special_price").hasClass("DTTT_selected") || $("#warehouse_" + whs + "_special_price").hasClass("selected")) {
-                                                  warehouse_ids.push(whs);
-                                              }
-                                          });
-
-                                          warehouse_ids = $.unique(warehouse_ids);
-                                          $('<input />').attr('type', 'hidden')
-                                                  .attr('name', "warehouse_ids")
-                                                  .attr('value', warehouse_ids)
-                                                  .appendTo('form');
-                                          return true;
-                                      });
-
-
-                                      $('#counter_event_code_special_price').on("input", function () {
-                                          $(this).val($(this).val().replace(/ /g, ""));
-                                      });
-
-                                <% if action_name.eql?("create") || action_name.eql?("edit") || action_name.eql?("update") %>
-                                        if ($(".discount-fields").length > 0)
-                                            $(".discount-fields").numeric();
-                                <% end %>
-                                  });
-                                </script>  
+                                  <% if action_name.eql?("create") || action_name.eql?("edit") || action_name.eql?("update") %>
+                                          if ($(".discount-fields").length > 0)
+                                              $(".discount-fields").numeric();
+                                  <% end %>
+                                    });
+                                  </script>  

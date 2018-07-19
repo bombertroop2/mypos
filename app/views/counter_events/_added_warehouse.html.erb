@@ -1,0 +1,19 @@
+<tr>
+    <% if params[:type].eql?("special price") %>
+      <td style="text-align: center;vertical-align: middle" id="row_number_<%= @warehouse.code %>_special_price"></td>
+    <% else %>
+      <td style="text-align: center;vertical-align: middle" id="row_number_<%= @warehouse.code %>"></td>
+    <% end %>
+    <td style="text-align: center;vertical-align: middle"><%= @warehouse.code %></td>
+    <td style="text-align: center;vertical-align: middle"><%= @warehouse.name %></td>
+    <td style="text-align: center;vertical-align: middle">
+        <%= fields_for "counter_event[counter_event_warehouses_attributes][#{DateTime.now.strftime("%Q")}]", @counter_event_warehouse do |counter_event_warehouse_fields| %>
+          <% if params[:type].eql?("special price") %>
+            <%= counter_event_warehouse_fields.hidden_field :warehouse_id, class: "warehouse_ids_special_price" %>
+            <% else %>
+              <%= counter_event_warehouse_fields.hidden_field :warehouse_id, class: "warehouse_ids_discount_percentage" %>
+              <% end %>
+              <%= counter_event_warehouse_fields.check_box :_destroy %>
+            <% end %>
+        </td>
+    </tr>

@@ -1,0 +1,35 @@
+<% if params[:type].eql?("discount percentage") %>
+  if($("input:hidden[class='warehouse_ids_discount_percentage'][value='<%= @warehouse.id %>']").length > 0){
+    var box = bootbox.alert({message: "Sorry, warehouse <%= @warehouse.code %> is already added",size: 'small'});
+    box.on("hidden.bs.modal", function () {
+      $("#warehouse_code_discount_percentage").focus();
+    });
+  }else{
+    $("#warehouse_code_discount_percentage").val("");
+    $("#warehouse_code_discount_percentage").focus();
+    if($("#added_warehouses_container").html().trim() == "")
+      $("#added_warehouses_container").html("<%= j(render(partial: "warehouses_table")) %>");
+    else{
+      var rowNumber = $("#listing-added-warehouses-table > tbody > tr").length + 1;
+      $("#listing-added-warehouses-table > tbody tr:last").after("<%= j(render(partial: "added_warehouse")) %>");
+      $("#row_number_<%= @warehouse.code %>").html(rowNumber);
+    } 
+  }
+<% elsif params[:type].eql?("special price") %>
+  if($("input:hidden[class='warehouse_ids_special_price'][value='<%= @warehouse.id %>']").length > 0){
+    var box = bootbox.alert({message: "Sorry, warehouse <%= @warehouse.code %> is already added",size: 'small'});
+    box.on("hidden.bs.modal", function () {
+      $("#warehouse_code_special_price").focus();
+    });
+  }else{
+    $("#warehouse_code_special_price").val("");
+    $("#warehouse_code_special_price").focus();
+    if($("#added_warehouses_container_special_price").html().trim() == "")
+      $("#added_warehouses_container_special_price").html("<%= j(render(partial: "warehouses_table")) %>");
+    else{
+      var rowNumber = $("#listing-added-warehouses-table-special-price > tbody > tr").length + 1;
+      $("#listing-added-warehouses-table-special-price > tbody tr:last").after("<%= j(render(partial: "added_warehouse")) %>");
+      $("#row_number_<%= @warehouse.code %>_special_price").html(rowNumber);
+    } 
+  }
+<% end %>
