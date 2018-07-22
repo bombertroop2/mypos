@@ -3,8 +3,8 @@ class ImportDataJob < ApplicationJob
 
   def perform(type, filename, step=1)
     if type.eql?("product")
-      start_from = step * 9999 - 9999 + 2 + step - 1
-      end_at = step * 9999 + 2 + step - 1
+      start_from = step * 99999 - 99999 + 2 + step - 1
+      end_at = step * 99999 + 2 + step - 1
       error = false
       error_messages = []
       products = []
@@ -67,8 +67,8 @@ class ImportDataJob < ApplicationJob
         end
       end
     elsif type.eql?("product detail")
-      start_from = step * 9999 - 9999 + 2 + step - 1
-      end_at = step * 9999 + 2 + step - 1
+      start_from = step * 99999 - 99999 + 2 + step - 1
+      end_at = step * 99999 + 2 + step - 1
       error = false
       error_messages = []
       product_details = []
@@ -120,8 +120,8 @@ class ImportDataJob < ApplicationJob
         end
       end
     elsif type.eql?("product costs")
-      start_from = step * 9999 - 9999 + 2 + step - 1
-      end_at = step * 9999 + 2 + step - 1
+      start_from = step * 99999 - 99999 + 2 + step - 1
+      end_at = step * 99999 + 2 + step - 1
       error = false
       error_messages = []
       cost_lists = []
