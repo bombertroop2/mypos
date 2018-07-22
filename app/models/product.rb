@@ -77,6 +77,7 @@ class Product < ApplicationRecord
     ["Special Price", "special price"],
     ["Sale", "sale"],
     ["Discount 20%", "discount 20%"],
+    ["Discount 30%", "discount 30%"],
     ["Discount 50%", "discount 50%"],
     ["Discount 60%", "discount 60%"],
     ["Discount 70%", "discount 70%"]
