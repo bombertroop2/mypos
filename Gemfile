@@ -67,6 +67,10 @@ gem 'jwt'
 
 gem 'creek'
 
+gem 'write_xlsx'
+
+gem 'activerecord-import'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

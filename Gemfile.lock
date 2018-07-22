@@ -33,6 +33,8 @@ GEM
       activemodel (= 5.0.0)
       activesupport (= 5.0.0)
       arel (~> 7.0)
+    activerecord-import (0.25.0)
+      activerecord (>= 3.2)
     activerecord-session_store (1.1.1)
       actionpack (>= 4.0)
       activerecord (>= 4.0)
@@ -282,11 +284,17 @@ GEM
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.3)
+    write_xlsx (0.85.5)
+      rubyzip (>= 1.0.0)
+      zip-zip
+    zip-zip (0.3)
+      rubyzip (>= 1.0.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord-import
   activerecord-session_store
   audited (~> 4.5)
   autoprefixer-rails
@@ -326,6 +334,7 @@ DEPENDENCIES
   sqlite3
   uglifier (>= 1.3.0)
   web-console (~> 2.0)
+  write_xlsx
 
 RUBY VERSION
    ruby 2.2.3p173
