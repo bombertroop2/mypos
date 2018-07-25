@@ -45,6 +45,13 @@
         <dd><%= object.warehouse_type.titleize %></dd>
     </dl>
 
+    <% if object.counter_type.present? %>
+      <dl class="dl-horizontal">
+          <dt>Counter type</dt>
+          <dd><%= object.counter_type %></dd>
+      </dl>
+    <% end %>
+
     <% if object.sku.present? %>
       <dl class="dl-horizontal">
           <dt>SKU</dt>

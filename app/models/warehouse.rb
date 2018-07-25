@@ -32,151 +32,169 @@ class Warehouse < ApplicationRecord
   has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
-  validates :sku, presence: true, if: proc{|warehouse| warehouse.warehouse_type.present? && warehouse.warehouse_type.include?("ctr")}
+  validates :sku, :counter_type, presence: true, if: proc{|warehouse| warehouse.warehouse_type.present? && warehouse.warehouse_type.include?("ctr")}
     validates :code, length: {maximum: 9}, if: Proc.new {|warehouse| warehouse.code.present?}
       validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
         :area_manager_available, :region_available, :price_code_available, :type_available,
         :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid, :price_code_not_changed
+      validate :counter_type_available, if: proc{|wr| wr.warehouse_type.present? && wr.warehouse_type.include?("ctr")}
 
-      before_validation :upcase_code, :strip_string_values
-      before_validation :activate_warehouse, on: :create
-      before_validation :delete_sku_value, if: proc{|warehouse| warehouse.warehouse_type.present? && !warehouse.warehouse_type.include?("ctr")}
-        before_save :empty_messages, unless: proc{|warehouse| warehouse.warehouse_type.eql?("showroom")}
-          before_destroy :delete_tracks
+        before_validation :upcase_code, :strip_string_values
+        before_validation :activate_warehouse, on: :create
+        before_validation :delete_sku_value, :delete_counter_type_value, if: proc{|warehouse| warehouse.warehouse_type.present? && !warehouse.warehouse_type.include?("ctr")}
+          before_save :empty_messages, unless: proc{|warehouse| warehouse.warehouse_type.eql?("showroom")}
+            before_destroy :delete_tracks
 
-          TYPES = [
-            ["Central", "central"],
-            ["Showroom", "showroom"],
-            ["CTR Matahari", "ctr_matahari"],
-            ["CTR Ramayana", "ctr_ramayana"],
-            ["CTR Non Ramayana", "ctr_non_ramayana"],
-            ["CTR SOGO", "ctr_sogo"],
-            ["CTR Metro", "ctr_metro"],
-            ["CTR Uniqlo", "ctr_uniqlo"]
-          ]
-    
-          def code_and_name
-            "#{code} - #{name}"
-          end
-    
-          def self.has_supervisor?(id)
-            SalesPromotionGirl.where(["warehouse_id = ? AND role = 'supervisor'", id]).select("1 AS one").present?
-          end
-    
-          def self.central
-            where(warehouse_type: "central")
-          end
-    
-          def self.actived
-            where(is_active: true)
-          end
-    
-          def self.not_central
-            where("warehouse_type <> 'central'")
-          end
+            TYPES = [
+              ["Central", "central"],
+              ["Showroom", "showroom"],
+              ["CTR Matahari", "ctr_matahari"],
+              ["CTR Ramayana", "ctr_ramayana"],
+              ["CTR Non Ramayana", "ctr_non_ramayana"],
+              ["CTR SOGO", "ctr_sogo"],
+              ["CTR Metro", "ctr_metro"],
+              ["CTR Uniqlo", "ctr_uniqlo"]
+            ]
 
-          def self.showroom
-            where("warehouse_type = 'showroom'")
-          end
+            COUNTER_TYPES = [
+              ["Man", "Man"],
+              ["Ladies", "Ladies"],
+              ["Kids", "Kids"],
+              ["Bazzar", "Bazzar"]
+            ]
+    
+            def code_and_name
+              "#{code} - #{name}"
+            end
+    
+            def self.has_supervisor?(id)
+              SalesPromotionGirl.where(["warehouse_id = ? AND role = 'supervisor'", id]).select("1 AS one").present?
+            end
+    
+            def self.central
+              where(warehouse_type: "central")
+            end
+    
+            def self.actived
+              where(is_active: true)
+            end
+    
+            def self.not_central
+              where("warehouse_type <> 'central'")
+            end
 
-          def self.counter
-            where("warehouse_type LIKE 'ctr%'")
-          end
+            def self.showroom
+              where("warehouse_type = 'showroom'")
+            end
 
-          private
+            def self.counter
+              where("warehouse_type LIKE 'ctr%'")
+            end
+
+            private
           
-          # untuk sekarang asumsikan warehouse selalu aktif
-          def activate_warehouse
-            self.is_active = true
-          end
+            # untuk sekarang asumsikan warehouse selalu aktif
+            def activate_warehouse
+              self.is_active = true
+            end
+            
+            def delete_counter_type_value
+              self.counter_type = nil
+            end
           
-          def delete_sku_value
-            self.sku = nil
-          end
+            def delete_sku_value
+              self.sku = nil
+            end
       
-          def code_not_invalid
-            unless code.eql?("-")
-              if code.include?(" ")
-                errors.add(:code, "is not valid")
-              else
-                splitted_code = code.split("-") 
-                if splitted_code.length != 2
+            def code_not_invalid
+              unless code.eql?("-")
+                if code.include?(" ")
                   errors.add(:code, "is not valid")
                 else
-                  errors.add(:code, "is not valid") if splitted_code[0].length < 3 || splitted_code[1].length < 3 || splitted_code[0].length > 4 || splitted_code[1].length > 4
+                  splitted_code = code.split("-") 
+                  if splitted_code.length != 2
+                    errors.add(:code, "is not valid")
+                  else
+                    errors.add(:code, "is not valid") if splitted_code[0].length < 3 || splitted_code[1].length < 3 || splitted_code[0].length > 4 || splitted_code[1].length > 4
+                  end
                 end
               end
             end
-          end
       
-          def code_not_emptied
-            errors.add(:code, "can't be blank") if code.eql?("-")
-          end
+            def code_not_emptied
+              errors.add(:code, "can't be blank") if code.eql?("-")
+            end
       
-          def empty_messages
-            self.first_message = self.second_message = self.third_message = self.fourth_message = self.fifth_message = ""
-          end
+            def empty_messages
+              self.first_message = self.second_message = self.third_message = self.fourth_message = self.fifth_message = ""
+            end
     
-          def delete_tracks
-            audits.destroy_all
-          end
+            def delete_tracks
+              audits.destroy_all
+            end
 
-          def strip_string_values
-            self.code = code.gsub("_"," ").strip
-            self.sku = sku.gsub(" ","").gsub("\t","") if sku.present?
-          end
+            def strip_string_values
+              self.code = code.gsub("_"," ").strip
+              self.sku = sku.gsub(" ","").gsub("\t","") if sku.present?
+            end
     
-          def area_manager_available
-            errors.add(:supervisor_id, "does not exist!") if supervisor_id.present? && Supervisor.where(id: supervisor_id).select("1 AS one").blank?      
-          end
+            def area_manager_available
+              errors.add(:supervisor_id, "does not exist!") if supervisor_id.present? && Supervisor.where(id: supervisor_id).select("1 AS one").blank?      
+            end
 
-          def region_available
-            errors.add(:region_id, "does not exist!") if region_id.present? && Region.where(id: region_id).select("1 AS one").blank?
-          end
+            def region_available
+              errors.add(:region_id, "does not exist!") if region_id.present? && Region.where(id: region_id).select("1 AS one").blank?
+            end
 
-          def price_code_available
-            errors.add(:price_code_id, "does not exist!") if price_code_id.present? && PriceCode.where(id: price_code_id).select("1 AS one").blank?
-          end
+            def price_code_available
+              errors.add(:price_code_id, "does not exist!") if price_code_id.present? && PriceCode.where(id: price_code_id).select("1 AS one").blank?
+            end
     
-          def type_available
-            TYPES.select{ |x| x[1] == warehouse_type }.first.first
-          rescue
-            errors.add(:warehouse_type, "does not exist!") if warehouse_type.present?
-          end
+            def type_available
+              TYPES.select{ |x| x[1] == warehouse_type }.first.first
+            rescue
+              errors.add(:warehouse_type, "does not exist!") if warehouse_type.present?
+            end
 
-          def is_area_manager_valid_to_supervise_this_warehouse?
-            warehouse_types = Warehouse.where(supervisor_id: supervisor_id).pluck(:warehouse_type)
-            if warehouse_types.present? && warehouse_type.present?
-              # hapus duplikat elemen dan replace type yang mengandung prefix ctr_ ke counter
-              replaced_warehouse_types = warehouse_types.map do |wt|
-                if wt.include?("ctr")
-                  "counter"
+            def counter_type_available
+              COUNTER_TYPES.select{ |x| x[1] == counter_type }.first.first
+            rescue
+              errors.add(:counter_type, "does not exist!") if counter_type.present?
+            end
+
+            def is_area_manager_valid_to_supervise_this_warehouse?
+              warehouse_types = Warehouse.where(supervisor_id: supervisor_id).pluck(:warehouse_type)
+              if warehouse_types.present? && warehouse_type.present?
+                # hapus duplikat elemen dan replace type yang mengandung prefix ctr_ ke counter
+                replaced_warehouse_types = warehouse_types.map do |wt|
+                  if wt.include?("ctr")
+                    "counter"
+                  else
+                    wt
+                  end
+                end.uniq    
+                # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
+                if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
+                  errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
                 else
-                  wt
+                  errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?(warehouse_type)
                 end
-              end.uniq    
-              # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
-              if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
-                errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
-              else
-                errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?(warehouse_type)
               end
             end
-          end
 
-          def upcase_code
-            self.code = code.upcase
-          end
+            def upcase_code
+              self.code = code.upcase
+            end
     
-          def code_not_changed
-            errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
-          end
+            def code_not_changed
+              errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
+            end
 
-          def warehouse_type_not_changed
-            errors.add(:warehouse_type, "change is not allowed!") if warehouse_type_changed? && persisted? && (event_warehouse_relation.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || po_relation.present? || spg_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
-          end
+            def warehouse_type_not_changed
+              errors.add(:warehouse_type, "change is not allowed!") if warehouse_type_changed? && persisted? && (event_warehouse_relation.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || po_relation.present? || spg_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
+            end
 
-          def price_code_not_changed
-            errors.add(:price_code_id, "change is not allowed!") if price_code_id_changed? && persisted? && (cashier_opening_relation.present? || consignment_sale_relation.present?)
+            def price_code_not_changed
+              errors.add(:price_code_id, "change is not allowed!") if price_code_id_changed? && persisted? && (cashier_opening_relation.present? || consignment_sale_relation.present?)
+            end
           end
-        end
