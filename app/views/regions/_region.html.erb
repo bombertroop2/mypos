@@ -3,5 +3,5 @@
 <td><%= object.description %></td>
 <td class="actions" style="text-align: right">
     <%= link_to_if(can?(:manage, Region), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_region_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, Region) && !object.warehouse_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <%= link_to_if(can?(:manage, Region) && !object.warehouse_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
   </td>

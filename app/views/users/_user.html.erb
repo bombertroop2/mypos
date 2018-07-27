@@ -4,5 +4,5 @@
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, user_path(object), data: {remote: true}, title: "Show" %>
     <%= link_to_if(can?(:manage, User), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_user_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, User), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <%= link_to_if(can?(:manage, User), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
   </td>

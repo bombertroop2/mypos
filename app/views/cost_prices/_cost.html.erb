@@ -6,5 +6,5 @@
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, cost_price_path(object), data: {remote: true}, title: "Show" rescue "" %>
     <%= link_to_if(can?(:manage, CostList), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_cost_price_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, CostList) && !object.created_purchase_order.present? && object.product.cost_count > 1, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), cost_price_path(object), :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+      <%= link_to_if(can?(:manage, CostList) && !object.created_purchase_order.present? && object.product.cost_count > 1, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), cost_price_path(object), :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
   </td>

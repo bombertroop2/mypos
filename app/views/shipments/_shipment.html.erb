@@ -5,7 +5,7 @@
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, shipment_path(object), data: {remote: true}, title: "Show" %>
 <%#= link_to_if(can?(:edit_action, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_shipment_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
-    <%= link_to_if(can?(:edit_action, Shipment) && object.received_date.nil? && !object.is_document_printed, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Delete" ) %>
+    <%= link_to_if(can?(:edit_action, Shipment) && object.received_date.nil? && !object.is_document_printed, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
     <%= link_to_if(can?(:undelete_action, Shipment), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_shipment_path(object), :remote => true, :method => :get, title: "Print" ) %>
     <%= link_to "<i class=\"glyphicon glyphicon-check\"></i>".html_safe, shipment_path(object), data: {remote: true}, title: "Check" %>
 </td>

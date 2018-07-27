@@ -4,5 +4,5 @@
 <td id="cashier-opening-closed-at-<%= object.id %>"><%= object.closed_at.strftime("%d/%m/%Y %H:%M") if object.closed_at.present? %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:manage, CashierOpening) && object.closed_at.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-remove"), close_cashier_opening_path(object), :remote => true, :method => :get, :data => {:confirmation => 'Are you sure?', placement: :left}, title: "Close" ) %>
+    <%= link_to_if(can?(:manage, CashierOpening) && object.closed_at.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-remove"), close_cashier_opening_path(object), :remote => true, :method => :get, :data => {:confirmation => 'Are you sure that you want to permanently close the selected cashier?', placement: :left}, title: "Close" ) %>
 </td>
