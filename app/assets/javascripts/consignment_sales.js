@@ -200,7 +200,7 @@ $(function () {
                 warehouse_id: $("#consignment_sale_warehouse_id").val().trim(),
                 transaction_date: $("#consignment_sale_transaction_date").val().trim()
             });
-        } else {
+        } else if ($("#consignment_sale_warehouse_id").length == 0) {
             $.get("/consignment_sales/get_events", {
                 transaction_date: $("#consignment_sale_transaction_date").val().trim()
             });
