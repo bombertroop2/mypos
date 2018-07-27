@@ -241,65 +241,65 @@ class ConsignmentSale < ApplicationRecord
                       current_month = today.month.to_s.rjust(2, '0')
                       current_year = today.strftime("%y").rjust(2, '0')
                       existed_numbers = unless no_sale
-                        ConsignmentSale.where(["no_sale = ?", false]).where("transaction_number LIKE '#{attr_warehouse_code}#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
+                        ConsignmentSale.where(["no_sale = ?", false]).where("transaction_number LIKE '1S#{attr_warehouse_code}#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
                       else
-                        ConsignmentSale.where(["no_sale = ?", true]).where("transaction_number LIKE 'NOSALE#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
+                        ConsignmentSale.where(["no_sale = ?", true]).where("transaction_number LIKE '1SNOSALE#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
                       end
                       if existed_numbers.blank?
                         new_number = unless no_sale
-                          "#{attr_warehouse_code}#{current_month}#{current_year}0000001"
+                          "1S#{attr_warehouse_code}#{current_month}#{current_year}0000001"
                         else
-                          "NOSALE#{current_month}#{current_year}001"
+                          "1SNOSALE#{current_month}#{current_year}001"
                         end
                       else
                         if existed_numbers.length == 1
                           seq_number = unless no_sale
-                            existed_numbers[0].transaction_number.split("#{attr_warehouse_code}#{current_month}#{current_year}").last
+                            existed_numbers[0].transaction_number.split("1S#{attr_warehouse_code}#{current_month}#{current_year}").last
                           else
-                            existed_numbers[0].transaction_number.split("NOSALE#{current_month}#{current_year}").last
+                            existed_numbers[0].transaction_number.split("1SNOSALE#{current_month}#{current_year}").last
                           end
                           if seq_number.to_i > 1
                             new_number = unless no_sale
-                              "#{attr_warehouse_code}#{current_month}#{current_year}0000001"
+                              "1S#{attr_warehouse_code}#{current_month}#{current_year}0000001"
                             else
-                              "NOSALE#{current_month}#{current_year}001"
+                              "1SNOSALE#{current_month}#{current_year}001"
                             end
                           else
                             new_number = unless no_sale
-                              "#{attr_warehouse_code}#{current_month}#{current_year}#{seq_number.succ}"
+                              "1S#{attr_warehouse_code}#{current_month}#{current_year}#{seq_number.succ}"
                             else
-                              "NOSALE#{current_month}#{current_year}#{seq_number.succ}"
+                              "1SNOSALE#{current_month}#{current_year}#{seq_number.succ}"
                             end
                           end
                         else
                           last_seq_number = ""
                           existed_numbers.each_with_index do |existed_number, index|
                             seq_number = unless no_sale
-                              existed_number.transaction_number.split("#{attr_warehouse_code}#{current_month}#{current_year}").last
+                              existed_number.transaction_number.split("1S#{attr_warehouse_code}#{current_month}#{current_year}").last
                             else
-                              existed_number.transaction_number.split("NOSALE#{current_month}#{current_year}").last
+                              existed_number.transaction_number.split("1SNOSALE#{current_month}#{current_year}").last
                             end
                             if seq_number.to_i > 1 && index == 0
                               new_number = unless no_sale
-                                "#{attr_warehouse_code}#{current_month}#{current_year}0000001"
+                                "1S#{attr_warehouse_code}#{current_month}#{current_year}0000001"
                               else
-                                "NOSALE#{current_month}#{current_year}001"
+                                "1SNOSALE#{current_month}#{current_year}001"
                               end
                               break                              
                             elsif last_seq_number.eql?("")
                               last_seq_number = seq_number
                             elsif (seq_number.to_i - last_seq_number.to_i) > 1
                               new_number = unless no_sale
-                                "#{attr_warehouse_code}#{current_month}#{current_year}#{last_seq_number.succ}"
+                                "1S#{attr_warehouse_code}#{current_month}#{current_year}#{last_seq_number.succ}"
                               else
-                                "NOSALE#{current_month}#{current_year}#{last_seq_number.succ}"
+                                "1SNOSALE#{current_month}#{current_year}#{last_seq_number.succ}"
                               end
                               break
                             elsif index == existed_numbers.length - 1
                               new_number = unless no_sale
-                                "#{attr_warehouse_code}#{current_month}#{current_year}#{seq_number.succ}"
+                                "1S#{attr_warehouse_code}#{current_month}#{current_year}#{seq_number.succ}"
                               else
-                                "NOSALE#{current_month}#{current_year}#{seq_number.succ}"
+                                "1SNOSALE#{current_month}#{current_year}#{seq_number.succ}"
                               end
                             else
                               last_seq_number = seq_number
