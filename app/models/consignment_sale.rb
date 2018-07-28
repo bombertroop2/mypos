@@ -29,7 +29,7 @@ class ConsignmentSale < ApplicationRecord
                   
                     def sale_not_created
                       if no_sale
-                        if ConsignmentSale.select("1 AS one").where(["(transaction_number LIKE ? OR warehouse_id = ?) AND transaction_date = ?", "#{attr_warehouse_code}%", warehouse_id, transaction_date]).present?
+                        if ConsignmentSale.select("1 AS one").where(["(transaction_number LIKE ? OR warehouse_id = ?) AND transaction_date = ?", "1S#{attr_warehouse_code}%", warehouse_id, transaction_date]).present?
                           raise "Sorry, you can't create a transaction on #{transaction_date.strftime("%d/%m/%Y")}"
                         end
                       else                        
@@ -45,7 +45,7 @@ class ConsignmentSale < ApplicationRecord
               
                     def yesterday_transaction_exist
                       consignment_sales = ConsignmentSale.
-                        where(["transaction_number LIKE ? OR (no_sale = ? AND warehouse_id = ?)", "#{attr_warehouse_code}%", true, warehouse_id]).
+                        where(["transaction_number LIKE ? OR (no_sale = ? AND warehouse_id = ?)", "1S#{attr_warehouse_code}%", true, warehouse_id]).
                         select(:transaction_date)
                       if consignment_sales.present?
                         raise "Please create a transaction before #{transaction_date.strftime("%d/%m/%Y")} first" if consignment_sales.select{|cs| cs.transaction_date == transaction_date - 1}.blank? && consignment_sales.select{|cs| cs.transaction_date == transaction_date}.blank?
