@@ -236,6 +236,7 @@
                                                       <% if can? :read, ListingStock %>
                                                         <li><%= link_to "Listing Stocks", listing_stocks_path, method: :get %></li>
                                                       <% end %>
+                                                      <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
                                                   </ul>
                                               </li>
                                             <% end %>
@@ -1108,6 +1109,8 @@
                           message: '<%= alert %>',
                           size: 'small'
                       });
+      <% elsif controller_name.eql?("growth_reports") %>
+                      $("#menu_toggle").click();
       <% end %>
                 });
               </script>

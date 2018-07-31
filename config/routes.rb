@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'growth_reports/index'
+
   namespace :api, defaults: { format: :json } do
     resources :stock_mutations do
       collection do
