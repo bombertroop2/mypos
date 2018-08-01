@@ -2,7 +2,8 @@ class Department < ApplicationRecord
   audited on: [:create, :update]
   validates :code, :name, presence: true
   validate :company_exist
-  belongs_to :company
+  has_many :coa_departments
+  belongs_to :company, -> {select("1 AS one")}
   before_validation :upcase_code
   before_destroy :delete_tracks
 

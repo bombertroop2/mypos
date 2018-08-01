@@ -30,6 +30,7 @@ class Warehouse < ApplicationRecord
   has_one :selected_columns_stock, -> {select(:id, :warehouse_id)}, class_name: "Stock"
   has_one :counter_event_warehouse_relation, -> {select("1 AS one")}, class_name: "CounterEventWarehouse"
   has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
+  has_many :coa_departments
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
   validates :sku, :counter_type, presence: true, if: proc{|warehouse| warehouse.warehouse_type.present? && warehouse.warehouse_type.include?("ctr")}
@@ -62,23 +63,23 @@ class Warehouse < ApplicationRecord
               ["Kids", "Kids"],
               ["Bazzar", "Bazzar"]
             ]
-    
+
             def code_and_name
               "#{code} - #{name}"
             end
-    
+
             def self.has_supervisor?(id)
               SalesPromotionGirl.where(["warehouse_id = ? AND role = 'supervisor'", id]).select("1 AS one").present?
             end
-    
+
             def self.central
               where(warehouse_type: "central")
             end
-    
+
             def self.actived
               where(is_active: true)
             end
-    
+
             def self.not_central
               where("warehouse_type <> 'central'")
             end
@@ -92,26 +93,26 @@ class Warehouse < ApplicationRecord
             end
 
             private
-          
+
             # untuk sekarang asumsikan warehouse selalu aktif
             def activate_warehouse
               self.is_active = true
             end
-            
+
             def delete_counter_type_value
               self.counter_type = nil
             end
-          
+
             def delete_sku_value
               self.sku = nil
             end
-      
+
             def code_not_invalid
               unless code.eql?("-")
                 if code.include?(" ")
                   errors.add(:code, "is not valid")
                 else
-                  splitted_code = code.split("-") 
+                  splitted_code = code.split("-")
                   if splitted_code.length != 2
                     errors.add(:code, "is not valid")
                   else
@@ -120,15 +121,15 @@ class Warehouse < ApplicationRecord
                 end
               end
             end
-      
+
             def code_not_emptied
               errors.add(:code, "can't be blank") if code.eql?("-")
             end
-      
+
             def empty_messages
               self.first_message = self.second_message = self.third_message = self.fourth_message = self.fifth_message = ""
             end
-    
+
             def delete_tracks
               audits.destroy_all
             end
@@ -137,9 +138,9 @@ class Warehouse < ApplicationRecord
               self.code = code.gsub("_"," ").strip
               self.sku = sku.gsub(" ","").gsub("\t","") if sku.present?
             end
-    
+
             def area_manager_available
-              errors.add(:supervisor_id, "does not exist!") if supervisor_id.present? && Supervisor.where(id: supervisor_id).select("1 AS one").blank?      
+              errors.add(:supervisor_id, "does not exist!") if supervisor_id.present? && Supervisor.where(id: supervisor_id).select("1 AS one").blank?
             end
 
             def region_available
@@ -149,7 +150,7 @@ class Warehouse < ApplicationRecord
             def price_code_available
               errors.add(:price_code_id, "does not exist!") if price_code_id.present? && PriceCode.where(id: price_code_id).select("1 AS one").blank?
             end
-    
+
             def type_available
               TYPES.select{ |x| x[1] == warehouse_type }.first.first
             rescue
@@ -172,7 +173,7 @@ class Warehouse < ApplicationRecord
                   else
                     wt
                   end
-                end.uniq    
+                end.uniq
                 # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
                 if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
                   errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
@@ -185,7 +186,7 @@ class Warehouse < ApplicationRecord
             def upcase_code
               self.code = code.upcase
             end
-    
+
             def code_not_changed
               errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
             end

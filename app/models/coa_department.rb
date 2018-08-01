@@ -1,9 +1,9 @@
 class CoaDepartment < ApplicationRecord
   audited on: [:create, :update]
-  belongs_to :company
-  belongs_to :department
-  belongs_to :coa
-  belongs_to :warehouse
+  belongs_to :company, -> {select("1 AS one")}
+  belongs_to :department, -> {select("1 AS one")}
+  belongs_to :coa, -> {select("1 AS one")}
+  belongs_to :warehouse, -> {select("1 AS one")}
   validates :company_id, :department_id, :coa_id, :cost_center, :warehouse_id, :location, presence: true
   validate :company_exist, :cost_center_available, :department_exist, :coa_exist, :warehouse_exist
   before_destroy :delete_tracks
