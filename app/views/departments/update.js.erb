@@ -1,0 +1,5 @@
+<% if @updated %>
+  <%= smart_listing_item :departments, :update, @department, "departments/department" %>
+<% else %>
+  <%= smart_listing_item :departments, :edit, @department, "departments/form" %>
+<% end %>
