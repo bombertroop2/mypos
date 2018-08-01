@@ -236,6 +236,7 @@
                                                       <% if can? :read, ListingStock %>
                                                         <li><%= link_to "Listing Stocks", listing_stocks_path, method: :get %></li>
                                                       <% end %>
+                                                      <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
                                                   </ul>
                                               </li>
                                             <% end %>
@@ -276,19 +277,19 @@
                                               </li>
                                             <% end %>
                                             <% if accounting_menu_active? %>
-                                            <li><a><i class="fa fa-cogs"></i> Accounting <span class="fa fa-chevron-down"></span></a>
+                                              <li><a><i class="fa fa-cogs"></i> Accounting <span class="fa fa-chevron-down"></span></a>
                                                   <ul class="nav child_menu">
-                                                    <% if can? :read, Coa %>
+                                                      <% if can? :read, Coa %>
                                                         <li><%= link_to "Chart Of Accounts", coas_path, method: :get %></li>
-                                                    <% end %>
-                                                    <% if can? :read, Department %>
+                                                      <% end %>
+                                                      <% if can? :read, Department %>
                                                         <li><%= link_to "Departments", departments_path, method: :get %></li>
-                                                    <% end %>
-                                                    <% if can? :read, CoaDepartment %>
+                                                      <% end %>
+                                                      <% if can? :read, CoaDepartment %>
                                                         <li><%= link_to "Company Departments", coa_departments_path, method: :get %></li>
-                                                    <% end %>
+                                                      <% end %>
                                                   </ul>
-                                                </li>
+                                              </li>
                                             <% end %>
                                             <% if setting_menu_active? %>
                                               <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
@@ -870,6 +871,8 @@
                             return false;
                         });
         <% end %>
+      <% elsif controller_name.eql?("growth_reports") %>
+                      $("#menu_toggle").click();
       <% elsif controller_name.eql?("sales_returns") %>
                       $("#menu_toggle").click();
                       $("#search-sales-return-btn").click(function () {
