@@ -31,6 +31,17 @@ $(function () {
         }, 0);
     });
 
+    $("#profile-tab2").click(function () {
+        var ytdTabProcessId = setInterval(function () {
+            if ($("#tab_content3").hasClass("active") && $("#tab_content3").hasClass("in")) {
+                $("#growth_report_year_year").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                $("#growth_report_region_year").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                $("#growth_report_counter_type_year").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                clearInterval(ytdTabProcessId);
+            }
+        }, 0);
+    });
+
     $("#growth_report_date").datepicker({
         dateFormat: "dd/mm/yy"
     });
@@ -50,6 +61,22 @@ $(function () {
                 date: $("#growth_report_date").val().trim(),
                 counter_type: $("#growth_report_counter_type_daily").val().trim(),
                 region: $("#growth_report_region_daily").val().trim()
+            });
+        }
+    });
+
+    $("#generate-btn-year").click(function () {
+        if ($("#growth_report_year_year").val().trim() == "")
+            bootbox.alert({message: "Please select year first!", size: "small"});
+        else if ($("#growth_report_counter_type_year").val().trim() == "")
+            bootbox.alert({message: "Please select counter type first!", size: "small"});
+        else if ($("#growth_report_region_year").val().trim() == "")
+            bootbox.alert({message: "Please select region first!", size: "small"});
+        else {
+            $.get("/growth_reports/index", {
+                year: $("#growth_report_year_year").val().trim(),
+                counter_type: $("#growth_report_counter_type_year").val().trim(),
+                region: $("#growth_report_region_year").val().trim()
             });
         }
     });
