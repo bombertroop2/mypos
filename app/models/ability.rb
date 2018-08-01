@@ -121,8 +121,8 @@ class Ability
             can :read, Member
           else
             can :read, class_name.gsub(/\s+/, "").constantize unless class_name.eql?("Company")
-          end        
-        end        
+          end
+        end
       end
       can :manage, Notification
     else
@@ -158,7 +158,7 @@ class Ability
               can :get_warehouses, class_name.gsub(/\s+/, "").constantize
             end
           elsif class_name.eql?("Event")
-            if !user_roles.include?("area_manager") 
+            if !user_roles.include?("area_manager")
               if user_roles.include?("accountant")
                 unless ability.eql?(:none)
                   can :read, Event
@@ -235,9 +235,15 @@ class Ability
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
-            can :read, class_name.gsub(/\s+/, "").constantize
-          end        
-        end        
+            if class_name.eql?("Accounting")
+              can ability, Coa
+              can ability, Department
+              can ability, CoaDepartment
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
+          end
+        end
       end
       can :manage, Notification unless user.new_record?
     end

@@ -1,6 +1,13 @@
 Rails.application.routes.draw do
+  resources :coa_departments do
+    collection do
+      post :get_coa_department
+    end
+  end
   get 'growth_reports/index'
 
+  resources :departments
+  resources :coas
   namespace :api, defaults: { format: :json } do
     resources :stock_mutations do
       collection do
@@ -21,7 +28,7 @@ Rails.application.routes.draw do
         get "unapprove"
       end
     end
-    resources :shipments, except: [:edit, :update] do    
+    resources :shipments, except: [:edit, :update] do
       collection do
         get "inventory_receipts"
         get "search_do"
@@ -61,7 +68,7 @@ Rails.application.routes.draw do
   #  get 'fake_consignment_sale/get_product'
   #  get 'consignments' => 'fake_consignment_sale#listing_sale'
 
-  resources :counter_events do    
+  resources :counter_events do
     collection do
       get "generate_warehouse_form"
       get "add_products"
@@ -100,7 +107,7 @@ Rails.application.routes.draw do
       get "close"
     end
   end
-  resources :events do    
+  resources :events do
     collection do
       get "generate_warehouse_form"
       get "add_products"
@@ -114,7 +121,7 @@ Rails.application.routes.draw do
   resources :listing_stocks, only: :index
   resources :stock_movements, only: :index
   resources :fiscal_years
-  resources :goods_in_transits, only: [:shipment_goods, :mutation_goods, :returned_goods] do    
+  resources :goods_in_transits, only: [:shipment_goods, :mutation_goods, :returned_goods] do
     collection do
       get "shipment_goods"
       get "mutation_goods"
@@ -160,13 +167,13 @@ Rails.application.routes.draw do
   #      get "generate_form"
   #    end
   #  end
-  resources :notifications, only: [:index, :show, :destroy, :notify_user] do 
+  resources :notifications, only: [:index, :show, :destroy, :notify_user] do
     collection do
       get "notify_user"
     end
   end
   resources :available_menus, only: [:new, :create]
-  resources :shipments, except: [:edit, :update] do    
+  resources :shipments, except: [:edit, :update] do
     collection do
       get "generate_ob_detail"
       get "inventory_receipts"
@@ -208,9 +215,9 @@ Rails.application.routes.draw do
   #  resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create, :index, :show] do
     collection do
-      get "get_product_details"      
+      get "get_product_details"
     end
-    
+
     member do
       get 'get_purchase_order'
       post 'receive_products_from_purchase_order'
@@ -223,7 +230,7 @@ Rails.application.routes.draw do
       get 'get_direct_purchase_details'
       post 'create_direct_purchase_return'
       get 'filter_purchase_records'
-    end    
+    end
     member do
       get 'print'
     end
@@ -235,15 +242,15 @@ Rails.application.routes.draw do
       get "generate_spg_user_form"
       get "get_area_manager_info"
     end
-  end    
-  
+  end
+
   get 'welcome/index'
 
   resources :purchase_orders do
     collection do
       get 'get_product_details'
     end
-    
+
     member do
       #      get 'receive'
       #      post 'receive'
@@ -283,7 +290,7 @@ Rails.application.routes.draw do
   # Websockets resemble this URL
   mount ActionCable.server => '/cable'
 
-  
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
