@@ -1,0 +1,56 @@
+<td colspan="6">
+  <div style="padding-top: 20px"></div>
+  <%= form_for(@coa, remote: true, html: {class: "form-horizontal"}) do |f| %>
+      <div class="form-group<%= control_group_error(@coa, :code) %>">
+        <%= f.label :code, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.text_field :code, class: "form-control upcase inputs" %>
+          <%= error_help_text(@coa, :code) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa, :name) %>">
+        <%= f.label :name, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+            <%= f.text_field :name, class: "form-control inputs" %>
+            <%= error_help_text(@coa, :name) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa, :company_id) %>">
+        <%= f.label :company_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :company_id, options_from_collection_for_select(Company.select(:id, :code), :id, :code, @coa.company_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@coa, :company_id) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa, :transaction_type) %>">
+        <%= f.label :transaction_type, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+            <%= f.select :transaction_type, options_for_select(Coa::TRANSACTION_TYPE, @coa.transaction_type), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+            <%= error_help_text(@coa, :transaction_type) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa, :description) %>">
+        <%= f.label :description, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.text_area :description, class: "form-control inputs" %>
+          <%= error_help_text(@coa, :description) %>
+        </div>
+      </div>
+
+  <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-9">
+        <%= f.submit "Save", class: "btn btn-primary" %>
+        <button class="btn btn-link cancel">Cancel</button>
+      </div>
+    </div>
+  <% end %>
+</td>
+<script>
+  $(function () {
+      $('#coa_code').on("input", function () {
+          $(this).val($(this).val().replace(/ /g, ""));
+      });
+      $("#coa_transaction_type").attr("data-placeholder", "Please select").chosen();
+      $("#coa_company_id").attr("data-placeholder", "Please select").chosen();
+  });
+</script>

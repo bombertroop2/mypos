@@ -1,0 +1,30 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-coa-thead">
+        <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Code", "code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Name", "name" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Company", "company_code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Transaction Type", "transaction_type" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Description", "description" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |coa| %>
+          <tr class="editable" data-id="<%= coa.id %>">
+              <%= smart_listing.render object: coa, partial: "coas/coa", locals: {object: coa} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_coa_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-coa-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-coa-thead").show();
+      }
+  }, 0);
+</script>
