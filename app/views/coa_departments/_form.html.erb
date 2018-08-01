@@ -1,0 +1,73 @@
+<td colspan="7">
+  <div style="padding-top: 20px"></div>
+  <%= form_for(@coa_department, remote: true, html: {class: "form-horizontal"}) do |f| %>
+      <div class="form-group<%= control_group_error(@coa_department, :company_id) %>">
+        <%= f.label :company_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :company_id, options_from_collection_for_select(Company.select(:id, :code), :id, :code, @coa_department.company_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs", onchange: "getcoalist()"} %>
+          <%= error_help_text(@coa_department, :company_id) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa_department, :department_id) %>">
+        <%= f.label :department_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+            <%= f.select :department_id, options_from_collection_for_select(@departments.select(:id, :code), :id, :code, @coa_department.department_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@coa_department, :department_id) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa_department, :coa_id) %>">
+        <%= f.label :coa_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :coa_id, options_from_collection_for_select(@coas.select(:id, :code), :id, :code, @coa_department.coa_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@coa_department, :coa_id) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa_department, :cost_center) %>">
+        <%= f.label :cost_center, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+            <%= f.select :cost_center, options_for_select(CoaDepartment::COST_CENTER, @coa_department.cost_center), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+            <%= error_help_text(@coa_department, :cost_center) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa_department, :warehouse_id) %>">
+        <%= f.label :warehouse_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.select(:id, :code), :id, :code, @coa_department.warehouse_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@coa_department, :warehouse_id) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa_department, :location) %>">
+        <%= f.label :location, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.text_field :location, {class: "form-control inputs"} %>
+          <%= error_help_text(@coa_department, :location) %>
+        </div>
+      </div>
+
+  <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-9">
+        <%= f.submit "Save", class: "btn btn-primary" %>
+        <button class="btn btn-link cancel">Cancel</button>
+      </div>
+    </div>
+  <% end %>
+</td>
+<script>
+  $(function () {
+      $("#coa_department_coa_id").attr("data-placeholder", "Please select").chosen();
+      $("#coa_department_cost_center").attr("data-placeholder", "Please select").chosen();
+      $("#coa_department_department_id").attr("data-placeholder", "Please select").chosen();
+      $("#coa_department_warehouse_id").attr("data-placeholder", "Please select").chosen();
+      $("#coa_department_company_id").attr("data-placeholder", "Please select").chosen();
+  });
+  function getcoalist(){
+        company_id = $('#coa_department_company_id').val();
+        $.ajax({
+          url: '/coa_departments/get_coa_department',
+          type: 'post',
+          data: {
+                  id: company_id
+          }
+        });
+      }
+</script>

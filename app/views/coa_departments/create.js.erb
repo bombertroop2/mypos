@@ -1,0 +1,5 @@
+<% if @created %>
+  <%= smart_listing_item :coa_departments, :create, @coa_department, "coa_departments/coa_department" %>
+<% else %>
+  <%= smart_listing_item :coa_departments, :create, @coa_department, "coa_departments/form" %>
+<% end %>

@@ -1,0 +1,31 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-coa-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Company", "company_code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Department", "department_code" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "COA", "coa_code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Cost Center", "cost_center" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Warehouse", "warehouse_code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Location", "location" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |coad| %>
+          <tr class="editable" data-id="<%= coad.id %>">
+              <%= smart_listing.render object: coad, partial: "coa_departments/coa_department", locals: {object: coad} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 7, link: new_coa_department_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-coa-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-coa-thead").show();
+      }
+  }, 0);
+</script>
