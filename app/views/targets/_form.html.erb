@@ -1,0 +1,48 @@
+<td colspan="5">
+  <div style="padding-top: 20px"></div>
+  <%= form_for(@target, remote: true, html: {class: "form-horizontal"}) do |f| %>
+      <div class="form-group<%= control_group_error(@target, :warehouse_id) %>">
+        <%= f.label :warehouse_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.select(:id, :code), :id, :code, @target.warehouse_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@target, :warehouse_id) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@target, :month) %>">
+        <%= f.label :month, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+            <%= f.select :month, options_for_select(Target::MONTHS, @target.month), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+            <%= error_help_text(@target, :month) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@target, :year) %>">
+        <%= f.label :year, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :year, options_for_select(Date.current.year..(Date.current.year+3), @target.year), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+          <%= error_help_text(@target, :year) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@target, :target_value) %>">
+        <%= f.label :target_value, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.text_field :target_value, "data-a-sep" => ".", "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16 , class: "form-control inputs" %>
+          <%= error_help_text(@target, :target_value) %>
+        </div>
+      </div>
+
+  <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-9">
+        <%= f.submit "Save", class: "btn btn-primary" %>
+        <button class="btn btn-link cancel">Cancel</button>
+      </div>
+    </div>
+  <% end %>
+</td>
+<script>
+  $(function () {
+      $('#target_target_value').autoNumeric('init');
+      $("#target_warehouse_id").attr("data-placeholder", "Please select").chosen();
+      $("#target_month").attr("data-placeholder", "Please select").chosen();
+      $("#target_year").attr("data-placeholder", "Please select").chosen();
+  });
+</script>

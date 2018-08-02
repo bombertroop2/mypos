@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :targets
   resources :coa_departments do
     collection do
       post :get_coa_department
