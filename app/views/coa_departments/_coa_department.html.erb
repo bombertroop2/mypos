@@ -1,8 +1,7 @@
-<td><%= object.company_view %></td>
-<td><%= object.department_view %></td>
-<td><%= object.coa_view %></td>
+<td><%= object.department.department_view %></td>
+<td><%= object.coa.coa_view %></td>
 <td><%= object.cost_center.humanize %></td>
-<td><%= object.warehouse_view %></td>
+<td><%= object.warehouse.code_and_name %></td>
 <td><%= object.location %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>

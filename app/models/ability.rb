@@ -13,6 +13,9 @@ class Ability
       cannot :manage, Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
+      cannot :manage, Coa
+      cannot :manage, Department
+      cannot :manage, CoaDepartment
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|

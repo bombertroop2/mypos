@@ -1,11 +1,10 @@
 class CoaDepartment < ApplicationRecord
   audited on: [:create, :update]
-  belongs_to :company, -> {select("1 AS one")}
-  belongs_to :department, -> {select("1 AS one")}
-  belongs_to :coa, -> {select("1 AS one")}
-  belongs_to :warehouse, -> {select("1 AS one")}
-  validates :company_id, :department_id, :coa_id, :cost_center, :warehouse_id, :location, presence: true
-  validate :company_exist, :cost_center_available, :department_exist, :coa_exist, :warehouse_exist
+  belongs_to :department
+  belongs_to :coa
+  belongs_to :warehouse
+  validates :department_id, :coa_id, :cost_center, :warehouse_id, :location, presence: true
+  validate :cost_center_available, :department_exist, :coa_exist, :warehouse_exist
   before_destroy :delete_tracks
 
   COST_CENTER = [
@@ -13,29 +12,9 @@ class CoaDepartment < ApplicationRecord
               ["Showroom", "showroom"]
             ]
 
-  def department_view
-    "#{department.code} - #{department.name}"
-  end
-
-  def company_view
-    "#{company.code} - #{company.name}"
-  end
-
-  def warehouse_view
-    "#{warehouse.code} - #{warehouse.name}"
-  end
-
-  def coa_view
-    "#{coa.code} - #{coa.transaction_type}"
-  end
-
   private
   def delete_tracks
     audits.destroy_all
-  end
-
-  def company_exist
-    errors.add(:company_id, "does not exist!") if company_id_changed? && Company.select("1 AS one").where(:id => company_id).blank?
   end
 
   def department_exist

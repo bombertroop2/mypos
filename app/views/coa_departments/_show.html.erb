@@ -1,22 +1,17 @@
-<td colspan="7">
+<td colspan="6">
     <button type="button" class="close cancel" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>
 
     <dl class="dl-horizontal">
-        <dt>Company</dt>
-        <dd><%= object.company_view %></dd>
-    </dl>
-
-    <dl class="dl-horizontal">
         <dt>Department</dt>
-        <dd><%= object.department_view %></dd>
+        <dd><%= object.department.department_view %></dd>
     </dl>
 
     <dl class="dl-horizontal">
         <dt>COA</dt>
-        <dd><%= object.coa_view %></dd>
+        <dd><%= object.coa.coa_view %></dd>
     </dl>
 
     <dl class="dl-horizontal">
@@ -26,7 +21,7 @@
 
     <dl class="dl-horizontal">
         <dt>Warehouse</dt>
-        <dd><%= object.warehouse_view %></dd>
+        <dd><%= object.warehouse.code_and_name %></dd>
     </dl>
 
     <dl class="dl-horizontal">

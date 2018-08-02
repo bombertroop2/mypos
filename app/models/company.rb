@@ -1,8 +1,5 @@
 class Company < ApplicationRecord
   before_validation :strip_field_values
-  has_many :departments
-  has_many :coas
-  has_many :coa_departments
 
   validates :code, :name, :taxpayer_registration_number, :address, presence: true
   validates :code, uniqueness: true
@@ -27,4 +24,5 @@ class Company < ApplicationRecord
   def self.display_name
     self.first.name rescue ""
   end
+
 end
