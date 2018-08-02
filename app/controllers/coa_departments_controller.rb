@@ -14,7 +14,6 @@ class CoaDepartmentsController < ApplicationController
       or(coa_departments_scope.where(["coas.name #{like_command} ?", "%"+params[:filter]+"%"])).
       or(coa_departments_scope.where(["warehouses.code #{like_command} ?", "%"+params[:filter]+"%"])).
       or(coa_departments_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(coa_departments_scope.where(["coa_departments.cost_center #{like_command} ?", "%"+params[:filter]+"%"])).
       or(coa_departments_scope.where(["coa_departments.location #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @coa_departments = smart_listing_create(:coa_departments, coa_departments_scope, partial: 'coa_departments/listing', default_sort: {id: "asc"})
   end
@@ -78,6 +77,6 @@ class CoaDepartmentsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def coa_department_params
-      params.require(:coa_department).permit(:department_id, :coa_id, :cost_center, :warehouse_id, :location)
+      params.require(:coa_department).permit(:department_id, :coa_id, :warehouse_id, :location)
     end
 end

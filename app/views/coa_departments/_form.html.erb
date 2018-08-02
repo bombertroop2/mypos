@@ -15,13 +15,6 @@
           <%= error_help_text(@coa_department, :coa_id) %>
         </div>
       </div>
-      <div class="form-group<%= control_group_error(@coa_department, :cost_center) %>">
-        <%= f.label :cost_center, class: "col-sm-3 control-label" %>
-        <div class="col-sm-9">
-            <%= f.select :cost_center, options_for_select(CoaDepartment::COST_CENTER, @coa_department.cost_center), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
-            <%= error_help_text(@coa_department, :cost_center) %>
-        </div>
-      </div>
       <div class="form-group<%= control_group_error(@coa_department, :warehouse_id) %>">
         <%= f.label :warehouse_id, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">
