@@ -1,8 +1,10 @@
 class Target < ApplicationRecord
+  audited on: [:create, :update]
   validates :warehouse_id, :month, :year, presence: true
   validates :target_value, presence:true, numericality: { greater_than: 0 }
-  validate :warehouse_available, :month_available, :year_available
+  validate :warehouse_available, :month_available, :year_available, :check_date
   belongs_to :warehouse
+  before_destroy :delete_tracks
 
   MONTHS = [
     ["January", 1],
@@ -24,6 +26,10 @@ class Target < ApplicationRecord
   end
 
   private
+  def delete_tracks
+    audits.destroy_all
+  end
+
   def warehouse_available
     errors.add(:warehouse_id, "does not exist!") if warehouse_id_changed? && Warehouse.select("1 AS one").where(:id => warehouse_id).blank?
   end
@@ -36,6 +42,12 @@ class Target < ApplicationRecord
 
   def year_available
     errors.add(:year, "does not exist!") if year.present? if year_changed? && !(Date.current.year..(Date.current.year+3)).to_a.select{ |x| x == year}.first.present?
+  end
+
+  def check_date
+    if month.present? && year.present? && month <= Date.today.month && year <= Date.today.year
+      errors.add(:month, "can't less than or equal with this month")
+    end
   end
 
 end
