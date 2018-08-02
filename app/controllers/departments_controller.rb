@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class DepartmentsController < ApplicationController
+  authorize_resource
   helper SmartListing::Helper
   before_action :set_department, only: [:show, :edit, :update, :destroy]
 
