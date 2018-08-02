@@ -7,11 +7,7 @@ class ShipmentsController < ApplicationController
   # GET /shipments
   # GET /shipments.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
@@ -38,11 +34,7 @@ class ShipmentsController < ApplicationController
   # GET /shipments
   # GET /shipments.json
   def inventory_receipts
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date

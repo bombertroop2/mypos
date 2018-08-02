@@ -7,11 +7,7 @@ class StocksController < ApplicationController
   # GET /stocks
   # GET /stocks.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     stocks_scope = if current_user.has_non_spg_role?
       if params[:filter_warehouse_id].blank?
         StockDetail.none

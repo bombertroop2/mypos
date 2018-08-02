@@ -7,11 +7,7 @@ class CompaniesController < ApplicationController
   # GET /companies
   # GET /companies.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     companies_scope = Company.select(:id, :code, :name, :address, :phone)
     companies_scope = companies_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(companies_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

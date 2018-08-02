@@ -7,11 +7,7 @@ class VendorsController < ApplicationController
   # GET /vendors
   # GET /vendors.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     vendors_scope = Vendor.select(:id, :code, :name, :phone, :facsimile, :email)
     vendors_scope = vendors_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(vendors_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

@@ -27,11 +27,7 @@ class NotificationsController < ApplicationController
       recipient.update notified: true, read: true
     end
     
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     notifications_scope = Notification.select(:id, :event, :body, :created_at).joins(:recipients).where("recipients.user_id = #{current_user.id}")
     notifications_scope = notifications_scope.where(["event #{like_command} ?", "%"+params[:filter]+"%"]).
       or(notifications_scope.where(["body #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]

@@ -7,11 +7,7 @@ class CoasController < ApplicationController
   # GET /coas
   # GET /coas.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     coas_scope = Coa.select(:id, :code, :name, :transaction_type, :description)
     coas_scope = coas_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(coas_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

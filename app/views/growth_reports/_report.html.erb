@@ -57,48 +57,11 @@
     <tbody>
         <% last_region_id = 0 %>
         <% @warehouses.each do |warehouse| %>
-          <% if params[:date].present? %>
-            <% lsts = ListingStockTransaction.select("listing_stock_transactions.transaction_type, listing_stock_transactions.quantity").joins(listing_stock_product_detail: :listing_stock).where(["listing_stock_transactions.transaction_date <= ? AND listing_stocks.warehouse_id = ?", params[:date].to_date, warehouse.id]) %>
-            <% csps = ConsignmentSaleProduct.select(:total, "consignment_sales.transaction_date").joins(:consignment_sale).where(["consignment_sales.warehouse_id = ? AND consignment_sales.no_sale <> ? AND (consignment_sales.transaction_date = ? OR consignment_sales.transaction_date = ?)", warehouse.id, true, params[:date].to_date - 1.year, params[:date].to_date]) %>
-            <% prev_net_sales = csps.sum{|csp| csp.transaction_date.to_date == params[:date].to_date - 1.year ? csp.total : 0} %>
-            <% selected_net_sales = csps.sum{|csp| csp.transaction_date.to_date == params[:date].to_date ? csp.total : 0} %>
-            <% prev_qty_sold = csps.select{|csp| csp.transaction_date.to_date == params[:date].to_date - 1.year}.length %>
-            <% selected_qty_sold = csps.select{|csp| csp.transaction_date.to_date == params[:date].to_date}.length %>
-            <% bs_quantity = lsts.sum{|lst| lst.transaction_type == "BS" ? lst.quantity : 0} %>
-            <% do_quantity = lsts.sum{|lst| lst.transaction_type == "DO" ? lst.quantity : 0} %>
-            <% rw_quantity = lsts.sum{|lst| lst.transaction_type == "RW" ? lst.quantity : 0} %>
-            <% rgo_quantity = lsts.sum{|lst| lst.transaction_type == "RGO" ? lst.quantity : 0} %>
-            <% rgi_quantity = lsts.sum{|lst| lst.transaction_type == "RGI" ? lst.quantity : 0} %>
-            <% slk_quantity = lsts.sum{|lst| lst.transaction_type == "SLK" ? lst.quantity : 0} %>
-            <% ending_stock = (bs_quantity + do_quantity + rgi_quantity) - (rw_quantity + rgo_quantity + slk_quantity) rescue 0 %>
-          <% elsif params[:month].present? %>
-            <% prev_year_beginning_of_month = "1/#{params[:month]}/#{params[:year].to_i - 1}".to_date %>
-            <% prev_year_end_of_month = prev_year_beginning_of_month.end_of_month %>
-            <% selected_year_beginning_of_month = "1/#{params[:month]}/#{params[:year]}".to_date %>
-            <% selected_year_end_of_month = selected_year_beginning_of_month.end_of_month %>
-    <%# lsts = ListingStockTransaction.select("listing_stock_transactions.transaction_type, listing_stock_transactions.quantity").joins(listing_stock_product_detail: :listing_stock).where(["listing_stock_transactions.transaction_date <= ? AND listing_stocks.warehouse_id = ?", selected_year_end_of_month, warehouse.id]) %>
-            <% csps = ConsignmentSaleProduct.select(:total, "consignment_sales.transaction_date").joins(:consignment_sale).where(["consignment_sales.warehouse_id = ? AND consignment_sales.no_sale <> ? AND ((consignment_sales.transaction_date >= ? AND consignment_sales.transaction_date <= ?) OR (consignment_sales.transaction_date >= ? AND consignment_sales.transaction_date <= ?))", warehouse.id, true, prev_year_beginning_of_month, prev_year_end_of_month, selected_year_beginning_of_month, selected_year_end_of_month]) %>
-            <% prev_net_sales = csps.sum{|csp| csp.transaction_date.to_date >= prev_year_beginning_of_month && csp.transaction_date.to_date <= prev_year_end_of_month ? csp.total : 0} %>
-            <% selected_net_sales = csps.sum{|csp| csp.transaction_date.to_date >= selected_year_beginning_of_month && csp.transaction_date.to_date <= selected_year_end_of_month ? csp.total : 0} %>
-            <% prev_qty_sold = csps.select{|csp| csp.transaction_date.to_date >= prev_year_beginning_of_month && csp.transaction_date.to_date <= prev_year_end_of_month}.length %>
-            <% selected_qty_sold = csps.select{|csp| csp.transaction_date.to_date >= selected_year_beginning_of_month && csp.transaction_date.to_date <= selected_year_end_of_month}.length %>
-          <% else %>
-            <% prev_year_beginning_of_year = "1/1/#{params[:year].to_i - 1}".to_date %>
-            <% prev_year_end_of_year = prev_year_beginning_of_year.end_of_year %>
-            <% selected_year_beginning_of_year = "1/1/#{params[:year]}".to_date %>
-            <% selected_year_end_of_year = selected_year_beginning_of_year.end_of_year %>
-    <%# lsts = ListingStockTransaction.select("listing_stock_transactions.transaction_type, listing_stock_transactions.quantity").joins(listing_stock_product_detail: :listing_stock).where(["listing_stock_transactions.transaction_date <= ? AND listing_stocks.warehouse_id = ?", selected_year_end_of_month, warehouse.id]) %>
-            <% csps = ConsignmentSaleProduct.select(:total, "consignment_sales.transaction_date").joins(:consignment_sale).where(["consignment_sales.warehouse_id = ? AND consignment_sales.no_sale <> ? AND ((consignment_sales.transaction_date >= ? AND consignment_sales.transaction_date <= ?) OR (consignment_sales.transaction_date >= ? AND consignment_sales.transaction_date <= ?))", warehouse.id, true, prev_year_beginning_of_year, prev_year_end_of_year, selected_year_beginning_of_year, selected_year_end_of_year]) %>
-            <% prev_net_sales = csps.sum{|csp| csp.transaction_date.to_date >= prev_year_beginning_of_year && csp.transaction_date.to_date <= prev_year_end_of_year ? csp.total : 0} %>
-            <% selected_net_sales = csps.sum{|csp| csp.transaction_date.to_date >= selected_year_beginning_of_year && csp.transaction_date.to_date <= selected_year_end_of_year ? csp.total : 0} %>
-            <% prev_qty_sold = csps.select{|csp| csp.transaction_date.to_date >= prev_year_beginning_of_year && csp.transaction_date.to_date <= prev_year_end_of_year}.length %>
-            <% selected_qty_sold = csps.select{|csp| csp.transaction_date.to_date >= selected_year_beginning_of_year && csp.transaction_date.to_date <= selected_year_end_of_year}.length %>
-          <% end %>
           <% total_counter_per_region = @warehouses.select{|wr| wr.region_id == warehouse.region_id}.length %>
           <% 
-          percentage = if prev_net_sales.to_f <= selected_net_sales.to_f
-            first_val = selected_net_sales.to_f
-            second_val = prev_net_sales.to_f
+          percentage = if warehouse.prev_net_sales.to_f <= warehouse.selected_net_sales.to_f
+            first_val = warehouse.selected_net_sales.to_f
+            second_val = warehouse.prev_net_sales.to_f
             if second_val > 0
               "#{((first_val - second_val) / second_val * 100).round}%"
               elsif first_val > 0
@@ -107,15 +70,15 @@
               "0%"
             end
             else
-            first_val = prev_net_sales.to_f
-            second_val = selected_net_sales.to_f
+            first_val = warehouse.prev_net_sales.to_f
+            second_val = warehouse.selected_net_sales.to_f
             "(#{((first_val - second_val) / first_val * 100).round}%)"
             end
         %>
           <% 
-          qty_sold_percentage = if prev_qty_sold <= selected_qty_sold
-            first_val = selected_qty_sold.to_f
-            second_val = prev_qty_sold.to_f
+          qty_sold_percentage = if warehouse.prev_qty_sold <= warehouse.selected_qty_sold
+            first_val = warehouse.selected_qty_sold.to_f
+            second_val = warehouse.prev_qty_sold.to_f
             if second_val > 0
               "#{((first_val - second_val) / second_val * 100).round}%"
               elsif first_val > 0
@@ -124,18 +87,18 @@
               "0%"
             end
             else
-            first_val = prev_qty_sold.to_f
-            second_val = selected_qty_sold.to_f
+            first_val = warehouse.prev_qty_sold.to_f
+            second_val = warehouse.selected_qty_sold.to_f
             "(#{((first_val - second_val) / first_val * 100).round}%)"
             end
         %>
-          <% if prev_qty_sold.to_i > 0 %>
-            <% prev_aur = (prev_net_sales.to_f / prev_qty_sold.to_i).round %>
+          <% if warehouse.prev_qty_sold.to_i > 0 %>
+            <% prev_aur = (warehouse.prev_net_sales.to_f / warehouse.prev_qty_sold.to_i).round %>
           <% else %>
             <% prev_aur = 0 %>
           <% end %>
-          <% if selected_qty_sold.to_i > 0 %>
-            <% aur = (selected_net_sales.to_f / selected_qty_sold.to_i).round %>
+          <% if warehouse.selected_qty_sold.to_i > 0 %>
+            <% aur = (warehouse.selected_net_sales.to_f / warehouse.selected_qty_sold.to_i).round %>
           <% else %>
             <% aur = 0 %>
           <% end %>
@@ -161,23 +124,23 @@
                 <td rowspan="<%= total_counter_per_region %>" style="vertical-align: middle"><%= "#{warehouse.region_code} - #{warehouse.region_name}" %></td>
               <% end %>
               <td><%= "#{warehouse.code} - #{warehouse.name}" %></td>
-              <td class="text-right"><%= number_to_currency(prev_net_sales.to_f,
+              <td class="text-right"><%= number_to_currency(warehouse.prev_net_sales.to_f,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "Rp",
                     :precision => 2) %></td>
-              <td class="text-right"><%= number_to_currency(selected_net_sales.to_f,
+              <td class="text-right"><%= number_to_currency(warehouse.selected_net_sales.to_f,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "Rp",
                     :precision => 2) %></td>
               <td class="text-right"><%= percentage %></td>
-              <td class="text-right"><%= number_to_currency(prev_qty_sold.to_i,
+              <td class="text-right"><%= number_to_currency(warehouse.prev_qty_sold.to_i,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency(selected_qty_sold.to_i,
+              <td class="text-right"><%= number_to_currency(warehouse.selected_qty_sold.to_i,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "",
@@ -204,7 +167,7 @@
                 <td></td>
                 <td></td>
               <% else %>
-                <td class="text-right"><%= number_to_currency(ending_stock.to_i,
+                <td class="text-right"><%= number_to_currency(warehouse.ending_stock.to_i,
                       :separator => ",",
                       :delimiter => ".",
                       :unit => "",

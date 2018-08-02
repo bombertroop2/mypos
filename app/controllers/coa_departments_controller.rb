@@ -6,11 +6,7 @@ class CoaDepartmentsController < ApplicationController
   # GET /coa_departments
   # GET /coa_departments.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     coa_departments_scope = CoaDepartment.joins(:department,:coa,:warehouse).select("coa_departments.*, departments.code AS department_code, departments.name AS department_name, coas.code AS coa_code, coas.name AS coa_name, warehouses.code AS warhouse_code, warehouses.name AS warehouse_code")
     coa_departments_scope = coa_departments_scope.where(["departments.code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(coa_departments_scope.where(["departments.name #{like_command} ?", "%"+params[:filter]+"%"])).

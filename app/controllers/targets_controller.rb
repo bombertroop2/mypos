@@ -7,11 +7,7 @@ class TargetsController < ApplicationController
   # GET /targets.json
   def index
     @targets = Target.all
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     targets_scope = Target.joins(:warehouse).select("targets.*,warehouses.code AS warehouse_code")
     targets_scope = targets_scope.where(["targets.month #{like_command} ?", "%"+params[:filter]+"%"]).
       or(targets_scope.where(["targets.year #{like_command} ?", "%"+params[:filter]+"%"])).

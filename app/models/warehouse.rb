@@ -61,10 +61,11 @@ class Warehouse < ApplicationRecord
             ]
 
             COUNTER_TYPES = [
-              ["Man", "Man"],
+              ["Men", "Men"],
               ["Ladies", "Ladies"],
               ["Kids", "Kids"],
-              ["Bazzar", "Bazzar"]
+              ["Bags", "Bags"],
+              ["Bazar", "Bazar"]
             ]
 
             def code_and_name

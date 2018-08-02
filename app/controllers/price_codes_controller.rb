@@ -7,11 +7,7 @@ class PriceCodesController < ApplicationController
   # GET /price_codes
   # GET /price_codes.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     price_codes_scope = PriceCode.select(:id, :code, :name, :description)
     price_codes_scope = price_codes_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(price_codes_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

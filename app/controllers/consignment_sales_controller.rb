@@ -15,11 +15,7 @@ class ConsignmentSalesController < ApplicationController
       end
     end
     
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     
     if params[:filter_date].present?
       splitted_start_time_range = params[:filter_date].split("-")

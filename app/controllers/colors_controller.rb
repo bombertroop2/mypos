@@ -7,11 +7,7 @@ class ColorsController < ApplicationController
   # GET /colors
   # GET /colors.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     colors_scope = Color.select(:id, :code, :name, :description)
     colors_scope = colors_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(colors_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

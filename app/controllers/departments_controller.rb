@@ -6,11 +6,7 @@ class DepartmentsController < ApplicationController
   # GET /departments
   # GET /departments.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     departments_scope = Department.select(:id, :code, :name, :description)
     departments_scope = departments_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(departments_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

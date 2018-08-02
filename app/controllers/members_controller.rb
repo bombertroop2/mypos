@@ -7,11 +7,7 @@ class MembersController < ApplicationController
   # GET /members
   # GET /members.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     members_scope = Member.select(:id, :name, :address, :mobile_phone, :email)
     members_scope = members_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"]).
       or(members_scope.where(["address #{like_command} ?", "%"+params[:filter]+"%"])).

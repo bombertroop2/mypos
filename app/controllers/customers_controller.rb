@@ -7,11 +7,7 @@ class CustomersController < ApplicationController
   # GET /customers
   # GET /customers.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     customers_scope = Customer.select(:id, :code, :name, :phone, :facsimile, :email)
     customers_scope = customers_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(customers_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
