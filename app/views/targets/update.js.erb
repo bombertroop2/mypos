@@ -1,0 +1,5 @@
+<% if @updated %>
+  <%= smart_listing_item :targets, :update, @target, "targets/target" %>
+<% else %>
+  <%= smart_listing_item :targets, :edit, @target, "targets/form" %>
+<% end %>

@@ -1,9 +1,7 @@
 class Coa < ApplicationRecord
   audited on: [:create, :update]
-  validates :code, :name, :company_id, :transaction_type, presence: true
-  validate :company_exist, :transaction_type_available
+  validates :code, :name, :transaction_type, presence: true
   has_many :coa_departments
-  belongs_to :company, -> {select("1 AS one")}
   before_validation :upcase_code
   before_destroy :delete_tracks
 
@@ -44,6 +42,10 @@ class Coa < ApplicationRecord
     end
   end
 
+  def coa_view
+    "#{code} - #{transaction_type}"
+  end
+
   private
   def delete_tracks
     audits.destroy_all
@@ -51,10 +53,6 @@ class Coa < ApplicationRecord
 
   def upcase_code
     self.code = code.upcase.gsub(" ","").gsub("\t","")
-  end
-
-  def company_exist
-    errors.add(:company_id, "does not exist!") if company_id_changed? && Company.select("1 AS one").where(:id => company_id).blank?
   end
 
   def transaction_type_available

@@ -1,0 +1,5 @@
+<% if @created %>
+  <%= smart_listing_item :targets, :create, @target, "targets/target" %>
+<% else %>
+  <%= smart_listing_item :targets, :create, @target, "targets/form" %>
+<% end %>

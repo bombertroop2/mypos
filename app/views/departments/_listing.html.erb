@@ -3,7 +3,6 @@
         <tr>
             <th class="col-md-2"><%= smart_listing.sortable "Code", "code" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "Name", "name" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "Company", "company_code" %></th>
             <th class="col-md-1"></th>
         </tr>
     </thead>
@@ -13,7 +12,7 @@
               <%= smart_listing.render object: dep, partial: "departments/department", locals: {object: dep} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 4, link: new_department_path %>
+        <%= smart_listing.item_new colspan: 3, link: new_department_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

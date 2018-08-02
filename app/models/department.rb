@@ -1,11 +1,13 @@
 class Department < ApplicationRecord
   audited on: [:create, :update]
   validates :code, :name, presence: true
-  validate :company_exist
   has_many :coa_departments
-  belongs_to :company, -> {select("1 AS one")}
   before_validation :upcase_code
   before_destroy :delete_tracks
+
+  def department_view
+    "#{code} - #{name}"
+  end
 
   private
   def delete_tracks
@@ -16,7 +18,4 @@ class Department < ApplicationRecord
     self.code = code.upcase.gsub(" ","").gsub("\t","")
   end
 
-  def company_exist
-    errors.add(:company_id, "does not exist!") if company_id_changed? && Company.select("1 AS one").where(:id => company_id).blank?
-  end
 end

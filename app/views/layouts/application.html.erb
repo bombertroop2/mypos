@@ -315,6 +315,9 @@
                                                       <% if can? :manage, Company %>
                                                         <li><%= link_to "Companies", companies_path, method: :get %></li>
                                                       <% end %>
+                                                      <% if can? :manage, Target %>
+                                                        <li><%= link_to "Targets", targets_path, method: :get %></li>
+                                                      <% end %>
                                                   </ul>
                                               </li>
                                             <% end %>

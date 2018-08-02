@@ -12,12 +12,11 @@ class CoasController < ApplicationController
     else
       "LIKE"
     end
-    coas_scope = Coa.joins(:company).select("coas.*,companies.code AS company_code")
-    coas_scope = coas_scope.where(["coas.code #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(coas_scope.where(["coas.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(coas_scope.where(["companies.code #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(coas_scope.where(["coas.transaction_type #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(coas_scope.where(["coas.description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    coas_scope = Coa.select(:id, :code, :name, :transaction_type, :description)
+    coas_scope = coas_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(coas_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(coas_scope.where(["transaction_type #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(coas_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @coas = smart_listing_create(:coas, coas_scope, partial: 'coas/listing', default_sort: {code: "asc"})
   end
 
@@ -43,7 +42,7 @@ class CoasController < ApplicationController
       @created = @coa.save
     rescue ActiveRecord::RecordNotUnique => e
       @created = false
-      if e.message.include?("index_coas_on_company_id_and_transaction_type")
+      if e.message.include?("index_coas_on_transaction_type")
         @coa.errors.messages[:transaction_type] = ["has already been taken"]
       else
         @coa.errors.messages[:code] = ["has already been taken"]
@@ -58,7 +57,7 @@ class CoasController < ApplicationController
       @updated = @coa.update(coa_params)
     rescue ActiveRecord::RecordNotUnique => e
       @updated = false
-      if e.message.include?("index_coas_on_company_id_and_transaction_type")
+      if e.message.include?("index_coas_on_transaction_type")
         @coa.errors.messages[:transaction_type] = ["has already been taken"]
       else
         @coa.errors.messages[:code] = ["has already been taken"]
@@ -80,6 +79,6 @@ class CoasController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def coa_params
-      params.require(:coa).permit(:code, :name, :company_id, :transaction_type, :description)
+      params.require(:coa).permit(:code, :name, :transaction_type, :description)
     end
 end

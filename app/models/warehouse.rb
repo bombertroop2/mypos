@@ -31,6 +31,9 @@ class Warehouse < ApplicationRecord
   has_one :counter_event_warehouse_relation, -> {select("1 AS one")}, class_name: "CounterEventWarehouse"
   has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
   has_many :coa_departments
+  has_many :targets
+  has_one :coa_department_relation, -> {select("1 AS one")}, class_name: "CoaDepartment"
+  has_one :target_relation, -> {select("1 AS one")}, class_name: "Target"
 
   validates :code, :name, :supervisor_id, :region_id, :price_code_id, :address, :warehouse_type, presence: true
   validates :sku, :counter_type, presence: true, if: proc{|warehouse| warehouse.warehouse_type.present? && warehouse.warehouse_type.include?("ctr")}

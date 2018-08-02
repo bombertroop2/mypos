@@ -1,0 +1,27 @@
+<td colspan="5">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Warehouse</dt>
+        <dd><%= object.warehouse.code %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Month</dt>
+        <dd><%= object.month_name %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Year</dt>
+        <dd><%= object.year %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Value</dt>
+        <dd><%= number_to_currency(object.target_value, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+    </dl>
+
+</td>

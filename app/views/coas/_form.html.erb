@@ -1,4 +1,4 @@
-<td colspan="6">
+<td colspan="4">
   <div style="padding-top: 20px"></div>
   <%= form_for(@coa, remote: true, html: {class: "form-horizontal"}) do |f| %>
       <div class="form-group<%= control_group_error(@coa, :code) %>">
@@ -13,13 +13,6 @@
         <div class="col-sm-9">
             <%= f.text_field :name, class: "form-control inputs" %>
             <%= error_help_text(@coa, :name) %>
-        </div>
-      </div>
-      <div class="form-group<%= control_group_error(@coa, :company_id) %>">
-        <%= f.label :company_id, class: "col-sm-3 control-label" %>
-        <div class="col-sm-9">
-          <%= f.select :company_id, options_from_collection_for_select(Company.select(:id, :code), :id, :code, @coa.company_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
-          <%= error_help_text(@coa, :company_id) %>
         </div>
       </div>
       <div class="form-group<%= control_group_error(@coa, :transaction_type) %>">
@@ -51,6 +44,5 @@
           $(this).val($(this).val().replace(/ /g, ""));
       });
       $("#coa_transaction_type").attr("data-placeholder", "Please select").chosen();
-      $("#coa_company_id").attr("data-placeholder", "Please select").chosen();
   });
 </script>

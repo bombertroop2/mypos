@@ -1,9 +1,6 @@
 Rails.application.routes.draw do
-  resources :coa_departments do
-    collection do
-      post :get_coa_department
-    end
-  end
+  resources :targets
+  resources :coa_departments
   get 'growth_reports/index'
 
   resources :departments
