@@ -1,7 +1,7 @@
 class Coa < ApplicationRecord
   audited on: [:create, :update]
   validates :code, :name, :transaction_type, presence: true
-  validate :code_not_changed, :transaction_type_not_changed
+  validate :code_not_changed, :transaction_type_not_changed, :transaction_type_available
   has_many :coa_departments
   has_one :coa_department_relation, -> {select("1 AS one")}, class_name: "CoaDepartment"
   before_validation :upcase_code
