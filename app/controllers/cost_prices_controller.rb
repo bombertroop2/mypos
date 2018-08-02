@@ -7,11 +7,7 @@ class CostPricesController < ApplicationController
     before_action :set_cost, only: [:show, :destroy]
 
     def index
-      like_command = if Rails.env.eql?("production")
-        "ILIKE"
-      else
-        "LIKE"
-      end
+      like_command = "ILIKE"
       if params[:filter_cost].present?
         params[:filter_cost] = params[:filter_cost].gsub("Rp","").gsub(".","").gsub(",",".").gsub(".00","")
       end

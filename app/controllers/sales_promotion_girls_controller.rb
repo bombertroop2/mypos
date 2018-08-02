@@ -7,11 +7,7 @@ class SalesPromotionGirlsController < ApplicationController
   # GET /sales_promotion_girls
   # GET /sales_promotion_girls.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     spg_scope = if current_user.has_non_spg_role?
       SalesPromotionGirl.joins(:warehouse).select("sales_promotion_girls.id, identifier, sales_promotion_girls.name, phone, warehouses.code AS warehouse_code, mobile_phone")
     else

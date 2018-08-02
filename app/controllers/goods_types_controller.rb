@@ -7,11 +7,7 @@ class GoodsTypesController < ApplicationController
   # GET /goods_types
   # GET /goods_types.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     goods_types_scope = GoodsType.select(:id, :code, :name, :description)
     goods_types_scope = goods_types_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(goods_types_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

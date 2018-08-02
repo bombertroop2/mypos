@@ -7,11 +7,7 @@ class BanksController < ApplicationController
   # GET /banks
   # GET /banks.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     banks_scope = Bank.select(:id, :code, :name, :card_type)
     banks_scope = banks_scope.where(["code #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(banks_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?

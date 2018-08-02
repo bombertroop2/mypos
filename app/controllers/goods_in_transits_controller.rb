@@ -4,11 +4,7 @@ class GoodsInTransitsController < ApplicationController
 
   def shipment_goods
     authorize! :read_shipment_goods, Shipment
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
@@ -44,11 +40,7 @@ class GoodsInTransitsController < ApplicationController
 
   def mutation_goods
     authorize! :read_mutation_goods, StockMutation
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
@@ -88,11 +80,7 @@ class GoodsInTransitsController < ApplicationController
   
   def returned_goods
     authorize! :read_mutation_goods, StockMutation
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date

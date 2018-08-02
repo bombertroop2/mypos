@@ -8,11 +8,7 @@ class CashierOpeningsController < ApplicationController
   # GET /cashier_openings.json
   def index
     flash[:notice] = ""
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_opened_at].present?
       splitted_date_range = params[:filter_opened_at].split("-")
       start_date = splitted_date_range[0].strip.to_date.beginning_of_day

@@ -7,11 +7,7 @@ class CouriersController < ApplicationController
   # GET /couriers
   # GET /couriers.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     couriers_scope = Courier.select(:id, :code, :name, :via, :unit)
     couriers_scope = couriers_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(couriers_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

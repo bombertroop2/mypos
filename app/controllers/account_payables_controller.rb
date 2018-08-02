@@ -7,11 +7,7 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables
   # GET /account_payables.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_payment_date].present?
       splitted_date_range = params[:filter_payment_date].split("-")
       start_date = splitted_date_range[0].strip.to_date

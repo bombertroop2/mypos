@@ -7,11 +7,7 @@ class ListingStocksController < ApplicationController
   # GET /listing_stocks
   # GET /listing_stocks.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     listing_stock_transactions_scope = if params[:filter_warehouse].present?
       splitted_date = params[:filter_listing_transaction_date].split(" - ")
       ListingStockTransaction.

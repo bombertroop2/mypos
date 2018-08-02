@@ -8,11 +8,7 @@ class FiscalYearsController < ApplicationController
   # GET /fiscal_years
   # GET /fiscal_years.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     fiscal_years_scope = FiscalYear.select(:id, :year)
     fiscal_years_scope = fiscal_years_scope.where(["year #{like_command} ?", "%"+params[:filter]+"%"]) if params[:filter]
     @fiscal_years = smart_listing_create(:fiscal_years, fiscal_years_scope, partial: 'fiscal_years/listing', default_sort: {year: "asc"})

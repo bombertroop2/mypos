@@ -7,11 +7,7 @@ class SizeGroupsController < ApplicationController
   # GET /size_groups
   # GET /size_groups.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     size_groups_scope = SizeGroup.joins("LEFT JOIN sizes on size_groups.id = sizes.size_group_id").select("size_groups.id, code, description, size")
     size_groups_scope = size_groups_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(size_groups_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])).

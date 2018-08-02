@@ -7,11 +7,7 @@ class CounterEventsController < ApplicationController
   # GET /counter_events
   # GET /counter_events.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_event_start_time].present?
       splitted_start_time_range = params[:filter_event_start_time].split("-")
       start_start_time = Time.zone.parse splitted_start_time_range[0].strip

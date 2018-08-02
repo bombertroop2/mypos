@@ -9,11 +9,7 @@ class StockMutationsController < ApplicationController
   # GET /stock_mutations
   # GET /stock_mutations.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
@@ -50,11 +46,7 @@ class StockMutationsController < ApplicationController
   end
   
   def store_to_store_inventory_receipts
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
@@ -91,11 +83,7 @@ class StockMutationsController < ApplicationController
   end
   
   def store_to_warehouse_inventory_receipts
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
@@ -119,11 +107,7 @@ class StockMutationsController < ApplicationController
   end
 
   def index_store_to_warehouse_mutation
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_delivery_date].present?
       splitted_delivery_date_range = params[:filter_delivery_date].split("-")
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date

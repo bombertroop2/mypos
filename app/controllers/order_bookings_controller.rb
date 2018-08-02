@@ -9,11 +9,7 @@ class OrderBookingsController < ApplicationController
   # GET /order_bookings
   # GET /order_bookings.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     if params[:filter_plan_date].present?
       splitted_date_range = params[:filter_plan_date].split("-")
       start_date = splitted_date_range[0].strip.to_date

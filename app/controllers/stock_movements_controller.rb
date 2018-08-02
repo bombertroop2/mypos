@@ -28,11 +28,7 @@ class StockMovementsController < ApplicationController
             order("products.code, color_code, size_order")
         end
       else
-        like_command = if Rails.env.eql?("production")
-          "ILIKE"
-        else
-          "LIKE"
-        end
+        like_command = "ILIKE"
         @stock_movement_transactions = if @warehouse.warehouse_type.eql?("central")
           StockMovementTransaction.
             joins(stock_movement_product_detail: [:size, :color, stock_movement_product: [:stock_movement_warehouse, product: :brand]]).

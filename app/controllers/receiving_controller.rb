@@ -6,11 +6,7 @@ class ReceivingController < ApplicationController
     before_action :set_received_order, only: :show
   
     def index
-      like_command = if Rails.env.eql?("production")
-        "ILIKE"
-      else
-        "LIKE"
-      end
+      like_command = "ILIKE"
       if params[:filter_receiving_date].present?
         splitted_date_range = params[:filter_receiving_date].split("-")
         start_date = splitted_date_range[0].strip.to_date

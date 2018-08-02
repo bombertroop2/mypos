@@ -7,11 +7,7 @@ class AreaManagersController < ApplicationController
     # GET /supervisors
     # GET /supervisors.json
     def index
-      like_command =  if Rails.env.eql?("production")
-        "ILIKE"
-      else
-        "LIKE"
-      end    
+      like_command = "ILIKE"
       supervisors_scope = Supervisor.joins("LEFT JOIN warehouses on supervisors.id = warehouses.supervisor_id").where(["warehouses.is_active = ?", true]).select("supervisors.id, supervisors.code, supervisors.name, email, phone, mobile_phone").group("supervisors.id")
       supervisors_scope = supervisors_scope.where(["supervisors.code #{like_command} ?", "%"+params[:filter]+"%"]).
         or(supervisors_scope.where(["supervisors.name #{like_command} ?", "%"+params[:filter]+"%"])).

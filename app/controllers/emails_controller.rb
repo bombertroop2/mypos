@@ -7,11 +7,7 @@ class EmailsController < ApplicationController
   # GET /emails
   # GET /emails.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     emails_scope = Email.select(:id, :address, :email_type)
     emails_scope = emails_scope.where(["address #{like_command} ?", "%"+params[:filter]+"%"]).
       or(emails_scope.where(["email_type #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]

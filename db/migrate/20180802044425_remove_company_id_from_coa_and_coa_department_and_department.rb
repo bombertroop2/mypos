@@ -5,9 +5,9 @@ class RemoveCompanyIdFromCoaAndCoaDepartmentAndDepartment < ActiveRecord::Migrat
     Coa.delete_all
     remove_index :coas, column: [:company_id, :code]
     remove_index :departments, column: [:company_id, :code]
-    remove_reference :coas, :company, index:true, foreign_key: true
-    remove_reference :departments, :company, index:true, foreign_key: true
-    remove_reference :coa_departments, :company, index:true, foreign_key: true
+    remove_reference :coas, :company, index:true
+    remove_reference :departments, :company, index:true
+    remove_reference :coa_departments, :company, index:true
     add_index :coas, :code, unique: true
     add_index :coas, :transaction_type, unique: true
     add_index :departments, :code, unique: true

@@ -7,11 +7,7 @@ class PurchaseReturnsController < ApplicationController
   # GET /purchase_returns
   # GET /purchase_returns.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     purchase_returns_scope = PurchaseReturn.joins("LEFT JOIN purchase_orders on purchase_returns.purchase_order_id = purchase_orders.id").joins("LEFT JOIN direct_purchases on purchase_returns.direct_purchase_id = direct_purchases.id").joins("INNER JOIN vendors ON vendors.id = purchase_orders.vendor_id OR vendors.id = direct_purchases.vendor_id").select("purchase_returns.id, purchase_returns.number, name")
     purchase_returns_scope = purchase_returns_scope.where(["purchase_returns.number #{like_command} ?", "%"+params[:filter]+"%"]).
       or(purchase_returns_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]

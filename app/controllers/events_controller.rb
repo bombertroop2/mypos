@@ -7,11 +7,7 @@ class EventsController < ApplicationController
   # GET /events
   # GET /events.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
 
     if params[:filter_event_start_time].present?
       splitted_start_time_range = params[:filter_event_start_time].split("-")

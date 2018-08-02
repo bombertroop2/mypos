@@ -8,11 +8,7 @@ class UsersController < ApplicationController
   end
 
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     users_scope = User.select(:id, :name, :gender).select("roles.name AS role_name").joins(users_roles: :role)
     users_scope = users_scope.where(["users.name #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string]
     users_scope = users_scope.where(["gender = ?", params[:filter_gender]]) if params[:filter_gender].present?

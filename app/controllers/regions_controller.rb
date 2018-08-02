@@ -7,11 +7,7 @@ class RegionsController < ApplicationController
   # GET /regions
   # GET /regions.json
   def index
-    like_command =  if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     regions_scope = Region.select(:id, :code, :name, :description)
     regions_scope = regions_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(regions_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).

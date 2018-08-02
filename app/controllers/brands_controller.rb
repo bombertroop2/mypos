@@ -6,11 +6,7 @@ class BrandsController < ApplicationController
   # GET /brands
   # GET /brands.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     brands_scope = Brand.select(:id, :code, :name, :description)
     brands_scope = brands_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(brands_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
