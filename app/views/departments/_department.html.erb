@@ -1,6 +1,5 @@
 <td id="code-<%= object.id %>"><%= object.code %></td>
 <td id="name-<%= object.id %>"><%= object.name %></td>
-<td id="company-<%= object.id %>"><%= object.company.code%> - <%= object.company.name %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
     <%= link_to_if(can?(:manage, Department), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_department_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>

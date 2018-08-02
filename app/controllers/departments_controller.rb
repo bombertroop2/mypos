@@ -11,13 +11,11 @@ class DepartmentsController < ApplicationController
     else
       "LIKE"
     end
-    departments_scope = Department.joins(:company).select("departments.*, companies.code AS company_code, companies.name AS company_name")
-    departments_scope = departments_scope.where(["departments.code #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(departments_scope.where(["departments.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(departments_scope.where(["companies.code #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(departments_scope.where(["companies.name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(departments_scope.where(["departments.description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
-    @departments = smart_listing_create(:departments, departments_scope, partial: 'departments/listing', default_sort: {:"departments.code" => "asc"})
+    departments_scope = Department.select(:id, :code, :name, :description)
+    departments_scope = departments_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(departments_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(departments_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+    @departments = smart_listing_create(:departments, departments_scope, partial: 'departments/listing', default_sort: {code: "asc"})
   end
 
   # GET /departments/1
@@ -71,6 +69,6 @@ class DepartmentsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def department_params
-      params.require(:department).permit(:code, :name, :company_id, :description)
+      params.require(:department).permit(:code, :name, :description)
     end
 end
