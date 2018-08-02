@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class CoaDepartmentsController < ApplicationController
+  authorize_resource
   helper SmartListing::Helper
   before_action :set_coa_department, only: [:show, :edit, :update, :destroy]
 
