@@ -9,9 +9,9 @@ class TargetsController < ApplicationController
     @targets = Target.all
     like_command = "ILIKE"
     targets_scope = Target.joins(:warehouse).select("targets.*,warehouses.code AS warehouse_code")
-    targets_scope = targets_scope.where(["targets.month #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(targets_scope.where(["targets.year #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(targets_scope.where(["targets.target_value #{like_command} ?", "%"+params[:filter]+"%"])).
+    targets_scope = targets_scope.where(["CAST(targets.month AS varchar) #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(targets_scope.where(["CAST(targets.year AS varchar) #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(targets_scope.where(["CAST(targets.target_value AS varchar) #{like_command} ?", "%"+params[:filter]+"%"])).
       or(targets_scope.where(["warehouses.code #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @targets = smart_listing_create(:targets, targets_scope, partial: 'targets/listing', default_sort: {year:  "asc"})
   end
