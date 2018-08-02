@@ -192,7 +192,7 @@ class Warehouse < ApplicationRecord
             end
 
             def code_not_changed
-              errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
+              errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present? || target_relation.present? || coa_department_relation.present?)
             end
 
             def warehouse_type_not_changed

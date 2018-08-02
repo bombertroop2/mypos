@@ -1,7 +1,9 @@
 class Coa < ApplicationRecord
   audited on: [:create, :update]
   validates :code, :name, :transaction_type, presence: true
+  validate :code_not_changed, :transaction_type_not_changed
   has_many :coa_departments
+  has_one :coa_department_relation, -> {select("1 AS one")}, class_name: "CoaDepartment"
   before_validation :upcase_code
   before_destroy :delete_tracks
 
@@ -59,6 +61,14 @@ class Coa < ApplicationRecord
     Coa::TRANSACTION_TYPE.select{ |x| x[1] == transaction_type }.first.first
   rescue
     errors.add(:transaction_type, "does not exist!") if transaction_type.present?
+  end
+
+  def code_not_changed
+    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && coa_department_relation.present?
+  end
+
+  def transaction_type_not_changed
+    errors.add(:transaction_type, "change is not allowed!") if transaction_type_changed? && persisted? && coa_department_relation.present?
   end
 
 end
