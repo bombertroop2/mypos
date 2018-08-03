@@ -45,7 +45,7 @@ class Target < ApplicationRecord
   end
 
   def check_date
-    if month.present? && year.present? && month <= Date.today.month && year <= Date.today.year
+    if month.present? && year.present? && month <= Date.current.month && year <= Date.current.year
       errors.add(:month, "can't less than or equal with this month")
     end
   end
