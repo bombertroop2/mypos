@@ -9,7 +9,7 @@ class TargetsController < ApplicationController
     @targets = Target.all
     like_command = "ILIKE"
     targets_scope = Target.joins(:warehouse).select("targets.*,warehouses.code AS warehouse_code")
-    targets_scope = targets_scope.where(["CAST(targets.month AS varchar) #{like_command} ?", "%"+params[:filter]+"%"]).
+    targets_scope = targets_scope.where(["to_char(to_timestamp (targets.month::text, 'MM'), 'Month') #{like_command} ?", "%"+params[:filter]+"%"]).
       or(targets_scope.where(["CAST(targets.year AS varchar) #{like_command} ?", "%"+params[:filter]+"%"])).
       or(targets_scope.where(["CAST(targets.target_value AS varchar) #{like_command} ?", "%"+params[:filter]+"%"])).
       or(targets_scope.where(["warehouses.code #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
