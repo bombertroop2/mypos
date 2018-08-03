@@ -22,10 +22,10 @@ class GrowthReportsController < ApplicationController
             Warehouse.
               select(:id, :code, :name, :region_id).
               select("common_fields.code AS region_code, common_fields.name AS region_name").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN 1 ELSE 0 END) AS prev_qty_sold").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN 1 ELSE 0 END) AS selected_qty_sold").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS prev_net_sales").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS selected_net_sales").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN '1' ELSE '0' END, ',') AS prev_qty_sold").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN '1' ELSE '0' END, ',') AS selected_qty_sold").
               select("((transaction_detail.bs_quantity + transaction_detail.do_quantity + transaction_detail.rgi_quantity) - (transaction_detail.rw_quantity + transaction_detail.rgo_quantity + transaction_detail.slk_quantity)) AS ending_stock").
               joins(:region).
               joins("INNER JOIN consignment_sales ON consignment_sales.warehouse_id = warehouses.id AND consignment_sales.no_sale <> 't' AND (consignment_sales.transaction_date = '#{prev_year_date}' OR consignment_sales.transaction_date = '#{selected_year_date}')").
@@ -36,10 +36,10 @@ class GrowthReportsController < ApplicationController
             Warehouse.
               select(:id, :code, :name, :region_id).
               select("common_fields.code AS region_code, common_fields.name AS region_name").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN 1 ELSE 0 END) AS prev_qty_sold").
-              select("SUM(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN 1 ELSE 0 END) AS selected_qty_sold").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS prev_net_sales").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS selected_net_sales").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN '1' ELSE '0' END, ',') AS prev_qty_sold").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN '1' ELSE '0' END, ',') AS selected_qty_sold").
               select("((transaction_detail.bs_quantity + transaction_detail.do_quantity + transaction_detail.rgi_quantity) - (transaction_detail.rw_quantity + transaction_detail.rgo_quantity + transaction_detail.slk_quantity)) AS ending_stock").
               joins(:region).
               joins("INNER JOIN consignment_sales ON consignment_sales.warehouse_id = warehouses.id AND consignment_sales.no_sale <> 't' AND (consignment_sales.transaction_date = '#{prev_year_date}' OR consignment_sales.transaction_date = '#{selected_year_date}')").
@@ -56,10 +56,10 @@ class GrowthReportsController < ApplicationController
             Warehouse.
               select(:id, :code, :name, :region_id).
               select("common_fields.code AS region_code, common_fields.name AS region_name").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN 1 ELSE 0 END) AS prev_qty_sold").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN 1 ELSE 0 END) AS selected_qty_sold").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS prev_net_sales").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS selected_net_sales").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN '1' ELSE '0' END, ',') AS prev_qty_sold").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN '1' ELSE '0' END, ',') AS selected_qty_sold").
               joins(:region).
               joins("INNER JOIN consignment_sales ON consignment_sales.warehouse_id = warehouses.id AND consignment_sales.no_sale <> 't' AND ((consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}') OR (consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}'))").
               joins("INNER JOIN consignment_sale_products ON consignment_sale_products.consignment_sale_id = consignment_sales.id").
@@ -68,10 +68,10 @@ class GrowthReportsController < ApplicationController
             Warehouse.
               select(:id, :code, :name, :region_id).
               select("common_fields.code AS region_code, common_fields.name AS region_name").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN 1 ELSE 0 END) AS prev_qty_sold").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN 1 ELSE 0 END) AS selected_qty_sold").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS prev_net_sales").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS selected_net_sales").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN '1' ELSE '0' END, ',') AS prev_qty_sold").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN '1' ELSE '0' END, ',') AS selected_qty_sold").
               joins(:region).
               joins("INNER JOIN consignment_sales ON consignment_sales.warehouse_id = warehouses.id AND consignment_sales.no_sale <> 't' AND ((consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}') OR (consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}'))").
               joins("INNER JOIN consignment_sale_products ON consignment_sale_products.consignment_sale_id = consignment_sales.id").
@@ -86,10 +86,10 @@ class GrowthReportsController < ApplicationController
             Warehouse.
               select(:id, :code, :name, :region_id).
               select("common_fields.code AS region_code, common_fields.name AS region_name").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN 1 ELSE 0 END) AS prev_qty_sold").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN 1 ELSE 0 END) AS selected_qty_sold").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS prev_net_sales").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS selected_net_sales").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN '1' ELSE '0' END, ',') AS prev_qty_sold").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN '1' ELSE '0' END, ',') AS selected_qty_sold").
               joins(:region).
               joins("INNER JOIN consignment_sales ON consignment_sales.warehouse_id = warehouses.id AND consignment_sales.no_sale <> 't' AND ((consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}') OR (consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}'))").
               joins("INNER JOIN consignment_sale_products ON consignment_sale_products.consignment_sale_id = consignment_sales.id").
@@ -98,10 +98,10 @@ class GrowthReportsController < ApplicationController
             Warehouse.
               select(:id, :code, :name, :region_id).
               select("common_fields.code AS region_code, common_fields.name AS region_name").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN 1 ELSE 0 END) AS prev_qty_sold").
-              select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN 1 ELSE 0 END) AS selected_qty_sold").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS prev_net_sales").
+              select("string_agg(CAST(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END AS VARCHAR(255)), ',') AS selected_net_sales").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN '1' ELSE '0' END, ',') AS prev_qty_sold").
+              select("string_agg(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN '1' ELSE '0' END, ',') AS selected_qty_sold").
               joins(:region).
               joins("INNER JOIN consignment_sales ON consignment_sales.warehouse_id = warehouses.id AND consignment_sales.no_sale <> 't' AND ((consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}') OR (consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}'))").
               joins("INNER JOIN consignment_sale_products ON consignment_sale_products.consignment_sale_id = consignment_sales.id").

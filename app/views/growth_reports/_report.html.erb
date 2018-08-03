@@ -57,11 +57,15 @@
     <tbody>
         <% last_region_id = 0 %>
         <% @warehouses.each do |warehouse| %>
+          <% prev_net_sales = warehouse.prev_net_sales.split(",").map{|val| val.to_f}.sum %>
+          <% selected_net_sales = warehouse.selected_net_sales.split(",").map{|val| val.to_f}.sum %>
+          <% prev_qty_sold = warehouse.prev_qty_sold.split(",").map{|val| val.to_i}.sum %>
+          <% selected_qty_sold = warehouse.selected_qty_sold.split(",").map{|val| val.to_i}.sum %>
           <% total_counter_per_region = @warehouses.select{|wr| wr.region_id == warehouse.region_id}.length %>
           <% 
-          percentage = if warehouse.prev_net_sales.to_f <= warehouse.selected_net_sales.to_f
-            first_val = warehouse.selected_net_sales.to_f
-            second_val = warehouse.prev_net_sales.to_f
+          percentage = if prev_net_sales.to_f <= selected_net_sales.to_f
+            first_val = selected_net_sales.to_f
+            second_val = prev_net_sales.to_f
             if second_val > 0
               "#{((first_val - second_val) / second_val * 100).round}%"
               elsif first_val > 0
@@ -70,15 +74,15 @@
               "0%"
             end
             else
-            first_val = warehouse.prev_net_sales.to_f
-            second_val = warehouse.selected_net_sales.to_f
+            first_val = prev_net_sales.to_f
+            second_val = selected_net_sales.to_f
             "(#{((first_val - second_val) / first_val * 100).round}%)"
             end
         %>
           <% 
-          qty_sold_percentage = if warehouse.prev_qty_sold <= warehouse.selected_qty_sold
-            first_val = warehouse.selected_qty_sold.to_f
-            second_val = warehouse.prev_qty_sold.to_f
+          qty_sold_percentage = if prev_qty_sold <= selected_qty_sold
+            first_val = selected_qty_sold.to_f
+            second_val = prev_qty_sold.to_f
             if second_val > 0
               "#{((first_val - second_val) / second_val * 100).round}%"
               elsif first_val > 0
@@ -87,18 +91,18 @@
               "0%"
             end
             else
-            first_val = warehouse.prev_qty_sold.to_f
-            second_val = warehouse.selected_qty_sold.to_f
+            first_val = prev_qty_sold.to_f
+            second_val = selected_qty_sold.to_f
             "(#{((first_val - second_val) / first_val * 100).round}%)"
             end
         %>
-          <% if warehouse.prev_qty_sold.to_i > 0 %>
-            <% prev_aur = (warehouse.prev_net_sales.to_f / warehouse.prev_qty_sold.to_i).round %>
+          <% if prev_qty_sold.to_i > 0 %>
+            <% prev_aur = (prev_net_sales.to_f / prev_qty_sold.to_i).round %>
           <% else %>
             <% prev_aur = 0 %>
           <% end %>
-          <% if warehouse.selected_qty_sold.to_i > 0 %>
-            <% aur = (warehouse.selected_net_sales.to_f / warehouse.selected_qty_sold.to_i).round %>
+          <% if selected_qty_sold.to_i > 0 %>
+            <% aur = (selected_net_sales.to_f / selected_qty_sold.to_i).round %>
           <% else %>
             <% aur = 0 %>
           <% end %>
@@ -124,23 +128,23 @@
                 <td rowspan="<%= total_counter_per_region %>" style="vertical-align: middle"><%= "#{warehouse.region_code} - #{warehouse.region_name}" %></td>
               <% end %>
               <td><%= "#{warehouse.code} - #{warehouse.name}" %></td>
-              <td class="text-right"><%= number_to_currency(warehouse.prev_net_sales.to_f,
+              <td class="text-right"><%= number_to_currency(prev_net_sales.to_f,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "Rp",
                     :precision => 2) %></td>
-              <td class="text-right"><%= number_to_currency(warehouse.selected_net_sales.to_f,
+              <td class="text-right"><%= number_to_currency(selected_net_sales.to_f,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "Rp",
                     :precision => 2) %></td>
               <td class="text-right"><%= percentage %></td>
-              <td class="text-right"><%= number_to_currency(warehouse.prev_qty_sold.to_i,
+              <td class="text-right"><%= number_to_currency(prev_qty_sold.to_i,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency(warehouse.selected_qty_sold.to_i,
+              <td class="text-right"><%= number_to_currency(selected_qty_sold.to_i,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "",
