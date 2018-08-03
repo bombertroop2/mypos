@@ -19,7 +19,7 @@ class Warehouse < ApplicationRecord
   has_many :destination_warehouse_stock_mutations, class_name: "StockMutation", foreign_key: :destination_warehouse_id, dependent: :restrict_with_error
   has_one :stock, dependent: :restrict_with_error
   has_many :coa_departments, dependent: :restrict_with_error
-  has_many :targets
+  has_many :targets, dependent: :restrict_with_error
   has_one :po_relation, -> {select("1 AS one")}, class_name: "PurchaseOrder"
   has_one :spg_relation, -> {select("1 AS one")}, class_name: "SalesPromotionGirl"
   has_one :origin_warehouse_order_booking_relation, -> {select("1 AS one")}, class_name: "OrderBooking", foreign_key: :origin_warehouse_id

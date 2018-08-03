@@ -41,12 +41,16 @@ class Target < ApplicationRecord
   end
 
   def year_available
-    errors.add(:year, "does not exist!") if year.present? if year_changed? && !(Date.current.year..(Date.current.year+3)).to_a.select{ |x| x == year}.first.present?
+    errors.add(:year, "does not exist!") if year.present? && year_changed? && !(Date.current.year..(Date.current.year+3)).to_a.select{ |x| x == year}.first.present?
   end
 
   def check_date
-    if month.present? && year.present? && month <= Date.current.month && year <= Date.current.year
-      errors.add(:month, "can't less than or equal with this month")
+    if month.present? && year.present?
+      if year < Date.current.year
+        errors.add(:year, "can't less than current year")
+      elsif year == Date.current.year && month <= Date.current.month
+        errors.add(:month, "can't less than or equal with current month")
+      end
     end
   end
 
