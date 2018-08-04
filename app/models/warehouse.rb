@@ -41,7 +41,7 @@ class Warehouse < ApplicationRecord
       validate :code_not_changed, :region_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
         :area_manager_available, :region_available, :price_code_available, :type_available,
         :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid, :price_code_not_changed,
-        :counter_type_not_changed
+        :counter_type_not_changed, :in_transit_present
       validate :counter_type_available, if: proc{|wr| wr.warehouse_type.present? && wr.warehouse_type.include?("ctr")}
 
         before_validation :upcase_code, :strip_string_values
@@ -53,6 +53,7 @@ class Warehouse < ApplicationRecord
             TYPES = [
               ["Central", "central"],
               ["Showroom", "showroom"],
+              ["In Transit", "in_transit"],
               ["CTR Matahari", "ctr_matahari"],
               ["CTR Ramayana", "ctr_ramayana"],
               ["CTR Non Ramayana", "ctr_non_ramayana"],
@@ -135,6 +136,13 @@ class Warehouse < ApplicationRecord
               self.first_message = self.second_message = self.third_message = self.fourth_message = self.fifth_message = ""
             end
 
+            def in_transit_present
+              in_transit = Warehouse.where(warehouse_type: "in_transit").select("1 AS one")
+              if in_transit.present?
+                errors.add(:warehouse_type, "only can create one in transit warehouse!") if warehouse_type.present?
+              end
+            end
+
             def delete_tracks
               audits.destroy_all
             end
@@ -203,12 +211,12 @@ class Warehouse < ApplicationRecord
             def price_code_not_changed
               errors.add(:price_code_id, "change is not allowed!") if price_code_id_changed? && persisted? && (cashier_opening_relation.present? || consignment_sale_relation.present? || coa_department_relation.present?)
             end
-            
+
             def region_not_changed
               errors.add(:region_id, "change is not allowed!") if region_id_changed? && persisted? && coa_department_relation.present?
             end
-            
-            def counter_type_not_changed              
+
+            def counter_type_not_changed
               errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && coa_department_relation.present?
             end
           end
