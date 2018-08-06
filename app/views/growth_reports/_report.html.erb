@@ -57,10 +57,14 @@
     <tbody>
         <% last_region_id = 0 %>
         <% @warehouses.each do |warehouse| %>
-          <% prev_net_sales = warehouse.prev_net_sales.split(",").map{|val| val.to_f}.sum %>
-          <% selected_net_sales = warehouse.selected_net_sales.split(",").map{|val| val.to_f}.sum %>
-          <% prev_qty_sold = warehouse.prev_qty_sold.split(",").map{|val| val.to_i}.sum %>
-          <% selected_qty_sold = warehouse.selected_qty_sold.split(",").map{|val| val.to_i}.sum %>
+          <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
+          <% prev_net_sales = consignment_sale.prev_net_sales %>
+          <% selected_net_sales = consignment_sale.selected_net_sales %>
+          <% prev_qty_sold = consignment_sale.prev_qty_sold %>
+          <% selected_qty_sold = consignment_sale.selected_qty_sold %>
+          <% if params[:date].present? %>
+            <% ending_stock = 0 %>
+          <% end %>
           <% total_counter_per_region = @warehouses.select{|wr| wr.region_id == warehouse.region_id}.length %>
           <% 
           percentage = if prev_net_sales.to_f <= selected_net_sales.to_f
@@ -171,7 +175,7 @@
                 <td></td>
                 <td></td>
               <% else %>
-                <td class="text-right"><%= number_to_currency(warehouse.ending_stock.to_i,
+                <td class="text-right"><%= number_to_currency(ending_stock.to_i,
                       :separator => ",",
                       :delimiter => ".",
                       :unit => "",
