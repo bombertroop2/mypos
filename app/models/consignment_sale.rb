@@ -241,9 +241,9 @@ class ConsignmentSale < ApplicationRecord
                       current_month = today.month.to_s.rjust(2, '0')
                       current_year = today.strftime("%y").rjust(2, '0')
                       existed_numbers = unless no_sale
-                        ConsignmentSale.where(["no_sale = ?", false]).where("transaction_number LIKE '1S#{attr_warehouse_code}#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
+                        ConsignmentSale.where(["warehouse_id = ?", warehouse_id]).where("transaction_number LIKE '1S#{attr_warehouse_code}#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
                       else
-                        ConsignmentSale.where(["no_sale = ?", true]).where("transaction_number LIKE '1SNOSALE#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
+                        ConsignmentSale.where(["warehouse_id = ?", warehouse_id]).where("transaction_number LIKE '1SNOSALE#{current_month}#{current_year}%'").select(:transaction_number).order(:transaction_number)
                       end
                       if existed_numbers.blank?
                         new_number = unless no_sale
