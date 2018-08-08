@@ -28,7 +28,7 @@ class GrowthReportsController < ApplicationController
             select("SUM(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
             select("SUM(CASE WHEN consignment_sales.transaction_date = '#{prev_year_date}' THEN 1 ELSE 0 END) AS prev_qty_sold").
             joins(:consignment_sale_products).
-            where(warehouse_id: @warehouses.pluck(:id)).
+            where(warehouse_id: @warehouses.map(&:id)).
             where(["consignment_sales.transaction_date = ?", prev_year_date]).
             group(:warehouse_id)
           @consignment_sales = ConsignmentSale.
@@ -36,7 +36,7 @@ class GrowthReportsController < ApplicationController
             select("SUM(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
             select("SUM(CASE WHEN consignment_sales.transaction_date = '#{selected_year_date}' THEN 1 ELSE 0 END) AS selected_qty_sold").
             joins(:consignment_sale_products).
-            where(warehouse_id: @warehouses.pluck(:id)).
+            where(warehouse_id: @warehouses.map(&:id)).
             where(["consignment_sales.transaction_date = ?", selected_year_date]).
             group(:warehouse_id)
         elsif params[:month].present?
@@ -67,14 +67,14 @@ class GrowthReportsController < ApplicationController
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_month}' THEN 1 ELSE 0 END) AS prev_qty_sold").
             joins(:consignment_sale_products).
-            where(warehouse_id: @warehouses.pluck(:id), transaction_date: prev_year_beginning_of_month..prev_year_end_of_month).
+            where(warehouse_id: @warehouses.map(&:id), transaction_date: prev_year_beginning_of_month..prev_year_end_of_month).
             group(:warehouse_id)
           @consignment_sales = ConsignmentSale.
             select(:warehouse_id).
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_month}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_month}' THEN 1 ELSE 0 END) AS selected_qty_sold").
             joins(:consignment_sale_products).
-            where(warehouse_id: @warehouses.pluck(:id), transaction_date: selected_year_beginning_of_month..selected_year_end_of_month).
+            where(warehouse_id: @warehouses.map(&:id), transaction_date: selected_year_beginning_of_month..selected_year_end_of_month).
             group(:warehouse_id)
         else
           prev_year_beginning_of_year = "1/1/#{params[:year].to_i - 1}".to_date
@@ -104,14 +104,14 @@ class GrowthReportsController < ApplicationController
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END) AS prev_net_sales").
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{prev_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{prev_year_end_of_year}' THEN 1 ELSE 0 END) AS prev_qty_sold").
             joins(:consignment_sale_products).
-            where(warehouse_id: @warehouses.pluck(:id), transaction_date: prev_year_beginning_of_year..prev_year_end_of_year).
+            where(warehouse_id: @warehouses.map(&:id), transaction_date: prev_year_beginning_of_year..prev_year_end_of_year).
             group(:warehouse_id)
           @consignment_sales = ConsignmentSale.
             select(:warehouse_id).
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN consignment_sale_products.total ELSE 0 END) AS selected_net_sales").
             select("SUM(CASE WHEN consignment_sales.transaction_date >= '#{selected_year_beginning_of_year}' AND consignment_sales.transaction_date <= '#{selected_year_end_of_year}' THEN 1 ELSE 0 END) AS selected_qty_sold").
             joins(:consignment_sale_products).
-            where(warehouse_id: @warehouses.pluck(:id), transaction_date: selected_year_beginning_of_year..selected_year_end_of_year).
+            where(warehouse_id: @warehouses.map(&:id), transaction_date: selected_year_beginning_of_year..selected_year_end_of_year).
             group(:warehouse_id)
         end
         format.js
