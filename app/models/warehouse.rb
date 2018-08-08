@@ -139,7 +139,7 @@ class Warehouse < ApplicationRecord
             def in_transit_present
               in_transit = Warehouse.where(warehouse_type: "in_transit").select("1 AS one")
               if in_transit.present?
-                errors.add(:warehouse_type, "only can create one in transit warehouse!") if warehouse_type.present?
+                errors.add(:warehouse_type, "has already been taken") if warehouse_type.present?
               end
             end
 
