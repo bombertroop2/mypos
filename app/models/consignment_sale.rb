@@ -21,7 +21,7 @@ class ConsignmentSale < ApplicationRecord
             before_create :yesterday_transaction_exist, unless: proc{|cs| cs.no_sale}
               before_destroy :record_not_deleted, :delete_tracks
               after_update :update_stock_and_afs, unless: proc{|cs| cs.attr_delete_products}
-              after_update :consignment_sale_journal
+                after_update :consignment_sale_journal
                 after_update :create_listing_stock, if: proc{|cs| !cs.approved_was && cs.approved && !cs.attr_delete_products}
                   after_update :delete_listing_stock, :delete_stock_movement, if: proc{|cs| cs.approved_was && !cs.approved && !cs.attr_delete_products}
 
@@ -31,7 +31,7 @@ class ConsignmentSale < ApplicationRecord
 
                     def sale_not_created
                       if no_sale
-                        if ConsignmentSale.select("1 AS one").where(["(transaction_number LIKE ? OR warehouse_id = ?) AND transaction_date = ?", "1S#{attr_warehouse_code}%", warehouse_id, transaction_date]).present?
+                        if ConsignmentSale.select("1 AS one").where(["warehouse_id = ? AND transaction_date = ?", warehouse_id, transaction_date]).present?
                           raise "Sorry, you can't create a transaction on #{transaction_date.strftime("%d/%m/%Y")}"
                         end
                       else
@@ -47,7 +47,7 @@ class ConsignmentSale < ApplicationRecord
 
                     def yesterday_transaction_exist
                       consignment_sales = ConsignmentSale.
-                        where(["transaction_number LIKE ? OR (no_sale = ? AND warehouse_id = ?)", "1S#{attr_warehouse_code}%", true, warehouse_id]).
+                        where(["warehouse_id = ?", warehouse_id]).
                         select(:transaction_date)
                       if consignment_sales.present?
                         raise "Please create a transaction before #{transaction_date.strftime("%d/%m/%Y")} first" if consignment_sales.select{|cs| cs.transaction_date == transaction_date - 1}.blank? && consignment_sales.select{|cs| cs.transaction_date == transaction_date}.blank?
