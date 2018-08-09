@@ -194,7 +194,7 @@ class ConsignmentSale < ApplicationRecord
                           ce = CounterEvent.find(self.counter_event_id)
                           if ce.counter_event_type.eql?("Discount(%)") && ce.first_discount.present? && ce.second_discount.present?
                             first_discount = gross_price * ce.first_discount/100
-                            second_discount = first_discount * ce.second_discount/100
+                            second_discount = (gross_price - first_discount) * ce.second_discount/100
                             discount = first_discount + second_discount
                             p first_discount.to_i
                             p second_discount.to_i
@@ -214,7 +214,8 @@ class ConsignmentSale < ApplicationRecord
                           gross_after_discount: self.total.to_f,
                           discount: discount.to_f,
                           ppn: ppn.to_f,
-                          nett: nett.to_f
+                          nett: nett.to_f,
+                          transaction_date: self.transaction_date
                         )
                         journal.save
                       elsif approved_was && !approved
