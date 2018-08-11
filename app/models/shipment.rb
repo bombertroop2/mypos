@@ -3,18 +3,19 @@ class Shipment < ApplicationRecord
   has_associated_audits
 
   attr_accessor :order_booking_number, :receiving_inventory, :attr_change_receive_date
-  
+
   belongs_to :order_booking
   belongs_to :courier
-  
+  has_many :journals, :as => :transactionable
+
   has_many :shipment_products, dependent: :destroy
 
   accepts_nested_attributes_for :shipment_products, allow_destroy: true#, reject_if: :child_blank
-    
+
   validates :delivery_date, :courier_id, :order_booking_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc {|shpmnt| shpmnt.order_booking.created_at.to_date}, message: 'must be after or equal to creation date of order booking' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.order_booking_id.present? && !shpmnt.attr_change_receive_date}
     validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.delivery_date_changed? && !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
-      validate :warehouse_is_active, :courier_available, :order_booking_available#, :check_min_quantity
+      validate :warehouse_is_active, :courier_available, :order_booking_available, :check_in_transit_warehouse#, :check_min_quantity
       validate :editable, on: :update, if: proc{|shpmnt| !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
         validate :order_booking_not_changed, on: :update, if: proc{|shipment| shipment.order_booking_id_changed?}
           validates :received_date, presence: true, if: proc{|shpmnt| shpmnt.receiving_inventory || shpmnt.attr_change_receive_date}
@@ -27,15 +28,29 @@ class Shipment < ApplicationRecord
                         validate :receive_date_not_changed, if: proc{|shipment| shipment.attr_change_receive_date}
 
                           before_create :generate_do_number
-                          after_create :finish_ob, :notify_store
+                          after_create :finish_ob, :notify_store, :delivery_order_journal
                           before_destroy :deletable, :transaction_open, :delete_tracks
                           after_destroy :set_ob_status_to_p
-                          before_update :set_is_receive_date_changed, :change_listing_stock_transaction_date, if: proc{|shipment| shipment.attr_change_receive_date}
-                            after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, if: proc{|shpmnt| shpmnt.receiving_inventory}
+                          before_update :set_is_receive_date_changed, :change_listing_stock_transaction_date, :update_journal_receive_date, if: proc{|shipment| shipment.attr_change_receive_date}
+                            after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, :delivery_order_receive_journal, if: proc{|shpmnt| shpmnt.receiving_inventory}
+
+                            def get_gross_price
+                              product_details = Shipment.get_product_details(self.id)
+                              gross = 0
+                              product_details.each do |pd|
+                                product_detail = ProductDetail.find(pd.id)
+                                if product_detail.present?
+                                  gross = gross + (product_detail.active_price.price.to_i * pd.quantity)
+                                else
+                                  return nil
+                                end
+                              end
+                              return gross
+                            end
 
 
                               private
-                              
+
                               def change_listing_stock_transaction_date
                                 if received_date != received_date_was
                                   warehouse_id = order_booking.destination_warehouse_id
@@ -46,7 +61,7 @@ class Shipment < ApplicationRecord
                                         listing_stock_transaction.with_lock do
                                           listing_stock_transaction.transaction_date = received_date
                                           listing_stock_transaction.save
-                                        end     
+                                        end
                                         delete_stock_movement(shipment_product.product_id, shipment_product_item.color_id, shipment_product_item.size_id, warehouse_id, received_date_was, shipment_product_item.quantity)
                                         create_stock_movement(shipment_product.product_id, shipment_product_item.color_id, shipment_product_item.size_id, warehouse_id, received_date, shipment_product_item.quantity)
                                       end
@@ -54,13 +69,13 @@ class Shipment < ApplicationRecord
                                   end
                                 end
                               end
-                              
+
                               def set_is_receive_date_changed
                                 if received_date != received_date_was
                                   self.is_receive_date_changed = true
                                 end
                               end
-                          
+
                               def receive_date_not_changed
                                 if is_receive_date_changed_was
                                   errors.add(:base, "Sorry, receive date is already changed")
@@ -68,11 +83,11 @@ class Shipment < ApplicationRecord
                                   errors.add(:base, "Sorry, inventory #{delivery_order_number} is not received yet")
                                 end
                               end
-                          
+
                               def new_received_date_valid
                                 errors.add(:base, "Receive date must be before or equal to #{received_date_was.strftime("%d/%m/%Y")}") if received_date_was.present? && received_date > received_date_was
                               end
-                        
+
                               def warehouse_is_active
                                 if order_booking_id.present?
                                   @order_booking = OrderBooking.select(:id, :status, :origin_warehouse_id, :destination_warehouse_id).where(id: order_booking_id).first
@@ -87,12 +102,113 @@ class Shipment < ApplicationRecord
                                   end
                                 end
                               end
-                        
+
+                              def delivery_order_journal
+                                coa = Coa.find_by_transaction_type('DO')
+                                gross = self.get_gross_price
+                                ppn = gross.to_i * 10 /100
+                                nett = gross - ppn
+                                warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                if warehouse.present?
+                                  self.journals.create([
+                                  {
+                                    coa_id: coa.id,
+                                    gross: gross.to_f,
+                                    gross_after_discount: gross.to_f,
+                                    discount: 0.0,
+                                    ppn: ppn.to_f,
+                                    nett: nett.to_f,
+                                    transaction_date: self.delivery_date,
+                                    warehouse_id: self.order_booking.origin_warehouse_id,
+                                    activity: "Out"
+                                    },
+                                    {
+                                    coa_id: coa.id,
+                                    gross: gross.to_f,
+                                    gross_after_discount: gross.to_f,
+                                    discount: 0.0,
+                                    ppn: ppn.to_f,
+                                    nett: nett.to_f,
+                                    transaction_date: self.delivery_date,
+                                    warehouse_id: warehouse.id,
+                                    activity: "In"
+                                    }]
+                                )
+                                else
+                                  errors.add(:base, "Please create In Transit Warehouse First!")
+                                end
+                              end
+
+                              def delivery_order_receive_journal
+                                coa = Coa.find_by_transaction_type('DO')
+                                gross = self.get_gross_price
+                                ppn = gross.to_i * 10 /100
+                                nett = gross - ppn
+                                warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                if warehouse.present?
+                                  self.journals.create([
+                                    {
+                                      coa_id: coa.id,
+                                      gross: gross.to_f,
+                                      gross_after_discount: gross.to_f,
+                                      discount: 0.0,
+                                      ppn: ppn.to_f,
+                                      nett: nett.to_f,
+                                      transaction_date: self.received_date,
+                                      warehouse_id: warehouse.id,
+                                      activity: "Out"
+                                    },
+                                    {
+                                      coa_id: coa.id,
+                                      gross: gross.to_f,
+                                      gross_after_discount: gross.to_f,
+                                      discount: 0.0,
+                                      ppn: ppn.to_f,
+                                      nett: nett.to_f,
+                                      transaction_date: self.received_date,
+                                      warehouse_id: self.order_booking.destination_warehouse_id,
+                                      activity: "In"
+                                    }]
+                                  )
+                                else
+                                  errors.add(:base, "Please create In Transit Warehouse First!")
+                                end
+                              end
+
+                              def check_in_transit_warehouse
+                                in_transit = Warehouse.where(warehouse_type: "in_transit").select("1 AS one")
+                                if !in_transit.present?
+                                  errors.add(:base, "Please create In Transit Warehouse First!")
+                                end
+                              end
+
+                              def self.get_product_details(id)
+                                Shipment.find_by_sql ["
+                                  SELECT product_details.id, SUM(shipment_product_items.quantity) AS quantity FROM shipments
+                                  INNER JOIN order_bookings ON order_bookings.id = shipments.order_booking_id
+                                  INNER JOIN warehouses ON warehouses.id = order_bookings.origin_warehouse_id
+                                  INNER JOIN shipment_products ON shipment_products.shipment_id = shipments.id
+                                  INNER JOIN shipment_product_items ON shipment_product_items.shipment_product_id = shipment_products.id
+                                  INNER JOIN order_booking_product_items ON order_booking_product_items.id = shipment_product_items.order_booking_product_item_id
+                                  INNER JOIN order_booking_products ON order_booking_products.id = shipment_products.order_booking_product_id
+                                  INNER JOIN products ON products.id = order_booking_products.product_id
+                                  INNER JOIN product_details ON product_details.product_id = products.id
+                                  WHERE (product_details.size_id = order_booking_product_items.size_id AND product_details.price_code_id = warehouses.price_code_id AND shipments.id = :id) GROUP BY product_details.id", {id: id}]
+                              end
+
+                              def update_journal_receive_date
+                                transit_warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                transit_journal = self.journals.where(warehouse_id: transit_warehouse.id, activity: "Out").first
+                                destination_journal = self.journals.where(warehouse_id: self.order_booking.destination_warehouse_id, activity: "In").first
+                                transit_journal.update(transaction_date: self.received_date) if transit_journal.present?
+                                destination_journal.update(transaction_date: self.received_date) if destination_journal.present?
+                              end
+
                               def create_listing_stock(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, shipment_product, shipment_product_item)
                                 transaction = Shipment.select(:delivery_order_number).where(id: shipment_product.shipment_id).first
                                 listing_stock = ListingStock.select(:id).where(warehouse_id: warehouse_id, product_id: product_id).first
                                 listing_stock = ListingStock.new warehouse_id: warehouse_id, product_id: product_id if listing_stock.blank?
-                                if listing_stock.new_record?                    
+                                if listing_stock.new_record?
                                   listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id
                                   listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: shipment_product_item.id, transactionable_type: shipment_product_item.class.name, quantity: quantity
                                   listing_stock.save
@@ -108,7 +224,7 @@ class Shipment < ApplicationRecord
                                   end
                                 end
                               end
-                        
+
                               def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity)
                                 next_month_movements = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:id, :beginning_stock, :ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date >= ?", warehouse_id, product_id, color_id, size_id, transaction_date.next_month.beginning_of_month]).group(:id, :beginning_stock, :ending_stock)
                                 next_month_movements.each do |next_month_movement|
@@ -116,15 +232,15 @@ class Shipment < ApplicationRecord
                                     next_month_movement.beginning_stock += quantity
                                     next_month_movement.ending_stock += quantity
                                     next_month_movement.save
-                                  end            
+                                  end
                                 end
 
                                 stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                 stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
-                                if stock_movement.new_record?                    
+                                if stock_movement.new_record?
                                   beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                   beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                  beginning_stock = 0 if beginning_stock.nil?                        
+                                  beginning_stock = 0 if beginning_stock.nil?
                                   stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
                                   stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                   stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
@@ -135,10 +251,10 @@ class Shipment < ApplicationRecord
                                 else
                                   stock_movement_month = stock_movement.stock_movement_months.select(:id).where(month: transaction_date.month).first
                                   stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month if stock_movement_month.blank?
-                                  if stock_movement_month.new_record?                      
+                                  if stock_movement_month.new_record?
                                     beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                     beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                    beginning_stock = 0 if beginning_stock.nil?                        
+                                    beginning_stock = 0 if beginning_stock.nil?
                                     stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                     stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                     stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
@@ -148,10 +264,10 @@ class Shipment < ApplicationRecord
                                   else
                                     stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select(:id).where(warehouse_id: warehouse_id).first
                                     stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
-                                    if stock_movement_warehouse.new_record?                        
+                                    if stock_movement_warehouse.new_record?
                                       beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                       beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                      beginning_stock = 0 if beginning_stock.nil?                        
+                                      beginning_stock = 0 if beginning_stock.nil?
                                       stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                       stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                         size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
@@ -160,10 +276,10 @@ class Shipment < ApplicationRecord
                                     else
                                       stock_movement_product = stock_movement_warehouse.stock_movement_products.select(:id).where(product_id: product_id).first
                                       stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
-                                      if stock_movement_product.new_record?                          
+                                      if stock_movement_product.new_record?
                                         beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                         beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                        beginning_stock = 0 if beginning_stock.nil?                        
+                                        beginning_stock = 0 if beginning_stock.nil?
                                         stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                           size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                         stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
@@ -174,13 +290,13 @@ class Shipment < ApplicationRecord
                                         if stock_movement_product_detail.blank?
                                           beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                           beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                          beginning_stock = 0 if beginning_stock.nil?                        
+                                          beginning_stock = 0 if beginning_stock.nil?
                                           stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                             size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                           stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
                                           stock_movement_product_detail.save
                                         else
-                                          stock_movement_product_detail.with_lock do                                      
+                                          stock_movement_product_detail.with_lock do
                                             stock_movement_product_detail.ending_stock += quantity
                                             stock_movement_product_detail.stock_movement_transactions.build delivery_order_quantity_received: quantity, transaction_date: transaction_date
                                             stock_movement_product_detail.save
@@ -191,7 +307,7 @@ class Shipment < ApplicationRecord
                                   end
                                 end
                               end
-                      
+
                               def transaction_open
                                 unless receiving_inventory
                                   if FiscalYear.joins(:fiscal_months).where(year: delivery_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[delivery_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
@@ -202,12 +318,12 @@ class Shipment < ApplicationRecord
                                   errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: received_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[received_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
                                 end
                               end
-                      
-                              def minimum_quantity                        
+
+                              def minimum_quantity
                                 errors.add(:base, "Shipment must have at least one item") if quantity == 0
                               end
-                    
-                              def load_goods_to_destination_warehouse
+
+                              def   load_goods_to_destination_warehouse
                                 destination_warehouse_id = if @order_booking.present?
                                   @order_booking.destination_warehouse_id
                                 else
@@ -253,7 +369,7 @@ class Shipment < ApplicationRecord
                                           color_id = shipment_product_item.order_booking_product_item.color_id
                                           stock_detail = stock_product.stock_details.select{|stock_detail| stock_detail.size_id == size_id && stock_detail.color_id == color_id}.first
                                           stock_detail = stock_product.stock_details.build size_id: size_id, color_id: color_id, quantity: shipment_product_item.quantity if stock_detail.blank?
-                                          if stock_detail.new_record?                                      
+                                          if stock_detail.new_record?
                                             create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity)
                                             create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, shipment_product_item.quantity, shipment_product, shipment_product_item)
                                             stock_detail.save
@@ -271,7 +387,7 @@ class Shipment < ApplicationRecord
                                   end
                                 end
                               end
-                  
+
                               def empty_in_transit_warehouse
                                 shipment_products.select(:id).each do |shipment_product|
                                   shipment_product.shipment_product_items.select(:order_booking_product_item_id).each do |shipment_product_item|
@@ -282,19 +398,19 @@ class Shipment < ApplicationRecord
                                   end
                                 end
                               end
-                  
+
                               def shipment_receivable
                                 errors.add(:base, "Sorry, inventory #{delivery_order_number} is already received") if received_date_was.present?
                               end
-      
-                              def order_booking_not_changed        
+
+                              def order_booking_not_changed
                                 errors.add(:order_booking_id, "cannot be changed")
                               end
-      
+
                               def editable
                                 errors.add(:base, "The record cannot be edited") if received_date.present? && !is_document_printed_changed?
                               end
-      
+
                               def notify_store
                                 destination_warehouse = if @destination_warehouse.present?
                                   @destination_warehouse
@@ -307,28 +423,28 @@ class Shipment < ApplicationRecord
                                 end
                                 notification.save
                               end
-      
+
                               def delete_tracks
                                 audits.destroy_all
                               end
-  
+
                               def set_ob_status_to_p
                                 order_booking.without_auditing do
                                   order_booking.update_attribute :status, "P"
                                 end
                               end
-      
+
                               def deletable
                                 if received_date.present? || is_document_printed
                                   errors.add(:base, "The record cannot be deleted")
                                   throw :abort
-                                end 
+                                end
                               end
-    
+
                               def courier_available
                                 errors.add(:courier_id, "does not exist!") if (new_record? || (courier_id_changed? && persisted?)) && courier_id.present? && Courier.where(id: courier_id).select("1 AS one").blank?
                               end
-    
+
                               def order_booking_available
                                 if (new_record? || (order_booking_id_changed? && persisted?)) && order_booking_id.present?
                                   is_ob_printed = if @order_booking.present?
@@ -339,34 +455,34 @@ class Shipment < ApplicationRecord
                                   errors.add(:order_booking_id, "does not exist!") unless is_ob_printed
                                 end
                               end
-  
+
                               def child_blank(attributed)
-                                attributed[:shipment_product_items_attributes].each do |key, value| 
+                                attributed[:shipment_product_items_attributes].each do |key, value|
                                   return false if value[:quantity].present?
                                 end
-      
+
                                 return true
                               end
-    
+
                               #      def check_min_quantity
                               #        if new_record?
                               #          errors.add(:base, "Shipment must have at least one piece of product") if shipment_products.blank?
                               #        end
                               #      end
-    
+
                               def generate_do_number
                                 destination_warehouse_id = if @order_booking.present?
                                   @order_booking.destination_warehouse_id
                                 else
                                   order_booking.destination_warehouse_id
                                 end
-                          
+
                                 full_warehouse_code = if @destination_warehouse.present?
                                   @destination_warehouse.code
                                 else
                                   Warehouse.select(:code).where(id: destination_warehouse_id, is_active: true).first.code
                                 end
-                          
+
                                 warehouse_code = full_warehouse_code.split("-")[0]
                                 today = Date.current
                                 current_month = today.month.to_s.rjust(2, '0')
@@ -388,7 +504,7 @@ class Shipment < ApplicationRecord
                                       seq_number = existed_number.delivery_order_number.split("#{warehouse_code}SJ#{current_month}#{current_year}").last
                                       if seq_number.to_i > 1 && index == 0
                                         new_number = "#{warehouse_code}SJ#{current_month}#{current_year}0001"
-                                        break                              
+                                        break
                                       elsif last_seq_number.eql?("")
                                         last_seq_number = seq_number
                                       elsif (seq_number.to_i - last_seq_number.to_i) > 1
@@ -400,18 +516,18 @@ class Shipment < ApplicationRecord
                                         last_seq_number = seq_number
                                       end
                                     end
-                                  end                        
+                                  end
                                 end
 
                                 self.delivery_order_number = new_number
                               end
-    
+
                               def finish_ob
                                 order_booking.without_auditing do
                                   order_booking.update_attribute :status, "F"
                                 end
                               end
-                              
+
                               def delete_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity)
                                 created_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date = ? AND delivery_order_quantity_received = ?", product_id, color_id, size_id, warehouse_id, transaction_date, quantity]).select(:id, :stock_movement_product_detail_id).first
                                 if created_movement
@@ -428,9 +544,9 @@ class Shipment < ApplicationRecord
                                       else
                                         stock_movement_product_detail.beginning_stock -= quantity
                                         stock_movement_product_detail.ending_stock -= quantity
-                                      end      
+                                      end
                                       stock_movement_product_detail.save
-                                    end            
+                                    end
                                   end
                                   created_movement.destroy unless stock_movement_product_detail_deleted
                                 end

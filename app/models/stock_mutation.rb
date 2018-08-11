@@ -1,6 +1,6 @@
 class StockMutation < ApplicationRecord
   attr_accessor :mutation_type, :approving_mutation, :receiving_inventory_to_store, :receiving_inventory_to_warehouse, :product_code, :attr_change_receive_date
-  
+
   audited on: [:create, :update]
   has_associated_audits
 
@@ -8,6 +8,7 @@ class StockMutation < ApplicationRecord
   belongs_to :origin_warehouse, class_name: "Warehouse", foreign_key: :origin_warehouse_id
   belongs_to :destination_warehouse, class_name: "Warehouse", foreign_key: :destination_warehouse_id
   has_many :stock_mutation_products, dependent: :destroy
+  has_many :journals, :as => :transactionable
 
   accepts_nested_attributes_for :stock_mutation_products, allow_destroy: true
 
@@ -32,14 +33,28 @@ class StockMutation < ApplicationRecord
                             before_update :set_is_receive_date_changed, :change_listing_stock_transaction_date, if: proc{|sm| sm.attr_change_receive_date}
                               before_update :delete_old_products, if: proc{|sm| sm.mutation_type.eql?("store to store") && sm.origin_warehouse_id_changed? && sm.persisted?}
                                 after_create :notify_origin_store, :notify_destination_store, unless: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
-                                  after_create :notify_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
+                                  after_create :notify_warehouse, :stock_mutation_journal, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
                                     after_update :notify_new_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                                       after_update :notify_new_destination_store, if: proc {|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                                         after_update :update_stock, if: proc {|sm| sm.approving_mutation}
-                                          after_update :load_goods_to_destination_warehouse, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
+                                          after_update :load_goods_to_destination_warehouse,:stock_mutation_receive_journal , if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
+
+                                          def get_gross_price
+                                            product_details = StockMutation.get_product_details(self.id,self.origin_warehouse.price_code_id)
+                                            gross = 0
+                                            product_details.each do |pd|
+                                              product_detail = ProductDetail.find(pd.id)
+                                              if product_detail.present?
+                                                gross = gross + (product_detail.active_price.price.to_i * pd.quantity)
+                                              else
+                                                return nil
+                                              end
+                                            end
+                                            return gross
+                                          end
 
                                             private
-                                            
+
                                             def delete_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity)
                                               created_movement = StockMovementTransaction.joins(stock_movement_product_detail: [stock_movement_product: [stock_movement_warehouse: [stock_movement_month: :stock_movement]]]).where(["stock_movement_products.product_id = ? AND stock_movement_product_details.color_id = ? AND stock_movement_product_details.size_id = ? AND stock_movement_warehouses.warehouse_id = ? AND transaction_date = ? AND stock_transfer_quantity_received = ?", product_id, color_id, size_id, warehouse_id, transaction_date, quantity]).select(:id, :stock_movement_product_detail_id).first
                                               if created_movement
@@ -56,14 +71,14 @@ class StockMutation < ApplicationRecord
                                                     else
                                                       stock_movement_product_detail.beginning_stock -= quantity
                                                       stock_movement_product_detail.ending_stock -= quantity
-                                                    end      
+                                                    end
                                                     stock_movement_product_detail.save
-                                                  end            
+                                                  end
                                                 end
                                                 created_movement.destroy unless stock_movement_product_detail_deleted
                                               end
                                             end
-                                            
+
                                             def change_listing_stock_transaction_date
                                               if received_date != received_date_was
                                                 warehouse_id = destination_warehouse_id
@@ -74,7 +89,7 @@ class StockMutation < ApplicationRecord
                                                       listing_stock_transaction.with_lock do
                                                         listing_stock_transaction.transaction_date = received_date
                                                         listing_stock_transaction.save
-                                                      end     
+                                                      end
                                                       delete_stock_movement(stock_mutation_product.product_id, stock_mutation_product_item.color_id, stock_mutation_product_item.size_id, warehouse_id, received_date_was, stock_mutation_product_item.quantity)
                                                       create_stock_movement(stock_mutation_product.product_id, stock_mutation_product_item.color_id, stock_mutation_product_item.size_id, warehouse_id, received_date, stock_mutation_product_item.quantity, "receiving stock transfer")
                                                     end
@@ -89,6 +104,89 @@ class StockMutation < ApplicationRecord
                                               end
                                             end
 
+                                            def self.get_product_details(id, price_code)
+                                              StockMutation.find_by_sql [
+                                                "SELECT product_details.id, SUM(stock_mutation_product_items.quantity) AS quantity FROM stock_mutations
+                                                INNER JOIN stock_mutation_products ON stock_mutation_products.stock_mutation_id = stock_mutations.id
+                                                INNER JOIN stock_mutation_product_items ON stock_mutation_product_items.stock_mutation_product_id = stock_mutation_products.id
+                                                INNER JOIN products ON products.id = stock_mutation_products.product_id
+                                                INNER JOIN product_details ON product_details.product_id = products.id
+                                                WHERE (product_details.size_id = stock_mutation_product_items.size_id AND product_details.price_code_id = :price_code AND stock_mutations.id = :id) GROUP BY product_details.id", {id: id, price_code: price_code}
+                                              ]
+                                            end
+
+                                            def stock_mutation_journal
+                                              coa = Coa.find_by_transaction_type('RW')
+                                              gross = self.get_gross_price
+                                              ppn = gross.to_i * 10 /100
+                                              nett = gross - ppn
+                                              warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                              if warehouse.present?
+                                                self.journals.create([
+                                                {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: self.origin_warehouse_id,
+                                                  activity: "Out"
+                                                  },
+                                                  {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: warehouse.id,
+                                                  activity: "In"
+                                                  }]
+                                              )
+                                              else
+                                                errors.add(:base, "Please create In Transit Warehouse First!")
+                                              end
+                                            end
+
+                                            def stock_mutation_receive_journal
+                                              coa = Coa.find_by_transaction_type('RW')
+                                              gross = self.get_gross_price
+                                              ppn = gross.to_i * 10 /100
+                                              nett = gross - ppn
+                                              warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                              if warehouse.present?
+                                                self.journals.create([
+                                                {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: self.destination_warehouse_id,
+                                                  activity: "In"
+                                                  },
+                                                  {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: warehouse.id,
+                                                  activity: "Out"
+                                                  }]
+                                                )
+                                              else
+                                                errors.add(:base, "Please create In Transit Warehouse First!")
+                                              end
+                                            end
+
                                             def receive_date_not_changed
                                               if is_receive_date_changed_was
                                                 errors.add(:base, "Sorry, receive date is already changed")
@@ -100,15 +198,15 @@ class StockMutation < ApplicationRecord
                                             def new_received_date_valid
                                               errors.add(:base, "Receive date must be before or equal to #{received_date_was.strftime("%d/%m/%Y")}") if received_date_was.present? && received_date > received_date_was
                                             end
-                                        
+
                                             def delete_old_products
                                               stock_mutation_products.select(:id).destroy_all
                                             end
-                                    
+
                                             def create_listing_stock(product_id, color_id, size_id, warehouse_id, transaction_date, stock_mutation_product_item, mutation_type="RW")
                                               listing_stock = ListingStock.select(:id).where(warehouse_id: warehouse_id, product_id: product_id).first
                                               listing_stock = ListingStock.new warehouse_id: warehouse_id, product_id: product_id if listing_stock.blank?
-                                              if listing_stock.new_record?                    
+                                              if listing_stock.new_record?
                                                 listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id
                                                 listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_date, transaction_number: number, transaction_type: mutation_type, transactionable_id: stock_mutation_product_item.id, transactionable_type: stock_mutation_product_item.class.name, quantity: stock_mutation_product_item.quantity
                                                 listing_stock.save
@@ -124,7 +222,7 @@ class StockMutation < ApplicationRecord
                                                 end
                                               end
                                             end
-                                    
+
                                             def create_stock_movement(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, transaction_type = "return to warehouse")
                                               next_month_movements = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:id, :beginning_stock, :ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date >= ?", warehouse_id, product_id, color_id, size_id, transaction_date.next_month.beginning_of_month]).group(:id, :beginning_stock, :ending_stock)
                                               next_month_movements.each do |next_month_movement|
@@ -137,12 +235,12 @@ class StockMutation < ApplicationRecord
                                                     next_month_movement.ending_stock -= quantity
                                                   end
                                                   next_month_movement.save
-                                                end            
-                                              end            
-                                      
+                                                end
+                                              end
+
                                               stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                               stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
-                                              if stock_movement.new_record?                    
+                                              if stock_movement.new_record?
                                                 stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
                                                 stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                                 stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
@@ -154,11 +252,11 @@ class StockMutation < ApplicationRecord
                                                   end
                                                   stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                     size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock - quantity)
-                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date                                        
+                                                  stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
                                                 else
                                                   beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                   beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                                  beginning_stock = 0 if beginning_stock.nil?                        
+                                                  beginning_stock = 0 if beginning_stock.nil?
                                                   stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                     size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                                   if transaction_type.eql?("receiving stock transfer")
@@ -171,7 +269,7 @@ class StockMutation < ApplicationRecord
                                               else
                                                 stock_movement_month = stock_movement.stock_movement_months.select(:id).where(month: transaction_date.month).first
                                                 stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month if stock_movement_month.blank?
-                                                if stock_movement_month.new_record?                      
+                                                if stock_movement_month.new_record?
                                                   stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                                   stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                                   if transaction_type.eql?("stock transfer")
@@ -186,7 +284,7 @@ class StockMutation < ApplicationRecord
                                                   else
                                                     beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                     beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                                    beginning_stock = 0 if beginning_stock.nil?                        
+                                                    beginning_stock = 0 if beginning_stock.nil?
                                                     stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                       size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                                     if transaction_type.eql?("receiving stock transfer")
@@ -199,7 +297,7 @@ class StockMutation < ApplicationRecord
                                                 else
                                                   stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select(:id).where(warehouse_id: warehouse_id).first
                                                   stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
-                                                  if stock_movement_warehouse.new_record?                        
+                                                  if stock_movement_warehouse.new_record?
                                                     stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                                     if transaction_type.eql?("stock transfer")
                                                       beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
@@ -213,7 +311,7 @@ class StockMutation < ApplicationRecord
                                                     else
                                                       beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                       beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                                      beginning_stock = 0 if beginning_stock.nil?                        
+                                                      beginning_stock = 0 if beginning_stock.nil?
                                                       stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                         size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                                       if transaction_type.eql?("receiving stock transfer")
@@ -226,7 +324,7 @@ class StockMutation < ApplicationRecord
                                                   else
                                                     stock_movement_product = stock_movement_warehouse.stock_movement_products.select(:id).where(product_id: product_id).first
                                                     stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
-                                                    if stock_movement_product.new_record?                          
+                                                    if stock_movement_product.new_record?
                                                       if transaction_type.eql?("stock transfer")
                                                         beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                         beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
@@ -239,7 +337,7 @@ class StockMutation < ApplicationRecord
                                                       else
                                                         beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                         beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                                        beginning_stock = 0 if beginning_stock.nil?                        
+                                                        beginning_stock = 0 if beginning_stock.nil?
                                                         stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                           size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                                         if transaction_type.eql?("receiving stock transfer")
@@ -265,7 +363,7 @@ class StockMutation < ApplicationRecord
                                                         else
                                                           beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                           beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
-                                                          beginning_stock = 0 if beginning_stock.nil?                        
+                                                          beginning_stock = 0 if beginning_stock.nil?
                                                           stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: color_id,
                                                             size_id: size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + quantity)
                                                           if transaction_type.eql?("receiving stock transfer")
@@ -278,13 +376,13 @@ class StockMutation < ApplicationRecord
                                                       else
                                                         stock_movement_product_detail.with_lock do
                                                           if transaction_type.eql?("stock transfer")
-                                                            stock_movement_product_detail.ending_stock -= quantity                                                    
+                                                            stock_movement_product_detail.ending_stock -= quantity
                                                             stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_delivered: quantity, transaction_date: transaction_date
                                                           elsif transaction_type.eql?("receiving stock transfer")
-                                                            stock_movement_product_detail.ending_stock += quantity                                                    
+                                                            stock_movement_product_detail.ending_stock += quantity
                                                             stock_movement_product_detail.stock_movement_transactions.build stock_transfer_quantity_received: quantity, transaction_date: transaction_date
                                                           else
-                                                            stock_movement_product_detail.ending_stock += quantity                                                    
+                                                            stock_movement_product_detail.ending_stock += quantity
                                                             stock_movement_product_detail.stock_movement_transactions.build stock_return_quantity_received: quantity, transaction_date: transaction_date
                                                           end
                                                           stock_movement_product_detail.save
@@ -295,7 +393,7 @@ class StockMutation < ApplicationRecord
                                                 end
                                               end
                                             end
-                                    
+
                                             def transaction_open
                                               if receiving_inventory_to_store || receiving_inventory_to_warehouse || attr_change_receive_date
                                                 errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: received_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[received_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
@@ -308,7 +406,7 @@ class StockMutation < ApplicationRecord
                                                 end
                                               end
                                             end
-                              
+
                                             def load_goods_to_destination_warehouse
                                               stock = Stock.select(:id).where(warehouse_id: destination_warehouse_id).first
                                               stock = Stock.new warehouse_id: destination_warehouse_id if stock.blank?
@@ -327,7 +425,7 @@ class StockMutation < ApplicationRecord
                                                       else
                                                         create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                                         create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item)
-                                                      end                                              
+                                                      end
                                                     end
                                                   end
                                                 end
@@ -349,7 +447,7 @@ class StockMutation < ApplicationRecord
                                                         else
                                                           create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                                           create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item)
-                                                        end                                              
+                                                        end
                                                       end
                                                     end
                                                     stock_product.save
@@ -367,7 +465,7 @@ class StockMutation < ApplicationRecord
                                                           else
                                                             create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                                             create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item)
-                                                          end                                              
+                                                          end
                                                           stock_detail.save
                                                         else
                                                           stock_detail.with_lock do
@@ -380,7 +478,7 @@ class StockMutation < ApplicationRecord
                                                           else
                                                             create_stock_movement(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item.quantity)
                                                             create_listing_stock(product_id, color_id, size_id, destination_warehouse_id, received_date, stock_mutation_product_item)
-                                                          end                                              
+                                                          end
                                                         end
                                                       end
                                                     end
@@ -388,11 +486,11 @@ class StockMutation < ApplicationRecord
                                                 end
                                               end
                                             end
-                            
+
                                             def shipment_receivable
                                               errors.add(:base, "Sorry, inventory #{number} is already received") if received_date_was.present?
                                             end
-                  
+
                                             def update_stock
                                               raise_error = false
                                               stock_mutation_products.select(:id, :product_id).each do |stock_mutation_product|
@@ -417,7 +515,7 @@ class StockMutation < ApplicationRecord
                                                 end
                                               end
                                             end
-              
+
                                             def approvable
                                               if approved_date_was.present?
                                                 errors.add(:base, "Sorry, stock mutation #{number} is already approved")
@@ -425,18 +523,18 @@ class StockMutation < ApplicationRecord
                                                 errors.add(:base, "Sorry, stock mutation #{number} is not approvable")
                                               end
                                             end
-            
+
                                             def prevent_delete_if_mutation_approved
                                               if approved_date.present? || received_date.present?
-                                                errors.add(:base, "Sorry, stock mutation #{number} cannot be deleted")                                  
+                                                errors.add(:base, "Sorry, stock mutation #{number} cannot be deleted")
                                                 throw :abort
                                               end
                                             end
-            
+
                                             def editable
                                               errors.add(:base, "The record cannot be edited") if approved_date.present? || received_date.present?
                                             end
-          
+
                                             def apologize_to_previous_destination_store
                                               notification = Notification.new(event: "New Notification", body: "Sorry, stock mutation #{number} has been cancelled", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
                                               destination_warehouse = Warehouse.where(id: destination_warehouse_id_was).select(:id).first
@@ -445,7 +543,7 @@ class StockMutation < ApplicationRecord
                                               end
                                               notification.save
                                             end
-  
+
                                             def notify_origin_store
                                               notification = Notification.new(event: "New Notification", body: "Please send #{destination_warehouse.name} a stock mutation #{number}", user_id: audits.where(action: "create").select(:user_id, :user_type).first.user.id)
                                               origin_warehouse.sales_promotion_girls.joins(:user).select("users.id AS user_id").each do |sales_promotion_girl|
@@ -477,7 +575,7 @@ class StockMutation < ApplicationRecord
                                               end
                                               notification.save
                                             end
-              
+
                                             def notify_new_warehouse
                                               notification = Notification.new(event: "New Notification", body: "Stock Mutation #{number} will arrive soon", user_id: audits.where(action: "update").select(:user_id, :user_type).first.user.id)
                                               User.joins(:roles).where("roles.name = 'staff' OR roles.name = 'manager' OR roles.name = 'accountant'").select(:id).each do |user|
@@ -485,11 +583,11 @@ class StockMutation < ApplicationRecord
                                               end
                                               notification.save
                                             end
-    
+
                                             def delete_tracks
                                               audits.destroy_all
                                             end
-    
+
                                             def courier_available
                                               errors.add(:courier_id, "does not exist!") if courier_id.present? && Courier.where(id: courier_id).select("1 AS one").blank?
                                             end
@@ -505,14 +603,14 @@ class StockMutation < ApplicationRecord
                                                 errors.add(:destination_warehouse_id, "does not exist!")
                                               end
                                             end
-    
+
                                             def generate_number
                                               number_id = if mutation_type.eql?("store to warehouse")
                                                 "RW"
                                               else
                                                 "RGO"
                                               end
-          
+
                                               full_warehouse_code = Warehouse.select(:code).where(id: origin_warehouse_id).first.code
                                               warehouse_code = full_warehouse_code.split("-")[0]
                                               today = Date.current
@@ -535,7 +633,7 @@ class StockMutation < ApplicationRecord
                                                     seq_number = existed_number.number.split("#{warehouse_code}#{number_id}#{current_month}#{current_year}").last
                                                     if seq_number.to_i > 1 && index == 0
                                                       new_number = "#{warehouse_code}#{number_id}#{current_month}#{current_year}0001"
-                                                      break                              
+                                                      break
                                                     elsif last_seq_number.eql?("")
                                                       last_seq_number = seq_number
                                                     elsif (seq_number.to_i - last_seq_number.to_i) > 1
@@ -547,7 +645,7 @@ class StockMutation < ApplicationRecord
                                                       last_seq_number = seq_number
                                                     end
                                                   end
-                                                end                        
+                                                end
                                               end
 
                                               self.number = new_number

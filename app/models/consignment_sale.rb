@@ -21,7 +21,7 @@ class ConsignmentSale < ApplicationRecord
             before_create :yesterday_transaction_exist, unless: proc{|cs| cs.no_sale}
               before_destroy :record_not_deleted, :delete_tracks
               after_update :update_stock_and_afs, unless: proc{|cs| cs.attr_delete_products}
-                after_update :consignment_sale_journal
+                after_update :consignment_sale_journal, unless: proc{|cs| cs.no_sale}
                 after_update :create_listing_stock, if: proc{|cs| !cs.approved_was && cs.approved && !cs.attr_delete_products}
                   after_update :delete_listing_stock, :delete_stock_movement, if: proc{|cs| cs.approved_was && !cs.approved && !cs.attr_delete_products}
 
@@ -215,7 +215,9 @@ class ConsignmentSale < ApplicationRecord
                           discount: discount.to_f,
                           ppn: ppn.to_f,
                           nett: nett.to_f,
-                          transaction_date: self.transaction_date
+                          transaction_date: self.transaction_date,
+                          activity: nil,
+                          warehouse_id: self.warehouse_id
                         )
                         journal.save
                       elsif approved_was && !approved

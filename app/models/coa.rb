@@ -3,7 +3,9 @@ class Coa < ApplicationRecord
   validates :code, :name, :transaction_type, presence: true
   validate :code_not_changed, :transaction_type_not_changed, :transaction_type_available
   has_many :coa_departments, dependent: :restrict_with_error
+  has_many :journals, dependent: :restrict_with_error
   has_one :coa_department_relation, -> {select("1 AS one")}, class_name: "CoaDepartment"
+  has_one :journal_relation, -> {select("1 AS one")}, class_name: "Journal"
   before_validation :upcase_code
   before_destroy :delete_tracks
 
@@ -64,11 +66,11 @@ class Coa < ApplicationRecord
   end
 
   def code_not_changed
-    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && coa_department_relation.present?
+    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && coa_department_relation.present?  && journal_relation.present?
   end
 
   def transaction_type_not_changed
-    errors.add(:transaction_type, "change is not allowed!") if transaction_type_changed? && persisted? && coa_department_relation.present?
+    errors.add(:transaction_type, "change is not allowed!") if transaction_type_changed? && persisted? && coa_department_relation.present? &&  journal_relation.present?
   end
 
 end
