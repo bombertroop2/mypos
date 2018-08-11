@@ -8,7 +8,9 @@ class WarehousesController < ApplicationController
   # GET /warehouses.json
   def index
     like_command = "ILIKE"
-    warehouses_scope = Warehouse.joins(:supervisor, :region).
+    warehouses_scope = Warehouse.
+      joins("LEFT JOIN supervisors ON supervisors.id = warehouses.supervisor_id").
+      joins("LEFT JOIN common_fields ON common_fields.id = warehouses.region_id AND common_fields.type IN ('Region')").
       select("warehouses.id, warehouses.code, warehouses.name, supervisors.name AS supervisor_name, common_fields.code AS region_code, warehouse_type")
     warehouses_scope = warehouses_scope.where(["warehouses.code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(warehouses_scope.where(["warehouses.name #{like_command} ?", "%"+params[:filter]+"%"])).
@@ -43,8 +45,13 @@ class WarehousesController < ApplicationController
     
     begin
       if @created = @warehouse.save
-        @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
-        @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+        unless @warehouse.warehouse_type.eql?("in_transit")
+          @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
+          @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+        else
+          @new_supervisor_name = nil
+          @new_region_code = nil
+        end
       else
         splitted_code = @warehouse.code.split("-")
         first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
@@ -69,14 +76,19 @@ class WarehousesController < ApplicationController
       supervisor_id_was = @warehouse.supervisor_id_was
       region_id_was = @warehouse.region_id_was
       if @updated = @warehouse.update(warehouse_params)
-        #cek apakah supervisor diganti
-        unless supervisor_id_was.to_s.eql?(params[:warehouse][:supervisor_id])
-          @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
-        end
+        unless @warehouse.warehouse_type.eql?("in_transit")
+          #cek apakah supervisor diganti
+          unless supervisor_id_was.to_s.eql?(params[:warehouse][:supervisor_id])
+            @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
+          end
         
-        #cek apakah region diganti
-        unless region_id_was.to_s.eql?(params[:warehouse][:region_id])
-          @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+          #cek apakah region diganti
+          unless region_id_was.to_s.eql?(params[:warehouse][:region_id])
+            @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
+          end
+        else
+          @new_supervisor_name = nil
+          @new_region_code = nil
         end
       else
         splitted_code = @warehouse.code.split("-")
@@ -108,7 +120,11 @@ class WarehousesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_warehouse
-    @warehouse = Warehouse.joins(:supervisor, :region, :price_code).where(id: params[:id]).
+    @warehouse = Warehouse.
+      joins("LEFT JOIN supervisors ON supervisors.id = warehouses.supervisor_id").
+      joins("LEFT JOIN common_fields ON common_fields.id = warehouses.region_id AND common_fields.type IN ('Region')").
+      joins("LEFT JOIN common_fields price_codes_warehouses ON price_codes_warehouses.id = warehouses.price_code_id AND price_codes_warehouses.type IN ('PriceCode')").
+      where(id: params[:id]).
       select("warehouses.id, warehouses.code, warehouses.name, warehouses.address, is_active, supervisors.name AS supervisor_name, common_fields.code AS region_code, price_codes_warehouses.code AS price_code_code, warehouse_type, supervisor_id, region_id, price_code_id").
       select(:first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type).first
   end
