@@ -1,10 +1,7 @@
 Rails.application.routes.draw do
   resources :targets
-  resources :coa_departments
   get 'growth_reports/index'
 
-  resources :departments
-  resources :coas
   namespace :api, defaults: { format: :json } do
     resources :stock_mutations do
       collection do

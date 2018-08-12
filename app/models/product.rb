@@ -66,7 +66,7 @@ class Product < ApplicationRecord
 
   
   SEX = [
-    ["Man", "man"],
+    ["Men", "men"],
     ["Ladies", "ladies"],
     ["Kids", "kids"],
     ["Unisex", "unisex"]

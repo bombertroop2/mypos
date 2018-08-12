@@ -8,7 +8,6 @@ class StockMutation < ApplicationRecord
   belongs_to :origin_warehouse, class_name: "Warehouse", foreign_key: :origin_warehouse_id
   belongs_to :destination_warehouse, class_name: "Warehouse", foreign_key: :destination_warehouse_id
   has_many :stock_mutation_products, dependent: :destroy
-  has_many :journals, :as => :transactionable
 
   accepts_nested_attributes_for :stock_mutation_products, allow_destroy: true
 
@@ -33,25 +32,11 @@ class StockMutation < ApplicationRecord
                             before_update :set_is_receive_date_changed, :change_listing_stock_transaction_date, if: proc{|sm| sm.attr_change_receive_date}
                               before_update :delete_old_products, if: proc{|sm| sm.mutation_type.eql?("store to store") && sm.origin_warehouse_id_changed? && sm.persisted?}
                                 after_create :notify_origin_store, :notify_destination_store, unless: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
-                                  after_create :notify_warehouse, :stock_mutation_journal, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
+                                  after_create :notify_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
                                     after_update :notify_new_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                                       after_update :notify_new_destination_store, if: proc {|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                                         after_update :update_stock, if: proc {|sm| sm.approving_mutation}
-                                          after_update :load_goods_to_destination_warehouse,:stock_mutation_receive_journal , if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
-
-                                          def get_gross_price
-                                            product_details = StockMutation.get_product_details(self.id,self.origin_warehouse.price_code_id)
-                                            gross = 0
-                                            product_details.each do |pd|
-                                              product_detail = ProductDetail.find(pd.id)
-                                              if product_detail.present?
-                                                gross = gross + (product_detail.active_price.price.to_i * pd.quantity)
-                                              else
-                                                return nil
-                                              end
-                                            end
-                                            return gross
-                                          end
+                                          after_update :load_goods_to_destination_warehouse, if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
 
                                             private
 
@@ -101,89 +86,6 @@ class StockMutation < ApplicationRecord
                                             def set_is_receive_date_changed
                                               if received_date != received_date_was
                                                 self.is_receive_date_changed = true
-                                              end
-                                            end
-
-                                            def self.get_product_details(id, price_code)
-                                              StockMutation.find_by_sql [
-                                                "SELECT product_details.id, SUM(stock_mutation_product_items.quantity) AS quantity FROM stock_mutations
-                                                INNER JOIN stock_mutation_products ON stock_mutation_products.stock_mutation_id = stock_mutations.id
-                                                INNER JOIN stock_mutation_product_items ON stock_mutation_product_items.stock_mutation_product_id = stock_mutation_products.id
-                                                INNER JOIN products ON products.id = stock_mutation_products.product_id
-                                                INNER JOIN product_details ON product_details.product_id = products.id
-                                                WHERE (product_details.size_id = stock_mutation_product_items.size_id AND product_details.price_code_id = :price_code AND stock_mutations.id = :id) GROUP BY product_details.id", {id: id, price_code: price_code}
-                                              ]
-                                            end
-
-                                            def stock_mutation_journal
-                                              coa = Coa.find_by_transaction_type('RW')
-                                              gross = self.get_gross_price
-                                              ppn = gross.to_i * 10 /100
-                                              nett = gross - ppn
-                                              warehouse = Warehouse.find_by_warehouse_type("in_transit")
-                                              if warehouse.present?
-                                                self.journals.create([
-                                                {
-                                                  coa_id: coa.id,
-                                                  gross: gross.to_f,
-                                                  gross_after_discount: gross.to_f,
-                                                  discount: 0.0,
-                                                  ppn: ppn.to_f,
-                                                  nett: nett.to_f,
-                                                  transaction_date: self.delivery_date,
-                                                  warehouse_id: self.origin_warehouse_id,
-                                                  activity: "Out"
-                                                  },
-                                                  {
-                                                  coa_id: coa.id,
-                                                  gross: gross.to_f,
-                                                  gross_after_discount: gross.to_f,
-                                                  discount: 0.0,
-                                                  ppn: ppn.to_f,
-                                                  nett: nett.to_f,
-                                                  transaction_date: self.delivery_date,
-                                                  warehouse_id: warehouse.id,
-                                                  activity: "In"
-                                                  }]
-                                              )
-                                              else
-                                                errors.add(:base, "Please create In Transit Warehouse First!")
-                                              end
-                                            end
-
-                                            def stock_mutation_receive_journal
-                                              coa = Coa.find_by_transaction_type('RW')
-                                              gross = self.get_gross_price
-                                              ppn = gross.to_i * 10 /100
-                                              nett = gross - ppn
-                                              warehouse = Warehouse.find_by_warehouse_type("in_transit")
-                                              if warehouse.present?
-                                                self.journals.create([
-                                                {
-                                                  coa_id: coa.id,
-                                                  gross: gross.to_f,
-                                                  gross_after_discount: gross.to_f,
-                                                  discount: 0.0,
-                                                  ppn: ppn.to_f,
-                                                  nett: nett.to_f,
-                                                  transaction_date: self.delivery_date,
-                                                  warehouse_id: self.destination_warehouse_id,
-                                                  activity: "In"
-                                                  },
-                                                  {
-                                                  coa_id: coa.id,
-                                                  gross: gross.to_f,
-                                                  gross_after_discount: gross.to_f,
-                                                  discount: 0.0,
-                                                  ppn: ppn.to_f,
-                                                  nett: nett.to_f,
-                                                  transaction_date: self.delivery_date,
-                                                  warehouse_id: warehouse.id,
-                                                  activity: "Out"
-                                                  }]
-                                                )
-                                              else
-                                                errors.add(:base, "Please create In Transit Warehouse First!")
                                               end
                                             end
 

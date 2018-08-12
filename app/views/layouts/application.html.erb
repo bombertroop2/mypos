@@ -276,21 +276,6 @@
                                                   </ul>
                                               </li>
                                             <% end %>
-                                            <% if accounting_menu_active? %>
-                                              <li><a><i class="fa fa-cogs"></i> Accounting <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, Coa %>
-                                                        <li><%= link_to "Chart Of Accounts", coas_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Department %>
-                                                        <li><%= link_to "Departments", departments_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CoaDepartment %>
-                                                        <li><%= link_to "Company Departments", coa_departments_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
                                             <% if setting_menu_active? %>
                                               <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
                                                   <ul class="nav child_menu">
@@ -583,30 +568,6 @@
         <% end %>
       <% elsif controller_name.eql?("brands") %>
         <% if cannot?(:manage, Brand) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("coas") %>
-        <% if cannot?(:manage, Coa) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("departments") %>
-        <% if cannot?(:manage, Department)  %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("coa_departments") %>
-        <% if cannot?(:manage, CoaDepartment) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {
