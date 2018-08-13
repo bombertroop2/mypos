@@ -36,8 +36,10 @@ class StockMutation < ApplicationRecord
                                   after_create :notify_warehouse, :stock_mutation_journal, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central")}
                                     after_update :notify_new_warehouse, if: proc {|sm| sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
                                       after_update :notify_new_destination_store, if: proc {|sm| !sm.destination_warehouse.warehouse_type.eql?("central") && sm.destination_warehouse_id_changed?}
-                                        after_update :update_stock, if: proc {|sm| sm.approving_mutation}
-                                          after_update :load_goods_to_destination_warehouse,:stock_mutation_receive_journal , if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
+                                        after_update :update_stock, :rolling_out_journal, if: proc {|sm| sm.approving_mutation}
+                                          after_update :load_goods_to_destination_warehouse , if: proc{|sm| sm.receiving_inventory_to_store || sm.receiving_inventory_to_warehouse}
+                                          after_update :stock_mutation_receive_journal, if: proc{|sm| sm.receiving_inventory_to_warehouse}
+                                          after_update :rolling_in_journal, if: proc{|sm| sm.receiving_inventory_to_store}
 
                                           def get_gross_price
                                             product_details = StockMutation.get_product_details(self.id,self.origin_warehouse.price_code_id)
@@ -167,8 +169,44 @@ class StockMutation < ApplicationRecord
                                                   ppn: ppn.to_f,
                                                   nett: nett.to_f,
                                                   transaction_date: self.delivery_date,
+                                                  warehouse_id: warehouse.id,
+                                                  activity: "Out"
+                                                },
+                                                {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
                                                   warehouse_id: self.destination_warehouse_id,
                                                   activity: "In"
+                                                  }]
+                                                )
+                                              else
+                                                errors.add(:base, "Please create In Transit Warehouse First!")
+                                              end
+                                            end
+
+                                            def rolling_out_journal
+                                              coa = Coa.find_by_transaction_type('RGO')
+                                              gross = self.get_gross_price
+                                              ppn = gross.to_i * 10 /100
+                                              nett = gross - ppn
+                                              warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                              if warehouse.present?
+                                                self.journals.create([
+                                                {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: self.origin_warehouse_id,
+                                                  activity: "Out"
                                                   },
                                                   {
                                                   coa_id: coa.id,
@@ -179,7 +217,43 @@ class StockMutation < ApplicationRecord
                                                   nett: nett.to_f,
                                                   transaction_date: self.delivery_date,
                                                   warehouse_id: warehouse.id,
+                                                  activity: "In"
+                                                  }]
+                                              )
+                                              else
+                                                errors.add(:base, "Please create In Transit Warehouse First!")
+                                              end
+                                            end
+
+                                            def rolling_in_journal
+                                              coa = Coa.find_by_transaction_type('RGI')
+                                              gross = self.get_gross_price
+                                              ppn = gross.to_i * 10 /100
+                                              nett = gross - ppn
+                                              warehouse = Warehouse.find_by_warehouse_type("in_transit")
+                                              if warehouse.present?
+                                                self.journals.create([
+                                                {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: warehouse.id,
                                                   activity: "Out"
+                                                },
+                                                {
+                                                  coa_id: coa.id,
+                                                  gross: gross.to_f,
+                                                  gross_after_discount: gross.to_f,
+                                                  discount: 0.0,
+                                                  ppn: ppn.to_f,
+                                                  nett: nett.to_f,
+                                                  transaction_date: self.delivery_date,
+                                                  warehouse_id: self.destination_warehouse_id,
+                                                  activity: "In"
                                                   }]
                                                 )
                                               else
