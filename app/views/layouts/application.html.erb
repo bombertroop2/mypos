@@ -39,6 +39,7 @@
         <%= stylesheet_link_tag 'application', media: 'all' %>
 <%#= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
         <%= csrf_meta_tags %>
+        <%= action_cable_meta_tag %>
     </head>
     <body class="<%= controller_name != 'sessions' ? "nav-md" : "login" %>">
         <% if controller_name != 'sessions' %>
