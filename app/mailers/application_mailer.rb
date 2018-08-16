@@ -1,6 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  company_code = Company.pluck(:code).first
-  default from: "admin@#{company_code}.com"
+  default from: "no-reply@transmart.com"
   layout 'mailer'
 end
 
