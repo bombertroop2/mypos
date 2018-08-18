@@ -1,0 +1,2 @@
+class JournalDetailBogo < ApplicationRecord
+end
