@@ -1,29 +1,30 @@
 class Sale < ApplicationRecord
   attr_accessor :warehouse_id, :cashier_id, :pay, :gift_event_gift_type,
     :gift_event_discount_amount, :attr_print_receipt, :attr_return_sale_products, :attr_total_returned
-  
+
   belongs_to :member
   belongs_to :bank
   belongs_to :cashier_opening
   belongs_to :gift_event_product, class_name: "StockDetail", foreign_key: :gift_event_product_id
   belongs_to :gift_event, class_name: "Event", foreign_key: :gift_event_id
   belongs_to :returned_document, class_name: "SalesReturn", foreign_key: :sales_return_id
-  
+
   has_many :sale_products, dependent: :destroy
   has_one :sales_return, dependent: :restrict_with_error
-  
+  has_one :journal, :as => :transactionable
+
   PAYMENT_METHODS = [
     ["Cash", "Cash"],
     ["Card", "Card"]
   ]
-  
+
   GIFT_OPTIONS = [
     ["Discount", "Discount"],
     ["Product", "Product"]
   ]
 
   accepts_nested_attributes_for :sale_products
-  
+
   before_validation :remove_card_details, if: proc{|sale| sale.payment_method.eql?("Cash")}
     before_validation :remove_cash_details, if: proc{|sale| sale.payment_method.eql?("Card")}
       before_validation :remove_gift_event_product, if: proc{|sale| sale.gift_event_gift_type.eql?("Discount")}
@@ -46,7 +47,7 @@ class Sale < ApplicationRecord
                               validates :gift_event_discount_amount, numericality: {greater_than: 0}, if: proc { |sp| sp.gift_event_gift_type.eql?("Discount") && sp.gift_event_id.present? && sp.gift_event_discount_amount.present? }
                                 validates :gift_event_product_id, presence: true, if: proc { |sp| sp.gift_event_gift_type.eql?("Product") && sp.gift_event_id.present? }
 
-                                  
+
                                   # validasi khusus untuk sales return
                                   validates :bank_id, presence: {message: "Bank can't be blank"}, if: proc{|sale| sale.payment_method.eql?("Card") && sale.attr_return_sale_products}
                                     validates :trace_number, presence: {message: "Trace number can't be blank"}, if: proc{|sale| sale.payment_method.eql?("Card") && sale.attr_return_sale_products}
@@ -59,39 +60,86 @@ class Sale < ApplicationRecord
                                               before_create :set_change, if: proc{|sale| sale.payment_method.eql?("Cash")}
                                                 before_create :strip_card_and_trace_number, if: proc{|sale| sale.payment_method.eql?("Card")}
                                                   after_create :update_stock, if: proc {|sale| sale.gift_event_product_id.present? && sale.gift_event_id.present? && sale.gift_event_gift_type.eql?("Product") && !sale.attr_return_sale_products}
-                                                    after_create :create_listing_stock
-  
+                                                    after_create :create_listing_stock, :point_of_sale_journal
+
+                                                    def journal_detail_gift
+                                                      pd =ProductDetail.where(product_id: self.gift_event_product.stock_product.product_id, size_id: self.gift_event_product.size_id, price_code_id: self.cashier_opening.warehouse.price_code_id).first
+                                                      product = self.gift_event_product.stock_product.product_id
+                                                      gross_price = pd.active_price.price.to_i
+                                                      discount = pd.active_price.price.to_i
+                                                      gross_after_discount = gross_price - discount
+                                                      ppn = gross_after_discount * 10 / 100
+                                                      nett = gross_after_discount - ppn
+                                                      journal.journal_detail_gifts.create(
+                                                        product_id: product,
+                                                        gross: gross_price,
+                                                        gross_after_discount: gross_after_discount,
+                                                        discount: discount,
+                                                        ppn: ppn,
+                                                        nett: nett
+                                                        )
+                                                    end
+
                                                     private
-                                                    
-                                                    def get_total_return                                                      
+
+                                                    def get_total_return
                                                       @total_return = SalesReturn.select(:total_return).where(id: sales_return_id).first.total_return
                                                     end
-                                                  
+
                                                     def payment_method_not_blank
                                                       total = sale_total - @total_return
                                                       if total > 0 && payment_method.strip.blank?
                                                         raise "Payment method can't be blank"
                                                       end
                                                     end
-                                                        
+
                                                     def cash_not_less_than_total
                                                       total = sale_total - @total_return
                                                       if cash < total
                                                         raise "Cash must be greater than or equal to #{total}"
                                                       end
                                                     end
-                                                                                                                          
+
                                                     def remove_gift_event_product
                                                       self.gift_event_product_id = nil
                                                     end
-                      
+
                                                     def gift_option_available
                                                       GIFT_OPTIONS.select{ |x| x[1] == gift_event_gift_type }.first.first
                                                     rescue
                                                       errors.add(:gift_event_gift_type, "does not exist!") if gift_event_gift_type.present?
                                                     end
 
-                  
+                                                    def point_of_sale_journal
+                                                      coa = Coa.find_by_transaction_type("POS")
+                                                      gross_price = self.sale_products.collect{|x| x.price_list.price.to_i }.sum
+                                                      discount = gross_price-self.total
+                                                      gross_after_discount = self.total
+                                                      ppn = gross_after_discount * 10 / 100
+                                                      nett = gross_after_discount - ppn
+                                                      warehouse = self.cashier_opening.warehouse.id
+                                                      journal = self.build_journal(
+                                                          coa_id: coa.id,
+                                                          gross: gross_price.to_f,
+                                                          gross_after_discount: self.total.to_f,
+                                                          discount: discount.to_f,
+                                                          ppn: ppn.to_f,
+                                                          nett: nett.to_f,
+                                                          transaction_date: self.transaction_time.to_date,
+                                                          activity: nil,
+                                                          warehouse_id: warehouse
+                                                        )
+                                                        if journal.save
+                                                          if self.gift_event_id.present? && self.gift_event_product_id.present?
+                                                            self.journal_detail_gift
+                                                          else
+                                                            self.sale_products.each do |sp|
+                                                              sp.point_of_sale_journal_details
+                                                            end
+                                                          end
+                                                        end
+                                                    end
+
                                                     def remove_card_details
                                                       self.bank_id = nil
                                                       self.trace_number = nil
@@ -102,12 +150,12 @@ class Sale < ApplicationRecord
                                                       self.cash = nil
                                                       self.change = nil
                                                     end
-              
+
                                                     def strip_card_and_trace_number
                                                       self.card_number = card_number.strip
                                                       self.trace_number = trace_number.strip
                                                     end
-            
+
                                                     def bank_available
                                                       if Bank.select("1 AS one").where(id: bank_id).blank?
                                                         unless attr_return_sale_products
@@ -117,20 +165,20 @@ class Sale < ApplicationRecord
                                                         end
                                                       end
                                                     end
-        
+
                                                     def transaction_after_beginning_stock_added
                                                       listing_stock_transaction = ListingStockTransaction.select(:transaction_date).where(transaction_type: "BS").first
                                                       errors.add(:base, "Sorry, you can't perform transaction on #{Date.current.strftime("%d/%m/%Y")}") if listing_stock_transaction.transaction_date > Date.current
                                                     end
-        
-                                                    def transaction_open                            
+
+                                                    def transaction_open
                                                       errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: Date.current.year).where("fiscal_months.month = '#{Date::MONTHNAMES[Date.current.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
                                                     end
-        
+
                                                     def set_cashier_opening_id
                                                       self.cashier_opening_id = @co.id
                                                     end
-        
+
                                                     def is_cashier_opened
                                                       @co = CashierOpening.joins(:warehouse).select(:id, :warehouse_id).where(warehouse_id: warehouse_id).where("closed_at IS NULL").where(["open_date = ? AND warehouses.is_active = ?", Date.current, true]).where("opened_by = #{cashier_id}").first
                                                       if @co.present?
@@ -139,7 +187,7 @@ class Sale < ApplicationRecord
                                                         errors.add(:base, "Please open the cashier first")
                                                       end
                                                     end
-      
+
                                                     def set_change
                                                       unless attr_return_sale_products
                                                         self.change = cash - total
@@ -147,11 +195,11 @@ class Sale < ApplicationRecord
                                                         self.change = cash - (total - @total_return)
                                                       end
                                                     end
-      
+
                                                     def sale_total
                                                       total
                                                     end
-      
+
                                                     def payment_method_available
                                                       PAYMENT_METHODS.select{ |x| x[1] == payment_method }.first.first
                                                     rescue
@@ -161,12 +209,12 @@ class Sale < ApplicationRecord
                                                         errors.add(:base, "Payment method does not exist!") if payment_method.present?
                                                       end
                                                     end
-    
+
                                                     def create_stock_movement(warehouse_id, product_id, color_id, size_id, transaction_date, quantity)
                                                       stock_movement = StockMovement.select(:id).where(year: transaction_date.year).first
                                                       stock_movement = StockMovement.new year: transaction_date.year if stock_movement.blank?
 
-                                                      if stock_movement.new_record?                    
+                                                      if stock_movement.new_record?
                                                         stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month
                                                         stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                                         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
@@ -182,7 +230,7 @@ class Sale < ApplicationRecord
                                                       else
                                                         stock_movement_month = stock_movement.stock_movement_months.select(:id).where(month: transaction_date.month).first
                                                         stock_movement_month = stock_movement.stock_movement_months.build month: transaction_date.month if stock_movement_month.blank?
-                                                        if stock_movement_month.new_record?                      
+                                                        if stock_movement_month.new_record?
                                                           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id
                                                           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                                           beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
@@ -197,7 +245,7 @@ class Sale < ApplicationRecord
                                                         else
                                                           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.select(:id).where(warehouse_id: warehouse_id).first
                                                           stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: warehouse_id if stock_movement_warehouse.blank?
-                                                          if stock_movement_warehouse.new_record?                        
+                                                          if stock_movement_warehouse.new_record?
                                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id
                                                             beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                             beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
@@ -211,7 +259,7 @@ class Sale < ApplicationRecord
                                                           else
                                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.select(:id).where(product_id: product_id).first
                                                             stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: product_id if stock_movement_product.blank?
-                                                            if stock_movement_product.new_record?                          
+                                                            if stock_movement_product.new_record?
                                                               beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", warehouse_id, product_id, color_id, size_id, transaction_date.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
                                                               beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", transaction_date.year, transaction_date.month, transaction_date.year, warehouse_id, product_id, color_id, size_id]).first.quantity rescue nil if beginning_stock.nil?
                                                               if beginning_stock.nil? || beginning_stock < 1
@@ -246,13 +294,13 @@ class Sale < ApplicationRecord
                                                         end
                                                       end
                                                     end
-    
+
                                                     def create_listing_stock
                                                       sale_products.joins(product_barcode: :product_color).joins("LEFT JOIN events ON sale_products.event_id = events.id").joins("LEFT JOIN stock_details ON sale_products.free_product_id = stock_details.id").select("sale_products.total, product_id, product_colors.color_id, product_barcodes.size_id, sale_products.quantity, events.event_type AS product_event_type, stock_details.size_id AS free_product_size_id, stock_details.color_id AS free_product_color_id, free_product_id").each do |sale_product|
                                                         # listing stock untuk item yang dibeli
                                                         listing_stock = ListingStock.select(:id).where(warehouse_id: @warehouse_id, product_id: sale_product.product_id).first
                                                         listing_stock = ListingStock.new warehouse_id: @warehouse_id, product_id: sale_product.product_id if listing_stock.blank?
-                                                        if listing_stock.new_record?                    
+                                                        if listing_stock.new_record?
                                                           listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: sale_product.color_id, size_id: sale_product.size_id
                                                           listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_time.to_date, transaction_number: transaction_number, transaction_type: "POS", transactionable_id: self.id, transactionable_type: self.class.name, quantity: sale_product.quantity
                                                           listing_stock.save
@@ -283,7 +331,7 @@ class Sale < ApplicationRecord
                                                           product_id = StockDetail.joins(:stock_product).select(:product_id).where(id: sale_product.free_product_id).first.product_id
                                                           listing_stock = ListingStock.select(:id).where(warehouse_id: @warehouse_id, product_id: product_id).first
                                                           listing_stock = ListingStock.new warehouse_id: @warehouse_id, product_id: product_id if listing_stock.blank?
-                                                          if listing_stock.new_record?                    
+                                                          if listing_stock.new_record?
                                                             listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: sale_product.free_product_color_id, size_id: sale_product.free_product_size_id
                                                             listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_time.to_date, transaction_number: transaction_number, transaction_type: "POS", transactionable_id: self.id, transactionable_type: self.class.name, quantity: sale_product.quantity
                                                             listing_stock.save
@@ -307,9 +355,9 @@ class Sale < ApplicationRecord
                                                             end
                                                           end
                                                           create_stock_movement(@warehouse_id, product_id, sale_product.free_product_color_id, sale_product.free_product_size_id, transaction_time.to_date, sale_product.quantity)
-                                                        end 
-                                                      end 
-                                    
+                                                        end
+                                                      end
+
                                                       # listing stock untuk produk gift event apabila ada
                                                       if gift_event_product_id.present? && gift_event_id.present? && gift_event_gift_type.eql?("Product")
                                                         product_id = @gift_product_id
@@ -317,7 +365,7 @@ class Sale < ApplicationRecord
                                                         size_id = @gift_size_id
                                                         listing_stock = ListingStock.select(:id).where(warehouse_id: @warehouse_id, product_id: product_id).first
                                                         listing_stock = ListingStock.new warehouse_id: @warehouse_id, product_id: product_id if listing_stock.blank?
-                                                        if listing_stock.new_record?                    
+                                                        if listing_stock.new_record?
                                                           listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: color_id, size_id: size_id
                                                           listing_stock_product_detail.listing_stock_transactions.build transaction_date: transaction_time.to_date, transaction_number: transaction_number, transaction_type: "POS", transactionable_id: self.id, transactionable_type: self.class.name, quantity: 1
                                                           listing_stock.save
@@ -343,11 +391,11 @@ class Sale < ApplicationRecord
                                                         create_stock_movement(@warehouse_id, product_id, color_id, size_id, transaction_time.to_date, 1)
                                                       end
                                                     end
-    
+
                                                     def set_transaction_time
                                                       self.transaction_time = Time.current
                                                     end
-    
+
                                                     def generate_transaction_number
                                                       warehouse = Warehouse.select(:id, :code).where(id: @warehouse_id).first
                                                       warehouse_code = warehouse.code.split("-")[0]
@@ -360,15 +408,15 @@ class Sale < ApplicationRecord
                                                       end
                                                       self.transaction_number = new_number
                                                     end
-  
+
                                                     def member_available
                                                       errors.add(:base, "Members not found") if Member.select("1 AS one").where(id: member_id).blank?
                                                     end
-    
+
                                                     def item_available
                                                       errors.add(:base, "Please insert at least one product per transaction!") if sale_products.blank?
                                                     end
-                                  
+
                                                     # update stock apabila ada barang yang keluar untuk GIFT event
                                                     def update_stock
                                                       stock_detail = StockDetail.joins(:stock_product).where(id: gift_event_product_id).select(:id, :color_id, :size_id, :quantity, :booked_quantity).select("stock_products.product_id").first
@@ -383,7 +431,7 @@ class Sale < ApplicationRecord
                                                         else
                                                           raise_error = true
                                                         end
-                                                      end          
+                                                      end
                                                       if raise_error
                                                         raise "Sorry, selected gift item is temporarily out of stock"
                                                       end
