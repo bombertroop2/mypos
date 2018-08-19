@@ -80,7 +80,7 @@ class SaleProduct < ApplicationRecord
                 raise "Sorry, product #{@barcode} is temporarily out of stock"
               else
                 if event_id.present? && event_type.eql?("Buy 1 Get 1 Free") && free_product_id.present?
-                  free_product_stock = StockDetail.where(id: free_product_id).select(:id, :quantity, :booked_quantity, :barcode).first
+                  free_product_stock = StockDetail.where(id: free_product_id).select(:id, :quantity, :booked_quantity).first
                   free_product_stock.with_lock do
                     if free_product_stock.quantity.to_i - free_product_stock.booked_quantity.to_i >= quantity
                       free_product_stock.quantity -= quantity
