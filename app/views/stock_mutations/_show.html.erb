@@ -1,7 +1,7 @@
 <% require 'barby'
 require 'barby/barcode/code_128'
 require 'barby/outputter/png_outputter'
-full_path = Rails.root.join("public", "stock_mutation_barcode.png")
+full_path = Rails.root.join("public", "stock_mutation_barcode_#{@stock_mutation.id}.png")
 barcode = Barby::Code128B.new(@stock_mutation.number)
 blob = Barby::PngOutputter.new(barcode).to_png
 #File.open(full_path, 'w') { |f| f.write barcode.to_png(:margin => 3, :xdim => 2, :height => 55) }
@@ -26,7 +26,7 @@ File.open(full_path, 'wb') { |f| f.write blob }
                         <td align="center" colspan="3"><%= @stock_mutation.number %></td>
                     </tr>
                     <tr>
-                        <td align="center" colspan="3"><%= image_tag "/stock_mutation_barcode.png", height: "100px" %></td>
+                        <td align="center" colspan="3"><%= image_tag "/stock_mutation_barcode_#{@stock_mutation.id}.png", height: "100px" %></td>
                     </tr>
                     <tr>
                         <td style="width: 50%" valign="top">
