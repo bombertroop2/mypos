@@ -83,6 +83,8 @@ gem 'activerecord-import'
 gem 'figaro'
 
 gem 'daemons'
+
+gem 'whenever', require: false
   
 group :development do
   gem 'net-ssh', '~> 4.2'
