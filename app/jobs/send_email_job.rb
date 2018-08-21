@@ -23,6 +23,8 @@ class SendEmailJob < ApplicationJob
       Email.sales_officers.each do |sales_officer_email|        
         DuosMailer.sales_general_summary_email(object, sales_officer_email.address).deliver
       end
+    else
+      DuosMailer.tes.deliver
     end
   end
 end

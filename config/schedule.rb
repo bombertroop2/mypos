@@ -18,6 +18,10 @@
 # end
 
 # Learn more: http://github.com/javan/whenever
-every :day, at: '12:00am' do
+#every :day, at: '12:00am' do
+#  rake "old_session:remove"
+#end
+
+every 5.minutes do
   rake "old_session:remove"
 end
