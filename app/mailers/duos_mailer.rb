@@ -1,11 +1,6 @@
 include AccountPayablesHelper
 include PurchaseReturnsHelper
 class DuosMailer < ApplicationMailer
-  def tes
-    mail to: "bombertroop@gmail.com", subject: "TES BROOO"
-  end
-  
-  
   def payment_email(account_payable, recipient)
     @account_payable = account_payable
     mail to: recipient, subject: "Account Payable Document"
