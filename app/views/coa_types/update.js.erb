@@ -1,0 +1,5 @@
+<% if @updated %>
+  <%= smart_listing_item :coa_types, :update, @coa_type, "coa_types/coa_type" %>
+<% else %>
+  <%= smart_listing_item :coa_types, :edit, @coa_type, "coa_types/form" %>
+<% end %>

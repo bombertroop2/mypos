@@ -16,6 +16,7 @@ class Ability
       cannot :manage, Coa
       cannot :manage, Department
       cannot :manage, CoaDepartment
+      cannot :manage, CoaType
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
@@ -242,6 +243,7 @@ class Ability
               can ability, Coa
               can ability, Department
               can ability, CoaDepartment
+              can ability, CoaType
             else
               can :read, class_name.gsub(/\s+/, "").constantize
             end

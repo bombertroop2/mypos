@@ -8,9 +8,11 @@ class CoasController < ApplicationController
   # GET /coas.json
   def index
     like_command = "ILIKE"
-    coas_scope = Coa.select(:id, :code, :name, :transaction_type, :description)
+    coas_scope = Coa.select(:id, :code, :name, :group, :coa_type_id, :transaction_type, :description)
     coas_scope = coas_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(coas_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(coas_scope.where(["group #{like_command} ?", "%"+params[:filter]+"%"])).
+      or(coas_scope.where(["coa_type_id #{like_command} ?", "%"+params[:filter]+"%"])).
       or(coas_scope.where(["transaction_type #{like_command} ?", "%"+params[:filter]+"%"])).
       or(coas_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @coas = smart_listing_create(:coas, coas_scope, partial: 'coas/listing', default_sort: {code: "asc"})
@@ -75,6 +77,6 @@ class CoasController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def coa_params
-      params.require(:coa).permit(:code, :name, :transaction_type, :description)
+      params.require(:coa).permit(:code, :name, :group, :coa_type_id, :transaction_type, :description)
     end
 end

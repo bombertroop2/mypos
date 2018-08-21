@@ -1,11 +1,12 @@
 class Coa < ApplicationRecord
   audited on: [:create, :update]
   validates :code, :name, :transaction_type, presence: true
-  validate :code_not_changed, :transaction_type_not_changed, :transaction_type_available
+  validate :code_not_changed, :transaction_type_not_changed, :transaction_type_available, :group_available, :coa_type_available
   has_many :coa_departments, dependent: :restrict_with_error
   has_many :journals, dependent: :restrict_with_error
   has_one :coa_department_relation, -> {select("1 AS one")}, class_name: "CoaDepartment"
   has_one :journal_relation, -> {select("1 AS one")}, class_name: "Journal"
+  belongs_to :coa_type
   before_validation :upcase_code
   before_destroy :delete_tracks
 
@@ -20,6 +21,18 @@ class Coa < ApplicationRecord
               ["POS - Point Of Sales", "POS"],
               ["RET - POS Return", "RET"],
               ["SLK - Consignment Sales", "SLK"]
+            ]
+
+GROUP = [
+              ["Aktiva Lancar", "aktiva_lancar"],
+              ["Aktiva Tidak Lancar", "aktiva_tidak_lancar"],
+              ["Passiva Lancar", "passiva_lancar"],
+              ["Passiva Tidak Lancar", "passiva_tidak_lancar"],
+              ["Ekuitas", "ekuitas"],
+              ["Penjualan", "penjualan"],
+              ["COGS", "cogs"],
+              ["Pendapatan Lain-Lain", "pendapatan_lain_lain"],
+              ["Biaya Lain-Lain", "biaya_lain_lain"]
             ]
 
   def transaction_type_detail
@@ -63,6 +76,16 @@ class Coa < ApplicationRecord
     Coa::TRANSACTION_TYPE.select{ |x| x[1] == transaction_type }.first.first
   rescue
     errors.add(:transaction_type, "does not exist!") if transaction_type.present?
+  end
+
+  def group_available
+    Coa::GROUP.select{ |x| x[1] == group }.first.first
+  rescue
+    errors.add(:group, "does not exist!") if group.present?
+  end
+
+  def coa_type_available
+    errors.add(:coa_type_id, "does not exist!") if coa_type_id_changed? && CoaType.select("1 AS one").where(:id => coa_type_id).blank?
   end
 
   def code_not_changed

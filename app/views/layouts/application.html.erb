@@ -279,6 +279,9 @@
                                             <% if accounting_menu_active? %>
                                               <li><a><i class="fa fa-cogs"></i> Accounting <span class="fa fa-chevron-down"></span></a>
                                                   <ul class="nav child_menu">
+                                                      <% if can? :read, CoaType %>
+                                                        <li><%= link_to "Chart Of Accounts Type", coa_types_path, method: :get %></li>
+                                                      <% end %>
                                                       <% if can? :read, Coa %>
                                                         <li><%= link_to "Chart Of Accounts", coas_path, method: :get %></li>
                                                       <% end %>

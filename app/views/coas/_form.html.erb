@@ -1,4 +1,4 @@
-<td colspan="4">
+<td colspan="6">
   <div style="padding-top: 20px"></div>
   <%= form_for(@coa, remote: true, html: {class: "form-horizontal"}) do |f| %>
       <div class="form-group<%= control_group_error(@coa, :code) %>">
@@ -13,6 +13,20 @@
         <div class="col-sm-9">
             <%= f.text_field :name, class: "form-control inputs" %>
             <%= error_help_text(@coa, :name) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa, :group) %>">
+        <%= f.label :group, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+            <%= f.select :group, options_for_select(Coa::GROUP, @coa.group), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+            <%= error_help_text(@coa, :group) %>
+        </div>
+      </div>
+      <div class="form-group<%= control_group_error(@coa, :coa_type_id) %>">
+        <%= f.label :coa_type_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :coa_type_id, options_from_collection_for_select(CoaType.all.select(:id, :code, :name), "id", "name", @coa.coa_type_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@coa, :coa_type_id) %>
         </div>
       </div>
       <div class="form-group<%= control_group_error(@coa, :transaction_type) %>">
@@ -43,6 +57,8 @@
       $('#coa_code').on("input", function () {
           $(this).val($(this).val().replace(/ /g, ""));
       });
+      $("#coa_group").attr("data-placeholder", "Please select").chosen();
+      $("#coa_coa_type_id").attr("data-placeholder", "Please select").chosen();
       $("#coa_transaction_type").attr("data-placeholder", "Please select").chosen();
   });
 </script>
