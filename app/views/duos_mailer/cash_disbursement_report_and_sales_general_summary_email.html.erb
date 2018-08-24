@@ -14,22 +14,22 @@
                             <tr>
                                 <td>Store</td>
                                 <td>:</td>
-                                <td><%= "#{@cashier_opening.code} - #{@cashier_opening.name}" %></td>
+                                <td><%= @cashier_opening.present? ? "#{@cashier_opening.code} - #{@cashier_opening.name}" : "" %></td>
                             </tr>
                             <tr>
                                 <td>Opened By</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.cashier_name %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.cashier_name : "" %></td>
                             </tr>
                             <tr>
                                 <td>Station</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.station %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.station : "" %></td>
                             </tr>
                             <tr>
                                 <td>Shift</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.shift %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.shift : "" %></td>
                             </tr>
                         </table>
                     </td>
@@ -38,43 +38,45 @@
                             <tr>
                                 <td>Opened At</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") : "" %></td>
                             </tr>
                             <tr>
                                 <td>Closed At</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></td>
+                                <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.present? && @cashier_opening.closed_at.present? %></td>
                             </tr>
                             <tr>
                                 <td>Beginning Cash</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.beginning_cash, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.beginning_cash : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                             <tr>
                                 <td>Cash On Hand</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.cash_balance, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.cash_balance : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                         </table>
                     </td>
                 </tr>
                 <tr>
                     <td align="center" colspan="2">
-                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: black;border-style: solid;border-collapse: collapse" width="100%">
+                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
                             <tbody>
-                                <tr style="text-align: center" bgcolor="#ffa500">
+                                <tr style="text-align: center;color: white" bgcolor="#337ab7">
                                     <td><strong>No.</strong></td>
                                     <td><strong>Description</strong></td>
                                     <td><strong>Price/Amount</strong></td>
                                 </tr>
                                 <% sum = 0 %>
-                                <% @cashier_opening.cash_disbursements.each_with_index do |cash_disbursement, index| %>
-                                  <% sum += cash_disbursement.price %>
-                                  <tr align="center">
-                                      <td style="vertical-align: middle"><%= index.succ %></td>
-                                      <td style="vertical-align: middle"><%= cash_disbursement.description %></td>
-                                      <td style="vertical-align: middle; text-align: right"><%= number_to_currency(cash_disbursement.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-                                  </tr>
+                                <% if @cashier_opening.present? %>
+                                  <% @cashier_opening.cash_disbursements.each_with_index do |cash_disbursement, index| %>
+                                    <% sum += cash_disbursement.price %>
+                                    <tr align="center">
+                                        <td style="vertical-align: middle"><%= index.succ %></td>
+                                        <td style="vertical-align: middle"><%= cash_disbursement.description %></td>
+                                        <td style="vertical-align: middle; text-align: right"><%= number_to_currency(cash_disbursement.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                    </tr>
+                                  <% end %>
                                 <% end %>
                             </tbody>
                             <tfoot>
@@ -111,37 +113,37 @@
                             <tr>
                                 <td>Store</td>
                                 <td>:</td>
-                                <td><%= "#{@cashier_opening.code} - #{@cashier_opening.name}" %></td>
+                                <td><%= @cashier_opening.present? ? "#{@cashier_opening.code} - #{@cashier_opening.name}" : "" %></td>
                             </tr>
                             <tr>
                                 <td>Station</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.station %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.station : "" %></td>
                             </tr>
                             <tr>
                                 <td>Shift</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.shift %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.shift : "" %></td>
                             </tr>
                             <tr>
                                 <td>Gross Sales</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.gross_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.gross_sales : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                             <tr>
                                 <td>Total Quantity</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.total_quantity %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.total_quantity : 0 %></td>
                             </tr>
                             <tr>
                                 <td>Total Gift Quantity</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.total_gift_quantity %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.total_gift_quantity : 0 %></td>
                             </tr>
                             <tr>
                                 <td>Total Cash Payment</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.cash_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.cash_payment : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                         </table>
                     </td>
@@ -150,56 +152,61 @@
                             <tr>
                                 <td>Opened By</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.cashier_name %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.cashier_name : "" %></td>
                             </tr>
                             <tr>
                                 <td>Opened At</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                                <td><%= @cashier_opening.present? ? @cashier_opening.created_at.strftime("%d/%m/%Y %H:%M") : "" %></td>
                             </tr>
                             <tr>
                                 <td>Closed At</td>
                                 <td>:</td>
-                                <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.closed_at.present? %></td>
+                                <td><%= @cashier_opening.closed_at.strftime("%d/%m/%Y %H:%M") if @cashier_opening.present? && @cashier_opening.closed_at.present? %></td>
                             </tr>
                             <tr>
                                 <td>Net Sales</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.net_sales, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.net_sales : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                             <tr>
                                 <td>Total Card Payment</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.card_payment : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                             <tr>
                                 <td>Total Debit Card Payment</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.debit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.debit_card_payment : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                             <tr>
                                 <td>Total Credit Card Payment</td>
                                 <td>:</td>
-                                <td><%= number_to_currency(@cashier_opening.credit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.credit_card_payment : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                         </table>
                     </td>
                 </tr>
                 <tr>
                     <td align="center" colspan="2">
-                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: black;border-style: solid;border-collapse: collapse" width="100%">
+                        <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
                             <tbody>
-                                <tr style="text-align: center" bgcolor="#ffa500">
+                                <tr style="text-align: center;color: white" bgcolor="#337ab7">
                                     <td><strong>Event</strong></td>
                                     <td><strong>Quantity</strong></td>
                                     <td><strong>Gross</strong></td>
                                     <td><strong>Net</strong></td>
                                 </tr>
-                                <% sale_products = SaleProduct.joins(:price_list, :sale).
-                                  joins("LEFT JOIN events ON sale_products.event_id = events.id").
-                                  joins("LEFT JOIN events gift_events ON sales.gift_event_id = gift_events.id").
-                                  where(["sales.cashier_opening_id = ?", @cashier_opening.id]).
-                                  select(:sale_id, :quantity, "sale_products.total AS subtotal", :event_id, "sales.gift_event_id", "price_lists.price AS article_price", "events.event_type AS article_event_type", "gift_events.discount_amount AS store_discount_amount", "sales.gift_event_product_id", "events.code AS article_event_code", "gift_events.code AS store_event_code") %>
+                                <% sale_products = if @cashier_opening.present?
+                                  SaleProduct.joins(:price_list, :sale).
+                                    joins("LEFT JOIN events ON sale_products.event_id = events.id").
+                                    joins("LEFT JOIN events gift_events ON sales.gift_event_id = gift_events.id").
+                                    where(["sales.cashier_opening_id = ?", @cashier_opening.id]).
+                                    select(:sale_id, :quantity, "sale_products.total AS subtotal", :event_id, "sales.gift_event_id", "price_lists.price AS article_price", "events.event_type AS article_event_type", "gift_events.discount_amount AS store_discount_amount", "sales.gift_event_product_id", "events.code AS article_event_code", "gift_events.code AS store_event_code")
+                                  else
+                                []
+                                  end
+                              %>
                                 <% sale_types = {} %>
                                 <% sale_products.each do |sale_product| %>
                                   <% if sale_product.event_id.blank? && sale_product.gift_event_id.blank? %>
