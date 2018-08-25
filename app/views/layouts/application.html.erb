@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <%= favicon_link_tag '32pix.ico' %>
         <title>
             <% if !params[:controller].eql?("welcome") && !params[:controller].eql?("devise/sessions") %>
               <% if params[:controller].eql?("stocks") %>
