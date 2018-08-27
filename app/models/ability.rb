@@ -206,7 +206,7 @@ class Ability
               alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
               can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts, :receive_to_warehouse], class_name.gsub(/\s+/, "").constantize
             end
-          elsif class_name.eql?("Goods In Transit") && !user_roles.include?("area_manager")
+          elsif class_name.eql?("Goods In Transit")
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment

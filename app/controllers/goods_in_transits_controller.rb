@@ -10,7 +10,24 @@ class GoodsInTransitsController < ApplicationController
       start_delivery_date = splitted_delivery_date_range[0].strip.to_date
       end_delivery_date = splitted_delivery_date_range[1].strip.to_date
     end
-    shipments_scope = if current_user.has_non_spg_role?
+    @user_roles = current_user.roles.pluck :name
+    shipments_scope = if @user_roles.include?("area_manager")
+      unless request.xhr?
+        @warehouses = current_user.supervisor.warehouses.actived.select(:id, :code, :name)
+        warehouse_ids = @warehouses.pluck(:id)
+        Shipment.select(:id, :delivery_order_number, :delivery_date, :quantity).
+          joins(order_booking: [:origin_warehouse, :destination_warehouse]).
+          where(:"order_bookings.destination_warehouse_id" => warehouse_ids).
+          where(["received_date IS NULL AND warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true])
+      else
+        Shipment.select(:id, :delivery_order_number, :delivery_date, :quantity).
+          joins(order_booking: [:origin_warehouse, :destination_warehouse]).
+          where(["received_date IS NULL AND warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true])
+      end
+    elsif @user_roles.include?("staff") || @user_roles.include?("manager") || @user_roles.include?("administrator") || @user_roles.include?("superadmin") || @user_roles.include?("accountant")
+      unless request.xhr?
+        @warehouses = Warehouse.not_central.actived.select(:id, :code, :name)
+      end
       Shipment.select(:id, :delivery_order_number, :delivery_date, :quantity).
         joins(order_booking: [:origin_warehouse, :destination_warehouse]).where(["received_date IS NULL AND warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true])
     else
