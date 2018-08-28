@@ -8,8 +8,17 @@ class StocksController < ApplicationController
   # GET /stocks.json
   def index
     like_command = "ILIKE"
-    stocks_scope = if current_user.has_non_spg_role?
+    user_roles = current_user.roles.pluck :name
+    stocks_scope = if user_roles.include?("area_manager")
       if params[:filter_warehouse_id].blank?
+        @warehouses = current_user.supervisor.warehouses.select(:id, :code, :name).order(:code)
+        StockDetail.none
+      else
+        StockDetail.joins(:size, :color, stock_product: [{product: :brand}, {stock: :warehouse}]).select("warehouses.name, products.code, brands_products.name AS brand_name, common_fields.name AS color_name, size AS size_label, quantity").where("warehouses.id = #{params[:filter_warehouse_id]}")
+      end
+    elsif user_roles.include?("staff") || user_roles.include?("manager") || user_roles.include?("administrator") || user_roles.include?("superadmin") || user_roles.include?("accountant")
+      if params[:filter_warehouse_id].blank?
+        @warehouses = Warehouse.select(:id, :code, :name).order(:code)
         StockDetail.none
       else
         StockDetail.joins(:size, :color, stock_product: [{product: :brand}, {stock: :warehouse}]).select("warehouses.name, products.code, brands_products.name AS brand_name, common_fields.name AS color_name, size AS size_label, quantity").where("warehouses.id = #{params[:filter_warehouse_id]}")
@@ -21,7 +30,7 @@ class StocksController < ApplicationController
       or(stocks_scope.where(["brands_products.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
       or(stocks_scope.where(["common_fields.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
       or(stocks_scope.where(["size #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) if params[:filter_product_criteria].present?
-#      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) 
+    #      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) 
     stocks_scope = if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
       stocks_scope.order("#{params[:stocks_smart_listing][:sort].keys.first} #{params[:stocks_smart_listing][:sort][params[:stocks_smart_listing][:sort].keys.first]}")
     else
@@ -71,7 +80,6 @@ class StocksController < ApplicationController
     end
 
     stocks = stocks.reverse if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
-    @warehouses = current_user.has_non_spg_role? ? Warehouse.select(:id, :code, :name).order(:code) : []
     @stocks = smart_listing_create(:stocks, stocks, partial: 'stocks/listing', array: true)
   end
 

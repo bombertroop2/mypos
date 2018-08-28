@@ -232,6 +232,8 @@ class Ability
             else
               can ability, Member
             end
+          elsif class_name.eql?("Stock") && user_roles.include?("area_manager")
+            can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
