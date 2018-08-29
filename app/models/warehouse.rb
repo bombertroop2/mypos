@@ -154,7 +154,7 @@ class Warehouse < ApplicationRecord
                   if warehouse_type_changed?
                     in_transit = Warehouse.where(warehouse_type: "in_transit").select("1 AS one")
                     if in_transit.present?
-                      errors.add(:warehouse_type, "has already been taken") if warehouse_type.present?
+                      errors.add(:warehouse_type, "has already been taken") if warehouse_type.present? && warehouse_type.eql?("in_transit")
                     end
                   end
                 end
