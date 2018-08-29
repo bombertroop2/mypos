@@ -61,9 +61,21 @@ class DirectPurchase < ApplicationRecord
                         else
                           discount = 0
                         end
-                        gross_after_discount = gross_price - discount
-                        ppn = gross_after_discount * 10 / 100
-                        nett = gross_after_discount - ppn
+                       if self.is_taxable_entrepreneur
+                          if self.vat_type.eql?("include")
+                            gross_after_discount = gross_price - discount
+                            ppn = gross_after_discount * 10 / 100
+                            nett = gross_after_discount
+                          elsif self.vat_type.eql?("exclude")
+                            gross_after_discount = gross_price - discount
+                            ppn = gross_after_discount * 10 / 100
+                            nett = gross_after_discount + ppn
+                          end
+                        else
+                          gross_after_discount = gross_price - discount
+                          ppn = 0
+                          nett = gross_after_discount
+                        end
                         journal = self.build_journal(
                             coa_id: coa.id,
                             gross: gross_price.to_f,

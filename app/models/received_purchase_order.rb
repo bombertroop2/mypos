@@ -50,9 +50,9 @@ class ReceivedPurchaseOrder < ApplicationRecord
 
                           def purchase_order_journal
                             coa = Coa.find_by_transaction_type("PO")
-                            gross_price = self.purchase_order.get_gross_price
                             warehouse = self.purchase_order.warehouse_id
                             transaction_date = self.purchase_order.purchase_order_date
+                            gross_price = self.purchase_order.get_gross_price
                             if self.purchase_order.first_discount.present? && self.purchase_order.second_discount.present?
                               first_discount = gross_price * self.purchase_order.first_discount/100
                               second_discount = (gross_price - first_discount) * self.purchase_order.second_discount/100
@@ -62,9 +62,24 @@ class ReceivedPurchaseOrder < ApplicationRecord
                             else
                               discount = 0
                             end
-                            gross_after_discount = gross_price - discount
-                            ppn = gross_after_discount * 10 / 100
-                            nett = gross_after_discount - ppn
+                            if self.purchase_order.vendor.is_taxable_entrepreneur
+                              if self.purchase_order.value_added_tax.eql?("include")
+                                gross_after_discount = gross_price - discount
+                                ppn = gross_after_discount * 10 / 100
+                                nett = gross_after_discount
+                              elsif self.purchase_order.value_added_tax.eql?("exclude")
+                                gross_after_discount = gross_price - discount
+                                ppn = gross_after_discount * 10 / 100
+                                nett = gross_after_discount + ppn
+                              end
+                            else
+                              p "==="
+                              p gross_price
+                              p "==="
+                              gross_after_discount = gross_price - discount
+                              ppn = 0
+                              nett = gross_after_discount
+                            end
                             if self.purchase_order.journal.present?
                               self.purchase_order.journal.update(
                                                   coa_id: coa.id,
