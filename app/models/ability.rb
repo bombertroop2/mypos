@@ -236,6 +236,8 @@ class Ability
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Stock Movement") && user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("ListingStock") && user_roles.include?("area_manager")
+            can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
