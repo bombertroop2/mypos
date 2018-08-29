@@ -48,6 +48,13 @@ class StockMovementsController < ApplicationController
       respond_to do |format|
         format.js
       end
+    else
+      user_roles = current_user.roles.pluck :name
+      @warehouses = if user_roles.include?("area_manager")
+        current_user.supervisor.warehouses.select(:id, :code, :name).order(:code)
+      elsif user_roles.include?("staff") || user_roles.include?("manager") || user_roles.include?("administrator") || user_roles.include?("superadmin") || user_roles.include?("accountant")
+        Warehouse.actived.select(:id, :code, :name).order(:code)
+      end
     end
   end
 
