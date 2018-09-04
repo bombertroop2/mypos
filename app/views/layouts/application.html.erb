@@ -858,6 +858,23 @@
         <% end %>
                           }
                       });
+                      $("#print-btn").click(function () {
+                          if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
+                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                          else {
+                            <% if current_user.has_non_spg_role? %>
+                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                              $("#filter_warehouse").val($("#warehouse").val());
+                            <% else %>
+                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                              $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
+                            <% end %>
+                            $.get("/listing_stocks/print", {
+                                    filter_warehouse: $("#filter_warehouse").val(),
+                                    filter_listing_transaction_date: $("#filter_listing_transaction_date").val()
+                            });
+                          }
+                      });
       <% elsif controller_name.eql?("cashier_openings") %>
                       $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
                       $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();

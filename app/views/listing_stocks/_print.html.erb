@@ -1,0 +1,126 @@
+<table id="ls_print_doc" class="table table-striped table-bordered" width="100%" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-stock-transactions-thead">
+        <tr>
+            <th class="text-center" colspan="9">Listing Stock Report</th>
+        </tr>
+        <tr>
+            <th class="text-center" colspan="9"><%= "#{@start_date} - #{@end_date}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
+        </tr>
+        <tr>
+            <th class="col-md-4 text-center" colspan="3">Transaction</th>
+            <th class="col-md-5 text-center" colspan="4">Article</th>
+            <th class="col-md-1 text-center" rowspan="2" style="vertical-align: middle">Qty</th>
+            <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle">Total Price</th>
+        </tr>
+        <tr>
+            <th class="text-center">Date</th>
+            <th class="text-center">Number</th>
+            <th class="text-center">Type</th>
+            <th class="text-center">Article</th>
+            <th class="text-center">Color</th>
+            <th class="text-center">Size</th>
+            <th class="text-center">Price</th>
+        </tr>
+    </thead>
+    <tbody>
+      <% total_qty = 0 %>
+      <% total_price = 0 %>
+      <% last_transaction_date = nil %>
+      <% last_transaction_number = "" %>
+      <% last_transaction_type = "" %>
+      <% last_product_code = "" %>
+      <% last_color_code = "" %>
+      <% last_size = "" %>
+      <% last_product_price = "" %>
+      <% collection = @listing_stock_transactions_scope %>
+      <% collection.each do |stock_transaction| %>
+        <% if stock_transaction.transaction_type.eql?("BS") %>
+          <% total_qty += stock_transaction.quantity %>
+          <% total_price += stock_transaction.total_product_price %>
+        <% elsif stock_transaction.transaction_type.eql?("PO") %>
+          <% total_qty += stock_transaction.quantity %>
+          <% if stock_transaction.total_product_price.present? %>
+            <% total_price += stock_transaction.total_product_price %>
+          <% end %>
+        <% elsif stock_transaction.transaction_type.eql?("PR") %>
+          <% total_qty -= stock_transaction.quantity %>
+          <% total_price -= stock_transaction.total_product_price %>
+        <% elsif stock_transaction.transaction_type.eql?("DO") %>
+          <% if stock_transaction.warehouse_type.eql?("central") %>
+            <% total_qty -= stock_transaction.quantity %>
+            <% total_price -= stock_transaction.total_product_price %>
+          <% else %>
+            <% total_qty += stock_transaction.quantity %>
+            <% total_price += stock_transaction.total_product_price %>
+          <% end %>
+        <% elsif stock_transaction.transaction_type.eql?("RW") %>
+          <% if stock_transaction.warehouse_type.eql?("central") %>
+            <% total_qty += stock_transaction.quantity %>
+            <% total_price += stock_transaction.total_product_price %>
+          <% else %>
+            <% total_qty -= stock_transaction.quantity %>
+            <% total_price -= stock_transaction.total_product_price %>
+          <% end %>
+        <% elsif stock_transaction.transaction_type.eql?("RGO") %>
+          <% total_qty -= stock_transaction.quantity %>
+          <% total_price -= stock_transaction.total_product_price %>
+        <% elsif stock_transaction.transaction_type.eql?("RGI") %>
+          <% total_qty += stock_transaction.quantity %>
+          <% total_price += stock_transaction.total_product_price %>
+        <% elsif stock_transaction.transaction_type.eql?("POS") %>
+          <% total_qty -= stock_transaction.quantity %>
+          <% total_price -= stock_transaction.total_product_price %>
+        <% elsif stock_transaction.transaction_type.eql?("RET") %>
+          <% total_qty += stock_transaction.quantity %>
+          <% total_price += stock_transaction.total_product_price %>
+        <% elsif stock_transaction.transaction_type.eql?("SLK") %>
+          <% total_qty -= stock_transaction.quantity %>
+          <% total_price -= stock_transaction.total_product_price %>
+        <% end %>
+        <tr class="editable">
+          <% total_transaction = collection.select{|st| st.transaction_date == stock_transaction.transaction_date}.length %>
+          <% total_transaction_number = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number)}.length %>
+          <% total_transaction_type = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type)}.length %>
+          <% total_product_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code)}.length %>
+          <% total_color_code = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code)}.length %>
+          <% total_size = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size)}.length %>
+          <% total_product_price = collection.select{|st| st.transaction_date == stock_transaction.transaction_date && st.transaction_number.eql?(stock_transaction.transaction_number) && st.transaction_type.eql?(stock_transaction.transaction_type) && st.product_code.eql?(stock_transaction.product_code) && st.color_code.eql?(stock_transaction.color_code) && st.size.eql?(stock_transaction.size) && st.product_first_price == stock_transaction.product_first_price}.length %>
+          <% unless last_transaction_date == stock_transaction.transaction_date %>
+            <td rowspan="<%= total_transaction %>"><%= stock_transaction.transaction_date.strftime("%d/%m/%Y") %></td>
+          <% end %>
+          <td><%= stock_transaction.transaction_number %></td>
+          <td><%= stock_transaction.transaction_type %></td>
+          <td><%= "#{stock_transaction.product_code} - #{stock_transaction.product_name}" %></td>
+          <td><%= "#{stock_transaction.color_code} - #{stock_transaction.color_name}" %></td>
+          <td><%= stock_transaction.size %></td>
+          <td class="text-right"><%= number_to_currency(stock_transaction.product_first_price,
+                      :separator => ",",
+                      :delimiter => ".",
+                      :unit => "Rp",
+                      :precision => 2) %></td>
+          <td class="text-right"><%= stock_transaction.quantity %></td>
+          <td class="text-right"><%= number_to_currency(stock_transaction.total_product_price,
+                :separator => ",",
+                :delimiter => ".",
+                :unit => "Rp",
+                :precision => 2) %></td>
+        </tr>
+        <% last_transaction_date = stock_transaction.transaction_date %>
+        <% last_transaction_number = stock_transaction.transaction_number %>
+        <% last_transaction_type = stock_transaction.transaction_type %>
+        <% last_product_code = stock_transaction.product_code %>
+        <% last_color_code = stock_transaction.color_code %>
+        <% last_size = stock_transaction.size %>
+        <% last_product_price = stock_transaction.product_first_price %>
+      <% end %>
+      <tr>
+          <td colspan="7" class="text-right">Total</td>
+          <td class="text-right"><%= total_qty %></td>
+          <td class="text-right"><%= number_to_currency(total_price,
+                :separator => ",",
+                :delimiter => ".",
+                :unit => "Rp",
+                :precision => 2) %></td>
+      </tr>
+    </tbody>
+</table>
