@@ -785,6 +785,26 @@
         <% end %>
                           }
                       });
+                      $("#print-btn").click(function () {
+                          if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
+                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                          else {
+                            <% if current_user.has_non_spg_role? %>
+                                $.get("/stock_movements/print", {
+                                    year: $("#year").val(),
+                                    month: $("#month").val(),
+                                    warehouse_id: $("#warehouse").val(),
+                                    product_code: $("#product_code").val()
+                                });
+                            <% else %>
+                                $.get("/stock_movements", {
+                                    year: $("#year").val(),
+                                    month: $("#month").val(),
+                                    product_code: $("#product_code").val()
+                                });
+                            <% end %>
+                          }
+                      });
       <% elsif controller_name.eql?("listing_stocks") %>
                       $("#menu_toggle").click();
                       $("#search-btn").click(function () {
