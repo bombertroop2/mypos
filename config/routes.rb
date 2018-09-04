@@ -113,8 +113,16 @@ Rails.application.routes.draw do
       patch "activate_deactivate"
     end
   end
-  resources :listing_stocks, only: :index
-  resources :stock_movements, only: :index
+  resources :listing_stocks, only: :index do
+    collection do
+      get :print
+    end
+  end
+  resources :stock_movements, only: :index do
+    collection do
+      get :print
+    end
+  end
   resources :fiscal_years
   resources :goods_in_transits, only: [:shipment_goods, :mutation_goods, :returned_goods] do
     collection do

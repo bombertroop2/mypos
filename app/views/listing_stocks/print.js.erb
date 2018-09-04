@@ -1,0 +1,4 @@
+$("#print_doc_container").html("<%= j(render(partial: "print")) %>");
+$("#ls_print_doc").removeClass("hidden");
+$("#ls_print_doc").print();
+$("#ls_print_doc").addClass("hidden");

@@ -26,7 +26,7 @@ class ListingStocksController < ApplicationController
       end
       ListingStockTransaction.none
     end
-    
+
     listing_stock_transactions_scope = if params[:listing_stock_transactions_smart_listing].present? && params[:listing_stock_transactions_smart_listing][:sort].present?
       order_fields = if params[:listing_stock_transactions_smart_listing][:sort].keys.first.eql?("transaction_date")
         "#{params[:listing_stock_transactions_smart_listing][:sort].keys.first} #{params[:listing_stock_transactions_smart_listing][:sort][params[:listing_stock_transactions_smart_listing][:sort].keys.first]}, transaction_number ASC, transaction_type ASC, products.code ASC, common_fields.code ASC, size ASC, product_first_price ASC, quantity ASC, total_product_price ASC"
@@ -106,6 +106,28 @@ class ListingStocksController < ApplicationController
     respond_to do |format|
       format.html { redirect_to listing_stocks_url, notice: 'Listing stock was successfully destroyed.' }
       format.json { head :no_content }
+    end
+  end
+
+  def print
+    @listing_stock_transactions_scope = if params[:filter_warehouse].present?
+      splitted_date = params[:filter_listing_transaction_date].split(" - ")
+      ListingStockTransaction.
+        joins(listing_stock_product_detail: [:color, :size, listing_stock: [:warehouse, product: :brand]]).
+        select(:transaction_date, :transaction_number, :transaction_type, :quantity).
+        select("products.code AS product_code, brands_products.name AS product_name, common_fields.code AS color_code, common_fields.name AS color_name, size, warehouses.warehouse_type").
+        select("(SELECT price_lists.price FROM price_lists INNER JOIN product_details ON product_details.id = price_lists.product_detail_id WHERE (product_details.size_id = listing_stock_product_details.size_id AND product_details.product_id = listing_stocks.product_id AND product_details.price_code_id = warehouses.price_code_id) ORDER BY price_lists.effective_date ASC LIMIT 1) AS product_first_price").
+        select("((SELECT price_lists.price FROM price_lists INNER JOIN product_details ON product_details.id = price_lists.product_detail_id WHERE (product_details.size_id = listing_stock_product_details.size_id AND product_details.product_id = listing_stocks.product_id AND product_details.price_code_id = warehouses.price_code_id) ORDER BY price_lists.effective_date ASC LIMIT 1) * listing_stock_transactions.quantity) AS total_product_price").
+        where(["transaction_date BETWEEN ? AND ? AND warehouse_id = ? AND warehouses.is_active = ?", splitted_date[0].to_date, splitted_date[1].to_date, params[:filter_warehouse], true]).order("transaction_date")
+    else
+      ListingStockTransaction.none
+    end
+    @start_date = splitted_date[0].to_date
+    @end_date = splitted_date[1].to_date
+    @warehouse =Warehouse.find(params[:filter_warehouse])
+    p @listing_stock_transactions_scope
+    respond_to do |format|
+      format.js
     end
   end
 
