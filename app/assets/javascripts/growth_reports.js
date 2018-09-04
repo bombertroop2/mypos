@@ -19,6 +19,57 @@ $(function () {
         }
     });
 
+    $("#print-btn-daily").click(function(){
+         if ($("#growth_report_date").val().trim() == "")
+            bootbox.alert({message: "Please select date first!", size: "small"});
+        else if ($("#growth_report_counter_type_daily").val().trim() == "")
+            bootbox.alert({message: "Please select counter type first!", size: "small"});
+        else if ($("#growth_report_region_daily").val().trim() == "")
+            bootbox.alert({message: "Please select region first!", size: "small"});
+        else {
+            $.get("/growth_reports/print", {
+                date: $("#growth_report_date").val().trim(),
+                counter_type: $("#growth_report_counter_type_daily").val().trim(),
+                region: $("#growth_report_region_daily").val().trim()
+            });
+        }
+    });
+
+    $("#print-btn-month").click(function(){
+         if ($("#growth_report_month").val().trim() == "")
+            bootbox.alert({message: "Please select month first!", size: "small"});
+        else if ($("#growth_report_year").val().trim() == "")
+            bootbox.alert({message: "Please select year first!", size: "small"});
+        else if ($("#growth_report_counter_type").val().trim() == "")
+            bootbox.alert({message: "Please select counter type first!", size: "small"});
+        else if ($("#growth_report_region").val().trim() == "")
+            bootbox.alert({message: "Please select region first!", size: "small"});
+        else {
+            $.get("/growth_reports/print", {
+                month: $("#growth_report_month").val().trim(),
+                year: $("#growth_report_year").val().trim(),
+                counter_type: $("#growth_report_counter_type").val().trim(),
+                region: $("#growth_report_region").val().trim()
+            });
+        }
+    });
+
+    $("#print-btn-year").click(function(){
+        if ($("#growth_report_year_year").val().trim() == "")
+            bootbox.alert({message: "Please select year first!", size: "small"});
+        else if ($("#growth_report_counter_type_year").val().trim() == "")
+            bootbox.alert({message: "Please select counter type first!", size: "small"});
+        else if ($("#growth_report_region_year").val().trim() == "")
+            bootbox.alert({message: "Please select region first!", size: "small"});
+        else {
+            $.get("/growth_reports/print", {
+                year: $("#growth_report_year_year").val().trim(),
+                counter_type: $("#growth_report_counter_type_year").val().trim(),
+                region: $("#growth_report_region_year").val().trim()
+            });
+        }
+    });
+
     $("#profile-tab").click(function () {
         var mtdTabProcessId = setInterval(function () {
             if ($("#tab_content2").hasClass("active") && $("#tab_content2").hasClass("in")) {

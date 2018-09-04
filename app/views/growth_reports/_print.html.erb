@@ -1,0 +1,183 @@
+<!--<div class="table-responsive">-->
+<table id="gr_print_doc" class="table table-striped table-bordered" width="100%" style="padding-bottom: 1px; word-wrap: break-word">
+    <thead>
+        <tr><th colspan="13" class="text-center">
+                <% if params[:date].present? %>
+                  <%= "#{params[:counter_type].strip}: #{(params[:date].to_date - 1.year).strftime("%d %B %Y")}" %> VS <%= "#{params[:date].to_date.strftime("%d %B %Y")}" %>
+                <% elsif params[:month].present? %>
+                  <%= "#{params[:counter_type].strip}: #{Date::MONTHNAMES[params[:month].to_i]} #{params[:year].to_i - 1}" %> VS <%= "#{Date::MONTHNAMES[params[:month].to_i]} #{params[:year]}" %>
+                <% else %>
+                  <%= "#{params[:counter_type].strip}: #{params[:year].to_i - 1}" %> VS <%= "#{params[:year]}" %>
+                <% end %>
+            </th></tr>
+        <tr>
+            <th class="text-center" style="vertical-align: middle" rowspan="2">Region</th>
+            <th class="text-center" style="vertical-align: middle" rowspan="2">Counter</th>
+            <th class="text-center" colspan="3">Net Sales</th>
+            <th class="text-center" colspan="3">Qty Sold</th>
+            <th class="text-center" colspan="3">AUR</th>
+            <% unless params[:date].present? %>
+              <th class="text-center" style="vertical-align: middle" rowspan="2">Target</th>
+              <th class="text-center" style="vertical-align: middle" rowspan="2">Ach</th>
+            <% else %>
+              <th class="text-center" style="vertical-align: middle" rowspan="2">Ending Stock</th>
+            <% end %>
+        </tr>
+        <tr>
+            <% if params[:date].present? %>
+              <th class="text-center"><%= (params[:date].to_date - 1.year).year %></th>
+              <th class="text-center"><%= params[:date].to_date.year %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= (params[:date].to_date - 1.year).year %></th>
+              <th class="text-center"><%= params[:date].to_date.year %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= (params[:date].to_date - 1.year).year %></th>
+              <th class="text-center"><%= params[:date].to_date.year %></th>
+              <th class="text-center">Growth</th>
+            <% else %>
+              <th class="text-center"><%= params[:year].to_i - 1 %></th>
+              <th class="text-center"><%= params[:year] %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= params[:year].to_i - 1 %></th>
+              <th class="text-center"><%= params[:year] %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= params[:year].to_i - 1 %></th>
+              <th class="text-center"><%= params[:year] %></th>
+              <th class="text-center">Growth</th>
+            <% end %>
+        </tr>
+    </thead>
+    <tbody>
+        <% last_region_id = 0 %>
+        <% @warehouses.each do |warehouse| %>
+          <% prev_consignment_sale = @prev_consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
+          <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
+          <% prev_net_sales = prev_consignment_sale.prev_net_sales rescue 0 %>
+          <% selected_net_sales = consignment_sale.selected_net_sales rescue 0 %>
+          <% prev_qty_sold = prev_consignment_sale.prev_qty_sold rescue 0 %>
+          <% selected_qty_sold = consignment_sale.selected_qty_sold rescue 0 %>
+          <% if params[:date].present? %>
+            <% ending_stock = 0 %>
+          <% end %>
+          <% total_counter_per_region = @warehouses.select{|wr| wr.region_id == warehouse.region_id}.length %>
+          <%
+          percentage = if prev_net_sales.to_f <= selected_net_sales.to_f
+            first_val = selected_net_sales.to_f
+            second_val = prev_net_sales.to_f
+            if second_val > 0
+              "#{((first_val - second_val) / second_val * 100).round}%"
+              elsif first_val > 0
+              "100%"
+              else
+              "0%"
+            end
+            else
+            first_val = prev_net_sales.to_f
+            second_val = selected_net_sales.to_f
+            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            end
+        %>
+          <%
+          qty_sold_percentage = if prev_qty_sold <= selected_qty_sold
+            first_val = selected_qty_sold.to_f
+            second_val = prev_qty_sold.to_f
+            if second_val > 0
+              "#{((first_val - second_val) / second_val * 100).round}%"
+              elsif first_val > 0
+              "100%"
+              else
+              "0%"
+            end
+            else
+            first_val = prev_qty_sold.to_f
+            second_val = selected_qty_sold.to_f
+            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            end
+        %>
+          <% if prev_qty_sold.to_i > 0 %>
+            <% prev_aur = (prev_net_sales.to_f / prev_qty_sold.to_i).round %>
+          <% else %>
+            <% prev_aur = 0 %>
+          <% end %>
+          <% if selected_qty_sold.to_i > 0 %>
+            <% aur = (selected_net_sales.to_f / selected_qty_sold.to_i).round %>
+          <% else %>
+            <% aur = 0 %>
+          <% end %>
+          <%
+          aur_percentage = if prev_aur.to_f <= aur.to_f
+            first_val = aur.to_f
+            second_val = prev_aur.to_f
+            if second_val > 0
+              "#{((first_val - second_val) / second_val * 100).round}%"
+              elsif first_val > 0
+              "100%"
+              else
+              "0%"
+            end
+            else
+            first_val = prev_aur.to_f
+            second_val = aur.to_f
+            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            end
+        %>
+          <tr>
+              <% if last_region_id != warehouse.region_id %>
+                <td rowspan="<%= total_counter_per_region %>" style="vertical-align: middle"><%= "#{warehouse.region_code} - #{warehouse.region_name}" %></td>
+              <% end %>
+              <td><%= "#{warehouse.code} - #{warehouse.name}" %></td>
+              <td class="text-right"><%= number_to_currency(prev_net_sales.to_f,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %></td>
+              <td class="text-right"><%= number_to_currency(selected_net_sales.to_f,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %></td>
+              <td class="text-right"><%= percentage %></td>
+              <td class="text-right"><%= number_to_currency(prev_qty_sold.to_i,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "",
+                    :precision => 0) %></td>
+              <td class="text-right"><%= number_to_currency(selected_qty_sold.to_i,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "",
+                    :precision => 0) %></td>
+              <td class="text-right"><%= qty_sold_percentage %></td>
+              <td class="text-right">
+                  <%= number_to_currency(prev_aur,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %>
+              </td>
+              <td class="text-right">
+                  <%= number_to_currency(aur,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %>
+              </td>
+              <td class="text-right">
+                  <%= aur_percentage %>
+              </td>
+              <% unless params[:date].present? %>
+                <td></td>
+                <td></td>
+              <% else %>
+                <td class="text-right"><%= number_to_currency(ending_stock.to_i,
+                      :separator => ",",
+                      :delimiter => ".",
+                      :unit => "",
+                      :precision => 0) %></td>
+              <% end %>
+          </tr>
+          <% last_region_id = warehouse.region_id %>
+        <% end %>
+    </tbody>
+</table>
+<!--</div>-->

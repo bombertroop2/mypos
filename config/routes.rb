@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :targets
   resources :coa_departments
   get 'growth_reports/index'
+  get 'growth_reports/print'
 
   resources :departments
   resources :coas
