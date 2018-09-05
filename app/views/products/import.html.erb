@@ -1,0 +1,24 @@
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Product<small>import</small></h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <%= form_tag(import_products_path, remote: true, class: "form-horizontal") do %>
+                    <div class="form-group">
+                        <%= label_tag :excel_file, "Excel file", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= file_field_tag :file, class: "form-control", style: "border: 0;box-shadow: none;width: auto" %>
+                          </div>
+                      </div>
+                      <div class="ln_solid"></div>
+      <%#= f.submit "No Sale", class: "btn btn-danger", id: "consignment_sale_no_sale_button", style: "float: right" %>
+      <%#= f.submit "Create", class: "btn btn-primary", id: "consignment_sale_submit_button", style: "float: right" %>
+                      <%= submit_tag "Import", style: "float: right", class: "btn btn-primary" %>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>

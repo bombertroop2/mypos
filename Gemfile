@@ -118,6 +118,7 @@ group :production do
   #  gem 'rails_12factor' ==>> kebutuhan heroku
 end
 
+gem "roo"
 
 gem 'carrierwave'
 gem 'cloudinary'

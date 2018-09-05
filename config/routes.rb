@@ -255,6 +255,8 @@ Rails.application.routes.draw do
   resources :products do
     collection do
       get 'populate_detail_form'
+      get 'import'
+      post 'import'
     end
   end
   resources :size_groups, except: :show

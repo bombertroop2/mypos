@@ -1,5 +1,5 @@
 class Product < ApplicationRecord
-  attr_accessor :attr_importing_data
+  attr_accessor :attr_importing_data, :attr_importing_data_via_web
   audited on: [:create, :update]
   has_associated_audits
   #  attr_accessor :effective_date
@@ -59,7 +59,7 @@ class Product < ApplicationRecord
   #  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
   
-  before_validation :upcase_code
+  before_validation :upcase_code, unless: proc{|pr| pr.attr_importing_data_via_web}
   before_update :delete_old_children_if_size_group_changed
   before_destroy :delete_tracks
   #  before_destroy :prevent_delete_if_purchase_order_created
