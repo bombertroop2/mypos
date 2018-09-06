@@ -1,0 +1,5 @@
+<% if @updated %>
+  <%= smart_listing_item :coa_cashes, :update, @coa_cash, "coa_cashes/coa_cash" %>
+<% else %>
+  <%= smart_listing_item :coa_cashes, :edit, @coa_cash, "coa_cashes/form" %>
+<% end %>

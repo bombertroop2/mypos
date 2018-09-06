@@ -1,0 +1,28 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-coa_cash-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Date", "date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Coa", "coas.code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Value", "value" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |coa_cash| %>
+          <tr class="editable" data-id="<%= coa_cash.id %>">
+              <%= smart_listing.render object: coa_cash, partial: "coa_cashes/coa_cash", locals: {object: coa_cash} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 4, link: new_coa_cash_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-coa_cash-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-coa_cash-thead").show();
+      }
+  }, 0);
+</script>

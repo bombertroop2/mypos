@@ -291,6 +291,9 @@
                                                       <% if can? :read, CoaDepartment %>
                                                         <li><%= link_to "Company Departments", coa_departments_path, method: :get %></li>
                                                       <% end %>
+                                                      <% if can? :read, CoaCash %>
+                                                        <li><%= link_to "Adjusment", coa_cashes_path, method: :get %></li>
+                                                      <% end %>
                                                   </ul>
                                               </li>
                                             <% end %>
@@ -610,6 +613,22 @@
         <% end %>
       <% elsif controller_name.eql?("coa_departments") %>
         <% if cannot?(:manage, CoaDepartment) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("coa_types") %>
+        <% if cannot?(:manage, CoaType) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("coa_cashes") %>
+        <% if cannot?(:manage, CoaCash) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {

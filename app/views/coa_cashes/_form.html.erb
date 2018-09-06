@@ -1,0 +1,46 @@
+<td colspan="4">
+  <div style="padding-top: 20px"></div>
+  <%= form_for(@coa_cash, remote: true, html: {class: "form-horizontal"}) do |f| %>
+
+      <div class="form-group<%= control_group_error(@coa_cash, :date) %>">
+        <%= f.label :date, class: "col-sm-3 control-label" %>
+          <div class="col-sm-9">
+              <%= f.text_field :date, size: 10, readonly: true, class: "form-control" %>
+              <%= error_help_text(@coa_cash, :date) %>
+          </div>
+       </div>
+
+      <div class="form-group<%= control_group_error(@coa_cash, :coa_id) %>">
+        <%= f.label :coa_id, class: "col-sm-3 control-label" %>
+        <div class="col-sm-9">
+          <%= f.select :coa_id, options_from_collection_for_select(Coa.all.order(:id).select(:id, :code, :transaction_type), "id", "coa_view", @coa_cash.coa_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= error_help_text(@coa_cash, :coa_id) %>
+        </div>
+      </div>
+
+       <div class="form-group<%= control_group_error(@coa_cash, :value) %>">
+          <%= f.label :value, class: "col-sm-3 control-label" %>
+          <div class="col-sm-9">
+            <%= f.text_field :value, class: "form-control", "data-a-sep" => ".", "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;" %>
+            <%= error_help_text(@coa_cash, :value) %>
+          </div>
+        </div>
+
+  <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-9">
+        <%= f.submit "Save", class: "btn btn-primary" %>
+        <button class="btn btn-link cancel">Cancel</button>
+      </div>
+    </div>
+  <% end %>
+</td>
+<script>
+  $(function () {
+      $("#coa_cash_coa_id").attr("data-placeholder", "Please select").chosen();
+      $('#coa_cash_value').autoNumeric('init', {lZero: 'keep', vMin: '0'});
+      $("#coa_cash_date").datepicker({
+        dateFormat: "dd/mm/yy",
+        maxDate: '0'
+      });
+  });
+</script>

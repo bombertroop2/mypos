@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :coa_cashes
   resources :coa_types
   resources :journals
   resources :targets
