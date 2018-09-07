@@ -76,6 +76,7 @@ class Product < ApplicationRecord
     ["Normal", "normal"],
     ["Special Price", "special price"],
     ["Sale", "sale"],
+    ["TH", "turun harga"],
     ["Discount 20%", "discount 20%"],
     ["Discount 30%", "discount 30%"],
     ["Discount 50%", "discount 50%"],
