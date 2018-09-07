@@ -99,6 +99,8 @@ class ConsignmentSalesController < ApplicationController
         unless @consignment_sale.save
           if @consignment_sale.errors[:base].present?
             render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"
+          elsif @consignment_sale.errors[:"consignment_sale_products.base"].present?
+            render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:"consignment_sale_products.base"].join("<br/>")}\",size: 'small'});"
           end
         end
       rescue ActiveRecord::RecordNotUnique => e
