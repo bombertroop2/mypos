@@ -20,7 +20,7 @@ class ImportDataJob < ApplicationJob
             if row.present? && Color.select("1 AS one").where(code: row["A#{idx + 1}"].strip).blank? #&& !added_colors.include?(row["A#{idx + 1}"].strip)
               puts "index => #{idx}"
               begin          
-                color = Color.new code: row["A#{idx + 1}"].strip, name: row["B#{idx + 1}"].strip, description: row["D#{idx + 1}"], type: "Color", attr_importing_data: true
+                color = Color.new code: row["A#{idx + 1}"].strip, name: row["B#{idx + 1}"].strip, description: row["D#{idx + 1}"], attr_importing_data: true
                 unless color.save
                   #                  error_messages << color.errors.inspect
                   #                  error_messages << "invalid index => #{idx}"
@@ -28,9 +28,11 @@ class ImportDataJob < ApplicationJob
                   #                else
                   #                  colors << color
                   #                  added_colors << row["A#{idx + 1}"].strip
+                  puts "ERRRRRROOOOOORRR => #{color.errors.messages}"
                   raise ActiveRecord::Rollback
                 end
               rescue Exception => e
+                puts "ERRRRRROOOOOORRR => #{e.message}"
                 raise ActiveRecord::Rollback
                 #                error_messages << e.inspect
                 #                error_messages << "invalid index => #{idx}"
