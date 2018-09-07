@@ -5,48 +5,52 @@ class ImportDataJob < ApplicationJob
     if type.eql?("color")
       start_from = step * 99999 - 99999 + 2 + step - 1
       end_at = step * 99999 + 2 + step - 1
-      error = false
-      error_messages = []
-      colors = []
-      added_colors = []
+      #      error = false
+      #      error_messages = []
+      #      colors = []
+      #      added_colors = []
       workbook = Creek::Book.new Rails.root.join("public", filename).to_s
       worksheets = workbook.sheets
 
-      worksheets.each do |worksheet|
-        worksheet.rows.each_with_index do |row, idx|          
-          next if idx < start_from
-          break if idx > end_at
-          if row.present? && Color.select("1 AS one").where(code: row["A#{idx + 1}"].strip).blank? && !added_colors.include?(row["A#{idx + 1}"].strip)
-            puts "index => #{idx}"
-            begin          
-              color = Color.new code: row["A#{idx + 1}"].strip, name: row["B#{idx + 1}"].strip, description: row["D#{idx + 1}"], type: "Color", attr_importing_data: true
-              unless color.valid?
-                error_messages << color.errors.inspect
-                error_messages << "invalid index => #{idx}"
-                error = true
-              else
-                colors << color
-                added_colors << row["A#{idx + 1}"].strip
+      ActiveRecord::Base.transaction do
+        worksheets.each do |worksheet|
+          worksheet.rows.each_with_index do |row, idx|          
+            next if idx < start_from
+            break if idx > end_at
+            if row.present? && Color.select("1 AS one").where(code: row["A#{idx + 1}"].strip).blank? #&& !added_colors.include?(row["A#{idx + 1}"].strip)
+              puts "index => #{idx}"
+              begin          
+                color = Color.new code: row["A#{idx + 1}"].strip, name: row["B#{idx + 1}"].strip, description: row["D#{idx + 1}"], type: "Color", attr_importing_data: true
+                unless color.save
+                  #                  error_messages << color.errors.inspect
+                  #                  error_messages << "invalid index => #{idx}"
+                  #                  error = true
+                  #                else
+                  #                  colors << color
+                  #                  added_colors << row["A#{idx + 1}"].strip
+                  raise ActiveRecord::Rollback
+                end
+              rescue Exception => e
+                raise ActiveRecord::Rollback
+                #                error_messages << e.inspect
+                #                error_messages << "invalid index => #{idx}"
+                #                error = true
               end
-            rescue Exception => e
-              error_messages << e.inspect
-              error_messages << "invalid index => #{idx}"
-              error = true
             end
           end
         end
       end
-      if error
-        error_messages.each_with_index do |error_message, idx|
-          puts "#{idx+1}. #{error_message}"
-        end
-      else
-        begin
-          Color.import(colors)          
-        rescue Exception => e
-          puts "error => #{e.inspect}"
-        end
-      end
+      #      if error
+      #        error_messages.each_with_index do |error_message, idx|
+      #          puts "#{idx+1}. #{error_message}"
+      #        end
+      #      else
+      #        begin
+      #          Color.import(colors)          
+      #        rescue Exception => e
+      #          puts "error => #{e.inspect}"
+      #        end
+      #      end
     elsif type.eql?("product")
       start_from = step * 99999 - 99999 + 2 + step - 1
       end_at = step * 99999 + 2 + step - 1
