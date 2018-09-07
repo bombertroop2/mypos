@@ -2,7 +2,52 @@ class ImportDataJob < ApplicationJob
   queue_as :default
 
   def perform(type, filename, step=1)
-    if type.eql?("product")
+    if type.eql?("color")
+      start_from = step * 99999 - 99999 + 2 + step - 1
+      end_at = step * 99999 + 2 + step - 1
+      error = false
+      error_messages = []
+      colors = []
+      added_colors = []
+      workbook = Creek::Book.new Rails.root.join("public", filename).to_s
+      worksheets = workbook.sheets
+
+      worksheets.each do |worksheet|
+        worksheet.rows.each_with_index do |row, idx|          
+          next if idx < start_from
+          break if idx > end_at
+          if row.present? && Color.select("1 AS one").where(code: row["A#{idx + 1}"].strip).blank? && !added_colors.include?(row["A#{idx + 1}"].strip)
+            puts "index => #{idx}"
+            begin          
+              color = Color.new code: row["A#{idx + 1}"].strip, name: row["B#{idx + 1}"].strip, description: row["D#{idx + 1}"].strip, type: "Color", attr_importing_data: true
+              unless color.valid?
+                error_messages << color.errors.inspect
+                error_messages << "invalid index => #{idx}"
+                error = true
+              else
+                colors << color
+                added_colors << row["A#{idx + 1}"].strip
+              end
+            rescue Exception => e
+              error_messages << e.inspect
+              error_messages << "invalid index => #{idx}"
+              error = true
+            end
+          end
+        end
+      end
+      if error
+        error_messages.each_with_index do |error_message, idx|
+          puts "#{idx+1}. #{error_message}"
+        end
+      else
+        begin
+          Color.import(colors)          
+        rescue Exception => e
+          puts "error => #{e.inspect}"
+        end
+      end
+    elsif type.eql?("product")
       start_from = step * 99999 - 99999 + 2 + step - 1
       end_at = step * 99999 + 2 + step - 1
       error = false
@@ -32,7 +77,7 @@ class ImportDataJob < ApplicationJob
                 row["E#{idx + 1}"].strip.downcase
               end
               brand_id = Brand.select(:id).where(code: row["B#{idx + 1}"].strip).first.id
-              sex = Product::SEX.select{ |x| x[1] == (row["C#{idx + 1}"].strip.eql?("B") || row["C#{idx + 1}"].strip.eql?("BAGS") ? "ladies" : (row["C#{idx + 1}"].strip.eql?("MENS") ? "man" : row["C#{idx + 1}"].strip.downcase)) }.first.first.downcase
+              sex = Product::SEX.select{ |x| x[1] == (row["C#{idx + 1}"].strip.eql?("B") || row["C#{idx + 1}"].strip.eql?("BAGS") ? "ladies" : (row["C#{idx + 1}"].strip.eql?("MENS") ? "men" : row["C#{idx + 1}"].strip.downcase)) }.first.first.downcase
               vendor_id = Vendor.select(:id).where(code: row["D#{idx + 1}"].strip).first.id
               target = Product::TARGETS.select{ |x| x[1] == target_value }.first.first.downcase
               model_id = Model.select(:id).where(code: row["F#{idx + 1}"].strip).first.id
@@ -507,155 +552,70 @@ class ImportDataJob < ApplicationJob
         end
       end
     elsif type.eql?("consignment sale")
-      # import per 10000 row
       start_from = step * 9999 - 9999 + 2 + step - 1
       end_at = step * 9999 + 2 + step - 1
       error = false
       error_messages = []
-      skipped_trans_number = []
-      skipped_trans_number_null_event_codes = []
-      skipped_trans_number_no_events = []
       consignment_sales = []
-      workbook = Creek::Book.new Rails.root.join("public", "import consignment sales.xlsx").to_s
+      duplicate_numbers = []
+      workbook = Creek::Book.new Rails.root.join("public", filename).to_s
       worksheets = workbook.sheets
 
       worksheets.each do |worksheet|
-        worksheet.rows.each_with_index do |row, idx|
+        worksheet.rows.each_with_index do |row, idx|  
           next if idx < start_from
           break if idx > end_at
-          if row.present? && idx >= start_from && idx <= end_at
+          if row.present? && row["E#{idx + 1}"].to_f >= 0
             puts "index => #{idx}"
-            if row["G#{idx + 1}"] != "S" && row["G#{idx + 1}"] != "NULL"
-              counter_event_id = 0
-              warehouse_id = 0
-              no_sale = if row["H#{idx + 1}"].present? && row["H#{idx + 1}"].downcase.strip.eql?("sale")
-                false
+            is_sale_approved = if row["B#{idx + 1}"].to_i == 1
+              true
+            else
+              false
+            end
+              
+            total = if row["E#{idx + 1}"].to_f == 0
+              if row["G#{idx + 1}"].strip == "N" || row["G#{idx + 1}"].strip == "NULL"
+                row["D#{idx + 1}"]
               else
-                true
-              end
-              counter_event_id = if row["G#{idx + 1}"].present? && !row["G#{idx + 1}"].strip.include?("SP") && !row["G#{idx + 1}"].strip.eql?("N") && !no_sale
-                CounterEvent.select(:id).where(["code = ? AND start_time <= ? AND end_time >= ?", row["G#{idx + 1}"].upcase.gsub(" ","").gsub("\t",""), Time.zone.parse(row["A#{idx + 1}"]).end_of_day, Time.zone.parse(row["A#{idx + 1}"])]).first.id
-              else
-                nil
-              end
-              warehouse = Warehouse.select(:id, :code).counter.where(code: row["F#{idx + 1}"]).first
-              if warehouse.present?
-                if row["E#{idx + 1}"].to_f > 0
-                  warehouse_id = warehouse.id
-                  is_sale_approved = if row["B#{idx + 1}"] == 1
-                    true
-                  else
-                    false
-                  end
-                
-                  consignment_sale = ConsignmentSale.new transaction_date: row["A#{idx + 1}"].to_date, approved: is_sale_approved, transaction_number: row["C#{idx + 1}"], total: row["E#{idx + 1}"], warehouse_id: warehouse_id, counter_event_id: counter_event_id, no_sale: no_sale, attr_warehouse_code: warehouse.code, attr_importing_data: true
-                  unless consignment_sale.valid?
-                    error_messages << consignment_sale.errors.inspect
-                    error_messages << "invalid index => #{idx}"
-                    error = true
-                  else
-                    consignment_sales << consignment_sale
-                  end
-                else
-                  skipped_trans_number << row["C#{idx + 1}"] unless skipped_trans_number.include?(row["C#{idx + 1}"])
-                end
-              else
-                skipped_trans_number << row["C#{idx + 1}"] unless skipped_trans_number.include?(row["C#{idx + 1}"])
+                row["E#{idx + 1}"].to_f
               end
             else
-              skipped_trans_number_null_event_codes << row["C#{idx + 1}"] if !skipped_trans_number_null_event_codes.include?(row["C#{idx + 1}"]) && row["G#{idx + 1}"] == "NULL"
-              skipped_trans_number_no_events << row["C#{idx + 1}"] if !skipped_trans_number_no_events.include?(row["C#{idx + 1}"]) && row["G#{idx + 1}"] == "S"
+              row["E#{idx + 1}"].to_f
             end
-          end
-        end
-      end
-      if error
-        error_messages.each_with_index do |error_message, idx|
-          puts "#{idx+1}. #{error_message}"
-        end
-      else
-        begin
-          ConsignmentSale.import(consignment_sales)          
-          puts "skipped numbers => #{skipped_trans_number.to_sentence}" if skipped_trans_number.present?
-          puts "skipped numbers (event NULL) => #{skipped_trans_number_null_event_codes.to_sentence}" if skipped_trans_number_null_event_codes.present?
-          puts "skipped numbers (no event) => #{skipped_trans_number_no_events.to_sentence}" if skipped_trans_number_no_events.present?
-        rescue Exception => e
-          puts "error => #{e.inspect}"
-        end
-      end
-    elsif type.eql?("consignment sale (skipped)")
-      # import per 10000 row
-      start_from = step * 9999 - 9999 + 2 + step - 1
-      end_at = step * 9999 + 2 + step - 1
-      error = false
-      error_messages = []
-      consignment_sales = []
-      workbook = Creek::Book.new Rails.root.join("public", "import consignment sales.xlsx").to_s
-      worksheets = workbook.sheets
-
-      worksheets.each do |worksheet|
-        worksheet.rows.each_with_index do |row, idx|
-          next if idx < start_from
-          break if idx > end_at
-          if row.present? && idx >= start_from && idx <= end_at && ConsignmentSale.select("1 AS one").where(transaction_number: row["C#{idx + 1}"]).blank?
-            puts "index => #{idx}"
+            
             counter_event_id = 0
             warehouse_id = 0
-            no_sale = if row["H#{idx + 1}"].present? && row["H#{idx + 1}"].downcase.strip.eql?("sale")
-              false
-            else
-              true
-            end
-
-            is_sale_approved = if row["B#{idx + 1}"] == 1
-              true
-            else
-              false
-            end
-                
             begin
-              counter_event = nil
-              counter_event_id = if row["G#{idx + 1}"].present? && !row["G#{idx + 1}"].strip.include?("SP") && !row["G#{idx + 1}"].strip.eql?("N") && !row["G#{idx + 1}"].strip.eql?("S") && row["E#{idx + 1}"] != "K02403170034" && !no_sale
-                (counter_event = CounterEvent.select(:id, :counter_event_type, :first_discount).where(["code = ? AND start_time <= ? AND end_time >= ?", row["G#{idx + 1}"].upcase.gsub(" ","").gsub("\t",""), Time.zone.parse(row["A#{idx + 1}"]).end_of_day, Time.zone.parse(row["A#{idx + 1}"])]).first).id
-              else
-                nil
-              end
-              warehouse = Warehouse.select(:id, :code).counter.where(code: row["F#{idx + 1}"]).first
-              if warehouse.present?
-                warehouse_id = warehouse.id                
-                # satu row yang aneh sendiri
-                if row["E#{idx + 1}"] == "K02403170034"
-                  consignment_sale = ConsignmentSale.new transaction_date: row["A#{idx + 1}"].to_date, approved: is_sale_approved, transaction_number: row["C#{idx + 1}"], total: row["D#{idx + 1}"], warehouse_id: warehouse_id, counter_event_id: counter_event_id, no_sale: no_sale, attr_warehouse_code: warehouse.code, attr_importing_data: true
-                  unless consignment_sale.valid?
-                    error_messages << consignment_sale.errors.inspect
-                    error_messages << "invalid index => #{idx}"
-                    error = true
-                  else
-                    consignment_sales << consignment_sale
-                  end
-                elsif row["E#{idx + 1}"].to_f == 0
-                  if !counter_event.counter_event_type.eql?("Discount(%)") || counter_event.first_discount.to_f != 100
-                    error_messages << "discount != 100%"
-                    error_messages << "invalid index => #{idx}"
-                    error = true
-                  else
-                    consignment_sale = ConsignmentSale.new transaction_date: row["A#{idx + 1}"].to_date, approved: is_sale_approved, transaction_number: row["C#{idx + 1}"], total: row["E#{idx + 1}"], warehouse_id: warehouse_id, counter_event_id: counter_event_id, no_sale: no_sale, attr_warehouse_code: warehouse.code, attr_importing_data: true
+              if row["D#{idx + 1}"].to_f == 0 && row["E#{idx + 1}"].to_f == 0
+              else                  
+                counter_event = nil
+                counter_event_id = if row["G#{idx + 1}"].present? && !row["G#{idx + 1}"].strip.include?("SP") && !row["G#{idx + 1}"].strip.eql?("N") && !row["G#{idx + 1}"].strip.eql?("NULL") && !row["G#{idx + 1}"].strip.eql?("S")
+                  (counter_event = CounterEvent.select(:id, :counter_event_type, :first_discount).where(["code = ? AND start_time <= ? AND end_time >= ?", row["G#{idx + 1}"].upcase.gsub(" ","").gsub("\t",""), row["A#{idx + 1}"].end_of_day, row["A#{idx + 1}"].beginning_of_day]).first).id
+                else
+                  nil
+                end
+                if total == 0 && (counter_event.nil? || !counter_event.counter_event_type.eql?("Discount(%)") || counter_event.first_discount.to_f != 100)
+                  error_messages << "discount != 100%"
+                  error_messages << "invalid index => #{idx}"
+                  error = true
+                else
+                  warehouse = Warehouse.select(:id, :code).where(code: row["F#{idx + 1}"].strip.upcase).first
+                  if warehouse.present?
+                    warehouse_id = warehouse.id
+                    consignment_sale = ConsignmentSale.new transaction_date: row["A#{idx + 1}"], approved: is_sale_approved, transaction_number: row["C#{idx + 1}"].strip, total: total, warehouse_id: warehouse_id, counter_event_id: counter_event_id, no_sale: false, attr_warehouse_code: warehouse.code, attr_importing_data: true
                     unless consignment_sale.valid?
                       error_messages << consignment_sale.errors.inspect
                       error_messages << "invalid index => #{idx}"
                       error = true
                     else
-                      consignment_sales << consignment_sale
+                      if consignment_sales.select{|cs| cs.transaction_number == row["C#{idx + 1}"].strip}.blank?
+                        if ConsignmentSale.select("1 AS one").where(transaction_number: row["C#{idx + 1}"].strip).blank?
+                          consignment_sales << consignment_sale
+                        else
+                          duplicate_numbers << row["C#{idx + 1}"].strip unless duplicate_numbers.include?(row["C#{idx + 1}"].strip)
+                        end
+                      end
                     end
-                  end
-                elsif row["G#{idx + 1}"].present? && row["G#{idx + 1}"].strip.eql?("S")
-                  consignment_sale = ConsignmentSale.new transaction_date: row["A#{idx + 1}"].to_date, approved: is_sale_approved, transaction_number: row["C#{idx + 1}"], total: row["E#{idx + 1}"], warehouse_id: warehouse_id, counter_event_id: counter_event_id, no_sale: no_sale, attr_warehouse_code: warehouse.code, attr_importing_data: true
-                  unless consignment_sale.valid?
-                    error_messages << consignment_sale.errors.inspect
-                    error_messages << "invalid index => #{idx}"
-                    error = true
-                  else
-                    consignment_sales << consignment_sale
                   end
                 end
               end
@@ -673,7 +633,226 @@ class ImportDataJob < ApplicationJob
         end
       else
         begin
-          ConsignmentSale.import(consignment_sales)          
+          ConsignmentSale.import(consignment_sales)
+        rescue Exception => e
+          puts "error => #{e.inspect}"
+        end
+        puts "duplicate numbers => #{duplicate_numbers.to_sentence}" if duplicate_numbers.present?
+      end
+      #    elsif type.eql?("beginning stock from con sale")
+      #      start_from = step * 99999 - 99999 + 2 + step - 1
+      #      end_at = step * 99999 + 2 + step - 1
+      #      error = false
+      #      error_messages = []
+      #      beginning_stocks = []
+      #      beginning_sale_date = ConsignmentSale.select(:transaction_date).order(:transaction_date).first.transaction_date
+      #      beginning_stock_year = beginning_sale_date.year
+      #      workbook = Creek::Book.new Rails.root.join("public", filename).to_s
+      #      worksheets = workbook.sheets
+      #
+      #      worksheets.each do |worksheet|
+      #        worksheet.rows.each_with_index do |row, idx|  
+      #          next if idx < start_from
+      #          break if idx > end_at
+      #          if row.present?
+      #            puts "index => #{idx}"
+      #            consignment_sale = ConsignmentSale.select(:warehouse_id).where(["transaction_number = ?", row["A#{idx + 1}"].strip]).first
+      #            if consignment_sale.present?
+      #              if BeginningStock.select("1 AS one").where(warehouse_id: consignment_sale.warehouse_id).blank?
+      #                if beginning_stocks.select{|bs| bs.warehouse_id == consignment_sale.warehouse_id}.blank?
+      #                  beginning_stocks << BeginningStock.new(year: beginning_stock_year, warehouse_id: consignment_sale.warehouse_id, attr_importing_data: true)
+      #                end
+      #              end
+      #            end
+      #          end
+      #        end
+      #      end
+      #      if error
+      #        error_messages.each_with_index do |error_message, idx|
+      #          puts "#{idx+1}. #{error_message}"
+      #        end
+      #      else
+      #        begin
+      #          BeginningStock.import(beginning_stocks)
+      #        rescue Exception => e
+      #          puts "error => #{e.inspect}"
+      #        end
+      #      end
+      #    elsif type.eql?("beginning stock month from con sale")
+      #      start_from = step * 99999 - 99999 + 2 + step - 1
+      #      end_at = step * 99999 + 2 + step - 1
+      #      error = false
+      #      error_messages = []
+      #      beginning_stock_months = []
+      #      beginning_sale_date = ConsignmentSale.select(:transaction_date).order(:transaction_date).first.transaction_date
+      #      beginning_stock_month = beginning_sale_date.month
+      #      workbook = Creek::Book.new Rails.root.join("public", filename).to_s
+      #      worksheets = workbook.sheets
+      #
+      #      worksheets.each do |worksheet|
+      #        worksheet.rows.each_with_index do |row, idx|  
+      #          next if idx < start_from
+      #          break if idx > end_at
+      #          if row.present?
+      #            puts "index => #{idx}"
+      #            warehouse = Warehouse.select(:id).where(["code = ?", row["F#{idx + 1}"].strip.upcase]).first
+      #            if warehouse.present?
+      #              beginning_stock = BeginningStock.select(:id).where(warehouse_id: warehouse.id).first
+      #              if beginning_stock.present?
+      #                if beginning_stock_months.select{|bsm| bsm.beginning_stock_id == beginning_stock.id && bsm.month == beginning_stock_month}.blank?
+      #                  beginning_stock_months << BeginningStockMonth.new(beginning_stock_id: beginning_stock.id, month: beginning_stock_month)
+      #                end
+      #              end
+      #            end
+      #          end
+      #        end
+      #      end
+      #      if error
+      #        error_messages.each_with_index do |error_message, idx|
+      #          puts "#{idx+1}. #{error_message}"
+      #        end
+      #      else
+      #        begin
+      #          BeginningStockMonth.import(beginning_stock_months)
+      #        rescue Exception => e
+      #          puts "error => #{e.inspect}"
+      #        end
+      #      end      
+    elsif type.eql?("missing price from consignment sale")
+      # cost untuk price yang missing ini belum ingat!!!
+      start_from = step * 99999 - 99999 + 2 + step - 1
+      end_at = step * 99999 + 2 + step - 1
+      error = false
+      error_messages = []
+      price_lists = []
+      workbook = Creek::Book.new Rails.root.join("public", filename).to_s
+      worksheets = workbook.sheets
+
+      worksheets.each do |worksheet|
+        worksheet.rows.each_with_index do |row, idx|  
+          next if idx < start_from
+          break if idx > end_at
+          if row.present?
+            puts "index => #{idx}"
+            begin
+              consignment_sale = ConsignmentSale.select(:transaction_date, :warehouse_id).where(["transaction_number = ?", row["A#{idx + 1}"].strip]).first
+              if consignment_sale.present?
+                price = row["E#{idx + 1}"].to_f
+                price_list = PriceList.select(:id, :price).joins(product_detail: [:size, :product, [price_code: :warehouses]]).
+                  where(["effective_date <= ? AND price = ?", consignment_sale.transaction_date, price]).
+                  where(["sizes.size = ? AND sizes.size_group_id = products.size_group_id", row["D#{idx + 1}"].strip]).
+                  where(["products.code = ?", row["B#{idx + 1}"].strip]).
+                  where(["warehouses.id = ?", consignment_sale.warehouse_id]).                  
+                  order("effective_date DESC").first
+                if price_list.blank?
+                  product_detail = ProductDetail.select(:id).
+                    joins(:size, :product, [price_code: :warehouses]).
+                    where(["sizes.size_group_id = products.size_group_id AND sizes.size = ? AND products.code = ? AND warehouses.id = ?", row["D#{idx + 1}"].strip, row["B#{idx + 1}"].strip, consignment_sale.warehouse_id]).first
+                  if product_detail.present? && price_lists.select{|pl| pl.effective_date == consignment_sale.transaction_date && pl.product_detail_id == product_detail.id}.blank?
+                    if PriceList.select("1 AS one").where(effective_date: consignment_sale.transaction_date, product_detail_id: product_detail.id).blank?
+                      new_price_list = PriceList.new(effective_date: consignment_sale.transaction_date, price: price, product_detail_id: product_detail.id, attr_importing_data: true)
+                      unless new_price_list.valid?
+                        error_messages << new_price_list.errors.inspect
+                        error_messages << "invalid index => #{idx}, article => #{row["B#{idx + 1}"].strip}"
+                        error = true
+                        break
+                      else
+                        price_lists << new_price_list
+                      end
+                    end
+                  end
+                else
+                  if price_list.price == 0
+                    price_list.attr_importing_data = true
+                    unless price_list.update(price: price)
+                      error_messages << price_list.errors.inspect
+                      error_messages << "(update price) invalid index => #{idx}, article => #{row["B#{idx + 1}"].strip}"
+                      error = true
+                      break
+                    end
+                  end
+                end
+              end
+            rescue Exception => e
+              error_messages << e.inspect
+              error_messages << "invalid index => #{idx}, rescue block"
+              error = true
+            end
+          end
+        end
+      end
+      if error
+        error_messages.each_with_index do |error_message, idx|
+          puts "#{idx+1}. #{error_message}"
+        end
+      else
+        begin
+          PriceList.import(price_lists)
+        rescue Exception => e
+          puts "error => #{e.inspect}"
+        end
+      end
+    elsif type.eql?("consignment sale products")
+      start_from = step * 99999 - 99999 + 2 + step - 1
+      end_at = step * 99999 + 2 + step - 1
+      error = false
+      error_messages = []
+      consignment_sale_products = []
+      workbook = Creek::Book.new Rails.root.join("public", filename).to_s
+      worksheets = workbook.sheets
+
+      worksheets.each do |worksheet|
+        worksheet.rows.each_with_index do |row, idx|  
+          next if idx < start_from
+          break if idx > end_at
+          if row.present?
+            puts "index => #{idx}"
+            begin
+              consignment_sale = ConsignmentSale.select(:id, :transaction_date, :warehouse_id).where(["transaction_number = ?", row["A#{idx + 1}"].strip]).first
+              if consignment_sale.present?
+                product_barcode = ProductBarcode.select(:id).joins(:size, product_color: [:product, :color]).
+                  where(["common_fields.code = ?", row["C#{idx + 1}"].upcase.gsub(" ","").gsub("\t","")]).
+                  where(["products.code = ?", row["B#{idx + 1}"].strip]).
+                  where(["sizes.size = ? AND sizes.size_group_id = products.size_group_id", row["D#{idx + 1}"].strip]).first
+                if product_barcode.present?
+                  product_detail = ProductDetail.select(:id).
+                    joins(:size, :product, [price_code: :warehouses]).
+                    where(["sizes.size_group_id = products.size_group_id AND sizes.size = ? AND products.code = ? AND warehouses.id = ?", row["D#{idx + 1}"].strip, row["B#{idx + 1}"].strip, consignment_sale.warehouse_id]).first
+                  if product_detail.present?
+                    price_list = PriceList.select(:id).
+                      where(["effective_date <= ?", consignment_sale.transaction_date]).
+                      where(product_detail_id: product_detail.id).
+                      order("effective_date DESC").first
+                    if price_list.present? && row["F#{idx + 1}"].to_i > 0
+                      quantity = row["F#{idx + 1}"].to_i
+                      total_per_row = row["G#{idx + 1}"].to_f / quantity
+                      1..quantity.times do |qty_index|
+                        imported_special_price = if row["H#{idx + 1}"].present?
+                          row["H#{idx + 1}"]
+                        else
+                          nil
+                        end
+                        consignment_sale_products << ConsignmentSaleProduct.new(consignment_sale_id: consignment_sale.id, product_barcode_id: product_barcode.id, price_list_id: price_list.id, total: total_per_row, imported_special_price: imported_special_price, attr_importing_data: true)
+                      end
+                    end
+                  end
+                end
+              end
+            rescue Exception => e
+              error_messages << e.inspect
+              error_messages << "invalid index => #{idx}, rescue block"
+              error = true
+            end
+          end
+        end
+      end
+      if error
+        error_messages.each_with_index do |error_message, idx|
+          puts "#{idx+1}. #{error_message}"
+        end
+      else
+        begin
+          ConsignmentSaleProduct.import(consignment_sale_products)
         rescue Exception => e
           puts "error => #{e.inspect}"
         end
