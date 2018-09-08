@@ -182,42 +182,42 @@ class ProductsController < ApplicationController
       (3..spreadsheet.last_row).each do |i|
         product_code = spreadsheet.row(i)[0].strip rescue nil
         if product_code.blank?
-          error_message = "Article code cannot be empty"
+          error_message = "Error for row (##{i}) : Article code cannot be empty"
           break
         end
         brand_code = spreadsheet.row(i)[2].strip rescue nil
         if brand_code.blank?
-          error_message = "Brand code cannot be empty"
+          error_message = "Error for row (##{i}) : Brand code cannot be empty"
           break
         end
         sex = spreadsheet.row(i)[3].strip.downcase rescue nil
         if sex.blank?
-          error_message = "Sex cannot be empty"
+          error_message = "Error for row (##{i}) : Sex cannot be empty"
           break
         end
         vendor_code = spreadsheet.row(i)[4].strip rescue nil
         if vendor_code.blank?
-          error_message = "Vendor code cannot be empty"
+          error_message = "Error for row (##{i}) : Vendor code cannot be empty"
           break
         end
         target = spreadsheet.row(i)[5].strip.downcase rescue nil
         if target.blank?
-          error_message = "Target cannot be empty"
+          error_message = "Error for row (##{i}) : Target cannot be empty"
           break
         end
         model_code = spreadsheet.row(i)[6].strip rescue nil
         if model_code.blank?
-          error_message = "Model code cannot be empty"
+          error_message = "Error for row (##{i}) : Model code cannot be empty"
           break
         end
         goods_type_code = spreadsheet.row(i)[7].strip rescue nil
         if goods_type_code.blank?
-          error_message = "Goods type code cannot be empty"
+          error_message = "Error for row (##{i}) : Goods type code cannot be empty"
           break
         end
         size_group_code = spreadsheet.row(i)[8].strip rescue nil
         if size_group_code.blank?
-          error_message = "Size group code cannot be empty"
+          error_message = "Error for row (##{i}) : Size group code cannot be empty"
           break
         end
         additional_information = spreadsheet.row(i)[9].strip.upcase rescue nil
@@ -225,42 +225,42 @@ class ProductsController < ApplicationController
         if prdct.blank?
           brand_id = Brand.where(code: brand_code).pluck(:id).first
           if brand_id.blank?
-            error_message = "Brand #{brand_code} doesn't exist"
+            error_message = "Error for row (##{i}) : Brand #{brand_code} doesn't exist"
             break
           end
           vendor_id = Vendor.where(code: vendor_code).pluck(:id).first
           if vendor_id.blank?
-            error_message = "Vendor #{vendor_code} doesn't exist"
+            error_message = "Error for row (##{i}) : Vendor #{vendor_code} doesn't exist"
             break
           end
           model_id = Model.where(code: model_code).pluck(:id).first
           if model_id.blank?
-            error_message = "Model #{model_code} doesn't exist"
+            error_message = "Error for row (##{i}) : Model #{model_code} doesn't exist"
             break
           end
           goods_type_id = GoodsType.where(code: goods_type_code).pluck(:id).first
           if goods_type_id.blank?
-            error_message = "Goods type #{goods_type_code} doesn't exist"
+            error_message = "Error for row (##{i}) : Goods type #{goods_type_code} doesn't exist"
             break
           end
           size_group_id = SizeGroup.where(code: size_group_code).pluck(:id).first
           if size_group_id.blank?
-            error_message = "Size group #{size_group_code} doesn't exist"
+            error_message = "Error for row (##{i}) : Size group #{size_group_code} doesn't exist"
             break
           end
           size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].strip).where(["size_groups.id = ?", size_group_id]).pluck(:id).first
           if size_id.blank?
-            error_message = "Size #{spreadsheet.row(i)[11].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].strip} doesn't exist"
             break
           end
           price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].strip).pluck(:id).first
           if price_code_id.blank?
-            error_message = "Price code #{spreadsheet.row(i)[12].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].strip} doesn't exist"
             break
           end
           color_id = Color.where(code: spreadsheet.row(i)[14].strip).pluck(:id).first
           if color_id.blank?
-            error_message = "Color #{spreadsheet.row(i)[14].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Color #{spreadsheet.row(i)[14].strip} doesn't exist"
             break
           end
           product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: additional_information, attr_importing_data_via_web: true
@@ -273,12 +273,12 @@ class ProductsController < ApplicationController
         else
           size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].strip).where(["size_groups.id = ?", prdct.size_group_id]).pluck(:id).first
           if size_id.blank?
-            error_message = "Size #{spreadsheet.row(i)[11].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].strip} doesn't exist"
             break
           end
           price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].strip).pluck(:id).first
           if price_code_id.blank?
-            error_message = "Price code #{spreadsheet.row(i)[12].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].strip} doesn't exist"
             break
           end
           product_detail = prdct.product_details.select{|pd| pd.size_id == size_id && pd.price_code_id == price_code_id}.first
