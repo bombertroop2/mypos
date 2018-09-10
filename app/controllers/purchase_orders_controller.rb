@@ -197,6 +197,14 @@ class PurchaseOrdersController < ApplicationController
     @purchase_order.closing_po = true
     @valid = @purchase_order.update(status: "Closed")
   end
+  
+  def export
+    respond_to do |format|
+      format.xls do
+        @pos = PurchaseOrder.select(:number, :request_delivery_date).select("products.code, products.target, brands_products.code AS brand_code, brands_products.name AS brand_name, common_fields.code AS color_code, common_fields.name AS color_name, sizes.size, product_barcodes.barcode, product_details.id AS product_detail_id").joins(:warehouse, purchase_order_products: [purchase_order_details: [:color, :size], product: :brand]).joins("INNER JOIN product_colors ON product_colors.product_id = products.id AND product_colors.color_id = common_fields.id").joins("INNER JOIN product_barcodes ON product_barcodes.product_color_id = product_colors.id AND product_barcodes.size_id = sizes.id").joins("INNER JOIN product_details ON product_details.size_id = sizes.id AND product_details.product_id = products.id AND product_details.price_code_id = warehouses.price_code_id").where(id: params[:id])
+      end
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
