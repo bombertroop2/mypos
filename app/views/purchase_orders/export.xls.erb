@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:html="http://www.w3.org/TR/REC-html40">
+    <Worksheet ss:Name="Sheet1">
+        <Table>
+            <Row>
+                <Cell><Data ss:Type="String">PO number</Data></Cell>
+                <Cell><Data ss:Type="String">Request Delivery Date</Data></Cell>
+                <Cell><Data ss:Type="String">Article Code</Data></Cell>
+                <Cell><Data ss:Type="String">Brand Code</Data></Cell>
+                <Cell><Data ss:Type="String">Brand Name</Data></Cell>
+                <Cell><Data ss:Type="String">Target</Data></Cell>
+                <Cell><Data ss:Type="String">Color Code</Data></Cell>
+                <Cell><Data ss:Type="String">Color Name</Data></Cell>
+                <Cell><Data ss:Type="String">Size</Data></Cell>
+                <Cell><Data ss:Type="String">Barcode</Data></Cell>
+                <Cell><Data ss:Type="String">Price</Data></Cell>
+            </Row>
+
+            <% @pos.each do |po| %>
+              <% pl = PriceList.select(:price).where(product_detail_id: po.product_detail_id).where(["effective_date <= ?", po.request_delivery_date]).order("effective_date DESC").first %>
+              <Row>
+                  <Cell><Data ss:Type="String"><%= po.number %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.request_delivery_date %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.code %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.brand_code %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.brand_name %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.target %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.color_code %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.color_name %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.size %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= po.barcode %></Data></Cell>
+                  <Cell><Data ss:Type="Number"><%= pl.price rescue 0 %></Data></Cell>
+              </Row>
+            <% end %>
+        </Table>
+    </Worksheet>
+</Workbook>

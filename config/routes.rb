@@ -263,6 +263,7 @@ Rails.application.routes.draw do
       #      post 'receive'
       get 'close'
       get 'print'
+      get 'export'
     end
   end
   resources :products do
