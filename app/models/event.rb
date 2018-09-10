@@ -26,7 +26,7 @@ class Event < ApplicationRecord
                           validates :discount_amount, numericality: {less_than: proc {|event| event.minimum_purchase_amount}}, if: proc { |event| event.event_type.strip.eql?("Gift") && event.discount_amount.present? && event.minimum_purchase_amount.present? }
                             validate :editable, on: :update, unless: proc {|event| event.event_activation.eql?("true")}
                               validate :activable, on: :update, if: proc {|event| event.event_activation.eql?("true")}
-                                #                              validate :activable, on: :create
+                                validate :activable, on: :create
                                 accepts_nested_attributes_for :event_warehouses, allow_destroy: true
                                 accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     

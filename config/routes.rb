@@ -3,12 +3,9 @@ Rails.application.routes.draw do
   resources :coa_types
   resources :journals
   resources :targets
-  resources :coa_departments
   get 'growth_reports/index'
   get 'growth_reports/print'
 
-  resources :departments
-  resources :coas
   namespace :api, defaults: { format: :json } do
     resources :stock_mutations do
       collection do
@@ -270,6 +267,8 @@ Rails.application.routes.draw do
   resources :products do
     collection do
       get 'populate_detail_form'
+      get 'import'
+      post 'import'
     end
   end
   resources :size_groups, except: :show

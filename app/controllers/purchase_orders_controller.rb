@@ -8,11 +8,7 @@ class PurchaseOrdersController < ApplicationController
   # GET /purchase_orders
   # GET /purchase_orders.json
   def index
-    like_command = if Rails.env.eql?("production")
-      "ILIKE"
-    else
-      "LIKE"
-    end
+    like_command = "ILIKE"
     po_scope = PurchaseOrder.joins(:vendor).select("purchase_orders.id, number, po_type, status, vendors.name AS vendor_name")
     if request.xhr?
       po_scope = po_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).

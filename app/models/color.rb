@@ -1,4 +1,6 @@
 class Color < CommonField
+  attr_accessor :attr_importing_data
+
   audited on: [:create, :update]
   has_many :purchase_order_details#, dependent: :restrict_with_error
   #  has_many :received_purchase_orders
@@ -13,7 +15,7 @@ class Color < CommonField
   has_one :order_booking_product_item_relation, -> {select("1 AS one")}, class_name: "OrderBookingProductItem"
   has_one :stock_mutation_product_item_relation, -> {select("1 AS one")}, class_name: "StockMutationProductItem"
 
-  before_validation :upcase_code
+  before_validation :upcase_code, unless: proc{|c| c.attr_importing_data}
 
   validates :code, uniqueness: true 
   validate :code_not_changed

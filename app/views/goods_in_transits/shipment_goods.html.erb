@@ -3,9 +3,9 @@
 </div>
 
 <div id="search-form-container" class="form-inline text-right">
-    <% if current_user.has_non_spg_role? %>
+    <% if @user_roles.include?("staff") || @user_roles.include?("manager") || @user_roles.include?("administrator") || @user_roles.include?("superadmin") || @user_roles.include?("accountant") || @user_roles.include?("area_manager") %>
       <div class="form-group">
-          <%= select_tag "destination_warehouse", options_from_collection_for_select(Warehouse.not_central.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Warehouse to", class: "form-control", id: "filter-destination-warehouse"} %>
+          <%= select_tag "destination_warehouse", options_from_collection_for_select(@warehouses, :id, "code_and_name"), {prompt: "Warehouse to", class: "form-control", id: "filter-destination-warehouse"} %>
         </div>
       <% end %>
       <div class="form-group">

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <%= favicon_link_tag '32pix.ico' %>
         <title>
             <% if !params[:controller].eql?("welcome") && !params[:controller].eql?("devise/sessions") %>
               <% if params[:controller].eql?("stocks") %>
@@ -39,6 +40,7 @@
         <%= stylesheet_link_tag 'application', media: 'all' %>
 <%#= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
         <%= csrf_meta_tags %>
+        <%= action_cable_meta_tag %>
     </head>
     <body class="<%= controller_name != 'sessions' ? "nav-md" : "login" %>">
         <% if controller_name != 'sessions' %>
@@ -49,7 +51,8 @@
                     <div class="col-md-3 left_col">
                         <div class="left_col scroll-view">
                             <div class="navbar nav_title" style="border: 0;">
-                                <%= link_to raw("<i class=\"fa fa-paw\"></i> <span>ONE-S</span>"), root_path, class: "site_title", method: :get %>
+                                <%#= link_to raw("<i class=\"fa fa-paw\"></i> <span>ONE-S</span>"), root_path, class: "site_title", method: :get %>
+                                <%= link_to image_tag(image_url("OneS-Jpeg.jpg"), style: 'height:100%;width:auto;'), root_path, method: :get %>
                               </div>
 
                               <div class="clearfix"></div>
@@ -100,6 +103,9 @@
                                                       <% end %>
                                                       <% if can? :read, Product %>
                                                         <li><%= link_to "Products", products_path, method: :get %></li>
+                                                      <% end %>
+                                                      <% if can? :manage, Product %>
+                                                        <li><%= link_to "Import Products", import_products_path, method: :get %></li>
                                                       <% end %>
                                                       <% if can? :read, User %>
                                                         <li><%= link_to "Customers", customers_path, method: :get %></li>
@@ -272,27 +278,6 @@
                                                       <% end %>
                                                       <% if can? :read, CounterEvent %>
                                                         <li><%= link_to "Counter Events", counter_events_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if accounting_menu_active? %>
-                                              <li><a><i class="fa fa-cogs"></i> Accounting <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, CoaType %>
-                                                        <li><%= link_to "Chart Of Accounts Type", coa_types_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Coa %>
-                                                        <li><%= link_to "Chart Of Accounts", coas_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Department %>
-                                                        <li><%= link_to "Departments", departments_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CoaDepartment %>
-                                                        <li><%= link_to "Company Departments", coa_departments_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CoaCash %>
-                                                        <li><%= link_to "Adjusment", coa_cashes_path, method: :get %></li>
                                                       <% end %>
                                                   </ul>
                                               </li>
@@ -589,46 +574,6 @@
         <% end %>
       <% elsif controller_name.eql?("brands") %>
         <% if cannot?(:manage, Brand) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("coas") %>
-        <% if cannot?(:manage, Coa) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("departments") %>
-        <% if cannot?(:manage, Department)  %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("coa_departments") %>
-        <% if cannot?(:manage, CoaDepartment) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("coa_types") %>
-        <% if cannot?(:manage, CoaType) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("coa_cashes") %>
-        <% if cannot?(:manage, CoaCash) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                         $('#new-item-btn').unbind("click");
                         $('#new-item-btn').click(function (e) {

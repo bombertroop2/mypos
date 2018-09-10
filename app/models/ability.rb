@@ -13,11 +13,6 @@ class Ability
       cannot :manage, Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
-      cannot :manage, Coa
-      cannot :manage, Department
-      cannot :manage, CoaDepartment
-      cannot :manage, CoaType
-      cannot :manage, CoaCash
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
@@ -211,7 +206,7 @@ class Ability
               alias_action :store_to_warehouse_inventory_receipts, :show_store_to_warehouse_receipt, to: :read_store_to_warehouse_inventory_receipts
               can [:read_store_to_store_mutations, :manage_store_to_store_mutation, :read_store_to_warehouse_mutations, :read_store_to_store_inventory_receipts, :read_store_to_warehouse_inventory_receipts, :receive_to_warehouse], class_name.gsub(/\s+/, "").constantize
             end
-          elsif class_name.eql?("Goods In Transit") && !user_roles.include?("area_manager")
+          elsif class_name.eql?("Goods In Transit")
             alias_action :shipment_goods, :show_shipment_goods, to: :read_shipment_goods
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
@@ -237,18 +232,16 @@ class Ability
             else
               can ability, Member
             end
+          elsif class_name.eql?("Stock") && user_roles.include?("area_manager")
+            can ability, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("Stock Movement") && user_roles.include?("area_manager")
+            can ability, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("ListingStock") && user_roles.include?("area_manager")
+            can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
-            if class_name.eql?("Accounting")
-              can ability, Coa
-              can ability, Department
-              can ability, CoaDepartment
-              can ability, CoaType
-              can ability, CoaCash
-            else
-              can :read, class_name.gsub(/\s+/, "").constantize
-            end
+            can :read, class_name.gsub(/\s+/, "").constantize
           end
         end
       end

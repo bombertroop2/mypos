@@ -72,12 +72,6 @@ module ApplicationHelper
     return true if can? :manage, Company
   end
 
-  def accounting_menu_active?
-    return true if can? :read, Coa
-    return true if can? :read, Department
-    return true if can? :read, CoaDepartment
-  end
-
   def event_menu_active?
     return true if can? :read, Event
     return true if can? :read, CounterEvent

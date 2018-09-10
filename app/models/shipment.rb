@@ -6,7 +6,6 @@ class Shipment < ApplicationRecord
 
   belongs_to :order_booking
   belongs_to :courier
-  has_many :journals, :as => :transactionable
 
   has_many :shipment_products, dependent: :destroy
 
@@ -15,7 +14,7 @@ class Shipment < ApplicationRecord
   validates :delivery_date, :courier_id, :order_booking_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc {|shpmnt| shpmnt.order_booking.created_at.to_date}, message: 'must be after or equal to creation date of order booking' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.order_booking_id.present? && !shpmnt.attr_change_receive_date}
     validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.delivery_date_changed? && !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
-      validate :warehouse_is_active, :courier_available, :order_booking_available, :check_in_transit_warehouse#, :check_min_quantity
+      validate :warehouse_is_active, :courier_available, :order_booking_available#, :check_min_quantity
       validate :editable, on: :update, if: proc{|shpmnt| !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
         validate :order_booking_not_changed, on: :update, if: proc{|shipment| shipment.order_booking_id_changed?}
           validates :received_date, presence: true, if: proc{|shpmnt| shpmnt.receiving_inventory || shpmnt.attr_change_receive_date}
@@ -28,26 +27,11 @@ class Shipment < ApplicationRecord
                         validate :receive_date_not_changed, if: proc{|shipment| shipment.attr_change_receive_date}
 
                           before_create :generate_do_number
-                          after_create :finish_ob, :notify_store, :delivery_order_journal
+                          after_create :finish_ob, :notify_store
                           before_destroy :deletable, :transaction_open, :delete_tracks
                           after_destroy :set_ob_status_to_p
-                          before_update :set_is_receive_date_changed, :change_listing_stock_transaction_date, :update_journal_receive_date, if: proc{|shipment| shipment.attr_change_receive_date}
-                            after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, :delivery_order_receive_journal, if: proc{|shpmnt| shpmnt.receiving_inventory}
-
-                            def get_gross_price
-                              product_details = Shipment.get_product_details(self.id)
-                              gross = 0
-                              product_details.each do |pd|
-                                product_detail = ProductDetail.find(pd.id)
-                                if product_detail.present?
-                                  gross = gross + (product_detail.active_price.price.to_i * pd.quantity)
-                                else
-                                  return nil
-                                end
-                              end
-                              return gross
-                            end
-
+                          before_update :set_is_receive_date_changed, :change_listing_stock_transaction_date, if: proc{|shipment| shipment.attr_change_receive_date}
+                            after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, if: proc{|shpmnt| shpmnt.receiving_inventory}
 
                               private
 
@@ -101,107 +85,6 @@ class Shipment < ApplicationRecord
                                     end
                                   end
                                 end
-                              end
-
-                              def delivery_order_journal
-                                coa = Coa.find_by_transaction_type('DO')
-                                gross = self.get_gross_price
-                                ppn = gross.to_i * 10 /100
-                                nett = gross - ppn
-                                warehouse = Warehouse.find_by_warehouse_type("in_transit")
-                                if warehouse.present?
-                                  self.journals.create([
-                                  {
-                                    coa_id: coa.id,
-                                    gross: gross.to_f,
-                                    gross_after_discount: gross.to_f,
-                                    discount: 0.0,
-                                    ppn: ppn.to_f,
-                                    nett: nett.to_f,
-                                    transaction_date: self.delivery_date,
-                                    warehouse_id: self.order_booking.origin_warehouse_id,
-                                    activity: "Out"
-                                    },
-                                    {
-                                    coa_id: coa.id,
-                                    gross: gross.to_f,
-                                    gross_after_discount: gross.to_f,
-                                    discount: 0.0,
-                                    ppn: ppn.to_f,
-                                    nett: nett.to_f,
-                                    transaction_date: self.delivery_date,
-                                    warehouse_id: warehouse.id,
-                                    activity: "In"
-                                    }]
-                                )
-                                else
-                                  errors.add(:base, "Please create In Transit Warehouse First!")
-                                end
-                              end
-
-                              def delivery_order_receive_journal
-                                coa = Coa.find_by_transaction_type('DO')
-                                gross = self.get_gross_price
-                                ppn = gross.to_i * 10 /100
-                                nett = gross - ppn
-                                warehouse = Warehouse.find_by_warehouse_type("in_transit")
-                                if warehouse.present?
-                                  self.journals.create([
-                                    {
-                                      coa_id: coa.id,
-                                      gross: gross.to_f,
-                                      gross_after_discount: gross.to_f,
-                                      discount: 0.0,
-                                      ppn: ppn.to_f,
-                                      nett: nett.to_f,
-                                      transaction_date: self.received_date,
-                                      warehouse_id: warehouse.id,
-                                      activity: "Out"
-                                    },
-                                    {
-                                      coa_id: coa.id,
-                                      gross: gross.to_f,
-                                      gross_after_discount: gross.to_f,
-                                      discount: 0.0,
-                                      ppn: ppn.to_f,
-                                      nett: nett.to_f,
-                                      transaction_date: self.received_date,
-                                      warehouse_id: self.order_booking.destination_warehouse_id,
-                                      activity: "In"
-                                    }]
-                                  )
-                                else
-                                  errors.add(:base, "Please create In Transit Warehouse First!")
-                                end
-                              end
-
-                              def check_in_transit_warehouse
-                                in_transit = Warehouse.where(warehouse_type: "in_transit").select("1 AS one")
-                                if !in_transit.present?
-                                  errors.add(:base, "Please create In Transit Warehouse First!")
-                                end
-                              end
-
-                              def self.get_product_details(id)
-                                Shipment.find_by_sql ["
-                                  SELECT product_details.id, SUM(shipment_product_items.quantity) AS quantity FROM shipments
-                                  INNER JOIN order_bookings ON order_bookings.id = shipments.order_booking_id
-                                  INNER JOIN warehouses ON warehouses.id = order_bookings.origin_warehouse_id
-                                  INNER JOIN shipment_products ON shipment_products.shipment_id = shipments.id
-                                  INNER JOIN shipment_product_items ON shipment_product_items.shipment_product_id = shipment_products.id
-                                  INNER JOIN order_booking_product_items ON order_booking_product_items.id = shipment_product_items.order_booking_product_item_id
-                                  INNER JOIN order_booking_products ON order_booking_products.id = shipment_products.order_booking_product_id
-                                  INNER JOIN products ON products.id = order_booking_products.product_id
-                                  INNER JOIN product_details ON product_details.product_id = products.id
-                                  WHERE (product_details.size_id = order_booking_product_items.size_id AND product_details.price_code_id = warehouses.price_code_id AND shipments.id = :id) GROUP BY product_details.id", {id: id}]
-                              end
-
-                              def update_journal_receive_date
-                                transit_warehouse = Warehouse.find_by_warehouse_type("in_transit")
-                                transit_journal = self.journals.where(warehouse_id: transit_warehouse.id, activity: "Out").first
-                                destination_journal = self.journals.where(warehouse_id: self.order_booking.destination_warehouse_id, activity: "In").first
-                                transit_journal.update(transaction_date: self.received_date) if transit_journal.present?
-                                destination_journal.update(transaction_date: self.received_date) if destination_journal.present?
                               end
 
                               def create_listing_stock(product_id, color_id, size_id, warehouse_id, transaction_date, quantity, shipment_product, shipment_product_item)
