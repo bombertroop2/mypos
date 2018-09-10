@@ -1,0 +1,7 @@
+$("#print_doc_container").html("");
+<% @shipments.each do |ship| %>
+  $("#print_doc_container").append("<%= j(render(partial: "multi_print", locals: { shipment: ship }) ) %>");
+<% end %>
+$("#print_doc_container").removeClass("hidden");
+$("#print_doc_container").print();
+$("#print_doc_container").addClass("hidden");

@@ -13,10 +13,11 @@
  *= require_tree .
  *= require_self
  */
- 
+
 @import "bootstrap-sprockets"
 @import "chosen.min"
 @import "bootstrap-chosen"
+@import "bs-checkbox"
 
 .upcase
   text-transform: uppercase
@@ -54,7 +55,7 @@ table.dataTable thead .sorting_desc
 
 table.dataTable thead .sorting
   background-image: url(<%= image_url("sort_both.png") %>)
-  
+
 .ui-icon,
 .ui-widget-content .ui-icon
   background-image: url(<%= asset_path("images/ui-icons_444444_256x240.png") %>)
