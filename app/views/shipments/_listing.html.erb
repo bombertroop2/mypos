@@ -5,7 +5,11 @@
             <th class="col-md-2"><%= smart_listing.sortable "Delivery Date", "delivery_date" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "Received Date", "received_date" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "Quantity", "shipments.quantity" %></th>
-            <th class="col-md-2"></th>
+            <th class="col-md-2">
+              <span id="checkAll" class="pull-right bs-checkbox glyphicon glyphicon-unchecked">
+                <input type="checkbox">
+              </span>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -26,5 +30,4 @@
           $("#listing-shipment-thead").show();
       }
   }, 0);
-
 </script>

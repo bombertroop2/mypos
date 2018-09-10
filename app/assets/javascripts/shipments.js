@@ -31,6 +31,39 @@ $(function () {
         $(this).val('');
     });
 
+    $('#new-item-btn').removeClass('pull-right');
+
+    $("tr.new-item-action").find("td").append("<button type='submit' class='btn btn-link pull-right' id='print-btn'><i class='glyphicon glyphicon-print'></i> Print Checked</button>");
+
+    $('.bs-checkbox').bsCheckbox();
+     $("#checkAll").click(function () {
+        checkbox = $(this).find( "input[type=checkbox]" );
+         if (checkbox.is(":checked")){
+            $('span.checkbox-table').each(function(){
+                $(this).find("input[type=checkbox]").prop('checked', true);
+                $(this).removeClass('glyphicon-unchecked').addClass('glyphicon-check');
+            });
+         }else{
+            $('span.checkbox-table').each(function(){
+                $(this).find("input[type=checkbox]").prop('checked', false);
+                $(this).removeClass('glyphicon-check').addClass('glyphicon-unchecked');
+            });
+         }
+     });
+
+    $("#print-btn").click(function () {
+        var check = [];
+        if ($('input:checkbox:checked').length == 0)
+            bootbox.alert({message: "Please check the data you want to print", size: "small"});
+        else {
+            $('input:checkbox:checked').each(function(){
+                check.push(parseInt($(this).val()));
+            });
+            $.get("/shipments/multiprint", {
+                check: check
+            });
+        }
+    });
 });
 
 

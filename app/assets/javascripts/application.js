@@ -24,6 +24,7 @@
 //= require fastclick
 //= require bootstrap-progressbar.min
 //= require custom.min
+//= require bs-checkbox
 //= require_tree .
 
 
@@ -35,7 +36,7 @@
 //            return false;
 //        }
 //    });
-//    
+//
 //    if ($("#taxable_entrepreneur").length == 0) {
 //        $(document).off("keydown");
 //    }

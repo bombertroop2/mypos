@@ -67,6 +67,14 @@ class ShipmentsController < ApplicationController
     @shipment.update(is_document_printed: true)
   end
 
+  def multiprint
+    @shipments = Shipment.where(id: params[:check]).order(:id)
+    @shipments.update_all(is_document_printed: true)
+    respond_to do |format|
+      format.js
+    end
+  end
+
   # GET /shipments/new
   def new
     @shipment = Shipment.new
@@ -118,11 +126,11 @@ class ShipmentsController < ApplicationController
       raise ActiveRecord::Rollback if @invalid
     end
   end
-  
+
   #  def edit
   #    @shipment.delivery_date = @shipment.delivery_date.strftime("%d/%m/%Y")
   #  end
-  #  
+  #
   #  def update
   #    add_additional_params_for_edit
   #    @valid = @shipment.update(edit_shipment_params)
@@ -142,9 +150,9 @@ class ShipmentsController < ApplicationController
       @deleted = false
     else
       @deleted = true
-    end  
+    end
   end
-  
+
   def generate_ob_detail
     order_booking_ids = params[:order_booking_ids].split(",")
     order_booking_numbers = params[:order_booking_numbers].split(",")
@@ -173,7 +181,7 @@ class ShipmentsController < ApplicationController
       end
     end
   end
-  
+
   def receive
     @shipment.with_lock do
       @shipment.update(received_date: params[:receive_date], receiving_inventory: true)
@@ -184,20 +192,20 @@ class ShipmentsController < ApplicationController
       render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
     end
   end
-  
+
   def search_do
     @shipments = if current_user.has_non_spg_role?
       Shipment.select(:id, :delivery_order_number).joins(:order_booking).where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
     else
       Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
     end
-    
+
     # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number (tapi sekarang 1 DO = 1 OB)
     if @shipments.length == 0 || @shipments.length > 1
       render js: "var box = bootbox.alert({message: \"No records found\",size: 'small'});box.on(\"hidden.bs.modal\", function () {$(\"#do_ob_number\").focus();});"
     end
   end
-  
+
   def change_receive_date
     @updated = false
     @shipment.with_lock do
@@ -211,7 +219,7 @@ class ShipmentsController < ApplicationController
       end
     end
   end
-  
+
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_shipment
@@ -231,7 +239,7 @@ class ShipmentsController < ApplicationController
         shipment_product_items_attributes: [:order_booking_product_item_id, :quantity,
           :order_booking_product_id, :order_booking_id]])
   end
-  
+
   # Never trust parameters from the scary internet, only allow the white list through.
   def edit_shipment_params
     params[:shipment].permit(:order_booking_number, :quantity, :delivery_date, :order_booking_id, :courier_id,
@@ -239,7 +247,7 @@ class ShipmentsController < ApplicationController
         shipment_product_items_attributes: [:id, :order_booking_product_item_id, :quantity,
           :order_booking_product_id, :order_booking_id]])
   end
-  
+
   def add_additional_params_for_edit
     total_quantity_shipment = 0
     params[:shipment][:shipment_products_attributes].each do |key, value|
@@ -254,7 +262,7 @@ class ShipmentsController < ApplicationController
     end if params[:shipment][:shipment_products_attributes].present?
     params[:shipment].merge! quantity: total_quantity_shipment
   end
-  
+
   def add_additional_params
     params[:shipments].each do |shipments_key, shipments_value|
       total_quantity_shipment = 0
