@@ -328,7 +328,7 @@ class ProductsController < ApplicationController
                 break
               end
               if valid
-                unless pr.save
+                unless valid = pr.save
                   message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
                   render js: "bootbox.alert({message: \"#{message}\",size: 'small'});"
                   raise ActiveRecord::Rollback
@@ -338,6 +338,7 @@ class ProductsController < ApplicationController
                 break
               end
             rescue ActiveRecord::RecordNotUnique => e
+              valid = false
               render js: "bootbox.alert({message: \"Article code #{pr.code} has already been taken\",size: 'small'});"
               raise ActiveRecord::Rollback
             end
