@@ -33,7 +33,7 @@ $(function () {
 
     $('#new-item-btn').removeClass('pull-right');
 
-    $("tr.new-item-action").find("td").append("<button type='submit' class='btn btn-link pull-right' id='print-btn'><i class='glyphicon glyphicon-print'></i> Print Checked</button>");
+    $("tr.new-item-action").find("td").append("<button type='submit' class='btn btn-link pull-right' id='print-btn'><i class='glyphicon glyphicon-print'></i> Print Checked Rows</button>");
 
     $('.bs-checkbox').bsCheckbox();
      $("#checkAll").click(function () {
