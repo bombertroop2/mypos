@@ -18,6 +18,7 @@
                 <Cell><Data ss:Type="String">Size</Data></Cell>
                 <Cell><Data ss:Type="String">Barcode</Data></Cell>
                 <Cell><Data ss:Type="String">Price</Data></Cell>
+                <Cell><Data ss:Type="String">Quantity</Data></Cell>
             </Row>
 
             <% @pos.each do |po| %>
@@ -34,6 +35,7 @@
                   <Cell><Data ss:Type="String"><%= po.size %></Data></Cell>
                   <Cell><Data ss:Type="String"><%= po.barcode %></Data></Cell>
                   <Cell><Data ss:Type="Number"><%= pl.price rescue 0 %></Data></Cell>
+                  <Cell><Data ss:Type="Number"><%= po.quantity rescue 0 %></Data></Cell>
               </Row>
             <% end %>
         </Table>
