@@ -53,7 +53,7 @@ class SalesPromotionGirl < ApplicationRecord
   end
   
   def warehouse_available
-    errors.add(:warehouse_id, "does not exist!") if warehouse_id.present? && Warehouse.where(id: warehouse_id, is_active: true).where("warehouse_type <> 'central'").select("1 AS one").blank?
+    errors.add(:warehouse_id, "does not exist!") if warehouse_id.present? && Warehouse.where(id: warehouse_id, is_active: true).where("warehouse_type <> 'central' AND warehouse_type <> 'in_transit'").select("1 AS one").blank?
   end
   
   def role_available

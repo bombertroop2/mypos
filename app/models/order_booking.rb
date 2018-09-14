@@ -94,7 +94,7 @@ class OrderBooking < ApplicationRecord
           end
 
           def destination_warehouse_available
-            errors.add(:destination_warehouse_id, "does not exist!") if (new_record? || (destination_warehouse_id_changed? && persisted?)) && destination_warehouse_id.present? && Warehouse.not_central.actived.where(id: destination_warehouse_id).select("1 AS one").blank?
+            errors.add(:destination_warehouse_id, "does not exist!") if (new_record? || (destination_warehouse_id_changed? && persisted?)) && destination_warehouse_id.present? && Warehouse.not_central.not_in_transit.actived.where(id: destination_warehouse_id).select("1 AS one").blank?
           end
     
           def generate_number
