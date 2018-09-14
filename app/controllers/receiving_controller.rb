@@ -177,6 +177,8 @@ class ReceivingController < ApplicationController
           elsif @direct_purchase.errors[:"direct_purchase_products.base"].present?
             error_message = "Please insert at least one piece per product!"
             render js: "bootbox.alert({message: \"#{error_message}\",size: 'small'});" if @direct_purchase.errors[:"direct_purchase_products.base"].to_sentence.eql?(error_message)
+          elsif @direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.base"].present?
+            render js: "bootbox.alert({message: \"#{@direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.base"].join("<br/>")}\",size: 'small'});"
           end
         else
           @product_received = true
