@@ -53,7 +53,7 @@ class DirectPurchase < ApplicationRecord
                     end
               
                     def warehouse_exist
-                      errors.add(:warehouse_id, "does not exist!") unless Warehouse.select("1 AS one").where(id: warehouse_id, is_active: true).present?
+                      errors.add(:warehouse_id, "does not exist!") if Warehouse.select("1 AS one").where(id: warehouse_id, is_active: true).where("warehouse_type = 'central'").blank?
                     end
               
                     def set_receiving_date_to_receiving_purchase_order
