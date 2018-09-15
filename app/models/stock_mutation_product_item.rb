@@ -58,12 +58,13 @@ class StockMutationProductItem < ApplicationRecord
                         stock_movement_product_detail_deleted = stock_movement_product_detail.destroy
                       else
                         stock_movement_product_detail.ending_stock += quantity
+                        stock_movement_product_detail.save
                       end
                     else
                       stock_movement_product_detail.beginning_stock += quantity
                       stock_movement_product_detail.ending_stock += quantity
+                      stock_movement_product_detail.save
                     end      
-                    stock_movement_product_detail.save
                   end            
                 end
                 created_movement.destroy unless stock_movement_product_detail_deleted
