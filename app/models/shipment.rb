@@ -206,7 +206,7 @@ class Shipment < ApplicationRecord
                                 errors.add(:base, "Shipment must have at least one item") if quantity == 0
                               end
 
-                              def   load_goods_to_destination_warehouse
+                              def load_goods_to_destination_warehouse
                                 destination_warehouse_id = if @order_booking.present?
                                   @order_booking.destination_warehouse_id
                                 else
@@ -423,12 +423,13 @@ class Shipment < ApplicationRecord
                                           stock_movement_product_detail_deleted = stock_movement_product_detail.destroy
                                         else
                                           stock_movement_product_detail.ending_stock -= quantity
+                                          stock_movement_product_detail.save
                                         end
                                       else
                                         stock_movement_product_detail.beginning_stock -= quantity
                                         stock_movement_product_detail.ending_stock -= quantity
+                                        stock_movement_product_detail.save
                                       end
-                                      stock_movement_product_detail.save
                                     end
                                   end
                                   created_movement.destroy unless stock_movement_product_detail_deleted
