@@ -322,21 +322,29 @@ class ProductsController < ApplicationController
                 SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
                   product_price_codes.uniq.each do |ppc|
                     if pr.product_details.select{|pd| pd.price_code_id == ppc && pd.size_id == size.id}.blank?
-                      valid = false
-                      render js: "bootbox.alert({message: \"Please add price to all sizes\",size: 'small'});"
-                      raise ActiveRecord::Rollback
+                      existed_product_detail = pr.product_details.select{|pd| pd.price_code_id == ppc}.first
+                      other_size_price = existed_product_detail.price_lists.last.price
+                      product_cost = pr.cost_lists.first.cost
+                      product_detail = pr.product_details.build size_id: size.id, price_code_id: ppc, size_group_id: pr.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
+                      product_detail.price_lists.build effective_date: current_date, price: other_size_price, cost: product_cost, user_is_adding_new_price: true
+                      #                      valid = false
+                      #                      render js: "bootbox.alert({message: \"Please add price to all sizes\",size: 'small'});"
+                      #                      raise ActiveRecord::Rollback
                     end
                   end
-                  if valid
-                    pr.product_colors.each do |pc|
-                      if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
-                        valid = false
-                        render js: "bootbox.alert({message: \"Please add barcode to all colors and sizes\",size: 'small'});"
-                        raise ActiveRecord::Rollback
+                  pr.product_colors.each do |pc|
+                    if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                      prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                      barcode = if prb.present?
+                        "1S#{prb.barcode.split("1S")[1].succ}"
+                      else
+                        "1S00001"
                       end
+                      pc.product_barcodes.build size_id: size.id, barcode: barcode
+                      #                      valid = false
+                      #                      render js: "bootbox.alert({message: \"Please add barcode to all colors and sizes\",size: 'small'});"
+                      #                      raise ActiveRecord::Rollback
                     end
-                  else
-                    break
                   end
                 end
               else
@@ -355,6 +363,10 @@ class ProductsController < ApplicationController
             rescue ActiveRecord::RecordNotUnique => e
               valid = false
               render js: "bootbox.alert({message: \"Article code #{pr.code} has already been taken\",size: 'small'});"
+              raise ActiveRecord::Rollback
+            rescue Exception => e
+              valid = false
+              render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
               raise ActiveRecord::Rollback
             end
           end
