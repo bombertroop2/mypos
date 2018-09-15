@@ -358,7 +358,7 @@ class ProductsController < ApplicationController
               if valid
                 unless valid = pr.save
                   message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
-                  render js: "bootbox.alert({message: \"#{message}\",size: 'small'});"
+                  error_message = message
                   raise ActiveRecord::Rollback
                   break
                 end
@@ -367,17 +367,19 @@ class ProductsController < ApplicationController
               end
             rescue ActiveRecord::RecordNotUnique => e
               valid = false
-              render js: "bootbox.alert({message: \"Article code #{pr.code} has already been taken\",size: 'small'});"
+              error_message = "Article code #{pr.code} has already been taken"
               raise ActiveRecord::Rollback
             rescue Exception => e
               valid = false
-              render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
+              error_message = e.message
               raise ActiveRecord::Rollback
             end
           end
         end
         if valid
           render js: "bootbox.alert({message: \"Articles were successfully imported\",size: 'small'});"
+        else
+          render js: "bootbox.alert({message: \"#{error_message}\",size: 'small'});"
         end
       end
     end
