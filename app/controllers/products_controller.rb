@@ -304,6 +304,7 @@ class ProductsController < ApplicationController
         render js: "bootbox.alert({message: \"#{error_message}\",size: 'small'});"
       else
         valid = true
+        barcode = ""
         ActiveRecord::Base.transaction do
           products.each do |pr|
             begin
@@ -334,11 +335,15 @@ class ProductsController < ApplicationController
                   end
                   pr.product_colors.each do |pc|
                     if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
-                      prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
-                      barcode = if prb.present?
-                        "1S#{prb.barcode.split("1S")[1].succ}"
+                      if barcode.blank?                        
+                        prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                        barcode = if prb.present?
+                          "1S#{prb.barcode.split("1S")[1].succ}"
+                        else
+                          "1S00001"
+                        end
                       else
-                        "1S00001"
+                        barcode = "1S#{barcode.split("1S")[1].succ}"
                       end
                       pc.product_barcodes.build size_id: size.id, barcode: barcode
                       #                      valid = false
