@@ -307,21 +307,36 @@ class ProductsController < ApplicationController
         ActiveRecord::Base.transaction do
           products.each do |pr|
             begin
-              PriceCode.select(:id).each do |pc|
-                if pr.product_details.select{|pd| pd.price_code_id == pc.id}.blank?
-                  valid = false
-                  render js: "bootbox.alert({message: \"Please add price to all price codes\",size: 'small'});"
-                  raise ActiveRecord::Rollback
-                end
+              #              PriceCode.select(:id).each do |pc|
+              #                if pr.product_details.select{|pd| pd.price_code_id == pc.id}.blank?
+              #                  valid = false
+              #                  render js: "bootbox.alert({message: \"Please add price to all price codes\",size: 'small'});"
+              #                  raise ActiveRecord::Rollback
+              #                end
+              #              end
+              product_price_codes = []
+              pr.product_details.each do |pd|
+                product_price_codes << pd.price_code_id
               end
               if valid
                 SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
-                  pr.product_colors.each do |pc|
-                    if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                  product_price_codes.uniq.each do |ppc|
+                    if pr.product_details.select{|pd| pd.price_code_id == ppc && pd.size_id == size.id}.blank?
                       valid = false
-                      render js: "bootbox.alert({message: \"Please add barcode to all colors and sizes\",size: 'small'});"
+                      render js: "bootbox.alert({message: \"Please add price to all sizes\",size: 'small'});"
                       raise ActiveRecord::Rollback
                     end
+                  end
+                  if valid
+                    pr.product_colors.each do |pc|
+                      if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                        valid = false
+                        render js: "bootbox.alert({message: \"Please add barcode to all colors and sizes\",size: 'small'});"
+                        raise ActiveRecord::Rollback
+                      end
+                    end
+                  else
+                    break
                   end
                 end
               else
