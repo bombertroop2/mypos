@@ -308,13 +308,6 @@ class ProductsController < ApplicationController
         ActiveRecord::Base.transaction do
           products.each do |pr|
             begin
-              #              PriceCode.select(:id).each do |pc|
-              #                if pr.product_details.select{|pd| pd.price_code_id == pc.id}.blank?
-              #                  valid = false
-              #                  render js: "bootbox.alert({message: \"Please add price to all price codes\",size: 'small'});"
-              #                  raise ActiveRecord::Rollback
-              #                end
-              #              end
               product_price_codes = []
               pr.product_details.each do |pd|
                 product_price_codes << pd.price_code_id
@@ -328,9 +321,6 @@ class ProductsController < ApplicationController
                       product_cost = pr.cost_lists.first.cost
                       product_detail = pr.product_details.build size_id: size.id, price_code_id: ppc, size_group_id: pr.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
                       product_detail.price_lists.build effective_date: current_date, price: other_size_price, cost: product_cost, user_is_adding_new_price: true
-                      #                      valid = false
-                      #                      render js: "bootbox.alert({message: \"Please add price to all sizes\",size: 'small'});"
-                      #                      raise ActiveRecord::Rollback
                     end
                   end
                   pr.product_colors.each do |pc|
@@ -346,30 +336,22 @@ class ProductsController < ApplicationController
                         barcode = "1S#{barcode.split("1S")[1].succ}"
                       end
                       pc.product_barcodes.build size_id: size.id, barcode: barcode
-                      #                      valid = false
-                      #                      render js: "bootbox.alert({message: \"Please add barcode to all colors and sizes\",size: 'small'});"
-                      #                      raise ActiveRecord::Rollback
                     end
                   end
                 end
-              else
-                break
-              end
-              if valid
                 unless valid = pr.save
                   message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
                   error_message = message
                   raise ActiveRecord::Rollback
-                  break
                 end
               else
-                break
+                raise ActiveRecord::Rollback
               end
             rescue ActiveRecord::RecordNotUnique => e
               valid = false
               error_message = "Article code #{pr.code} has already been taken"
               raise ActiveRecord::Rollback
-            rescue Exception => e
+            rescue RuntimeError => e
               valid = false
               error_message = e.message
               raise ActiveRecord::Rollback
