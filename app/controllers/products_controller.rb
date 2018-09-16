@@ -265,7 +265,7 @@ class ProductsController < ApplicationController
           end
           product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: additional_information, attr_importing_data_via_web: true
           product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-          product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, cost: spreadsheet.row(i)[13].to_f, user_is_adding_new_price: true
+          product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
           product_color = product.product_colors.build color_id: color_id, attr_importing_data: true
           product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
@@ -284,8 +284,7 @@ class ProductsController < ApplicationController
           product_detail = prdct.product_details.select{|pd| pd.size_id == size_id && pd.price_code_id == price_code_id}.first
           if product_detail.blank?
             product_detail = prdct.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: prdct.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-            cost = prdct.cost_lists.first.cost
-            product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, cost: cost, user_is_adding_new_price: true
+            product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           end
           color_id = Color.where(code: spreadsheet.row(i)[14].strip).pluck(:id).first
           product_color = prdct.product_colors.select{|pc| pc.color_id == color_id}.first
@@ -318,9 +317,8 @@ class ProductsController < ApplicationController
                     if pr.product_details.select{|pd| pd.price_code_id == ppc && pd.size_id == size.id}.blank?
                       existed_product_detail = pr.product_details.select{|pd| pd.price_code_id == ppc}.first
                       other_size_price = existed_product_detail.price_lists.last.price
-                      product_cost = pr.cost_lists.first.cost
                       product_detail = pr.product_details.build size_id: size.id, price_code_id: ppc, size_group_id: pr.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-                      product_detail.price_lists.build effective_date: current_date, price: other_size_price, cost: product_cost, user_is_adding_new_price: true
+                      product_detail.price_lists.build effective_date: current_date, price: other_size_price, user_is_adding_new_price: true, attr_importing_data: true
                     end
                   end
                   pr.product_colors.each do |pc|
