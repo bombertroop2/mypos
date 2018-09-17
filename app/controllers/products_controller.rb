@@ -265,6 +265,13 @@ class ProductsController < ApplicationController
             error_message = "Error for row (##{i}) : Color #{spreadsheet.row(i)[14].strip} doesn't exist"
             break
           end
+          sex = if sex == "NULL"
+            nil
+          elsif sex == "Ledies"
+            "Ladies"
+          else
+            sex
+          end
           product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: additional_information, attr_importing_data_via_web: true
           product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
           product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
