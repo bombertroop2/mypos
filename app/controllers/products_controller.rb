@@ -179,6 +179,8 @@ class ProductsController < ApplicationController
       current_date = Date.current
       products = []
       error_message = ""
+      added_spreadsheet_barcodes = []
+      barcode = ""
       (3..spreadsheet.last_row).each do |i|
         product_code = spreadsheet.row(i)[0].strip rescue nil
         if product_code.blank?
@@ -268,7 +270,22 @@ class ProductsController < ApplicationController
           product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
           product_color = product.product_colors.build color_id: color_id, attr_importing_data: true
-          product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+          if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
+            product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+            added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+          else
+            if barcode.blank?                        
+              prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+              barcode = if prb.present?
+                "1S#{prb.barcode.split("1S")[1].succ}"
+              else
+                "1S00001"
+              end
+            else
+              barcode = "1S#{barcode.split("1S")[1].succ}"
+            end
+            product_color.product_barcodes.build size_id: size_id, barcode: barcode
+          end
           products << product
         else
           size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].strip).where(["size_groups.id = ?", prdct.size_group_id]).pluck(:id).first
@@ -290,11 +307,41 @@ class ProductsController < ApplicationController
           product_color = prdct.product_colors.select{|pc| pc.color_id == color_id}.first
           if product_color.blank?
             product_color = prdct.product_colors.build color_id: color_id, attr_importing_data: true
-            product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+            if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
+              product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+              added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+            else
+              if barcode.blank?                        
+                prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                barcode = if prb.present?
+                  "1S#{prb.barcode.split("1S")[1].succ}"
+                else
+                  "1S00001"
+                end
+              else
+                barcode = "1S#{barcode.split("1S")[1].succ}"
+              end
+              product_color.product_barcodes.build size_id: size_id, barcode: barcode
+            end
           else
             product_barcode = product_color.product_barcodes.select{|pb| pb.size_id == size_id}.first
             if product_barcode.blank?
-              product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+              if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
+                product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+                added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+              else
+                if barcode.blank?                        
+                  prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                  barcode = if prb.present?
+                    "1S#{prb.barcode.split("1S")[1].succ}"
+                  else
+                    "1S00001"
+                  end
+                else
+                  barcode = "1S#{barcode.split("1S")[1].succ}"
+                end
+                product_color.product_barcodes.build size_id: size_id, barcode: barcode
+              end
             end
           end
         end
@@ -303,7 +350,6 @@ class ProductsController < ApplicationController
         render js: "bootbox.alert({message: \"#{error_message}\",size: 'small'});"
       else
         valid = true
-        barcode = ""
         ActiveRecord::Base.transaction do
           products.each do |pr|
             begin
