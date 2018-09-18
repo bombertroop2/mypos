@@ -15,7 +15,7 @@
                 </div>
             </div>
             <div class="form-group<%= control_group_error(@direct_purchase, :warehouse_id) %>">
-                <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>            
+                <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>
                   <div class="col-sm-10">
                       <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @direct_purchase.warehouse_id.to_s), {prompt: 'Select Warehouse'}, {class: "form-control"} %>
                         <%= error_help_text(@direct_purchase, :warehouse_id) %>
@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <div class="form-group<%= control_group_error(@direct_purchase, :second_discount) %>">
-                        <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>                              
+                        <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>
                           <div class="col-sm-10">
                               <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "2", disabled: !@direct_purchase.second_discount.present? %>
                                 <%= error_help_text(@direct_purchase, :second_discount) %>
@@ -56,7 +56,8 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">Products</label>
                                     <div class="col-sm-10">
-                                        <table id="listing_product_table_receiving" class="display" width="100%">
+                                        <%= autocomplete_field_tag 'product', params[:receiving_product_ids], autocomplete_product_code_receiving_index_path, class: "form-control",'data-delimiter' => ',', :multiple => true %>
+                                        <!-- <table id="listing_product_table_receiving" class="display" width="100%">
                                             <thead>
                                                 <tr>
                                                     <th></th>
@@ -66,15 +67,15 @@
                                             </thead>
 
                                             <tbody>
-                                                <% Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
-                                                  <tr id="product_<%= product.id %>">
+                                                <%# Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
+                                                  <tr id="product_<%#= product.id %>">
                                                       <td></td>
-                                                      <td><%= product.code %></td>
-                                                      <td><%= product.name %></td>
+                                                      <td><%#= product.code %></td>
+                                                      <td><%#= product.name %></td>
                                                   </tr>
-                                                <% end %>
+                                                <%# end %>
                                             </tbody>
-                                        </table>
+                                        </table> -->
                                         <a class="btn btn-default active" id="generate_dp_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
                                     </div>
                                 </div>
@@ -85,7 +86,7 @@
                                               <%= render 'product_quantities' %>
                                             <% end %>
                                         </div>
-                                    </div>                                                      
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-offset-2 col-sm-10">
@@ -109,34 +110,59 @@
                                         dateFormat: "dd/mm/yy"
                                     });
 
-                                    var receivingDataTableDirectPurchase = $('#listing_product_table_receiving').DataTable({
-                                        order: [1, 'asc'],
-                                        dom: 'T<"clear">lfrtip',
-                                        columns: [
-                                            {data: null, defaultContent: '', orderable: false},
-                                            {data: 'code'},
-                                            {data: 'brand'}
-                                        ],
-                                        tableTools: {
-                                            sRowSelect: 'os',
-                                            //sRowSelector: 'td:first-child',
-                                            aButtons: ['select_all', 'select_none']
-                                        },
-                                        paging: false,
-                                        info: false,
-                                        scrollY: "250px",
-                                        scrollCollapse: true
+                                    // var receivingDataTableDirectPurchase = $('#listing_product_table_receiving').DataTable({
+                                    //     order: [1, 'asc'],
+                                    //     dom: 'T<"clear">lfrtip',
+                                    //     columns: [
+                                    //         {data: null, defaultContent: '', orderable: false},
+                                    //         {data: 'code'},
+                                    //         {data: 'brand'}
+                                    //     ],
+                                    //     tableTools: {
+                                    //         sRowSelect: 'os',
+                                    //         //sRowSelector: 'td:first-child',
+                                    //         aButtons: ['select_all', 'select_none']
+                                    //     },
+                                    //     paging: false,
+                                    //     info: false,
+                                    //     scrollY: "250px",
+                                    //     scrollCollapse: true
+                                    // });
+                                    //
+                                    $("#product").tagit({
+                                      autocomplete: {
+                                        delay: 0,
+                                        minLength: 2,
+                                        source: function(search, response){
+                                          $.ajax({
+                                            url: "/receiving/autocomplete_product_code",
+                                            data: {term: search.term},
+                                            success: function(data) {
+                                              response($.map(data, function (item) {
+                                                return {
+                                                    id: item.id,
+                                                    label: item.label
+                                                }
+                                              }));
+                                            }
+                                          });
+                                        }
+                                      }
                                     });
 
                                     $("#generate_dp_detail_form").click(function () {
-                                        if (receivingDataTableDirectPurchase.rows('.selected').data().length == 0)
+                                        if ($('#product').tagit('assignedTags').length == 0)
                                             bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
                                         else if ($("#direct_purchase_receiving_date").val() == "")
                                             bootbox.alert({message: "Please fill in receiving date first", size: 'small'});
                                         else {
                                             var productIds = [];
-                                            $.each(receivingDataTableDirectPurchase.rows('.selected')[0], function (index, value) {
-                                                productIds.push(receivingDataTableDirectPurchase.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                            // $.each(receivingDataTableDirectPurchase.rows('.selected')[0], function (index, value) {
+                                            //     productIds.push(receivingDataTableDirectPurchase.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                            // });
+                                            products = $("#product").val().split(",")
+                                            products.forEach(function(element) {
+                                              productIds.push(element.split(" ")[0]);
                                             });
 
                                             $.get("/receiving/get_product_details", {
@@ -198,7 +224,7 @@
 
                                     $("#new_direct_purchase").submit(function (event) {
                                         $("body").css('padding-right', '0px');
-                                        // untuk kebutuhan auto do number                                                        
+                                        // untuk kebutuhan auto do number
                                         //$("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
                                         // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
                                         //$(".receiving-date").val($("#direct_purchase_receiving_date").val());
