@@ -4,7 +4,7 @@
       <div class="form-group<%= control_group_error(@target, :warehouse_id) %>">
         <%= f.label :warehouse_id, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">
-          <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.not_central.select(:id, :code), :id, :code, @target.warehouse_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= f.select :warehouse_id, options_from_collection_for_select(Warehouse.not_central.not_in_transit.select(:id, :code), :id, :code, @target.warehouse_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
           <%= error_help_text(@target, :warehouse_id) %>
         </div>
       </div>

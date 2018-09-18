@@ -50,7 +50,9 @@ class Product < ApplicationRecord
 
   before_validation :strip_string_values
 
-  validates :code, :size_group_id, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, presence: true
+  validates :code, :size_group_id, :brand_id, :vendor_id, :target, :model_id, :goods_type_id, presence: true
+  validates :sex, presence: true, unless: proc{|pr| pr.attr_importing_data_via_web}
+
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
   validate :check_item, on: :create, unless: proc{|product| product.attr_importing_data}

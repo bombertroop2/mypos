@@ -90,6 +90,10 @@ class Warehouse < ApplicationRecord
                   where("warehouse_type <> 'central'")
                 end
 
+                def self.not_in_transit
+                  where("warehouse_type <> 'in_transit'")
+                end
+
                 def self.showroom
                   where("warehouse_type = 'showroom'")
                 end
