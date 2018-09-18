@@ -218,6 +218,7 @@ Rails.application.routes.draw do
   #  end
   #  resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create, :index, :show] do
+    get :autocomplete_product_code, :on => :collection
     collection do
       get "get_product_details"
     end
@@ -251,6 +252,7 @@ Rails.application.routes.draw do
   get 'welcome/index'
 
   resources :purchase_orders do
+    get :autocomplete_product_code, :on => :collection
     collection do
       get 'get_product_details'
     end

@@ -3,15 +3,15 @@ class Product < ApplicationRecord
   audited on: [:create, :update]
   has_associated_audits
   #  attr_accessor :effective_date
-  
+
   belongs_to :brand
   belongs_to :vendor
   belongs_to :model
   belongs_to :goods_type
   belongs_to :size_group
-  
+
   mount_uploader :image, ImageUploader
-  
+
   has_many :event_general_products, dependent: :restrict_with_error
   has_many :event_products, dependent: :restrict_with_error
   has_many :direct_purchase_products, dependent: :restrict_with_error
@@ -42,16 +42,17 @@ class Product < ApplicationRecord
   has_one :stock_mutation_product_relation, -> {select("1 AS one")}, class_name: "StockMutationProduct"
   has_one :event_product_relation, -> {select("1 AS one")}, class_name: "EventProduct"
   has_one :event_general_product_relation, -> {select("1 AS one")}, class_name: "EventGeneralProduct"
-  
-  
+
+
   accepts_nested_attributes_for :product_details#, reject_if: :price_blank
   accepts_nested_attributes_for :product_colors, reject_if: proc { |attributes| attributes['selected_color_id'].blank? }, allow_destroy: true
   accepts_nested_attributes_for :cost_lists
-  
+
   before_validation :strip_string_values
-  
+
   validates :code, :size_group_id, :brand_id, :vendor_id, :target, :model_id, :goods_type_id, presence: true
   validates :sex, presence: true, unless: proc{|pr| pr.attr_importing_data_via_web}
+
   validates :code, uniqueness: true
   validate :code_not_changed, :size_group_not_changed, :color_selected
   validate :check_item, on: :create, unless: proc{|product| product.attr_importing_data}
@@ -59,13 +60,13 @@ class Product < ApplicationRecord
     :model_available, :goods_type_available, :size_group_available
   #  validate :check_item, :code_not_changed, :size_group_not_changed, :color_selected
   #        validate :effective_date_not_changed, :cost_not_changed, on: :update
-  
+
   before_validation :upcase_code, unless: proc{|pr| pr.attr_importing_data_via_web}
   before_update :delete_old_children_if_size_group_changed
   before_destroy :delete_tracks
   #  before_destroy :prevent_delete_if_purchase_order_created
 
-  
+
   SEX = [
     ["Men", "men"],
     ["Ladies", "ladies"],
@@ -89,12 +90,15 @@ class Product < ApplicationRecord
     ["TH", "TH"],
     ["NA", "NA"]
   ]
-  
+
   def code_and_brand
     "#{code} - #{brand_name}"
   end
-    
-  
+
+  def autocomplete_display_value
+    "#{code} #{brand.name}"
+  end
+
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
     cost_lists.each do |cost_list|
@@ -104,7 +108,7 @@ class Product < ApplicationRecord
     end
     return nil
   end
-  
+
   def active_cost_by_po_date(po_date, cost_lists=[])
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date) if cost_lists.blank?
     cost_lists.each do |cost_list|
@@ -113,7 +117,7 @@ class Product < ApplicationRecord
       end
     end
   end
-  
+
   def active_effective_date
     cost_lists = self.cost_lists.select(:effective_date)
     cost_lists.each do |cost_list|
@@ -122,17 +126,17 @@ class Product < ApplicationRecord
       end
     end
   end
-  
+
   def cost_count
     cost_lists.count(:id)
   end
-  
+
   def product_details_count
     product_details.count(:id)
   end
-        
+
   private
-  
+
   def delete_tracks
     audits.destroy_all
   end
@@ -141,7 +145,7 @@ class Product < ApplicationRecord
     self.code = code.strip
   end
 
-  
+
   def brand_available
     errors.add(:brand_id, "does not exist!") if brand_id.present? && Brand.where(id: brand_id).select("1 AS one").blank?
   end
@@ -173,7 +177,7 @@ class Product < ApplicationRecord
   rescue
     errors.add(:target, "does not exist!") if target.present?
   end
-  
+
   def color_selected
     if new_record?
       valid = if product_colors.present?
@@ -181,7 +185,7 @@ class Product < ApplicationRecord
       else
         false
       end
-    else    
+    else
       valid = if product_colors.map(&:_destroy).include?(false)
         true
       else
@@ -190,9 +194,9 @@ class Product < ApplicationRecord
     end
     errors.add(:base, "Product must have at least one color!") if !valid && !attr_importing_data
   end
-  
-  
-  
+
+
+
   def delete_old_children_if_size_group_changed
     if size_group_id_changed?
       self.product_details.select(:id).each do |product_detail|
@@ -203,16 +207,16 @@ class Product < ApplicationRecord
       end
     end
   end
-            
+
   # apabila sudah ada relasi dengan table lain maka tidak dapat ubah code
   def code_not_changed
     errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_general_product_relation.present? || event_product_relation.present? || order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || stock_mutation_product_relation.present?)
   end
-  
+
   def size_group_not_changed
     errors.add(:size_group_id, "change is not allowed!") if size_group_id_changed? && persisted?# && (order_booking_product_relation.present? || stock_product_relation.present? || purchase_order_relation.present? || direct_purchase_product_relation.present? || cost_lists.select(:id).count > 1 || stock_mutation_product_relation.present?)
   end
-        
+
   def check_item
     valid = if product_details.present?
       true
@@ -221,9 +225,9 @@ class Product < ApplicationRecord
     end
     errors.add(:base, "Product prices must be filled in!") unless valid
   end
-            
+
   def upcase_code
     self.code = code.upcase.gsub(" ","").gsub("\t","")
   end
-        
+
 end
