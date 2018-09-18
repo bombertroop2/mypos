@@ -265,10 +265,10 @@ class ProductsController < ApplicationController
             error_message = "Error for row (##{i}) : Color #{spreadsheet.row(i)[14].strip} doesn't exist"
             break
           end
-          sex = if sex == "NULL"
+          sex = if sex == "null"
             nil
-          elsif sex == "Ledies"
-            "Ladies"
+          elsif sex == "ledies"
+            "ladies"
           else
             sex
           end
