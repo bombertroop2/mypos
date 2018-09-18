@@ -6,7 +6,7 @@
     <% end %>
     <div style="padding-top: 20px"></div>
     <%= form_for(@purchase_order, remote: true, html: {class: "form-horizontal po-form", id: !@purchase_order.new_record? ? "edit_purchase_order" : "new_purchase_order"}) do |f| %>
-        <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.pluck(:id).map{|id| id.to_s}.join(",") rescue "") %>
+        <%= hidden_field_tag "product_ids", params[:product_ids].present? ? params[:product_ids] : (@products.map{|p| p.code.to_s}.join(",") rescue "") %>
         <div class="form-group<%= control_group_error(@purchase_order, :vendor_id) %>">
             <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
               <% if @purchase_order.new_record? %>
