@@ -251,6 +251,7 @@ Rails.application.routes.draw do
   get 'welcome/index'
 
   resources :purchase_orders do
+    get :autocomplete_product_code, :on => :collection
     collection do
       get 'get_product_details'
     end

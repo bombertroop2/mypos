@@ -25,6 +25,9 @@
 //= require bootstrap-progressbar.min
 //= require custom.min
 //= require bs-checkbox
+//= require jquery-ui.min
+//= require tag-it
+//= require autocomplete-rails
 //= require_tree .
 
 

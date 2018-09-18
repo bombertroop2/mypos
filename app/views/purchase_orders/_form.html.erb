@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="form-group<%= control_group_error(@purchase_order, :warehouse_id) %>">
-                <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>            
+                <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>
                   <div class="col-sm-10">
                       <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code', @purchase_order.warehouse_id.to_s), {prompt: 'Select Warehouse'}, {class: "form-control"} %>
                         <%= error_help_text(@purchase_order, :warehouse_id) %>
@@ -48,7 +48,7 @@
                                 </div>
                             </div>
                             <div class="form-group<%= control_group_error(@purchase_order, :second_discount) %>">
-                                <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>                              
+                                <%= f.label :second_discount, "Second discount (%)", class: "col-sm-2 control-label" %>
                                   <div class="col-sm-10">
                                       <%= f.text_field :second_discount, size: 10, class: "form-control quantity-fields discount-fields inputs", tabindex: "2", disabled: !@purchase_order.second_discount.present? %>
                                         <%= error_help_text(@purchase_order, :second_discount) %>
@@ -63,13 +63,14 @@
                                 <div class="form-group">
                                     <%= f.label :note, class: "col-sm-2 control-label" %>
                                       <div class="col-sm-10">
-                                          <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>                                            
+                                          <%= f.text_area :note, size: 10, class: "form-control", tabindex: "4" %>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label">Products</label>
                                         <div class="col-sm-10">
-                                            <table id="listing_product_table" class="display">
+                                            <%= autocomplete_field_tag 'product', params[:product_ids].present? ? params[:product_ids] : (@products.map{|p| p.code.to_s}.join(",")  rescue ""), autocomplete_product_code_purchase_orders_path, class: "form-control",'data-delimiter' => ',', :multiple => true %>
+                                            <!-- <table id="listing_product_table" class="display">
                                                 <thead>
                                                     <tr>
                                                         <th></th>
@@ -79,15 +80,15 @@
                                                 </thead>
 
                                                 <tbody>
-                                                    <% @product_list.each_with_index do |product, index| %>
-                                                      <tr id="product_<%= product.id %>">
+                                                    <%# @product_list.each_with_index do |product, index| %>
+                                                      <tr id="product_<%#= product.id %>">
                                                           <td></td>
-                                                          <td><%= product.code %></td>
-                                                          <td><%= product.brand_name %></td>
+                                                          <td><%#= product.code %></td>
+                                                          <td><%#= product.brand_name %></td>
                                                       </tr>
-                                                    <% end %>
+                                                    <%# end %>
                                                 </tbody>
-                                            </table>
+                                            </table> -->
                                 <%#= submit_tag "Generate form", id: "generate_po_detail_form", class: "btn btn-default active", style: "float: right;margin-top: 10px;" %>
                                             <a class="btn btn-default active" id="generate_po_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
                                         </div>
@@ -99,7 +100,7 @@
                                                   <%= render 'product_quantities' %>
                                                 <% end %>
                                             </div>
-                                        </div>                                                      
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-10">
@@ -129,36 +130,79 @@
                                     });
 
 
-                                    dataTable = $('#listing_product_table').DataTable({
-                                        order: [1, 'asc'],
-                                        dom: 'T<"clear">lfrtip',
-                                        columns: [
-                                            {data: null, defaultContent: '', orderable: false},
-                                            {data: 'code'},
-                                            {data: 'brand'}
-                                        ],
-                                        tableTools: {
-                                            sRowSelect: 'os',
-                                            //sRowSelector: 'td:first-child',
-                                            aButtons: ['select_all', 'select_none']
-                                        },
-                                        paging: false,
-                                        info: false,
-                                        scrollY: "250px",
-                                        scrollCollapse: true
+                                    // dataTable = $('#listing_product_table').DataTable({
+                                    //     order: [1, 'asc'],
+                                    //     dom: 'T<"clear">lfrtip',
+                                    //     columns: [
+                                    //         {data: null, defaultContent: '', orderable: false},
+                                    //         {data: 'code'},
+                                    //         {data: 'brand'}
+                                    //     ],
+                                    //     tableTools: {
+                                    //         sRowSelect: 'os',
+                                    //         //sRowSelector: 'td:first-child',
+                                    //         aButtons: ['select_all', 'select_none']
+                                    //     },
+                                    //     paging: false,
+                                    //     info: false,
+                                    //     scrollY: "250px",
+                                    //     scrollCollapse: true
+                                    // });
+                                    //
+                                    //
+                                    // var codes = [];
+                                    // $("#product").tagit({
+                                    //   tagSource: function(search, showChoices) {
+                                    //     var that = this;
+                                    //     $.ajax({
+                                    //       url: "/purchase_orders/autocomplete_product_code",
+                                    //       data: {term: search.term},
+                                    //       success: function(choices) {
+                                    //         showChoices(that._subtractArray(choices, that.assignedTags()));
+                                    //       }
+                                    //     });
+                                    //   },
+                                    //   afterTagAdded: function(event, ui) {
+                                    //     codes.push(String(ui.tagLabel));
+                                    //   }
+                                    // });
+
+                                    $("#product").tagit({
+                                      autocomplete: {
+                                        delay: 0,
+                                        minLength: 2,
+                                        source: function(search, response){
+                                          $.ajax({
+                                            url: "/purchase_orders/autocomplete_product_code",
+                                            data: {term: search.term},
+                                            success: function(data) {
+                                              response($.map(data, function (item) {
+                                                return {
+                                                    id: item.id,
+                                                    label: item.label
+                                                }
+                                              }));
+                                            }
+                                          });
+                                        }
+                                      }
                                     });
 
 
                                     $("#generate_po_detail_form").click(function () {
-                                        if (dataTable.rows('.selected').data().length == 0)
+                                        if ($('#product').tagit('assignedTags').length == 0)
                                             bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
                                         else if ($("#purchase_order_purchase_order_date").val() == "")
                                             bootbox.alert({message: "Please fill in purchase order date first", size: 'small'});
                                         else {
                                             var productIds = [];
-                                            $.each(dataTable.rows('.selected')[0], function (index, value) {
-                                                productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                            products = $("#product").val().split(",")
+                                            products.forEach(function(element) {
+                                              productIds.push(element.split(" ")[0]);
                                             });
+                                            // $.each(dataTable.rows('.selected')[0], function (index, value) {
+                                            //     productIds.push(dataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                            // });
                                             if (typeof purchaseOrderId === 'undefined')
                                                 $.get("/purchase_orders/get_product_details", {
                                                     product_ids: productIds.join(","),
