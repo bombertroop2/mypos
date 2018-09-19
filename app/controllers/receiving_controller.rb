@@ -89,6 +89,7 @@ class ReceivingController < ApplicationController
 
           render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
           render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.base"].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.base"].present? && @purchase_order.errors[:base].blank?
+          render js: "bootbox.alert({message: \"#{@purchase_order.errors[:"received_purchase_orders.received_purchase_order_products.received_purchase_order_items.base"].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:"received_purchase_orders.received_purchase_order_products.received_purchase_order_items.base"].present? && @purchase_order.errors[:base].blank? && @purchase_order.errors[:"received_purchase_orders.base"]
         else
           @valid = true
           @received_order = ReceivedPurchaseOrder.
