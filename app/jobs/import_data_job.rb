@@ -573,7 +573,7 @@ class ImportDataJob < ApplicationJob
           break if idx > end_at
           if row.present? && row["E#{idx + 1}"].to_f >= 0
             puts "index => #{idx}"
-            is_sale_approved = if row["B#{idx + 1}"].to_i == 1
+            is_sale_approved = if row["B#{idx + 1}"] == true || row["B#{idx + 1}"].to_i == 1
               true
             else
               false
