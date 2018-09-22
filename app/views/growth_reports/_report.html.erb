@@ -89,7 +89,7 @@
             else
             first_val = prev_net_sales.to_f
             second_val = selected_net_sales.to_f
-            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            "<font color='red'>(#{((first_val - second_val) / first_val * 100).round}%)</font>".html_safe
             end
         %>
           <% 
@@ -106,7 +106,7 @@
             else
             first_val = prev_qty_sold.to_f
             second_val = selected_qty_sold.to_f
-            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            "<font color='red'>(#{((first_val - second_val) / first_val * 100).round}%)</font>".html_safe
             end
         %>
           <% if prev_qty_sold.to_i > 0 %>
@@ -133,7 +133,7 @@
             else
             first_val = prev_aur.to_f
             second_val = aur.to_f
-            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            "<font color='red'>(#{((first_val - second_val) / first_val * 100).round}%)</font>".html_safe
             end
         %>
           <tr>
