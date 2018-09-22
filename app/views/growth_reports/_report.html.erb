@@ -60,7 +60,7 @@
           <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
           <% prev_net_sales = prev_consignment_sale.prev_net_sales rescue 0 %>
           <% selected_net_sales = consignment_sale.selected_net_sales rescue 0 %>
-          <% prev_net_sales == 0 && selected_net_sales == 0 %>
+          <% prev_net_sales == 0 || selected_net_sales == 0 %>
         <% end %>
 
         <% last_region_id = 0 %>
