@@ -80,16 +80,16 @@
             first_val = selected_net_sales.to_f
             second_val = prev_net_sales.to_f
             if second_val > 0
-              "#{((first_val - second_val) / second_val * 100).round}%"
+              "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
               elsif first_val > 0
-              "100%"
+              "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
               else
-              "0%"
+              "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
             end
             else
             first_val = prev_net_sales.to_f
             second_val = selected_net_sales.to_f
-            "<font color='red'>(#{((first_val - second_val) / first_val * 100).round}%)</font>".html_safe
+            "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
           <% 
@@ -97,16 +97,16 @@
             first_val = selected_qty_sold.to_f
             second_val = prev_qty_sold.to_f
             if second_val > 0
-              "#{((first_val - second_val) / second_val * 100).round}%"
+              "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
               elsif first_val > 0
-              "100%"
+              "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
               else
-              "0%"
+              "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
             end
             else
             first_val = prev_qty_sold.to_f
             second_val = selected_qty_sold.to_f
-            "<font color='red'>(#{((first_val - second_val) / first_val * 100).round}%)</font>".html_safe
+            "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
           <% if prev_qty_sold.to_i > 0 %>
@@ -124,16 +124,16 @@
             first_val = aur.to_f
             second_val = prev_aur.to_f
             if second_val > 0
-              "#{((first_val - second_val) / second_val * 100).round}%"
+              "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
               elsif first_val > 0
-              "100%"
+              "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
               else
-              "0%"
+              "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
             end
             else
             first_val = prev_aur.to_f
             second_val = aur.to_f
-            "<font color='red'>(#{((first_val - second_val) / first_val * 100).round}%)</font>".html_safe
+            "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
           <tr>
