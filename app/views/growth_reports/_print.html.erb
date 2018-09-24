@@ -249,7 +249,7 @@
           "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
           end  
       %>
-        <tr>
+        <tr style="font-weight: bold">
             <td colspan="2" class="text-right">Total</td>
             <td class="text-right"><%= number_to_currency(total_prev_net_sales.to_f,
                   :separator => ",",

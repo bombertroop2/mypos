@@ -1,13 +1,6 @@
 <!--<div class="table-responsive">-->
-<table class="table table-striped table-bordered" style="padding-bottom: 1px; word-wrap: break-word">
-    <thead>
-        <% if params[:date].present? %>
-          <tr>
-              <th colspan="13" style="background-color: rgba(52,152,219,.88); color: #ffffff" class="text-center">
-                  System will update ending stock once user approved transaction
-              </th>
-          </tr>
-        <% end %>
+<table class="table table-striped table-bordered" width="100%" style="padding-bottom: 1px; word-wrap: break-word">
+    <tbody>
         <tr><th colspan="13" class="text-center">
                 <% if params[:date].present? %>
                   <%= "#{params[:counter_type].strip}: #{(params[:date].to_date - 1.year).strftime("%d %B %Y")}" %> VS <%= "#{params[:date].to_date.strftime("%d %B %Y")}" %>
@@ -53,8 +46,6 @@
               <th class="text-center">Growth</th>
             <% end %>
         </tr>
-    </thead>
-    <tbody>
         <% @warehouses = @warehouses.to_a.delete_if do |warehouse| %>
           <% prev_consignment_sale = @prev_consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
           <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
@@ -81,7 +72,7 @@
             <% ending_stock = 0 %>
           <% end %>
           <% total_counter_per_region = @warehouses.select{|wr| wr.region_id == warehouse.region_id}.length %>
-          <% 
+          <%
           percentage = if prev_net_sales.to_f <= selected_net_sales.to_f
             first_val = selected_net_sales.to_f
             second_val = prev_net_sales.to_f
@@ -98,7 +89,7 @@
             "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
-          <% 
+          <%
           qty_sold_percentage = if prev_qty_sold <= selected_qty_sold
             first_val = selected_qty_sold.to_f
             second_val = prev_qty_sold.to_f
@@ -125,7 +116,7 @@
           <% else %>
             <% aur = 0 %>
           <% end %>
-          <% 
+          <%
           aur_percentage = if prev_aur.to_f <= aur.to_f
             first_val = aur.to_f
             second_val = prev_aur.to_f
@@ -256,7 +247,7 @@
           "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
           end  
       %>
-          <tr style="font-weight: bold">
+        <tr style="font-weight: bold">
             <td colspan="2" class="text-right">Total</td>
             <td class="text-right"><%= number_to_currency(total_prev_net_sales.to_f,
                   :separator => ",",
