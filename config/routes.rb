@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resources :targets
   get 'growth_reports/index'
   get 'growth_reports/print'
+  get 'growth_reports/export'
 
   namespace :api, defaults: { format: :json } do
     resources :stock_mutations do
