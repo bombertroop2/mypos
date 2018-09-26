@@ -1,11 +1,13 @@
 <!--<div class="table-responsive">-->
 <table id="gr_print_doc" class="table table-striped table-bordered" width="100%" style="padding-bottom: 1px; word-wrap: break-word">
-    <thead>
+    <tbody>
         <tr><th colspan="13" class="text-center">
                 <% if params[:date].present? %>
                   <%= "#{params[:counter_type].strip}: #{(params[:date].to_date - 1.year).strftime("%d %B %Y")}" %> VS <%= "#{params[:date].to_date.strftime("%d %B %Y")}" %>
                 <% elsif params[:month].present? %>
                   <%= "#{params[:counter_type].strip}: #{Date::MONTHNAMES[params[:month].to_i]} #{params[:year].to_i - 1}" %> VS <%= "#{Date::MONTHNAMES[params[:month].to_i]} #{params[:year]}" %>
+                <% elsif params[:date_range].present? %>
+                  <%= "#{params[:counter_type].strip}: #{@prev_date_beginning.strftime("%d %B %Y")} - #{@prev_date_end.strftime("%d %B %Y")}" %> VS <%= "#{@selected_date_beginning.strftime("%d %B %Y")} - #{@selected_date_end.strftime("%d %B %Y")}" %>
                 <% else %>
                   <%= "#{params[:counter_type].strip}: #{params[:year].to_i - 1}" %> VS <%= "#{params[:year]}" %>
                 <% end %>
@@ -34,6 +36,16 @@
               <th class="text-center"><%= (params[:date].to_date - 1.year).year %></th>
               <th class="text-center"><%= params[:date].to_date.year %></th>
               <th class="text-center">Growth</th>
+            <% elsif params[:date_range].present? %>
+              <th class="text-center"><%= @prev_date_beginning.year %></th>
+              <th class="text-center"><%= @selected_date_beginning.year %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= @prev_date_beginning.year %></th>
+              <th class="text-center"><%= @selected_date_beginning.year %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= @prev_date_beginning.year %></th>
+              <th class="text-center"><%= @selected_date_beginning.year %></th>
+              <th class="text-center">Growth</th>
             <% else %>
               <th class="text-center"><%= params[:year].to_i - 1 %></th>
               <th class="text-center"><%= params[:year] %></th>
@@ -46,8 +58,6 @@
               <th class="text-center">Growth</th>
             <% end %>
         </tr>
-    </thead>
-    <tbody>
         <% @warehouses = @warehouses.to_a.delete_if do |warehouse| %>
           <% prev_consignment_sale = @prev_consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
           <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
