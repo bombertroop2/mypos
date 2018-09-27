@@ -282,6 +282,27 @@
                                                   </ul>
                                               </li>
                                             <% end %>
+                                            <% if accounting_menu_active? %>
+                                              <li><a><i class="fa fa-cogs"></i> Accounting <span class="fa fa-chevron-down"></span></a>
+                                                  <ul class="nav child_menu">
+                                                      <% if can? :read, CoaType %>
+                                                        <li><%= link_to "Chart Of Accounts Type", coa_types_path, method: :get %></li>
+                                                      <% end %>
+                                                      <% if can? :read, Coa %>
+                                                        <li><%= link_to "Chart Of Accounts", coas_path, method: :get %></li>
+                                                      <% end %>
+                                                      <% if can? :read, Department %>
+                                                        <li><%= link_to "Departments", departments_path, method: :get %></li>
+                                                      <% end %>
+                                                      <% if can? :read, CoaDepartment %>
+                                                        <li><%= link_to "Company Departments", coa_departments_path, method: :get %></li>
+                                                      <% end %>
+                                                      <% if can? :read, CoaCash %>
+                                                        <li><%= link_to "Adjusment", coa_cashes_path, method: :get %></li>
+                                                      <% end %>
+                                                  </ul>
+                                              </li>
+                                            <% end %>
                                             <% if setting_menu_active? %>
                                               <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
                                                   <ul class="nav child_menu">
@@ -580,6 +601,46 @@
                             return false;
                         });
         <% end %>
+        <% elsif controller_name.eql?("coas") %>
+        <% if cannot?(:manage, Coa) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("departments") %>
+        <% if cannot?(:manage, Department)  %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("coa_departments") %>
+        <% if cannot?(:manage, CoaDepartment) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("coa_types") %>
+        <% if cannot?(:manage, CoaType) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
+      <% elsif controller_name.eql?("coa_cashes") %>
+        <% if cannot?(:manage, CoaCash) %>
+                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                        $('#new-item-btn').unbind("click");
+                        $('#new-item-btn').click(function (e) {
+                            return false;
+                        });
+        <% end %>
       <% elsif controller_name.eql?("members") %>
         <% if cannot?(:manage, Member) %>
                         $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
@@ -839,6 +900,42 @@
                             });
                           }
                       });
+      <% elsif controller_name.eql?("general_ledgers") %>
+                      $("#menu_toggle").click();
+                      $("#search-btn").click(function () {
+                          if ($("#general-ledger-transaction-date").val() == "" || $("#transaction_type").val() == "")
+                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                          else {
+                              <% if current_user.has_non_spg_role? %>
+                                  $.get("/general_ledgers", {
+                                      transaction_date: $("#general-ledger-transaction-date").val(),
+                                      transaction_type: $("#transaction_type").val()
+                                  });
+                              <% else %>
+                                  $.get("/general_ledgers", {
+                                      transaction_date: $("#general-ledger-transaction-date").val(),
+                                      transaction_type: $("#transaction_type").val()
+                                  });
+                              <% end %>
+                          }
+                      });
+                      // $("#print-btn").click(function () {
+                      //     if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
+                      //         bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                      //     else {
+                      //       <% if current_user.has_non_spg_role? %>
+                      //         $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                      //         $("#filter_warehouse").val($("#warehouse").val());
+                      //       <% else %>
+                      //         $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                      //         $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
+                      //       <% end %>
+                      //       $.get("/listing_stocks/print", {
+                      //               filter_warehouse: $("#filter_warehouse").val(),
+                      //               filter_listing_transaction_date: $("#filter_listing_transaction_date").val()
+                      //       });
+                      //     }
+                      // });
       <% elsif controller_name.eql?("cashier_openings") %>
                       $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
                       $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();

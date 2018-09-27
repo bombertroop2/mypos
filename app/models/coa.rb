@@ -65,7 +65,7 @@ GROUP = [
   end
 
   def coa_view
-    "#{code} - #{transaction_type}"
+    "#{code} - #{name}"
   end
 
   private

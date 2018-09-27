@@ -13,6 +13,11 @@ class Ability
       cannot :manage, Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
+      cannot :manage, Coa
+      cannot :manage, Department
+      cannot :manage, CoaDepartment
+      cannot :manage, CoaType
+      cannot :manage, CoaCash
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
@@ -241,7 +246,15 @@ class Ability
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
-            can :read, class_name.gsub(/\s+/, "").constantize
+            if class_name.eql?("Accounting")
+              can ability, Coa
+              can ability, Department
+              can ability, CoaDepartment
+              can ability, CoaType
+              can ability, CoaCash
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           end
         end
       end

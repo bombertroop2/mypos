@@ -1,8 +1,12 @@
 Rails.application.routes.draw do
   resources :coa_cashes
   resources :coa_types
+  resources :coa_departments
+  resources :departments
+  resources :coas
   resources :journals
   resources :targets
+  resources :general_ledgers, only: :index
   get 'growth_reports/index'
   get 'growth_reports/print'
 

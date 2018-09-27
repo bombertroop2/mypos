@@ -1,0 +1,35 @@
+<div class="page-header">
+    <h1>General Ledgers</h1>
+</div>
+
+<div class="row">
+  <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Show General Ledger</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+          <div class="form-horizontal">
+
+            <div class="form-group">
+              <label class="control-label col-md-3 col-sm-3 col-xs-12" for="transaction-date">Transaction date <span class="required">*</span></label>
+              <div class="col-md-6 col-sm-6 col-xs-12">
+                <input type="text" class="form-control col-md-7 col-xs-12" readonly="true" id="general-ledger-transaction-date">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="transaction_type" class="control-label col-md-3 col-sm-3 col-xs-12">Transaction Type <span class="required">*</span></label>
+              <div class="col-md-6 col-sm-6 col-xs-12">
+                <%= select_tag "transaction_type",  options_for_select(Coa::TRANSACTION_TYPE), {prompt: "Select", class: "form-control col-md-7 col-xs-12"} %>
+              </div>
+            </div>
+          <div class="ln_solid"></div>
+          <button type="submit" class="btn btn-success" id="search-btn" style="float: right">Show</button>
+          <button type="submit" class="btn btn-success" id="print-btn" style="float: right">Print</button>
+          </div>
+        </div>
+    </div>
+    <div id="report-container-daily"></div>
+  </div>
+</div>

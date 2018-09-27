@@ -13,7 +13,7 @@
       <div class="form-group<%= control_group_error(@coa_cash, :coa_id) %>">
         <%= f.label :coa_id, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">
-          <%= f.select :coa_id, options_from_collection_for_select(Coa.all.order(:id).select(:id, :code, :transaction_type), "id", "coa_view", @coa_cash.coa_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
+          <%= f.select :coa_id, options_from_collection_for_select(Coa.all.order(:id).select(:id, :code, :name), "id", "coa_view", @coa_cash.coa_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control inputs"} %>
           <%= error_help_text(@coa_cash, :coa_id) %>
         </div>
       </div>

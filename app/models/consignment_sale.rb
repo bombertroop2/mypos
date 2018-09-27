@@ -5,6 +5,7 @@ class ConsignmentSale < ApplicationRecord
   audited on: [:create, :update]
   has_many :consignment_sale_products, dependent: :destroy
   has_many :listing_stock_transactions, as: :transactionable
+  has_one :journal, :as => :transactionable
   belongs_to :warehouse
 
   validate :product_is_exist, on: :create, if: proc{|cs| !cs.no_sale && !cs.attr_importing_data}
@@ -18,6 +19,7 @@ class ConsignmentSale < ApplicationRecord
         before_create :generate_number, unless: proc{|cs| cs.attr_importing_data}
           before_create :yesterday_transaction_exist
           before_destroy :record_not_deleted, :delete_tracks
+          after_update :consignment_sale_journal, unless: proc{|cs| cs.no_sale}
           after_update :update_stock_and_afs, unless: proc{|cs| cs.attr_delete_products}
             after_update :create_listing_stock, if: proc{|cs| !cs.approved_was && cs.approved && !cs.attr_delete_products}
               after_update :delete_listing_stock, :delete_stock_movement, if: proc{|cs| cs.approved_was && !cs.approved && !cs.attr_delete_products}
@@ -25,6 +27,45 @@ class ConsignmentSale < ApplicationRecord
                 accepts_nested_attributes_for :consignment_sale_products, allow_destroy: true, reject_if: proc { |attributes| attributes[:attr_no_sale].eql?("true") }
 
                 private
+
+                def consignment_sale_journal
+                  if !approved_was && approved
+                    coa = Coa.find_by_transaction_type('SLK')
+                    gross_price = self.consignment_sale_products.collect{|p| p.price_list.price}.sum rescue 0
+                    ppn = self.total * 10 / 100
+                    nett = self.total - ppn
+                    if self.counter_event_id.present?
+                      ce = CounterEvent.find(self.counter_event_id)
+                      if ce.counter_event_type.eql?("Discount(%)") && ce.first_discount.present? && ce.second_discount.present?
+                        first_discount = gross_price * ce.first_discount/100
+                        second_discount = (gross_price - first_discount) * ce.second_discount/100
+                        discount = first_discount + second_discount
+                      elsif ce.counter_event_type.eql?("Discount(%)") && ce.first_discount.present?
+                        discount = gross_price * ce.first_discount/100
+                      elsif ce.counter_event_type.eql?("Special Price")
+                        discount = 0
+                      end
+                    else
+                      discount = 0
+                    end
+                    journal = self.build_journal(
+                          coa_id: coa.id,
+                          gross: gross_price.to_f,
+                          gross_after_discount: self.total.to_f,
+                          discount: discount.to_f,
+                          ppn: ppn.to_f,
+                          nett: nett.to_f,
+                          transaction_date: self.transaction_date,
+                          activity: nil,
+                          warehouse_id: self.warehouse_id
+                        )
+                    journal.save
+                  elsif approved_was && !approved
+                        p "not approved"
+                        journal = self.journal
+                        journal.delete if journal.present?
+                  end
+                end
 
                 def sale_not_created
                   if no_sale
