@@ -43,7 +43,7 @@
                     <div class="x_title">
                         <h2><%= "#{event_warehouse.wrhs_code} - #{event_warehouse.wrhs_name}" %></h2>
                         <div class="navbar-right">
-                            <% if !event_warehouse_fields.object.new_record? %>                      
+                            <% if !event_warehouse_fields.object.new_record? %>
                               <%= event_warehouse_fields.check_box :_destroy %> Delete
                             <% end %>
                             <% if event_type.present? && event_type.eql?("cash discount") %>
@@ -74,6 +74,40 @@
                       <% end %>
                       <div class="x_content<%= " hidden" unless event_warehouse.select_different_products? %>" id="<%= x_content_id %>">
 
+                          <% if event_type.present? && event_type.eql?("cash discount") %>
+                            <% text_field_id = "code_#{event_warehouse.warehouse_id}_cash_discount" %>
+                          <% elsif event_type.present? && event_type.eql?("special price") %>
+                            <% text_field_id = "code_#{event_warehouse.warehouse_id}_special_price" %>
+                          <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                            <% text_field_id = "code_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
+                          <% else %>
+                            <% text_field_id = "code_#{event_warehouse.warehouse_id}" %>
+                          <% end %>
+                          <div class="form-group">
+                              <label class="control-label col-sm-3" for="code">Code</label>
+                              <div class="col-sm-9">
+                                  <%= text_field_tag "code", "", {class: "form-control", id: text_field_id} %>
+                                </div>
+                            </div>
+                            <% if event_type.present? && event_type.eql?("cash discount") %>
+                              <% button_code_class = "add-buttons-by-code-cash-discount" %>
+                              <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-cash-discount" %>
+                            <% elsif event_type.present? && event_type.eql?("special price") %>
+                              <% button_code_class = "add-buttons-by-code-special-price" %>
+                              <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-special-price" %>
+                            <% elsif event_type.present? && event_type.eql?("buy one get one") %>
+                              <% button_code_class = "add-buttons-by-code-buy-one-get-one" %>
+                              <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-buy-one-get-one" %>
+                            <% else %>
+                              <% button_code_class = "add-buttons-by-code" %>
+                              <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code" %>
+                            <% end %>
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-9">
+                                    <button type="submit" class="btn btn-success <%= button_code_class %>" id="<%= button_code_id %>">Add</button>
+                                </div>
+                            </div>
+
                           <div>
                               <% if event_type.present? && event_type.eql?("cash discount") %>
                                 <% tab_id_bgm = "add_products_by_bgm_#{event_warehouse.warehouse_id}_cash_discount" %>
@@ -89,114 +123,114 @@
                                 <% tab_id_code = "add_products_by_code_#{event_warehouse.warehouse_id}" %>
                               <% end %>
                               <!-- Nav tabs -->
-                              <ul class="nav nav-tabs" role="tablist">
+                              <!-- <ul class="nav nav-tabs" role="tablist">
                                   <li role="presentation" class="active"><a href="#<%= tab_id_bgm %>" aria-controls="<%= tab_id_bgm %>" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
                                   <li role="presentation"><a href="#<%= tab_id_code %>" aria-controls="<%= tab_id_code %>" role="tab" data-toggle="tab">Add products by code</a></li>
-                              </ul>
+                              </ul> -->
 
                               <!-- Tab panes -->
-                              <div class="tab-content">
+                              <!-- <div class="tab-content">
                                   <div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_bgm %>" style="padding-top: 20px">
-                                      <% if event_type.present? && event_type.eql?("cash discount") %>
-                                        <% brand_field_id = "brand_#{event_warehouse.warehouse_id}_cash_discount" %>
-                                      <% elsif event_type.present? && event_type.eql?("special price") %>
-                                        <% brand_field_id = "brand_#{event_warehouse.warehouse_id}_special_price" %>
-                                      <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                        <% brand_field_id = "brand_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
-                                      <% else %>
-                                        <% brand_field_id = "brand_#{event_warehouse.warehouse_id}" %>
-                                      <% end %>
+                                      <%# if event_type.present? && event_type.eql?("cash discount") %>
+                                        <%# brand_field_id = "brand_#{event_warehouse.warehouse_id}_cash_discount" %>
+                                      <%# elsif event_type.present? && event_type.eql?("special price") %>
+                                        <%# brand_field_id = "brand_#{event_warehouse.warehouse_id}_special_price" %>
+                                      <%# elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                        <%# brand_field_id = "brand_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                      <%# else %>
+                                        <%# brand_field_id = "brand_#{event_warehouse.warehouse_id}" %>
+                                      <%# end %>
                                       <div class="form-group">
                                           <label class="control-label col-sm-3" for="brand">Brand</label>
                                           <div class="col-sm-9">
-                                              <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: brand_field_id} %>
+                                              <%#= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: brand_field_id} %>
                                             </div>
                                         </div>
-                                        <% if event_type.present? && event_type.eql?("cash discount") %>
-                                          <% goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}_cash_discount" %>
-                                        <% elsif event_type.present? && event_type.eql?("special price") %>
-                                          <% goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}_special_price" %>
-                                        <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                          <% goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
-                                        <% else %>
-                                          <% goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}" %>
-                                        <% end %>
+                                        <%# if event_type.present? && event_type.eql?("cash discount") %>
+                                          <%# goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}_cash_discount" %>
+                                        <%# elsif event_type.present? && event_type.eql?("special price") %>
+                                          <%# goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}_special_price" %>
+                                        <%# elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                          <%# goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                        <%# else %>
+                                          <%# goods_type_field_id = "goods_type_#{event_warehouse.warehouse_id}" %>
+                                        <%# end %>
                                         <div class="form-group">
                                             <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
                                             <div class="col-sm-9">
-                                                <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: goods_type_field_id} %>
+                                                <%#= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: goods_type_field_id} %>
                                               </div>
                                           </div>
-                                          <% if event_type.present? && event_type.eql?("cash discount") %>
-                                            <% model_field_id = "model_#{event_warehouse.warehouse_id}_cash_discount" %>
-                                          <% elsif event_type.present? && event_type.eql?("special price") %>
-                                            <% model_field_id = "model_#{event_warehouse.warehouse_id}_special_price" %>
-                                          <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                            <% model_field_id = "model_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
-                                          <% else %>
-                                            <% model_field_id = "model_#{event_warehouse.warehouse_id}" %>
-                                          <% end %>
+                                          <%# if event_type.present? && event_type.eql?("cash discount") %>
+                                            <%# model_field_id = "model_#{event_warehouse.warehouse_id}_cash_discount" %>
+                                          <%# elsif event_type.present? && event_type.eql?("special price") %>
+                                            <%# model_field_id = "model_#{event_warehouse.warehouse_id}_special_price" %>
+                                          <%# elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                            <%# model_field_id = "model_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                          <%# else %>
+                                            <%# model_field_id = "model_#{event_warehouse.warehouse_id}" %>
+                                          <%# end %>
                                           <div class="form-group">
                                               <label class="control-label col-sm-3" for="model">Model</label>
                                               <div class="col-sm-9">
-                                                  <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: model_field_id} %>
+                                                  <%#= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: model_field_id} %>
                                                 </div>
                                             </div>
-                                            <% if event_type.present? && event_type.eql?("cash discount") %>
-                                              <% button_bgm_class = "add-buttons-cash-discount" %>
-                                              <% button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}-cash-discount" %>
-                                            <% elsif event_type.present? && event_type.eql?("special price") %>
-                                              <% button_bgm_class = "add-buttons-special-price" %>
-                                              <% button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}-special-price" %>
-                                            <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                              <% button_bgm_class = "add-buttons-buy-one-get-one" %>
-                                              <% button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}-buy-one-get-one" %>
-                                            <% else %>
-                                              <% button_bgm_class = "add-buttons" %>
-                                              <% button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}" %>
-                                            <% end %>
+                                            <%# if event_type.present? && event_type.eql?("cash discount") %>
+                                              <%# button_bgm_class = "add-buttons-cash-discount" %>
+                                              <%# button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}-cash-discount" %>
+                                            <%# elsif event_type.present? && event_type.eql?("special price") %>
+                                              <%# button_bgm_class = "add-buttons-special-price" %>
+                                              <%# button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}-special-price" %>
+                                            <%# elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                              <%# button_bgm_class = "add-buttons-buy-one-get-one" %>
+                                              <%# button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}-buy-one-get-one" %>
+                                            <%# else %>
+                                              <%# button_bgm_class = "add-buttons" %>
+                                              <%# button_bgm_id = "add-btn-#{event_warehouse.warehouse_id}" %>
+                                            <%# end %>
                                             <div class="form-group">
                                                 <div class="col-sm-offset-3 col-sm-9">
-                                                    <button type="submit" class="btn btn-success <%= button_bgm_class %>" id="<%= button_bgm_id %>">Add</button>
+                                                    <button type="submit" class="btn btn-success <%#= button_bgm_class %>" id="<%#= button_bgm_id %>">Add</button>
                                                 </div>
                                             </div>
                                         </div>
                                         <div role="tabpanel" class="tab-pane fade" id="<%= tab_id_code %>" style="padding-top: 20px">
-                                            <% if event_type.present? && event_type.eql?("cash discount") %>
-                                              <% text_field_id = "code_#{event_warehouse.warehouse_id}_cash_discount" %>
-                                            <% elsif event_type.present? && event_type.eql?("special price") %>
-                                              <% text_field_id = "code_#{event_warehouse.warehouse_id}_special_price" %>
-                                            <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                              <% text_field_id = "code_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
-                                            <% else %>
-                                              <% text_field_id = "code_#{event_warehouse.warehouse_id}" %>
-                                            <% end %>
+                                            <%# if event_type.present? && event_type.eql?("cash discount") %>
+                                              <%# text_field_id = "code_#{event_warehouse.warehouse_id}_cash_discount" %>
+                                            <%# elsif event_type.present? && event_type.eql?("special price") %>
+                                              <%# text_field_id = "code_#{event_warehouse.warehouse_id}_special_price" %>
+                                            <%# elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                              <%# text_field_id = "code_#{event_warehouse.warehouse_id}_buy_one_get_one" %>
+                                            <%# else %>
+                                              <%# text_field_id = "code_#{event_warehouse.warehouse_id}" %>
+                                            <%# end %>
                                             <div class="form-group">
                                                 <label class="control-label col-sm-3" for="code">Code</label>
                                                 <div class="col-sm-9">
-                                                    <%= text_field_tag "code", "", {class: "form-control", id: text_field_id} %>
+                                                    <%#= text_field_tag "code", "", {class: "form-control", id: text_field_id} %>
                                                   </div>
                                               </div>
-                                              <% if event_type.present? && event_type.eql?("cash discount") %>
-                                                <% button_code_class = "add-buttons-by-code-cash-discount" %>
-                                                <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-cash-discount" %>
-                                              <% elsif event_type.present? && event_type.eql?("special price") %>
-                                                <% button_code_class = "add-buttons-by-code-special-price" %>
-                                                <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-special-price" %>
-                                              <% elsif event_type.present? && event_type.eql?("buy one get one") %>
-                                                <% button_code_class = "add-buttons-by-code-buy-one-get-one" %>
-                                                <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-buy-one-get-one" %>
-                                              <% else %>
-                                                <% button_code_class = "add-buttons-by-code" %>
-                                                <% button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code" %>
-                                              <% end %>
+                                              <%# if event_type.present? && event_type.eql?("cash discount") %>
+                                                <%# button_code_class = "add-buttons-by-code-cash-discount" %>
+                                                <%# button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-cash-discount" %>
+                                              <%# elsif event_type.present? && event_type.eql?("special price") %>
+                                                <%# button_code_class = "add-buttons-by-code-special-price" %>
+                                                <%# button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-special-price" %>
+                                              <%# elsif event_type.present? && event_type.eql?("buy one get one") %>
+                                                <%# button_code_class = "add-buttons-by-code-buy-one-get-one" %>
+                                                <%# button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code-buy-one-get-one" %>
+                                              <%# else %>
+                                                <%# button_code_class = "add-buttons-by-code" %>
+                                                <%# button_code_id = "add-btn-#{event_warehouse.warehouse_id}-by-code" %>
+                                              <%# end %>
                                               <div class="form-group">
                                                   <div class="col-sm-offset-3 col-sm-9">
-                                                      <button type="submit" class="btn btn-success <%= button_code_class %>" id="<%= button_code_id %>">Add</button>
+                                                      <button type="submit" class="btn btn-success <%#= button_code_class %>" id="<%#= button_code_id %>">Add</button>
                                                   </div>
                                               </div>
                                           </div>
-                                      </div>
+                                      </div> -->
                                       <% if event_type.present? && event_type.eql?("cash discount") %>
                                         <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products-cash-discount">
                                           <% elsif event_type.present? && event_type.eql?("special price") %>
@@ -214,7 +248,7 @@
                                                         <%# end %>
                                                       <% end %>
                                                   </div>
-                                              </div>                    
+                                              </div>
 
                                               <div class="ln_solid"></div>
 

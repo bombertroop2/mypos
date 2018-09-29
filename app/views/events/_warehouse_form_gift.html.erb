@@ -34,7 +34,7 @@
                     <div class="x_title">
                         <h2><%= "#{event_warehouse.wrhs_code} - #{event_warehouse.wrhs_name}" %></h2>
                         <div class="navbar-right">
-                            <% if !event_warehouse_fields.object.new_record? %>                      
+                            <% if !event_warehouse_fields.object.new_record? %>
                               <%= event_warehouse_fields.check_box :_destroy %> Delete
                             <% end %>
                             <%= event_warehouse_fields.check_box :select_different_products, class: "event-warehouse-select-different-products-fields-gift", id: "event_event_warehouses_attributes_#{event_warehouse.warehouse_id}_select_different_products_gift" %> Select different products
@@ -43,30 +43,42 @@
                       </div>
                       <div class="x_content<%= " hidden" unless event_warehouse.select_different_products? %>" id="event-warehouse-<%= event_warehouse.warehouse_id %>-form-container-gift">
 
+                          <div class="form-group">
+                            <label class="control-label col-sm-3" for="code">Code</label>
+                            <div class="col-sm-9">
+                                <%= text_field_tag "code", "", {class: "form-control", id: "code_#{event_warehouse.warehouse_id}_gift"} %>
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <div class="col-sm-offset-3 col-sm-9">
+                                  <button type="submit" class="btn btn-success add-buttons-by-code-gift" id="add-btn-<%= event_warehouse.warehouse_id %>-by-code-gift">Add</button>
+                              </div>
+                          </div>
+
                           <!-- Nav tabs -->
-                          <ul class="nav nav-tabs" role="tablist">
+                          <!-- <ul class="nav nav-tabs" role="tablist">
                               <li role="presentation" class="active"><a href="#add_products_by_bgm_<%= event_warehouse.warehouse_id %>_gift" aria-controls="add_products_by_bgm_<%= event_warehouse.warehouse_id %>_gift" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
                               <li role="presentation"><a href="#add_products_by_code_<%= event_warehouse.warehouse_id %>_gift" aria-controls="add_products_by_code_<%= event_warehouse.warehouse_id %>_gift" role="tab" data-toggle="tab">Add products by code</a></li>
-                          </ul>
+                          </ul> -->
                           <!-- Tab panes -->
-                          <div class="tab-content">
+                          <!-- <div class="tab-content">
                               <div role="tabpanel" class="tab-pane fade in active" id="add_products_by_bgm_<%= event_warehouse.warehouse_id %>_gift" style="padding-top: 20px">
                                   <div class="form-group">
                                       <label class="control-label col-sm-3" for="brand">Brand</label>
                                       <div class="col-sm-9">
-                                          <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_#{event_warehouse.warehouse_id}_gift"} %>
+                                          <%#= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_#{event_warehouse.warehouse_id}_gift"} %>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
                                         <div class="col-sm-9">
-                                            <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_#{event_warehouse.warehouse_id}_gift"} %>
+                                            <%#= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_#{event_warehouse.warehouse_id}_gift"} %>
                                           </div>
                                       </div>
                                       <div class="form-group">
                                           <label class="control-label col-sm-3" for="model">Model</label>
                                           <div class="col-sm-9">
-                                              <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_#{event_warehouse.warehouse_id}_gift"} %>
+                                              <%#= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_#{event_warehouse.warehouse_id}_gift"} %>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -79,7 +91,7 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-3" for="code">Code</label>
                                             <div class="col-sm-9">
-                                                <%= text_field_tag "code", "", {class: "form-control", id: "code_#{event_warehouse.warehouse_id}_gift"} %>
+                                                <%#= text_field_tag "code", "", {class: "form-control", id: "code_#{event_warehouse.warehouse_id}_gift"} %>
                                               </div>
                                           </div>
                                           <div class="form-group">
@@ -88,7 +100,7 @@
                                               </div>
                                           </div>
                                       </div>
-                                  </div>
+                                  </div> -->
                                   <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products-gift">
                                       <% if (action_name.eql?("edit") && event_products.length > 0) || action_name.eql?("update") %>
                                         <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_products: event_products, event_type: event_type} %>
