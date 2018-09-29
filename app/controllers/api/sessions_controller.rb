@@ -11,10 +11,10 @@ class Api::SessionsController < Devise::SessionsController
       if user.sales_promotion_girl_id.present? && user.sales_promotion_girl.warehouse.warehouse_type.include?("ctr")
         @current_user = user
       else
-        render json: { status: false, message: "Sorry, you don't have access to this app" }, status: :unprocessable_entity
+        render json: { status: false, message: "Sorry, you don't have access to this app" }#, status: :unprocessable_entity
       end
     else
-      render json: { status: false, message: "Invalid login or password" }, status: :unprocessable_entity
+      render json: { status: false, message: "Invalid login or password" }#, status: :unprocessable_entity
     end
   end
 end

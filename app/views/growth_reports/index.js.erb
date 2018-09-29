@@ -2,6 +2,8 @@
   $("#report-container-daily").html("<%= j(render(partial: "report")) %>");
 <% elsif params[:month].present? %>
   $("#report-container").html("<%= j(render(partial: "report")) %>");
+<% elsif params[:date_range].present? %>
+  $("#report-container-custom-range").html("<%= j(render(partial: "report")) %>");
 <% else %>
   $("#report-container-year").html("<%= j(render(partial: "report")) %>");
 <% end %>

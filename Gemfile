@@ -127,3 +127,5 @@ gem "roo"
 gem 'carrierwave'
 gem 'cloudinary'
 gem 'sidekiq-scheduler'
+gem 'wicked_pdf', '~> 1.1'
+gem 'wkhtmltopdf-binary'
