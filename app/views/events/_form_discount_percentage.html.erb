@@ -52,39 +52,35 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">Product</label>
                                 <div class="col-sm-10">
-                                    <div class="form-group">
-                                            <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_percentage_discount"} %>
-                                            <button type="submit" class="btn btn-success" id="add-btn-by-code-percentage-discount">Add</button>
-                                    </div>
                                     <div class="x_panel">
-                                        <div class="x_content">
+                                        <div class="x_content">                        
 
                                             <div>
                                                 <!-- Nav tabs -->
-                                                <!-- <ul class="nav nav-tabs" role="tablist">
-                                                    <li role="presentation" class="active"><a href="#add_general_products_by_bgm_percentage_discount" aria-controls="add_general_products_by_bgm_percentage_discount" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
-                                                    <li role="presentation"><a href="#add_general_products_by_code_percentage_discount" aria-controls="add_general_products_by_code_percentage_discount" role="tab" data-toggle="tab">Add products by code</a></li>
-                                                </ul> -->
+                                                <ul class="nav nav-tabs" role="tablist">
+                                                    <!--<li role="presentation" class="active"><a href="#add_general_products_by_bgm_percentage_discount" aria-controls="add_general_products_by_bgm_percentage_discount" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>-->
+                                                    <li role="presentation" class="active"><a href="#add_general_products_by_code_percentage_discount" aria-controls="add_general_products_by_code_percentage_discount" role="tab" data-toggle="tab">Add products by code</a></li>
+                                                </ul>
 
                                                 <!-- Tab panes -->
-                                                <!-- <div class="tab-content">
-                                                    <div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_percentage_discount" style="padding-top: 20px">
+                                                <div class="tab-content">
+                                                    <!--<div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_percentage_discount" style="padding-top: 20px">
                                                         <div class="form-group">
                                                             <label class="control-label col-sm-3" for="brand">Brand</label>
                                                             <div class="col-sm-9">
-                                                                <%#= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_percentage_discount"} %>
+                                                                <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_percentage_discount"} %>
                                                               </div>
                                                           </div>
                                                           <div class="form-group">
                                                               <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
                                                               <div class="col-sm-9">
-                                                                  <%#= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_percentage_discount"} %>
+                                                                  <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_percentage_discount"} %>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label class="control-label col-sm-3" for="model">Model</label>
                                                                 <div class="col-sm-9">
-                                                                    <%#= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_percentage_discount"} %>
+                                                                    <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_percentage_discount"} %>
                                                                   </div>
                                                               </div>
                                                               <div class="form-group">
@@ -92,12 +88,12 @@
                                                                       <button type="submit" class="btn btn-success" id="add-btn-percentage-discount">Add</button>
                                                                   </div>
                                                               </div>
-                                                          </div>
-                                                          <div role="tabpanel" class="tab-pane fade" id="add_general_products_by_code_percentage_discount" style="padding-top: 20px">
+                                                          </div>-->
+                                                          <div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_code_percentage_discount" style="padding-top: 20px">
                                                               <div class="form-group">
                                                                   <label class="control-label col-sm-3" for="code">Code</label>
                                                                   <div class="col-sm-9">
-                                                                      <%#= text_field_tag "code", "", {class: "form-control", id: "code_general_products_percentage_discount"} %>
+                                                                      <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_percentage_discount"} %>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
@@ -106,18 +102,18 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div> -->
+                                                        </div>
                                                         <div id="listing-general-products-percentage-discount">
                                                             <% if action_name.eql?("edit") %>
                                                               <% event_general_products = @event.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
                                                             <% else %>
                                                               <% event_general_products = @event.event_general_products %>
                                                             <% end %>
-                                                            <% if event_general_products.present? %>
+                                                            <% if event_general_products.present? %>                        
                                                               <%= render partial: "listing_general_products", locals: {event_general_products: event_general_products} %>
                                                             <% end %>
                                                         </div>
-                                                    </div>
+                                                    </div>                    
 
                                                     <div class="ln_solid"></div>
 
@@ -154,8 +150,8 @@
 
                                     <div id="listing-warehouse-details">
                                         <% if action_name.eql?("create") || !@event.new_record? %>
-                                          <%= render(partial: "warehouse_form") %>
-                                        <% end %>
+                                          <%= render(partial: "warehouse_form") %>    
+                                        <% end %>      
                                     </div>
 
                                     <div class="form-group">
@@ -345,4 +341,4 @@
                                               $(this).val($(this).val().replace(/ /g, ""));
                                           });
                                       });
-                                    </script>
+                                    </script>  
