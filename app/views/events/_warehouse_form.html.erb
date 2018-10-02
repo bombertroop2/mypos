@@ -90,13 +90,13 @@
                               <% end %>
                               <!-- Nav tabs -->
                               <ul class="nav nav-tabs" role="tablist">
-                                  <li role="presentation" class="active"><a href="#<%= tab_id_bgm %>" aria-controls="<%= tab_id_bgm %>" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
-                                  <li role="presentation"><a href="#<%= tab_id_code %>" aria-controls="<%= tab_id_code %>" role="tab" data-toggle="tab">Add products by code</a></li>
+                                  <!--<li role="presentation" class="active"><a href="#<%= tab_id_bgm %>" aria-controls="<%= tab_id_bgm %>" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>-->
+                                  <li role="presentation" class="active"><a href="#<%= tab_id_code %>" aria-controls="<%= tab_id_code %>" role="tab" data-toggle="tab">Add products by code</a></li>
                               </ul>
 
                               <!-- Tab panes -->
                               <div class="tab-content">
-                                  <div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_bgm %>" style="padding-top: 20px">
+                                  <!--<div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_bgm %>" style="padding-top: 20px">
                                       <% if event_type.present? && event_type.eql?("cash discount") %>
                                         <% brand_field_id = "brand_#{event_warehouse.warehouse_id}_cash_discount" %>
                                       <% elsif event_type.present? && event_type.eql?("special price") %>
@@ -160,8 +160,8 @@
                                                     <button type="submit" class="btn btn-success <%= button_bgm_class %>" id="<%= button_bgm_id %>">Add</button>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div role="tabpanel" class="tab-pane fade" id="<%= tab_id_code %>" style="padding-top: 20px">
+                                        </div>-->
+                                        <div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_code %>" style="padding-top: 20px">
                                             <% if event_type.present? && event_type.eql?("cash discount") %>
                                               <% text_field_id = "code_#{event_warehouse.warehouse_id}_cash_discount" %>
                                             <% elsif event_type.present? && event_type.eql?("special price") %>
@@ -206,12 +206,12 @@
                                                   <% else %>
                                                     <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products">
                                                       <% end %>
-                                                      <%# if event_warehouse.select_different_products %>
-                                                        <% if (action_name.eql?("edit") && event_products.length > 0) || action_name.eql?("update") %>
-                                                          <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_products: event_products, event_type: event_type} %>
-                                                        <% elsif event_warehouse.event_products.present? %>
-                                                          <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_type: event_type} %>
-                                                        <%# end %>
+                  <%# if event_warehouse.select_different_products %>
+                                                      <% if (action_name.eql?("edit") && event_products.length > 0) || action_name.eql?("update") %>
+                                                        <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_products: event_products, event_type: event_type} %>
+                                                      <% elsif event_warehouse.event_products.present? %>
+                                                        <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_type: event_type} %>
+                    <%# end %>
                                                       <% end %>
                                                   </div>
                                               </div>                    

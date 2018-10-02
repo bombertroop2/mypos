@@ -41,7 +41,7 @@ class Api::ShipmentsController < Api::ApplicationController
     
     # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number (tapi sekarang 1 DO = 1 OB)
     if @delivery_orders.length == 0 || @delivery_orders.length > 1
-      render json: { status: false, message: "No records found" }, status: :unprocessable_entity
+      render json: { status: false, message: "No records found" }#, status: :unprocessable_entity
     else
       render json: { status: true, delivery_order: @delivery_orders.first }
     end
