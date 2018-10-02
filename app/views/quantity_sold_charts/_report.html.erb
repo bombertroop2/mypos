@@ -1,0 +1,72 @@
+<!--<div class="table-responsive">-->
+<table class="table table-striped table-bordered" style="padding-bottom: 1px; word-wrap: break-word">
+    <thead>
+        <tr>
+            <th colspan="14" class="text-center">
+                <%= "Region: #{@region_name}" %>,
+                <%= "Year: #{params[:year]}" %>
+            </th>
+        </tr>
+        <tr>
+            <th class="text-center">
+                <%= "#{@brand_name} - #{@counter_type}" %>
+            </th>
+            <th class="text-center">Jan</th>
+            <th class="text-center">Feb</th>
+            <th class="text-center">Mar</th>
+            <th class="text-center">Apr</th>
+            <th class="text-center">May</th>
+            <th class="text-center">Jun</th>
+            <th class="text-center">Jul</th>
+            <th class="text-center">Aug</th>
+            <th class="text-center">Sep</th>
+            <th class="text-center">Oct</th>
+            <th class="text-center">Nov</th>
+            <th class="text-center">Dec</th>
+            <th class="text-center">
+                Total
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <% chart_data = {} %>
+        <% @models.each do |model| %>
+          <% if (csp = @consignment_sale_products.select{|csp| csp.model_id == model.id}.first).present? %>
+            <% if csp.qty_sold_jan != 0 ||
+                csp.qty_sold_feb != 0 ||
+                csp.qty_sold_mar != 0 ||
+                csp.qty_sold_apr != 0 ||
+                csp.qty_sold_may != 0 ||
+                csp.qty_sold_jun != 0 ||
+                csp.qty_sold_jul != 0 ||
+                csp.qty_sold_aug != 0 ||
+                csp.qty_sold_sep != 0 ||
+                csp.qty_sold_oct != 0 ||
+                csp.qty_sold_nov != 0 ||
+                csp.qty_sold_dec != 0 %>
+              <tr>
+                  <td><%= model.name %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_jan, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_feb, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_mar, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_apr, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_may, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_jun, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_jul, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_aug, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_sep, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_oct, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_nov, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <td class="text-right"><%= number_to_currency(csp.qty_sold_dec, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                  <% total = csp.qty_sold_jan + csp.qty_sold_feb + csp.qty_sold_mar + csp.qty_sold_apr + csp.qty_sold_may + csp.qty_sold_jun + csp.qty_sold_jul + csp.qty_sold_aug + csp.qty_sold_sep + csp.qty_sold_oct + csp.qty_sold_nov + csp.qty_sold_dec %>
+                  <td class="text-right"><strong><%= number_to_currency(total, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></strong></td>
+              </tr>
+              <% chart_data[model.name] = total %>
+            <% end %>
+          <% end %>
+        <% end %>
+    </tbody>
+</table>
+
+<%#= pie_chart Product.group(:target).count, thousands: ".", library: {plotOptions: {pie: {dataLabels: {enabled: false}, showInLegend: true}}} %>
+<%= pie_chart chart_data, height: "100%", thousands: ".", library: {plotOptions: {pie: {dataLabels: {format: "<b>{point.name}</b>: {point.y:,.0f} ({point.percentage:.2f}%)", allowOverlap: true, padding: 0}, size: "100%", allowPointSelect: true, showInLegend: true}}} if chart_data.present? %>
