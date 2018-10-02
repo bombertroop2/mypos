@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'quantity_sold_charts/index'
   resources :targets
   get 'growth_reports/index'
   get 'growth_reports/print'
