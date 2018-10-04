@@ -54,7 +54,7 @@ class Product < ApplicationRecord
   validates :sex, presence: true, unless: proc{|pr| pr.attr_importing_data_via_web}
 
   validates :code, uniqueness: true
-  validate :code_not_changed, :size_group_not_changed, :color_selected
+  validate :code_not_changed, :size_group_not_changed, :color_selected, :goods_type_not_changed, :sex_not_changed
   validate :check_item, on: :create, unless: proc{|product| product.attr_importing_data}
   validate :brand_available, :sex_available, :vendor_available, :target_available,
     :model_available, :goods_type_available, :size_group_available
@@ -136,6 +136,14 @@ class Product < ApplicationRecord
   end
 
   private
+  
+  def sex_not_changed
+    errors.add(:sex, "change is not allowed!") if sex_changed? && persisted? && order_booking_product_relation.present?
+  end
+  
+  def goods_type_not_changed
+    errors.add(:goods_type_id, "change is not allowed!") if goods_type_id_changed? && persisted? && order_booking_product_relation.present?
+  end
 
   def delete_tracks
     audits.destroy_all
