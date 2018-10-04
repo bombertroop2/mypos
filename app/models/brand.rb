@@ -10,6 +10,10 @@ class Brand < CommonField
   
   before_destroy :delete_tracks
   
+  def code_and_name
+    "#{code} - #{name}"
+  end
+  
   private
   
   def delete_tracks

@@ -1,0 +1,2 @@
+module QuantitySoldChartsHelper
+end
