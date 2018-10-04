@@ -1,5 +1,5 @@
 class OrderBookingProduct < ApplicationRecord
-  attr_accessor :product_code, :product_name
+  attr_accessor :product_code, :product_name, :attr_destination_warehouse_id
   attr_reader :origin_warehouse_id
   
   audited associated_with: :order_booking, on: :create
@@ -17,6 +17,7 @@ class OrderBookingProduct < ApplicationRecord
   validates :product_id, presence: true
   validate :product_available, if: proc{|obp| obp.product_id.present? && (obp.new_record? || (obp.product_id_changed? && obp.persisted?))}
     validate :check_min_product_quantity
+    validate :article_sex_not_valid
     
     before_create :calculate_quantity, :update_order_booking_quantity
     before_destroy :delete_tracks
@@ -28,6 +29,20 @@ class OrderBookingProduct < ApplicationRecord
     end
   
     private
+    
+    def article_sex_not_valid
+      if @product.present? && !@product.sex.downcase.eql?("unisex")
+        dest_warehouse = Warehouse.select(:code, :counter_type).find(attr_destination_warehouse_id)
+        if dest_warehouse.counter_type.blank? || dest_warehouse.counter_type.eql?("Bazar")
+        elsif dest_warehouse.counter_type.eql?("Bags")
+          if !@product.goods_type_name.strip.downcase.eql?("bag") && !@product.goods_type_name.strip.downcase.eql?("bags")
+            errors.add(:base, "Article #{@product.code} is not allowed for warehouse #{dest_warehouse.code}")
+          end
+        elsif !dest_warehouse.counter_type.downcase.eql?(@product.sex.downcase)
+          errors.add(:base, "Article #{@product.code} is not allowed for warehouse #{dest_warehouse.code}")
+        end
+      end
+    end
     
     def delete_tracks
       audits.destroy_all
@@ -51,11 +66,11 @@ class OrderBookingProduct < ApplicationRecord
     end
       
     def product_available
-      errors.add(:base, "Some products do not exist!") if Product.joins(stock_products: [stock: :warehouse]).
-        where(id: product_id).
-        where("stocks.warehouse_id = #{origin_warehouse_id}").
-        where(["warehouses.is_active = ?", true]).
-        select("1 AS one").blank?
+      errors.add(:base, "Some products do not exist!") if (@product = Product.joins(:goods_type, stock_products: [stock: :warehouse]).
+          where(id: product_id).
+          where("stocks.warehouse_id = #{origin_warehouse_id}").
+          where(["warehouses.is_active = ?", true]).
+          select(:code, :sex, "common_fields.name AS goods_type_name").first).blank?
     end
     
     def calculate_quantity
