@@ -80,6 +80,9 @@ class OrderBookingsController < ApplicationController
       warehouse_to_ids.each do |warehouse_to_id|
         begin
           @order_booking = OrderBooking.new(order_booking_params)
+          @order_booking.order_booking_products.each do |obp|
+            obp.attr_destination_warehouse_id = warehouse_to_id
+          end
           @order_booking.destination_warehouse_id = warehouse_to_id
           unless @order_booking.save
             if @order_booking.errors[:base].present?
@@ -127,6 +130,9 @@ class OrderBookingsController < ApplicationController
     if @total_products != 0 && @total_deleted_products != 0 && @total_products == @total_deleted_products
       render js: "bootbox.alert({message: \"Sorry, you can't delete all records\",size: 'small'});"
     else
+      params[:order_booking][:order_booking_products_attributes].each do |key, value|
+        params[:order_booking][:order_booking_products_attributes][key].merge! attr_destination_warehouse_id: @order_booking.destination_warehouse_id
+      end if params[:order_booking][:order_booking_products_attributes].present?
       unless @order_booking.update(order_booking_params)
         if @order_booking.errors[:base].present?
           render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
@@ -165,7 +171,7 @@ class OrderBookingsController < ApplicationController
         end
       else
         @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+        #        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
       end
     end
   end
@@ -267,11 +273,19 @@ class OrderBookingsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def order_booking_params
-    params.require(:order_booking).permit(:plan_date, :origin_warehouse_id,
-      :destination_warehouse_id, :note, order_booking_products_attributes: [:product_id,
-        :product_code, :product_name, :origin_warehouse_id, :id, :_destroy,
-        order_booking_product_items_attributes: [:new_product, :id, :size_id, :color_id, :quantity,
-          :available_for_booking_quantity, :product_id, :origin_warehouse_id]])
+    if action_name.eql?("create")
+      params.require(:order_booking).permit(:plan_date, :origin_warehouse_id,
+        :destination_warehouse_id, :note, order_booking_products_attributes: [:product_id,
+          :product_code, :product_name, :origin_warehouse_id, :id, :_destroy,
+          order_booking_product_items_attributes: [:new_product, :id, :size_id, :color_id, :quantity,
+            :available_for_booking_quantity, :product_id, :origin_warehouse_id]])
+    else
+      params.require(:order_booking).permit(:plan_date, :origin_warehouse_id,
+        :note, order_booking_products_attributes: [:product_id,
+          :product_code, :product_name, :origin_warehouse_id, :id, :_destroy, :attr_destination_warehouse_id,
+          order_booking_product_items_attributes: [:new_product, :id, :size_id, :color_id, :quantity,
+            :available_for_booking_quantity, :product_id, :origin_warehouse_id]])
+    end
   end
   
   def populate_warehouses
