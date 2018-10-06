@@ -754,6 +754,11 @@ class StockMutationsController < ApplicationController
         stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id, :attr_destination_warehouse_id,
           stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
             :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])
+    elsif action_name.eql?("create_store_to_warehouse_mutation")
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :courier_id, :origin_warehouse_id, :destination_warehouse_id,
+        stock_mutation_products_attributes: [:quantity, :_destroy, :product_name, :product_code, :product_id, :attr_destination_warehouse_id, :origin_warehouse_id, :attr_mutation_type,
+          stock_mutation_product_items_attributes: [:quantity, :color_id, :size_id, :_destroy,
+            :origin_warehouse_id, :product_id, :mutation_type]])      
     else
       params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :number, :destination_warehouse_id,
         stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id, :attr_destination_warehouse_id,
@@ -777,7 +782,7 @@ class StockMutationsController < ApplicationController
         if params[:stock_mutation][:stock_mutation_products_attributes][key][:_destroy].eql?("0")
           delete_all_products = false
           total_stock_mutation_product_quantity = 0
-          params[:stock_mutation][:stock_mutation_products_attributes][key].merge! origin_warehouse_id: origin_warehouse_id, attr_destination_warehouse_id: params[:stock_mutation][:destination_warehouse_id]
+          params[:stock_mutation][:stock_mutation_products_attributes][key].merge! origin_warehouse_id: origin_warehouse_id, attr_destination_warehouse_id: params[:stock_mutation][:destination_warehouse_id], attr_mutation_type: type
           if params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].present?
             quantity_present = false
             params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].each do |smpi_key, smpi_value|
