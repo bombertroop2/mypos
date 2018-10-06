@@ -99,6 +99,10 @@ class Product < ApplicationRecord
     "#{code} #{brand.name}"
   end
 
+  def event_autocomplete_display_value
+    "#{code}; #{brand.code} - #{brand.name}; #{target}"
+  end
+
   def active_cost
     cost_lists = self.cost_lists.select(:id, :cost, :effective_date)
     cost_lists.each do |cost_list|

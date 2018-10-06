@@ -43,7 +43,7 @@
                     <div class="x_title">
                         <h2><%= "#{event_warehouse.wrhs_code} - #{event_warehouse.wrhs_name}" %></h2>
                         <div class="navbar-right">
-                            <% if !event_warehouse_fields.object.new_record? %>                      
+                            <% if !event_warehouse_fields.object.new_record? %>
                               <%= event_warehouse_fields.check_box :_destroy %> Delete
                             <% end %>
                             <% if event_type.present? && event_type.eql?("cash discount") %>
@@ -73,7 +73,12 @@
                         <% x_content_id = "event-warehouse-#{event_warehouse.warehouse_id}-form-container-percentage-discount" %>
                       <% end %>
                       <div class="x_content<%= " hidden" unless event_warehouse.select_different_products? %>" id="<%= x_content_id %>">
-
+                          <div class="form-group">
+                              <label class="col-sm-2 control-label">Search Article</label>
+                              <div class="col-sm-10">
+                                <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_percentage_discount"} %>
+                              </div>
+                            </div>
                           <div>
                               <% if event_type.present? && event_type.eql?("cash discount") %>
                                 <% tab_id_bgm = "add_products_by_bgm_#{event_warehouse.warehouse_id}_cash_discount" %>
@@ -89,13 +94,13 @@
                                 <% tab_id_code = "add_products_by_code_#{event_warehouse.warehouse_id}" %>
                               <% end %>
                               <!-- Nav tabs -->
-                              <ul class="nav nav-tabs" role="tablist">
+                              <!-- <ul class="nav nav-tabs" role="tablist"> -->
                                   <!--<li role="presentation" class="active"><a href="#<%= tab_id_bgm %>" aria-controls="<%= tab_id_bgm %>" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>-->
-                                  <li role="presentation" class="active"><a href="#<%= tab_id_code %>" aria-controls="<%= tab_id_code %>" role="tab" data-toggle="tab">Add products by code</a></li>
-                              </ul>
+                                  <!-- <li role="presentation" class="active"><a href="#<%= tab_id_code %>" aria-controls="<%= tab_id_code %>" role="tab" data-toggle="tab">Add products by code</a></li> -->
+                              <!-- </ul> -->
 
                               <!-- Tab panes -->
-                              <div class="tab-content">
+                              <!-- <div class="tab-content"> -->
                                   <!--<div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_bgm %>" style="padding-top: 20px">
                                       <% if event_type.present? && event_type.eql?("cash discount") %>
                                         <% brand_field_id = "brand_#{event_warehouse.warehouse_id}_cash_discount" %>
@@ -161,7 +166,7 @@
                                                 </div>
                                             </div>
                                         </div>-->
-                                        <div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_code %>" style="padding-top: 20px">
+                                        <!-- <div role="tabpanel" class="tab-pane fade in active" id="<%= tab_id_code %>" style="padding-top: 20px">
                                             <% if event_type.present? && event_type.eql?("cash discount") %>
                                               <% text_field_id = "code_#{event_warehouse.warehouse_id}_cash_discount" %>
                                             <% elsif event_type.present? && event_type.eql?("special price") %>
@@ -195,8 +200,8 @@
                                                       <button type="submit" class="btn btn-success <%= button_code_class %>" id="<%= button_code_id %>">Add</button>
                                                   </div>
                                               </div>
-                                          </div>
-                                      </div>
+                                          </div> -->
+                                      <!-- </div> -->
                                       <% if event_type.present? && event_type.eql?("cash discount") %>
                                         <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products-cash-discount">
                                           <% elsif event_type.present? && event_type.eql?("special price") %>
@@ -214,7 +219,7 @@
                     <%# end %>
                                                       <% end %>
                                                   </div>
-                                              </div>                    
+                                              </div>
 
                                               <div class="ln_solid"></div>
 

@@ -1,0 +1,171 @@
+<% if params[:event_type].present? && params[:event_type].eql?("cash discount") %>
+  <% if @event.new_record? %>
+    if($("#listing_event_general_products_table_cash_discount").length == 0){
+    $("#listing-general-products-cash-discount").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesCashDiscount.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesCashDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_cash_discount_<%= product.id %>');
+      <% event_general_product = @event.event_general_products.select{|ep| ep.product_id == product.id}.first %>
+      $("#event_general_product_fields_container_cash_discount").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+    <% end %>
+    }
+  <% else %>
+    if($("#listing_event_general_products_table_cash_discount").length == 0){
+    $("#listing-general-products-cash-discount").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesCashDiscount.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesCashDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_cash_discount_<%= product.id %>');
+      <% event_general_product = @existing_event_new_general_products.select{|ep| ep.product_id == product.id}.first %>
+      <% if event_general_product.present? %>
+        $("#event_general_product_fields_container_cash_discount").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+      <% end %>
+    <% end %>
+    }
+  <% end %>
+<% elsif params[:event_type].present? && params[:event_type].eql?("special price") %>
+  <% if @event.new_record? %>
+    if($("#listing_event_general_products_table_special_price").length == 0){
+    $("#listing-general-products-special-price").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesSpecialPrice.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesSpecialPrice.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_special_price_<%= product.id %>');
+      <% event_general_product = @event.event_general_products.select{|ep| ep.product_id == product.id}.first %>
+      $("#event_general_product_fields_container_special_price").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+    <% end %>
+    }
+  <% else %>
+    if($("#listing_event_general_products_table_special_price").length == 0){
+    $("#listing-general-products-special-price").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesSpecialPrice.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesSpecialPrice.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_special_price_<%= product.id %>');
+      <% event_general_product = @existing_event_new_general_products.select{|ep| ep.product_id == product.id}.first %>
+      <% if event_general_product.present? %>
+        $("#event_general_product_fields_container_special_price").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+      <% end %>
+    <% end %>
+    }
+  <% end %>
+<% elsif params[:event_type].present? && params[:event_type].eql?("buy one get one") %>
+  <% if @event.new_record? %>
+    if($("#listing_event_general_products_table_buy_one_get_one").length == 0){
+    $("#listing-general-products-buy-one-get-one").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesBuyOneGetOne.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesBuyOneGetOne.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_bo_go_<%= product.id %>');
+      <% event_general_product = @event.event_general_products.select{|ep| ep.product_id == product.id}.first %>
+      $("#event_general_product_fields_container_buy_one_get_one").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+    <% end %>
+    }
+  <% else %>
+    if($("#listing_event_general_products_table_buy_one_get_one").length == 0){
+    $("#listing-general-products-buy-one-get-one").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesBuyOneGetOne.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesBuyOneGetOne.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_bo_go_<%= product.id %>');
+      <% event_general_product = @existing_event_new_general_products.select{|ep| ep.product_id == product.id}.first %>
+      <% if event_general_product.present? %>
+        $("#event_general_product_fields_container_buy_one_get_one").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+      <% end %>
+    <% end %>
+    }
+  <% end %>
+<% elsif params[:event_type].present? && params[:event_type].eql?("gift") %>
+  <% if @event.new_record? %>
+    if($("#listing_event_general_products_table_gift").length == 0){
+    $("#listing-general-products-gift").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesGift.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesGift.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_gift_event_<%= product.id %>');
+      <% event_general_product = @event.event_general_products.select{|ep| ep.product_id == product.id}.first %>
+      $("#event_general_product_fields_container_gift").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+    <% end %>
+    }
+  <% else %>
+    if($("#listing_event_general_products_table_gift").length == 0){
+    $("#listing-general-products-gift").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesGift.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesGift.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_gift_event_<%= product.id %>');
+      <% event_general_product = @existing_event_new_general_products.select{|ep| ep.product_id == product.id}.first %>
+      <% if event_general_product.present? %>
+        $("#event_general_product_fields_container_gift").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+      <% end %>
+    <% end %>
+    }
+  <% end %>
+<% else %>
+  <% if @event.new_record? %>
+    if($("#listing_event_general_products_table_percentage_discount").length == 0){
+    $("#listing-general-products-percentage-discount").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesPercentageDiscount.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesPercentageDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_percentage_discount_<%= product.id %>');
+      <% event_general_product = @event.event_general_products.select{|ep| ep.product_id == product.id}.first %>
+      $("#event_general_product_fields_container_percentage_discount").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+    <% end %>
+    }
+  <% else %>
+    if($("#listing_event_general_products_table_percentage_discount").length == 0){
+    $("#listing-general-products-percentage-discount").html("<%= j(render(partial: "listing_general_products", locals: {event_general_products: @existing_event_new_general_products})) %>");
+    }else{
+    <% @products.each do |product| %>
+      var rowValue = {
+      'code': '<%= product.product_code %>',
+      'name': '<%= product.product_name %>'
+      };
+      var rowObject = eventGeneralProductDataTablesPercentageDiscount.row.add(rowValue).draw(false);
+      eventGeneralProductDataTablesPercentageDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_percentage_discount_<%= product.id %>');
+      <% event_general_product = @existing_event_new_general_products.select{|ep| ep.product_id == product.id}.first %>
+      <% if event_general_product.present? %>
+        $("#event_general_product_fields_container_percentage_discount").append("<%= j(render(partial: "event_general_product_fields", locals: {event_general_product: event_general_product, event_type: params[:event_type]})) %>");
+      <% end %>
+    <% end %>
+    }
+  <% end %>
+<% end %>
