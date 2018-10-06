@@ -40,7 +40,7 @@ class Warehouse < ApplicationRecord
         validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
           :area_manager_available, :region_available, :price_code_available, :type_available,
           :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid, :price_code_not_changed,
-          :in_transit_present
+          :in_transit_present, :counter_type_not_changed
         validate :counter_type_available, if: proc{|wr| wr.warehouse_type.present? && wr.warehouse_type.include?("ctr")}
 
           before_validation :delete_non_intransit_attributes, if: proc{|warehouse| warehouse.warehouse_type.eql?("in_transit")}
@@ -230,5 +230,9 @@ class Warehouse < ApplicationRecord
 
                 def price_code_not_changed
                   errors.add(:price_code_id, "change is not allowed!") if price_code_id_changed? && persisted? && (cashier_opening_relation.present? || consignment_sale_relation.present?)
+                end
+                
+                def counter_type_not_changed
+                  errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && destination_warehouse_order_booking_relation.present?
                 end
               end

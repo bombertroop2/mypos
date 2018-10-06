@@ -1,5 +1,5 @@
 class StockMutationProduct < ApplicationRecord
-  attr_accessor :origin_warehouse_id, :product_code, :product_name
+  attr_accessor :origin_warehouse_id, :product_code, :product_name, :attr_destination_warehouse_id, :attr_mutation_type
   
   audited associated_with: :stock_mutation, on: [:create, :update]
   has_associated_audits
@@ -15,20 +15,35 @@ class StockMutationProduct < ApplicationRecord
   validates :product_id, presence: true
   #  validate :should_has_details
   validate :product_available
+  validate :article_sex_not_valid, if: proc{|smp| smp.product_id.present? && !smp.attr_mutation_type.eql?("store to warehouse") && (smp.new_record? || (smp.product_id_changed? && smp.persisted?))}
 
-  before_destroy :delete_tracks
+    before_destroy :delete_tracks
 
-  private
+    private
   
-  def delete_tracks
-    audits.destroy_all
+    def article_sex_not_valid
+      if @sp.present? && !@sp.product_sex.downcase.eql?("unisex")
+        dest_warehouse = Warehouse.select(:code, :counter_type).find(attr_destination_warehouse_id)
+        if dest_warehouse.counter_type.blank? || dest_warehouse.counter_type.eql?("Bazar")
+        elsif dest_warehouse.counter_type.eql?("Bags")
+          if !@sp.goods_type_name.strip.downcase.eql?("bag") && !@sp.goods_type_name.strip.downcase.eql?("bags")
+            errors.add(:base, "Article #{@sp.product_code} is not allowed for warehouse #{dest_warehouse.code}")
+          end
+        elsif !dest_warehouse.counter_type.downcase.eql?(@sp.product_sex.downcase)
+          errors.add(:base, "Article #{@sp.product_code} is not allowed for warehouse #{dest_warehouse.code}")
+        end
+      end
+    end
+  
+    def delete_tracks
+      audits.destroy_all
+    end
+  
+    #  def should_has_details
+    #    errors.add(:base, "Please insert at least one piece per product!") if stock_mutation_product_items.blank?
+    #  end
+  
+    def product_available
+      errors.add(:base, "Some products do not exist!") if (@sp = StockProduct.joins(:stock, product: :goods_type).where(product_id: product_id).where(["warehouse_id = ?", origin_warehouse_id]).select("products.code AS product_code", "products.sex AS product_sex", "common_fields.name AS goods_type_name").first).blank?
+    end
   end
-  
-  #  def should_has_details
-  #    errors.add(:base, "Please insert at least one piece per product!") if stock_mutation_product_items.blank?
-  #  end
-  
-  def product_available
-    errors.add(:base, "Some products do not exist!") if StockProduct.joins(:stock).where(product_id: product_id).where(["warehouse_id = ?", origin_warehouse_id]).select("1 AS one").blank?
-  end
-end
