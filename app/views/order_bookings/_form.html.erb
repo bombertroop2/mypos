@@ -46,13 +46,13 @@
                     </div>
 
                     <% unless @order_booking.new_record? %>
-                      <div class="form-group<%= control_group_error(@order_booking, :destination_warehouse_id) %>">
-                          <%= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-2 control-label" %>
+                      <!--<div class="form-group<%#= control_group_error(@order_booking, :destination_warehouse_id) %>">
+                          <%#= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-2 control-label" %>
                             <div class="col-sm-10">
-                                <%= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
-                                  <%= error_help_text(@order_booking, :destination_warehouse_id) %>
+                                <%#= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                                  <%#= error_help_text(@order_booking, :destination_warehouse_id) %>
                               </div>
-                          </div>
+                          </div>-->
                         <% else %>
                           <div class="form-group">
                               <label class="col-sm-2 control-label">Warehouse to</label>
