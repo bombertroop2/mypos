@@ -265,9 +265,9 @@ class EventsController < ApplicationController
       @existing_event_new_products = []
       products.each do |product|
         if !@event.new_record? && @event_warehouse.event_products.where(product_id: product.id).select("1 AS one").blank?
-          @existing_event_new_products << @event_warehouse.event_products.build(product_id: product.id, prdct_code: product.product_code, prdct_name: product.product_name)
+          @existing_event_new_products << @event_warehouse.event_products.build(product_id: product.id, prdct_code: product.code, prdct_name: product.brand.name)
         elsif @event.new_record?
-          @event_warehouse.event_products.build product_id: product.id, prdct_code: product.product_code, prdct_name: product.product_name
+          @event_warehouse.event_products.build product_id: product.id, prdct_code: product.code, prdct_name: product.brand.name
         end
       end
     end
@@ -362,7 +362,7 @@ class EventsController < ApplicationController
   end
 
   def autocomplete_events
-    products = Product.where("LOWER(code) LIKE LOWER('#{params[:term]}%') AND brand_id = #{params[:brand]} AND target = '#{params[:target]}' ")
+    products = Product.where("LOWER(code) LIKE LOWER('#{params[:term]}%') AND brand_id = #{params[:brand].to_i} AND target = '#{params[:target]}' ")
     render json: products.map { |product|
       {
         id:    product.id,

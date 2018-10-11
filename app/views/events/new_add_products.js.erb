@@ -6,8 +6,8 @@
     <% event_warehouse = @event.event_warehouses.select{|ew| ew.warehouse_id == params[:warehouse_id].to_i}.first %>
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesCashDiscount['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesCashDiscount['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_cash_discount');
@@ -22,8 +22,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesCashDiscount['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesCashDiscount['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_cash_discount');
@@ -46,8 +46,8 @@
     <% event_warehouse = @event.event_warehouses.select{|ew| ew.warehouse_id == params[:warehouse_id].to_i}.first %>
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesSpecialPrice['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesSpecialPrice['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_special_price');
@@ -62,8 +62,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesSpecialPrice['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesSpecialPrice['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_special_price');
@@ -86,8 +86,8 @@
     <% event_warehouse = @event.event_warehouses.select{|ew| ew.warehouse_id == params[:warehouse_id].to_i}.first %>
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesBuyOneGetOne['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesBuyOneGetOne['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_buy_one_get_one');
@@ -102,8 +102,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesBuyOneGetOne['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesBuyOneGetOne['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_buy_one_get_one');
@@ -126,8 +126,8 @@
     <% event_warehouse = @event.event_warehouses.select{|ew| ew.warehouse_id == params[:warehouse_id].to_i}.first %>
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_gift');
@@ -142,8 +142,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTablesGift['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>_gift');
@@ -166,8 +166,8 @@
     <% event_warehouse = @event.event_warehouses.select{|ew| ew.warehouse_id == params[:warehouse_id].to_i}.first %>
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTables['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
       eventWarehouseProductDataTables['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>');
@@ -182,11 +182,11 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventWarehouseProductDataTables['<%= params[:warehouse_id] %>'].row.add(rowValue).draw(false);
-      eventWarehouseProductDataTables['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>');
+      eventWarehouseProductDataTables['<%= params[:warehouse_id] %>'].rows(rowObject.index()).nodes().to$().attr("id", 'warehouse_<%= params[:warehouse_id] %>_product_<%= product.id %>');            
       if($("#event_event_warehouses_attributes_<%= params[:warehouse_id] %>_event_products_attributes_<%= product.id %>__destroy").length > 0)
       $("#event_event_warehouses_attributes_<%= params[:warehouse_id] %>_event_products_attributes_<%= product.id %>__destroy").val("false");
       else{

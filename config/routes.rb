@@ -105,7 +105,7 @@ Rails.application.routes.draw do
     end
   end
   resources :events do
-    get :autocomplete_product_code, :on => :collection
+#    get :autocomplete_product_code, :on => :collection
     collection do
       get :autocomplete_events
       get :new_add_general_products

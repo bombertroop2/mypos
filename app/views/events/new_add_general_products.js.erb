@@ -5,8 +5,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesCashDiscount.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesCashDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_cash_discount_<%= product.id %>');
@@ -20,8 +20,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesCashDiscount.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesCashDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_cash_discount_<%= product.id %>');
@@ -39,8 +39,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesSpecialPrice.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesSpecialPrice.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_special_price_<%= product.id %>');
@@ -54,8 +54,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesSpecialPrice.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesSpecialPrice.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_special_price_<%= product.id %>');
@@ -73,8 +73,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesBuyOneGetOne.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesBuyOneGetOne.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_bo_go_<%= product.id %>');
@@ -88,8 +88,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesBuyOneGetOne.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesBuyOneGetOne.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_bo_go_<%= product.id %>');
@@ -107,8 +107,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesGift.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesGift.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_gift_event_<%= product.id %>');
@@ -122,8 +122,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesGift.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesGift.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_gift_event_<%= product.id %>');
@@ -156,8 +156,8 @@
     }else{
     <% @products.each do |product| %>
       var rowValue = {
-      'code': '<%= product.product_code %>',
-      'name': '<%= product.product_name %>'
+      'code': '<%= product.code %>',
+      'name': '<%= product.brand.name %>'
       };
       var rowObject = eventGeneralProductDataTablesPercentageDiscount.row.add(rowValue).draw(false);
       eventGeneralProductDataTablesPercentageDiscount.rows(rowObject.index()).nodes().to$().attr("id", 'general_product_percentage_discount_<%= product.id %>');
