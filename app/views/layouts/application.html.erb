@@ -244,6 +244,7 @@
                                                       <% end %>
                                                       <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
                                                       <li><%= link_to "Pie Chart of Qty Sold", quantity_sold_charts_index_path, method: :get %></li>
+                                                      <li><%= link_to "Sell Thru", sell_thru_path, method: :get %></li>
                                                   </ul>
                                               </li>
                                             <% end %>
@@ -882,6 +883,8 @@
       <% elsif controller_name.eql?("growth_reports") %>
                       $("#menu_toggle").click();
       <% elsif controller_name.eql?("quantity_sold_charts") %>
+                      $("#menu_toggle").click();
+      <% elsif controller_name.eql?("sell_thrus") %>
                       $("#menu_toggle").click();
       <% elsif controller_name.eql?("sales_returns") %>
                       $("#menu_toggle").click();

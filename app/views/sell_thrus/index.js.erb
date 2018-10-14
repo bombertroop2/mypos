@@ -1,0 +1,7 @@
+$("#report-container-st").html("<%= j(render(partial: "report")) %>");
+sortSellThruTable();
+
+<% if params[:export].present? %>
+  exportSellThruDataToExcel("sell_thru_<%= @warehouse.code %>_<%= @received_date.strftime("%d_%b_%Y") %>");
+  $("#report-container-st").html("");
+<% end %>
