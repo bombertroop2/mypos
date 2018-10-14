@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'sell_thru' => 'sell_thrus#index'
   get 'quantity_sold_charts/index'
   resources :targets
   get 'growth_reports/index'
@@ -105,7 +106,7 @@ Rails.application.routes.draw do
     end
   end
   resources :events do
-#    get :autocomplete_product_code, :on => :collection
+    #    get :autocomplete_product_code, :on => :collection
     collection do
       get :autocomplete_events
       get :new_add_general_products
