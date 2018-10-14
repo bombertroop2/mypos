@@ -69,13 +69,13 @@ function sortSellThruTable() {
     }
 }
 
-function exportSellThruDataToExcel(filename='')
+function exportSellThruDataToExcel(filename)
 {
     var downloadurl;
     var fileType = 'application/vnd.ms-excel';
     var tableSelect = document.getElementById("sell-thru-table");
     var dataHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-    filename = filename ? filename + '.xls' : 'sell_thru_report.xls';
+    filename = filename + '.xls';
     downloadurl = document.createElement("a");
     document.body.appendChild(downloadurl);
     if (navigator.msSaveOrOpenBlob)
