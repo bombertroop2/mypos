@@ -47,8 +47,8 @@ function sortSellThruTable() {
             shouldSwitch = false;
             /* Get the two elements you want to compare,
              one from current row and one from the next: */
-            x = rows[i].getElementsByTagName("TD")[9];
-            y = rows[i + 1].getElementsByTagName("TD")[9];
+            x = rows[i].getElementsByTagName("TD")[10];
+            y = rows[i + 1].getElementsByTagName("TD")[10];
 
             var firstPercentage = parseFloat(x.innerHTML.toLowerCase().trim().split("%")[0]);
             var secondPercentage = parseFloat(y.innerHTML.toLowerCase().trim().split("%")[0]);
