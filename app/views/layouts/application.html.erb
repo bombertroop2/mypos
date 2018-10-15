@@ -24,6 +24,8 @@
                 <% opened_menu_name = "Fiscal Reopening/Closing" %>
               <% elsif params[:controller].eql?("cost_prices") %>
                 <% opened_menu_name = "Costs & Prices" %>
+              <% elsif params[:controller].eql?("sell_thrus") %>
+                <% opened_menu_name = params[:controller].humanize.titleize.singularize %>
               <% elsif params[:controller].eql?("events") %>
                 <% if action_name.eql?("index") %>
                   <% opened_menu_name = "Showroom Events" %>

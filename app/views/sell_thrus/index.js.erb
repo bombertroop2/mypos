@@ -1,7 +1,17 @@
-$("#report-container-st").html("<%= j(render(partial: "report")) %>");
-sortSellThruTable();
+<% if params[:counter].present? %>
+  $("#report-container-st").html("<%= j(render(partial: "report")) %>");
+  sortSellThruTable("sell-thru-table");
+<% else %>
+  $("#report-container-st-showroom").html("<%= j(render(partial: "report")) %>");
+  sortSellThruTable("sell-thru-table-showroom");
+<% end %>
 
 <% if params[:export].present? %>
-  exportSellThruDataToExcel("sell_thru_<%= @warehouse.code %>_<%= @received_date.strftime("%d_%b_%Y") %>");
-  $("#report-container-st").html("");
+  <% if params[:type].present? %>
+    exportSellThruDataToExcel("sell_thru_<%= @warehouse.code %>_<%= @received_date.strftime("%d_%b_%Y") %>", "sell-thru-table-showroom");
+    $("#report-container-st-showroom").html("");
+  <% else %>
+    exportSellThruDataToExcel("sell_thru_<%= @warehouse.code %>_<%= @received_date.strftime("%d_%b_%Y") %>", "sell-thru-table");
+    $("#report-container-st").html("");
+  <% end %>
 <% end %>
