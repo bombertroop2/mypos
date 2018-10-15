@@ -2,7 +2,11 @@ $(function () {
     $("#sell_thru_date").datepicker({
         dateFormat: "dd/mm/yy"
     });
+    $("#sell_thru_date_showroom").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
     $("#sell_thru_counter").attr("data-placeholder", "Please select").chosen();
+    $("#sell_thru_showroom").attr("data-placeholder", "Please select").chosen({width: "200px"});
     $("#generate-btn-sell-thru-report").click(function () {
         if ($("#sell_thru_counter").val().trim() == "")
             bootbox.alert({message: "Please select counter first!", size: "small"});
@@ -28,11 +32,38 @@ $(function () {
             });
         }
     });
+    $("#generate-btn-sell-thru-report-showroom").click(function () {
+        if ($("#sell_thru_showroom").val().trim() == "")
+            bootbox.alert({message: "Please select showroom first!", size: "small"});
+        else if ($("#sell_thru_date_showroom").val().trim() == "")
+            bootbox.alert({message: "Please select date first!", size: "small"});
+        else {
+            $.get("/sell_thru", {
+                date: $("#sell_thru_date_showroom").val().trim(),
+                showroom: $("#sell_thru_showroom").val().trim(),
+                type: "showroom"
+            });
+        }
+    });
+    $("#export-btn-sell-thru-report-showroom").click(function () {
+        if ($("#sell_thru_showroom").val().trim() == "")
+            bootbox.alert({message: "Please select showroom first!", size: "small"});
+        else if ($("#sell_thru_date_showroom").val().trim() == "")
+            bootbox.alert({message: "Please select date first!", size: "small"});
+        else {
+            $.get("/sell_thru", {
+                date: $("#sell_thru_date_showroom").val().trim(),
+                showroom: $("#sell_thru_showroom").val().trim(),
+                export: true,
+                type: "showroom"
+            });
+        }
+    });
 });
 
-function sortSellThruTable() {
+function sortSellThruTable(tableId) {
     var table, rows, switching, i, x, y, shouldSwitch;
-    table = document.getElementById("sell-thru-table");
+    table = document.getElementById(tableId);
     switching = true;
     /* Make a loop that will continue until
      no switching has been done: */
@@ -69,11 +100,11 @@ function sortSellThruTable() {
     }
 }
 
-function exportSellThruDataToExcel(filename)
+function exportSellThruDataToExcel(filename, tableId)
 {
     var downloadurl;
     var fileType = 'application/vnd.ms-excel';
-    var tableSelect = document.getElementById("sell-thru-table");
+    var tableSelect = document.getElementById(tableId);
     var dataHTML = tableSelect.outerHTML.replace(/ /g, '%20');
     filename = filename + '.xls';
     downloadurl = document.createElement("a");

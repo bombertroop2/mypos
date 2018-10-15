@@ -1,9 +1,10 @@
+<% table_id = params[:counter].present? ? "sell-thru-table" : "sell-thru-table-showroom" %>
 <!--<div class="table-responsive">-->
-<table class="table table-striped table-bordered" style="padding-bottom: 1px; word-wrap: break-word" id="sell-thru-table">
+<table class="table table-striped table-bordered" style="padding-bottom: 1px; word-wrap: break-word" id="<%= table_id %>">
     <thead>
         <tr>
             <th colspan="11" class="text-center">
-                <%= "Counter: #{@warehouse.code_and_name}" %>,
+                <%= params[:counter].present? ? "Counter: #{@warehouse.code_and_name}" : "Showroom: #{@warehouse.code_and_name}" %>,
                 <%= "Date: #{params[:date]}" %>
             </th>
         </tr>
@@ -23,16 +24,52 @@
             <th class="text-center">Total Qty Sold</th>
             <th class="text-center">Percentage</th>
         </tr>
-    </thead>
+    </thead>   
     <tbody>
         <% @shipment_products.each do |sp| %>
-          <% consignment_sale_product = @consignment_sale_products.select {|csp| csp.product_id == sp.product_id && csp.color_id == sp.color_id}.first %>
-          <% total_per_article_color = (consignment_sale_product.present? ? consignment_sale_product.qty_sold_first : 0) %>
-          <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_second : 0) %>
-          <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_third : 0) %>
-          <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_fourth : 0) %>
-          <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_fifth : 0) %>
-          <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_sixth : 0) %>
+          <% if params[:counter].present? %>
+            <% consignment_sale_product = @consignment_sale_products.select {|csp| csp.product_id == sp.product_id && csp.color_id == sp.color_id}.first %>
+            <% total_per_article_color = (consignment_sale_product.present? ? consignment_sale_product.qty_sold_first : 0) %>
+            <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_second : 0) %>
+            <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_third : 0) %>
+            <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_fourth : 0) %>
+            <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_fifth : 0) %>
+            <% total_per_article_color += (consignment_sale_product.present? ? consignment_sale_product.qty_sold_sixth : 0) %>
+            <% qty_sold_first = consignment_sale_product.present? ? consignment_sale_product.qty_sold_first : 0 %>
+            <% qty_sold_second = consignment_sale_product.present? ? consignment_sale_product.qty_sold_second : 0 %>
+            <% qty_sold_third = consignment_sale_product.present? ? consignment_sale_product.qty_sold_third : 0 %>
+            <% qty_sold_fourth = consignment_sale_product.present? ? consignment_sale_product.qty_sold_fourth : 0 %>
+            <% qty_sold_fifth = consignment_sale_product.present? ? consignment_sale_product.qty_sold_fifth : 0 %>
+            <% qty_sold_sixth = consignment_sale_product.present? ? consignment_sale_product.qty_sold_sixth : 0 %>
+          <% else %>
+            <% sale_product = @sale_products.select {|sale_product| sale_product.product_id == sp.product_id && sale_product.color_id == sp.color_id}.first %>
+            <% sales_return_product = @sales_return_products.select {|srp| srp.product_id == sp.product_id && srp.color_id == sp.color_id}.first %>
+            <% total_per_article_color = (sale_product.present? ? sale_product.qty_sold_first : 0) %>
+            <% total_per_article_color += (sale_product.present? ? sale_product.qty_sold_second : 0) %>
+            <% total_per_article_color += (sale_product.present? ? sale_product.qty_sold_third : 0) %>
+            <% total_per_article_color += (sale_product.present? ? sale_product.qty_sold_fourth : 0) %>
+            <% total_per_article_color += (sale_product.present? ? sale_product.qty_sold_fifth : 0) %>
+            <% total_per_article_color += (sale_product.present? ? sale_product.qty_sold_sixth : 0) %>
+            <% total_returned_per_article_color = (sales_return_product.present? ? sales_return_product.qty_returned_first : 0) %>
+            <% total_returned_per_article_color += (sales_return_product.present? ? sales_return_product.qty_returned_second : 0) %>
+            <% total_returned_per_article_color += (sales_return_product.present? ? sales_return_product.qty_returned_third : 0) %>
+            <% total_returned_per_article_color += (sales_return_product.present? ? sales_return_product.qty_returned_fourth : 0) %>
+            <% total_returned_per_article_color += (sales_return_product.present? ? sales_return_product.qty_returned_fifth : 0) %>
+            <% total_returned_per_article_color += (sales_return_product.present? ? sales_return_product.qty_returned_sixth : 0) %>
+            <% total_per_article_color -= total_returned_per_article_color %>
+            <% qty_sold_first = sale_product.present? ? sale_product.qty_sold_first : 0 %>
+            <% qty_sold_first = sale_product.present? && sales_return_product.present? ? (sale_product.qty_sold_first - sales_return_product.qty_returned_first) : qty_sold_first %>
+            <% qty_sold_second = sale_product.present? ? sale_product.qty_sold_second : 0 %>
+            <% qty_sold_second = sale_product.present? && sales_return_product.present? ? (sale_product.qty_sold_second - sales_return_product.qty_returned_second) : qty_sold_second %>
+            <% qty_sold_third = sale_product.present? ? sale_product.qty_sold_third : 0 %>
+            <% qty_sold_third = sale_product.present? && sales_return_product.present? ? (sale_product.qty_sold_third - sales_return_product.qty_returned_third) : qty_sold_third %>
+            <% qty_sold_fourth = sale_product.present? ? sale_product.qty_sold_fourth : 0 %>
+            <% qty_sold_fourth = sale_product.present? && sales_return_product.present? ? (sale_product.qty_sold_fourth - sales_return_product.qty_returned_fourth) : qty_sold_fourth %>
+            <% qty_sold_fifth = sale_product.present? ? sale_product.qty_sold_fifth : 0 %>
+            <% qty_sold_fifth = sale_product.present? && sales_return_product.present? ? (sale_product.qty_sold_fifth - sales_return_product.qty_returned_fifth) : qty_sold_fifth %>
+            <% qty_sold_sixth = sale_product.present? ? sale_product.qty_sold_sixth : 0 %>
+            <% qty_sold_sixth = sale_product.present? && sales_return_product.present? ? (sale_product.qty_sold_sixth - sales_return_product.qty_returned_sixth) : qty_sold_sixth %>
+          <% end %>
           <tr>
               <td>
                   <%= "#{sp.product_code} - #{sp.product_name}" %>
@@ -43,32 +80,32 @@
               <td class="text-right">
                   <%= sp.qty_received_per_article_color %>
               </td>
-              <td class="text-right"><%= number_to_currency((consignment_sale_product.present? ? consignment_sale_product.qty_sold_first : 0),
+              <td class="text-right"><%= number_to_currency(qty_sold_first,
                     :separator => "",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency((consignment_sale_product.present? ? consignment_sale_product.qty_sold_second : 0),
+              <td class="text-right"><%= number_to_currency(qty_sold_second,
                     :separator => "",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency((consignment_sale_product.present? ? consignment_sale_product.qty_sold_third : 0),
+              <td class="text-right"><%= number_to_currency(qty_sold_third,
                     :separator => "",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency((consignment_sale_product.present? ? consignment_sale_product.qty_sold_fourth : 0),
+              <td class="text-right"><%= number_to_currency(qty_sold_fourth,
                     :separator => "",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency((consignment_sale_product.present? ? consignment_sale_product.qty_sold_fifth : 0),
+              <td class="text-right"><%= number_to_currency(qty_sold_fifth,
                     :separator => "",
                     :delimiter => ".",
                     :unit => "",
                     :precision => 0) %></td>
-              <td class="text-right"><%= number_to_currency((consignment_sale_product.present? ? consignment_sale_product.qty_sold_sixth : 0),
+              <td class="text-right"><%= number_to_currency(qty_sold_sixth,
                     :separator => "",
                     :delimiter => ".",
                     :unit => "",
@@ -83,5 +120,4 @@
           </tr>
         <% end %>
     </tbody>
-
 </table>
