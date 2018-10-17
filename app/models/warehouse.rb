@@ -40,7 +40,7 @@ class Warehouse < ApplicationRecord
         validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
           :area_manager_available, :region_available, :price_code_available, :type_available,
           :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid, :price_code_not_changed,
-          :in_transit_present, :counter_type_not_changed
+          :in_transit_present, :counter_type_not_changed, :central_present
         validate :counter_type_available, if: proc{|wr| wr.warehouse_type.present? && wr.warehouse_type.include?("ctr")}
 
           before_validation :delete_non_intransit_attributes, if: proc{|warehouse| warehouse.warehouse_type.eql?("in_transit")}
@@ -159,6 +159,15 @@ class Warehouse < ApplicationRecord
                     in_transit = Warehouse.where(warehouse_type: "in_transit").select("1 AS one")
                     if in_transit.present?
                       errors.add(:warehouse_type, "has already been taken") if warehouse_type.present? && warehouse_type.eql?("in_transit")
+                    end
+                  end
+                end
+
+                def central_present
+                  if warehouse_type_changed?
+                    central_warehouse = Warehouse.where(warehouse_type: "central").select("1 AS one")
+                    if central_warehouse.present?
+                      errors.add(:warehouse_type, "has already been taken") if warehouse_type.present? && warehouse_type.eql?("central")
                     end
                   end
                 end
