@@ -1,15 +1,27 @@
 <% if params[:counter].present? %>
   $("#report-container-st").html("<%= j(render(partial: "report")) %>");
   sortSellThruTable("sell-thru-table");
-<% else %>
+<% elsif params[:showroom].present? %>
   $("#report-container-st-showroom").html("<%= j(render(partial: "report")) %>");
   sortSellThruTable("sell-thru-table-showroom");
+<% elsif params[:type].eql?("central counter") %>
+  $("#report-container-st-central-counter").html("<%= j(render(partial: "report")) %>");
+  sortSellThruTable("sell-thru-table-central-counter");
+<% else %>
+  $("#report-container-st-central-showroom").html("<%= j(render(partial: "report")) %>");
+  sortSellThruTable("sell-thru-table-central-showroom");
 <% end %>
 
 <% if params[:export].present? %>
-  <% if params[:type].present? %>
+  <% if params[:type].eql?("showroom") %>
     exportSellThruDataToExcel("sell_thru_<%= @warehouse.code %>_<%= @received_date.strftime("%d_%b_%Y") %>", "sell-thru-table-showroom");
     $("#report-container-st-showroom").html("");
+  <% elsif params[:type].eql?("central counter") %>
+    exportSellThruDataToExcel("sell_thru_central_warehouse_<%= @received_date.strftime("%d_%b_%Y") %>_counter_sales", "sell-thru-table-central-counter");
+    $("#report-container-st-central-counter").html("");
+  <% elsif params[:type].eql?("central showroom") %>
+    exportSellThruDataToExcel("sell_thru_central_warehouse_<%= @received_date.strftime("%d_%b_%Y") %>_showroom_sales", "sell-thru-table-central-showroom");
+    $("#report-container-st-central-showroom").html("");
   <% else %>
     exportSellThruDataToExcel("sell_thru_<%= @warehouse.code %>_<%= @received_date.strftime("%d_%b_%Y") %>", "sell-thru-table");
     $("#report-container-st").html("");
