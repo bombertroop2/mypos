@@ -8,6 +8,9 @@ $(function () {
     $("#sell_thru_date_central_counter").datepicker({
         dateFormat: "dd/mm/yy"
     });
+    $("#sell_thru_date_central_showroom").datepicker({
+        dateFormat: "dd/mm/yy"
+    });
     $("#sell_thru_counter").attr("data-placeholder", "Please select").chosen();
     $("#sell_thru_showroom").attr("data-placeholder", "Please select").chosen({width: "200px"});
     //$("#sell_thru_central_counter").attr("data-placeholder", "Please select").chosen({width: "200px"});
@@ -86,6 +89,27 @@ $(function () {
                 date: $("#sell_thru_date_central_counter").val().trim(),
                 //showroom: $("#sell_thru_central_counter").val().trim(),
                 type: "central counter",
+                export: true
+            });
+        }
+    });
+    $("#generate-btn-sell-thru-report-central-showroom").click(function () {
+        if ($("#sell_thru_date_central_showroom").val().trim() == "")
+            bootbox.alert({message: "Please select date first!", size: "small"});
+        else {
+            $.get("/sell_thru", {
+                date: $("#sell_thru_date_central_showroom").val().trim(),
+                type: "central showroom"
+            });
+        }
+    });
+    $("#export-btn-sell-thru-report-central-showroom").click(function () {
+        if ($("#sell_thru_date_central_showroom").val().trim() == "")
+            bootbox.alert({message: "Please select date first!", size: "small"});
+        else {
+            $.get("/sell_thru", {
+                date: $("#sell_thru_date_central_showroom").val().trim(),
+                type: "central showroom",
                 export: true
             });
         }
