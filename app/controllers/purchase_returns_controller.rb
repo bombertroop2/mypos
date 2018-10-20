@@ -223,11 +223,11 @@ class PurchaseReturnsController < ApplicationController
       end
       
       @do_numbers = if params[:received_date].present? && params[:vendor_id].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(receiving_date) BETWEEN ? AND ? #{params[:query_operator].strip} vendor_id = ?", start_received_date, end_received_date, params[:vendor_id].strip]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(direct_purchases.receiving_date) BETWEEN ? AND ? #{params[:query_operator].strip} direct_purchases.vendor_id = ?", start_received_date, end_received_date, params[:vendor_id].strip]).order(:delivery_order_number)
       elsif params[:received_date].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(receiving_date) BETWEEN ? AND ?", start_received_date, end_received_date]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(direct_purchases.receiving_date) BETWEEN ? AND ?", start_received_date, end_received_date]).order(:delivery_order_number)
       elsif params[:vendor_id].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["vendor_id = ?", params[:vendor_id].strip]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["direct_purchases.vendor_id = ?", params[:vendor_id].strip]).order(:delivery_order_number)
       elsif params[:do_number].present?
         ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id, direct_purchase_id").where(["delivery_order_number = ?", params[:do_number]]).order(:delivery_order_number)
       else

@@ -24,6 +24,8 @@
                 <% opened_menu_name = "Fiscal Reopening/Closing" %>
               <% elsif params[:controller].eql?("cost_prices") %>
                 <% opened_menu_name = "Costs & Prices" %>
+              <% elsif params[:controller].eql?("sell_thrus") %>
+                <% opened_menu_name = params[:controller].humanize.titleize.singularize %>
               <% elsif params[:controller].eql?("events") %>
                 <% if action_name.eql?("index") %>
                   <% opened_menu_name = "Showroom Events" %>
@@ -244,6 +246,7 @@
                                                       <% end %>
                                                       <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
                                                       <li><%= link_to "Pie Chart of Qty Sold", quantity_sold_charts_index_path, method: :get %></li>
+                                                      <li><%= link_to "Sell Thru", sell_thru_path, method: :get %></li>
                                                   </ul>
                                               </li>
                                             <% end %>
@@ -882,6 +885,8 @@
       <% elsif controller_name.eql?("growth_reports") %>
                       $("#menu_toggle").click();
       <% elsif controller_name.eql?("quantity_sold_charts") %>
+                      $("#menu_toggle").click();
+      <% elsif controller_name.eql?("sell_thrus") %>
                       $("#menu_toggle").click();
       <% elsif controller_name.eql?("sales_returns") %>
                       $("#menu_toggle").click();
