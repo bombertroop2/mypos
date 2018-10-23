@@ -11,7 +11,7 @@ class Api::ShipmentsController < Api::ApplicationController
     #    else
     #      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NULL")
     #    end
-    @delivery_orders = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NULL")
+    @delivery_orders = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NOT NULL")
   end
     
   def receive
@@ -21,9 +21,9 @@ class Api::ShipmentsController < Api::ApplicationController
     end
     unless received
       if @delivery_order.errors[:base].present?
-        render json: { status: false, message: @delivery_order.errors[:base].first }, status: :unprocessable_entity
+        render json: { status: false, message: @delivery_order.errors[:base].first }#, status: :unprocessable_entity
       elsif @delivery_order.errors[:received_date].present?
-        render json: { status: false, message: "Receive date #{@delivery_order.errors[:received_date].first}" }, status: :unprocessable_entity
+        render json: { status: false, message: "Receive date #{@delivery_order.errors[:received_date].first}" }#, status: :unprocessable_entity
       end
     else
       render json: { status: true, message: "Delivery order #{@delivery_order.delivery_order_number} was successfully received" }
