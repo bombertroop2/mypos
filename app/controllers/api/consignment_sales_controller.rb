@@ -15,8 +15,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
   
   def index        
     warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    user_ids = SalesPromotionGirl.select("users.id AS user_id").joins(:user).where(:"sales_promotion_girls.warehouse_id" => warehouse_id).map(&:user_id).uniq
-    @consignment_sales = ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).joins(:audits).where(["(audits.user_id IN (?) AND audits.action = 'create') OR consignment_sales.warehouse_id = ?", user_ids, warehouse_id]).where(approved: false).order(:transaction_number).distinct
+    @consignment_sales = ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).where(["consignment_sales.warehouse_id = ?", warehouse_id]).where(approved: false).order(:transaction_number).distinct
   end
   
   def get_events
@@ -25,7 +24,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
     #    else
     #      CounterEvent.select(:id, :code, :name).joins(:counter_event_warehouses).where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_event_warehouses.warehouse_id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, current_user.sales_promotion_girl.warehouse_id, true, true])
     #    end      
-    @events = CounterEvent.select(:id, :code, :name).joins(:counter_event_warehouses).where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_event_warehouses.warehouse_id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, current_user.sales_promotion_girl.warehouse_id, true, true])
+    @events = CounterEvent.select(:id, :code, :name).joins(:counter_event_warehouses).where(["counter_events.start_time <= ? AND counter_events.end_time >= ? AND counter_event_warehouses.warehouse_id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date.end_of_day, params[:transaction_date].to_date.beginning_of_day, current_user.sales_promotion_girl.warehouse_id, true, true])
   end
   
   def get_product
@@ -46,7 +45,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
         where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode]).
         where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
         where(["effective_date <= ?", params[:transaction_date].to_date]).
-        where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date, params[:transaction_date].to_date, params[:counter_event_id], true, true]).
+        where(["counter_events.start_time <= ? AND counter_events.end_time >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date.end_of_day, params[:transaction_date].to_date.beginning_of_day, params[:counter_event_id], true, true]).
         select(:id, :barcode).
         select("stock_details.size_id AS product_size_id, stock_details.color_id AS product_color_id, warehouses.id AS warehouse_id").
         select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.unapproved_quantity").
@@ -105,7 +104,8 @@ class Api::ConsignmentSalesController < Api::ApplicationController
   end
   
   def create
-    render json: { status: false, message: "Please fill in transaction date first" }, status: :unprocessable_entity and return if params[:consignment_sale][:transaction_date].blank?
+    #    render json: { status: false, message: "Please fill in transaction date first" }, status: :unprocessable_entity and return if params[:consignment_sale][:transaction_date].blank?
+    render json: { status: false, message: "Please fill in transaction date first" } and return if params[:consignment_sale][:transaction_date].blank?
 
     add_additional_params_to_consignment_sales    
     calculate_total unless params[:consignment_sale][:no_sale].eql?("true")
@@ -114,7 +114,6 @@ class Api::ConsignmentSalesController < Api::ApplicationController
     end if params[:consignment_sale][:consignment_sale_products_attributes].present?
     @consignment_sale = ConsignmentSale.new(consignment_sale_params)
     @consignment_sale.warehouse_id = @warehouse_id if params[:consignment_sale][:no_sale].eql?("true")
-    @consignment_sale.attr_create_by_admin = false
     @consignment_sale.attr_create_by_am = false
     
     recreate = false
@@ -125,7 +124,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
         recreate = false
         unless @consignment_sale.save
           if @consignment_sale.errors[:base].present?
-            render json: { status: false, message: @consignment_sale.errors[:base].first }, status: :unprocessable_entity
+            render json: { status: false, message: @consignment_sale.errors[:base].first }#, status: :unprocessable_entity
           end
         else
           render json: { status: true, message: "Transaction was successfully created" }
@@ -136,11 +135,11 @@ class Api::ConsignmentSalesController < Api::ApplicationController
           recreate_counter += 1
         else
           recreate = false
-          render json: { status: false, message: "Something went wrong. Please try again" }, status: :unprocessable_entity
+          render json: { status: false, message: "Something went wrong. Please try again" }#, status: :unprocessable_entity
         end
       rescue RuntimeError => e
         recreate = false
-        render json: { status: false, message: e.message }, status: :unprocessable_entity
+        render json: { status: false, message: e.message }#, status: :unprocessable_entity
       end
     end while recreate
   end
@@ -189,6 +188,24 @@ class Api::ConsignmentSalesController < Api::ApplicationController
     rescue RuntimeError => e
       render json: { status: false, message: e.message }, status: :unprocessable_entity
     end
+  end
+  
+  def show
+    @consignment_sale = ConsignmentSale.
+      select(:id, :transaction_date, :transaction_number, :total, "warehouses.code, warehouses.name").
+      select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
+      select("sales_promotion_girls_warehouses.code AS sales_promotion_girls_warehouses_code, sales_promotion_girls_warehouses.name AS sales_promotion_girls_warehouses_name").
+      joins(:audits).
+      joins("LEFT JOIN counter_events ON consignment_sales.counter_event_id = counter_events.id").
+      joins("LEFT JOIN warehouses ON consignment_sales.warehouse_id = warehouses.id").
+      joins("LEFT JOIN users ON audits.user_id = users.id AND audits.user_type = 'User'").
+      joins("LEFT JOIN sales_promotion_girls ON users.sales_promotion_girl_id = sales_promotion_girls.id").
+      joins("LEFT JOIN warehouses sales_promotion_girls_warehouses ON sales_promotion_girls.warehouse_id = sales_promotion_girls_warehouses.id").
+      where("audits.action = 'create'").
+      find(params[:id])
+    @consignment_sale_products = @consignment_sale.consignment_sale_products.
+      joins(:price_list, product_barcode: [:size, product_color: [:color, [product: :brand]]]).
+      select("product_barcodes.barcode", "brands_products.name AS product_name", "products.code AS product_code", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "consignment_sale_products.total AS subtotal")
   end
 
   private
@@ -243,7 +260,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
           where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
           where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
           where(["effective_date <= ?", params[:consignment_sale][:transaction_date].to_date]).
-          where(["DATE(counter_events.start_time) <= ? AND DATE(counter_events.end_time) >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:consignment_sale][:transaction_date].to_date, params[:consignment_sale][:transaction_date].to_date, params[:consignment_sale][:counter_event_id], true, true]).
+          where(["counter_events.start_time <= ? AND counter_events.end_time >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:consignment_sale][:transaction_date].to_date.end_of_day, params[:consignment_sale][:transaction_date].to_date.beginning_of_day, params[:consignment_sale][:counter_event_id], true, true]).
           select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
           select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
           order("effective_date DESC").
