@@ -28,7 +28,8 @@ class Api::ConsignmentSalesController < Api::ApplicationController
   end
   
   def get_product
-    render json: { status: false, message: "Please fill in transaction date first" }, status: :unprocessable_entity and return if params[:transaction_date].blank?
+    #    render json: { status: false, message: "Please fill in transaction date first" }, status: :unprocessable_entity and return if params[:transaction_date].blank?
+    render json: { status: false, message: "Please fill in transaction date first" } and return if params[:transaction_date].blank?
 
     @product = if params[:counter_event_id].blank?
       ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
@@ -55,13 +56,13 @@ class Api::ConsignmentSalesController < Api::ApplicationController
     end
     
     if @product.nil?
-      render json: { status: false, message: "Product is not available" }, status: :unprocessable_entity
+      render json: { status: false, message: "Product #{params[:barcode]} is not available" }#, status: :unprocessable_entity
     else
       #  var unapprovedQty = <%= @product.unapproved_quantity %>;
       if @product.quantity < 1
-        render json: { status: false, message: "Sorry, product #{@product.barcode} is temporarily out of stock" }, status: :unprocessable_entity
+        render json: { status: false, message: "Sorry, product #{@product.barcode} is temporarily out of stock" }#, status: :unprocessable_entity
       elsif @product.quantity - @product.unapproved_quantity < 1
-        render json: { status: false, message: "Sorry, product #{@product.barcode} is temporarily out of stock" }, status: :unprocessable_entity
+        render json: { status: false, message: "Sorry, product #{@product.barcode} is temporarily out of stock" }#, status: :unprocessable_entity
       else
         # hitung total stok receiving DO di tanggal setelah tanggal transaksi penjualan
         shipment_items = ShipmentProductItem.
@@ -71,7 +72,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
           where(["order_bookings.destination_warehouse_id = ?", @product.warehouse_id]).
           where(["shipments.received_date > ?", params[:transaction_date].to_date]).
           select(:quantity, "shipments.received_date").order("shipments.received_date ASC")
-  
+          
         # hitung total stok rolling in di tanggal setelah tanggal transaksi penjualan
         stock_mutation_product_items = StockMutationProductItem.
           joins(stock_mutation_product: :stock_mutation).
@@ -80,14 +81,14 @@ class Api::ConsignmentSalesController < Api::ApplicationController
           where(["stock_mutations.destination_warehouse_id = ?", @product.warehouse_id]).
           where(["stock_mutations.received_date > ?", params[:transaction_date].to_date]).
           select(:quantity, "stock_mutations.received_date").order("stock_mutations.received_date ASC")
-          
+                  
         do_qty_on_hand = shipment_items.present? ? shipment_items.sum(&:quantity) : 0
         mutation_qty_on_hand = stock_mutation_product_items.present? ? stock_mutation_product_items.sum(&:quantity) : 0
         # QOH sebelum DO dan mutation masuk di tanggal sesudah tanggal transaksi penjualan
         final_qty_on_hand = @product.quantity - (do_qty_on_hand + mutation_qty_on_hand)
         # apabila di tanggal transaksi qty on hand < added qty
         if final_qty_on_hand < 1
-          render json: { status: false, message: "Sorry, available quantity of product #{@product.barcode} on #{params[:transaction_date]} is #{final_qty_on_hand}" }, status: :unprocessable_entity
+          render json: { status: false, message: "Sorry, available quantity of product #{@product.barcode} on #{params[:transaction_date]} is #{final_qty_on_hand}" }#, status: :unprocessable_entity
         else
           if do_qty_on_hand > 0 || mutation_qty_on_hand > 0
             # htung jumlah barang yang sudah dipesan dari tanggal transaksi pnjualan ke belakang
@@ -95,7 +96,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
               where(["consignment_sale_products.product_barcode_id = ? AND consignment_sales.approved = ? AND consignment_sales.transaction_date <= ? AND consignment_sales.warehouse_id = ?", @product.id, false, params[:transaction_date].to_date, @product.warehouse_id]).
               size rescue 0
             if final_qty_on_hand - booked_quantity < 1
-              render json: { status: false, message: "Sorry, product #{@product.barcode} on #{params[:transaction_date]} is temporarily out of stock" }, status: :unprocessable_entity
+              render json: { status: false, message: "Sorry, product #{@product.barcode} on #{params[:transaction_date]} is temporarily out of stock" }#, status: :unprocessable_entity
             end
           end
         end
@@ -105,16 +106,14 @@ class Api::ConsignmentSalesController < Api::ApplicationController
   
   def create
     #    render json: { status: false, message: "Please fill in transaction date first" }, status: :unprocessable_entity and return if params[:consignment_sale][:transaction_date].blank?
-    render json: { status: false, message: "Please fill in transaction date first" } and return if params[:consignment_sale][:transaction_date].blank?
+    render json: { status: false, message: "Please fill in transaction date first" } and return if params[:transaction_date].blank?
 
-    add_additional_params_to_consignment_sales    
-    calculate_total unless params[:consignment_sale][:no_sale].eql?("true")
-    params[:consignment_sale][:consignment_sale_products_attributes].each do |key, value|
-      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! attr_no_sale: params[:consignment_sale][:no_sale]
-    end if params[:consignment_sale][:consignment_sale_products_attributes].present?
-    @consignment_sale = ConsignmentSale.new(consignment_sale_params)
-    @consignment_sale.warehouse_id = @warehouse_id if params[:consignment_sale][:no_sale].eql?("true")
+    spg = SalesPromotionGirl.joins(:warehouse).select(:warehouse_id, "warehouses.code").where(id: current_user.sales_promotion_girl_id).first
+    @consignment_sale = ConsignmentSale.new(no_sale: params[:no_sale], transaction_date: params[:transaction_date], counter_event_id: params[:counter_event_id])
+    @consignment_sale.warehouse_id = spg.warehouse_id
     @consignment_sale.attr_create_by_am = false
+    @consignment_sale.attr_warehouse_code = spg.code
+    calculate_total unless params[:no_sale].eql?("true")
     
     recreate = false
     recreate_counter = 1
@@ -125,6 +124,8 @@ class Api::ConsignmentSalesController < Api::ApplicationController
         unless @consignment_sale.save
           if @consignment_sale.errors[:base].present?
             render json: { status: false, message: @consignment_sale.errors[:base].first }#, status: :unprocessable_entity
+          elsif @consignment_sale.errors[:"consignment_sale_products.base"].present?
+            render json: { status: false, message: @consignment_sale.errors[:"consignment_sale_products.base"].first }#, status: :unprocessable_entity
           end
         else
           render json: { status: true, message: "Transaction was successfully created" }
@@ -210,22 +211,12 @@ class Api::ConsignmentSalesController < Api::ApplicationController
 
   private
   
-  def add_additional_params_to_consignment_sales
-    #    unless current_user.has_non_spg_role?
-    spg = SalesPromotionGirl.joins(:warehouse).select(:warehouse_id, "warehouses.code").where(id: current_user.sales_promotion_girl_id).first
-    @warehouse_id = spg.warehouse_id
-    @warehouse_code = spg.code
-    #    else
-    #      warehouse = if current_user.has_role?(:area_manager)
-    #        Warehouse.select(:id, :code).where(id: params[:consignment_sale][:warehouse_id], supervisor_id: current_user.supervisor_id).first
-    #      else
-    #        Warehouse.select(:id, :code).where(id: params[:consignment_sale][:warehouse_id]).first
-    #      end
-    #      @warehouse_id = warehouse.id
-    #      @warehouse_code = warehouse.code
-    #    end
-    params[:consignment_sale].merge! attr_warehouse_code: @warehouse_code
-  end
+  #  def add_additional_params_to_consignment_sales
+  #    spg = SalesPromotionGirl.joins(:warehouse).select(:warehouse_id, "warehouses.code").where(id: current_user.sales_promotion_girl_id).first
+  #    @warehouse_id = spg.warehouse_id
+  #    @warehouse_code = spg.code
+  #    params[:consignment_sale].merge! attr_warehouse_code: @warehouse_code
+  #  end
   
   def consignment_sale_params
     unless action_name.eql?("update")
@@ -246,27 +237,27 @@ class Api::ConsignmentSalesController < Api::ApplicationController
 
   def calculate_total
     total = 0
-    params[:consignment_sale][:consignment_sale_products_attributes].each do |key, value|
-      product = if params[:consignment_sale][:counter_event_id].blank?
+    params[:products].each do |param_product|
+      product = if params[:counter_event_id].blank?
         ProductBarcode.joins(product_color: [product: [product_details: :price_lists, stock_products: [stock: [warehouse: :sales_promotion_girls]]]]).
-          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
+          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, id: param_product[:product_barcode_id]).
           where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
-          where(["effective_date <= ?", params[:consignment_sale][:transaction_date].to_date]).
+          where(["effective_date <= ?", params[:transaction_date].to_date]).
           select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
           order("effective_date DESC").
           first
       else
         ProductBarcode.joins(product_color: [product: [product_details: :price_lists, stock_products: [stock: [warehouse: [:sales_promotion_girls, counter_event_warehouses: :counter_event]]]]]).
-          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, id: params[:consignment_sale][:consignment_sale_products_attributes][key][:product_barcode_id]).
+          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, id: param_product[:product_barcode_id]).
           where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id").
-          where(["effective_date <= ?", params[:consignment_sale][:transaction_date].to_date]).
-          where(["counter_events.start_time <= ? AND counter_events.end_time >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:consignment_sale][:transaction_date].to_date.end_of_day, params[:consignment_sale][:transaction_date].to_date.beginning_of_day, params[:consignment_sale][:counter_event_id], true, true]).
+          where(["effective_date <= ?", params[:transaction_date].to_date]).
+          where(["counter_events.start_time <= ? AND counter_events.end_time >= ? AND counter_events.id = ? AND (counter_events.is_active = ? OR counter_event_warehouses.is_active = ?)", params[:transaction_date].to_date.end_of_day, params[:transaction_date].to_date.beginning_of_day, params[:counter_event_id], true, true]).
           select(:barcode, "price_lists.price, price_lists.id AS price_list_id").
           select("counter_events.counter_event_type, counter_events.first_discount, counter_events.second_discount, counter_events.special_price").
           order("effective_date DESC").
           first
       end
-      subtotal = if params[:consignment_sale][:counter_event_id].present? && product.counter_event_type.present?
+      subtotal = if params[:counter_event_id].present? && product.counter_event_type.present?
         if product.counter_event_type.eql?("Discount(%)") && product.first_discount.present? && product.second_discount.present?
           first_discounted_subtotal = product.price - product.price * product.first_discount / 100
           first_discounted_subtotal - first_discounted_subtotal * product.second_discount / 100
@@ -276,14 +267,13 @@ class Api::ConsignmentSalesController < Api::ApplicationController
           product.special_price
         end
       else
-        params[:consignment_sale][:counter_event_id] = nil if params[:consignment_sale][:counter_event_id].present?
+        @consignment_sale.counter_event_id = params[:counter_event_id] = nil if params[:counter_event_id].present?
         product.price
       end
-      params[:consignment_sale][:consignment_sale_products_attributes][key][:price_list_id] = product.price_list_id
-      params[:consignment_sale][:consignment_sale_products_attributes][key].merge! total: subtotal, attr_warehouse_id: @warehouse_id, attr_barcode: product.barcode, attr_transaction_date: params[:consignment_sale][:transaction_date]
+      @consignment_sale.consignment_sale_products.build price_list_id: product.price_list_id, total: subtotal, attr_warehouse_id: @consignment_sale.warehouse_id, attr_barcode: product.barcode, attr_transaction_date: params[:transaction_date], attr_no_sale: params[:no_sale], product_barcode_id: param_product[:product_barcode_id]
       total += subtotal
-    end if params[:consignment_sale][:consignment_sale_products_attributes].present?
-    params[:consignment_sale].merge! total: total
+    end if params[:products].present?
+    @consignment_sale.total = total
   end
 
   def set_consignment_sale
