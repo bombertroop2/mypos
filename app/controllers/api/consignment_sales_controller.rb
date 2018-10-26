@@ -15,7 +15,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
   
   def index        
     warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    @consignment_sales = ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).where(["consignment_sales.warehouse_id = ?", warehouse_id]).where(approved: false).order(:transaction_number).distinct
+    @consignment_sales = ConsignmentSale.select(:id, :transaction_date, :transaction_number, :total, :approved, :no_sale).where(["consignment_sales.warehouse_id = ?", warehouse_id]).order(:transaction_number)
   end
   
   def get_events
@@ -174,12 +174,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
   def destroy
     begin
       warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-      if @consignment_sale.warehouse_id.blank?
-        user_ids = SalesPromotionGirl.select("users.id AS user_id").joins(:user).where(:"sales_promotion_girls.warehouse_id" => warehouse_id).map(&:user_id).uniq
-        @consignment_sale.attr_user_ids = user_ids
-      else
-        @consignment_sale.attr_spg_warehouse_id = warehouse_id
-      end
+      @consignment_sale.attr_spg_warehouse_id = warehouse_id
       @consignment_sale.consignment_sale_products.each do |consignment_sale_product|
         consignment_sale_product.attr_warehouse_id = warehouse_id
       end
@@ -187,7 +182,7 @@ class Api::ConsignmentSalesController < Api::ApplicationController
         render json: { status: true, message: "Transaction #{@consignment_sale.transaction_number} was successfully deleted" }
       end
     rescue RuntimeError => e
-      render json: { status: false, message: e.message }, status: :unprocessable_entity
+      render json: { status: false, message: e.message }#, status: :unprocessable_entity
     end
   end
   
