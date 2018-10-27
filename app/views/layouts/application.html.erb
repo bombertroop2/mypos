@@ -313,6 +313,9 @@
                                                       <% if can? :manage, Target %>
                                                         <li><%= link_to "Targets", targets_path, method: :get %></li>
                                                       <% end %>
+                                                      <% if can? :manage, BeginningStockProduct %>
+                                                        <li><%= link_to "Import Beginning Stock", import_beginning_stocks_path, method: :get %></li>
+                                                      <% end %>
                                                   </ul>
                                               </li>
                                             <% end %>

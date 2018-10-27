@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get 'import_beginning_stocks' => 'import_beginning_stocks#new'
+
+  post 'import_beginning_stocks/create'
+
   get 'sell_thru' => 'sell_thrus#index'
   get 'quantity_sold_charts/index'
   resources :targets
