@@ -247,7 +247,9 @@
                                                       <% if can? :read, GrowthReport %>
                                                         <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
                                                       <% end %>
-                                                      <li><%= link_to "Pie Chart of Qty Sold", quantity_sold_charts_index_path, method: :get %></li>
+                                                      <% if can? :read, QuantitySoldChart %>
+                                                        <li><%= link_to "Pie Chart of Qty Sold", quantity_sold_charts_index_path, method: :get %></li>
+                                                      <% end %>
                                                       <li><%= link_to "Sell Thru", sell_thru_path, method: :get %></li>
                                                   </ul>
                                               </li>

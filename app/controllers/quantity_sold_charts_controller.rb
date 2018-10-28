@@ -1,4 +1,5 @@
 class QuantitySoldChartsController < ApplicationController
+  authorize_resource
   def index
     respond_to do |format|
       if params[:region].present? && params[:year].present? && params[:counter_type].present? && params[:brand].present?
