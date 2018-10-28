@@ -1,4 +1,5 @@
 class SellThrusController < ApplicationController
+  authorize_resource
   def index    
     respond_to do |format|
       if params[:date].present? && (params[:counter].present? || params[:showroom].present? || params[:type].eql?("central counter") || params[:type].eql?("central showroom"))
