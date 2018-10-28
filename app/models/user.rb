@@ -67,7 +67,7 @@ class User < ApplicationRecord
                       "Receiving", "Stock Balance", "Purchase Return", "Cost & Price", "Email", "Account Payable",
                       "Order Booking", "Courier", "Shipment", "Stock Mutation", "Goods In Transit",
                       "Fiscal Reopening/Closing", "Stock Movement", "Listing Stocks", "Event", "Point of Sale", "Bank Master",
-                      "Member", "Company", "Consignment"]
+                      "Member", "Company", "Consignment", "Growth Report"]
 
                     #  def name
                     #    sales_promotion_girl.name

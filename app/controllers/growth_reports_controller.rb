@@ -1,4 +1,5 @@
 class GrowthReportsController < ApplicationController
+  authorize_resource
   def index
     respond_to do |format|
       if params[:region].present?
