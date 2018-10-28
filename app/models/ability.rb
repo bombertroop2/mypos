@@ -33,6 +33,10 @@ class Ability
             "Bank"
           elsif user_menu.eql?("Consignment")
             "ConsignmentSale"
+          elsif user_menu.eql?("Pie Chart of Qty Sold")
+            "QuantitySoldChart"
+          elsif user_menu.eql?("Sell Thru Report")
+            "SellThru"
           else
             user_menu
           end
@@ -76,7 +80,9 @@ class Ability
               class_name.eql?("Purchase Order") || class_name.eql?("Vendor") ||
               class_name.eql?("Customer") || class_name.eql?("Purchase Return") ||
               class_name.eql?("Courier") || class_name.eql?("Event") ||
-              class_name.eql?("Email") || class_name.eql?("Bank")
+              class_name.eql?("Email") || class_name.eql?("Bank") ||
+              class_name.eql?("Growth Report") || class_name.eql?("Pie Chart of Qty Sold") ||
+              class_name.eql?("Sell Thru Report")
             #            can :read, class_name.gsub(/\s+/, "").constantize
             #            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
@@ -146,6 +152,10 @@ class Ability
             "Bank"
           elsif user_menu.name.eql?("Consignment")
             "ConsignmentSale"
+          elsif user_menu.name.eql?("Pie Chart of Qty Sold")
+            "QuantitySoldChart"
+          elsif user_menu.name.eql?("Sell Thru Report")
+            "SellThru"
           else
             user_menu.name
           end
