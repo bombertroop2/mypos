@@ -63,6 +63,7 @@ module ApplicationHelper
     return true if can? :read, ListingStock
     return true if can? :read, GrowthReport
     return true if can? :read, QuantitySoldChart
+    return true if can? :read, SellThru
   end
 
   def setting_menu_active?
