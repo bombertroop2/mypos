@@ -16,7 +16,7 @@ class ImportBeginningStocksController < ApplicationController
             error_message = "Error for row (##{i}) : Warehouse code cannot be empty"
             break
           else
-            warehouse = Warehouse.select(:id).where(code: warehouse_code).first
+            warehouse = Warehouse.select(:id).where(code: warehouse_code).not_in_transit.not_direct_sales.first
             if warehouse.blank?
               error_message = "Error for row (##{i}) : Warehouse #{warehouse_code} doesn't exist"
               break

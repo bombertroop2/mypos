@@ -54,6 +54,7 @@ class Warehouse < ApplicationRecord
                   ["Central", "central"],
                   ["Showroom", "showroom"],
                   ["In Transit", "in_transit"],
+                  ["Direct Sales", "direct_sales"],
                   ["CTR Matahari", "ctr_matahari"],
                   ["CTR Ramayana", "ctr_ramayana"],
                   ["CTR Non Ramayana", "ctr_non_ramayana"],
@@ -92,6 +93,10 @@ class Warehouse < ApplicationRecord
 
                 def self.not_in_transit
                   where("warehouse_type <> 'in_transit'")
+                end
+                
+                def self.not_direct_sales
+                  where("warehouse_type <> 'direct_sales'")
                 end
 
                 def self.showroom
