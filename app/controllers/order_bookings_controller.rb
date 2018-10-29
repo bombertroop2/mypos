@@ -290,7 +290,7 @@ class OrderBookingsController < ApplicationController
   
   def populate_warehouses
     @origin_warehouses = Warehouse.central.select(:id, :code, :name)
-    @destination_warehouses = Warehouse.not_central.not_in_transit.actived.select(:id, :code, :name)
+    @destination_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.actived.select(:id, :code, :name)
   end
   
   def add_additional_params_to_child

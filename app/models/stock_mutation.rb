@@ -520,11 +520,11 @@ class StockMutation < ApplicationRecord
                                                 end
 
                                                 def origin_warehouse_available
-                                                  errors.add(:origin_warehouse_id, "does not exist!") if (origin_warehouse_id.present? && Warehouse.not_central.not_in_transit.where(id: origin_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
+                                                  errors.add(:origin_warehouse_id, "does not exist!") if (origin_warehouse_id.present? && Warehouse.not_central.not_in_transit.not_direct_sales.where(id: origin_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
                                                 end
 
                                                 def destination_warehouse_available
-                                                  if (!mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && (@dw = Warehouse.not_central.not_in_transit.where(id: destination_warehouse_id).select(:code, :counter_type).first).blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
+                                                  if (!mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && (@dw = Warehouse.not_central.not_in_transit.not_direct_sales.where(id: destination_warehouse_id).select(:code, :counter_type).first).blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
                                                     errors.add(:destination_warehouse_id, "does not exist!")
                                                   elsif (mutation_type.eql?("store to warehouse") && destination_warehouse_id.present? && Warehouse.central.where(id: destination_warehouse_id).select("1 AS one").blank?) || (origin_warehouse_id.present? && destination_warehouse_id.present? && origin_warehouse_id == destination_warehouse_id)
                                                     errors.add(:destination_warehouse_id, "does not exist!")

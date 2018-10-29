@@ -224,6 +224,8 @@ class Warehouse < ApplicationRecord
                     # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
                     if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
                       errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
+                    elsif warehouse_type.eql?("direct_sales") || warehouse_type.eql?("central")
+                      errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("direct_sales") && !replaced_warehouse_types.include?("central")
                     else
                       errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?(warehouse_type)
                     end
