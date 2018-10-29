@@ -31,7 +31,7 @@ class Target < ApplicationRecord
   end
 
   def warehouse_available
-    errors.add(:warehouse_id, "does not exist!") if warehouse_id_changed? && Warehouse.not_central.select("1 AS one").where(:id => warehouse_id).blank?
+    errors.add(:warehouse_id, "does not exist!") if warehouse_id_changed? && Warehouse.not_central.not_in_transit.select("1 AS one").where(:id => warehouse_id).blank?
   end
 
   def month_available
