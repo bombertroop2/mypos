@@ -99,7 +99,7 @@ class BeginningStockProduct < ApplicationRecord
   
       def warehouse_available
         if warehouse_id.present?
-          errors.add(:warehouse_id, "doesn't exist") if Warehouse.select("1 AS one").where(id: warehouse_id).blank?
+          errors.add(:warehouse_id, "doesn't exist") if Warehouse.select("1 AS one").where(id: warehouse_id).not_in_transit.not_direct_sales.blank?
         end
       end  
       
