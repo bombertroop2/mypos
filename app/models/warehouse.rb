@@ -54,6 +54,7 @@ class Warehouse < ApplicationRecord
                   ["Central", "central"],
                   ["Showroom", "showroom"],
                   ["In Transit", "in_transit"],
+                  ["Direct Sales", "direct_sales"],
                   ["CTR Matahari", "ctr_matahari"],
                   ["CTR Ramayana", "ctr_ramayana"],
                   ["CTR Non Ramayana", "ctr_non_ramayana"],
@@ -92,6 +93,10 @@ class Warehouse < ApplicationRecord
 
                 def self.not_in_transit
                   where("warehouse_type <> 'in_transit'")
+                end
+                
+                def self.not_direct_sales
+                  where("warehouse_type <> 'direct_sales'")
                 end
 
                 def self.showroom
@@ -219,6 +224,8 @@ class Warehouse < ApplicationRecord
                     # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
                     if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
                       errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
+                    elsif warehouse_type.eql?("direct_sales") || warehouse_type.eql?("central")
+                      errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("direct_sales") && !replaced_warehouse_types.include?("central")
                     else
                       errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?(warehouse_type)
                     end

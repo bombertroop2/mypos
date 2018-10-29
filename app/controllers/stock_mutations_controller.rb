@@ -168,7 +168,7 @@ class StockMutationsController < ApplicationController
 
   # GET /stock_mutations/new
   def new
-    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.select(:id, :code)
+    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
     @stock_mutation = StockMutation.new
   end
 
@@ -186,7 +186,7 @@ class StockMutationsController < ApplicationController
           elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
             render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
           else
-            @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.select(:id, :code)
+            @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
             selected_product_ids = @stock_mutation.stock_mutation_products.map(&:product_id)
             @selected_products = Product.joins(stock_products: :stock).
               where(id: selected_product_ids).
@@ -245,7 +245,7 @@ class StockMutationsController < ApplicationController
   def new_store_to_warehouse_mutation
     if current_user.has_non_spg_role?
       #      @origin_warehouses = Warehouse.not_central.select(:id, :code)
-      @origin_warehouses = Warehouse.not_central.not_in_transit.select(:id, :code)
+      @origin_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
       @stock_mutation = StockMutation.new mutation_type: "store to warehouse"
     else
       #      @products = Product.joins(:brand).joins(stock_products: :stock).where(["warehouse_id = ?", current_user.sales_promotion_girl.warehouse_id]).select(:id, :code, :name).order(:code)
@@ -272,7 +272,7 @@ class StockMutationsController < ApplicationController
             render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
           else
             if current_user.has_non_spg_role?
-              @origin_warehouses = Warehouse.not_central.not_in_transit.select(:id, :code)
+              @origin_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
             else
               @origin_warehouse = current_user.sales_promotion_girl.warehouse
             end
@@ -435,7 +435,7 @@ class StockMutationsController < ApplicationController
   #  end
   
   def edit
-    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.select(:id, :code)
+    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
     @stock_mutation.delivery_date = @stock_mutation.delivery_date.strftime("%d/%m/%Y")
     selected_product_ids = @stock_mutation.stock_mutation_products.map(&:product_id)
     @selected_products = Product.joins([stock_products: :stock], :brand).
@@ -529,7 +529,7 @@ class StockMutationsController < ApplicationController
           #          end
           
           
-          @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.select(:id, :code)
+          @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
           selected_product_ids = []
           params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
             selected_product_ids << params[:stock_mutation][:stock_mutation_products_attributes][key][:product_id]
