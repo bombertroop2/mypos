@@ -74,6 +74,7 @@ module ApplicationHelper
     return true if can? :read, Member
     return true if can? :manage, Company
     return true if can? :manage, BeginningStockProduct
+    return true if can? :read, Customer
   end
 
   def event_menu_active?
