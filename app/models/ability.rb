@@ -78,7 +78,7 @@ class Ability
           if class_name.eql?("Supervisor") || class_name.eql?("Warehouse") ||
               class_name.eql?("Region") || class_name.eql?("ReceivedPurchaseOrder") ||
               class_name.eql?("Purchase Order") || class_name.eql?("Vendor") ||
-              class_name.eql?("Customer") || class_name.eql?("Purchase Return") ||
+              class_name.eql?("Purchase Return") ||
               class_name.eql?("Courier") || class_name.eql?("Event") ||
               class_name.eql?("Email") || class_name.eql?("Bank") ||
               class_name.eql?("Growth Report") || class_name.eql?("Pie Chart of Qty Sold") ||
