@@ -3,6 +3,7 @@ class CustomersController < ApplicationController
   helper SmartListing::Helper
   authorize_resource
   before_action :set_customer, only: [:show, :edit, :update, :destroy]
+  before_action :convert_limit_value_to_numeric, only: [:create, :update]
 
   # GET /customers
   # GET /customers.json
@@ -70,11 +71,15 @@ class CustomersController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_customer
-    @customer = Customer.where(id: params[:id]).select(:id, :code, :name, :address, :phone, :facsimile, :email, :pic_name, :pic_mobile_phone, :pic_email, :terms_of_payment, :value_added_tax, :is_taxable_entrepreneur).first
+    @customer = Customer.where(id: params[:id]).select(:id, :code, :name, :address, :phone, :facsimile, :email, :pic_name, :pic_mobile_phone, :pic_email, :terms_of_payment, :value_added_tax, :is_taxable_entrepreneur, :limit_value, :deliver_to).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def customer_params
-    params.require(:customer).permit(:is_taxable_entrepreneur, :terms_of_payment, :value_added_tax, :code, :name, :phone, :facsimile, :email, :pic_name,  :pic_mobile_phone, :pic_email, :address)
+    params.require(:customer).permit(:is_taxable_entrepreneur, :terms_of_payment, :value_added_tax, :code, :name, :phone, :facsimile, :email, :pic_name,  :pic_mobile_phone, :pic_email, :address, :limit_value, :deliver_to)
+  end
+  
+  def convert_limit_value_to_numeric
+    params[:customer][:limit_value] = params[:customer][:limit_value].gsub("Rp","").gsub(".","").gsub(",",".") if params[:customer][:limit_value].present?
   end
 end

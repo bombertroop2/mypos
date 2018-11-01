@@ -39,10 +39,6 @@
         <dd><%= object.pic_name %></dd>
     </dl>
     <dl class="dl-horizontal">
-        <dt>PIC phone</dt>
-        <dd><%= remove_empty_space_from_phone_number(object.pic_phone) %></dd>
-    </dl>
-    <dl class="dl-horizontal">
         <dt>PIC mobile phone</dt>
         <dd><%= remove_empty_space_from_phone_number(object.pic_mobile_phone) %></dd>
     </dl>
@@ -57,6 +53,18 @@
     <dl class="dl-horizontal">
         <dt>Value added tax</dt>
         <dd><%= object.value_added_tax.capitalize %></dd>
+    </dl>
+    <dl class="dl-horizontal">
+        <dt>Limit value</dt>
+        <dd><%= number_to_currency(object.limit_value,
+              :separator => ",",
+              :delimiter => ".",
+              :unit => "Rp",
+              :precision => 2) %></dd>
+    </dl>
+    <dl class="dl-horizontal">
+        <dt>Deliver to</dt>
+        <dd><%= object.deliver_to %></dd>
     </dl>
 
 </td>
