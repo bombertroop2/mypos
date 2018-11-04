@@ -44,13 +44,27 @@
               </td>
               <td>
                   <% if purchase_return.purchase_order && purchase_return.purchase_order.is_taxable_entrepreneur %>
-                    <%= number_to_currency(get_vat_in_money_pr(purchase_return),
+                    <%
+                    vat_in_money = if purchase_return.purchase_order.value_added_tax.eql?("include")
+                      get_include_vat_in_money_pr(purchase_return)
+                      else
+                      get_vat_in_money_pr(purchase_return)
+                      end
+                  %>
+                    <%= number_to_currency(vat_in_money,
                       :separator => ",",
                       :delimiter => ".",
                       :unit => "Rp",
                       :precision => 2) %> (<%= purchase_return.purchase_order.value_added_tax %>)
                   <% elsif purchase_return.direct_purchase && purchase_return.direct_purchase.is_taxable_entrepreneur %>
-                    <%= number_to_currency(get_vat_in_money_pr(purchase_return),
+                    <%
+                    vat_in_money = if purchase_return.direct_purchase.vat_type.eql?("include")
+                      get_include_vat_in_money_pr(purchase_return)
+                      else
+                      get_vat_in_money_pr(purchase_return)
+                      end
+                  %>
+                    <%= number_to_currency(vat_in_money,
                       :separator => ",",
                       :delimiter => ".",
                       :unit => "Rp",

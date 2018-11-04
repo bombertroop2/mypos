@@ -49,7 +49,14 @@
                             </td>
                             <td>
                                 <% if purchase_order.is_taxable_entrepreneur %>
-                                  <%= number_to_currency(get_vat_in_money_for_ap(purchase_order),
+                                  <%
+                                  vat_in_money = if purchase_order.value_added_tax.eql?("include")
+                                    get_include_vat_in_money_for_ap(purchase_order)
+                                    else
+                                    get_vat_in_money_for_ap(purchase_order)
+                                    end
+                                %>
+                                  <%= number_to_currency(vat_in_money,
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
