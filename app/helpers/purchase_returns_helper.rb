@@ -64,6 +64,10 @@ module PurchaseReturnsHelper
   def get_vat_in_money_pr(purchase_return)
     value_after_discount_pr(purchase_return) * 0.1
   end
+
+  def get_include_vat_in_money_pr(purchase_return)
+    (value_after_discount_pr(purchase_return) / 1.1 * 0.1).round(2)
+  end
   
   def value_after_ppn_pr(purchase_return)
     if (purchase_return.purchase_order && purchase_return.purchase_order.value_added_tax.eql?("exclude")) || (purchase_return.direct_purchase && purchase_return.direct_purchase.vat_type.eql?("exclude"))

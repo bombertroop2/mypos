@@ -172,10 +172,17 @@
                                         </td>
                                     </tr>
                               <% if @purchase_return.purchase_order && @purchase_return.purchase_order.is_taxable_entrepreneur %>
+                                <%
+                                vat_in_money = if @purchase_return.purchase_order.value_added_tax.eql?("include")
+                                  get_include_vat_in_money_pr(@purchase_return)
+                                  else
+                                  get_vat_in_money_pr(@purchase_return)
+                                  end
+                              %>
                                     <tr>
                                         <td colspan="5" align="right"><strong>Value Added Tax (<%= @purchase_return.purchase_order.value_added_tax %> 10%)</strong></td>
                                         <td align="right">
-                                        <%= number_to_currency(get_vat_in_money_pr(@purchase_return),
+                                        <%= number_to_currency(vat_in_money,
                                           :separator => ",",
                                           :delimiter => ".",
                                           :unit => "Rp",
@@ -183,10 +190,17 @@
                                         </td>
                                     </tr>
                               <% elsif @purchase_return.direct_purchase && @purchase_return.direct_purchase.is_taxable_entrepreneur %>
+                                <%
+                                vat_in_money = if @purchase_return.direct_purchase.vat_type.eql?("include")
+                                  get_include_vat_in_money_pr(@purchase_return)
+                                  else
+                                  get_vat_in_money_pr(@purchase_return)
+                                  end
+                              %>
                                     <tr>
                                         <td colspan="5" align="right"><strong>Value Added Tax (<%= @purchase_return.direct_purchase.vat_type %> 10%)</strong></td>
                                         <td align="right">
-                                        <%= number_to_currency(get_vat_in_money_pr(@purchase_return),
+                                        <%= number_to_currency(vat_in_money,
                                           :separator => ",",
                                           :delimiter => ".",
                                           :unit => "Rp",
