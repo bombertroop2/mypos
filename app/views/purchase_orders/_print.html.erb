@@ -168,10 +168,17 @@
                                   :precision => 2) if current_user.has_managerial_role? %></td>
                     </tr>
                 <% if @purchase_order.is_taxable_entrepreneur %>                            
+                  <%
+                  vat_in_money = if @purchase_order.value_added_tax.eql?("include")
+                    get_include_vat_in_money(@purchase_order)
+                    else
+                    get_vat_in_money(@purchase_order)
+                    end
+                %>
                     <tr>
                         <td colspan="5" align="right"><strong>Value Added Tax (<%= @purchase_order.value_added_tax %> 10%)</strong></td>
                         <td align="right">
-                          <%= number_to_currency(get_vat_in_money(@purchase_order),
+                          <%= number_to_currency(vat_in_money,
                             :separator => ",",
                             :delimiter => ".",
                             :unit => "Rp",

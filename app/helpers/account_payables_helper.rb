@@ -11,6 +11,10 @@ module AccountPayablesHelper
   def get_vat_in_money_for_ap(purchase_order)
     value_after_discount_for_ap(purchase_order) * 0.1
   end
+
+  def get_include_vat_in_money_for_ap(purchase_order)
+    (value_after_discount_for_ap(purchase_order) / 1.1 * 0.1).round(2)
+  end
   
   def value_after_discount_for_ap(purchase_order)
     value_after_first_discount = purchase_order.receiving_value - purchase_order.receiving_value * (purchase_order.first_discount.to_f / 100)
