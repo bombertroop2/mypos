@@ -75,21 +75,25 @@ class OrderBookingsController < ApplicationController
     @order_bookings = []
     @ori_warehouse_names = []
     @dest_warehouse_names = []
-    warehouse_to_ids = params[:warehouse_to_ids].split(",")
+    warehouse_to_and_customer_ids = params[:warehouse_to_ids].split(",")
     ActiveRecord::Base.transaction do
-      warehouse_to_ids.each do |warehouse_to_id|
+      warehouse_to_and_customer_ids.each do |warehouse_to_and_customer_id|
+        warehouse_to_id = warehouse_to_and_customer_id.split(":")[0]
+        customer_id = warehouse_to_and_customer_id.split(":")[1] rescue nil
         begin
           @order_booking = OrderBooking.new(order_booking_params)
           @order_booking.order_booking_products.each do |obp|
             obp.attr_destination_warehouse_id = warehouse_to_id
           end
           @order_booking.destination_warehouse_id = warehouse_to_id
+          @order_booking.customer_id = customer_id
           unless @order_booking.save
             if @order_booking.errors[:base].present?
               render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
             elsif @order_booking.errors[:"order_booking_products.base"].present?
               render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
             else
+              @customers = Customer.select(:id, :code, :name).order(:code)
               populate_warehouses
               stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
               @products = stock.stock_products.joins([product: :brand], :stock_details).
@@ -256,6 +260,17 @@ class OrderBookingsController < ApplicationController
       render js: "bootbox.alert({message: \"#{@order_booking.errors.messages[:base].join("<br/>")}\",size: 'small'});"
     end
   end
+  
+  def add_destination_warehouse
+    @destination_warehouse = Warehouse.select(:id, :code, :name, :warehouse_type).not_central.not_in_transit.actived.where(code: params[:warehouse_code]).first
+    if @destination_warehouse.blank?
+      render js: "bootbox.alert({message: \"No records found\",size: 'small'});"
+    else
+      if @destination_warehouse.warehouse_type.eql?("direct_sales")
+        @customers = Customer.select(:id, :code, :name).order(:code)
+      end
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -290,7 +305,9 @@ class OrderBookingsController < ApplicationController
   
   def populate_warehouses
     @origin_warehouses = Warehouse.central.select(:id, :code, :name)
-    @destination_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.actived.select(:id, :code, :name)
+    if !action_name.eql?("new") && !action_name.eql?("create")
+      @destination_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.actived.select(:id, :code, :name)
+    end
   end
   
   def add_additional_params_to_child

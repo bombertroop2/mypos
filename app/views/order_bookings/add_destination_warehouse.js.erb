@@ -1,0 +1,9 @@
+if($("#dest_warehouses_form_container").html().trim() == ""){
+  $("#dest_warehouses_form_container").html("<%= j(render(partial: "form_dest_warehouse")) %>");
+  $($("#dest_warehouses_form_container").parent().parent()).removeClass("hidden");
+}else{
+  if($("#dest-warehouse-<%= @destination_warehouse.id %>").length > 0)
+    bootbox.alert({message: "Warehouse <%= params[:warehouse_code] %> is already added to the list",size: 'small'});
+  else
+    $("#listing-dest-warehouses-table > tbody tr:last").after("<%= j(render(partial: "form_dest_warehouse_new_row")) %>");
+}
