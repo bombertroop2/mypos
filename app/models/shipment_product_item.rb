@@ -96,23 +96,25 @@ class ShipmentProductItem < ApplicationRecord
       end
       
       def create_listing_stock
-        shipment_product = ShipmentProduct.select(:shipment_id).where(id: shipment_product_id).first
-        transaction = Shipment.joins(order_booking: [:origin_warehouse, :destination_warehouse]).select(:delivery_order_number).where(id: shipment_product.shipment_id, :"warehouses.is_active" => true, :"destination_warehouses_order_bookings.is_active" => true).first
-        listing_stock = ListingStock.select(:id).where(warehouse_id: @warehouse_id, product_id: @product_id).first
-        listing_stock = ListingStock.new warehouse_id: @warehouse_id, product_id: @product_id if listing_stock.blank?
-        if listing_stock.new_record?                    
-          listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: @color_id, size_id: @size_id
-          listing_stock_product_detail.listing_stock_transactions.build transaction_date: @transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
-          listing_stock.save
-        else
-          listing_stock_product_detail = listing_stock.listing_stock_product_details.where(color_id: @color_id, size_id: @size_id).select(:id).first
-          listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: @color_id, size_id: @size_id if listing_stock_product_detail.blank?
-          if listing_stock_product_detail.new_record?
+        if quantity > 0
+          shipment_product = ShipmentProduct.select(:shipment_id).where(id: shipment_product_id).first
+          transaction = Shipment.joins(order_booking: [:origin_warehouse, :destination_warehouse]).select(:delivery_order_number).where(id: shipment_product.shipment_id, :"warehouses.is_active" => true, :"destination_warehouses_order_bookings.is_active" => true).first
+          listing_stock = ListingStock.select(:id).where(warehouse_id: @warehouse_id, product_id: @product_id).first
+          listing_stock = ListingStock.new warehouse_id: @warehouse_id, product_id: @product_id if listing_stock.blank?
+          if listing_stock.new_record?                    
+            listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: @color_id, size_id: @size_id
             listing_stock_product_detail.listing_stock_transactions.build transaction_date: @transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
-            listing_stock_product_detail.save
+            listing_stock.save
           else
-            listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: @transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
-            listing_stock_transaction.save
+            listing_stock_product_detail = listing_stock.listing_stock_product_details.where(color_id: @color_id, size_id: @size_id).select(:id).first
+            listing_stock_product_detail = listing_stock.listing_stock_product_details.build color_id: @color_id, size_id: @size_id if listing_stock_product_detail.blank?
+            if listing_stock_product_detail.new_record?
+              listing_stock_product_detail.listing_stock_transactions.build transaction_date: @transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+              listing_stock_product_detail.save
+            else
+              listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: @transaction_date, transaction_number: transaction.delivery_order_number, transaction_type: "DO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+              listing_stock_transaction.save
+            end
           end
         end
       end
