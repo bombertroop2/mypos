@@ -146,6 +146,7 @@ class ShipmentsController < ApplicationController
   # DELETE /shipments/1
   # DELETE /shipments/1.json
   def destroy
+    @shipment.attr_user_id = current_user.id
     unless @shipment.destroy
       @deleted = false
     else
