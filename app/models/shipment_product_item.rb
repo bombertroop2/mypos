@@ -85,13 +85,17 @@ class ShipmentProductItem < ApplicationRecord
       
       def update_available_quantity
         unless destroyed?
-          order_booking_product_item.shipping = true
-          order_booking_product_item.update_attribute :available_quantity, quantity          
+          order_booking_product_item.with_lock do
+            order_booking_product_item.shipping = true
+            order_booking_product_item.update_attribute :available_quantity, quantity          
+          end
           create_stock_movement if quantity > 0
         else
-          order_booking_product_item.cancel_shipment = true
-          order_booking_product_item.old_available_quantity = order_booking_product_item.available_quantity
-          order_booking_product_item.update_attribute :available_quantity, nil
+          order_booking_product_item.with_lock do
+            order_booking_product_item.cancel_shipment = true
+            order_booking_product_item.old_available_quantity = order_booking_product_item.available_quantity
+            order_booking_product_item.update_attribute :available_quantity, nil
+          end
         end
       end
       

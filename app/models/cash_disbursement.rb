@@ -20,7 +20,9 @@ class CashDisbursement < ApplicationRecord
     end
     
     def update_cash_balance
-      self.cashier.update cash_balance: (cashier.cash_balance - price), update_cash_balance: true
+      self.cashier.with_lock do
+        self.cashier.update cash_balance: (cashier.cash_balance - price), update_cash_balance: true
+      end
     end
     
     def cash_balance
