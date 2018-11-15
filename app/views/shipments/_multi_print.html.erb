@@ -8,13 +8,13 @@ blob = Barby::PngOutputter.new(barcode).to_png
 File.open(full_path, 'wb') { |f| f.write blob }
 %>
 <style type="text/css">
-  @media all {
-    .page-break { display: none; }
-  }
+    @media all {
+        .page-break { display: none; }
+    }
 
-  @media print {
-    .page-break { display: block; page-break-before: always; }
-  }
+    @media print {
+        .page-break { display: block; page-break-before: always; }
+    }
 </style>
 <table width="100%" id="shipment_print_doc">
     <tr>
@@ -65,12 +65,25 @@ File.open(full_path, 'wb') { |f| f.write blob }
                 <tr>
                     <td>Warehouse To</td>
                     <td>:</td>
-                    <td><%= "#{shipment.order_booking.destination_warehouse.code} - #{shipment.order_booking.destination_warehouse.name}" %></td>
+                    <td>
+                        <% if shipment.order_booking.customer_id.present? %>
+                          <% customer = Customer.select(:code, :name, :deliver_to).find(shipment.order_booking.customer_id) %>
+                          <%= "#{customer.code} - #{customer.name}" %>
+                        <% else %>
+                          <%= "#{shipment.order_booking.destination_warehouse.code} - #{shipment.order_booking.destination_warehouse.name}" %>
+                        <% end %>
+                    </td>
                 </tr>
                 <tr>
                     <td style="vertical-align: top">Address</td>
                     <td style="vertical-align: top">:</td>
-                    <td><%= shipment.order_booking.destination_warehouse.address %></td>
+                    <td>
+                        <% if shipment.order_booking.customer_id.present? %>
+                          <%= customer.deliver_to %>
+                        <% else %>
+                          <%= shipment.order_booking.destination_warehouse.address %>
+                        <% end %>
+                    </td>
                 </tr>
             </table>
         </td>
