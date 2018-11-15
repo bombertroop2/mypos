@@ -18,13 +18,17 @@ class OrderBookingsController < ApplicationController
     order_bookings_scope = if current_user.has_non_spg_role?
       OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
         select("ow.name AS ow_name, dw.name AS dw_name").
+        select("customers.name AS cust_name").
         joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
-        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id")
+        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
+        joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id")
     else
       OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
         select("ow.name AS ow_name, dw.name AS dw_name").
+        select("customers.name AS cust_name").
         joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
         joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
+        joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id").
         where(destination_warehouse_id: current_user.sales_promotion_girl.warehouse_id)
     end
     order_bookings_scope = order_bookings_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -39,6 +43,12 @@ class OrderBookingsController < ApplicationController
   # GET /order_bookings/1
   # GET /order_bookings/1.json
   def show
+    if @order_booking.customer_id.present?
+      customer = Customer.select(:code, :name, :deliver_to).find(@order_booking.customer_id)
+      @customer_code = customer.code
+      @customer_name = customer.name
+      @customer_deliver_to = customer.deliver_to
+    end
   end
 
   # GET /order_bookings/new
@@ -254,8 +264,15 @@ class OrderBookingsController < ApplicationController
   
   def picking_note
     if @order_booking.update status: "P", print_date: Time.current, picking_note: true
+      if @order_booking.customer_id.present?
+        customer = Customer.select(:code, :name, :deliver_to).find(@order_booking.customer_id)
+        @customer_code = customer.code
+        @customer_name = customer.name
+        @customer_deliver_to = customer.deliver_to
+      else
+        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+      end
       @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-      @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
     elsif @order_booking.errors.present? && @order_booking.errors.messages[:base].present?
       render js: "bootbox.alert({message: \"#{@order_booking.errors.messages[:base].join("<br/>")}\",size: 'small'});"
     end

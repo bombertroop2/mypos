@@ -53,12 +53,24 @@
                 <tr>
                     <td>Warehouse To</td>
                     <td>:</td>
-                    <td><%= "#{@order_booking.destination_warehouse.code} - #{@order_booking.destination_warehouse.name}" %></td>
+                    <td>
+                        <% if @customer_code.present? %>
+                          <%= "#{@customer_code} - #{@customer_name}" %>
+                        <% else %>
+                          <%= "#{@order_booking.destination_warehouse.code} - #{@order_booking.destination_warehouse.name}" %>
+                        <% end %>
+                    </td>
                 </tr>
                 <tr>
                     <td style="vertical-align: top">Address</td>
                     <td style="vertical-align: top">:</td>
-                    <td><%= @order_booking.destination_warehouse.address %></td>
+                    <td>
+                        <% if @customer_code.present? %>
+                          <%= @customer_deliver_to %>
+                        <% else %>
+                          <%= @order_booking.destination_warehouse.address %>
+                        <% end %>
+                    </td>
                 </tr>
             </table>
         </td>
