@@ -7,7 +7,7 @@ class Customer < ApplicationRecord
 	before_validation :strip_string_values
 
 	validates :code, presence: true, uniqueness: true
-	validates :name, :address, :terms_of_payment, :limit_value, presence: true
+	validates :name, :address, :terms_of_payment, :limit_value, :deliver_to, presence: true
 	validates :value_added_tax, presence: true, if: proc {|customer| customer.is_taxable_entrepreneur}  
     validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|customer| customer.terms_of_payment.present?}
       validate :vat_available
