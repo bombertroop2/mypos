@@ -32,8 +32,7 @@ class OrderBookingsController < ApplicationController
         where(destination_warehouse_id: current_user.sales_promotion_girl.warehouse_id)
     end
     order_bookings_scope = order_bookings_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
-      or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])).
-      or(order_bookings_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+      or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     order_bookings_scope = order_bookings_scope.where(["DATE(plan_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_plan_date].present?
     order_bookings_scope = order_bookings_scope.where(["status = ?", params[:filter_status]]) if params[:filter_status].present?
     order_bookings_scope = order_bookings_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
