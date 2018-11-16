@@ -1,5 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class PurchaseOrdersController < ApplicationController
+  autocomplete :product, :code, :extra_data => [:brand_id], display_value: :autocomplete_display_value
   helper SmartListing::Helper
   authorize_resource
   before_action :populate_combobox_list, :populate_products, only: [:new, :edit]
@@ -38,7 +39,7 @@ class PurchaseOrdersController < ApplicationController
   def edit
     @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
     @purchase_order.purchase_order_date = @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date
-    @products = @purchase_order.products.select :id
+    @products = @purchase_order.products
     @colors = []
     @sizes = []
     @purchase_order.purchase_order_products.each do |pop|
@@ -50,7 +51,7 @@ class PurchaseOrdersController < ApplicationController
       @sizes[product.id] = product.sizes.distinct
       @colors[product.id].each do |color|
         @sizes[product.id].each do |size|
-          pop.purchase_order_details.build size_id: size.id, color_id: color.id             
+          pop.purchase_order_details.build size_id: size.id, color_id: color.id
         end
       end
     end
@@ -72,7 +73,7 @@ class PurchaseOrdersController < ApplicationController
           populate_products
           @colors = []
           @sizes = []
-          @products = Product.where(id: params[:product_ids].split(",")).select(:id)
+          @products = Product.where(code: params[:product_ids].split(",")).select(:id)
           @purchase_order.purchase_order_products.each do |pop|
             product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
             pop.prdct_code = product.code
@@ -85,7 +86,7 @@ class PurchaseOrdersController < ApplicationController
               end
             end
           end
-        
+
           render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_order.errors[:base].present?
         else
           @valid = true
@@ -106,12 +107,12 @@ class PurchaseOrdersController < ApplicationController
     else
       @valid = true
       @purchase_order.edit_document = true
-      @purchase_order.order_value = @total_product_value      
+      @purchase_order.order_value = @total_product_value
       unless @purchase_order.update(purchase_order_params)
         @valid = false
         populate_combobox_list
         populate_products
-        @products = Product.where(id: params[:product_ids].split(",")).select(:id)
+        @products = Product.where(code: params[:product_ids].split(",")).select(:id)
         @colors = []
         @sizes = []
         @purchase_order.purchase_order_products.each do |pop|
@@ -121,18 +122,18 @@ class PurchaseOrdersController < ApplicationController
           @colors[product.id] = product.colors.distinct
           @sizes[product.id] = product.sizes.distinct
           @colors[product.id].each do |color|
-            @sizes[product.id].each do |size|  
-              pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?              
+            @sizes[product.id].each do |size|
+              pop.purchase_order_details.build size_id: size.id, color_id: color.id #if pop.purchase_order_details.select{|pod| pod.size_id.eql?(gpd.size_id) and pod.color_id.eql?(color.id)}.blank?
             end
           end
         end
-        
+
         render js: "bootbox.alert({message: \"#{@purchase_order.errors[:base].join("<br/>")}\",size: 'small'});" if @purchase_order.errors[:base].present?
 
       end
     end
   end
-  
+
   def get_product_details
     @product_costs = Hash.new
     @colors = []
@@ -146,8 +147,8 @@ class PurchaseOrdersController < ApplicationController
     else
       PurchaseOrder.new
     end
-    #    if splitted_selected_product_ids.present?      
-    products = Product.joins(:brand).where(id: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
+    #    if splitted_selected_product_ids.present?
+    products = Product.joins(:brand).where(code: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
     products.each do |product|
       @colors[product.id] = product.colors.distinct
       @sizes[product.id] = product.sizes.distinct
@@ -158,13 +159,13 @@ class PurchaseOrdersController < ApplicationController
         @sizes[product.id].each do |size|
           pop.purchase_order_details.build size_id: size.id, color_id: color.id #unless existing_item
         end
-      end        
+      end
     end
 
-    # id yang diganti, caranya yang lama dihapus dan yang baru ditambahkan      
+    # id yang diganti, caranya yang lama dihapus dan yang baru ditambahkan
     #      @replaced_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")
     #      respond_to { |format| format.js }
-    #    else      
+    #    else
     #      if previous_selected_product_ids.split(",").length > selected_product_ids.split(",").length
     #        @removed_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")
     #        products = Product.where(id: selected_product_ids.split(",")).select(:id)
@@ -182,7 +183,7 @@ class PurchaseOrdersController < ApplicationController
     #        respond_to do |format|
     #          format.js { render 'update_cost' }
     #        end
-    #      end      
+    #      end
     #    end
   end
 
@@ -191,20 +192,22 @@ class PurchaseOrdersController < ApplicationController
   def destroy
     @purchase_order.destroy
   end
-    
+
   def close
     @old_status = @purchase_order.status
     @purchase_order.closing_po = true
     @valid = @purchase_order.update(status: "Closed")
   end
-  
+
   def export
     respond_to do |format|
       format.xls do
-        @pos = PurchaseOrder.select(:number, :request_delivery_date).select("products.code, products.target, brands_products.code AS brand_code, brands_products.name AS brand_name, common_fields.code AS color_code, common_fields.name AS color_name, sizes.size, product_barcodes.barcode, product_details.id AS product_detail_id").joins(:warehouse, purchase_order_products: [purchase_order_details: [:color, :size], product: :brand]).joins("INNER JOIN product_colors ON product_colors.product_id = products.id AND product_colors.color_id = common_fields.id").joins("INNER JOIN product_barcodes ON product_barcodes.product_color_id = product_colors.id AND product_barcodes.size_id = sizes.id").joins("INNER JOIN product_details ON product_details.size_id = sizes.id AND product_details.product_id = products.id AND product_details.price_code_id = warehouses.price_code_id").where(id: params[:id])
+        @pos = PurchaseOrder.select(:number, :request_delivery_date).select("products.code, products.target, brands_products.code AS brand_code, brands_products.name AS brand_name, brands_products.description AS brand_desc, models_products.code AS model_code, models_products.name AS mdl_name, models_products.description AS model_desc, common_fields.code AS color_code, common_fields.name AS color_name, sizes.size, product_barcodes.barcode, product_details.id AS product_detail_id, purchase_order_details.quantity, products.description, goods_types_products.code AS goods_type_code, goods_types_products.name AS goods_type_name, goods_types_products.description AS goods_type_desc, common_fields.description AS color_desc").joins(:warehouse, purchase_order_products: [purchase_order_details: [:color, :size], product: [:brand, :model, :goods_type]]).joins("INNER JOIN product_colors ON product_colors.product_id = products.id AND product_colors.color_id = common_fields.id").joins("INNER JOIN product_barcodes ON product_barcodes.product_color_id = product_colors.id AND product_barcodes.size_id = sizes.id").joins("INNER JOIN product_details ON product_details.size_id = sizes.id AND product_details.product_id = products.id AND product_details.price_code_id = warehouses.price_code_id").where(id: params[:id]).order("sizes.size_order")
+        headers["Content-Disposition"] = "attachment; filename='export_po_#{@pos.first.number}.xls'"
       end
     end
   end
+
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -217,21 +220,21 @@ class PurchaseOrdersController < ApplicationController
   def purchase_order_params
     params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
       :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:_destroy, :id, :po_cost, :product_id, :purchase_order_date,
-        purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity, :product_id]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number, 
+        purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity, :product_id]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number,
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
   end
-  
+
   def populate_combobox_list
     @suppliers = Vendor.select(:id, :name)
     @warehouses = Warehouse.where("warehouse_type = 'central'").select(:id, :code)
   end
-  
+
   def populate_products
     @product_list = Product.joins(:brand).select("products.id, products.code, common_fields.name AS brand_name").order(:code)
   end
-  
+
   def add_additional_params_to_purchase_order_products(po_date)
-    @total_product_value = 0                                            
+    @total_product_value = 0
     params[:purchase_order][:purchase_order_products_attributes].each do |key, value|
       @quantity_per_product_present = false
       params[:purchase_order][:purchase_order_products_attributes][key].merge! purchase_order_date: po_date

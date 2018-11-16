@@ -61,6 +61,9 @@ module ApplicationHelper
     return true if can? :read, Stock
     return true if can? :read, StockMovement
     return true if can? :read, ListingStock
+    return true if can? :read, GrowthReport
+    return true if can? :read, QuantitySoldChart
+    return true if can? :read, SellThru
   end
 
   def setting_menu_active?
@@ -70,6 +73,8 @@ module ApplicationHelper
     return true if can? :read, FiscalYear
     return true if can? :read, Member
     return true if can? :manage, Company
+    return true if can? :manage, BeginningStockProduct
+    return true if can? :read, Customer
   end
 
   def accounting_menu_active?

@@ -1,11 +1,13 @@
 <!--<div class="table-responsive">-->
 <table id="gr_print_doc" class="table table-striped table-bordered" width="100%" style="padding-bottom: 1px; word-wrap: break-word">
-    <thead>
+    <tbody>
         <tr><th colspan="13" class="text-center">
                 <% if params[:date].present? %>
                   <%= "#{params[:counter_type].strip}: #{(params[:date].to_date - 1.year).strftime("%d %B %Y")}" %> VS <%= "#{params[:date].to_date.strftime("%d %B %Y")}" %>
                 <% elsif params[:month].present? %>
                   <%= "#{params[:counter_type].strip}: #{Date::MONTHNAMES[params[:month].to_i]} #{params[:year].to_i - 1}" %> VS <%= "#{Date::MONTHNAMES[params[:month].to_i]} #{params[:year]}" %>
+                <% elsif params[:date_range].present? %>
+                  <%= "#{params[:counter_type].strip}: #{@prev_date_beginning.strftime("%d %B %Y")} - #{@prev_date_end.strftime("%d %B %Y")}" %> VS <%= "#{@selected_date_beginning.strftime("%d %B %Y")} - #{@selected_date_end.strftime("%d %B %Y")}" %>
                 <% else %>
                   <%= "#{params[:counter_type].strip}: #{params[:year].to_i - 1}" %> VS <%= "#{params[:year]}" %>
                 <% end %>
@@ -34,6 +36,16 @@
               <th class="text-center"><%= (params[:date].to_date - 1.year).year %></th>
               <th class="text-center"><%= params[:date].to_date.year %></th>
               <th class="text-center">Growth</th>
+            <% elsif params[:date_range].present? %>
+              <th class="text-center"><%= @prev_date_beginning.year %></th>
+              <th class="text-center"><%= @selected_date_beginning.year %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= @prev_date_beginning.year %></th>
+              <th class="text-center"><%= @selected_date_beginning.year %></th>
+              <th class="text-center">Growth</th>
+              <th class="text-center"><%= @prev_date_beginning.year %></th>
+              <th class="text-center"><%= @selected_date_beginning.year %></th>
+              <th class="text-center">Growth</th>
             <% else %>
               <th class="text-center"><%= params[:year].to_i - 1 %></th>
               <th class="text-center"><%= params[:year] %></th>
@@ -46,9 +58,21 @@
               <th class="text-center">Growth</th>
             <% end %>
         </tr>
-    </thead>
-    <tbody>
+        <% @warehouses = @warehouses.to_a.delete_if do |warehouse| %>
+          <% prev_consignment_sale = @prev_consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
+          <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
+          <% prev_net_sales = prev_consignment_sale.prev_net_sales rescue 0 %>
+          <% selected_net_sales = consignment_sale.selected_net_sales rescue 0 %>
+          <% prev_net_sales == 0 || selected_net_sales == 0 %>
+        <% end %>
+
         <% last_region_id = 0 %>
+        <% total_prev_net_sales = 0 %>
+        <% total_selected_net_sales = 0 %>
+        <% total_prev_qty_sold = 0 %>
+        <% total_selected_qty_sold = 0 %>
+        <% total_prev_aur = 0 %>
+        <% total_aur = 0 %>
         <% @warehouses.each do |warehouse| %>
           <% prev_consignment_sale = @prev_consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
           <% consignment_sale = @consignment_sales.select{|con_sale| con_sale.warehouse_id == warehouse.id}.first %>
@@ -65,16 +89,16 @@
             first_val = selected_net_sales.to_f
             second_val = prev_net_sales.to_f
             if second_val > 0
-              "#{((first_val - second_val) / second_val * 100).round}%"
+              "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
               elsif first_val > 0
-              "100%"
+              "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
               else
-              "0%"
+              "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
             end
             else
             first_val = prev_net_sales.to_f
             second_val = selected_net_sales.to_f
-            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
           <%
@@ -82,16 +106,16 @@
             first_val = selected_qty_sold.to_f
             second_val = prev_qty_sold.to_f
             if second_val > 0
-              "#{((first_val - second_val) / second_val * 100).round}%"
+              "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
               elsif first_val > 0
-              "100%"
+              "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
               else
-              "0%"
+              "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
             end
             else
             first_val = prev_qty_sold.to_f
             second_val = selected_qty_sold.to_f
-            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
           <% if prev_qty_sold.to_i > 0 %>
@@ -109,16 +133,16 @@
             first_val = aur.to_f
             second_val = prev_aur.to_f
             if second_val > 0
-              "#{((first_val - second_val) / second_val * 100).round}%"
+              "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
               elsif first_val > 0
-              "100%"
+              "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
               else
-              "0%"
+              "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
             end
             else
             first_val = prev_aur.to_f
             second_val = aur.to_f
-            "(#{((first_val - second_val) / first_val * 100).round}%)"
+            "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
             end
         %>
           <tr>
@@ -177,7 +201,117 @@
               <% end %>
           </tr>
           <% last_region_id = warehouse.region_id %>
+          <% total_prev_net_sales += prev_net_sales.to_f %>
+          <% total_selected_net_sales += selected_net_sales.to_f %>
+          <% total_prev_qty_sold += prev_qty_sold %>
+          <% total_selected_qty_sold += selected_qty_sold %>
+          <% total_prev_aur += prev_aur %>
+          <% total_aur += aur %>
         <% end %>
+        <%
+        total_percentage = if total_prev_net_sales.to_f <= total_selected_net_sales.to_f
+          first_val = total_selected_net_sales.to_f
+          second_val = total_prev_net_sales.to_f
+          if second_val > 0
+            "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
+            elsif first_val > 0
+            "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
+            else
+            "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
+          end
+          else
+          first_val = total_prev_net_sales.to_f
+          second_val = total_selected_net_sales.to_f
+          "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
+          end
+      %>
+        <% 
+        total_qty_sold_percentage = if total_prev_qty_sold <= total_selected_qty_sold
+          first_val = total_selected_qty_sold.to_f
+          second_val = total_prev_qty_sold.to_f
+          if second_val > 0
+            "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
+            elsif first_val > 0
+            "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
+            else
+            "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
+          end
+          else
+          first_val = total_prev_qty_sold.to_f
+          second_val = total_selected_qty_sold.to_f
+          "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
+          end
+      %>
+        <%
+        total_aur_percentage = if total_prev_aur.to_f <= total_aur.to_f
+          first_val = total_aur.to_f
+          second_val = total_prev_aur.to_f
+          if second_val > 0
+            "#{number_with_precision((first_val - second_val) / second_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%"
+            elsif first_val > 0
+            "#{number_with_precision(100, :precision => 2, :delimiter => '', :separator => ",")}%"
+            else
+            "#{number_with_precision(0, :precision => 2, :delimiter => '', :separator => ",")}%"
+          end
+          else
+          first_val = total_prev_aur.to_f
+          second_val = total_aur.to_f
+          "<font color='red'>(#{number_with_precision((first_val - second_val) / first_val * 100, :precision => 2, :delimiter => '', :separator => ",")}%)</font>".html_safe
+          end  
+      %>
+        <tr style="font-weight: bold">
+            <td colspan="2" class="text-right">Total</td>
+            <td class="text-right"><%= number_to_currency(total_prev_net_sales.to_f,
+                  :separator => ",",
+                  :delimiter => ".",
+                  :unit => "Rp",
+                  :precision => 2) %></td>
+            <td class="text-right"><%= number_to_currency(total_selected_net_sales.to_f,
+                  :separator => ",",
+                  :delimiter => ".",
+                  :unit => "Rp",
+                  :precision => 2) %></td>
+            <td class="text-right"><%= total_percentage %></td>
+            <td class="text-right"><%= number_to_currency(total_prev_qty_sold.to_i,
+                  :separator => ",",
+                  :delimiter => ".",
+                  :unit => "",
+                  :precision => 0) %></td>
+            <td class="text-right"><%= number_to_currency(total_selected_qty_sold.to_i,
+                  :separator => ",",
+                  :delimiter => ".",
+                  :unit => "",
+                  :precision => 0) %></td>
+            <td class="text-right"><%= total_qty_sold_percentage %></td>
+            <td class="text-right">
+                <%= number_to_currency(total_prev_aur,
+                  :separator => ",",
+                  :delimiter => ".",
+                  :unit => "Rp",
+                  :precision => 2) %>
+            </td>
+            <td class="text-right">
+                <%= number_to_currency(total_aur,
+                  :separator => ",",
+                  :delimiter => ".",
+                  :unit => "Rp",
+                  :precision => 2) %>
+            </td>
+            <td class="text-right">
+                <%= total_aur_percentage %>
+            </td>
+            <% unless params[:date].present? %>
+              <td></td>
+              <td></td>
+            <% else %>
+              <td class="text-right"><%= number_to_currency(0,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "",
+                    :precision => 0) %></td>
+            <% end %>
+
+        </tr>
     </tbody>
 </table>
 <!--</div>-->

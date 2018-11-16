@@ -77,7 +77,6 @@ class SalesReturnProduct < ApplicationRecord
     stock_movement = StockMovement.new year: @sales_return.created_at.year if stock_movement.blank?
     if stock_movement.new_record?                    
       beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id, @sales_return.created_at.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
-      beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", @sales_return.created_at.year, @sales_return.created_at.month, @sales_return.created_at.year, attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id]).first.quantity rescue nil if beginning_stock.nil?
       beginning_stock = 0 if beginning_stock.nil?                        
       stock_movement_month = stock_movement.stock_movement_months.build month: @sales_return.created_at.month
       stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: attr_warehouse_id
@@ -91,7 +90,6 @@ class SalesReturnProduct < ApplicationRecord
       stock_movement_month = stock_movement.stock_movement_months.build month: @sales_return.created_at.month if stock_movement_month.blank?
       if stock_movement_month.new_record?                      
         beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id, @sales_return.created_at.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
-        beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", @sales_return.created_at.year, @sales_return.created_at.month, @sales_return.created_at.year, attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id]).first.quantity rescue nil if beginning_stock.nil?
         beginning_stock = 0 if beginning_stock.nil?                        
         stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: attr_warehouse_id
         stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: @sd.product_id
@@ -104,7 +102,6 @@ class SalesReturnProduct < ApplicationRecord
         stock_movement_warehouse = stock_movement_month.stock_movement_warehouses.build warehouse_id: attr_warehouse_id if stock_movement_warehouse.blank?
         if stock_movement_warehouse.new_record?                        
           beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id, @sales_return.created_at.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
-          beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", @sales_return.created_at.year, @sales_return.created_at.month, @sales_return.created_at.year, attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id]).first.quantity rescue nil if beginning_stock.nil?
           beginning_stock = 0 if beginning_stock.nil?                        
           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: @sd.product_id
           stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: @sd.color_id,
@@ -116,7 +113,6 @@ class SalesReturnProduct < ApplicationRecord
           stock_movement_product = stock_movement_warehouse.stock_movement_products.build product_id: @sd.product_id if stock_movement_product.blank?
           if stock_movement_product.new_record?                          
             beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id, @sales_return.created_at.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
-            beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", @sales_return.created_at.year, @sales_return.created_at.month, @sales_return.created_at.year, attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id]).first.quantity rescue nil if beginning_stock.nil?
             beginning_stock = 0 if beginning_stock.nil?                        
             stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: @sd.color_id,
               size_id: @sd.size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + 1)
@@ -127,7 +123,6 @@ class SalesReturnProduct < ApplicationRecord
               where(color_id: @sd.color_id, size_id: @sd.size_id).first
             if stock_movement_product_detail.blank?
               beginning_stock = StockMovementProductDetail.joins(:stock_movement_transactions, stock_movement_product: :stock_movement_warehouse).select(:ending_stock).where(["warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ? AND transaction_date <= ?", attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id, @sales_return.created_at.prev_month.end_of_month]).order("transaction_date DESC").first.ending_stock rescue nil
-              beginning_stock = BeginningStockProductDetail.joins(beginning_stock_product: [beginning_stock_month: :beginning_stock]).select(:quantity).where(["((year = ? AND month <= ?) OR year < ?) AND warehouse_id = ? AND product_id = ? AND color_id = ? AND size_id = ?", @sales_return.created_at.year, @sales_return.created_at.month, @sales_return.created_at.year, attr_warehouse_id, @sd.product_id, @sd.color_id, @sd.size_id]).first.quantity rescue nil if beginning_stock.nil?
               beginning_stock = 0 if beginning_stock.nil?                        
               stock_movement_product_detail = stock_movement_product.stock_movement_product_details.build color_id: @sd.color_id,
                 size_id: @sd.size_id, beginning_stock: beginning_stock, ending_stock: (beginning_stock + 1)

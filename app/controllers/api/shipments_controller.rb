@@ -11,7 +11,7 @@ class Api::ShipmentsController < Api::ApplicationController
     #    else
     #      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NULL")
     #    end
-    @delivery_orders = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NULL")
+    @delivery_orders = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NOT NULL")
   end
     
   def receive
@@ -21,9 +21,9 @@ class Api::ShipmentsController < Api::ApplicationController
     end
     unless received
       if @delivery_order.errors[:base].present?
-        render json: { status: false, message: @delivery_order.errors[:base].first }, status: :unprocessable_entity
+        render json: { status: false, message: @delivery_order.errors[:base].first }#, status: :unprocessable_entity
       elsif @delivery_order.errors[:received_date].present?
-        render json: { status: false, message: "Receive date #{@delivery_order.errors[:received_date].first}" }, status: :unprocessable_entity
+        render json: { status: false, message: "Receive date #{@delivery_order.errors[:received_date].first}" }#, status: :unprocessable_entity
       end
     else
       render json: { status: true, message: "Delivery order #{@delivery_order.delivery_order_number} was successfully received" }
@@ -37,11 +37,11 @@ class Api::ShipmentsController < Api::ApplicationController
     #      Shipment.select(:id).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
     #    end
     #    @delivery_orders = Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_number], params[:do_number]])
-    @delivery_orders = Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["shipments.delivery_order_number = ? AND received_date IS NULL", params[:do_number]])
+    @delivery_orders = Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["shipments.delivery_order_number = ? AND received_date IS NULL", params[:do_number]]).where(is_document_printed: true)
     
     # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number (tapi sekarang 1 DO = 1 OB)
     if @delivery_orders.length == 0 || @delivery_orders.length > 1
-      render json: { status: false, message: "No records found" }, status: :unprocessable_entity
+      render json: { status: false, message: "No records found" }#, status: :unprocessable_entity
     else
       render json: { status: true, delivery_order: @delivery_orders.first }
     end
@@ -59,6 +59,7 @@ class Api::ShipmentsController < Api::ApplicationController
     #    end
     @delivery_order = Shipment.joins(:order_booking).where(id: params[:id]).
       where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
+      where(is_document_printed: true).
       select("shipments.*").first
   end
 

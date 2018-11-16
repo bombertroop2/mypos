@@ -42,7 +42,7 @@ class Warehouse < ApplicationRecord
         validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
           :area_manager_available, :region_available, :price_code_available, :type_available,
           :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid, :price_code_not_changed,
-          :in_transit_present, :region_not_changed, :counter_type_not_changed
+          :in_transit_present, :region_not_changed, :counter_type_not_changed, :direct_sales_present
         validate :counter_type_available, if: proc{|wr| wr.warehouse_type.present? && wr.warehouse_type.include?("ctr")}
 
           before_validation :delete_non_intransit_attributes, if: proc{|warehouse| warehouse.warehouse_type.eql?("in_transit")}
@@ -56,6 +56,7 @@ class Warehouse < ApplicationRecord
                   ["Central", "central"],
                   ["Showroom", "showroom"],
                   ["In Transit", "in_transit"],
+                  ["Direct Sales", "direct_sales"],
                   ["CTR Matahari", "ctr_matahari"],
                   ["CTR Ramayana", "ctr_ramayana"],
                   ["CTR Non Ramayana", "ctr_non_ramayana"],
@@ -90,6 +91,14 @@ class Warehouse < ApplicationRecord
 
                 def self.not_central
                   where("warehouse_type <> 'central'")
+                end
+
+                def self.not_in_transit
+                  where("warehouse_type <> 'in_transit'")
+                end
+                
+                def self.not_direct_sales
+                  where("warehouse_type <> 'direct_sales'")
                 end
 
                 def self.showroom
@@ -161,6 +170,24 @@ class Warehouse < ApplicationRecord
                   end
                 end
 
+                def direct_sales_present
+                  if warehouse_type_changed?
+                    direct_sales = Warehouse.where(warehouse_type: "direct_sales").select("1 AS one")
+                    if direct_sales.present?
+                      errors.add(:warehouse_type, "has already been taken") if warehouse_type.present? && warehouse_type.eql?("direct_sales")
+                    end
+                  end
+                end
+
+                #                def central_present
+                #                  if warehouse_type_changed?
+                #                    central_warehouse = Warehouse.where(warehouse_type: "central").select("1 AS one")
+                #                    if central_warehouse.present?
+                #                      errors.add(:warehouse_type, "has already been taken") if warehouse_type.present? && warehouse_type.eql?("central")
+                #                    end
+                #                  end
+                #                end
+
                 def delete_tracks
                   audits.destroy_all
                 end
@@ -208,6 +235,8 @@ class Warehouse < ApplicationRecord
                     # apabila tipe yang dipilih showroom atau mengandung prefix ctr (counter), maka tampilkan error jika warehouse tipe yang di supervisi sebelumnya adalah selain showroom dan counter
                     if warehouse_type.include?("ctr") || warehouse_type.eql?("showroom")
                       errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("counter") && !replaced_warehouse_types.include?("showroom")
+                    elsif warehouse_type.eql?("direct_sales") || warehouse_type.eql?("central")
+                      errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?("direct_sales") && !replaced_warehouse_types.include?("central")
                     else
                       errors.add(:supervisor_id, "should manage the warehouse with type #{replaced_warehouse_types.to_sentence}") if !replaced_warehouse_types.include?(warehouse_type)
                     end
@@ -229,13 +258,12 @@ class Warehouse < ApplicationRecord
                 def price_code_not_changed
                   errors.add(:price_code_id, "change is not allowed!") if price_code_id_changed? && persisted? && (cashier_opening_relation.present? || consignment_sale_relation.present?)
                 end
-
+                
                 def region_not_changed
                   errors.add(:region_id, "change is not allowed!") if region_id_changed? && persisted? && coa_department_relation.present?
                 end
-
-                 def counter_type_not_changed
-                  errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && coa_department_relation.present?
+                
+                def counter_type_not_changed
+                  errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && (destination_warehouse_order_booking_relation.present? || coa_department_relation.present?)
                 end
-
               end

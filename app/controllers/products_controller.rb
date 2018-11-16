@@ -179,6 +179,8 @@ class ProductsController < ApplicationController
       current_date = Date.current
       products = []
       error_message = ""
+      added_spreadsheet_barcodes = []
+      barcode = ""
       (3..spreadsheet.last_row).each do |i|
         product_code = spreadsheet.row(i)[0].strip rescue nil
         if product_code.blank?
@@ -263,12 +265,34 @@ class ProductsController < ApplicationController
             error_message = "Error for row (##{i}) : Color #{spreadsheet.row(i)[14].strip} doesn't exist"
             break
           end
+          sex = if sex == "null"
+            nil
+          elsif sex == "ledies"
+            "ladies"
+          else
+            sex
+          end
           product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: additional_information, attr_importing_data_via_web: true
           product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-          product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, cost: spreadsheet.row(i)[13].to_f, user_is_adding_new_price: true
+          product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
           product_color = product.product_colors.build color_id: color_id, attr_importing_data: true
-          product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+          if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
+            product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+            added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+          else
+            if barcode.blank?                        
+              prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+              barcode = if prb.present?
+                "1S#{prb.barcode.split("1S")[1].succ}"
+              else
+                "1S00001"
+              end
+            else
+              barcode = "1S#{barcode.split("1S")[1].succ}"
+            end
+            product_color.product_barcodes.build size_id: size_id, barcode: barcode
+          end
           products << product
         else
           size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].strip).where(["size_groups.id = ?", prdct.size_group_id]).pluck(:id).first
@@ -284,18 +308,47 @@ class ProductsController < ApplicationController
           product_detail = prdct.product_details.select{|pd| pd.size_id == size_id && pd.price_code_id == price_code_id}.first
           if product_detail.blank?
             product_detail = prdct.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: prdct.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-            cost = prdct.cost_lists.first.cost
-            product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, cost: cost, user_is_adding_new_price: true
+            product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           end
           color_id = Color.where(code: spreadsheet.row(i)[14].strip).pluck(:id).first
           product_color = prdct.product_colors.select{|pc| pc.color_id == color_id}.first
           if product_color.blank?
             product_color = prdct.product_colors.build color_id: color_id, attr_importing_data: true
-            product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+            if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
+              product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+              added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+            else
+              if barcode.blank?                        
+                prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                barcode = if prb.present?
+                  "1S#{prb.barcode.split("1S")[1].succ}"
+                else
+                  "1S00001"
+                end
+              else
+                barcode = "1S#{barcode.split("1S")[1].succ}"
+              end
+              product_color.product_barcodes.build size_id: size_id, barcode: barcode
+            end
           else
             product_barcode = product_color.product_barcodes.select{|pb| pb.size_id == size_id}.first
             if product_barcode.blank?
-              product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+              if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
+                product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
+                added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+              else
+                if barcode.blank?                        
+                  prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                  barcode = if prb.present?
+                    "1S#{prb.barcode.split("1S")[1].succ}"
+                  else
+                    "1S00001"
+                  end
+                else
+                  barcode = "1S#{barcode.split("1S")[1].succ}"
+                end
+                product_color.product_barcodes.build size_id: size_id, barcode: barcode
+              end
             end
           end
         end
@@ -307,38 +360,59 @@ class ProductsController < ApplicationController
         ActiveRecord::Base.transaction do
           products.each do |pr|
             begin
-              PriceCode.select(:id).each do |pc|
-                if pr.product_details.select{|pd| pd.price_code_id == pc.id}.blank?
-                  valid = false
-                  render js: "bootbox.alert({message: \"Please add price to all price codes\",size: 'small'});"
-                  raise ActiveRecord::Rollback
-                end
+              product_price_codes = []
+              pr.product_details.each do |pd|
+                product_price_codes << pd.price_code_id
               end
               if valid
                 SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
+                  product_price_codes.uniq.each do |ppc|
+                    if pr.product_details.select{|pd| pd.price_code_id == ppc && pd.size_id == size.id}.blank?
+                      existed_product_detail = pr.product_details.select{|pd| pd.price_code_id == ppc}.first
+                      other_size_price = existed_product_detail.price_lists.last.price
+                      product_detail = pr.product_details.build size_id: size.id, price_code_id: ppc, size_group_id: pr.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
+                      product_detail.price_lists.build effective_date: current_date, price: other_size_price, user_is_adding_new_price: true, attr_importing_data: true
+                    end
+                  end
                   pr.product_colors.each do |pc|
                     if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
-                      valid = false
-                      render js: "bootbox.alert({message: \"Please add barcode to all colors and sizes\",size: 'small'});"
-                      raise ActiveRecord::Rollback
+                      if barcode.blank?                        
+                        prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                        barcode = if prb.present?
+                          "1S#{prb.barcode.split("1S")[1].succ}"
+                        else
+                          "1S00001"
+                        end
+                      else
+                        barcode = "1S#{barcode.split("1S")[1].succ}"
+                      end
+                      pc.product_barcodes.build size_id: size.id, barcode: barcode
                     end
                   end
                 end
-              end
-              if valid
-                unless pr.save
+                unless valid = pr.save
                   message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
-                  render js: "bootbox.alert({message: \"#{message}\",size: 'small'});"
+                  error_message = message
                   raise ActiveRecord::Rollback
-                else
-                  render js: "bootbox.alert({message: \"Articles were successfully imported\",size: 'small'});"
                 end
+              else
+                raise ActiveRecord::Rollback
               end
             rescue ActiveRecord::RecordNotUnique => e
-              render js: "bootbox.alert({message: \"Article code #{pr.code} has already been taken\",size: 'small'});"
+              valid = false
+              error_message = "Article code #{pr.code} has already been taken"
+              raise ActiveRecord::Rollback
+            rescue RuntimeError => e
+              valid = false
+              error_message = e.message
               raise ActiveRecord::Rollback
             end
           end
+        end
+        if valid
+          render js: "bootbox.alert({message: \"Articles were successfully imported\",size: 'small'});"
+        else
+          render js: "bootbox.alert({message: \"#{error_message}\",size: 'small'});"
         end
       end
     end

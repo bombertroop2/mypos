@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
   helper SmartListing::Helper
   authorize_resource except: :create
-  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :receive, :print, :change_receive_date]
+  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :print, :change_receive_date]
 
   # GET /shipments
   # GET /shipments.json
@@ -46,9 +46,9 @@ class ShipmentsController < ApplicationController
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking)
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where(is_document_printed: true)
     else
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where(is_document_printed: true).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(shipments_scope.where(["shipments.quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -146,6 +146,7 @@ class ShipmentsController < ApplicationController
   # DELETE /shipments/1
   # DELETE /shipments/1.json
   def destroy
+    @shipment.attr_user_id = current_user.id
     unless @shipment.destroy
       @deleted = false
     else
@@ -183,21 +184,26 @@ class ShipmentsController < ApplicationController
   end
 
   def receive
-    @shipment.with_lock do
-      @shipment.update(received_date: params[:receive_date], receiving_inventory: true)
-    end
-    if @shipment.errors[:base].present?
-      render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
-    elsif @shipment.errors[:received_date].present?
-      render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
+    @shipment = Shipment.where(id: params[:id]).where(is_document_printed: true).first
+    if @shipment.present?
+      @shipment.with_lock do
+        @shipment.update(received_date: params[:receive_date], receiving_inventory: true)
+      end
+      if @shipment.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@shipment.errors[:base].join("<br/>")}\",size: 'small'});"
+      elsif @shipment.errors[:received_date].present?
+        render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
+      end
+    else
+      render js: "bootbox.alert({message: \"No records found\",size: 'small'});"
     end
   end
 
   def search_do
     @shipments = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number).joins(:order_booking).where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
+      Shipment.select(:id, :delivery_order_number).joins(:order_booking).where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]]).where(is_document_printed: true)
     else
-      Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]])
+      Shipment.select(:id, :delivery_order_number).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").where(["(shipments.delivery_order_number = ? OR order_bookings.number = ?) AND received_date IS NULL", params[:do_ob_number], params[:do_ob_number]]).where(is_document_printed: true)
     end
 
     # apabila jumlahnya lebih dari satu maka artinya satu DO bisa banyak OB, jadi tidak bisa search by OB number (tapi sekarang 1 DO = 1 OB)

@@ -5,10 +5,17 @@ Rails.application.routes.draw do
   resources :departments
   resources :coas
   resources :journals
+  get 'import_beginning_stocks' => 'import_beginning_stocks#new'
+
+  post 'import_beginning_stocks/create'
+
+  get 'sell_thru' => 'sell_thrus#index'
+  get 'quantity_sold_charts/index'
   resources :targets
   resources :general_ledgers, only: :index
   get 'growth_reports/index'
   get 'growth_reports/print'
+  get 'growth_reports/export'
 
   namespace :api, defaults: { format: :json } do
     resources :stock_mutations do
@@ -110,7 +117,11 @@ Rails.application.routes.draw do
     end
   end
   resources :events do
+    #    get :autocomplete_product_code, :on => :collection
     collection do
+      get :autocomplete_events
+      get :new_add_general_products
+      get :new_add_products
       get "generate_warehouse_form"
       get "add_products"
       get "add_general_products"
@@ -201,6 +212,7 @@ Rails.application.routes.draw do
     collection do
       get "get_warehouse_products"
       get "generate_product_item_form"
+      get "add_destination_warehouse"
     end
     member do
       get "picking_note"
@@ -225,6 +237,7 @@ Rails.application.routes.draw do
   #  end
   #  resources :cost_lists, except: :show
   resources :receiving, only: [:new, :create, :index, :show] do
+    get :autocomplete_product_code, :on => :collection
     collection do
       get "get_product_details"
     end
@@ -258,6 +271,7 @@ Rails.application.routes.draw do
   get 'welcome/index'
 
   resources :purchase_orders do
+    get :autocomplete_product_code, :on => :collection
     collection do
       get 'get_product_details'
     end

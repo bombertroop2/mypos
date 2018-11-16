@@ -71,6 +71,10 @@ gem 'write_xlsx'
 
 gem 'activerecord-import'
 
+gem 'rails-jquery-autocomplete'
+
+gem 'tag-it-rails'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -85,7 +89,7 @@ gem 'figaro'
 gem 'daemons'
 
 gem 'whenever', require: false
-  
+
 group :development do
   gem 'net-ssh', '~> 4.2'
   gem 'capistrano'
@@ -102,14 +106,14 @@ group :development, :test do
   # Use sqlite3 as the database for Active Record
   gem 'sqlite3'
 end
-  
+
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-  
+
 end
 
 group :production do
@@ -123,3 +127,7 @@ gem "roo"
 gem 'carrierwave'
 gem 'cloudinary'
 gem 'sidekiq-scheduler'
+gem 'wicked_pdf', '~> 1.1'
+gem 'wkhtmltopdf-binary'
+gem "chartkick"
+

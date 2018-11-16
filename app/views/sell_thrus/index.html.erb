@@ -1,0 +1,149 @@
+<div class="page-header">
+    <h1>Sell Thru</h1>
+</div>
+<div class="row">
+    <div class="" role="tabpanel" data-example-id="togglable-tabs">
+        <ul id="stTab" class="nav nav-tabs bar_tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#tab_content_st1" id="home-tab-st" role="tab" data-toggle="tab" aria-expanded="true">Report by Counter</a></li>
+            <li role="presentation"><a href="#tab_content_st2" role="tab" id="profile-tab-st" data-toggle="tab" aria-expanded="false">Report by Showroom</a></li>
+            <li role="presentation"><a href="#tab_content_st3" role="tab" id="profile-tab-st3" data-toggle="tab" aria-expanded="false">Report by Central Warehouse (Sale center: Counter)</a></li>
+            <li role="presentation"><a href="#tab_content_st4" role="tab" id="profile-tab-st4" data-toggle="tab" aria-expanded="false">Report by Central Warehouse (Sale center: Showroom)</a></li>
+        </ul>
+        <div id="stTabContent" class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="tab_content_st1" aria-labelledby="home-tab-st">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>Generate Report</h2>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <div class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="counter">Counter<span class="required">*</span></label>
+                                    <div class="col-sm-10">
+                                        <%= select_tag "counter", options_from_collection_for_select(Warehouse.counter.order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "sell_thru_counter"} %>
+                                      </div>
+                                  </div>                                                                
+                                  <div class="form-group">
+                                      <label class="col-sm-2 control-label" for="date">Date <span class="required">*</span></label>
+                                      <div class="col-sm-10">
+                                          <%= text_field_tag "date", "", readonly: true, class: "form-control", id: "sell_thru_date" %>
+                                        </div>
+                                    </div>
+                                    <div class="ln_solid"></div>
+                                    <!--                            <div class="form-group">
+                                                                    <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">-->
+                                    <button type="submit" class="btn btn-success" id="generate-btn-sell-thru-report" style="float: right">Generate</button>
+                                    <button type="submit" class="btn btn-success" id="export-btn-sell-thru-report" style="float: right">Export to XLS</button>
+                                    <!--                                </div>
+                                                                </div>-->
+
+                                </div>
+                            </div>
+                        </div>
+                        <div id="report-container-st"></div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="tab_content_st2" aria-labelledby="profile-tab-st">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Generate Report</h2>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="showroom">Showroom<span class="required">*</span></label>
+                                        <div class="col-sm-10">
+                                            <%= select_tag "showroom", options_from_collection_for_select(Warehouse.showroom.order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "sell_thru_showroom"} %>
+                                          </div>
+                                      </div>                                                                
+                                      <div class="form-group">
+                                          <label class="col-sm-2 control-label" for="date">Date <span class="required">*</span></label>
+                                          <div class="col-sm-10">
+                                              <%= text_field_tag "date", "", readonly: true, class: "form-control", id: "sell_thru_date_showroom" %>
+                                            </div>
+                                        </div>
+                                        <div class="ln_solid"></div>
+                                        <!--                            <div class="form-group">
+                                                                        <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">-->
+                                        <button type="submit" class="btn btn-success" id="generate-btn-sell-thru-report-showroom" style="float: right">Generate</button>
+                                        <button type="submit" class="btn btn-success" id="export-btn-sell-thru-report-showroom" style="float: right">Export to XLS</button>
+                                        <!--                                </div>
+                                                                    </div>-->
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="report-container-st-showroom"></div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="tab_content_st3" aria-labelledby="profile-tab-st3">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>Generate Report</h2>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                    <div class="form-horizontal">
+                                        <!--<div class="form-group">
+                                            <label class="col-sm-2 control-label" for="warehouse">Warehouse<span class="required">*</span></label>
+                                            <div class="col-sm-10">
+        <%#= select_tag "warehouse", options_from_collection_for_select(Warehouse.central.order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "sell_thru_central_counter"} %>
+                                              </div>
+                                          </div>-->
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label" for="date">Date <span class="required">*</span></label>
+                                            <div class="col-sm-10">
+                                                <%= text_field_tag "date", "", readonly: true, class: "form-control", id: "sell_thru_date_central_counter" %>
+                                              </div>
+                                          </div>
+                                          <div class="ln_solid"></div>
+                                          <!--                            <div class="form-group">
+                                                                          <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">-->
+                                          <button type="submit" class="btn btn-success" id="generate-btn-sell-thru-report-central-counter" style="float: right">Generate</button>
+                                          <button type="submit" class="btn btn-success" id="export-btn-sell-thru-report-central-counter" style="float: right">Export to XLS</button>
+                                          <!--                                </div>
+                                                                      </div>-->
+
+                                      </div>
+                                  </div>
+                              </div>
+                              <div id="report-container-st-central-counter"></div>
+                          </div>
+                      </div>
+                      <div role="tabpanel" class="tab-pane fade" id="tab_content_st4" aria-labelledby="profile-tab-st4">
+                          <div class="col-md-12 col-sm-12 col-xs-12">
+                              <div class="x_panel">
+                                  <div class="x_title">
+                                      <h2>Generate Report</h2>
+                                      <div class="clearfix"></div>
+                                  </div>
+                                  <div class="x_content">
+                                      <div class="form-horizontal">
+                                          <div class="form-group">
+                                              <label class="col-sm-2 control-label" for="date">Date <span class="required">*</span></label>
+                                              <div class="col-sm-10">
+                                                  <%= text_field_tag "date", "", readonly: true, class: "form-control", id: "sell_thru_date_central_showroom" %>
+                                                </div>
+                                            </div>
+                                            <div class="ln_solid"></div>
+                                            <!--                            <div class="form-group">
+                                                                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">-->
+                                            <button type="submit" class="btn btn-success" id="generate-btn-sell-thru-report-central-showroom" style="float: right">Generate</button>
+                                            <button type="submit" class="btn btn-success" id="export-btn-sell-thru-report-central-showroom" style="float: right">Export to XLS</button>
+                                            <!--                                </div>
+                                                                        </div>-->
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="report-container-st-central-showroom"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>   
+            </div>

@@ -48,289 +48,364 @@
                                 <div class="x_panel">
                                     <div class="x_content">                        
 
-                                        <div>
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist">
-                                                <li role="presentation" class="active"><a href="#add_general_products_by_bgm_special_price" aria-controls="add_general_products_by_bgm_special_price" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>
-                                                <li role="presentation"><a href="#add_general_products_by_code_special_price" aria-controls="add_general_products_by_code_special_price" role="tab" data-toggle="tab">Add products by code</a></li>
-                                            </ul>
+                                        <!--<div>-->
+                                        <!-- Nav tabs -->
+                                        <!--<ul class="nav nav-tabs" role="tablist">-->
+                                        <!--<li role="presentation" class="active"><a href="#add_general_products_by_bgm_special_price" aria-controls="add_general_products_by_bgm_special_price" role="tab" data-toggle="tab">Add products by brand/goods type/model</a></li>-->
+                                        <!--<li role="presentation" class="active"><a href="#add_general_products_by_code_special_price" aria-controls="add_general_products_by_code_special_price" role="tab" data-toggle="tab">Add products by code</a></li>-->
+                                        <!--</ul>-->
 
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_special_price" style="padding-top: 20px">
-                                                    <div class="form-group">
-                                                        <label class="control-label col-sm-3" for="brand">Brand</label>
-                                                        <div class="col-sm-9">
-                                                            <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_special_price"} %>
-                                                          </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                          <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
-                                                          <div class="col-sm-9">
-                                                              <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_special_price"} %>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label class="control-label col-sm-3" for="model">Model</label>
-                                                            <div class="col-sm-9">
-                                                                <%= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_special_price"} %>
-                                                              </div>
-                                                          </div>
-                                                          <div class="form-group">
-                                                              <div class="col-sm-offset-3 col-sm-9">
-                                                                  <button type="submit" class="btn btn-success" id="add-btn-general-products-special-price">Add</button>
-                                                              </div>
-                                                          </div>
-                                                      </div>
-                                                      <div role="tabpanel" class="tab-pane fade" id="add_general_products_by_code_special_price" style="padding-top: 20px">
-                                                          <div class="form-group">
-                                                              <label class="control-label col-sm-3" for="code">Code</label>
-                                                              <div class="col-sm-9">
-                                                                  <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_special_price"} %>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-sm-offset-3 col-sm-9">
-                                                                    <button type="submit" class="btn btn-success" id="add-btn-by-code-general-products-special-price">Add</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                        <!-- Tab panes -->
+                                        <!--<div class="tab-content">-->
+                                        <!--<div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_bgm_special_price" style="padding-top: 20px">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="brand">Brand</label>
+                                                <div class="col-sm-9">
+                        <%#= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "brand_general_products_special_price"} %>
+                                                  </div>
+                                              </div>
+                                              <div class="form-group">
+                                                  <label class="control-label col-sm-3" for="goods-type">Goods Type</label>
+                                                  <div class="col-sm-9">
+                        <%#= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "goods_type_general_products_special_price"} %>
                                                     </div>
-                                                    <div id="listing-general-products-special-price">
-                                                        <% if action_name.eql?("edit") %>
-                                                          <% event_general_products = @event.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
-                                                        <% else %>
-                                                          <% event_general_products = @event.event_general_products %>
-                                                        <% end %>
-                                                        <% if event_general_products.present? %>                        
-                                                          <%= render partial: "listing_general_products", locals: {event_general_products: event_general_products, event_type: "special price"} %>
-                                                        <% end %>
-                                                    </div>
-                                                </div>                    
-
-                                                <div class="ln_solid"></div>
-
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-sm-3" for="model">Model</label>
+                                                    <div class="col-sm-9">
+                        <%#= select_tag "model", options_from_collection_for_select(@models, :id, "code_and_name"), {prompt: "All", class: "form-control", id: "model_general_products_special_price"} %>
+                                                      </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                      <div class="col-sm-offset-3 col-sm-9">
+                                                          <button type="submit" class="btn btn-success" id="add-btn-general-products-special-price">Add</button>
+                                                      </div>
+                                                  </div>
+                                              </div>-->
+                                        <!--<div role="tabpanel" class="tab-pane fade in active" id="add_general_products_by_code_special_price" style="padding-top: 20px">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="code">Code</label>
+                                                <div class="col-sm-9">
+                        <%#= text_field_tag "code", "", {class: "form-control", id: "code_general_products_special_price"} %>
+                                                  </div>
+                                              </div>
+                                              <div class="form-group">
+                                                  <div class="col-sm-offset-3 col-sm-9">
+                                                      <button type="submit" class="btn btn-success" id="add-btn-by-code-general-products-special-price">Add</button>
+                                                  </div>
+                                              </div>
+                                          </div>-->
+                                        <!--</div>-->
+                                        <div class="form-group">
+                                            <div class="col-sm-12">
+                                                <%= select_tag "brand", options_from_collection_for_select(@brands, :id, "code_and_name"), {include_blank: true, class: "form-control", id: "brand_general_products_special_price"} %>
+                                              </div>
+                                          </div>
+                                          <div class="form-group">
+                                              <div class="col-sm-12">
+                                                  <%= select_tag "target",options_for_select(Product::TARGETS), {include_blank: true, class: "form-control", id: "target_general_products_special_price"} %>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-12">
+                                                    <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_special_price"} %>
+                                                  </div>
+                                              </div>
+                                              <div class="form-group">
+                                                  <div class="col-sm-12">
+                                                      <button type="button" class="btn btn-success" id="add-btn-special-price-products" style="float: right">Add</button>
+                                                  </div>
+                                              </div>
+                                              <div id="listing-general-products-special-price">
+                                                  <% if action_name.eql?("edit") %>
+                                                    <% event_general_products = @event.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+                                                  <% else %>
+                                                    <% event_general_products = @event.event_general_products %>
+                                                  <% end %>
+                                                  <% if event_general_products.present? %>                        
+                                                    <%= render partial: "listing_general_products", locals: {event_general_products: event_general_products, event_type: "special price"} %>
+                                                  <% end %>
+                                              </div>
+                                              <!--</div>-->
 
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">Warehouses</label>
-                                    <div class="col-sm-10">
-                                        <table id="listing_event_warehouses_table_special_price" class="display">
-                                            <thead>
-                                                <tr>
-                                                    <th></th>
-                                                    <th id="code_th_sp">Code</th>
-                                                    <th>Name</th>
-                                                </tr>
-                                            </thead>
+                                              <!--<div class="ln_solid"></div>-->
 
-                                            <tbody>
-                                                <% @warehouses.each do |warehouse| %>
-                                                  <tr id="warehouse_<%= warehouse.id %>_special_price">
-                                                      <td></td>
-                                                      <td><%= warehouse.code %></td>
-                                                      <td><%= warehouse.name %></td>
-                                                  </tr>
-                                                <% end %>
-                                            </tbody>
-                                        </table>
-                                        <a class="btn btn-default active" id="generate_event_warehouse_form_special_price" style="float: right;margin-top: 10px;">Generate form</a>
-                                    </div>
-                                </div>
-
-                                <div id="listing-warehouse-details-sp">
-                                    <% if action_name.eql?("create") || !@event.new_record? %>
-                                      <%= render partial: "warehouse_form", locals: {event_type: "special price"} %>
-                                    <% end %>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
+                                          </div>
                                       </div>
                                   </div>
-                                <% end %>
+                              </div>
 
-                                <script type="text/javascript">
-                                  $(function () {
-                                      $("#event_start_date_time_special_price").datetimepicker({
-                                          format: "dd/mm/yyyy hh:ii",
-                                          autoclose: true,
-                                          minuteStep: 1
-                                      });
-                                      $("#event_end_date_time_special_price").datetimepicker({
-                                          format: "dd/mm/yyyy hh:ii",
-                                          autoclose: true,
-                                          minuteStep: 1
-                                      });
-                                      var eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
-                                          order: [1, 'asc'],
-                                          dom: 'T<"clear">lfrtip',
-                                          columns: [
-                                              {data: null, defaultContent: '', orderable: false},
-                                              {data: 'code'},
-                                              {data: 'name'}
-                                          ],
-                                          tableTools: {
-                                              sRowSelect: 'os',
-                                              aButtons: ['select_all', 'select_none']
-                                          },
-                                          paging: false,
-                                          info: false,
-                                          scrollY: "250px",
-                                          scrollCollapse: true
-                                      });
+                              <div class="form-group">
+                                  <label class="col-sm-2 control-label">Warehouses</label>
+                                  <div class="col-sm-10">
+                                      <table id="listing_event_warehouses_table_special_price" class="display">
+                                          <thead>
+                                              <tr>
+                                                  <th></th>
+                                                  <th id="code_th_sp">Code</th>
+                                                  <th>Name</th>
+                                              </tr>
+                                          </thead>
 
-                                      $("#generate_event_warehouse_form_special_price").click(function (e) {
-                                          if (eventWarehousesSpecialPriceDataTable.rows('.selected').data().length == 0) {
-                                              e.preventDefault();
-                                              bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
-                                          } else {
-                                              var warehouseIds = [];
-                                              $.each(eventWarehousesSpecialPriceDataTable.rows('.selected')[0], function (index, value) {
-                                                  warehouseIds.push(eventWarehousesSpecialPriceDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
-                                              });
-                                <% if @event.new_record? %>
-                                                $.get("/events/generate_warehouse_form", {
-                                                    warehouse_ids: warehouseIds.join(","),
-                                                    event_type: "special price"
-                                                });
-                                <% else %>
-                                                $.get("/events/generate_warehouse_form", {
-                                                    warehouse_ids: warehouseIds.join(","),
-                                                    event_type: "special price",
-                                                    event_id: "<%= @event.id %>"
-                                                });
-                                <% end %>
-                                          }
+                                          <tbody>
+                                              <% @warehouses.each do |warehouse| %>
+                                                <tr id="warehouse_<%= warehouse.id %>_special_price">
+                                                    <td></td>
+                                                    <td><%= warehouse.code %></td>
+                                                    <td><%= warehouse.name %></td>
+                                                </tr>
+                                              <% end %>
+                                          </tbody>
+                                      </table>
+                                      <a class="btn btn-default active" id="generate_event_warehouse_form_special_price" style="float: right;margin-top: 10px;">Generate form</a>
+                                  </div>
+                              </div>
 
-                                      });
-
-                                      $("#submit-btn-special-price").click(function () {
-                                          if ($("#listing-warehouse-details-sp").html().trim() == "") {
-                                              bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-                                              return false;
-                                          } else {
-                                              if ($(".event_warehouse_id_fields_special_price").length > 0) {
-                                                  var valid = true;
-                                                  $(".event_warehouse_id_fields_special_price").each(function () {
-                                                      if ($("#event_event_warehouses_attributes_" + $(this).val() + "_select_different_products_special_price").is(':checked')) {
-                                                          if ($("#event_product_fields_container_" + $(this).val() + "_special_price").length == 0) {
-                                                              valid = false;
-                                                              return false;
-                                                          } else if ($("#event_product_fields_container_" + $(this).val() + "_special_price").html().trim() == "") {
-                                                              valid = false;
-                                                              return false;
-                                                          }
-                                                      } else
-                                                      if ($("#event_general_product_fields_container_special_price").length == 0) {
-                                                          valid = false;
-                                                          return false;
-                                                      } else if ($("#event_general_product_fields_container_special_price").html().trim() == "") {
-                                                          valid = false;
-                                                          return false;
-                                                      }
-                                                  });
-                                                  if (!valid) {
-                                                      bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
-                                                      return false;
-                                                  } else
-                                                      return true;
-                                              } else {
-                                                  bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-                                                  return false;
-                                              }
-
-                                          }
-                                      });
-
-                                <% @event.event_warehouses.each do |event_warehouse| %>
-                                  <% unless event_warehouse._destroy %>
-                                          var e = jQuery.Event("click");
-                                          e.ctrlKey = true;
-                                          $("#warehouse_<%= event_warehouse.warehouse_id %>_special_price").find("td:first-child").trigger(e);
+                              <div id="listing-warehouse-details-sp">
+                                  <% if action_name.eql?("create") || !@event.new_record? %>
+                                    <%= render partial: "warehouse_form", locals: {event_type: "special price"} %>
                                   <% end %>
-                                <% end %>
-                                      $('#event_special_price').autoNumeric('init');
+                              </div>
 
-                                      $("#add-btn-general-products-special-price").click(function () {
-                                          var productIds = [];
-                                          $(".event-general-products-product-id-fields-special-price").each(function () {
-                                              var attrId = $(this).attr('id');
-                                              productIds.push(attrId.split("_")[5]);
-                                          });
-                                          var addProductParams = {};
-                                <% if @event.new_record? %>
-                                            addProductParams = {
-                                                brand_id: $("#brand_general_products_special_price").val(),
-                                                goods_type_id: $("#goods_type_general_products_special_price").val(),
-                                                model_id: $("#model_general_products_special_price").val(),
-                                                selected_product_ids: productIds.join(","),
-                                                event_type: "special price"
-                                            };
-                                <% else %>
-                                            addProductParams = {
-                                                brand_id: $("#brand_general_products_special_price").val(),
-                                                goods_type_id: $("#goods_type_general_products_special_price").val(),
-                                                model_id: $("#model_general_products_special_price").val(),
-                                                selected_product_ids: productIds.join(","),
-                                                event_type: "special price",
-                                                event_id: "<%= @event.id %>"
-                                            };
-                                <% end %>
-                                          $.get("/events/add_general_products", addProductParams);
-                                          $("#brand_general_products_special_price").prop('selectedIndex', 0);
-                                          $("#goods_type_general_products_special_price").prop('selectedIndex', 0);
-                                          $("#model_general_products_special_price").prop('selectedIndex', 0);
-                                          return false;
-                                      });
+                              <div class="form-group">
+                                  <div class="col-sm-offset-2 col-sm-10">
+                                      <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-special-price" %>
+                                        <button class="btn btn-link cancel">Cancel</button>
+                                    </div>
+                                </div>
+                              <% end %>
 
-                                      $('#code_general_products_special_price').keypress(function (e) {
-                                          var key = e.which;
-                                          if (key == 13)  // the enter key code
-                                          {
-                                              if ($("#code_general_products_special_price").val().trim() != "") {
-                                                  $("#add-btn-by-code-general-products-special-price").click();
-                                              }
-                                              return false;
-                                          }
-                                      });
+                              <script type="text/javascript">
+                                $(function () {
+                                    $("#brand_general_products_special_price").attr("data-placeholder", "Select brand").chosen({width: "200px"});
+                                    $("#target_general_products_special_price").attr("data-placeholder", "Select target").chosen({width: "200px"});
+                                    $("#code_general_products_special_price").tagit({
+                                        autocomplete: {
+                                            delay: 0,
+                                            minLength: 1,
+                                            source: function (search, response) {
+                                                $.ajax({
+                                                    url: "/events/autocomplete_events",
+                                                    data: {
+                                                        brand: $("#brand_general_products_special_price").val(),
+                                                        target: $("#target_general_products_special_price").val(),
+                                                        term: search.term
+                                                    },
+                                                    success: function (data) {
+                                                        response($.map(data, function (item) {
+                                                            return {
+                                                                id: item.id,
+                                                                label: item.label
+                                                            }
+                                                        }));
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        placeholderText: 'Article code'
+                                    });
+                                    $("#event_start_date_time_special_price").datetimepicker({
+                                        format: "dd/mm/yyyy hh:ii",
+                                        autoclose: true,
+                                        minuteStep: 1
+                                    });
+                                    $("#event_end_date_time_special_price").datetimepicker({
+                                        format: "dd/mm/yyyy hh:ii",
+                                        autoclose: true,
+                                        minuteStep: 1
+                                    });
+                                    var eventWarehousesSpecialPriceDataTable = $('#listing_event_warehouses_table_special_price').DataTable({
+                                        order: [1, 'asc'],
+                                        dom: 'T<"clear">lfrtip',
+                                        columns: [
+                                            {data: null, defaultContent: '', orderable: false},
+                                            {data: 'code'},
+                                            {data: 'name'}
+                                        ],
+                                        tableTools: {
+                                            sRowSelect: 'os',
+                                            aButtons: ['select_all', 'select_none']
+                                        },
+                                        paging: false,
+                                        info: false,
+                                        scrollY: "250px",
+                                        scrollCollapse: true
+                                    });
 
-                                      $("#add-btn-by-code-general-products-special-price").click(function () {
-                                          if ($("#code_general_products_special_price").val().trim() == "")
-                                              bootbox.alert({message: "Please fill out the field above", size: "small"});
-                                          else {
-                                              var productIds = [];
-                                              $(".event-general-products-product-id-fields-special-price").each(function () {
-                                                  var attrId = $(this).attr('id');
-                                                  productIds.push(attrId.split("_")[5]);
+                                    $("#generate_event_warehouse_form_special_price").click(function (e) {
+                                        if (eventWarehousesSpecialPriceDataTable.rows('.selected').data().length == 0) {
+                                            e.preventDefault();
+                                            bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+                                        } else {
+                                            var warehouseIds = [];
+                                            $.each(eventWarehousesSpecialPriceDataTable.rows('.selected')[0], function (index, value) {
+                                                warehouseIds.push(eventWarehousesSpecialPriceDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                            });
+                              <% if @event.new_record? %>
+                                              $.get("/events/generate_warehouse_form", {
+                                                  warehouse_ids: warehouseIds.join(","),
+                                                  event_type: "special price"
                                               });
-                                              var addProductParams = {};
-                                <% if @event.new_record? %>
-                                                addProductParams = {
-                                                    product_code: $("#code_general_products_special_price").val(),
-                                                    selected_product_ids: productIds.join(","),
-                                                    event_type: "special price"
-                                                };
-                                <% else %>
-                                                addProductParams = {
-                                                    product_code: $("#code_general_products_special_price").val(),
-                                                    selected_product_ids: productIds.join(","),
-                                                    event_type: "special price",
-                                                    event_id: "<%= @event.id %>"
-                                                };
+                              <% else %>
+                                              $.get("/events/generate_warehouse_form", {
+                                                  warehouse_ids: warehouseIds.join(","),
+                                                  event_type: "special price",
+                                                  event_id: "<%= @event.id %>"
+                                              });
+                              <% end %>
+                                        }
+
+                                    });
+
+                                    $("#submit-btn-special-price").click(function () {
+                                        if ($("#listing-warehouse-details-sp").html().trim() == "") {
+                                            bootbox.alert({message: "Please generate warehouse form", size: 'small'});
+                                            return false;
+                                        } else {
+                                            if ($(".event_warehouse_id_fields_special_price").length > 0) {
+                                                var valid = true;
+                                                $(".event_warehouse_id_fields_special_price").each(function () {
+                                                    if ($("#event_event_warehouses_attributes_" + $(this).val() + "_select_different_products_special_price").is(':checked')) {
+                                                        if ($("#event_product_fields_container_" + $(this).val() + "_special_price").length == 0) {
+                                                            valid = false;
+                                                            return false;
+                                                        } else if ($("#event_product_fields_container_" + $(this).val() + "_special_price").html().trim() == "") {
+                                                            valid = false;
+                                                            return false;
+                                                        }
+                                                    } else
+                                                    if ($("#event_general_product_fields_container_special_price").length == 0) {
+                                                        valid = false;
+                                                        return false;
+                                                    } else if ($("#event_general_product_fields_container_special_price").html().trim() == "") {
+                                                        valid = false;
+                                                        return false;
+                                                    }
+                                                });
+                                                if (!valid) {
+                                                    bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
+                                                    return false;
+                                                } else
+                                                    return true;
+                                            } else {
+                                                bootbox.alert({message: "Please generate warehouse form", size: 'small'});
+                                                return false;
+                                            }
+
+                                        }
+                                    });
+
+                              <% @event.event_warehouses.each do |event_warehouse| %>
+                                <% unless event_warehouse._destroy %>
+                                        var e = jQuery.Event("click");
+                                        e.ctrlKey = true;
+                                        $("#warehouse_<%= event_warehouse.warehouse_id %>_special_price").find("td:first-child").trigger(e);
                                 <% end %>
-                                              $.get("/events/add_general_products", addProductParams);
-                                              $("#code_general_products_special_price").val("");
-                                          }
-                                          return false;
-                                      });
-                                      $('#event_code_special_price').on("input", function () {
-                                          $(this).val($(this).val().replace(/ /g, ""));
-                                      });
-                                  });
-                                </script>  
+                              <% end %>
+                                    $('#event_special_price').autoNumeric('init');
+
+                                    /*$("#add-btn-general-products-special-price").click(function () {
+                                     var productIds = [];
+                                     $(".event-general-products-product-id-fields-special-price").each(function () {
+                                     var attrId = $(this).attr('id');
+                                     productIds.push(attrId.split("_")[5]);
+                                     });
+                                     var addProductParams = {};
+                                     <%# if @event.new_record? %>
+                                     addProductParams = {
+                                     brand_id: $("#brand_general_products_special_price").val(),
+                                     goods_type_id: $("#goods_type_general_products_special_price").val(),
+                                     model_id: $("#model_general_products_special_price").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "special price"
+                                     };
+                                     <%# else %>
+                                     addProductParams = {
+                                     brand_id: $("#brand_general_products_special_price").val(),
+                                     goods_type_id: $("#goods_type_general_products_special_price").val(),
+                                     model_id: $("#model_general_products_special_price").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "special price",
+                                     event_id: "<%#= @event.id %>"
+                                     };
+                                     <%# end %>
+                                     $.get("/events/add_general_products", addProductParams);
+                                     $("#brand_general_products_special_price").prop('selectedIndex', 0);
+                                     $("#goods_type_general_products_special_price").prop('selectedIndex', 0);
+                                     $("#model_general_products_special_price").prop('selectedIndex', 0);
+                                     return false;
+                                     });*/
+
+                                    /*$('#code_general_products_special_price').keypress(function (e) {
+                                     var key = e.which;
+                                     if (key == 13)  // the enter key code
+                                     {
+                                     if ($("#code_general_products_special_price").val().trim() != "") {
+                                     $("#add-btn-by-code-general-products-special-price").click();
+                                     }
+                                     return false;
+                                     }
+                                     });*/
+
+                                    /*$("#add-btn-by-code-general-products-special-price").click(function () {
+                                     if ($("#code_general_products_special_price").val().trim() == "")
+                                     bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                     else {
+                                     var productIds = [];
+                                     $(".event-general-products-product-id-fields-special-price").each(function () {
+                                     var attrId = $(this).attr('id');
+                                     productIds.push(attrId.split("_")[5]);
+                                     });
+                                     var addProductParams = {};
+                                     <%# if @event.new_record? %>
+                                     addProductParams = {
+                                     product_code: $("#code_general_products_special_price").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "special price"
+                                     };
+                                     <%# else %>
+                                     addProductParams = {
+                                     product_code: $("#code_general_products_special_price").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "special price",
+                                     event_id: "<%#= @event.id %>"
+                                     };
+                                     <%# end %>
+                                     $.get("/events/add_general_products", addProductParams);
+                                     $("#code_general_products_special_price").val("");
+                                     }
+                                     return false;
+                                     });*/
+                                    $('#event_code_special_price').on("input", function () {
+                                        $(this).val($(this).val().replace(/ /g, ""));
+                                    });
+
+                                    $("#add-btn-special-price-products").click(function () {
+                                        var productIds = [];
+                                        var products = $("#code_general_products_special_price").val().split(",");
+                                        products.forEach(function (element) {
+                                            productIds.push(element.split(";")[0]);
+                                        });
+                                        var selectedProductIds = [];
+                                        $(".event-general-products-product-id-fields-special-price").each(function () {
+                                            var attrId = $(this).attr('id');
+                                            selectedProductIds.push(attrId.split("_")[5]);
+                                        });
+                              <% if @event.new_record? %>
+                                          $.get("/events/new_add_general_products", {
+                                              products: productIds,
+                                              selected_products: selectedProductIds,
+                                              event_type: "special price"
+                                          });
+                              <% else %>
+                                          $.get("/events/new_add_general_products", {
+                                              products: productIds,
+                                              selected_products: selectedProductIds,
+                                              event_type: "special price",
+                                              event_id: "<%= @event.id %>"
+                                          });
+                              <% end %>
+                                        $('#code_general_products_special_price').tagit('removeAll');
+                                    });
+                                });
+                              </script>  

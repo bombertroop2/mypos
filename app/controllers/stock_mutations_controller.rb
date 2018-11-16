@@ -168,7 +168,7 @@ class StockMutationsController < ApplicationController
 
   # GET /stock_mutations/new
   def new
-    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.select(:id, :code)
+    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
     @stock_mutation = StockMutation.new
   end
 
@@ -186,7 +186,7 @@ class StockMutationsController < ApplicationController
           elsif @stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].present?
             render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
           else
-            @origin_warehouses = @destintation_warehouses = Warehouse.not_central.select(:id, :code)
+            @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
             selected_product_ids = @stock_mutation.stock_mutation_products.map(&:product_id)
             @selected_products = Product.joins(stock_products: :stock).
               where(id: selected_product_ids).
@@ -245,7 +245,7 @@ class StockMutationsController < ApplicationController
   def new_store_to_warehouse_mutation
     if current_user.has_non_spg_role?
       #      @origin_warehouses = Warehouse.not_central.select(:id, :code)
-      @origin_warehouses = Warehouse.not_central.select(:id, :code)
+      @origin_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
       @stock_mutation = StockMutation.new mutation_type: "store to warehouse"
     else
       #      @products = Product.joins(:brand).joins(stock_products: :stock).where(["warehouse_id = ?", current_user.sales_promotion_girl.warehouse_id]).select(:id, :code, :name).order(:code)
@@ -272,7 +272,7 @@ class StockMutationsController < ApplicationController
             render js: "bootbox.alert({message: \"#{@stock_mutation.errors[:"stock_mutation_products.stock_mutation_product_items.base"].join("<br/>")}\",size: 'small'});"
           else
             if current_user.has_non_spg_role?
-              @origin_warehouses = Warehouse.not_central.select(:id, :code)
+              @origin_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
             else
               @origin_warehouse = current_user.sales_promotion_girl.warehouse
             end
@@ -435,7 +435,7 @@ class StockMutationsController < ApplicationController
   #  end
   
   def edit
-    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.select(:id, :code)
+    @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
     @stock_mutation.delivery_date = @stock_mutation.delivery_date.strftime("%d/%m/%Y")
     selected_product_ids = @stock_mutation.stock_mutation_products.map(&:product_id)
     @selected_products = Product.joins([stock_products: :stock], :brand).
@@ -529,7 +529,7 @@ class StockMutationsController < ApplicationController
           #          end
           
           
-          @origin_warehouses = @destintation_warehouses = Warehouse.not_central.select(:id, :code)
+          @origin_warehouses = @destintation_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.select(:id, :code)
           selected_product_ids = []
           params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
             selected_product_ids << params[:stock_mutation][:stock_mutation_products_attributes][key][:product_id]
@@ -749,23 +749,40 @@ class StockMutationsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def stock_mutation_params
-    params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id,
-      stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id,
-        stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
-          :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])
+    if action_name.eql?("create")
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id,
+        stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id, :attr_destination_warehouse_id,
+          stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
+            :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])
+    elsif action_name.eql?("create_store_to_warehouse_mutation")
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :courier_id, :origin_warehouse_id, :destination_warehouse_id,
+        stock_mutation_products_attributes: [:quantity, :_destroy, :product_name, :product_code, :product_id, :attr_destination_warehouse_id, :origin_warehouse_id, :attr_mutation_type,
+          stock_mutation_product_items_attributes: [:quantity, :color_id, :size_id, :_destroy,
+            :origin_warehouse_id, :product_id, :mutation_type]])      
+    else
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :number, :destination_warehouse_id,
+        stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id, :attr_destination_warehouse_id,
+          stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
+            :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])
+    end
   end
   
   def add_additional_params(type)
     @total_stock_mutation_quantity = 0
     @valid = true
     @error_message = ""
+    origin_warehouse_id = if action_name.eql?("update")
+      @stock_mutation.origin_warehouse_id
+    else
+      params[:stock_mutation][:origin_warehouse_id]
+    end
     if params[:stock_mutation][:stock_mutation_products_attributes].present?
       delete_all_products = true
       params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
         if params[:stock_mutation][:stock_mutation_products_attributes][key][:_destroy].eql?("0")
           delete_all_products = false
           total_stock_mutation_product_quantity = 0
-          params[:stock_mutation][:stock_mutation_products_attributes][key].merge! origin_warehouse_id: params[:stock_mutation][:origin_warehouse_id]
+          params[:stock_mutation][:stock_mutation_products_attributes][key].merge! origin_warehouse_id: origin_warehouse_id, attr_destination_warehouse_id: params[:stock_mutation][:destination_warehouse_id], attr_mutation_type: type
           if params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].present?
             quantity_present = false
             params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes].each do |smpi_key, smpi_value|
@@ -773,7 +790,7 @@ class StockMutationsController < ApplicationController
                 quantity_present = true
                 @total_stock_mutation_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
                 total_stock_mutation_product_quantity += params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:quantity].to_i
-                params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key].merge! origin_warehouse_id: params[:stock_mutation][:origin_warehouse_id], product_id: params[:stock_mutation][:stock_mutation_products_attributes][key][:product_id]
+                params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key].merge! origin_warehouse_id: origin_warehouse_id, product_id: params[:stock_mutation][:stock_mutation_products_attributes][key][:product_id]
                 params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key].merge! mutation_type: type
               else
                 params[:stock_mutation][:stock_mutation_products_attributes][key][:stock_mutation_product_items_attributes][smpi_key][:_destroy] = "true"
