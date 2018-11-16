@@ -428,8 +428,10 @@ class ConsignmentSalesController < ApplicationController
       @consignment_sale.attr_spg_warehouse_id = current_user.sales_promotion_girl.warehouse_id
     end
     begin
-      unless @consignment_sale.update(approved: true)
-        render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"
+      @consignment_sale.with_lock do
+        unless @consignment_sale.update(approved: true)
+          render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"
+        end
       end
     rescue RuntimeError => e
       render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
@@ -443,8 +445,10 @@ class ConsignmentSalesController < ApplicationController
       @consignment_sale.attr_spg_warehouse_id = current_user.sales_promotion_girl.warehouse_id
     end
     begin
-      unless @consignment_sale.update(approved: false)
-        render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"
+      @consignment_sale.with_lock do
+        unless @consignment_sale.update(approved: false)
+          render js: "bootbox.alert({message: \"#{@consignment_sale.errors[:base].join("<br/>")}\",size: 'small'});"
+        end
       end
     rescue RuntimeError => e
       render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"

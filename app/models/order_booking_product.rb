@@ -57,10 +57,12 @@ class OrderBookingProduct < ApplicationRecord
     def update_order_booking_quantity
       last_quantity = order_booking.quantity
       order_booking.without_auditing do
-        if destroyed?
-          order_booking.update_attribute :quantity, last_quantity - quantity
-        else
-          order_booking.update_attribute :quantity, quantity + last_quantity.to_i
+        order_booking.with_lock do
+          if destroyed?
+            order_booking.update_attribute :quantity, last_quantity - quantity
+          else
+            order_booking.update_attribute :quantity, quantity + last_quantity.to_i
+          end
         end
       end
     end
