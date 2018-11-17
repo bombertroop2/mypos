@@ -3,7 +3,11 @@ $("#pn_print_doc").removeClass("hidden");
 $("#pn_print_doc").print();
 $("#pn_print_doc").addClass("hidden");
 <%= smart_listing_item :order_bookings, :update, @order_booking, "order_bookings/order_booking" %>
-<% if @ori_warehouse_name.present? && @dest_warehouse_name.present? %>
+<% if @ori_warehouse_name.present? && (@dest_warehouse_name.present? || @customer_name.present?) %>
   $("#ori-warehouse-name-<%= @order_booking.id %>").html("<%= @ori_warehouse_name %>");
-  $("#dest-warehouse-name-<%= @order_booking.id %>").html("<%= @dest_warehouse_name %>");
+  <% if @customer_name.present? %>
+    $("#dest-warehouse-name-<%= @order_booking.id %>").html("<%= @customer_name %>");
+  <% else %>
+    $("#dest-warehouse-name-<%= @order_booking.id %>").html("<%= @dest_warehouse_name %>");
+  <% end %>
 <% end %>

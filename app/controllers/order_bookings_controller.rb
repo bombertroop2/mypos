@@ -18,18 +18,21 @@ class OrderBookingsController < ApplicationController
     order_bookings_scope = if current_user.has_non_spg_role?
       OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
         select("ow.name AS ow_name, dw.name AS dw_name").
+        select("customers.name AS cust_name").
         joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
-        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id")
+        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
+        joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id")
     else
       OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
         select("ow.name AS ow_name, dw.name AS dw_name").
+        select("customers.name AS cust_name").
         joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
         joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
+        joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id").
         where(destination_warehouse_id: current_user.sales_promotion_girl.warehouse_id)
     end
     order_bookings_scope = order_bookings_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
-      or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])).
-      or(order_bookings_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+      or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     order_bookings_scope = order_bookings_scope.where(["DATE(plan_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_plan_date].present?
     order_bookings_scope = order_bookings_scope.where(["status = ?", params[:filter_status]]) if params[:filter_status].present?
     order_bookings_scope = order_bookings_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
@@ -39,6 +42,12 @@ class OrderBookingsController < ApplicationController
   # GET /order_bookings/1
   # GET /order_bookings/1.json
   def show
+    if @order_booking.customer_id.present?
+      customer = Customer.select(:code, :name, :deliver_to).find(@order_booking.customer_id)
+      @customer_code = customer.code
+      @customer_name = customer.name
+      @customer_deliver_to = customer.deliver_to
+    end
   end
 
   # GET /order_bookings/new
@@ -75,21 +84,25 @@ class OrderBookingsController < ApplicationController
     @order_bookings = []
     @ori_warehouse_names = []
     @dest_warehouse_names = []
-    warehouse_to_ids = params[:warehouse_to_ids].split(",")
+    warehouse_to_and_customer_ids = params[:warehouse_to_ids].split(",")
     ActiveRecord::Base.transaction do
-      warehouse_to_ids.each do |warehouse_to_id|
+      warehouse_to_and_customer_ids.each do |warehouse_to_and_customer_id|
+        warehouse_to_id = warehouse_to_and_customer_id.split(":")[0]
+        customer_id = warehouse_to_and_customer_id.split(":")[1] rescue nil
         begin
           @order_booking = OrderBooking.new(order_booking_params)
           @order_booking.order_booking_products.each do |obp|
             obp.attr_destination_warehouse_id = warehouse_to_id
           end
           @order_booking.destination_warehouse_id = warehouse_to_id
+          @order_booking.customer_id = customer_id
           unless @order_booking.save
             if @order_booking.errors[:base].present?
               render js: "bootbox.alert({message: \"#{@order_booking.errors[:base].join("<br/>")}\",size: 'small'});"
             elsif @order_booking.errors[:"order_booking_products.base"].present?
               render js: "bootbox.alert({message: \"#{@order_booking.errors[:"order_booking_products.base"].join("<br/>")}\",size: 'small'});"
             else
+              @customers = Customer.select(:id, :code, :name).order(:code)
               populate_warehouses
               stock = Stock.select(:id).where(warehouse_id: @order_booking.origin_warehouse_id).first
               @products = stock.stock_products.joins([product: :brand], :stock_details).
@@ -250,10 +263,28 @@ class OrderBookingsController < ApplicationController
   
   def picking_note
     if @order_booking.update status: "P", print_date: Time.current, picking_note: true
+      if @order_booking.customer_id.present?
+        customer = Customer.select(:code, :name, :deliver_to).find(@order_booking.customer_id)
+        @customer_code = customer.code
+        @customer_name = customer.name
+        @customer_deliver_to = customer.deliver_to
+      else
+        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+      end
       @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-      @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
     elsif @order_booking.errors.present? && @order_booking.errors.messages[:base].present?
       render js: "bootbox.alert({message: \"#{@order_booking.errors.messages[:base].join("<br/>")}\",size: 'small'});"
+    end
+  end
+  
+  def add_destination_warehouse
+    @destination_warehouse = Warehouse.select(:id, :code, :name, :warehouse_type).not_central.not_in_transit.actived.where(code: params[:warehouse_code]).first
+    if @destination_warehouse.blank?
+      render js: "bootbox.alert({message: \"No records found\",size: 'small'});"
+    else
+      if @destination_warehouse.warehouse_type.eql?("direct_sales")
+        @customers = Customer.select(:id, :code, :name).order(:code)
+      end
     end
   end
 
@@ -290,7 +321,9 @@ class OrderBookingsController < ApplicationController
   
   def populate_warehouses
     @origin_warehouses = Warehouse.central.select(:id, :code, :name)
-    @destination_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.actived.select(:id, :code, :name)
+    if !action_name.eql?("new") && !action_name.eql?("create")
+      @destination_warehouses = Warehouse.not_central.not_in_transit.not_direct_sales.actived.select(:id, :code, :name)
+    end
   end
   
   def add_additional_params_to_child

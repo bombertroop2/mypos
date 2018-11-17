@@ -50,14 +50,16 @@ class OrderBookingProductItem < ApplicationRecord
                 where(size_id: size_id, color_id: color_id).
                 where("stock_products.product_id = #{order_booking_product.product_id} AND stocks.warehouse_id = #{origin_warehouse_id}").
                 where(["warehouses.is_active = ?", true]).first
-              if shipping
-                booked_quantity = stock_item.booked_quantity - quantity
-                last_quantity = stock_item.quantity - available_quantity
-                stock_item.update({booked_quantity: booked_quantity, quantity: last_quantity})
-              else
-                booked_quantity = stock_item.booked_quantity + quantity
-                last_quantity = stock_item.quantity + old_available_quantity
-                stock_item.update({booked_quantity: booked_quantity, quantity: last_quantity})
+              stock_item.with_lock do
+                if shipping
+                  stock_item.booked_quantity -= quantity
+                  stock_item.quantity -= available_quantity
+                  stock_item.save
+                else
+                  stock_item.booked_quantity += quantity
+                  stock_item.quantity += old_available_quantity
+                  stock_item.save
+                end
               end
             end
       

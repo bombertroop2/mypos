@@ -1,0 +1,71 @@
+<table style="width: 100%" class="table table-striped" id="listing-dest-warehouses-table">
+    <thead>
+        <tr>
+            <th style="text-align: center">Code</th>
+            <th style="text-align: center">Name</th>
+            <th style="text-align: center">Customer</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if action_name.eql?("create") %>
+          <% warehouse_to_and_customer_ids = params[:warehouse_to_ids].split(",") %>
+          <% warehouse_to_and_customer_ids.each do |warehouse_to_and_customer_id| %>
+            <% warehouse_to_id = warehouse_to_and_customer_id.split(":")[0] %>
+            <% warehouse = Warehouse.select(:id, :code, :name, :warehouse_type).where(id: warehouse_to_id).first %>
+            <tr id="dest-warehouse-<%= warehouse.id %>">
+                <td style="vertical-align: middle;text-align: center"><%= warehouse.code %></td>
+                <td style="vertical-align: middle;text-align: center"><%= warehouse.name %></td>
+                <% unless warehouse.warehouse_type.eql?("direct_sales") %>
+                  <td style="vertical-align: middle;text-align: center">Not Available</td>
+                <% else %>
+                  <% customer_id = warehouse_to_and_customer_id.split(":")[1] %>
+                  <td style="vertical-align: middle;text-align: center"><%= select_tag "order_booking_customer_#{warehouse.id}", options_from_collection_for_select(@customers, :id, "code_and_name", customer_id), {include_blank: true, style: "width: 200px"} %></td>
+                <% end %>
+                <td style="vertical-align: middle;text-align: right"><button type="button" class="btn btn-danger" id="btn-delete-dest-warehouse-<%= warehouse.id %>">Delete</button></td>
+            </tr>
+          <% end %>        
+        <% else %>
+          <tr id="dest-warehouse-<%= @destination_warehouse.id %>">
+              <td style="vertical-align: middle;text-align: center"><%= @destination_warehouse.code %></td>
+              <td style="vertical-align: middle;text-align: center"><%= @destination_warehouse.name %></td>
+              <% unless @destination_warehouse.warehouse_type.eql?("direct_sales") %>
+                <td style="vertical-align: middle;text-align: center">Not Available</td>
+              <% else %>
+                <td style="vertical-align: middle;text-align: center"><%= select_tag "order_booking_customer_#{@destination_warehouse.id}", options_from_collection_for_select(@customers, :id, "code_and_name"), {include_blank: true, style: "width: 200px"} %></td>
+              <% end %>
+              <td style="vertical-align: middle;text-align: right"><button type="button" class="btn btn-danger" id="btn-delete-dest-warehouse-<%= @destination_warehouse.id %>">Delete</button></td>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+
+<script>
+  $(function () {
+<% if action_name.eql?("create") %>
+  <% warehouse_to_and_customer_ids = params[:warehouse_to_ids].split(",") %>
+  <% warehouse_to_and_customer_ids.each do |warehouse_to_and_customer_id| %>
+    <% warehouse_to_id = warehouse_to_and_customer_id.split(":")[0] %>
+          $("#btn-delete-dest-warehouse-<%= warehouse_to_id %>").click(function () {
+              var rowId = $(this).attr("id").split("-")[4];
+              $("#dest-warehouse-" + rowId).remove();
+              if ($('#listing-dest-warehouses-table tbody>tr').length == 0) {
+                  $("#dest_warehouses_form_container").html("");
+                  $($("#dest_warehouses_form_container").parent().parent()).addClass("hidden");
+              }
+          });
+          $("#order_booking_customer_<%= warehouse_to_id %>").attr("data-placeholder", "Please select").chosen("destroy").chosen({width: "200px"});
+  <% end %>
+<% else %>
+        $("#btn-delete-dest-warehouse-<%= @destination_warehouse.id %>").click(function () {
+            var rowId = $(this).attr("id").split("-")[4];
+            $("#dest-warehouse-" + rowId).remove();
+            if ($('#listing-dest-warehouses-table tbody>tr').length == 0) {
+                $("#dest_warehouses_form_container").html("");
+                $($("#dest_warehouses_form_container").parent().parent()).addClass("hidden");
+            }
+        });
+        $("#order_booking_customer_<%= @destination_warehouse.id %>").attr("data-placeholder", "Please select").chosen("destroy").chosen({width: "200px"});
+<% end %>
+  });
+</script>

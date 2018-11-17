@@ -1,0 +1,24 @@
+<tr id="dest-warehouse-<%= @destination_warehouse.id %>">
+    <td style="vertical-align: middle;text-align: center"><%= @destination_warehouse.code %></td>
+    <td style="vertical-align: middle;text-align: center"><%= @destination_warehouse.name %></td>
+    <% unless @destination_warehouse.warehouse_type.eql?("direct_sales") %>
+      <td style="vertical-align: middle;text-align: center">Not Available</td>
+    <% else %>
+      <td style="vertical-align: middle;text-align: center"><%= select_tag "order_booking_customer_#{@destination_warehouse.id}", options_from_collection_for_select(@customers, :id, "code_and_name"), {include_blank: true, style: "width: 200px"} %></td>
+    <% end %>
+    <td style="vertical-align: middle;text-align: right"><button type="button" class="btn btn-danger" id="btn-delete-dest-warehouse-<%= @destination_warehouse.id %>">Delete</button></td>
+</tr>
+
+<script>
+  $(function () {
+      $("#btn-delete-dest-warehouse-<%= @destination_warehouse.id %>").click(function () {
+          var rowId = $(this).attr("id").split("-")[4];
+          $("#dest-warehouse-" + rowId).remove();
+          if ($('#listing-dest-warehouses-table tbody>tr').length == 0) {
+              $("#dest_warehouses_form_container").html("");
+              $($("#dest_warehouses_form_container").parent().parent()).addClass("hidden");
+          }
+      });
+      $("#order_booking_customer_<%= @destination_warehouse.id %>").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+  });
+</script>
