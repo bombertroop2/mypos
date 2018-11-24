@@ -6,6 +6,7 @@ class StockMutationProductItem < ApplicationRecord
   belongs_to :stock_mutation_product
   belongs_to :size
   belongs_to :color
+  has_one :listing_stock_transaction, as: :transactionable
 
   validates :size_id, :color_id, :quantity, presence: true
   validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |dpd| dpd.quantity.present? }
@@ -13,13 +14,17 @@ class StockMutationProductItem < ApplicationRecord
     validate :item_available
     validate :quantity_valid
     
-    before_destroy :return_goods_to_warehouse, :delete_stock_movement, if: proc{|smpi| smpi.stock_mutation_product.stock_mutation.destination_warehouse.warehouse_type.eql?("central")}
+    before_destroy :return_goods_to_warehouse, :delete_stock_movement, :delete_listing_stock, if: proc{|smpi| smpi.stock_mutation_product.stock_mutation.destination_warehouse.warehouse_type.eql?("central")}
       before_destroy :delete_tracks
       before_update :update_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
         before_create :update_stock, :create_stock_movement, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
           after_create :create_listing_stock, if: proc{|smpi| smpi.mutation_type.eql?("store to warehouse")}
   
             private
+            
+            def delete_listing_stock
+              listing_stock_transaction.destroy
+            end
           
             def create_listing_stock
               listing_stock = ListingStock.select(:id).where(warehouse_id: @stock_mutation.origin_warehouse_id, product_id: @stock_mutation_product.product_id).first
@@ -163,15 +168,15 @@ class StockMutationProductItem < ApplicationRecord
             def item_available
               @stock = StockDetail.joins(stock_product: :stock).
                 where(["warehouse_id = ? AND size_id = ? AND color_id = ? AND stock_products.product_id = ?", origin_warehouse_id, size_id, color_id, product_id]).
-                select(:id, :quantity).first
+                select(:id, :quantity, :unapproved_quantity).first
               errors.add(:base, "Some products do not exist!") if @stock.blank?
             end
   
             def quantity_valid
               if new_record?
-                errors.add(:quantity, "cannot be greater than #{@stock.quantity}") if quantity.to_i > @stock.quantity
+                errors.add(:quantity, "cannot be greater than #{@stock.quantity - @stock.unapproved_quantity}") if quantity.to_i > @stock.quantity - @stock.unapproved_quantity
               else
-                errors.add(:quantity, "cannot be greater than #{@stock.quantity + quantity_was}") if quantity.to_i > @stock.quantity + quantity_was
+                errors.add(:quantity, "cannot be greater than #{@stock.quantity + quantity_was - @stock.unapproved_quantity}") if quantity.to_i > @stock.quantity + quantity_was - @stock.unapproved_quantity
               end
             end
     
