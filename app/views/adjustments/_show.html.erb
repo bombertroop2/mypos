@@ -1,0 +1,78 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Number</dt>
+        <dd><%= object.number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Warehouse</dt>
+        <dd><%= "#{object.warehouse_code} - #{object.warehouse_name}" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Date</dt>
+        <dd><%= object.adj_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Type</dt>
+        <dd><%= object.adj_type %></dd>
+    </dl>
+
+    <% adjustment_products = object.adjustment_products.
+      select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name").
+      joins(product: :brand)
+  %>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-center">No.</th>
+                <th class="text-center">Product</th>
+                <th class="text-center">Color X Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% adjustment_products.each_with_index do |adjustment_product, index| %>
+              <% product_colors = ProductColor.select("common_fields.id", "common_fields.code AS color_code", "common_fields.name AS color_name").joins(:color).where(product_id: adjustment_product.product_id).order("common_fields.code") %>
+              <% product_sizes = ProductDetail.select("sizes.id", "sizes.size AS product_size").joins(:size).where(product_id: adjustment_product.product_id).order("sizes.size_order") %>
+              <tr>
+                  <td style="vertical-align: middle" class="text-center"><%= index + 1 %></td>
+                  <td style="vertical-align: middle" class="text-center"><%= "#{adjustment_product.product_code} - #{adjustment_product.product_name}" %></td>
+                  <td class="text-center">
+                      <table class="table table-condensed table-responsive table-bordered">
+                          <tbody>                              
+                              <tr>
+                                  <td></td>
+                                  <% product_sizes.map(&:product_size).uniq.each do |product_size| %>
+                                    <td align="center" style="vertical-align: middle"><%= product_size %></td>
+                                  <% end %>
+                              </tr>
+                              <% product_colors.each_with_index do |product_color, idx| %>
+                                <tr align="center">    
+                                    <td align="center" style="vertical-align: middle"><%= "#{product_color.color_code} - #{product_color.color_name}" %></td>
+                                    <% product_sizes.map(&:id).uniq.each do |size_id| %>
+                                      <% adjustment_product_detail = adjustment_product.adjustment_product_details.where(color_id: product_color.id, size_id: size_id).first %>
+                                      <% if adjustment_product_detail.present? %>
+                                        <td align="center" style="vertical-align: middle">
+                                            <%= number_to_currency(adjustment_product_detail.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
+                                        </td>
+                                      <% else %>
+                                        <td></td>
+                                      <% end %>
+                                    <% end %>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                  </td>
+              </tr>
+            <% end %>
+        </tbody>
+    </table>    
+</td>

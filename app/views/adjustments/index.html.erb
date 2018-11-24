@@ -1,0 +1,30 @@
+<div class="page-header">
+    <h1>Adjustments</h1>
+</div>
+
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" id="filter-number-adjustment" class="form-control" placeholder="Number">
+    </div>
+    <div class="form-group text-left">
+        <%= select_tag "warehouse", options_from_collection_for_select(Warehouse.not_in_transit.not_direct_sales.actived.order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-warehouse-adjustment"} %>
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-adjustment-date" placeholder="Adjustment date">
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "type", options_for_select(Adjustment::TYPES), {include_blank: true, class: "form-control", id: "filter-adjustment-type"} %>
+        </div>
+        <button id="search-adjustment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:adjustments, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_number, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_warehouse, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_type, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+              </div>
+              <%= smart_listing_render(:adjustments) %>

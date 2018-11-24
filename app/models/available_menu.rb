@@ -4,7 +4,7 @@ class AvailableMenu < ApplicationRecord
     "Receiving", "Stock Balance", "Purchase Return", "Cost & Price", "Email", "Account Payable",
     "Order Booking", "Courier", "Shipment", "Stock Mutation", "Goods In Transit",
     "Fiscal Reopening/Closing", "Stock Movement", "Listing Stocks", "Event", "Point of Sale", "Bank Master",
-    "Member", "Company", "Consignment", "Growth Report", "Pie Chart of Qty Sold", "Sell Thru Report", "Customer"]
+    "Member", "Company", "Consignment", "Growth Report", "Pie Chart of Qty Sold", "Sell Thru Report", "Customer", "Adjustment"]
 
   validates :name, presence: true
 

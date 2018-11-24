@@ -161,6 +161,9 @@ class PurchaseOrdersController < ApplicationController
         end
       end
     end
+    
+    render js: "bootbox.alert({message: \"No records found\",size: 'small'});" if products.blank?
+    
 
     # id yang diganti, caranya yang lama dihapus dan yang baru ditambahkan
     #      @replaced_ids = previous_selected_product_ids.split(",") - selected_product_ids.split(",")

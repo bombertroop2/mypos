@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :adjustments, except: [:edit, :update, :destroy] do
+    collection do
+      get :autocomplete_product_code
+      get :get_product
+    end
+  end
   get 'import_beginning_stocks' => 'import_beginning_stocks#new'
 
   post 'import_beginning_stocks/create'

@@ -82,7 +82,7 @@ class Ability
               class_name.eql?("Courier") || class_name.eql?("Event") ||
               class_name.eql?("Email") || class_name.eql?("Bank") ||
               class_name.eql?("Growth Report") || class_name.eql?("Pie Chart of Qty Sold") ||
-              class_name.eql?("Sell Thru Report")
+              class_name.eql?("Sell Thru Report") || class_name.eql?("Adjustment")
             #            can :read, class_name.gsub(/\s+/, "").constantize
             #            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
@@ -231,7 +231,7 @@ class Ability
             else
               can ability, FiscalYear
             end
-          elsif class_name.eql?("Point of Sale") || class_name.eql?("Company")
+          elsif class_name.eql?("Point of Sale") || class_name.eql?("Company") || class_name.eql?("Adjustment")
           elsif class_name.eql?("ConsignmentSale")
             if user_roles.include?("area_manager") && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
               can ability, ConsignmentSale

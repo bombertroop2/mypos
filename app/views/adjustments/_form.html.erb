@@ -1,0 +1,120 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#tab_adj_in" aria-controls="tab_adj_in" role="tab" data-toggle="tab">In</a></li>
+            <li role="presentation"><a href="#tab_adj_out" aria-controls="tab_adj_out" role="tab" data-toggle="tab">Out</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="tab_adj_in" style="padding-top: 20px">
+                <%= form_for(@adjustment, remote: true, html: {class: "form-horizontal"}) do |f| %>        
+                    <%= f.hidden_field :adj_type, value: "In" %>
+                    <div class="form-group<%= control_group_error(@adjustment, :adj_date) %>">
+                        <%= f.label :adj_date, "Date", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_field :adj_date, size: 10, readonly: true, class: "form-control" %>
+                                <%= error_help_text(@adjustment, :adj_date) %>
+                            </div>
+                        </div>
+                        <div class="form-group<%= control_group_error(@adjustment, :warehouse_id) %>">
+                            <%= f.label :warehouse_id, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.select :warehouse_id, options_from_collection_for_select(@warehouses, 'id', 'code_and_name', @adjustment.warehouse_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                    <%= error_help_text(@adjustment, :warehouse_id) %>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Products</label>
+                                <div class="col-sm-10">
+                                    <%= text_field_tag :adjustment_products, params[:adjustment_products], size: 10, class: "form-control" %>
+              <%#= autocomplete_field_tag 'adjustment_products', params[:product_ids].present? ? params[:product_ids] : (@products.map{|p| p.code.to_s}.join(",") rescue ""), autocomplete_product_code_adjustments_path, class: "form-control",'data-delimiter' => ',', :multiple => true %>
+                                      <a class="btn btn-default active" id="generate_product_form_btn" style="float: right">Generate product form</a>
+                                  </div>
+                              </div>
+                              <div id="adjustment-product-form-container">
+                                  <%= render "product_form" if @adjustment_products.present? %>
+                              </div>
+                              <div class="form-group">
+                                  <div class="col-sm-offset-2 col-sm-10">
+                                      <%= f.submit "Save", class: "btn btn-primary", id: "adjustment-submit-btn" %>
+                                        <button class="btn btn-link cancel">Cancel</button>
+                                    </div>
+                                </div>
+                              <% end %>
+                          </div>
+                          <div role="tabpanel" class="tab-pane fade" id="tab_adj_out" style="padding-top: 20px">
+                          </div>
+                      </div>
+                  </div>
+              </td>
+              <script>
+                $(function () {
+                    $("#adjustment_warehouse_id").attr("data-placeholder", "Please select").chosen();
+                    $("#adjustment_adj_date").datepicker({
+                        dateFormat: "dd/mm/yy"
+                    });
+                    $("#adjustment_products").tagit({
+                        autocomplete: {
+                            delay: 0,
+                            minLength: 2,
+                            source: function (search, response) {
+                                $.ajax({
+                                    url: "/adjustments/autocomplete_product_code",
+                                    data: {term: search.term},
+                                    success: function (data) {
+                                        response($.map(data, function (item) {
+                                            return {
+                                                id: item.id,
+                                                label: item.label
+                                            }
+                                        }));
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    $("#generate_product_form_btn").click(function () {
+                        if ($('#adjustment_products').tagit('assignedTags').length == 0)
+                            bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+                        else {
+                            var productCodes = [];
+                            $("#adjustment_products").val().split(",").forEach(function (element) {
+                                productCodes.push(element.split(" - ")[0]);
+                            });
+                            $.get("/adjustments/get_product", {
+                                product_codes: productCodes
+                            });
+                        }
+
+                        return false;
+                    });
+
+                    $("#adjustment-submit-btn").click(function () {
+                        bootbox.confirm({
+                            message: "Once you create adjustment, you'll not be able to change or cancel it</br>Are you sure?",
+                            buttons: {
+                                confirm: {
+                                    label: '<i class="fa fa-check"></i> Confirm'
+                                },
+                                cancel: {
+                                    label: '<i class="fa fa-times"></i> Cancel'
+                                }
+                            },
+                            callback: function (result) {
+                                if (result) {
+                                    $("body").css('padding-right', '0px');
+                                    $("#new_adjustment").submit();
+                                }
+                            },
+                            size: "small"
+                        });
+                        return false;
+                    });
+                });
+              </script>

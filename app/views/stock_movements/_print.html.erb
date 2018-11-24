@@ -3,89 +3,94 @@
         <td>-->
 <table class="table table-bordered table-condensed" width="100%" id="sm_print_doc">
     <thead>
-            <tr>
-                <th class="text-center" colspan="16">Stock Movement Report</th>
-            </tr>
-            <tr>
-                <th class="text-center" colspan="16"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
-            </tr>
-            <tr>
-                <th class="text-center" rowspan="2">Article</th>
-                <th class="text-center" rowspan="2">Color</th>
-                <th class="text-center" rowspan="2">Size</th>
-                <th class="text-center" rowspan="2">Beg. Stock</th>
-                <th class="text-center" rowspan="2">BS</th>
-                <th class="text-center" rowspan="2">Rec. PO</th>
-                <th class="text-center" rowspan="2">Ret. PO</th>
-                <th class="text-center" rowspan="2">DO</th>
-                <th class="text-center" rowspan="2">RW</th>
-                <th class="text-center" colspan="2">Rolling</th>
-                <th class="text-center" rowspan="2">Sales</th>
-                <th class="text-center" rowspan="2">Return</th>
-                <th class="text-center" rowspan="2">SLK</th>
-                <th class="text-center" rowspan="2">Ending Stock</th>
-                <th class="text-center" rowspan="2">Gross Value</th>
-            </tr>
-            <tr>
-                <th class="text-center">In</th>
-                <th class="text-center">Out</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% last_product_code = "" %>
-            <% last_color_code = "" %>
-            <% @stock_movement_transactions.each do |stock_movement_transaction| %>
-              <% puts "product: #{stock_movement_transaction.product_id}" %>
-              <% product_first_price = PriceList.select(:price).joins(:product_detail).where(["product_details.size_id = ? AND product_details.product_id = ? AND product_details.price_code_id = ?", stock_movement_transaction.size_id, stock_movement_transaction.product_id, @warehouse.price_code_id]).order(:effective_date).first.price %>
+        <tr>
+            <th class="text-center" colspan="18">Stock Movement Report</th>
+        </tr>
+        <tr>
+            <th class="text-center" colspan="18"><%= "#{Date::MONTHNAMES[@selected_date.month]} #{@selected_date.year}" %> - <%= "#{@warehouse.code}, #{@warehouse.name}" %></th>
+        </tr>
+        <tr>
+            <th class="text-center" rowspan="2">Article</th>
+            <th class="text-center" rowspan="2">Color</th>
+            <th class="text-center" rowspan="2">Size</th>
+            <th class="text-center" rowspan="2">Beg. Stock</th>
+            <th class="text-center" rowspan="2">BS</th>
+            <th class="text-center" rowspan="2">Rec. PO</th>
+            <th class="text-center" rowspan="2">Ret. PO</th>
+            <th class="text-center" rowspan="2">DO</th>
+            <th class="text-center" rowspan="2">RW</th>
+            <th class="text-center" colspan="2">Rolling</th>
+            <th class="text-center" rowspan="2">Sales</th>
+            <th class="text-center" rowspan="2">Return</th>
+            <th class="text-center" rowspan="2">SLK</th>
+            <th class="text-center" colspan="2">Adjustment</th>
+            <th class="text-center" rowspan="2">Ending Stock</th>
+            <th class="text-center" rowspan="2">Gross Value</th>
+        </tr>
+        <tr>
+            <th class="text-center">In</th>
+            <th class="text-center">Out</th>
+            <th class="text-center">In</th>
+            <th class="text-center">Out</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% last_product_code = "" %>
+        <% last_color_code = "" %>
+        <% @stock_movement_transactions.each do |stock_movement_transaction| %>
+          <% puts "product: #{stock_movement_transaction.product_id}" %>
+          <% product_first_price = PriceList.select(:price).joins(:product_detail).where(["product_details.size_id = ? AND product_details.product_id = ? AND product_details.price_code_id = ?", stock_movement_transaction.size_id, stock_movement_transaction.product_id, @warehouse.price_code_id]).order(:effective_date).first.price rescue 0 %>
+          <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
+            <% total_product = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code)}.length %>
+            <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
+          <% end %>
+          <% if last_product_code.eql?(stock_movement_transaction.product_code) && !last_color_code.eql?(stock_movement_transaction.color_code) %>
+            <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
+          <% end %>
+          <tr>
               <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
-                <% total_product = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code)}.length %>
-                <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
+                <td rowspan="<%= total_product %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.product_code} - #{stock_movement_transaction.product_name}" %></td>
               <% end %>
-              <% if last_product_code.eql?(stock_movement_transaction.product_code) && !last_color_code.eql?(stock_movement_transaction.color_code) %>
-                <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>
+              <% if !last_product_code.eql?(stock_movement_transaction.product_code) || (last_product_code.eql?(stock_movement_transaction.product_code) && !last_color_code.eql?(stock_movement_transaction.color_code)) %>
+                <td rowspan="<%= total_product_color %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
               <% end %>
-              <tr>
-                  <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
-                    <td rowspan="<%= total_product %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.product_code} - #{stock_movement_transaction.product_name}" %></td>
+              <td class="text-right"><%= stock_movement_transaction.product_size %></td>
+              <td class="text-right"><%= stock_movement_transaction.beginning_stock %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_beginning_stock %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_po_quantity_received rescue 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_pr_quantity_returned rescue 0 %></th>
+              <td class="text-right">
+                  <% if @warehouse.warehouse_type.eql?("central") %>
+                    <%= stock_movement_transaction.total_do_quantity_delivered rescue 0 %>
+                  <% else %>
+                    <%= stock_movement_transaction.total_do_quantity_received rescue 0 %>
                   <% end %>
-                  <% if !last_product_code.eql?(stock_movement_transaction.product_code) || (last_product_code.eql?(stock_movement_transaction.product_code) && !last_color_code.eql?(stock_movement_transaction.color_code)) %>
-                    <td rowspan="<%= total_product_color %>" class="text-center" style="vertical-align: middle"><%= "#{stock_movement_transaction.color_code} - #{stock_movement_transaction.color_name}" %></td>
+              </td>
+              <td class="text-right">
+                  <% if @warehouse.warehouse_type.eql?("central") %>
+                    <%= stock_movement_transaction.total_stock_return_quantity_received rescue 0 %>
+                  <% else %>
+                    <%= stock_movement_transaction.total_stock_return_quantity_returned rescue 0 %>
                   <% end %>
-                  <td class="text-right"><%= stock_movement_transaction.product_size %></td>
-                  <td class="text-right"><%= stock_movement_transaction.beginning_stock %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_beginning_stock %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_po_quantity_received rescue 0 %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_pr_quantity_returned rescue 0 %></th>
-                  <td class="text-right">
-                      <% if @warehouse.warehouse_type.eql?("central") %>
-                        <%= stock_movement_transaction.total_do_quantity_delivered rescue 0 %>
-                      <% else %>
-                        <%= stock_movement_transaction.total_do_quantity_received rescue 0 %>
-                      <% end %>
-                  </td>
-                  <td class="text-right">
-                      <% if @warehouse.warehouse_type.eql?("central") %>
-                        <%= stock_movement_transaction.total_stock_return_quantity_received rescue 0 %>
-                      <% else %>
-                        <%= stock_movement_transaction.total_stock_return_quantity_returned rescue 0 %>
-                      <% end %>
-                  </td>
-                  <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_received rescue 0 %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_delivered rescue 0 %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_sold_quantity rescue 0 %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_sales_return_quantity_received rescue 0 %></td>
-                  <td class="text-right"><%= stock_movement_transaction.total_consignment_sold_quantity rescue 0 %></td>
-                  <td class="text-right"><%= stock_movement_transaction.ending_stock %></td>
-                  <td class="text-right"><%= number_to_currency(stock_movement_transaction.ending_stock * product_first_price,
-                                :separator => ",",
-                                :delimiter => ".",
-                                :unit => "Rp",
-                                :precision => 2) %></td>
-              </tr>
-              <% last_product_code = stock_movement_transaction.product_code %>
-              <% last_color_code = stock_movement_transaction.color_code %>
-            <% end %>
-        </tbody>
+              </td>
+              <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_received rescue 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_stock_transfer_quantity_delivered rescue 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_sold_quantity rescue 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_sales_return_quantity_received rescue 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_consignment_sold_quantity rescue 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.total_adjustment_in_quantity %></td>
+              <td class="text-right"><%= 0 %></td>
+              <td class="text-right"><%= stock_movement_transaction.ending_stock %></td>
+              <td class="text-right"><%= number_to_currency(stock_movement_transaction.ending_stock * product_first_price,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %></td>
+          </tr>
+          <% last_product_code = stock_movement_transaction.product_code %>
+          <% last_color_code = stock_movement_transaction.color_code %>
+        <% end %>
+    </tbody>
 </table>
 <!--</td>
 </tr>
