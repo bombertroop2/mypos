@@ -1,0 +1,86 @@
+<div class="form-group">
+    <label class="col-sm-2 control-label"></label>
+    <div class="col-sm-10">
+        <table border="1" class="table table-condensed table-responsive table-bordered" style="table-layout: fixed;width: 100%">
+            <tr style="text-align: center">
+                <td style="vertical-align: middle;width: 20% !important;"><strong>Product</strong></td>
+                <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
+            </tr>
+            <% @adjustment_products.each do |adjustment_product| %>
+              <%= fields_for "adjustment[adjustment_products_attributes][#{adjustment_product.product_id}]", adjustment_product do |adjustment_product_fields| %>
+                <%= adjustment_product_fields.hidden_field :product_id %>
+                <%= adjustment_product_fields.hidden_field :attr_product_code %>
+                <%= adjustment_product_fields.hidden_field :attr_brand_name %>
+                <tr style="text-align: center">
+                    <td style="vertical-align: middle;width: 20% !important;">
+                        <%= "#{adjustment_product_fields.object.attr_product_code} - #{adjustment_product_fields.object.attr_brand_name}" %>
+                    </td>
+                    <td style="width: auto !important;">
+                        <% product_colors = adjustment_product.adjustment_product_details.map(&:color_id).uniq %>
+                        <% product_sizes = adjustment_product.adjustment_product_details.map(&:size_id).uniq %>
+                        <div class="table-responsive">
+                            <table border="1" class="table table-condensed table-responsive table-bordered">
+                                <tr style="text-align: center">
+                                    <th rowspan="2"></th>
+                                </tr>
+
+                                <tr style="text-align: center">
+                                    <% product_sizes.each do |product_size| %>
+                                      <% adjustment_product_detail_by_size = adjustment_product.adjustment_product_details.select{|apd| apd.size_id == product_size}.first %>
+                                      <td align="center">
+                                          <%= adjustment_product_detail_by_size.attr_size %>
+                                      </td>
+                                    <% end %>
+                                </tr>
+
+                                <% counter = 0 %>
+                                <% product_colors.each_with_index do |product_color, idx| %>
+                                  <% adjustment_product_detail_by_color = adjustment_product.adjustment_product_details.select{|apd| apd.color_id == product_color}.first %>
+                                  <tr style="text-align: center">
+                                      <td style="vertical-align: middle"><%= "#{adjustment_product_detail_by_color.attr_color_code} - #{adjustment_product_detail_by_color.attr_color_name}" %></td>
+                                      <% product_sizes.each do |product_size| %>
+                                        <% adjustment_product_detail = adjustment_product.adjustment_product_details.select{|apd| apd.size_id == product_size && apd.color_id == product_color}.first %>
+                                        <td align="center" style="vertical-align: middle">
+                                            <%= fields_for "adjustment[adjustment_products_attributes][#{adjustment_product.product_id}][adjustment_product_details_attributes][#{counter}]", adjustment_product_detail do |adjustment_product_detail_form| %>                                              
+                                              <div class="<%= control_group_error(adjustment_product_detail_form.object, :quantity) %>">
+                                                  <table cellpadding="0" cellspacing="0">
+                                                      <tr>
+                                                          <td>
+                                                              <%= adjustment_product_detail_form.hidden_field :size_id %>
+                                                              <%= adjustment_product_detail_form.hidden_field :color_id %>
+                                                              <%= adjustment_product_detail_form.hidden_field :attr_color_code %>
+                                                              <%= adjustment_product_detail_form.hidden_field :attr_color_name %>
+                                                              <%= adjustment_product_detail_form.hidden_field :attr_size %>
+                                                              <%= adjustment_product_detail_form.text_field :quantity, placeholder: "qty", class: "quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                                            </td>
+                                                        </tr>
+                                                    </table>                                                
+                                                    <%= error_help_text(adjustment_product_detail_form.object, :quantity) %>
+                                                </div>
+                                              <% end %>
+                                          </td>
+                                          <% counter += 1 %>
+                                        <% end %>
+                                    </tr>
+                                  <% end %>              
+                              </table>
+                          </div>
+                      </td>
+                  </tr>
+                <% end %>
+              <% end %>
+          </table>
+      </div>
+  </div>
+  <script>
+    $(function () {
+        $(".quantity").numeric({
+            decimal: false,
+            negative: false
+        }, function () {
+            alert("Positive integers only");
+            this.value = "";
+            this.focus();
+        });
+    });
+  </script>

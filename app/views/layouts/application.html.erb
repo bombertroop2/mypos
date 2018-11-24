@@ -322,6 +322,9 @@
                                                       <% if can? :manage, BeginningStockProduct %>
                                                         <li><%= link_to "Import Beginning Stock", import_beginning_stocks_path, method: :get %></li>
                                                       <% end %>
+                                                      <% if can? :manage, Adjustment %>
+                                                        <li><%= link_to "Adjustments", adjustments_path, method: :get %></li>
+                                                      <% end %>
                                                   </ul>
                                               </li>
                                             <% end %>
@@ -798,7 +801,7 @@
         <% end %>
                           }
                       });
-                      $("#print-btn").click(function () {
+                      $("#print-btn-stock-movement").click(function () {
                           if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
                               bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
                           else {
@@ -835,7 +838,7 @@
         <% end %>
                           }
                       });
-                      $("#print-btn").click(function () {
+                      $("#print-btn-listing-stock").click(function () {
                           if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
                               bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
                           else {

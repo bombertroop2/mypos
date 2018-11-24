@@ -12,6 +12,7 @@ class Warehouse < ApplicationRecord
   has_many :cashier_openings, dependent: :restrict_with_error
   has_many :counter_event_warehouses, dependent: :restrict_with_error
   has_many :consignment_sales, dependent: :restrict_with_error
+  has_many :adjustments, dependent: :restrict_with_error
   has_many :sales, through: :cashier_openings
   has_many :origin_warehouse_order_bookings, class_name: "OrderBooking", foreign_key: :origin_warehouse_id, dependent: :restrict_with_error
   has_many :destination_warehouse_order_bookings, class_name: "OrderBooking", foreign_key: :destination_warehouse_id, dependent: :restrict_with_error
@@ -32,6 +33,7 @@ class Warehouse < ApplicationRecord
   has_one :counter_event_warehouse_relation, -> {select("1 AS one")}, class_name: "CounterEventWarehouse"
   has_many :stock_products, -> {select(:stock_id, :product_id, :code).joins(:product)}, through: :selected_columns_stock
   has_one :target_relation, -> {select("1 AS one")}, class_name: "Target"
+  has_one :adjustment_relation, -> {select("1 AS one")}, class_name: "Adjustment"
 
   validates :code, :name, :warehouse_type, presence: true
   validates :supervisor_id, :region_id, :price_code_id, :address, presence: true, unless: proc{|warehouse| warehouse.warehouse_type.eql?("in_transit")}
@@ -246,11 +248,11 @@ class Warehouse < ApplicationRecord
                 end
 
                 def code_not_changed
-                  errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present? || target_relation.present?)
+                  errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (event_warehouse_relation.present? || spg_relation.present? || po_relation.present? || stock.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present? || target_relation.present? || adjustment_relation.present?)
                 end
 
                 def warehouse_type_not_changed
-                  errors.add(:warehouse_type, "change is not allowed!") if warehouse_type_changed? && persisted? && (event_warehouse_relation.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || po_relation.present? || spg_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present?)
+                  errors.add(:warehouse_type, "change is not allowed!") if warehouse_type_changed? && persisted? && (event_warehouse_relation.present? || destination_warehouse_order_booking_relation.present? || origin_warehouse_order_booking_relation.present? || po_relation.present? || spg_relation.present? || origin_warehouse_stock_mutation_relation.present? || destination_warehouse_stock_mutation_relation.present? || cashier_opening_relation.present? || consignment_sale_relation.present? || counter_event_warehouse_relation.present? || adjustment_relation.present?)
                 end
 
                 def price_code_not_changed
@@ -258,6 +260,6 @@ class Warehouse < ApplicationRecord
                 end
                 
                 def counter_type_not_changed
-                  errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && destination_warehouse_order_booking_relation.present?
+                  errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && (destination_warehouse_order_booking_relation.present? || adjustment_relation.present?)
                 end
               end
