@@ -173,11 +173,7 @@ class StockMutationProductItem < ApplicationRecord
             end
   
             def quantity_valid
-              if new_record?
-                errors.add(:quantity, "cannot be greater than #{@stock.quantity - @stock.unapproved_quantity}") if quantity.to_i > @stock.quantity - @stock.unapproved_quantity
-              else
-                errors.add(:quantity, "cannot be greater than #{@stock.quantity + quantity_was - @stock.unapproved_quantity}") if quantity.to_i > @stock.quantity + quantity_was - @stock.unapproved_quantity
-              end
+              errors.add(:quantity, "cannot be greater than #{@stock.quantity - @stock.unapproved_quantity}") if quantity.to_i > @stock.quantity - @stock.unapproved_quantity
             end
     
             def update_stock
