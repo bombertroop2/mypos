@@ -424,9 +424,9 @@ class StockMutation < ApplicationRecord
                                                     stock_mutation_product.stock_mutation_product_items.select(:id, :quantity, :size_id, :color_id).each do |stock_mutation_product_item|
                                                       stock = StockDetail.joins(stock_product: :stock).
                                                         where(["warehouse_id = ? AND size_id = ? AND color_id = ? AND stock_products.product_id = ?", origin_warehouse_id, stock_mutation_product_item.size_id, stock_mutation_product_item.color_id, stock_mutation_product.product_id]).
-                                                        select(:id, :quantity).first
+                                                        select(:id, :quantity, :unapproved_quantity).first
                                                       stock.with_lock do
-                                                        if stock_mutation_product_item.quantity > stock.quantity
+                                                        if stock_mutation_product_item.quantity > stock.quantity - stock.unapproved_quantity
                                                           raise_error = true
                                                         else
                                                           stock.quantity -= stock_mutation_product_item.quantity
