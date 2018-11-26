@@ -83,13 +83,13 @@ class Api::ConsignmentSalesController < Api::ApplicationController
           select(:quantity, "stock_mutations.received_date").order("stock_mutations.received_date ASC")
 
         # hitung total stok adjustment in di tanggal setelah tanggal transaksi penjualan
-        adjustment_product_details = AdjustmentProductDetail.
-          select(:quantity).joins(adjustment_product: :adjustment).
-          where(["adjustment_product_details.size_id = ? AND adjustment_product_details.color_id = ?", @product.product_size_id, @product.product_color_id]).
-          where(["adjustment_products.product_id = ?", @product.product_id]).
-          where(["adjustments.warehouse_id = ? AND adjustments.adj_type = 'In'", @product.warehouse_id]).
-          where(["adjustments.adj_date > ?", params[:transaction_date].to_date]).
-          order("adjustments.adj_date ASC")
+#        adjustment_product_details = AdjustmentProductDetail.
+#          select(:quantity).joins(adjustment_product: :adjustment).
+#          where(["adjustment_product_details.size_id = ? AND adjustment_product_details.color_id = ?", @product.product_size_id, @product.product_color_id]).
+#          where(["adjustment_products.product_id = ?", @product.product_id]).
+#          where(["adjustments.warehouse_id = ? AND adjustments.adj_type = 'In'", @product.warehouse_id]).
+#          where(["adjustments.adj_date > ?", params[:transaction_date].to_date]).
+#          order("adjustments.adj_date ASC")
 
         # hitung total stok rolling out di tanggal setelah tanggal transaksi penjualan
         rolling_out_items = StockMutationProductItem.
@@ -113,16 +113,18 @@ class Api::ConsignmentSalesController < Api::ApplicationController
 
         do_qty_on_hand = shipment_items.present? ? shipment_items.sum(&:quantity) : 0
         mutation_qty_on_hand = stock_mutation_product_items.present? ? stock_mutation_product_items.sum(&:quantity) : 0
-        adj_in_qty_on_hand = adjustment_product_details.present? ? adjustment_product_details.sum(&:quantity) : 0
+#        adj_in_qty_on_hand = adjustment_product_details.present? ? adjustment_product_details.sum(&:quantity) : 0
         rolling_out_qty = rolling_out_items.present? ? rolling_out_items.sum(&:quantity) : 0
         return_qty = return_items.present? ? return_items.sum(&:quantity) : 0
         # QOH sebelum DO dan mutation masuk di tanggal sesudah tanggal transaksi penjualan
-        final_qty_on_hand = @product.quantity - (do_qty_on_hand + mutation_qty_on_hand + adj_in_qty_on_hand - rolling_out_qty - return_qty)
+#        final_qty_on_hand = @product.quantity - (do_qty_on_hand + mutation_qty_on_hand + adj_in_qty_on_hand - rolling_out_qty - return_qty)
+        final_qty_on_hand = @product.quantity - (do_qty_on_hand + mutation_qty_on_hand - rolling_out_qty - return_qty)
         # apabila di tanggal transaksi qty on hand < added qty
         if final_qty_on_hand < 1
           render json: { status: false, message: "Sorry, available quantity of product #{@product.barcode} on #{params[:transaction_date]} is #{final_qty_on_hand}" }#, status: :unprocessable_entity
         else
-          if do_qty_on_hand > 0 || mutation_qty_on_hand > 0 || adj_in_qty_on_hand > 0 || rolling_out_qty > 0 || return_qty > 0
+#          if do_qty_on_hand > 0 || mutation_qty_on_hand > 0 || adj_in_qty_on_hand > 0 || rolling_out_qty > 0 || return_qty > 0
+          if do_qty_on_hand > 0 || mutation_qty_on_hand > 0 || rolling_out_qty > 0 || return_qty > 0
             # htung jumlah barang yang sudah dipesan dari tanggal transaksi pnjualan ke belakang
             booked_quantity = ConsignmentSaleProduct.joins(:consignment_sale).
               where(["consignment_sale_products.product_barcode_id = ? AND consignment_sales.approved = ? AND consignment_sales.transaction_date <= ? AND consignment_sales.warehouse_id = ?", @product.id, false, params[:transaction_date].to_date, @product.warehouse_id]).
