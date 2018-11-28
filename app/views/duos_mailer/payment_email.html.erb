@@ -222,7 +222,7 @@
                             </tbody>
                             <tfoot bgcolor="#337ab7" style="color: white">
                                 <tr>
-                                    <td colspan="8" align="right"><strong>Previous Paid</strong></td>
+                                    <td colspan="8" align="right"><strong>Previous Invoice</strong></td>
                                     <td align="right"><strong><%= number_to_currency((@account_payable.present? ? @account_payable.previous_paid : 0),
                                               :separator => ",",
                                               :delimiter => ".",
@@ -230,7 +230,7 @@
                                               :precision => 2) %></strong></td>
                                 </tr>
                                 <tr>
-                                    <td colspan="8" align="right"><strong>Amount Paid</strong></td>
+                                    <td colspan="8" align="right"><strong>Amount To Pay</strong></td>
                                     <td align="right"><strong><%= number_to_currency((@account_payable.present? ? @account_payable.amount_paid : 0),
                                               :separator => ",",
                                               :delimiter => ".",

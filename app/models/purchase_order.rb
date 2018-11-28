@@ -1,5 +1,5 @@
 class PurchaseOrder < ApplicationRecord
-  audited on: [:create, :update], except: [:receiving_value, :payment_status]
+  audited on: [:create, :update], except: [:receiving_value, :invoice_status]
   has_associated_audits
 
   belongs_to :vendor
