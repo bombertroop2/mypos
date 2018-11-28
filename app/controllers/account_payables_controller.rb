@@ -30,12 +30,12 @@ class AccountPayablesController < ApplicationController
     @account_payable = AccountPayable.new
     @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date,
       :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur,
-      :value_added_tax,:is_additional_disc_from_net, :net_amount, :payment_status).
+      :value_added_tax,:is_additional_disc_from_net, :net_amount, :invoice_status).
       select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).
-      where("(status = 'Finish' OR status = 'Closed') AND (payment_status = 'Paid' OR payment_status = '')").
+      where("(status = 'Finish' OR status = 'Closed') AND (invoice_status = 'Invoiced' OR invoice_status = '')").
       order("received_purchase_orders.receiving_date")
     @direct_purchases = DirectPurchase.
-      select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :payment_status).
+      select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :invoice_status).
       select("vendors.name AS vendor_name").
       joins(:received_purchase_order, :vendor).
       order(:receiving_date)
@@ -155,7 +155,7 @@ class AccountPayablesController < ApplicationController
       if account_payables.present?
         account_payables.each do |account_payable|        
           account_payable.account_payable_purchases.pluck(:purchase_id).each do |purchase_id|
-            purchase_order_ids << purchase_id if PurchaseOrder.select("1 AS one").where(["id = ? AND payment_status <> 'Paid'", purchase_id]).present?
+            purchase_order_ids << purchase_id if PurchaseOrder.select("1 AS one").where(["id = ? AND invoice_status <> 'Invoiced'", purchase_id]).present?
           end
         end
       else
@@ -179,7 +179,7 @@ class AccountPayablesController < ApplicationController
       @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
     end
     
-    selected_purchase_orders = PurchaseOrder.where(id: purchase_order_ids).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(payment_status: "")
+    selected_purchase_orders = PurchaseOrder.where(id: purchase_order_ids).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(invoice_status: "")
     selected_purchase_orders.each_with_index do |selected_purchase_order, index|
       @account_payable = AccountPayable.new vendor_id: selected_purchase_order.vendor_id if index == 0
       @account_payable.account_payable_purchases.build purchase_id: selected_purchase_order.id, purchase_type: selected_purchase_order.class.name
@@ -198,7 +198,7 @@ class AccountPayablesController < ApplicationController
       if account_payables.present?
         account_payables.each do |account_payable|        
           account_payable.account_payable_purchases.pluck(:purchase_id).each do |purchase_id|
-            direct_purchase_ids << purchase_id if DirectPurchase.select("1 AS one").where(["id = ? AND payment_status <> 'Paid'", purchase_id]).present?
+            direct_purchase_ids << purchase_id if DirectPurchase.select("1 AS one").where(["id = ? AND invoice_status <> 'Invoiced'", purchase_id]).present?
           end
         end
       else
@@ -222,7 +222,7 @@ class AccountPayablesController < ApplicationController
       @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
     end
     
-    selected_direct_purchases = DirectPurchase.where(id: direct_purchase_ids).select(:id, :vendor_id).where(payment_status: "")
+    selected_direct_purchases = DirectPurchase.where(id: direct_purchase_ids).select(:id, :vendor_id).where(invoice_status: "")
     selected_direct_purchases.each_with_index do |selected_direct_purchase, index|
       @account_payable = AccountPayable.new vendor_id: selected_direct_purchase.vendor_id if index == 0
       @account_payable.account_payable_purchases.build purchase_id: selected_direct_purchase.id, purchase_type: selected_direct_purchase.class.name

@@ -4,9 +4,9 @@ class AccountPayablePurchase < ApplicationRecord
   belongs_to :account_payable
   belongs_to :purchase, polymorphic: true
   
-  validate :purchase_is_payable, :check_payment_status, :purchase_payable
+  validate :purchase_is_payable, :check_invoice_status, :purchase_payable
   
-  after_destroy :remove_paid_mark_from_purchase_doc
+  after_destroy :remove_invoiced_mark_from_purchase_doc
   
   private
   
@@ -15,12 +15,12 @@ class AccountPayablePurchase < ApplicationRecord
     errors.add(:base, "Not able to pay selected purchases") if purchase_type.eql?("DirectPurchase") && DirectPurchase.select("1 AS one").joins(:vendor).where(id: purchase_id).where("vendors.id = #{vendor_id}").blank?
   end
   
-  def check_payment_status
-    errors.add(:base, "Some purchases has been paid") if purchase.payment_status.eql?('Paid')
+  def check_invoice_status
+    errors.add(:base, "Some purchases has been invoiced") if purchase.invoice_status.eql?('Invoiced')
   end
   
-  def remove_paid_mark_from_purchase_doc
-    purchase.update_attribute :payment_status, ""           
+  def remove_invoiced_mark_from_purchase_doc
+    purchase.update_attribute :invoice_status, ""           
   end
   
   def purchase_is_payable
