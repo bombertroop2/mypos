@@ -7,13 +7,8 @@ class CoasController < ApplicationController
   # GET /coas
   # GET /coas.json
   def index
-    like_command = "ILIKE"
-    coas_scope = Coa.select(:id, :code, :name, :transaction_type, :description)
-    coas_scope = coas_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(coas_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(coas_scope.where(["transaction_type #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(coas_scope.where(["description #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
-    @coas = smart_listing_create(:coas, coas_scope, partial: 'coas/listing', default_sort: {code: "asc"})
+    coas_scope = AccountingAccount.filters(params[:q] || {})
+    @coas = smart_listing_create(:coas, coas_scope, partial: 'coas/listing', default_sort: {code: "ASC"})
   end
 
   # GET /coas/1
@@ -23,7 +18,7 @@ class CoasController < ApplicationController
 
   # GET /coas/new
   def new
-    @coa = Coa.new
+    @coa = AccountingAccount.new
   end
 
   # GET /coas/1/edit
@@ -33,7 +28,7 @@ class CoasController < ApplicationController
   # POST /coas
   # POST /coas.json
   def create
-    @coa = Coa.new(coa_params)
+    @coa = AccountingAccount.new(coa_params)
     begin
       @created = @coa.save
     rescue ActiveRecord::RecordNotUnique => e
@@ -70,11 +65,11 @@ class CoasController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_coa
-      @coa = Coa.find(params[:id])
+      @coa = AccountingAccount.find(params[:id])
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def coa_params
-      params.require(:coa).permit(:code, :name, :transaction_type, :description)
+      params.require(:accounting_account).permit(:code, :classification, :description, :category_id)
     end
 end

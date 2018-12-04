@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  coa_id: 1
+  salod: 1.5
+  year: MyString
+
+two:
+  coa_id: 1
+  salod: 1.5
+  year: MyString

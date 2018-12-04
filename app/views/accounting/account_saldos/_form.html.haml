@@ -1,0 +1,17 @@
+%td{:colspan => "4"}
+  %div{:style => "padding-top: 20px"}
+  = form_for(@setting, url: (accounting_account_saldo_path(@setting)) ,remote: true, html: {class: "form-horizontal"}) do |f|
+    %div{:class => "form-group#{control_group_error(@setting, :coa_id)}"}
+      = f.label :coa_id, class: "col-sm-3 control-label"
+      .col-sm-9
+        = @setting.coa.description
+        = error_help_text(@setting, :coa_id)
+    %div{:class => "form-group#{control_group_error(@setting, :saldo)}"}
+      = f.label :saldo, class: "col-sm-3 control-label"
+      .col-sm-9
+        = f.text_field :saldo
+        = error_help_text(@setting, :saldo)
+    .form-group
+      .col-sm-offset-3.col-sm-9
+        = f.submit "Save", class: "btn btn-primary"
+        %button.btn.btn-link.cancel Cancel
