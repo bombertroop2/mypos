@@ -8,7 +8,7 @@ class CouriersController < ApplicationController
   # GET /couriers.json
   def index
     like_command = "ILIKE"
-    couriers_scope = Courier.select(:id, :code, :name, :via, :unit)
+    couriers_scope = Courier.select(:id, :code, :name, :via, :unit, :status)
     couriers_scope = couriers_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
       or(couriers_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
       or(couriers_scope.where(["via #{like_command} ?", "%"+params[:filter]+"%"])).
@@ -62,6 +62,6 @@ class CouriersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def courier_params
-    params.require(:courier).permit(:code, :name, :via, :unit)
+    params.require(:courier).permit(:code, :name, :via, :unit, :status)
   end
 end
