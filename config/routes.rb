@@ -199,6 +199,7 @@ Rails.application.routes.draw do
       get "inventory_receipts"
       get "search_do"
       get :multiprint
+      get "toggle_courier_cost"
     end
     member do
       get "receive"
