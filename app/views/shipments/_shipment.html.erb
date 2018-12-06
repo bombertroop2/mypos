@@ -2,6 +2,11 @@
 <td><%= object.delivery_date.strftime("%d/%m/%Y") %></td>
 <td><%= object.received_date.strftime("%d/%m/%Y") if object.received_date.present? %></td>
 <td id="total-quantity-<%= object.id %>"><%= object.quantity %></td>
+<td><%= number_to_currency(object.courier_cost,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, shipment_path(object), data: {remote: true}, title: "Show" %>
 <%#= link_to_if(can?(:edit_action, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_shipment_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>

@@ -7,7 +7,7 @@ blob = Barby::PngOutputter.new(barcode).to_png
 #File.open(full_path, 'w') { |f| f.write barcode.to_png(:margin => 3, :xdim => 2, :height => 55) }
 File.open(full_path, 'wb') { |f| f.write blob }
 %>
-<td colspan="5">
+<td colspan="6">
     <button type="button" class="close cancel" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
