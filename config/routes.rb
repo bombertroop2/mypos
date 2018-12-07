@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :account_payable_payments
   resources :adjustments, except: [:edit, :update, :destroy] do
     collection do
       get :autocomplete_product_code
@@ -167,6 +168,7 @@ Rails.application.routes.draw do
       get "store_to_warehouse_inventory_receipts"
       post "create_store_to_warehouse_mutation"
       get "search"
+      get "toggle_courier_cost"
     end
     member do
       get "approve"

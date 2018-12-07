@@ -3,6 +3,11 @@
 <td><%= object.approved_date.strftime("%d/%m/%Y") if object.approved_date.present? %></td>
 <td><%= object.received_date.strftime("%d/%m/%Y") if object.received_date.present? %></td>
 <td><%= object.quantity %></td>
+<td><%= number_to_currency(object.courier_cost,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, show_store_to_store_receipt_stock_mutation_path(id: object.id), data: {remote: true}, title: "Show" %>
     <%= link_to_if(can?(:receive, StockMutation) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveStoreToStoreInventory('#{object.id}', '#{object.number}')", title: "Receive" ) %>
