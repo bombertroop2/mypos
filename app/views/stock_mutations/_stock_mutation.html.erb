@@ -5,6 +5,11 @@
 <% end %>
 <td><%= object.received_date.strftime("%d/%m/%Y") if object.received_date.present? %></td>
 <td id="total-sm-quantity-<%= object.id %>"><%= object.quantity %></td>
+<td><%= number_to_currency(object.courier_cost,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
 <td class="actions" style="text-align: right">
     <% unless object.destination_warehouse.warehouse_type.eql?("central") %>
       <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, stock_mutation_path(object), data: {remote: true}, title: "Show" %>
