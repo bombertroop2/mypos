@@ -168,7 +168,6 @@ Rails.application.routes.draw do
       get "store_to_warehouse_inventory_receipts"
       post "create_store_to_warehouse_mutation"
       get "search"
-      get "toggle_courier_cost"
     end
     member do
       get "approve"
@@ -201,7 +200,6 @@ Rails.application.routes.draw do
       get "inventory_receipts"
       get "search_do"
       get :multiprint
-      get "toggle_courier_cost"
     end
     member do
       get "receive"
