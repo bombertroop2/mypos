@@ -23,7 +23,7 @@
   </td>-->
 
 
-<td colspan="6">
+<td colspan="7">
     <button type="button" class="close cancel hidden" aria-label="Close" id="x_button">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -108,8 +108,7 @@
                                   <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', @stock_mutation.courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
                                     <%= error_help_text(@stock_mutation, :courier_id) %>
                                 </div>
-                            </div>
-
+                            </div>                            
                             <div class="form-group">
                                 <div class="col-sm-offset-2 col-sm-10">
                                     <a class="btn btn-primary" id="save-btn">Save</a>

@@ -37,7 +37,7 @@ class Shipment < ApplicationRecord
                                 after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, if: proc{|shpmnt| shpmnt.receiving_inventory}
 
                                   private
-                                    
+                                  
                                   def received_date_changeable
                                     errors.add(:base, "Sorry, receive date cannot be changed") if order_booking.destination_warehouse.warehouse_type.eql?("direct_sales")
                                   end

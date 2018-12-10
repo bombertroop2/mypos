@@ -735,7 +735,7 @@ class StockMutationsController < ApplicationController
       render js: "var box = bootbox.alert({message: \"No records found\",size: 'small'});box.on(\"hidden.bs.modal\", function () {$(\"#mutation_number\").focus();});"
     end
   end
-
+  
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_stock_mutation

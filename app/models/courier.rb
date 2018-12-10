@@ -9,8 +9,8 @@ class Courier < ApplicationRecord
   before_validation :strip_string_values, :upcase_code
   validates :code, :name, :via, :unit, presence: true
   validates :code, uniqueness: true
-  validate :code_not_changed, :via_not_changed, :unit_not_changed
-
+  validate :code_not_changed, :via_not_changed, :unit_not_changed, :shipping_way_available, :unit_available
+  
   before_destroy :delete_tracks
   
   SHIPPING_WAYS = [
@@ -22,13 +22,25 @@ class Courier < ApplicationRecord
     ["Cubic", "Cubic"],
     ["Kilogram", "Kilogram"]
   ]
-  
+    
   def code_and_name
     "#{code} - #{name}"
   end
 
   
   private
+  
+  def shipping_way_available
+    Courier::SHIPPING_WAYS.select{ |x| x[1] == via }.first.first
+  rescue
+    errors.add(:via, "does not exist!") if via.present?
+  end
+
+  def unit_available
+    Courier::UNITS.select{ |x| x[1] == unit }.first.first
+  rescue
+    errors.add(:unit, "does not exist!") if unit.present?
+  end
   
   def delete_tracks
     audits.destroy_all

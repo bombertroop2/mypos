@@ -13,10 +13,10 @@
           <div class="form-group<%= control_group_error(shipment, :courier_id) %>">
               <%= p.label :courier_id, class: "col-sm-2 control-label" %>            
                 <div class="col-sm-10">
-                    <%= p.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', shipment.courier_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
+                    <%= p.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', shipment.courier_id.to_s), {prompt: 'Select'}, {class: "form-control courier-id-fields"} %>
                       <%= error_help_text(shipment, :courier_id) %>
                   </div>
-              </div>
+              </div>              
               <div class="form-group<%= control_group_error(shipment, :order_booking_id) %>">
                   <label class="col-sm-2 control-label">Order booking</label>
                   <div class="col-sm-10">
@@ -150,6 +150,7 @@
                       });
                       return false;
                   });
+
               });
 
             </script>
