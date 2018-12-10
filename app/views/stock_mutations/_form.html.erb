@@ -102,134 +102,126 @@
                             </div>
                         </div>
 
-                        <div class="form-group<%= control_group_error(@stock_mutation, :courier_id) %>">
-                            <%= f.label :courier_id, class: "col-sm-2 control-label" %>            
-                              <div class="col-sm-10">
-                                  <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), 'id', 'code_and_name', @stock_mutation.courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
-                                    <%= error_help_text(@stock_mutation, :courier_id) %>
-                                </div>
-                            </div>                            
-                            <div class="form-group">
-                                <div class="col-sm-offset-2 col-sm-10">
-                                    <a class="btn btn-primary" id="save-btn">Save</a>
-                                    <a class="btn btn-link cancel" id="btn-cancel-new-po">Cancel</a>
-                                </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <a class="btn btn-primary" id="save-btn">Save</a>
+                                <a class="btn btn-link cancel" id="btn-cancel-new-po">Cancel</a>
                             </div>
-                          <% end %>
-
-                          <script>
-                            $(function () {
-                                $("#stock_mutation_product_code").keypress(function (e) {
-                                    var key = e.which;
-                                    if (key == 13)  // the enter key code
-                                    {
-                                        $("#btn_add_product").click();
-                                        return false;
-                                    }
-                                });
-
-                                $("#stock_mutation_origin_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
-                                $("#stock_mutation_destination_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
-                                $("#stock_mutation_courier_id").attr("data-placeholder", "Please select courier").chosen();
-                                $("#stock_mutation_origin_warehouse_id").change(function () {
-                      <% if @stock_mutation.new_record? %>
-                                      $("#warehouse_products_form_container").html("");
-                      <% else %>
-                                      /*$.get("/stock_mutations/get_saved_products", {
-                                       origin_warehouse_id: $("#stock_mutation_origin_warehouse_id").val().trim(),
-                                       stock_mutation_id: <%#= @stock_mutation.id %>
-                                       });*/
+                        </div>
                       <% end %>
-                                });
-                                $("#btn_add_product").click(function () {
 
-                      <% if !@stock_mutation.mutation_type.eql?("store to warehouse") || (@stock_mutation.mutation_type.eql?("store to warehouse") && current_user.has_non_spg_role?) %>
-                                      var originWarehouseId = "";
-                        <% if @stock_mutation.new_record? %>
-                                        originWarehouseId = $("#stock_mutation_origin_warehouse_id").val().trim();
-                        <% else %>
-                                        originWarehouseId = "<%= @stock_mutation.origin_warehouse_id %>";
-                        <% end %>
-                                      if (originWarehouseId == "")
-                                          bootbox.alert({message: "Please select origin warehouse", size: "small"});
-                                      else if ($("#stock_mutation_product_code").val().trim() == "")
-                                          bootbox.alert({message: "Please fill in product code field", size: "small"});
-                                      else {
-                                          var productIds = [];
-                                          $(".stock-mutation-product-id-fields").each(function () {
-                                              productIds.push($(this).val());
-                                          });
-                                          var addProductParams = {};
-                        <% if !@stock_mutation.new_record? %>
-                                            addProductParams = {
-                                                origin_warehouse_id: originWarehouseId,
-                                                product_code: $("#stock_mutation_product_code").val().trim(),
-                                                prev_selected_product_ids: productIds.join(","),
-                                                stock_mutation_id: <%= @stock_mutation.id %>
-                                            };
-                        <% else %>
-                                            addProductParams = {
-                                                origin_warehouse_id: originWarehouseId,
-                                                product_code: $("#stock_mutation_product_code").val().trim(),
-                                                prev_selected_product_ids: productIds.join(",")
-                                            };
-                        <% end %>
-                                          $.get("/stock_mutations/get_products", addProductParams);
-                                      }
-                      <% else %>
-                                      if ($("#origin-warehouse-hidden-field").val().trim() == "")
-                                          bootbox.alert({message: "Please select origin warehouse", size: "small"});
-                                      else if ($("#stock_mutation_product_code").val().trim() == "")
-                                          bootbox.alert({message: "Please fill in product code field", size: "small"});
-                                      else {
-                                          var productIds = [];
-                                          $(".stock-mutation-product-id-fields").each(function () {
-                                              productIds.push($(this).val());
-                                          });
-                                          var addProductParams = {};
-                                          addProductParams = {
-                                              origin_warehouse_id: $("#origin-warehouse-hidden-field").val().trim(),
-                                              product_code: $("#stock_mutation_product_code").val().trim(),
-                                              prev_selected_product_ids: productIds.join(",")
-                                          };
-                                          $.get("/stock_mutations/get_products", addProductParams);
-                                      }
-                      <% end %>
-                                });
-                                $("#stock_mutation_delivery_date").datepicker({
-                                    dateFormat: "dd/mm/yy"
-                                });
-                                $("#btn-cancel-new-po").click(function () {
-                                    $("#x_button").click();
-                                });
-                                $("#save-btn").click(function () {
-                      <% if @stock_mutation.new_record? %>
-                        <% if @stock_mutation.mutation_type.eql?("store to warehouse") %>
-                                        bootbox.confirm({
-                                            message: "Once you return product, you'll not be able to change it</br>Are you sure?",
-                                            buttons: {
-                                                confirm: {
-                                                    label: '<i class="fa fa-check"></i> Confirm'
-                                                },
-                                                cancel: {
-                                                    label: '<i class="fa fa-times"></i> Cancel'
-                                                }
-                                            },
-                                            callback: function (result) {
-                                                if (result) {
-                                                    $("body").css('padding-right', '0px');
-                                                    $("#new_stock_mutation").submit();
-                                                }
-                                            },
-                                            size: "small"
-                                        });
-                                        return false;
-                        <% else %>
-                                        $("#new_stock_mutation").submit();
-                        <% end %>
-                      <% else %>
-                                      $("#edit_stock_mutation_<%= @stock_mutation.id %>").submit();
-                      <% end %>
-                                });
+                      <script>
+                        $(function () {
+                            $("#stock_mutation_product_code").keypress(function (e) {
+                                var key = e.which;
+                                if (key == 13)  // the enter key code
+                                {
+                                    $("#btn_add_product").click();
+                                    return false;
+                                }
                             });
-                          </script>
+
+                            $("#stock_mutation_origin_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
+                            $("#stock_mutation_destination_warehouse_id").attr("data-placeholder", "Please select warehouse").chosen();
+                            $("#stock_mutation_origin_warehouse_id").change(function () {
+                  <% if @stock_mutation.new_record? %>
+                                  $("#warehouse_products_form_container").html("");
+                  <% else %>
+                                  /*$.get("/stock_mutations/get_saved_products", {
+                                   origin_warehouse_id: $("#stock_mutation_origin_warehouse_id").val().trim(),
+                                   stock_mutation_id: <%#= @stock_mutation.id %>
+                                   });*/
+                  <% end %>
+                            });
+                            $("#btn_add_product").click(function () {
+
+                  <% if !@stock_mutation.mutation_type.eql?("store to warehouse") || (@stock_mutation.mutation_type.eql?("store to warehouse") && current_user.has_non_spg_role?) %>
+                                  var originWarehouseId = "";
+                    <% if @stock_mutation.new_record? %>
+                                    originWarehouseId = $("#stock_mutation_origin_warehouse_id").val().trim();
+                    <% else %>
+                                    originWarehouseId = "<%= @stock_mutation.origin_warehouse_id %>";
+                    <% end %>
+                                  if (originWarehouseId == "")
+                                      bootbox.alert({message: "Please select origin warehouse", size: "small"});
+                                  else if ($("#stock_mutation_product_code").val().trim() == "")
+                                      bootbox.alert({message: "Please fill in product code field", size: "small"});
+                                  else {
+                                      var productIds = [];
+                                      $(".stock-mutation-product-id-fields").each(function () {
+                                          productIds.push($(this).val());
+                                      });
+                                      var addProductParams = {};
+                    <% if !@stock_mutation.new_record? %>
+                                        addProductParams = {
+                                            origin_warehouse_id: originWarehouseId,
+                                            product_code: $("#stock_mutation_product_code").val().trim(),
+                                            prev_selected_product_ids: productIds.join(","),
+                                            stock_mutation_id: <%= @stock_mutation.id %>
+                                        };
+                    <% else %>
+                                        addProductParams = {
+                                            origin_warehouse_id: originWarehouseId,
+                                            product_code: $("#stock_mutation_product_code").val().trim(),
+                                            prev_selected_product_ids: productIds.join(",")
+                                        };
+                    <% end %>
+                                      $.get("/stock_mutations/get_products", addProductParams);
+                                  }
+                  <% else %>
+                                  if ($("#origin-warehouse-hidden-field").val().trim() == "")
+                                      bootbox.alert({message: "Please select origin warehouse", size: "small"});
+                                  else if ($("#stock_mutation_product_code").val().trim() == "")
+                                      bootbox.alert({message: "Please fill in product code field", size: "small"});
+                                  else {
+                                      var productIds = [];
+                                      $(".stock-mutation-product-id-fields").each(function () {
+                                          productIds.push($(this).val());
+                                      });
+                                      var addProductParams = {};
+                                      addProductParams = {
+                                          origin_warehouse_id: $("#origin-warehouse-hidden-field").val().trim(),
+                                          product_code: $("#stock_mutation_product_code").val().trim(),
+                                          prev_selected_product_ids: productIds.join(",")
+                                      };
+                                      $.get("/stock_mutations/get_products", addProductParams);
+                                  }
+                  <% end %>
+                            });
+                            $("#stock_mutation_delivery_date").datepicker({
+                                dateFormat: "dd/mm/yy"
+                            });
+                            $("#btn-cancel-new-po").click(function () {
+                                $("#x_button").click();
+                            });
+                            $("#save-btn").click(function () {
+                  <% if @stock_mutation.new_record? %>
+                    <% if @stock_mutation.mutation_type.eql?("store to warehouse") %>
+                                    bootbox.confirm({
+                                        message: "Once you return product, you'll not be able to change it</br>Are you sure?",
+                                        buttons: {
+                                            confirm: {
+                                                label: '<i class="fa fa-check"></i> Confirm'
+                                            },
+                                            cancel: {
+                                                label: '<i class="fa fa-times"></i> Cancel'
+                                            }
+                                        },
+                                        callback: function (result) {
+                                            if (result) {
+                                                $("body").css('padding-right', '0px');
+                                                $("#new_stock_mutation").submit();
+                                            }
+                                        },
+                                        size: "small"
+                                    });
+                                    return false;
+                    <% else %>
+                                    $("#new_stock_mutation").submit();
+                    <% end %>
+                  <% else %>
+                                  $("#edit_stock_mutation_<%= @stock_mutation.id %>").submit();
+                  <% end %>
+                            });
+                        });
+                      </script>

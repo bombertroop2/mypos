@@ -40,22 +40,12 @@ File.open(full_path, 'wb') { |f| f.write blob }
                                     <td style="vertical-align: top">Address</td>
                                     <td style="vertical-align: top">:</td>
                                     <td><%= @stock_mutation.origin_warehouse.address %></td>
-                                </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+                                </tr>                                
                                 <tr>
                                     <td>Delivery Date</td>
                                     <td>:</td>
                                     <td><%= @stock_mutation.delivery_date.strftime("%d/%m/%Y") %></td>
-                                </tr>
-                                <tr>
-                                    <td>Courier</td>
-                                    <td>:</td>
-                                    <td><%= @stock_mutation.courier.code %> - <%= @stock_mutation.courier.name %></td>
-                                </tr>
+                                </tr>                                
                             </table>
                         </td>
                         <td></td>
