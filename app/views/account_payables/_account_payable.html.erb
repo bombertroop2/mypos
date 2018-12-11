@@ -1,6 +1,48 @@
+<% total_amount_received = 0 %>
+<% object.account_payable_purchases.select(:purchase_id, :purchase_type).each do |app| %>
+  <% purchase_order = app.purchase %>
+  <% total_amount_received += value_after_ppn_for_ap(purchase_order) %>
+<% end %>
+<% total_amount_returned = 0 %>
+<% allocated_return_items = object.allocated_return_items.select(:purchase_return_id) %>
+<% if allocated_return_items.size > 0 %>
+  <% object.allocated_return_items.select(:purchase_return_id).each do |ari| %>
+    <% total_amount_returned += value_after_ppn_pr(ari.purchase_return) %>
+  <% end %>
+<% end %>
+<%
+previous_account_payables = []
+object.account_payable_purchases.select(:purchase_id, :purchase_type).each do |account_payable_purchase|
+  account_payables = if account_payable_purchase.purchase_type.eql?("DirectPurchase")
+    AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = #{account_payable_purchase.purchase_id} AND purchase_type = 'DirectPurchase' AND account_payables.id <> #{object.id}").where(["account_payables.id < ?", object.id])
+    else
+    AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = #{account_payable_purchase.purchase_id} AND purchase_type = 'PurchaseOrder' AND account_payables.id <> #{object.id}").where(["account_payables.id < ?", object.id])
+    end
+  account_payables.each do |account_payable|        
+    previous_account_payables << account_payable
+  end
+  end
+
+previous_paid = 0
+previous_account_payables.uniq.each do |previous_account_payable|
+  previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
+  end
+
+debt = total_amount_received - total_amount_returned - previous_paid - object.amount_paid
+%>
 <td><%= object.number %></td>
 <td><%= object.payment_date.strftime("%d/%m/%Y") %></td>
 <td id="vendor_name_<%= object.id %>"><%= object.name rescue "" %></td>
+<td><%= number_to_currency(object.amount_paid,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td><%= number_to_currency(debt,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, account_payable_path(object), data: {remote: true}, id: "show_detail_ap_#{object.id}", title: "Show" %>
     <%= link_to_if(can?(:manage, AccountPayable), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_path(object), :remote => true, :method => :get, title: "Print" ) %>
