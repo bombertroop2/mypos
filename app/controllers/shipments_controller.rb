@@ -19,9 +19,9 @@ class ShipmentsController < ApplicationController
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed, :courier_cost).joins(:order_booking)
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed).joins(:order_booking)
     else
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed, :courier_cost).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
@@ -222,15 +222,7 @@ class ShipmentsController < ApplicationController
         render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
       end
     end
-  end
-  
-  def toggle_courier_cost
-    if Courier.select(:status).find(params[:courier_id]).status.eql?("Internal")
-      render js: "$(\"#courier-cost-field-container-#{params[:index]}\").addClass(\"hidden\");"
-    else
-      render js: "$(\"#courier-cost-field-container-#{params[:index]}\").removeClass(\"hidden\");"
-    end
-  end
+  end   
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -246,7 +238,7 @@ class ShipmentsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def shipment_params(params)
-    params.permit(:order_booking_number, :quantity, :delivery_date, :order_booking_id, :courier_id, :courier_cost,
+    params.permit(:order_booking_number, :quantity, :delivery_date, :order_booking_id, :courier_id,
       shipment_products_attributes: [:order_booking_product_id, :order_booking_id, :quantity,
         shipment_product_items_attributes: [:order_booking_product_item_id, :quantity,
           :order_booking_product_id, :order_booking_id]])
@@ -289,7 +281,6 @@ class ShipmentsController < ApplicationController
         params[:shipments][shipments_key][:shipment_products_attributes][key].merge! quantity: total_quantity_shipment_product
       end if params[:shipments][shipments_key][:shipment_products_attributes].present?
       params[:shipments][shipments_key].merge! quantity: total_quantity_shipment
-      params[:shipments][shipments_key][:courier_cost] = params[:shipments][shipments_key][:courier_cost].gsub("Rp","").gsub(".","").gsub(",",".") if params[:shipments][shipments_key][:courier_cost].present?
     end
   end
 end

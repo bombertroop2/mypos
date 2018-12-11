@@ -3,10 +3,9 @@
         <tr>
             <th class="col-md-2"><%= smart_listing.sortable "Number", "number" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "Delivery Date", "delivery_date" %></th>
-            <th class="col-md-1"><%= smart_listing.sortable "App. At", "approved_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Approved At", "approved_date" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "Received At", "received_date" %></th>
-            <th class="col-md-1"><%= smart_listing.sortable "Qty", "quantity" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "Courier Cost", "courier_cost" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Quantity", "quantity" %></th>
             <th class="col-md-2"></th>
         </tr>
     </thead>
@@ -16,7 +15,7 @@
               <%= smart_listing.render object: stock_mutation, partial: "stock_mutations/stock_mutation", locals: {object: stock_mutation} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 7, link: new_stock_mutation_path %>
+        <%= smart_listing.item_new colspan: 6, link: new_stock_mutation_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

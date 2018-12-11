@@ -28,12 +28,12 @@ class StockMutationsController < ApplicationController
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date, :courier_cost).
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type <> 'central'")
     else
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date, :courier_cost).
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type <> 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -65,12 +65,12 @@ class StockMutationsController < ApplicationController
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date, :is_receive_date_changed, :courier_cost).
+        :destination_warehouse_id, :approved_date, :is_receive_date_changed).
         where("warehouse_type <> 'central'")
     else
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date, :is_receive_date_changed, :courier_cost).
+        :destination_warehouse_id, :approved_date, :is_receive_date_changed).
         where("warehouse_type <> 'central' AND destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -96,7 +96,7 @@ class StockMutationsController < ApplicationController
     end
     stock_mutations_scope = StockMutation.joins(:destination_warehouse).
       select(:id, :number, :delivery_date, :received_date, :quantity,
-      :destination_warehouse_id, :courier_cost).
+      :destination_warehouse_id).
       where("warehouse_type = 'central'")
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(stock_mutations_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -121,12 +121,12 @@ class StockMutationsController < ApplicationController
     stock_mutations_scope = if current_user.has_non_spg_role?
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date, :courier_cost).
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type = 'central'")
     else
       StockMutation.joins(:destination_warehouse).
         select(:id, :number, :delivery_date, :received_date, :quantity,
-        :destination_warehouse_id, :approved_date, :courier_cost).
+        :destination_warehouse_id, :approved_date).
         where("warehouse_type = 'central' AND origin_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
     stock_mutations_scope = stock_mutations_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
@@ -736,14 +736,6 @@ class StockMutationsController < ApplicationController
     end
   end
   
-  def toggle_courier_cost
-    if Courier.select(:status).find(params[:courier_id]).status.eql?("Internal")
-      render js: "$(\"#courier-cost-field-container-sm\").addClass(\"hidden\");"
-    else
-      render js: "$(\"#courier-cost-field-container-sm\").removeClass(\"hidden\");"
-    end
-  end
-
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_stock_mutation
@@ -758,17 +750,17 @@ class StockMutationsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def stock_mutation_params
     if action_name.eql?("create")
-      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :origin_warehouse_id, :number, :destination_warehouse_id, :courier_cost,
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :origin_warehouse_id, :number, :destination_warehouse_id,
         stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id, :attr_destination_warehouse_id,
           stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
             :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])
     elsif action_name.eql?("create_store_to_warehouse_mutation")
-      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :courier_id, :origin_warehouse_id, :destination_warehouse_id, :courier_cost,
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :origin_warehouse_id, :destination_warehouse_id,
         stock_mutation_products_attributes: [:quantity, :_destroy, :product_name, :product_code, :product_id, :attr_destination_warehouse_id, :origin_warehouse_id, :attr_mutation_type,
           stock_mutation_product_items_attributes: [:quantity, :color_id, :size_id, :_destroy,
             :origin_warehouse_id, :product_id, :mutation_type]])      
     else
-      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :courier_id, :number, :destination_warehouse_id, :courier_cost,
+      params.require(:stock_mutation).permit(:mutation_type, :delivery_date, :received_date, :quantity, :number, :destination_warehouse_id,
         stock_mutation_products_attributes: [:product_code, :product_name, :_destroy, :id, :quantity, :origin_warehouse_id, :product_id, :attr_destination_warehouse_id,
           stock_mutation_product_items_attributes: [:id, :color_id, :size_id, :quantity,
             :origin_warehouse_id, :product_id, :mutation_type, :_destroy]])
@@ -784,7 +776,6 @@ class StockMutationsController < ApplicationController
     else
       params[:stock_mutation][:origin_warehouse_id]
     end
-    params[:stock_mutation][:courier_cost] = params[:stock_mutation][:courier_cost].gsub("Rp","").gsub(".","").gsub(",",".") if params[:stock_mutation][:courier_cost].present?
     if params[:stock_mutation][:stock_mutation_products_attributes].present?
       delete_all_products = true
       params[:stock_mutation][:stock_mutation_products_attributes].each do |key, value|
