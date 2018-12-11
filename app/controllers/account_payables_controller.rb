@@ -267,7 +267,7 @@ class AccountPayablesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
     params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id,
-      :giro_number, :giro_date, :amount_paid, :debt,
+      :giro_number, :giro_date, :amount_paid, :debt, :note,
       account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id],
       allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp])
   end

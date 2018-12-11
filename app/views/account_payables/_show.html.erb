@@ -17,7 +17,7 @@
                         <td align="center" colspan="2"><%= @account_payable.number %></td>
                     </tr>
                     <tr>
-                        <td>
+                        <td width="50%" style="vertical-align: top">
                             <table class="table-condensed table-responsive">
                                 <tr>
                                     <td>Vendor</td>
@@ -46,6 +46,15 @@
                                       <td><%= @account_payable.giro_date.strftime("%d/%m/%Y") rescue "" %></td>
                                   </tr>
                                 <% end %>
+                            </table>
+                        </td>
+                        <td width="50%" style="vertical-align: top">
+                            <table class="table-condensed table-responsive" align="right">
+                                <tr>
+                                    <td style="vertical-align: top">Note</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td><%= @account_payable.note %></td>
+                                </tr>
                             </table>
                         </td>
                     </tr>

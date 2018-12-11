@@ -174,54 +174,60 @@
                                       <%= error_help_text(@account_payable, :debt) %>
                                   </div>
                               </div>
-
-                              <div class="form-group">
-                                  <div class="col-sm-offset-2 col-sm-10">
-                                      <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn_for_dp" %>
-                                        <button class="btn btn-link cancel">Cancel</button>
+                              <div class="form-group<%= control_group_error(@account_payable, :note) %>">
+                                  <%= f.label :note, class: "col-sm-2 control-label" %>
+                                    <div class="col-sm-10">
+                                        <%= f.text_area :note, rows: 6, class: "form-control" %>
+                                          <%= error_help_text(@account_payable, :note) %>
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <div class="col-sm-offset-2 col-sm-10">
+                                          <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn_for_dp" %>
+                                            <button class="btn btn-link cancel">Cancel</button>
+                                        </div>
                                     </div>
-                                </div>
-                              <% end %>
+                                  <% end %>
 
-                              <script>
-                                $(function () {
-                                    previousPaidForDPPayment = <%= @previous_paid %>;
-                                    totalAmountReceivedForDPPayment = <%= total_amount_received_for_dp %>;
-                                    $("#account_payable_payment_method_for_dp").change(function () {
-                                        if ($(this).val() == "Giro") {
+                                  <script>
+                                    $(function () {
+                                        previousPaidForDPPayment = <%= @previous_paid %>;
+                                        totalAmountReceivedForDPPayment = <%= total_amount_received_for_dp %>;
+                                        $("#account_payable_payment_method_for_dp").change(function () {
+                                            if ($(this).val() == "Giro") {
+                                                $("#giro_number_for_dp").show();
+                                                $("#giro_date_for_dp").show();
+                                            } else {
+                                                $("#giro_number_for_dp").hide();
+                                                $("#giro_date_for_dp").hide();
+                                            }
+                                        });
+
+                                        $("#account_payable_giro_date_for_dp").datepicker({
+                                            dateFormat: "dd/mm/yy"
+                                        });
+
+                                        $("#account_payable_payment_date_for_dp").datepicker({
+                                            dateFormat: "dd/mm/yy"
+                                        });
+
+                                        $('#account_payable_amount_paid_for_dp').autoNumeric('init');
+                                        $('#account_payable_debt_for_dp').autoNumeric('init');
+
+                                        $('#account_payable_amount_paid_for_dp').keyup(function () {
+                                            var amountPaid = $(this).val().replace("Rp", "").replace(/\./g, "").replace(",", ".");
+                                            var amountToPay = $("#amount-to-pay-for-dp").html().trim().replace("<strong>", "").replace("</strong>", "").replace("Rp", "").replace(/\./g, "").replace(",", ".");
+                                            $('#account_payable_debt_for_dp').val(amountToPay - amountPaid);
+                                            $('#account_payable_debt_for_dp').trigger("blur");
+                                        });
+
+                                        if ($("#account_payable_payment_method_for_dp").val() == "Giro") {
                                             $("#giro_number_for_dp").show();
                                             $("#giro_date_for_dp").show();
                                         } else {
                                             $("#giro_number_for_dp").hide();
                                             $("#giro_date_for_dp").hide();
                                         }
+
                                     });
-
-                                    $("#account_payable_giro_date_for_dp").datepicker({
-                                        dateFormat: "dd/mm/yy"
-                                    });
-
-                                    $("#account_payable_payment_date_for_dp").datepicker({
-                                        dateFormat: "dd/mm/yy"
-                                    });
-
-                                    $('#account_payable_amount_paid_for_dp').autoNumeric('init');
-                                    $('#account_payable_debt_for_dp').autoNumeric('init');
-
-                                    $('#account_payable_amount_paid_for_dp').keyup(function () {
-                                        var amountPaid = $(this).val().replace("Rp", "").replace(/\./g, "").replace(",", ".");
-                                        var amountToPay = $("#amount-to-pay-for-dp").html().trim().replace("<strong>", "").replace("</strong>", "").replace("Rp", "").replace(/\./g, "").replace(",", ".");
-                                        $('#account_payable_debt_for_dp').val(amountToPay - amountPaid);
-                                        $('#account_payable_debt_for_dp').trigger("blur");
-                                    });
-
-                                    if ($("#account_payable_payment_method_for_dp").val() == "Giro") {
-                                        $("#giro_number_for_dp").show();
-                                        $("#giro_date_for_dp").show();
-                                    } else {
-                                        $("#giro_number_for_dp").hide();
-                                        $("#giro_date_for_dp").hide();
-                                    }
-
-                                });
-                              </script>
+                                  </script>
