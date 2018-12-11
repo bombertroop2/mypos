@@ -33,6 +33,10 @@ class Vendor < ApplicationRecord
       before_validation :upcase_code
       before_save :remove_vat, if: proc {|vendor| !vendor.value_added_tax_was.eql?("") && vendor.persisted? && !vendor.is_taxable_entrepreneur}
         before_destroy :delete_tracks
+        
+        def code_and_name
+          "#{code} - #{name}"
+        end
 
         private
 

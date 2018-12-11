@@ -14,125 +14,29 @@
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane fade in active" id="purchase_order" style="padding-top: 20px">
                 <div id="search-form-container" class="form-inline text-right">
-                    <div class="form-group">
-                        <input type="text" id="filter-vendor" class="form-control" placeholder="Vendor" style="width: 150px">
-                    </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control" readonly="true" id="filter-po-date" placeholder="PO date" style="width: 180px">
-                    </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control" readonly="true" id="filter-receipt-date" placeholder="Receipt date" style="width: 180px">
-                    </div>
-                    <div class="form-group">
-                        <%= select_tag "invoice_status", options_for_select(AccountPayable::INVOICE_STATUSES), {prompt: "Invoice status", class: "form-control", style: "width: 150px;"} %>
-                      </div>
-                      <button id="search-po-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
-                      <button id="pay-btn" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
-                      <button id="return-item-allocation" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
-                  </div>
-                  <table id="ap_listing_po_table" class="display" width="100%">
-                      <thead>
-                          <tr>
-                              <th></th>
-                              <th>Number</th>
-                              <th>Vendor</th>
-                              <th>PO Date</th>
-                              <th>Rec. Date</th>
-                              <th>Qty</th>
-                              <th>Gross Amount</th>
-                              <th>1st Disc</th>
-                              <th>2nd Disc</th>
-                              <th>Value Added Tax (10%)</th>
-                              <th>Net Amount</th>
-                              <th>Invoice Status</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          <% displayed_pos = [] %>
-                          <% @purchase_orders.each do |purchase_order| %>
-                            <% if displayed_pos.blank? || displayed_pos.exclude?(purchase_order.id) %>
-                              <% displayed_pos << purchase_order.id %>
-                              <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
-                              <tr id="purchase_order_<%= purchase_order.id %>">
-                                  <td></td>
-                                  <td><%= purchase_order.number %></td>
-                                  <td><%= purchase_order.vendor_name %></td>
-                                  <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
-                                  <td><%= latest_receiving_date %></td>
-                                  <td><%= purchase_order.quantity_received %></td>
-                                  <td><%= number_to_currency(purchase_order.receiving_value,
-                                        :separator => ",",
-                                        :delimiter => ".",
-                                        :unit => "Rp",
-                                        :precision => 2) %></td>
-                                  <td>
-                                      <% if purchase_order.first_discount.present? %>
-                                        <%= number_to_currency((purchase_order.first_discount.to_f / 100) * purchase_order.receiving_value,
-                                          :separator => ",",
-                                          :delimiter => ".",
-                                          :unit => "Rp",
-                                          :precision => 2) %> (<%= "#{purchase_order.first_discount}%" %>)
-                                      <% end %>
-                                  </td>
-                                  <td>
-                                      <% if purchase_order.second_discount.present? %>
-                                        <%= number_to_currency(get_second_discount_in_money_for_ap(purchase_order),
-                                          :separator => ",",
-                                          :delimiter => ".",
-                                          :unit => "Rp",
-                                          :precision => 2) %> (<%= "#{purchase_order.second_discount}%" %> from <%= purchase_order.is_additional_disc_from_net ? "net" : "gross" %>)
-                                      <% end %>
-                                  </td>
-                                  <td>
-                                      <% if purchase_order.is_taxable_entrepreneur %>
-                                        <%
-                                        vat_in_money = if purchase_order.value_added_tax.eql?("include")
-                                          get_include_vat_in_money_for_ap(purchase_order)
-                                          else
-                                          get_vat_in_money_for_ap(purchase_order)
-                                          end
-                                      %>
-                                        <%= number_to_currency(vat_in_money,
-                                          :separator => ",",
-                                          :delimiter => ".",
-                                          :unit => "Rp",
-                                          :precision => 2) %> (<%= purchase_order.value_added_tax %>)
-                                      <% end %>
-                                  </td>
-                                  <td><%= number_to_currency(value_after_ppn_for_ap(purchase_order),
-                                        :separator => ",",
-                                        :delimiter => ".",
-                                        :unit => "Rp",
-                                        :precision => 2) %></td>
-                                  <td><%= purchase_order.invoice_status %></td>
-                              </tr>
-                            <% end %>
-                          <% end %>
-                      </tbody>
-                  </table>
-                  <div id="form_container"></div>
-              </div>
-              <div role="tabpanel" class="tab-pane fade" id="direct_purchase" style="padding-top: 20px">
-                  <div id="search-form-container-dp" class="form-inline text-right">
-                      <div class="form-group">
-                          <input type="text" id="filter-vendor-dp" class="form-control" placeholder="Vendor" style="width: 150px">
+                    <div class="form-group text-left">
+                        <%= select_tag "filter-vendor", options_from_collection_for_select(Vendor.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
                       </div>
                       <div class="form-group">
-                          <input type="text" class="form-control" readonly="true" id="filter-receipt-date-dp" placeholder="Receipt date" style="width: 180px">
+                          <input type="text" class="form-control" readonly="true" id="filter-po-date" placeholder="PO date" style="width: 180px">
                       </div>
                       <div class="form-group">
-                          <%= select_tag "invoice_status", options_for_select(AccountPayable::INVOICE_STATUSES), {prompt: "Invoice status", class: "form-control", style: "width: 150px;", id: :payment_status_dp} %>
+                          <input type="text" class="form-control" readonly="true" id="filter-receipt-date" placeholder="Receipt date" style="width: 180px">
+                      </div>
+                      <div class="form-group">
+                          <%= select_tag "invoice_status", options_for_select(AccountPayable::INVOICE_STATUSES), {prompt: "Invoice status", class: "form-control", style: "width: 150px;"} %>
                         </div>
-                        <button id="search-dp-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
-                        <button id="pay-btn-dp" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
-                        <button id="return-item-allocation-dp" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
+                        <button id="search-po-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                        <button id="pay-btn" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
+                        <button id="return-item-allocation" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
                     </div>
-                    <table id="ap_listing_dp_table" class="display" width="100%">
+                    <table id="ap_listing_po_table" class="display" width="100%">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th>Number</th>
                                 <th>Vendor</th>
+                                <th>PO Date</th>
                                 <th>Rec. Date</th>
                                 <th>Qty</th>
                                 <th>Gross Amount</th>
@@ -144,511 +48,611 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% @direct_purchases.each_with_index do |direct_purchase, index| %>
-                              <tr id="direct_purchase_<%= direct_purchase.id %>">
-                                  <td></td>
-                                  <td><%= direct_purchase.delivery_order_number %></td>
-                                  <td><%= direct_purchase.vendor_name %></td>
-                                  <td><%= direct_purchase.receiving_date.strftime("%d/%m/%Y") %></td>
-                                  <td><%= direct_purchase.quantity_received %></td>
-                                  <td><%= number_to_currency(direct_purchase.receiving_value,
-                                        :separator => ",",
-                                        :delimiter => ".",
-                                        :unit => "Rp",
-                                        :precision => 2) %></td>
-                                  <td>
-                                      <% if direct_purchase.first_discount.present? %>
-                                        <%= number_to_currency((direct_purchase.first_discount.to_f / 100) * direct_purchase.receiving_value,
+                            <% displayed_pos = [] %>
+                            <% @purchase_orders.each do |purchase_order| %>
+                              <% if displayed_pos.blank? || displayed_pos.exclude?(purchase_order.id) %>
+                                <% displayed_pos << purchase_order.id %>
+                                <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
+                                <tr id="purchase_order_<%= purchase_order.id %>">
+                                    <td></td>
+                                    <td><%= purchase_order.number %></td>
+                                    <td><%= purchase_order.vendor_name %></td>
+                                    <td><%= purchase_order.purchase_order_date.strftime("%d/%m/%Y") %></td>
+                                    <td><%= latest_receiving_date %></td>
+                                    <td><%= purchase_order.quantity_received %></td>
+                                    <td><%= number_to_currency(purchase_order.receiving_value,
                                           :separator => ",",
                                           :delimiter => ".",
                                           :unit => "Rp",
-                                          :precision => 2) %> (<%= "#{direct_purchase.first_discount}%" %>)
-                                      <% end %>
-                                  </td>
-                                  <td>
-                                      <% if direct_purchase.second_discount.present? %>
-                                        <%= number_to_currency(get_second_discount_in_money_for_ap(direct_purchase),
+                                          :precision => 2) %></td>
+                                    <td>
+                                        <% if purchase_order.first_discount.present? %>
+                                          <%= number_to_currency((purchase_order.first_discount.to_f / 100) * purchase_order.receiving_value,
+                                            :separator => ",",
+                                            :delimiter => ".",
+                                            :unit => "Rp",
+                                            :precision => 2) %> (<%= "#{purchase_order.first_discount}%" %>)
+                                        <% end %>
+                                    </td>
+                                    <td>
+                                        <% if purchase_order.second_discount.present? %>
+                                          <%= number_to_currency(get_second_discount_in_money_for_ap(purchase_order),
+                                            :separator => ",",
+                                            :delimiter => ".",
+                                            :unit => "Rp",
+                                            :precision => 2) %> (<%= "#{purchase_order.second_discount}%" %> from <%= purchase_order.is_additional_disc_from_net ? "net" : "gross" %>)
+                                        <% end %>
+                                    </td>
+                                    <td>
+                                        <% if purchase_order.is_taxable_entrepreneur %>
+                                          <%
+                                          vat_in_money = if purchase_order.value_added_tax.eql?("include")
+                                            get_include_vat_in_money_for_ap(purchase_order)
+                                            else
+                                            get_vat_in_money_for_ap(purchase_order)
+                                            end
+                                        %>
+                                          <%= number_to_currency(vat_in_money,
+                                            :separator => ",",
+                                            :delimiter => ".",
+                                            :unit => "Rp",
+                                            :precision => 2) %> (<%= purchase_order.value_added_tax %>)
+                                        <% end %>
+                                    </td>
+                                    <td><%= number_to_currency(value_after_ppn_for_ap(purchase_order),
                                           :separator => ",",
                                           :delimiter => ".",
                                           :unit => "Rp",
-                                          :precision => 2) %> (<%= "#{direct_purchase.second_discount}%" %> from <%= direct_purchase.is_additional_disc_from_net ? "net" : "gross" %>)
-                                      <% end %>
-                                  </td>
-                                  <td>
-                                      <% if direct_purchase.is_taxable_entrepreneur %>
-                                        <%
-                                        vat_in_money = if direct_purchase.vat_type.eql?("include")
-                                          get_include_vat_in_money_for_ap(direct_purchase)
-                                          else
-                                          get_vat_in_money_for_ap(direct_purchase)
-                                          end
-                                      %>
-                                        <%= number_to_currency(vat_in_money,
-                                          :separator => ",",
-                                          :delimiter => ".",
-                                          :unit => "Rp",
-                                          :precision => 2) %> (<%= direct_purchase.vat_type %>)
-                                      <% end %>
-                                  </td>
-                                  <td><%= number_to_currency(value_after_ppn_for_ap(direct_purchase),
-                                        :separator => ",",
-                                        :delimiter => ".",
-                                        :unit => "Rp",
-                                        :precision => 2) %></td>
-                                  <td><%= direct_purchase.invoice_status %></td>
-                              </tr>
+                                          :precision => 2) %></td>
+                                    <td><%= purchase_order.invoice_status %></td>
+                                </tr>
+                              <% end %>
                             <% end %>
                         </tbody>
                     </table>
-                    <div id="form_container_dp"></div>
+                    <div id="form_container"></div>
                 </div>
-            </div>
-        </div>                         
-    </td>
+                <div role="tabpanel" class="tab-pane fade" id="direct_purchase" style="padding-top: 20px">
+                    <div id="search-form-container-dp" class="form-inline text-right">
+                        <div class="form-group text-left">
+                            <%= select_tag "filter-vendor-dp", options_from_collection_for_select(Vendor.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                          </div>
+                          <div class="form-group">
+                              <input type="text" class="form-control" readonly="true" id="filter-receipt-date-dp" placeholder="Receipt date" style="width: 180px">
+                          </div>
+                          <div class="form-group">
+                              <%= select_tag "invoice_status", options_for_select(AccountPayable::INVOICE_STATUSES), {prompt: "Invoice status", class: "form-control", style: "width: 150px;", id: :payment_status_dp} %>
+                            </div>
+                            <button id="search-dp-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                            <button id="pay-btn-dp" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
+                            <button id="return-item-allocation-dp" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
+                        </div>
+                        <table id="ap_listing_dp_table" class="display" width="100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Number</th>
+                                    <th>Vendor</th>
+                                    <th>Rec. Date</th>
+                                    <th>Qty</th>
+                                    <th>Gross Amount</th>
+                                    <th>1st Disc</th>
+                                    <th>2nd Disc</th>
+                                    <th>Value Added Tax (10%)</th>
+                                    <th>Net Amount</th>
+                                    <th>Invoice Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% @direct_purchases.each_with_index do |direct_purchase, index| %>
+                                  <tr id="direct_purchase_<%= direct_purchase.id %>">
+                                      <td></td>
+                                      <td><%= direct_purchase.delivery_order_number %></td>
+                                      <td><%= direct_purchase.vendor_name %></td>
+                                      <td><%= direct_purchase.receiving_date.strftime("%d/%m/%Y") %></td>
+                                      <td><%= direct_purchase.quantity_received %></td>
+                                      <td><%= number_to_currency(direct_purchase.receiving_value,
+                                            :separator => ",",
+                                            :delimiter => ".",
+                                            :unit => "Rp",
+                                            :precision => 2) %></td>
+                                      <td>
+                                          <% if direct_purchase.first_discount.present? %>
+                                            <%= number_to_currency((direct_purchase.first_discount.to_f / 100) * direct_purchase.receiving_value,
+                                              :separator => ",",
+                                              :delimiter => ".",
+                                              :unit => "Rp",
+                                              :precision => 2) %> (<%= "#{direct_purchase.first_discount}%" %>)
+                                          <% end %>
+                                      </td>
+                                      <td>
+                                          <% if direct_purchase.second_discount.present? %>
+                                            <%= number_to_currency(get_second_discount_in_money_for_ap(direct_purchase),
+                                              :separator => ",",
+                                              :delimiter => ".",
+                                              :unit => "Rp",
+                                              :precision => 2) %> (<%= "#{direct_purchase.second_discount}%" %> from <%= direct_purchase.is_additional_disc_from_net ? "net" : "gross" %>)
+                                          <% end %>
+                                      </td>
+                                      <td>
+                                          <% if direct_purchase.is_taxable_entrepreneur %>
+                                            <%
+                                            vat_in_money = if direct_purchase.vat_type.eql?("include")
+                                              get_include_vat_in_money_for_ap(direct_purchase)
+                                              else
+                                              get_vat_in_money_for_ap(direct_purchase)
+                                              end
+                                          %>
+                                            <%= number_to_currency(vat_in_money,
+                                              :separator => ",",
+                                              :delimiter => ".",
+                                              :unit => "Rp",
+                                              :precision => 2) %> (<%= direct_purchase.vat_type %>)
+                                          <% end %>
+                                      </td>
+                                      <td><%= number_to_currency(value_after_ppn_for_ap(direct_purchase),
+                                            :separator => ",",
+                                            :delimiter => ".",
+                                            :unit => "Rp",
+                                            :precision => 2) %></td>
+                                      <td><%= direct_purchase.invoice_status %></td>
+                                  </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                        <div id="form_container_dp"></div>
+                    </div>
+                </div>
+            </div>                         
+        </td>
 
-    <script>
-      var activeTab = "";
-      $(function () {
-          var aPpRdataTable = null;
-          var aPdPdataTable = null;
-          var aPpOdataTable = $('#ap_listing_po_table').DataTable({
-              "searchCols": [
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  {"search": "^$", "regex": true, "smart": false}
-              ],
-              order: [],
-              dom: 'T<"clear">lrtip',
-              columns: [
-                  {data: null, defaultContent: '', orderable: false},
-                  {data: 'number'},
-                  {data: 'name'},
-                  {data: 'po_date'},
-                  {data: 'receiving_date'},
-                  {data: 'quantity'},
-                  {data: 'gross_amount'},
-                  {data: 'first_discount'},
-                  {data: 'second_discount'},
-                  {data: 'value_added_tax'},
-                  {data: 'net_amount'},
-                  {data: 'invoice_status'}
+        <script>
+          var activeTab = "";
+          $(function () {
+              var aPpRdataTable = null;
+              var aPdPdataTable = null;
+              var aPpOdataTable = $('#ap_listing_po_table').DataTable({
+                  "searchCols": [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      {"search": "^$", "regex": true, "smart": false}
+                  ],
+                  order: [],
+                  dom: 'T<"clear">lrtip',
+                  columns: [
+                      {data: null, defaultContent: '', orderable: false},
+                      {data: 'number'},
+                      {data: 'name'},
+                      {data: 'po_date'},
+                      {data: 'receiving_date'},
+                      {data: 'quantity'},
+                      {data: 'gross_amount'},
+                      {data: 'first_discount'},
+                      {data: 'second_discount'},
+                      {data: 'value_added_tax'},
+                      {data: 'net_amount'},
+                      {data: 'invoice_status'}
 
-              ],
-              tableTools: {
-                  sRowSelect: 'os',
-                  aButtons: []
-              },
-              paging: false,
-              info: false,
-              scrollY: "250px",
-              scrollX: true,
-              scrollCollapse: true
-          });
-          $("#search-po-btn").click(function () {
-              activeTab = "purchase_order";
-              aPpOdataTable
-                      .columns(2)
-                      .search($('#filter-vendor').val())
-                      .draw();
-              var searchValue = $('#invoice_status').val();
-              var useRegex = false;
-              var useSmartSearch = true;
-              if (searchValue == "") {
-                  searchValue = "^$";
-                  useRegex = true;
-                  useSmartSearch = false;
-              }
-              aPpOdataTable
-                      .columns(11)
-                      .search(searchValue, useRegex, useSmartSearch)
-                      .draw();
-              aPpOdataTable.draw();
-          });
-          $("#search-dp-btn").click(function () {
-              activeTab = "direct_purchase";
-              aPdPdataTable
-                      .columns(2)
-                      .search($('#filter-vendor-dp').val())
-                      .draw();
-              var searchValue = $('#payment_status_dp').val();
-              var useRegex = false;
-              var useSmartSearch = true;
-              if (searchValue == "") {
-                  searchValue = "^$";
-                  useRegex = true;
-                  useSmartSearch = false;
-              }
-              aPdPdataTable
-                      .columns(10)
-                      .search(searchValue, useRegex, useSmartSearch)
-                      .draw();
-              aPdPdataTable.draw();
-          });
-          $('#filter-po-date').daterangepicker(
-                  {
-                      locale: {
-                          format: 'DD/MM/YYYY'
-                      },
-                      opens: "left",
-                      autoUpdateInput: false
-                  });
-          $('#filter-po-date').on('apply.daterangepicker', function (ev, picker) {
-              $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-          });
-          $('#filter-po-date').on('cancel.daterangepicker', function (ev, picker) {
-              $(this).val('');
-          });
-          $('#filter-receipt-date').daterangepicker(
-                  {
-                      locale: {
-                          format: 'DD/MM/YYYY'
-                      },
-                      opens: "left",
-                      autoUpdateInput: false
-                  });
-          $('#filter-receipt-date').on('apply.daterangepicker', function (ev, picker) {
-              $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-          });
-          $('#filter-receipt-date').on('cancel.daterangepicker', function (ev, picker) {
-              $(this).val('');
-          });
-          $('#filter-receipt-date-dp').daterangepicker(
-                  {
-                      locale: {
-                          format: 'DD/MM/YYYY'
-                      },
-                      opens: "left",
-                      autoUpdateInput: false
-                  });
-          $('#filter-receipt-date-dp').on('apply.daterangepicker', function (ev, picker) {
-              $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-          });
-          $('#filter-receipt-date-dp').on('cancel.daterangepicker', function (ev, picker) {
-              $(this).val('');
-          });
-          $("#pay-btn").click(function () {
-              if (aPpOdataTable.rows('.selected').data().length == 0)
-                  bootbox.alert({message: "You have not selected PO yet!", size: 'small'});
-              else {
-                  var purchaseOrderIds = [];
-                  $.each(aPpOdataTable.rows('.selected')[0], function (index, value) {
-                      purchaseOrderIds.push(aPpOdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
-                  });
-                  $.get("/account_payables/generate_form", {
-                      purchase_order_ids: purchaseOrderIds.join(",")
-                  });
-              }
-          });
-          $("#pay-btn-dp").click(function () {
-              if (aPdPdataTable.rows('.selected').data().length == 0)
-                  bootbox.alert({message: "You have not selected record yet!", size: 'small'});
-              else {
-                  var directPurchaseIds = [];
-                  $.each(aPdPdataTable.rows('.selected')[0], function (index, value) {
-                      directPurchaseIds.push(aPdPdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
-                  });
-                  $.get("/account_payables/generate_dp_payment_form", {
-                      direct_purchase_ids: directPurchaseIds.join(",")
-                  });
-              }
-          });
-          $("#return-item-allocation").click(function () {
-              // split isi dari action attributnya form untuk ambil id produk
-              $.get("/account_payables/get_purchase_returns", {
-                  vendor_id: $("#account_payable_vendor_id").val()
-              }).done(function (data) {
-                  bootbox.confirm({
-                      size: "large",
-                      title: "Unallocated Return Items of " + $("#vendor_id").html(),
-                      message: data,
-                      callback: function (result) {
-                          if (result) {
-                              if (aPpRdataTable.rows('.selected').data().length == 0) {
-                                  bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
-                                  return false;
-                              } else {
-                                  var purchaseReturnIds = [];
-                                  $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
-                                      purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
-                                  });
-                                  $.get("/account_payables/select_purchase_return", {
-                                      purchase_return_ids: purchaseReturnIds.join(","),
-                                      vendor_id: $("#account_payable_vendor_id").val(),
-                                      previous_paid: previousPaid,
-                                      total_amount_received: totalAmountReceived
-                                  });
-                              }
-                          }
-                      }
-                  }).on("shown.bs.modal", function () {
-                      aPpRdataTable = $('#ap_listing_pr_table').DataTable({
-                          order: [1, 'asc'],
-                          dom: 'T<"clear">lfrtip',
-                          columns: [
-                              {data: null, defaultContent: '', orderable: false},
-                              {data: 'pr_number'},
-                              {data: 'po_do_number'},
-                              {data: 'quantity'},
-                              {data: 'gross_amount'},
-                              {data: 'first_discount'},
-                              {data: 'second_discount'},
-                              {data: 'value_added_tax'},
-                              {data: 'net_amount'}
-
-                          ],
-                          tableTools: {
-                              sRowSelect: 'os',
-                              //sRowSelector: 'td:first-child',
-                              aButtons: ['select_all', 'select_none']
-                          },
-                          paging: false,
-                          info: false,
-                          scrollY: "250px",
-                          scrollX: true,
-                          scrollCollapse: true
-                                  /*,
-                                   bFilter: false*/
-                      });
-                      // ambil kumpulan id PR apabila ada untuk default selected di popup
-                      var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids");
-                      $.each(allocatedPurchaseReturnIds, function (index, value) {
-                          var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids")[index]).val();
-                          if (allocatedPurchaseReturnId != "") {
-                              var e = jQuery.Event("click");
-                              e.ctrlKey = true;
-                              var clickRowProcessId = setInterval(function () {
-                                  if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
-                                      $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
-                                  } else {
-                                      clearInterval(clickRowProcessId);
-                                  }
-                              }, 0);
-                          }
-                      });
-                  });
+                  ],
+                  tableTools: {
+                      sRowSelect: 'os',
+                      aButtons: []
+                  },
+                  paging: false,
+                  info: false,
+                  scrollY: "250px",
+                  scrollX: true,
+                  scrollCollapse: true
               });
-          });
-          $("#return-item-allocation-dp").click(function () {
-              // split isi dari action attributnya form untuk ambil id produk
-              $.get("/account_payables/get_purchase_returns_for_dp", {
-                  vendor_id: $("#account_payable_vendor_id_for_dp").val()
-              }).done(function (data) {
-                  bootbox.confirm({
-                      size: "large",
-                      title: "Unallocated Return Items of " + $("#vendor_id_for_dp").html(),
-                      message: data,
-                      callback: function (result) {
-                          if (result) {
-                              if (aPpRdataTable.rows('.selected').data().length == 0) {
-                                  bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
-                                  return false;
-                              } else {
-                                  var purchaseReturnIds = [];
-                                  $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
-                                      purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
-                                  });
-                                  $.get("/account_payables/select_purchase_return_for_dp", {
-                                      purchase_return_ids: purchaseReturnIds.join(","),
-                                      vendor_id: $("#account_payable_vendor_id_for_dp").val(),
-                                      previous_paid: previousPaidForDPPayment,
-                                      total_amount_received: totalAmountReceivedForDPPayment
-                                  });
-                              }
-                          }
-                      }
-                  }).on("shown.bs.modal", function () {
-                      aPpRdataTable = $('#ap_listing_pr_table').DataTable({
-                          order: [1, 'asc'],
-                          dom: 'T<"clear">lfrtip',
-                          columns: [
-                              {data: null, defaultContent: '', orderable: false},
-                              {data: 'pr_number'},
-                              {data: 'po_do_number'},
-                              {data: 'quantity'},
-                              {data: 'gross_amount'},
-                              {data: 'first_discount'},
-                              {data: 'second_discount'},
-                              {data: 'value_added_tax'},
-                              {data: 'net_amount'}
-
-                          ],
-                          tableTools: {
-                              sRowSelect: 'os',
-                              //sRowSelector: 'td:first-child',
-                              aButtons: ['select_all', 'select_none']
-                          },
-                          paging: false,
-                          info: false,
-                          scrollY: "250px",
-                          scrollX: true,
-                          scrollCollapse: true
-                                  /*,
-                                   bFilter: false*/
-                      });
-                      // ambil kumpulan id PR apabila ada untuk default selected di popup
-                      var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids-for-dp");
-                      $.each(allocatedPurchaseReturnIds, function (index, value) {
-                          var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids-for-dp")[index]).val();
-                          if (allocatedPurchaseReturnId != "") {
-                              var e = jQuery.Event("click");
-                              e.ctrlKey = true;
-                              var clickRowProcessId = setInterval(function () {
-                                  if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
-                                      $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
-                                  } else {
-                                      clearInterval(clickRowProcessId);
-                                  }
-                              }, 0);
-                          }
-                      });
-                  });
-              });
-          });
-          $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-              var target = $(e.target).attr("href"); // activated tab
-              if (target == "#direct_purchase" && aPdPdataTable == null) {
-                  aPdPdataTable = $('#ap_listing_dp_table').DataTable({
-                      "searchCols": [
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          {"search": "^$", "regex": true, "smart": false}
-                      ],
-                      order: [],
-                      dom: 'T<"clear">lrtip',
-                      columns: [
-                          {data: null, defaultContent: '', orderable: false},
-                          {data: 'number'},
-                          {data: 'name'},
-                          {data: 'receiving_date'},
-                          {data: 'quantity'},
-                          {data: 'gross_amount'},
-                          {data: 'first_discount'},
-                          {data: 'second_discount'},
-                          {data: 'value_added_tax'},
-                          {data: 'net_amount'},
-                          {data: 'invoice_status'}
-
-                      ],
-                      tableTools: {
-                          sRowSelect: 'os',
-                          //sRowSelector: 'td:first-child',
-                          aButtons: []
-                      },
-                      paging: false,
-                      info: false,
-                      scrollY: "250px",
-                      scrollX: true,
-                      scrollCollapse: true
-                              /*,
-                               bFilter: false*/
-                  });
-              }
-          });
-      });
-      $.fn.dataTable.ext.search.push(
-              function (settings, data, dataIndex) {
-                  if (activeTab == "purchase_order") {
-                      if ($("#filter-po-date").val() != "" && $("#filter-receipt-date").val() != "") {
-                          var poDate = $("#filter-po-date").val();
-                          var splittedPoStartAndEndDate = poDate.split(" - ");
-                          var poStartDate = splittedPoStartAndEndDate[0];
-                          var poEndDate = splittedPoStartAndEndDate[1];
-                          var splittedPoStartDate = poStartDate.split("/");
-                          var splittedPoEndDate = poEndDate.split("/");
-                          var convertedPoStartDate = new Date(splittedPoStartDate[1] + "/" + splittedPoStartDate[0] + "/" + splittedPoStartDate[2]);
-                          var convertedPoEndDate = new Date(splittedPoEndDate[1] + "/" + splittedPoEndDate[0] + "/" + splittedPoEndDate[2]);
-                          var tablePoDate = data[3]; // use data for the po date column
-                          var splittedTablePoDate = tablePoDate.split("/");
-                          var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
-                          var receiptDate = $("#filter-receipt-date").val();
-                          var splittedReceiptStartAndEndDate = receiptDate.split(" - ");
-                          var receiptStartDate = splittedReceiptStartAndEndDate[0];
-                          var receiptEndDate = splittedReceiptStartAndEndDate[1];
-                          var splittedReceiptStartDate = receiptStartDate.split("/");
-                          var splittedReceiptEndDate = receiptEndDate.split("/");
-                          var convertedReceiptStartDate = new Date(splittedReceiptStartDate[1] + "/" + splittedReceiptStartDate[0] + "/" + splittedReceiptStartDate[2]);
-                          var convertedReceiptEndDate = new Date(splittedReceiptEndDate[1] + "/" + splittedReceiptEndDate[0] + "/" + splittedReceiptEndDate[2]);
-                          var tableReceiptDate = data[4]; // use data for the receipt date column
-                          var splittedTableReceiptDate = tableReceiptDate.split("/");
-                          var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
-                          if (convertedPoStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedPoEndDate && convertedReceiptStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedReceiptEndDate)
-                          {
-                              return true;
-                          }
-                          return false;
-                      } else if ($("#filter-po-date").val() != "") {
-                          var poDate = $("#filter-po-date").val();
-                          var splittedStartAndEndDate = poDate.split(" - ");
-                          var startDate = splittedStartAndEndDate[0];
-                          var endDate = splittedStartAndEndDate[1];
-                          var splittedStartDate = startDate.split("/");
-                          var splittedEndDate = endDate.split("/");
-                          var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
-                          var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
-                          var tablePoDate = data[3]; // use data for the po date column
-                          var splittedTablePoDate = tablePoDate.split("/");
-                          var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
-                          if (convertedStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedEndDate)
-                          {
-                              return true;
-                          }
-                          return false;
-                      } else if ($("#filter-receipt-date").val() != "") {
-                          var receiptDate = $("#filter-receipt-date").val();
-                          var splittedStartAndEndDate = receiptDate.split(" - ");
-                          var startDate = splittedStartAndEndDate[0];
-                          var endDate = splittedStartAndEndDate[1];
-                          var splittedStartDate = startDate.split("/");
-                          var splittedEndDate = endDate.split("/");
-                          var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
-                          var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
-                          var tableReceiptDate = data[4]; // use data for the receipt date column
-                          var splittedTableReceiptDate = tableReceiptDate.split("/");
-                          var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
-                          if (convertedStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedEndDate)
-                          {
-                              return true;
-                          }
-                          return false;
-                      }
-                  } else if (activeTab == "direct_purchase") {
-                      if ($("#filter-receipt-date-dp").val() != "") {
-                          var receiptDate = $("#filter-receipt-date-dp").val();
-                          var splittedStartAndEndDate = receiptDate.split(" - ");
-                          var startDate = splittedStartAndEndDate[0];
-                          var endDate = splittedStartAndEndDate[1];
-                          var splittedStartDate = startDate.split("/");
-                          var splittedEndDate = endDate.split("/");
-                          var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
-                          var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
-                          var tableReceiptDate = data[3]; // use data for the receipt date column
-                          var splittedTableReceiptDate = tableReceiptDate.split("/");
-                          var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
-                          if (convertedStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedEndDate)
-                          {
-                              return true;
-                          }
-                          return false;
-                      }
+              $("#search-po-btn").click(function () {
+                  activeTab = "purchase_order";
+                  var vendorName = $('#filter-vendor option:selected').text().split(" - ")[1].trim();
+                  aPpOdataTable
+                          .columns(2)
+                          .search(vendorName)
+                          .draw();
+                  var searchValue = $('#invoice_status').val();
+                  var useRegex = false;
+                  var useSmartSearch = true;
+                  if (searchValue == "") {
+                      searchValue = "^$";
+                      useRegex = true;
+                      useSmartSearch = false;
                   }
-                  return true;
-              }
-      );
-    </script>
+                  aPpOdataTable
+                          .columns(11)
+                          .search(searchValue, useRegex, useSmartSearch)
+                          .draw();
+                  aPpOdataTable.draw();
+              });
+              $("#search-dp-btn").click(function () {
+                  activeTab = "direct_purchase";
+                  var vendorName = $('#filter-vendor-dp option:selected').text().split(" - ")[1].trim();
+                  aPdPdataTable
+                          .columns(2)
+                          .search(vendorName)
+                          .draw();
+                  var searchValue = $('#payment_status_dp').val();
+                  var useRegex = false;
+                  var useSmartSearch = true;
+                  if (searchValue == "") {
+                      searchValue = "^$";
+                      useRegex = true;
+                      useSmartSearch = false;
+                  }
+                  aPdPdataTable
+                          .columns(10)
+                          .search(searchValue, useRegex, useSmartSearch)
+                          .draw();
+                  aPdPdataTable.draw();
+              });
+              $('#filter-po-date').daterangepicker(
+                      {
+                          locale: {
+                              format: 'DD/MM/YYYY'
+                          },
+                          opens: "left",
+                          autoUpdateInput: false
+                      });
+              $('#filter-po-date').on('apply.daterangepicker', function (ev, picker) {
+                  $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+              });
+              $('#filter-po-date').on('cancel.daterangepicker', function (ev, picker) {
+                  $(this).val('');
+              });
+              $('#filter-receipt-date').daterangepicker(
+                      {
+                          locale: {
+                              format: 'DD/MM/YYYY'
+                          },
+                          opens: "left",
+                          autoUpdateInput: false
+                      });
+              $('#filter-receipt-date').on('apply.daterangepicker', function (ev, picker) {
+                  $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+              });
+              $('#filter-receipt-date').on('cancel.daterangepicker', function (ev, picker) {
+                  $(this).val('');
+              });
+              $('#filter-receipt-date-dp').daterangepicker(
+                      {
+                          locale: {
+                              format: 'DD/MM/YYYY'
+                          },
+                          opens: "left",
+                          autoUpdateInput: false
+                      });
+              $('#filter-receipt-date-dp').on('apply.daterangepicker', function (ev, picker) {
+                  $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+              });
+              $('#filter-receipt-date-dp').on('cancel.daterangepicker', function (ev, picker) {
+                  $(this).val('');
+              });
+              $("#pay-btn").click(function () {
+                  if (aPpOdataTable.rows('.selected').data().length == 0)
+                      bootbox.alert({message: "You have not selected PO yet!", size: 'small'});
+                  else {
+                      var purchaseOrderIds = [];
+                      $.each(aPpOdataTable.rows('.selected')[0], function (index, value) {
+                          purchaseOrderIds.push(aPpOdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                      });
+                      $.get("/account_payables/generate_form", {
+                          purchase_order_ids: purchaseOrderIds.join(",")
+                      });
+                  }
+              });
+              $("#pay-btn-dp").click(function () {
+                  if (aPdPdataTable.rows('.selected').data().length == 0)
+                      bootbox.alert({message: "You have not selected record yet!", size: 'small'});
+                  else {
+                      var directPurchaseIds = [];
+                      $.each(aPdPdataTable.rows('.selected')[0], function (index, value) {
+                          directPurchaseIds.push(aPdPdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                      });
+                      $.get("/account_payables/generate_dp_payment_form", {
+                          direct_purchase_ids: directPurchaseIds.join(",")
+                      });
+                  }
+              });
+              $("#return-item-allocation").click(function () {
+                  // split isi dari action attributnya form untuk ambil id produk
+                  $.get("/account_payables/get_purchase_returns", {
+                      vendor_id: $("#account_payable_vendor_id").val()
+                  }).done(function (data) {
+                      bootbox.confirm({
+                          size: "large",
+                          title: "Unallocated Return Items of " + $("#vendor_id").html(),
+                          message: data,
+                          callback: function (result) {
+                              if (result) {
+                                  if (aPpRdataTable.rows('.selected').data().length == 0) {
+                                      bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
+                                      return false;
+                                  } else {
+                                      var purchaseReturnIds = [];
+                                      $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
+                                          purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                                      });
+                                      $.get("/account_payables/select_purchase_return", {
+                                          purchase_return_ids: purchaseReturnIds.join(","),
+                                          vendor_id: $("#account_payable_vendor_id").val(),
+                                          previous_paid: previousPaid,
+                                          total_amount_received: totalAmountReceived
+                                      });
+                                  }
+                              }
+                          }
+                      }).on("shown.bs.modal", function () {
+                          aPpRdataTable = $('#ap_listing_pr_table').DataTable({
+                              order: [1, 'asc'],
+                              dom: 'T<"clear">lfrtip',
+                              columns: [
+                                  {data: null, defaultContent: '', orderable: false},
+                                  {data: 'pr_number'},
+                                  {data: 'po_do_number'},
+                                  {data: 'quantity'},
+                                  {data: 'gross_amount'},
+                                  {data: 'first_discount'},
+                                  {data: 'second_discount'},
+                                  {data: 'value_added_tax'},
+                                  {data: 'net_amount'}
+
+                              ],
+                              tableTools: {
+                                  sRowSelect: 'os',
+                                  //sRowSelector: 'td:first-child',
+                                  aButtons: ['select_all', 'select_none']
+                              },
+                              paging: false,
+                              info: false,
+                              scrollY: "250px",
+                              scrollX: true,
+                              scrollCollapse: true
+                                      /*,
+                                       bFilter: false*/
+                          });
+                          // ambil kumpulan id PR apabila ada untuk default selected di popup
+                          var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids");
+                          $.each(allocatedPurchaseReturnIds, function (index, value) {
+                              var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids")[index]).val();
+                              if (allocatedPurchaseReturnId != "") {
+                                  var e = jQuery.Event("click");
+                                  e.ctrlKey = true;
+                                  var clickRowProcessId = setInterval(function () {
+                                      if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
+                                          $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
+                                      } else {
+                                          clearInterval(clickRowProcessId);
+                                      }
+                                  }, 0);
+                              }
+                          });
+                      });
+                  });
+              });
+              $("#return-item-allocation-dp").click(function () {
+                  // split isi dari action attributnya form untuk ambil id produk
+                  $.get("/account_payables/get_purchase_returns_for_dp", {
+                      vendor_id: $("#account_payable_vendor_id_for_dp").val()
+                  }).done(function (data) {
+                      bootbox.confirm({
+                          size: "large",
+                          title: "Unallocated Return Items of " + $("#vendor_id_for_dp").html(),
+                          message: data,
+                          callback: function (result) {
+                              if (result) {
+                                  if (aPpRdataTable.rows('.selected').data().length == 0) {
+                                      bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
+                                      return false;
+                                  } else {
+                                      var purchaseReturnIds = [];
+                                      $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
+                                          purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                                      });
+                                      $.get("/account_payables/select_purchase_return_for_dp", {
+                                          purchase_return_ids: purchaseReturnIds.join(","),
+                                          vendor_id: $("#account_payable_vendor_id_for_dp").val(),
+                                          previous_paid: previousPaidForDPPayment,
+                                          total_amount_received: totalAmountReceivedForDPPayment
+                                      });
+                                  }
+                              }
+                          }
+                      }).on("shown.bs.modal", function () {
+                          aPpRdataTable = $('#ap_listing_pr_table').DataTable({
+                              order: [1, 'asc'],
+                              dom: 'T<"clear">lfrtip',
+                              columns: [
+                                  {data: null, defaultContent: '', orderable: false},
+                                  {data: 'pr_number'},
+                                  {data: 'po_do_number'},
+                                  {data: 'quantity'},
+                                  {data: 'gross_amount'},
+                                  {data: 'first_discount'},
+                                  {data: 'second_discount'},
+                                  {data: 'value_added_tax'},
+                                  {data: 'net_amount'}
+
+                              ],
+                              tableTools: {
+                                  sRowSelect: 'os',
+                                  //sRowSelector: 'td:first-child',
+                                  aButtons: ['select_all', 'select_none']
+                              },
+                              paging: false,
+                              info: false,
+                              scrollY: "250px",
+                              scrollX: true,
+                              scrollCollapse: true
+                                      /*,
+                                       bFilter: false*/
+                          });
+                          // ambil kumpulan id PR apabila ada untuk default selected di popup
+                          var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids-for-dp");
+                          $.each(allocatedPurchaseReturnIds, function (index, value) {
+                              var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids-for-dp")[index]).val();
+                              if (allocatedPurchaseReturnId != "") {
+                                  var e = jQuery.Event("click");
+                                  e.ctrlKey = true;
+                                  var clickRowProcessId = setInterval(function () {
+                                      if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
+                                          $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
+                                      } else {
+                                          clearInterval(clickRowProcessId);
+                                      }
+                                  }, 0);
+                              }
+                          });
+                      });
+                  });
+              });
+              $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                  var target = $(e.target).attr("href"); // activated tab
+                  if (target == "#direct_purchase" && aPdPdataTable == null) {
+                      aPdPdataTable = $('#ap_listing_dp_table').DataTable({
+                          "searchCols": [
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              {"search": "^$", "regex": true, "smart": false}
+                          ],
+                          order: [],
+                          dom: 'T<"clear">lrtip',
+                          columns: [
+                              {data: null, defaultContent: '', orderable: false},
+                              {data: 'number'},
+                              {data: 'name'},
+                              {data: 'receiving_date'},
+                              {data: 'quantity'},
+                              {data: 'gross_amount'},
+                              {data: 'first_discount'},
+                              {data: 'second_discount'},
+                              {data: 'value_added_tax'},
+                              {data: 'net_amount'},
+                              {data: 'invoice_status'}
+
+                          ],
+                          tableTools: {
+                              sRowSelect: 'os',
+                              //sRowSelector: 'td:first-child',
+                              aButtons: []
+                          },
+                          paging: false,
+                          info: false,
+                          scrollY: "250px",
+                          scrollX: true,
+                          scrollCollapse: true
+                                  /*,
+                                   bFilter: false*/
+                      });
+                  }
+              });
+              $("#filter-vendor").attr("data-placeholder", "Vendor").chosen();
+              $("#filter-vendor-dp").attr("data-placeholder", "Vendor").chosen({width: "200px"});
+          });
+          $.fn.dataTable.ext.search.push(
+                  function (settings, data, dataIndex) {
+                      if (activeTab == "purchase_order") {
+                          if ($("#filter-po-date").val() != "" && $("#filter-receipt-date").val() != "") {
+                              var poDate = $("#filter-po-date").val();
+                              var splittedPoStartAndEndDate = poDate.split(" - ");
+                              var poStartDate = splittedPoStartAndEndDate[0];
+                              var poEndDate = splittedPoStartAndEndDate[1];
+                              var splittedPoStartDate = poStartDate.split("/");
+                              var splittedPoEndDate = poEndDate.split("/");
+                              var convertedPoStartDate = new Date(splittedPoStartDate[1] + "/" + splittedPoStartDate[0] + "/" + splittedPoStartDate[2]);
+                              var convertedPoEndDate = new Date(splittedPoEndDate[1] + "/" + splittedPoEndDate[0] + "/" + splittedPoEndDate[2]);
+                              var tablePoDate = data[3]; // use data for the po date column
+                              var splittedTablePoDate = tablePoDate.split("/");
+                              var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
+                              var receiptDate = $("#filter-receipt-date").val();
+                              var splittedReceiptStartAndEndDate = receiptDate.split(" - ");
+                              var receiptStartDate = splittedReceiptStartAndEndDate[0];
+                              var receiptEndDate = splittedReceiptStartAndEndDate[1];
+                              var splittedReceiptStartDate = receiptStartDate.split("/");
+                              var splittedReceiptEndDate = receiptEndDate.split("/");
+                              var convertedReceiptStartDate = new Date(splittedReceiptStartDate[1] + "/" + splittedReceiptStartDate[0] + "/" + splittedReceiptStartDate[2]);
+                              var convertedReceiptEndDate = new Date(splittedReceiptEndDate[1] + "/" + splittedReceiptEndDate[0] + "/" + splittedReceiptEndDate[2]);
+                              var tableReceiptDate = data[4]; // use data for the receipt date column
+                              var splittedTableReceiptDate = tableReceiptDate.split("/");
+                              var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
+                              if (convertedPoStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedPoEndDate && convertedReceiptStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedReceiptEndDate)
+                              {
+                                  return true;
+                              }
+                              return false;
+                          } else if ($("#filter-po-date").val() != "") {
+                              var poDate = $("#filter-po-date").val();
+                              var splittedStartAndEndDate = poDate.split(" - ");
+                              var startDate = splittedStartAndEndDate[0];
+                              var endDate = splittedStartAndEndDate[1];
+                              var splittedStartDate = startDate.split("/");
+                              var splittedEndDate = endDate.split("/");
+                              var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
+                              var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
+                              var tablePoDate = data[3]; // use data for the po date column
+                              var splittedTablePoDate = tablePoDate.split("/");
+                              var convertedTablePoDate = new Date(splittedTablePoDate[1] + "/" + splittedTablePoDate[0] + "/" + splittedTablePoDate[2]);
+                              if (convertedStartDate <= convertedTablePoDate && convertedTablePoDate <= convertedEndDate)
+                              {
+                                  return true;
+                              }
+                              return false;
+                          } else if ($("#filter-receipt-date").val() != "") {
+                              var receiptDate = $("#filter-receipt-date").val();
+                              var splittedStartAndEndDate = receiptDate.split(" - ");
+                              var startDate = splittedStartAndEndDate[0];
+                              var endDate = splittedStartAndEndDate[1];
+                              var splittedStartDate = startDate.split("/");
+                              var splittedEndDate = endDate.split("/");
+                              var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
+                              var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
+                              var tableReceiptDate = data[4]; // use data for the receipt date column
+                              var splittedTableReceiptDate = tableReceiptDate.split("/");
+                              var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
+                              if (convertedStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedEndDate)
+                              {
+                                  return true;
+                              }
+                              return false;
+                          }
+                      } else if (activeTab == "direct_purchase") {
+                          if ($("#filter-receipt-date-dp").val() != "") {
+                              var receiptDate = $("#filter-receipt-date-dp").val();
+                              var splittedStartAndEndDate = receiptDate.split(" - ");
+                              var startDate = splittedStartAndEndDate[0];
+                              var endDate = splittedStartAndEndDate[1];
+                              var splittedStartDate = startDate.split("/");
+                              var splittedEndDate = endDate.split("/");
+                              var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
+                              var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
+                              var tableReceiptDate = data[3]; // use data for the receipt date column
+                              var splittedTableReceiptDate = tableReceiptDate.split("/");
+                              var convertedTableReceiptDate = new Date(splittedTableReceiptDate[1] + "/" + splittedTableReceiptDate[0] + "/" + splittedTableReceiptDate[2]);
+                              if (convertedStartDate <= convertedTableReceiptDate && convertedTableReceiptDate <= convertedEndDate)
+                              {
+                                  return true;
+                              }
+                              return false;
+                          }
+                      }
+                      return true;
+                  }
+          );
+        </script>
