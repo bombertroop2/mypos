@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class AccountPayablesController < ApplicationController
   authorize_resource
-  before_action :set_account_payable, only: [:show, :edit, :update, :destroy]
+  before_action :set_account_payable, only: [:show, :edit, :update, :destroy, :print]
   helper SmartListing::Helper
 
   # GET /account_payables
@@ -23,6 +23,10 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables/1
   # GET /account_payables/1.json
   def show
+  end
+  
+  def print
+    @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
   end
 
   # GET /account_payables/new

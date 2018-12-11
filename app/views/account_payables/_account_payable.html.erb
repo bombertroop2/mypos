@@ -3,5 +3,6 @@
 <td id="vendor_name_<%= object.id %>"><%= object.name rescue "" %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, account_payable_path(object), data: {remote: true}, id: "show_detail_ap_#{object.id}", title: "Show" %>
+    <%= link_to_if(can?(:manage, AccountPayable), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_path(object), :remote => true, :method => :get, title: "Print" ) %>
     <%= link_to_if(can?(:manage, AccountPayable), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
 </td>

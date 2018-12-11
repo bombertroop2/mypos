@@ -228,6 +228,9 @@ Rails.application.routes.draw do
       get 'select_purchase_return_for_dp'
       post 'create_dp_payment'
     end
+    member do
+      get 'print'
+    end
   end
   resources :emails
   #  resources :price_lists, except: :show do
