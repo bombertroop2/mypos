@@ -9,6 +9,7 @@ CLASSIFICATIONS = [
 #satu setting inputan "PurchaseOrder", "DirectPurchase"
 #AllocatedReturnItem membalikan barang PurchaseOrder / DirectPurchase ke vendor
 JOURNALTYPE = ["AccountPayable", "PurchaseOrder", "CashDisbursement", "Sale", "Tax"]
+URLSETTINGJURNAL = ["cashin", "cashout", "payable", "sale"]
 
 #accounting payment invoice belum ada
 # Adjustment masuk ke mana?

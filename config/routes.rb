@@ -310,12 +310,13 @@ Rails.application.routes.draw do
     get "generate_form", on: :collection
     patch "create", on: :collection
   end
-  
+
   # accounting
   resources :coas
-  namespace :accounting do 
-    scope ":jurnals" do 
+  namespace :accounting do
+    scope ":jurnals" do
       resources :account_settings, except: :show
+      resources :jurnal_transctions, except: :show
     end
 
     resources :account_saldos, except: [:show, :destroy, :new, :create]
