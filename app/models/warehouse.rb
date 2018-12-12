@@ -3,6 +3,8 @@ class Warehouse < ApplicationRecord
   belongs_to :supervisor
   belongs_to :region
   belongs_to :price_code
+  belongs_to :province
+  belongs_to :city
 
   has_many :event_warehouses, dependent: :restrict_with_error
   has_many :listing_stocks, dependent: :restrict_with_error
@@ -35,14 +37,14 @@ class Warehouse < ApplicationRecord
   has_one :target_relation, -> {select("1 AS one")}, class_name: "Target"
   has_one :adjustment_relation, -> {select("1 AS one")}, class_name: "Adjustment"
 
-  validates :code, :name, :warehouse_type, presence: true
+  validates :code, :name, :warehouse_type, :province_id, :city_id, presence: true
   validates :supervisor_id, :region_id, :price_code_id, :address, presence: true, unless: proc{|warehouse| warehouse.warehouse_type.eql?("in_transit")}
     validates :sku, :counter_type, presence: true, if: proc{|warehouse| warehouse.warehouse_type.present? && warehouse.warehouse_type.include?("ctr")}
       validates :code, length: {maximum: 9}, if: Proc.new {|warehouse| warehouse.code.present?}
         validate :code_not_changed, :is_area_manager_valid_to_supervise_this_warehouse?,
           :area_manager_available, :region_available, :price_code_available, :type_available,
           :warehouse_type_not_changed, :code_not_emptied, :code_not_invalid, :price_code_not_changed,
-          :in_transit_present, :counter_type_not_changed, :direct_sales_present
+          :in_transit_present, :counter_type_not_changed, :direct_sales_present, :city_available
         validate :counter_type_available, if: proc{|wr| wr.warehouse_type.present? && wr.warehouse_type.include?("ctr")}
 
           before_validation :delete_non_intransit_attributes, if: proc{|warehouse| warehouse.warehouse_type.eql?("in_transit")}
@@ -110,6 +112,10 @@ class Warehouse < ApplicationRecord
                 end
 
                 private
+                
+                def city_available
+                  errors.add(:city_id, "does not exist!") if province_id.present? && city_id.present? && City.select("1 AS one").where(id: city_id, province_id: province_id).blank?
+                end
 
                 def delete_non_intransit_attributes
                   self.address = nil
