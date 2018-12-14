@@ -1,0 +1,6 @@
+<% if @valid %>
+  <%= smart_listing_item :courier_prices, :update, @courier_price, "courier_prices/courier_price" %>
+  $("#courier-price-city-<%= @courier_price.id %>").html("<%= City.select(:name).find(@courier_price.city_id).name %>");
+<% else %>
+  <%= smart_listing_item :courier_prices, :edit, @courier_price, "courier_prices/form" %>
+<% end %>

@@ -1,0 +1,14 @@
+<td id="courier-price-courier-<%= object.id %>"><%= "#{object.code} - #{object.name}" rescue "" %></td>
+<td id="courier-price-city-<%= object.id %>"><%= object.city_name rescue "" %></td>
+<td><%= object.effective_date.strftime("%d/%m/%Y") %></td>
+<td><%= object.price_type %></td>
+<td><%= number_to_currency(object.price,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, courier_price_path(object), data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, Courier), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_courier_price_path(object), :remote => true, class: :edit, :method => :get, title: "Edit" ) %>
+      <%= link_to_if(can?(:manage, Courier), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+  </td>
