@@ -116,6 +116,10 @@ class WarehousesController < ApplicationController
       render js: "window.location = '#{warehouses_url}'"
     end
   end
+  
+  def get_cities
+    @cities = City.select(:id, :name).where(province_id: params[:province_id]).order(:name)
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -126,11 +130,11 @@ class WarehousesController < ApplicationController
       joins("LEFT JOIN common_fields price_codes_warehouses ON price_codes_warehouses.id = warehouses.price_code_id AND price_codes_warehouses.type IN ('PriceCode')").
       where(id: params[:id]).
       select("warehouses.id, warehouses.code, warehouses.name, warehouses.address, is_active, supervisors.name AS supervisor_name, common_fields.code AS region_code, price_codes_warehouses.code AS price_code_code, warehouse_type, supervisor_id, region_id, price_code_id").
-      select(:first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type).first
+      select(:province_id, :city_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def warehouse_params
-    params.require(:warehouse).permit(:code, :name, :address, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type)
+    params.require(:warehouse).permit(:code, :name, :address, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type, :province_id, :city_id)
   end
 end

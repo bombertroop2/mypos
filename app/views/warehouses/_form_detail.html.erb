@@ -29,113 +29,146 @@
                 <div class="form-group<%= control_group_error(@warehouse, :supervisor_id) %>">
                     <%= f.label :supervisor_id, "Area Manager", class: "col-sm-2 control-label" %>
                       <div class="col-sm-10">
-                          <%= f.select :supervisor_id, options_from_collection_for_select(Supervisor.select(:id, :name), :id, :name, @warehouse.supervisor_id.to_s), {prompt: true}, {tabindex: "5", class: "form-control"} %>
+                          <%= f.select :supervisor_id, options_from_collection_for_select(Supervisor.select(:id, :name), :id, :name, @warehouse.supervisor_id.to_s), {include_blank: true}, {tabindex: "5", class: "form-control"} %>
                             <%= error_help_text(@warehouse, :supervisor_id) %>
                         </div>
                     </div>
-                    <div class="form-group<%= control_group_error(@warehouse, :region_id) %>">
-                        <%= f.label :region_id, class: "col-sm-2 control-label" %>
+                    <div class="form-group<%= control_group_error(@warehouse, :province_id) %>">
+                        <%= f.label :province_id, class: "col-sm-2 control-label" %>
                           <div class="col-sm-10">
-                              <%= f.select :region_id, options_from_collection_for_select(Region.select(:id, :code), :id, :code, @warehouse.region_id.to_s), {prompt: true}, {tabindex: "6", class: "form-control"} %>
-                                <%= error_help_text(@warehouse, :region_id) %>
+                              <%= f.select :province_id, options_from_collection_for_select(Province.select(:id, :name), :id, :name, @warehouse.province_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                <%= error_help_text(@warehouse, :province_id) %>
                             </div>
                         </div>
-
-                        <div class="form-group<%= control_group_error(@warehouse, :price_code_id) %>">
-                            <%= f.label :price_code_id, class: "col-sm-2 control-label" %>
+                        <%
+                        cities = if @warehouse.province_id.present?                          
+                          options_from_collection_for_select(City.select(:id, :name).where(province_id: @warehouse.province_id).order(:name), :id, :name, @warehouse.city_id.to_s)
+                          else
+                          ""
+                          end
+                      %>
+                        <div class="form-group<%= control_group_error(@warehouse, :city_id) %>">
+                            <%= f.label :city_id, class: "col-sm-2 control-label" %>
                               <div class="col-sm-10">
-                                  <%= f.select :price_code_id, options_from_collection_for_select(PriceCode.select(:id, :code), :id, :code, @warehouse.price_code_id.to_s), {prompt: true}, {tabindex: "7", class: "form-control"} %>
-                                    <%= error_help_text(@warehouse, :price_code_id) %>
+                                  <%= f.select :city_id, cities, {include_blank: true}, {class: "form-control"} %>
+                                    <%= error_help_text(@warehouse, :city_id) %>
                                 </div>
                             </div>
-                            <div class="form-group<%= control_group_error(@warehouse, :warehouse_type) %>">
-                                <%= f.label :warehouse_type, "Type", class: "col-sm-2 control-label" %>
+                            <div class="form-group<%= control_group_error(@warehouse, :region_id) %>">
+                                <%= f.label :region_id, class: "col-sm-2 control-label" %>
                                   <div class="col-sm-10">
-                                      <%= f.select :warehouse_type, options_for_select(Warehouse::TYPES, @warehouse.warehouse_type), {prompt: true}, {tabindex: "8", class: "form-control"} %>
-                                        <%= error_help_text(@warehouse, :warehouse_type) %>
+                                      <%= f.select :region_id, options_from_collection_for_select(Region.select(:id, :code), :id, :code, @warehouse.region_id.to_s), {include_blank: true}, {tabindex: "6", class: "form-control"} %>
+                                        <%= error_help_text(@warehouse, :region_id) %>
                                     </div>
                                 </div>
-                                <% if @warehouse.warehouse_type.present? && @warehouse.warehouse_type.include?("ctr") %>
-                                  <% hidden_class_name = "" %>
-                                <% else %>
-                                  <% hidden_class_name = " hidden" %>
-                                <% end %>
-                                <div class="form-group<%= control_group_error(@warehouse, :counter_type) %><%= hidden_class_name %>" id="counter_type_field">
-                                    <%= f.label :counter_type, "Counter type", class: "col-sm-2 control-label" %>
+
+                                <div class="form-group<%= control_group_error(@warehouse, :price_code_id) %>">
+                                    <%= f.label :price_code_id, class: "col-sm-2 control-label" %>
                                       <div class="col-sm-10">
-                                          <%= f.select :counter_type, options_for_select(Warehouse::COUNTER_TYPES, @warehouse.counter_type), {prompt: true}, {class: "form-control"} %>
-                                            <%= error_help_text(@warehouse, :counter_type) %>
+                                          <%= f.select :price_code_id, options_from_collection_for_select(PriceCode.select(:id, :code), :id, :code, @warehouse.price_code_id.to_s), {include_blank: true}, {tabindex: "7", class: "form-control"} %>
+                                            <%= error_help_text(@warehouse, :price_code_id) %>
                                         </div>
                                     </div>
-                                    <div class="form-group<%= control_group_error(@warehouse, :sku) %><%= hidden_class_name %>" id="sku_field">
-                                        <%= f.label :stock_keeping_unit, "SKU", class: "col-sm-2 control-label" %>
+                                    <div class="form-group<%= control_group_error(@warehouse, :warehouse_type) %>">
+                                        <%= f.label :warehouse_type, "Type", class: "col-sm-2 control-label" %>
                                           <div class="col-sm-10">
-                                              <%= f.text_field :sku, class: "form-control" %>
-                                                <%= error_help_text(@warehouse, :sku) %>
+                                              <%= f.select :warehouse_type, options_for_select(Warehouse::TYPES, @warehouse.warehouse_type), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+                                                <%= error_help_text(@warehouse, :warehouse_type) %>
                                             </div>
-                                        </div>                                
-                                        <div class="form-group">
-                                            <%= f.label :first_message, class: "col-sm-2 control-label" %>
+                                        </div>
+                                        <% if @warehouse.warehouse_type.present? && @warehouse.warehouse_type.include?("ctr") %>
+                                          <% hidden_class_name = "" %>
+                                        <% else %>
+                                          <% hidden_class_name = " hidden" %>
+                                        <% end %>
+                                        <div class="form-group<%= control_group_error(@warehouse, :counter_type) %><%= hidden_class_name %>" id="counter_type_field">
+                                            <%= f.label :counter_type, "Counter type", class: "col-sm-2 control-label" %>
                                               <div class="col-sm-10">
-                                                  <%= f.text_field :first_message, class: "form-control inputs" %>
+                                                  <%= f.select :counter_type, options_for_select(Warehouse::COUNTER_TYPES, @warehouse.counter_type), {include_blank: true}, {class: "form-control"} %>
+                                                    <%= error_help_text(@warehouse, :counter_type) %>
                                                 </div>
                                             </div>
-                                            <div class="form-group">
-                                                <%= f.label :second_message, class: "col-sm-2 control-label" %>
+                                            <div class="form-group<%= control_group_error(@warehouse, :sku) %><%= hidden_class_name %>" id="sku_field">
+                                                <%= f.label :stock_keeping_unit, "SKU", class: "col-sm-2 control-label" %>
                                                   <div class="col-sm-10">
-                                                      <%= f.text_field :second_message, class: "form-control inputs" %>
+                                                      <%= f.text_field :sku, class: "form-control" %>
+                                                        <%= error_help_text(@warehouse, :sku) %>
                                                     </div>
-                                                </div>
+                                                </div>                                
                                                 <div class="form-group">
-                                                    <%= f.label :third_message, class: "col-sm-2 control-label" %>
+                                                    <%= f.label :first_message, class: "col-sm-2 control-label" %>
                                                       <div class="col-sm-10">
-                                                          <%= f.text_field :third_message, class: "form-control inputs" %>
+                                                          <%= f.text_field :first_message, class: "form-control inputs" %>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
-                                                        <%= f.label :fourth_message, class: "col-sm-2 control-label" %>
+                                                        <%= f.label :second_message, class: "col-sm-2 control-label" %>
                                                           <div class="col-sm-10">
-                                                              <%= f.text_field :fourth_message, class: "form-control inputs" %>
+                                                              <%= f.text_field :second_message, class: "form-control inputs" %>
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
-                                                            <%= f.label :fifth_message, class: "col-sm-2 control-label" %>
+                                                            <%= f.label :third_message, class: "col-sm-2 control-label" %>
                                                               <div class="col-sm-10">
-                                                                  <%= f.text_field :fifth_message, class: "form-control inputs" %>
+                                                                  <%= f.text_field :third_message, class: "form-control inputs" %>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
-                                                                <div class="col-sm-offset-2 col-sm-10">
-                                                                    <%= f.submit "Save", class: "btn btn-primary" %>
-                                                                      <button class="btn btn-link cancel">Cancel</button>
-                                                                  </div>
-                                                              </div>
-                                                            <% end %>
+                                                                <%= f.label :fourth_message, class: "col-sm-2 control-label" %>
+                                                                  <div class="col-sm-10">
+                                                                      <%= f.text_field :fourth_message, class: "form-control inputs" %>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <%= f.label :fifth_message, class: "col-sm-2 control-label" %>
+                                                                      <div class="col-sm-10">
+                                                                          <%= f.text_field :fifth_message, class: "form-control inputs" %>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <div class="col-sm-offset-2 col-sm-10">
+                                                                            <%= f.submit "Save", class: "btn btn-primary" %>
+                                                                              <button class="btn btn-link cancel">Cancel</button>
+                                                                          </div>
+                                                                      </div>
+                                                                    <% end %>
 
-                                                            <script>
-                                                              $(function () {
-                                                                  MaskedInput({
-                                                                      elm: document.getElementById('warehouse_code'),
-                                                                      format: '____-____',
-                                                                      separator: '-',
-                                                                      allowed: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                                  });
-                                                            <% if action_name.eql?("update") %>
-                                                                    $("#warehouse_code").val("<%= @warehouse_code %>");
-                                                            <% end %>
+                                                                    <script>
+                                                                      $(function () {
+                                                                          MaskedInput({
+                                                                              elm: document.getElementById('warehouse_code'),
+                                                                              format: '____-____',
+                                                                              separator: '-',
+                                                                              allowed: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                                          });
+                                                                    <% if action_name.eql?("update") %>
+                                                                            $("#warehouse_code").val("<%= @warehouse_code %>");
+                                                                    <% end %>
 
-                                                                  $("#warehouse_warehouse_type").change(function () {
-                                                                      if ($(this).val().trim().indexOf("ctr") >= 0) {
-                                                                          $("#counter_type_field").removeClass("hidden");
-                                                                          $("#sku_field").removeClass("hidden");
-                                                                      } else {
-                                                                          $("#counter_type_field").addClass("hidden");
-                                                                          $("#sku_field").addClass("hidden");
-                                                                      }
-                                                                  });
-                                                                  $('#warehouse_sku').on("input", function () {
-                                                                      $(this).val($(this).val().replace(/ /g, ""));
-                                                                  });
-                                                              });
+                                                                          $("#warehouse_warehouse_type").change(function () {
+                                                                              if ($(this).val().trim().indexOf("ctr") >= 0) {
+                                                                                  $("#counter_type_field").removeClass("hidden");
+                                                                                  $("#sku_field").removeClass("hidden");
+                                                                              } else {
+                                                                                  $("#counter_type_field").addClass("hidden");
+                                                                                  $("#sku_field").addClass("hidden");
+                                                                              }
+                                                                          });
+                                                                          $('#warehouse_sku').on("input", function () {
+                                                                              $(this).val($(this).val().replace(/ /g, ""));
+                                                                          });
+                                                                          $("#warehouse_supervisor_id").attr("data-placeholder", "Please select").chosen();
+                                                                          $("#warehouse_province_id").attr("data-placeholder", "Please select").chosen();
+                                                                          $("#warehouse_city_id").attr("data-placeholder", "Please select").chosen();
+                                                                          $("#warehouse_region_id").attr("data-placeholder", "Please select").chosen();
+                                                                          $("#warehouse_price_code_id").attr("data-placeholder", "Please select").chosen();
+                                                                          $("#warehouse_warehouse_type").attr("data-placeholder", "Please select").chosen();
+                                                                          $("#warehouse_counter_type").attr("data-placeholder", "Please select").chosen({width: "200px"});
+                                                                          $("#warehouse_province_id").change(function () {
+                                                                              $.get("/warehouses/get_cities", {
+                                                                                  province_id: $("#warehouse_province_id").val()
+                                                                              });
+                                                                          });
+                                                                      });
 
-                                                            </script>
+                                                                    </script>

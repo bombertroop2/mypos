@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class AccountPayablesController < ApplicationController
   authorize_resource
-  before_action :set_account_payable, only: [:show, :edit, :update, :destroy]
+  before_action :set_account_payable, only: [:show, :edit, :update, :destroy, :print]
   helper SmartListing::Helper
 
   # GET /account_payables
@@ -13,7 +13,7 @@ class AccountPayablesController < ApplicationController
       start_date = splitted_date_range[0].strip.to_date
       end_date = splitted_date_range[1].strip.to_date
     end
-    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date").joins(:vendor)
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date, amount_paid").joins(:vendor)
     account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     account_payables_scope = account_payables_scope.where(["DATE(payment_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_payment_date].present?
@@ -23,6 +23,10 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables/1
   # GET /account_payables/1.json
   def show
+  end
+  
+  def print
+    @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
   end
 
   # GET /account_payables/new
@@ -267,7 +271,7 @@ class AccountPayablesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
     params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id,
-      :giro_number, :giro_date, :amount_paid, :debt,
+      :giro_number, :giro_date, :amount_paid, :debt, :note,
       account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id],
       allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp])
   end
