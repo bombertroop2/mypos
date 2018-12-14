@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :courier_prices
   resources :account_payable_payments
   resources :adjustments, except: [:edit, :update, :destroy] do
     collection do

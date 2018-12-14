@@ -53,1195 +53,1205 @@
                     <div class="col-md-3 left_col">
                         <div class="left_col scroll-view">
                             <div class="navbar nav_title" style="border: 0;">
-                                <%#= link_to raw("<i class=\"fa fa-paw\"></i> <span>ONE-S</span>"), root_path, class: "site_title", method: :get %>
+    <%#= link_to raw("<i class=\"fa fa-paw\"></i> <span>ONE-S</span>"), root_path, class: "site_title", method: :get %>
                                 <%= link_to image_tag(image_url("OneS-Jpeg.jpg"), style: 'height:100%;width:auto;'), root_path, method: :get %>
-                              </div>
-
-                              <div class="clearfix"></div>
-
-                              <!-- menu profile quick info -->
-                              <div class="profile clearfix">
-                                  <div class="profile_pic">
-                                      <%= image_tag(image_url("img.jpg"), class: "img-circle profile_img") %>
-                                    </div>
-                                    <div class="profile_info">
-                                        <span><%= t "Welcome" %>,</span>
-                                        <h2>
-                                            <% warehouse_name = Warehouse.joins(:sales_promotion_girls).select("warehouses.name AS warehouse_name").where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id).first.warehouse_name rescue nil %>
-                                            <% if warehouse_name.present? %>
-                                              <%= "#{current_user.name} - #{warehouse_name}" %>
-                                            <% else %>
-                                              <%= current_user.name %>
-                                            <% end %>
-                                        </h2>
-                                    </div>
-                                </div>
-                                <!-- /menu profile quick info -->
-
-                                <br />
-
-                                <!-- sidebar menu -->
-                                <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-                                    <div class="menu_section">
-                                        <!--<h3>General</h3>-->
-                                        <ul class="nav side-menu">
-                                            <% if product_menu_active? %>
-                                              <li><a><i class="fa fa-cubes"></i> Product Master <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, Brand %>
-                                                        <li><%= link_to "Brands", brands_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, GoodsType %>
-                                                        <li><%= link_to "Goods Types", goods_types_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Model %>
-                                                        <li><%= link_to "Models", models_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Color %>
-                                                        <li><%= link_to "Colors", colors_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, SizeGroup %>
-                                                        <li><%= link_to "Size Groups", size_groups_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Product %>
-                                                        <li><%= link_to "Products", products_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, Product %>
-                                                        <li><%= link_to "Import Products", import_products_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if price_control_menu_active? %>
-                                              <li><a><i class="fa fa-money"></i> Price Control <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, PriceCode %>
-                                                        <li><%= link_to "Price Codes", price_codes_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CostList %>
-                                                        <li><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if warehouse_control_menu_active? %>
-                                              <li><a><i class="fa fa-industry"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, SalesPromotionGirl %>
-                                                        <li><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Supervisor %>
-                                                        <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Warehouse %>
-                                                        <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Region %>
-                                                        <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if purchase_order_menu_active? %>
-                                              <li><a><i class="fa fa-exchange"></i> Purchase Order <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, Vendor %>
-                                                        <li><%= link_to "Vendors", vendors_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, PurchaseOrder %>
-                                                        <li><%= link_to "Purchase Order Entry", purchase_orders_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, ReceivedPurchaseOrder %>
-                                                        <li><%= link_to "Receiving", receiving_index_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, PurchaseReturn %>
-                                                        <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, AccountPayable %>
-                                                        <li><%= link_to "AP Invoice", account_payables_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if booking_control_menu_active? %>
-                                              <li><a><i class="fa fa-dropbox"></i> Booking Control <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, OrderBooking %>
-                                                        <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read_action_for_staff, Shipment %>
-                                                        <li><%= link_to "Shipments", shipments_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Courier %>
-                                                        <li><%= link_to "Couriers", couriers_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if inventory_receipt_menu_active? %>
-                                              <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read_action, Shipment %>
-                                                        <li><%= link_to "Delivery Order Receipts", inventory_receipts_shipments_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read_store_to_store_inventory_receipts, StockMutation %>
-                                                        <li><%= link_to "Rolling Receipts", store_to_store_inventory_receipts_stock_mutations_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read_store_to_warehouse_inventory_receipts, StockMutation %>
-                                                        <li><%= link_to "Return Receipts", store_to_warehouse_inventory_receipts_stock_mutations_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if stock_mutation_menu_active? %>
-                                              <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read_store_to_store_mutations, StockMutation %>
-                                                        <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read_store_to_warehouse_mutations, StockMutation %>
-                                                        <li><%= link_to "Store to Warehouse", index_store_to_warehouse_mutation_stock_mutations_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if consignment_menu_active? %>
-                                              <li><a><i class="fa fa-calculator"></i> Consignments <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :manage, ConsignmentSale %>
-                                                        <li><%= link_to "Sale Entry", new_consignment_sale_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, ConsignmentSale %>
-                                                        <li><%= link_to "Listing Sales", consignment_sales_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if report_menu_active? || goods_in_transit_active? %>
-                                              <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, Stock %>
-                                                        <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
-                                                      <% end %>
-
-                                                      <% if goods_in_transit_active? %>
-                                                        <li><a>Goods In Transit<span class="fa fa-chevron-down"></span></a>
-                                                            <ul class="nav child_menu">
-                                                                <li><%= link_to "Delivery Orders", shipment_goods_goods_in_transits_path, method: :get %></li>
-                                                                <li><%= link_to "Rolling Goods", mutation_goods_goods_in_transits_path, method: :get %></li>
-                                                                <li><%= link_to "Returned Goods", returned_goods_goods_in_transits_path, method: :get %></li>
-                                                            </ul>
-                                                        </li>
-                                                      <% end %>
-
-                                                      <% if can? :read, StockMovement %>
-                                                        <li><%= link_to "Stock Movement", stock_movements_path, method: :get %></li>
-                                                      <% end %>
-
-                                                      <% if can? :read, ListingStock %>
-                                                        <li><%= link_to "Listing Stocks", listing_stocks_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, GrowthReport %>
-                                                        <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, QuantitySoldChart %>
-                                                        <li><%= link_to "Pie Chart of Qty Sold", quantity_sold_charts_index_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, SellThru %>
-                                                        <li><%= link_to "Sell Thru", sell_thru_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if cashier_menu_active? %>
-                                              <li><a><i class="fa fa-calculator"></i> Point of Sale <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :manage, CashierOpening %>
-                                                        <li><%= link_to "Cashier Opening", new_cashier_opening_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CashDisbursement %>
-                                                        <li><%= link_to "Cash Disbursements", cash_disbursements_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CashierOpening %>
-                                                        <li><%= link_to "Cashier Closing", cashier_openings_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, Sale %>
-                                                        <li><%= link_to "Sale Entry", new_sale_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Sale %>
-                                                        <li><%= link_to "Listing Sales", sales_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, SalesReturn %>
-                                                        <li><%= link_to "Sales Returns", sales_returns_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if event_menu_active? %>
-                                              <li><a><i class="fa fa-calendar-check-o"></i> Events <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, Event %>
-                                                        <li><%= link_to "Showroom Events", events_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, CounterEvent %>
-                                                        <li><%= link_to "Counter Events", counter_events_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-                                            <% if setting_menu_active? %>
-                                              <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
-                                                  <ul class="nav child_menu">
-                                                      <% if can? :read, Email %>
-                                                        <li><%= link_to "Emails", emails_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, User %>
-                                                        <li><%= link_to "Users", users_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Customer %>
-                                                        <li><%= link_to "Customers", customers_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, AvailableMenu %>
-                                                        <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, FiscalYear %>
-                                                        <li><%= link_to "Fiscal Reopening/Closing", fiscal_years_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Bank %>
-                                                        <li><%= link_to "Banks", banks_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :read, Member %>
-                                                        <li><%= link_to "Members", members_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, Company %>
-                                                        <li><%= link_to "Companies", companies_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, Target %>
-                                                        <li><%= link_to "Targets", targets_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, BeginningStockProduct %>
-                                                        <li><%= link_to "Import Beginning Stock", import_beginning_stocks_path, method: :get %></li>
-                                                      <% end %>
-                                                      <% if can? :manage, Adjustment %>
-                                                        <li><%= link_to "Adjustments", adjustments_path, method: :get %></li>
-                                                      <% end %>
-                                                  </ul>
-                                              </li>
-                                            <% end %>
-
-                                        </ul>
-                                    </div>
-                                    <!--<div class="menu_section">
-                                        <h3>Live On</h3>
-                                        <ul class="nav side-menu">
-                                            <li><a><i class="fa fa-bug"></i> Additional Pages <span class="fa fa-chevron-down"></span></a>
-                                                <ul class="nav child_menu">
-                                                    <li><a href="e_commerce.html">E-commerce</a></li>
-                                                    <li><a href="projects.html">Projects</a></li>
-                                                    <li><a href="project_detail.html">Project Detail</a></li>
-                                                    <li><a href="contacts.html">Contacts</a></li>
-                                                    <li><a href="profile.html">Profile</a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a><i class="fa fa-windows"></i> Extras <span class="fa fa-chevron-down"></span></a>
-                                                <ul class="nav child_menu">
-                                                    <li><a href="page_403.html">403 Error</a></li>
-                                                    <li><a href="page_404.html">404 Error</a></li>
-                                                    <li><a href="page_500.html">500 Error</a></li>
-                                                    <li><a href="plain_page.html">Plain Page</a></li>
-                                                    <li><a href="login.html">Login Page</a></li>
-                                                    <li><a href="pricing_tables.html">Pricing Tables</a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a href="javascript:void(0)"><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a></li>
-                                        </ul>
-                                    </div>-->
-
-                                </div>
-                                <!-- /sidebar menu -->
-
-                                <!-- /menu footer buttons -->
-                                <div class="sidebar-footer hidden-small">
-                                    <a data-toggle="tooltip" data-placement="top" title="Settings">
-                                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                                    </a>
-                                    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                                        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                                    </a>
-                                    <a data-toggle="tooltip" data-placement="top" title="Lock">
-                                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                                    </a>
-                                    <!--
-                                    <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
-                                        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-                                    </a>-->
-                                    <%= link_to(raw("<span class=\"glyphicon glyphicon-off\" aria-hidden=\"true\"></span>"), destroy_user_session_path, :method => :delete, title: "Logout", :"data-toggle" => "tooltip", :"data-placement" => "top") %>
-                                </div>
-                                <!-- /menu footer buttons -->
                             </div>
-                        </div>
 
-                        <!-- top navigation -->
-                        <div class="top_nav">
-                            <div class="nav_menu">
-                                <nav>
-                                    <div class="nav toggle">
-                                        <a id="menu_toggle"><i class="fa fa-bars"></i></a>
-                                    </div>
-
-                                    <ul class="nav navbar-nav navbar-right">
-                                        <li class="">
-                                            <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                                <%= image_tag(image_url("img.jpg")) %><%= current_user.name %>
-                                                <span class=" fa fa-angle-down"></span>
-                                            </a>
-                                            <ul class="dropdown-menu dropdown-usermenu pull-right">
-                                                <!--<li><a href="javascript:;"> Profile</a></li>
-                                                <li>
-                                                    <a href="javascript:;">
-                                                        <span class="badge bg-red pull-right">50%</span>
-                                                        <span>Settings</span>
-                                                    </a>
-                                                </li>
-                                                <li><a href="javascript:;">Help</a></li>-->
-                                                <li><%= link_to(raw("<i class=\"fa fa-sign-out pull-right\"></i> Log Out"), destroy_user_session_path, :method => :delete) %></li>
-                                            </ul>
-                                        </li>
-
-                                        <%= render "notifications/notification_center", {notifications: @notifications, unnotified_notification_count: @unnotified_notification_count} %>
-
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
-                        <!-- /top navigation -->
-
-                        <!-- page content -->
-                        <div class="right_col" role="main">
-                            <%= yield %>
-                        </div>
-                        <!-- /page content -->
-
-                        <!-- footer content -->
-                        <footer>
-                            <div class="pull-right">
-                                Gentelella - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
-                            </div>
                             <div class="clearfix"></div>
-                        </footer>
-                        <!-- /footer content -->
-                      <% else %>
-                        <%= yield %>
-                      <% end %>
-                  </div>
-              </div>
 
-              <%= javascript_include_tag "application" %>
+                            <!-- menu profile quick info -->
+                            <div class="profile clearfix">
+                                <div class="profile_pic">
+                                    <%= image_tag(image_url("img.jpg"), class: "img-circle profile_img") %>
+                                  </div>
+                                  <div class="profile_info">
+                                      <span><%= t "Welcome" %>,</span>
+                                      <h2>
+                                          <% warehouse_name = Warehouse.joins(:sales_promotion_girls).select("warehouses.name AS warehouse_name").where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id).first.warehouse_name rescue nil %>
+                                          <% if warehouse_name.present? %>
+                                            <%= "#{current_user.name} - #{warehouse_name}" %>
+                                          <% else %>
+                                            <%= current_user.name %>
+                                          <% end %>
+                                      </h2>
+                                  </div>
+                              </div>
+                              <!-- /menu profile quick info -->
 
-              <script>
-                $(function () {
-      <% unless controller_name.eql?("incompatible_browsers") %>
-        <% @notifications.each do |notification| %>
-                        $("#notification_<%= notification.id %>").click(function () {
-                            $.get("/notifications/<%= notification.id %>").done(function (data) {
-                                bootbox.alert({
-                                    title: "Notification",
-                                    message: data
-                                });
-                            });
-                        });
-        <% end %>
+                              <br />
+
+                              <!-- sidebar menu -->
+                              <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                                  <div class="menu_section">
+                                      <!--<h3>General</h3>-->
+                                      <ul class="nav side-menu">
+                                          <% if product_menu_active? %>
+                                            <li><a><i class="fa fa-cubes"></i> Product Master <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Brand %>
+                                                      <li><%= link_to "Brands", brands_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, GoodsType %>
+                                                      <li><%= link_to "Goods Types", goods_types_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Model %>
+                                                      <li><%= link_to "Models", models_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Color %>
+                                                      <li><%= link_to "Colors", colors_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, SizeGroup %>
+                                                      <li><%= link_to "Size Groups", size_groups_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Product %>
+                                                      <li><%= link_to "Products", products_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, Product %>
+                                                      <li><%= link_to "Import Products", import_products_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if price_control_menu_active? %>
+                                            <li><a><i class="fa fa-money"></i> Price Control <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, PriceCode %>
+                                                      <li><%= link_to "Price Codes", price_codes_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, CostList %>
+                                                      <li><%= link_to "Costs & Prices", "/cost_prices", method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if warehouse_control_menu_active? %>
+                                            <li><a><i class="fa fa-industry"></i> Warehouse Control <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, SalesPromotionGirl %>
+                                                      <li><%= link_to "Sales Promotion Girls", sales_promotion_girls_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Supervisor %>
+                                                      <li class="<%= params[:controller].eql?("area_managers") ? "active" : "" %>"><%= link_to "Area Managers", area_managers_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Warehouse %>
+                                                      <li class="<%= params[:controller].eql?("warehouses") ? "active" : "" %>"><%= link_to "Warehouses", warehouses_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Region %>
+                                                      <li class="<%= params[:controller].eql?("regions") ? "active" : "" %>"><%= link_to "Regions", regions_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if purchase_order_menu_active? %>
+                                            <li><a><i class="fa fa-exchange"></i> Purchase Order <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Vendor %>
+                                                      <li><%= link_to "Vendors", vendors_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, PurchaseOrder %>
+                                                      <li><%= link_to "Purchase Order Entry", purchase_orders_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, ReceivedPurchaseOrder %>
+                                                      <li><%= link_to "Receiving", receiving_index_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, PurchaseReturn %>
+                                                      <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountPayable %>
+                                                      <li><%= link_to "AP Invoice", account_payables_path, method: :get %></li>
+                                                    <% end %>
+                                                    <%# if can? :read, AccountPayablePayment %>
+                                                      <%#*<li><%= link_to "AP Payments", account_payable_payments_path, method: :get %></li>%>
+                                                    <%# end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if booking_control_menu_active? %>
+                                            <li><a><i class="fa fa-dropbox"></i> Booking Control <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, OrderBooking %>
+                                                      <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read_action_for_staff, Shipment %>
+                                                      <li><%= link_to "Shipments", shipments_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if inventory_receipt_menu_active? %>
+                                            <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read_action, Shipment %>
+                                                      <li><%= link_to "Delivery Order Receipts", inventory_receipts_shipments_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read_store_to_store_inventory_receipts, StockMutation %>
+                                                      <li><%= link_to "Rolling Receipts", store_to_store_inventory_receipts_stock_mutations_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read_store_to_warehouse_inventory_receipts, StockMutation %>
+                                                      <li><%= link_to "Return Receipts", store_to_warehouse_inventory_receipts_stock_mutations_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if stock_mutation_menu_active? %>
+                                            <li><a><i class="fa fa-recycle"></i> Stock Mutations <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read_store_to_store_mutations, StockMutation %>
+                                                      <li><%= link_to "Store to Store", stock_mutations_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read_store_to_warehouse_mutations, StockMutation %>
+                                                      <li><%= link_to "Store to Warehouse", index_store_to_warehouse_mutation_stock_mutations_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if consignment_menu_active? %>
+                                            <li><a><i class="fa fa-calculator"></i> Consignments <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :manage, ConsignmentSale %>
+                                                      <li><%= link_to "Sale Entry", new_consignment_sale_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, ConsignmentSale %>
+                                                      <li><%= link_to "Listing Sales", consignment_sales_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if report_menu_active? || goods_in_transit_active? %>
+                                            <li><a><i class="fa fa-file"></i> Reports <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Stock %>
+                                                      <li><%= link_to "Stock Balance", stocks_path, method: :get %></li>
+                                                    <% end %>
+
+                                                    <% if goods_in_transit_active? %>
+                                                      <li><a>Goods In Transit<span class="fa fa-chevron-down"></span></a>
+                                                          <ul class="nav child_menu">
+                                                              <li><%= link_to "Delivery Orders", shipment_goods_goods_in_transits_path, method: :get %></li>
+                                                              <li><%= link_to "Rolling Goods", mutation_goods_goods_in_transits_path, method: :get %></li>
+                                                              <li><%= link_to "Returned Goods", returned_goods_goods_in_transits_path, method: :get %></li>
+                                                          </ul>
+                                                      </li>
+                                                    <% end %>
+
+                                                    <% if can? :read, StockMovement %>
+                                                      <li><%= link_to "Stock Movement", stock_movements_path, method: :get %></li>
+                                                    <% end %>
+
+                                                    <% if can? :read, ListingStock %>
+                                                      <li><%= link_to "Listing Stocks", listing_stocks_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, GrowthReport %>
+                                                      <li><%= link_to "Growth Report", growth_reports_index_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, QuantitySoldChart %>
+                                                      <li><%= link_to "Pie Chart of Qty Sold", quantity_sold_charts_index_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, SellThru %>
+                                                      <li><%= link_to "Sell Thru", sell_thru_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if cashier_menu_active? %>
+                                            <li><a><i class="fa fa-calculator"></i> Point of Sale <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :manage, CashierOpening %>
+                                                      <li><%= link_to "Cashier Opening", new_cashier_opening_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, CashDisbursement %>
+                                                      <li><%= link_to "Cash Disbursements", cash_disbursements_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, CashierOpening %>
+                                                      <li><%= link_to "Cashier Closing", cashier_openings_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, Sale %>
+                                                      <li><%= link_to "Sale Entry", new_sale_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Sale %>
+                                                      <li><%= link_to "Listing Sales", sales_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, SalesReturn %>
+                                                      <li><%= link_to "Sales Returns", sales_returns_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if event_menu_active? %>
+                                            <li><a><i class="fa fa-calendar-check-o"></i> Events <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Event %>
+                                                      <li><%= link_to "Showroom Events", events_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, CounterEvent %>
+                                                      <li><%= link_to "Counter Events", counter_events_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if expedition_menu_active? %>
+                                            <li><a><i class="fa fa-truck"></i> Expedition <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Courier %>
+                                                      <li><%= link_to "Couriers", couriers_path, method: :get %></li>
+                                                      <li><%= link_to "Courier Prices", courier_prices_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if setting_menu_active? %>
+                                            <li><a><i class="fa fa-cogs"></i> Settings <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Email %>
+                                                      <li><%= link_to "Emails", emails_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, User %>
+                                                      <li><%= link_to "Users", users_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Customer %>
+                                                      <li><%= link_to "Customers", customers_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, AvailableMenu %>
+                                                      <li><%= link_to "Available Menus", new_available_menu_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, FiscalYear %>
+                                                      <li><%= link_to "Fiscal Reopening/Closing", fiscal_years_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Bank %>
+                                                      <li><%= link_to "Banks", banks_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, Member %>
+                                                      <li><%= link_to "Members", members_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, Company %>
+                                                      <li><%= link_to "Companies", companies_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, Target %>
+                                                      <li><%= link_to "Targets", targets_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, BeginningStockProduct %>
+                                                      <li><%= link_to "Import Beginning Stock", import_beginning_stocks_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, Adjustment %>
+                                                      <li><%= link_to "Adjustments", adjustments_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+
+                                      </ul>
+                                  </div>
+                                  <!--<div class="menu_section">
+                                      <h3>Live On</h3>
+                                      <ul class="nav side-menu">
+                                          <li><a><i class="fa fa-bug"></i> Additional Pages <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="e_commerce.html">E-commerce</a></li>
+                                                  <li><a href="projects.html">Projects</a></li>
+                                                  <li><a href="project_detail.html">Project Detail</a></li>
+                                                  <li><a href="contacts.html">Contacts</a></li>
+                                                  <li><a href="profile.html">Profile</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a><i class="fa fa-windows"></i> Extras <span class="fa fa-chevron-down"></span></a>
+                                              <ul class="nav child_menu">
+                                                  <li><a href="page_403.html">403 Error</a></li>
+                                                  <li><a href="page_404.html">404 Error</a></li>
+                                                  <li><a href="page_500.html">500 Error</a></li>
+                                                  <li><a href="plain_page.html">Plain Page</a></li>
+                                                  <li><a href="login.html">Login Page</a></li>
+                                                  <li><a href="pricing_tables.html">Pricing Tables</a></li>
+                                              </ul>
+                                          </li>
+                                          <li><a href="javascript:void(0)"><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a></li>
+                                      </ul>
+                                  </div>-->
+
+                              </div>
+                              <!-- /sidebar menu -->
+
+                              <!-- /menu footer buttons -->
+                              <div class="sidebar-footer hidden-small">
+                                  <a data-toggle="tooltip" data-placement="top" title="Settings">
+                                      <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                  </a>
+                                  <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                                      <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+                                  </a>
+                                  <a data-toggle="tooltip" data-placement="top" title="Lock">
+                                      <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                                  </a>
+                                  <!--
+                                  <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+                                      <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                                  </a>-->
+                                  <%= link_to(raw("<span class=\"glyphicon glyphicon-off\" aria-hidden=\"true\"></span>"), destroy_user_session_path, :method => :delete, title: "Logout", :"data-toggle" => "tooltip", :"data-placement" => "top") %>
+                              </div>
+                              <!-- /menu footer buttons -->
+                          </div>
+                      </div>
+
+                      <!-- top navigation -->
+                      <div class="top_nav">
+                          <div class="nav_menu">
+                              <nav>
+                                  <div class="nav toggle">
+                                      <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                                  </div>
+
+                                  <ul class="nav navbar-nav navbar-right">
+                                      <li class="">
+                                          <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                              <%= image_tag(image_url("img.jpg")) %><%= current_user.name %>
+                                              <span class=" fa fa-angle-down"></span>
+                                          </a>
+                                          <ul class="dropdown-menu dropdown-usermenu pull-right">
+                                              <!--<li><a href="javascript:;"> Profile</a></li>
+                                              <li>
+                                                  <a href="javascript:;">
+                                                      <span class="badge bg-red pull-right">50%</span>
+                                                      <span>Settings</span>
+                                                  </a>
+                                              </li>
+                                              <li><a href="javascript:;">Help</a></li>-->
+                                              <li><%= link_to(raw("<i class=\"fa fa-sign-out pull-right\"></i> Log Out"), destroy_user_session_path, :method => :delete) %></li>
+                                          </ul>
+                                      </li>
+
+                                      <%= render "notifications/notification_center", {notifications: @notifications, unnotified_notification_count: @unnotified_notification_count} %>
+
+                                  </ul>
+                              </nav>
+                          </div>
+                      </div>
+                      <!-- /top navigation -->
+
+                      <!-- page content -->
+                      <div class="right_col" role="main">
+                          <%= yield %>
+                      </div>
+                      <!-- /page content -->
+
+                      <!-- footer content -->
+                      <footer>
+                          <div class="pull-right">
+                              Gentelella - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
+                          </div>
+                          <div class="clearfix"></div>
+                      </footer>
+                      <!-- /footer content -->
+                    <% else %>
+                      <%= yield %>
+                    <% end %>
+                </div>
+            </div>
+
+            <%= javascript_include_tag "application" %>
+
+            <script>
+              $(function () {
+    <% unless controller_name.eql?("incompatible_browsers") %>
+      <% @notifications.each do |notification| %>
+                      $("#notification_<%= notification.id %>").click(function () {
+                          $.get("/notifications/<%= notification.id %>").done(function (data) {
+                              bootbox.alert({
+                                  title: "Notification",
+                                  message: data
+                              });
+                          });
+                      });
       <% end %>
-      <% if controller_name.eql?("shipments") %>
-                      $("#search-shipment-btn").click(function () {
+    <% end %>
+    <% if controller_name.eql?("shipments") %>
+                    $("#search-shipment-btn").click(function () {
+                        $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                        $("#filter_received_date").val($("#filter-received-date").val());
+                        $("#filter_string").val($("#filter-string").val());
+      <% if current_user.has_non_spg_role? %>
+                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+      <% end %>
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot?(:undelete_action, Shipment) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+
+      <% if action_name.eql?("inventory_receipts") %>
+                      $("#do_ob_number").focus();
+                      $("#do_ob_number").keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $("#btn-receive-searched-do").click();
+                              return false;
+                          }
+                      });
+                      $("#btn-receive-searched-do").click(function () {
+                          $.get("/shipments/search_do", {
+                              do_ob_number: $("#do_ob_number").val().trim()
+                          });
+                          $("#do_ob_number").val('');
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("cost_prices") %>
+                    $("#search-cost-btn").click(function () {
+                        $("#filter_effective_date").val($("#filter-effective-date").val());
+                        $("#filter_product_code").val($("#filter-product-code").val());
+      <% if current_user.has_managerial_role? %>
+                          $("#filter_cost").val($("#search-cost").val());
+      <% end %>
+                        //$(".smart-listing-controls").html($("#search-form-container").html());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot? :manage, CostList %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("receiving") %>
+                    $("#search-ro-btn").click(function () {
+                        $("#filter_receiving_date").val($("#filter-receiving-date").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot? :manage, ReceivedPurchaseOrder %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("account_payables") %>
+                    $("#search-ap-btn").click(function () {
+                        $("#filter_payment_date").val($("#filter-payment-date").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot? :manage, AccountPayable %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("users") %>
+                    $("#search-user-btn").click(function () {
+                        $("#filter_gender").val($("#filter-gender").val());
+                        $("#filter_role").val($("#filter-role").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+    <% elsif controller_name.eql?("stock_mutations") %>
+      <% if !action_name.eql?("index_store_to_warehouse_mutation") %>
+                      $("#search-stock-mutation-btn").click(function () {
+                          $("#filter_delivery_date").val($("#filter-delivery-date").val());
+                          $("#filter_approved_date").val($("#filter-approved-date").val());
+                          $("#filter_received_date").val($("#filter-received-date").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
+                      $("#search-stock-mutation-btn").click(function () {
                           $("#filter_delivery_date").val($("#filter-delivery-date").val());
                           $("#filter_received_date").val($("#filter-received-date").val());
                           $("#filter_string").val($("#filter-string").val());
-        <% if current_user.has_non_spg_role? %>
-                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-        <% end %>
+                          //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
                           $(".smart-listing-controls").submit();
-                      });
-        <% if cannot?(:undelete_action, Shipment) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-
-        <% if action_name.eql?("inventory_receipts") %>
-                        $("#do_ob_number").focus();
-                        $("#do_ob_number").keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $(this).blur();
-                                $("#btn-receive-searched-do").click();
-                                return false;
-                            }
-                        });
-                        $("#btn-receive-searched-do").click(function () {
-                            $.get("/shipments/search_do", {
-                                do_ob_number: $("#do_ob_number").val().trim()
-                            });
-                            $("#do_ob_number").val('');
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("cost_prices") %>
-                      $("#search-cost-btn").click(function () {
-                          $("#filter_effective_date").val($("#filter-effective-date").val());
-                          $("#filter_product_code").val($("#filter-product-code").val());
-        <% if current_user.has_managerial_role? %>
-                            $("#filter_cost").val($("#search-cost").val());
-        <% end %>
-                          //$(".smart-listing-controls").html($("#search-form-container").html());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot? :manage, CostList %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("receiving") %>
-                      $("#search-ro-btn").click(function () {
-                          $("#filter_receiving_date").val($("#filter-receiving-date").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot? :manage, ReceivedPurchaseOrder %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("account_payables") %>
-                      $("#search-ap-btn").click(function () {
-                          $("#filter_payment_date").val($("#filter-payment-date").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot? :manage, AccountPayable %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("users") %>
-                      $("#search-user-btn").click(function () {
-                          $("#filter_gender").val($("#filter-gender").val());
-                          $("#filter_role").val($("#filter-role").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-      <% elsif controller_name.eql?("stock_mutations") %>
-        <% if !action_name.eql?("index_store_to_warehouse_mutation") %>
-                        $("#search-stock-mutation-btn").click(function () {
-                            $("#filter_delivery_date").val($("#filter-delivery-date").val());
-                            $("#filter_approved_date").val($("#filter-approved-date").val());
-                            $("#filter_received_date").val($("#filter-received-date").val());
-                            $("#filter_string").val($("#filter-string").val());
-                            //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                            $(".smart-listing-controls").submit();
-                        });
-        <% elsif action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
-                        $("#search-stock-mutation-btn").click(function () {
-                            $("#filter_delivery_date").val($("#filter-delivery-date").val());
-                            $("#filter_received_date").val($("#filter-received-date").val());
-                            $("#filter_string").val($("#filter-string").val());
-                            //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                            $(".smart-listing-controls").submit();
-                        });
-        <% end %>
-        <% if !action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_store_mutation, StockMutation) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% elsif action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-        <% if action_name.eql?("store_to_store_inventory_receipts") && can?(:receive, StockMutation) %>
-                        $("#mutation_number").focus();
-                        $("#mutation_number").keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $(this).blur();
-                                $("#btn-receive-searched-sm").click();
-                                return false;
-                            }
-                        });
-                        $("#btn-receive-searched-sm").click(function () {
-                            $.get("/stock_mutations/search", {
-                                mutation_number: $("#mutation_number").val().trim()
-                            });
-                            $("#mutation_number").val('');
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("brands") %>
-        <% if cannot?(:manage, Brand) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("members") %>
-        <% if cannot?(:manage, Member) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("goods_types") %>
-        <% if cannot? :manage, GoodsType %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("models") %>
-        <% if cannot? :manage, Model %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("colors") %>
-        <% if cannot?(:manage, Color) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("size_groups") %>
-        <% if cannot? :manage, SizeGroup %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("products") %>
-        <% if cannot? :manage, Product %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("sales_promotion_girls") %>
-        <% if cannot? :manage, SalesPromotionGirl %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("area_managers") %>
-        <% if cannot? :manage, Supervisor %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("warehouses") %>
-        <% if cannot? :manage, Warehouse %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("regions") %>
-        <% if cannot? :manage, Region %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("vendors") %>
-        <% if cannot? :manage, Vendor %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("purchase_orders") %>
-        <% if cannot? :manage, PurchaseOrder %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("purchase_returns") %>
-        <% if cannot? :manage, PurchaseReturn %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("order_bookings") %>
-                      $("#search-ob-btn").click(function () {
-                          $("#filter_plan_date").val($("#filter-plan-date").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $("#filter_status").val($("#filter-status").val());
-        <% if current_user.has_non_spg_role? %>
-                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-        <% end %>
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot? :manage, OrderBooking %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("couriers") %>
-        <% if cannot? :manage, Courier %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("emails") %>
-        <% if cannot? :manage, Email %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("events") %>
-                      $("#search-event-btn").click(function () {
-                          $("#filter_event_start_time").val($("#filter-event-start-time").val());
-                          $("#filter_event_end_time").val($("#filter-event-end-time").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot? :manage, Event %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("goods_in_transits") %>
-        <% if action_name.eql?("shipment_goods") %>
-                        $("#search-shipment-btn").click(function () {
-                            $("#filter_delivery_date").val($("#filter-delivery-date-git").val());
-                            $("#filter_string").val($("#filter-string").val());
-          <% if current_user.has_non_spg_role? %>
-                              $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-          <% end %>
-                            $(".smart-listing-controls").submit();
-                        });
-        <% elsif action_name.eql?("returned_goods") %>
-                        $("#search-stock-mutation-btn").click(function () {
-                            $("#filter_delivery_date").val($("#filter-delivery-date-returned-goods").val());
-                            $("#filter_string").val($("#filter-string").val());
-                            //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
-                            $(".smart-listing-controls").submit();
-                        });
-        <% else %>
-                        $("#search-stock-mutation-btn").click(function () {
-                            $("#filter_delivery_date").val($("#filter-delivery-date-rolling-goods").val());
-                            $("#filter_string").val($("#filter-string").val());
-                            $(".smart-listing-controls").submit();
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("fiscal_years") %>
-        <% if cannot?(:manage, FiscalYear) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("stock_movements") %>
-                      $("#menu_toggle").click();
-                      $("#search-btn").click(function () {
-                          if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
-                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
-                          else {
-        <% if current_user.has_non_spg_role? %>
-                                $.get("/stock_movements", {
-                                    year: $("#year").val(),
-                                    month: $("#month").val(),
-                                    warehouse_id: $("#warehouse").val(),
-                                    product_code: $("#product_code").val()
-                                });
-        <% else %>
-                                $.get("/stock_movements", {
-                                    year: $("#year").val(),
-                                    month: $("#month").val(),
-                                    product_code: $("#product_code").val()
-                                });
-        <% end %>
-                          }
-                      });
-                      $("#print-btn-stock-movement").click(function () {
-                          if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
-                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
-                          else {
-                            <% if current_user.has_non_spg_role? %>
-                                $.get("/stock_movements/print", {
-                                    year: $("#year").val(),
-                                    month: $("#month").val(),
-                                    warehouse_id: $("#warehouse").val(),
-                                    product_code: $("#product_code").val()
-                                });
-                            <% else %>
-                                $.get("/stock_movements", {
-                                    year: $("#year").val(),
-                                    month: $("#month").val(),
-                                    product_code: $("#product_code").val()
-                                });
-                            <% end %>
-                          }
-                      });
-      <% elsif controller_name.eql?("listing_stocks") %>
-                      $("#menu_toggle").click();
-                      $("#search-btn").click(function () {
-                          if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
-                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
-                          else {
-        <% if current_user.has_non_spg_role? %>
-                                $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
-                                $("#filter_warehouse").val($("#warehouse").val());
-                                $(".smart-listing-controls").submit();
-        <% else %>
-                                $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
-                                $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
-                                $(".smart-listing-controls").submit();
-        <% end %>
-                          }
-                      });
-                      $("#print-btn-listing-stock").click(function () {
-                          if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
-                              bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
-                          else {
-                            <% if current_user.has_non_spg_role? %>
-                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
-                              $("#filter_warehouse").val($("#warehouse").val());
-                            <% else %>
-                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
-                              $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
-                            <% end %>
-                            $.get("/listing_stocks/print", {
-                                    filter_warehouse: $("#filter_warehouse").val(),
-                                    filter_listing_transaction_date: $("#filter_listing_transaction_date").val()
-                            });
-                          }
-                      });
-      <% elsif controller_name.eql?("cashier_openings") %>
-                      $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
-                      $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();
-                      $("#search-cashier-opening-btn").click(function () {
-                          $("#filter_opened_at").val($("#filter-opened-at").val());
-                          $("#filter_station").val($("#filter-station").val());
-                          $("#filter_shift").val($("#filter-shift").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <%# if notice.present? %>
-                      //bootbox.alert({message: "<%#= notice %>", size: 'small'});
-        <%# end %>
-      <% elsif controller_name.eql?("cash_disbursements") %>
-                      $("#search-cash-disbursement-btn").click(function () {
-                          $("#filter_date").val($("#filter-date").val());
-                          $("#filter_station").val($("#filter-station").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot?(:manage, CashDisbursement) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("banks") %>
-                      $("#search-bank-btn").click(function () {
-                          $("#filter_type").val($("#filter-type").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot?(:manage, Bank) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("growth_reports") %>
-                      $("#menu_toggle").click();
-      <% elsif controller_name.eql?("quantity_sold_charts") %>
-                      $("#menu_toggle").click();
-      <% elsif controller_name.eql?("sell_thrus") %>
-                      $("#menu_toggle").click();
-      <% elsif controller_name.eql?("sales_returns") %>
-                      $("#menu_toggle").click();
-                      $("#search-sales-return-btn").click(function () {
-                          $("#filter_date").val($("#filter-sales-return-date").val());
-                          $("#filter_string").val($("#filter-string").val());
-                          $(".smart-listing-controls").submit();
-                      });
-        <% if cannot?(:manage, SalesReturn) %>
-                        $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-                        $('#new-item-btn').unbind("click");
-                        $('#new-item-btn').click(function (e) {
-                            return false;
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("sales") %>
-        <% unless action_name.eql?("index") %>
-                        $("#menu_toggle").click();
-                        $("#member-id").focus();
-                        $(window).on("keydown", function (e) {
-                            if (e.ctrlKey && e.altKey && e.which === 49)
-                                $("#list-step-1").click();
-                            else if (e.ctrlKey && e.altKey && e.which === 50)
-                                $("#list-step-2").click();
-                            else if (e.ctrlKey && e.altKey && e.which === 51)
-                                $("#list-step-3").click();
-                            else if (e.altKey && e.which === 83 && $("#step-2").is(":visible"))
-                                $("#search-sale-product-btn").click();
-                            else if (e.shiftKey && e.altKey && e.which === 39)
-                                $(".actionBar > .buttonNext").click();
-                            else if (e.shiftKey && e.altKey && e.which === 37)
-                                $(".actionBar > .buttonPrevious").click();
-                            else if (e.shiftKey && e.altKey && e.which === 40)
-                                $(".actionBar > .buttonFinish").click();
-                        });
-
-                        $('#sale_cash').autoNumeric('init');
-                        $('#sale_pay').autoNumeric('init');
-
-                        $('#sale_cash').keyup(function () {
-                            var cashValue = parseFloat($(this).val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
-                            if (isNaN(cashValue))
-                                cashValue = 0;
-
-                            var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'))
-                            if (isNaN(saleTotal))
-                                saleTotal = 0;
-
-                            var giftEventDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
-                            if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
-                                giftEventDiscount = 0;
-
-                            var moneyChange = cashValue - (saleTotal - giftEventDiscount);
-                            $("#payment_form_sale_change").html(moneyChange);
-                            $("#payment_form_sale_change").toCurrency({
-                                precision: 2, // decimal precision
-                                delimiter: ".", // thousands delimiter
-                                separator: ",", // decimal separator
-                                unit: "Rp", // unit
-                                format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
-                                negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
-                            });
-                        });
-
-
-                        $("#search-member-btn").click(function () {
-                            $("#member-id").blur();
-                            $.get("/sales/get_member", {
-                                member_id: $("#member-id").val().trim()
-                            });
-
-                        });
-
-                        $("#search-barcode-btn").click(function () {
-                            $("#barcode").blur();
-                            $.get("/sales/get_product", {
-                                barcode: $("#barcode").val().trim()
-                            });
-
-                        });
-
-                        $('#member-id').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $("#search-member-btn").click();
-                                return false;
-                            }
-                        });
-
-                        $('#barcode').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $("#search-barcode-btn").click();
-                                return false;
-                            }
-                        });
-
-                        $('#sale_card_number').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $("#sale_trace_number").focus();
-                                return false;
-                            }
-                        });
-
-                        $('#sale_trace_number').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $(this).blur();
-                                $(".actionBar > .buttonFinish").click();
-                                return false;
-                            }
-                        });
-
-                        $('#sale_pay').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $(this).blur();
-                                $(".actionBar > .buttonFinish").click();
-
-                                return false;
-                            }
-                        });
-
-                        $("#sale_payment_method").change(function () {
-                            if ($(this).val() == "Cash") {
-                                $("#sale_card_fields_container").addClass("hidden");
-                                $("#sale_cash_field_container").removeClass("hidden");
-                                $("#sale_change_field_container").removeClass("hidden");
-                                var processId = setInterval(function () {
-                                    if ($("#sale_cash").is(":focus")) {
-                                        clearInterval(processId);
-                                    } else {
-                                        $("#sale_cash").focus();
-                                    }
-                                }, 0);
-                            } else {
-                                $("#sale_card_fields_container").removeClass("hidden");
-                                $("#sale_bank_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
-                                $("#sale_cash_field_container").addClass("hidden");
-                                $("#sale_change_field_container").addClass("hidden");
-                            }
-                            $($(".stepContainer")[0]).css("height", "100%");
-                        });
-
-
-                        $('#search-sale-product-btn').on('click', function () {
-                            bootboxDialogForm = bootbox
-                                    .dialog({
-                                        title: 'Search Product',
-                                        message: $('#searchSaleProductForm'),
-                                        show: false, /* We will show it manually later */
-                                        onEscape: true
-                                    }).on('shown.bs.modal', function () {
-                                $('#searchSaleProductForm')
-                                        .show();
-                                $("#sale_product_code").focus();
-                                $("#sale_product_code").val("");
-                                $("#sale_product_color_field_container").html("");
-                                $("#sale_product_size_field_container").html("");
-                                $("#modal_form_btn_add_product").addClass("hidden");
-                            }).on('hide.bs.modal', function (e) {
-                                $('#searchSaleProductForm').hide().appendTo('body');
-                                var processId = setInterval(function () {
-                                    if ($("#barcode").is(":focus")) {
-                                        clearInterval(processId);
-                                    } else {
-                                        $("#barcode").focus();
-                                    }
-                                }, 0);
-                            }).modal('show');
-                        });
-
-                        $('#sale_product_code').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $.get("/sales/get_product_colors", {
-                                    sale_product_code: $("#sale_product_code").val().trim()
-                                });
-                                return false;
-                            }
-                        });
-                        $('#modal_form_btn_add_product').click(function () {
-                            if ($("#sale_product_code").val().trim() == "" || $("#sale_product_color").val().trim() == "" || $("#sale_product_size").val().trim() == "")
-                                bootbox.alert({message: "Please fill out the field above", size: "small"});
-                            else
-                                $.get("/sales/get_product", {
-                                    sale_product_code: $("#sale_product_code").val().trim(),
-                                    sale_product_color: $("#sale_product_color").val().trim(),
-                                    sale_product_size: $("#sale_product_size").val().trim()
-                                });
-                        });
-                        $('#sale_cash').keypress(function (e) {
-                            var key = e.which;
-                            if (key == 13)  // the enter key code
-                            {
-                                $(this).blur();
-                                $(".actionBar > .buttonFinish").click();
-                                return false;
-                            }
-                        });
-
-                        $("#btn-change-gift-item-gift-event").click(function () {
-                            bootboxDialogFormGiftEvent = bootbox
-                                    .dialog({
-                                        title: 'Add Gift',
-                                        message: $('#addSaleGiftForm'),
-                                        show: false, /* We will show it manually later */
-                                        onEscape: true
-                                    }).on('shown.bs.modal', function () {
-                                $('#addSaleGiftForm')
-                                        .show();
-                                $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
-                                $('#discount_product').val('').trigger('chosen:updated');
-                                $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
-                                $(".gift-event-product-search-fields").addClass("hidden");
-                                $("#modal_form_btn_add_event_gift_product").addClass("hidden");
-                                $("#sale_event_gift_product_color_field_container").html("");
-                                $("#sale_event_gift_product_size_field_container").html("");
-                            }).on('hide.bs.modal', function (e) {
-                                $('#addSaleGiftForm').hide().appendTo('body');
-                            }).modal('show');
-                        });
-
-                        $("#btn-change-discount-gift-event").click(function () {
-                            bootboxDialogFormGiftEvent = bootbox
-                                    .dialog({
-                                        title: 'Add Gift',
-                                        message: $('#addSaleGiftForm'),
-                                        show: false, /* We will show it manually later */
-                                        onEscape: true
-                                    }).on('shown.bs.modal', function () {
-                                $('#addSaleGiftForm')
-                                        .show();
-                                $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
-                                $('#discount_product').val('').trigger('chosen:updated');
-                                $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
-                                $(".gift-event-product-search-fields").addClass("hidden");
-                                $("#modal_form_btn_add_event_gift_product").addClass("hidden");
-                                $("#sale_event_gift_product_color_field_container").html("");
-                                $("#sale_event_gift_product_size_field_container").html("");
-                            }).on('hide.bs.modal', function (e) {
-                                $('#addSaleGiftForm').hide().appendTo('body');
-                            }).modal('show');
-                        });
-          <% if params[:print_receipt].present? %>
-                          $.get("/sales/<%= params[:print_receipt] %>/print", {
-                              update_sale_row: false
-                          });
-          <% end %>
-          <% if !@cashier_opened %>
-                          bootbox.alert({
-                              message: 'Please open the cashier first',
-                              size: 'small',
-                              callback: function () {
-                                  window.location = '<%= new_cashier_opening_path %>';
-                              }
-                          });
-          <% end %>
-        <% else %>
-                        $("#search-sale-btn").click(function () {
-                            $("#filter_payment_method").val($("#filter-payment-method").val());
-                            $("#filter_date").val($("#filter-sale-transaction-time").val());
-                            $("#filter_string").val($("#filter-string").val());
-                            $(".smart-listing-controls").submit();
-                        });
-        <% end %>
-      <% elsif controller_name.eql?("welcome") && alert.present? %>
-                      bootbox.alert({
-                          message: '<%= alert %>',
-                          size: 'small'
                       });
       <% end %>
-                });
-              </script>
-            <% else %>
-              <div>
-                  <!--<a class="hiddenanchor" id="signup"></a>-->
-                  <!--<a class="hiddenanchor" id="signin"></a>-->
+      <% if !action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_store_mutation, StockMutation) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% elsif action_name.eql?("index_store_to_warehouse_mutation") && cannot?(:manage_store_to_warehouse_mutation, StockMutation) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+      <% if action_name.eql?("store_to_store_inventory_receipts") && can?(:receive, StockMutation) %>
+                      $("#mutation_number").focus();
+                      $("#mutation_number").keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $("#btn-receive-searched-sm").click();
+                              return false;
+                          }
+                      });
+                      $("#btn-receive-searched-sm").click(function () {
+                          $.get("/stock_mutations/search", {
+                              mutation_number: $("#mutation_number").val().trim()
+                          });
+                          $("#mutation_number").val('');
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("brands") %>
+      <% if cannot?(:manage, Brand) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("members") %>
+      <% if cannot?(:manage, Member) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("goods_types") %>
+      <% if cannot? :manage, GoodsType %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("models") %>
+      <% if cannot? :manage, Model %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("colors") %>
+      <% if cannot?(:manage, Color) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("size_groups") %>
+      <% if cannot? :manage, SizeGroup %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("products") %>
+      <% if cannot? :manage, Product %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("sales_promotion_girls") %>
+      <% if cannot? :manage, SalesPromotionGirl %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("area_managers") %>
+      <% if cannot? :manage, Supervisor %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("warehouses") %>
+      <% if cannot? :manage, Warehouse %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("regions") %>
+      <% if cannot? :manage, Region %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("vendors") %>
+      <% if cannot? :manage, Vendor %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("purchase_orders") %>
+      <% if cannot? :manage, PurchaseOrder %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("purchase_returns") %>
+      <% if cannot? :manage, PurchaseReturn %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("order_bookings") %>
+                    $("#search-ob-btn").click(function () {
+                        $("#filter_plan_date").val($("#filter-plan-date").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $("#filter_status").val($("#filter-status").val());
+      <% if current_user.has_non_spg_role? %>
+                          $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+      <% end %>
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot? :manage, OrderBooking %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("couriers") %>
+      <% if cannot? :manage, Courier %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("emails") %>
+      <% if cannot? :manage, Email %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("events") %>
+                    $("#search-event-btn").click(function () {
+                        $("#filter_event_start_time").val($("#filter-event-start-time").val());
+                        $("#filter_event_end_time").val($("#filter-event-end-time").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot? :manage, Event %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("goods_in_transits") %>
+      <% if action_name.eql?("shipment_goods") %>
+                      $("#search-shipment-btn").click(function () {
+                          $("#filter_delivery_date").val($("#filter-delivery-date-git").val());
+                          $("#filter_string").val($("#filter-string").val());
+        <% if current_user.has_non_spg_role? %>
+                            $("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+        <% end %>
+                          $(".smart-listing-controls").submit();
+                      });
+      <% elsif action_name.eql?("returned_goods") %>
+                      $("#search-stock-mutation-btn").click(function () {
+                          $("#filter_delivery_date").val($("#filter-delivery-date-returned-goods").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          //$("#filter_destination_warehouse").val($("#filter-destination-warehouse").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% else %>
+                      $("#search-stock-mutation-btn").click(function () {
+                          $("#filter_delivery_date").val($("#filter-delivery-date-rolling-goods").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("fiscal_years") %>
+      <% if cannot?(:manage, FiscalYear) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("stock_movements") %>
+                    $("#menu_toggle").click();
+                    $("#search-btn").click(function () {
+                        if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
+                            bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                        else {
+      <% if current_user.has_non_spg_role? %>
+                              $.get("/stock_movements", {
+                                  year: $("#year").val(),
+                                  month: $("#month").val(),
+                                  warehouse_id: $("#warehouse").val(),
+                                  product_code: $("#product_code").val()
+                              });
+      <% else %>
+                              $.get("/stock_movements", {
+                                  year: $("#year").val(),
+                                  month: $("#month").val(),
+                                  product_code: $("#product_code").val()
+                              });
+      <% end %>
+                        }
+                    });
+                    $("#print-btn-stock-movement").click(function () {
+                        if ($("#year").val() == "" || $("#month").val() == "" || $("#warehouse").val() == "")
+                            bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                        else {
+      <% if current_user.has_non_spg_role? %>
+                              $.get("/stock_movements/print", {
+                                  year: $("#year").val(),
+                                  month: $("#month").val(),
+                                  warehouse_id: $("#warehouse").val(),
+                                  product_code: $("#product_code").val()
+                              });
+      <% else %>
+                              $.get("/stock_movements", {
+                                  year: $("#year").val(),
+                                  month: $("#month").val(),
+                                  product_code: $("#product_code").val()
+                              });
+      <% end %>
+                        }
+                    });
+    <% elsif controller_name.eql?("listing_stocks") %>
+                    $("#menu_toggle").click();
+                    $("#search-btn").click(function () {
+                        if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
+                            bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                        else {
+      <% if current_user.has_non_spg_role? %>
+                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                              $("#filter_warehouse").val($("#warehouse").val());
+                              $(".smart-listing-controls").submit();
+      <% else %>
+                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                              $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
+                              $(".smart-listing-controls").submit();
+      <% end %>
+                        }
+                    });
+                    $("#print-btn-listing-stock").click(function () {
+                        if ($("#filter-listing-transaction-date").val() == "" || $("#warehouse").val() == "")
+                            bootbox.alert({message: "Please fill in a value for all mandatory fields", size: "small"});
+                        else {
+      <% if current_user.has_non_spg_role? %>
+                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                              $("#filter_warehouse").val($("#warehouse").val());
+      <% else %>
+                              $("#filter_listing_transaction_date").val($("#filter-listing-transaction-date").val());
+                              $("#filter_warehouse").val('<%= current_user.sales_promotion_girl.warehouse_id %>');
+      <% end %>
+                            $.get("/listing_stocks/print", {
+                                filter_warehouse: $("#filter_warehouse").val(),
+                                filter_listing_transaction_date: $("#filter_listing_transaction_date").val()
+                            });
+                        }
+                    });
+    <% elsif controller_name.eql?("cashier_openings") %>
+                    $("#cashier_opening_station").attr("data-placeholder", "Please select").chosen();
+                    $("#cashier_opening_shift").attr("data-placeholder", "Please select").chosen();
+                    $("#search-cashier-opening-btn").click(function () {
+                        $("#filter_opened_at").val($("#filter-opened-at").val());
+                        $("#filter_station").val($("#filter-station").val());
+                        $("#filter_shift").val($("#filter-shift").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <%# if notice.present? %>
+                    //bootbox.alert({message: "<%#= notice %>", size: 'small'});
+      <%# end %>
+    <% elsif controller_name.eql?("cash_disbursements") %>
+                    $("#search-cash-disbursement-btn").click(function () {
+                        $("#filter_date").val($("#filter-date").val());
+                        $("#filter_station").val($("#filter-station").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot?(:manage, CashDisbursement) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("banks") %>
+                    $("#search-bank-btn").click(function () {
+                        $("#filter_type").val($("#filter-type").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot?(:manage, Bank) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("growth_reports") %>
+                    $("#menu_toggle").click();
+    <% elsif controller_name.eql?("quantity_sold_charts") %>
+                    $("#menu_toggle").click();
+    <% elsif controller_name.eql?("sell_thrus") %>
+                    $("#menu_toggle").click();
+    <% elsif controller_name.eql?("sales_returns") %>
+                    $("#menu_toggle").click();
+                    $("#search-sales-return-btn").click(function () {
+                        $("#filter_date").val($("#filter-sales-return-date").val());
+                        $("#filter_string").val($("#filter-string").val());
+                        $(".smart-listing-controls").submit();
+                    });
+      <% if cannot?(:manage, SalesReturn) %>
+                      $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
+                      $('#new-item-btn').unbind("click");
+                      $('#new-item-btn').click(function (e) {
+                          return false;
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("sales") %>
+      <% unless action_name.eql?("index") %>
+                      $("#menu_toggle").click();
+                      $("#member-id").focus();
+                      $(window).on("keydown", function (e) {
+                          if (e.ctrlKey && e.altKey && e.which === 49)
+                              $("#list-step-1").click();
+                          else if (e.ctrlKey && e.altKey && e.which === 50)
+                              $("#list-step-2").click();
+                          else if (e.ctrlKey && e.altKey && e.which === 51)
+                              $("#list-step-3").click();
+                          else if (e.altKey && e.which === 83 && $("#step-2").is(":visible"))
+                              $("#search-sale-product-btn").click();
+                          else if (e.shiftKey && e.altKey && e.which === 39)
+                              $(".actionBar > .buttonNext").click();
+                          else if (e.shiftKey && e.altKey && e.which === 37)
+                              $(".actionBar > .buttonPrevious").click();
+                          else if (e.shiftKey && e.altKey && e.which === 40)
+                              $(".actionBar > .buttonFinish").click();
+                      });
 
-                  <div class="login_wrapper">
-                      <div class="animate form login_form">
-                          <section class="login_content">
-                              <% if alert && alert.include?("Invalid") %>
-                                <div class="alert alert-warning alert-dismissible fade in" role="alert">
-                                    <%= alert %>
+                      $('#sale_cash').autoNumeric('init');
+                      $('#sale_pay').autoNumeric('init');
+
+                      $('#sale_cash').keyup(function () {
+                          var cashValue = parseFloat($(this).val().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                          if (isNaN(cashValue))
+                              cashValue = 0;
+
+                          var saleTotal = parseFloat($("#payment_form_total_sale").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'))
+                          if (isNaN(saleTotal))
+                              saleTotal = 0;
+
+                          var giftEventDiscount = parseFloat($("#sale_gift_event_discount_field").html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.'));
+                          if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
+                              giftEventDiscount = 0;
+
+                          var moneyChange = cashValue - (saleTotal - giftEventDiscount);
+                          $("#payment_form_sale_change").html(moneyChange);
+                          $("#payment_form_sale_change").toCurrency({
+                              precision: 2, // decimal precision
+                              delimiter: ".", // thousands delimiter
+                              separator: ",", // decimal separator
+                              unit: "Rp", // unit
+                              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                          });
+                      });
+
+
+                      $("#search-member-btn").click(function () {
+                          $("#member-id").blur();
+                          $.get("/sales/get_member", {
+                              member_id: $("#member-id").val().trim()
+                          });
+
+                      });
+
+                      $("#search-barcode-btn").click(function () {
+                          $("#barcode").blur();
+                          $.get("/sales/get_product", {
+                              barcode: $("#barcode").val().trim()
+                          });
+
+                      });
+
+                      $('#member-id').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#search-member-btn").click();
+                              return false;
+                          }
+                      });
+
+                      $('#barcode').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#search-barcode-btn").click();
+                              return false;
+                          }
+                      });
+
+                      $('#sale_card_number').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#sale_trace_number").focus();
+                              return false;
+                          }
+                      });
+
+                      $('#sale_trace_number').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $(".actionBar > .buttonFinish").click();
+                              return false;
+                          }
+                      });
+
+                      $('#sale_pay').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $(".actionBar > .buttonFinish").click();
+
+                              return false;
+                          }
+                      });
+
+                      $("#sale_payment_method").change(function () {
+                          if ($(this).val() == "Cash") {
+                              $("#sale_card_fields_container").addClass("hidden");
+                              $("#sale_cash_field_container").removeClass("hidden");
+                              $("#sale_change_field_container").removeClass("hidden");
+                              var processId = setInterval(function () {
+                                  if ($("#sale_cash").is(":focus")) {
+                                      clearInterval(processId);
+                                  } else {
+                                      $("#sale_cash").focus();
+                                  }
+                              }, 0);
+                          } else {
+                              $("#sale_card_fields_container").removeClass("hidden");
+                              $("#sale_bank_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                              $("#sale_cash_field_container").addClass("hidden");
+                              $("#sale_change_field_container").addClass("hidden");
+                          }
+                          $($(".stepContainer")[0]).css("height", "100%");
+                      });
+
+
+                      $('#search-sale-product-btn').on('click', function () {
+                          bootboxDialogForm = bootbox
+                                  .dialog({
+                                      title: 'Search Product',
+                                      message: $('#searchSaleProductForm'),
+                                      show: false, /* We will show it manually later */
+                                      onEscape: true
+                                  }).on('shown.bs.modal', function () {
+                              $('#searchSaleProductForm')
+                                      .show();
+                              $("#sale_product_code").focus();
+                              $("#sale_product_code").val("");
+                              $("#sale_product_color_field_container").html("");
+                              $("#sale_product_size_field_container").html("");
+                              $("#modal_form_btn_add_product").addClass("hidden");
+                          }).on('hide.bs.modal', function (e) {
+                              $('#searchSaleProductForm').hide().appendTo('body');
+                              var processId = setInterval(function () {
+                                  if ($("#barcode").is(":focus")) {
+                                      clearInterval(processId);
+                                  } else {
+                                      $("#barcode").focus();
+                                  }
+                              }, 0);
+                          }).modal('show');
+                      });
+
+                      $('#sale_product_code').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $.get("/sales/get_product_colors", {
+                                  sale_product_code: $("#sale_product_code").val().trim()
+                              });
+                              return false;
+                          }
+                      });
+                      $('#modal_form_btn_add_product').click(function () {
+                          if ($("#sale_product_code").val().trim() == "" || $("#sale_product_color").val().trim() == "" || $("#sale_product_size").val().trim() == "")
+                              bootbox.alert({message: "Please fill out the field above", size: "small"});
+                          else
+                              $.get("/sales/get_product", {
+                                  sale_product_code: $("#sale_product_code").val().trim(),
+                                  sale_product_color: $("#sale_product_color").val().trim(),
+                                  sale_product_size: $("#sale_product_size").val().trim()
+                              });
+                      });
+                      $('#sale_cash').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $(this).blur();
+                              $(".actionBar > .buttonFinish").click();
+                              return false;
+                          }
+                      });
+
+                      $("#btn-change-gift-item-gift-event").click(function () {
+                          bootboxDialogFormGiftEvent = bootbox
+                                  .dialog({
+                                      title: 'Add Gift',
+                                      message: $('#addSaleGiftForm'),
+                                      show: false, /* We will show it manually later */
+                                      onEscape: true
+                                  }).on('shown.bs.modal', function () {
+                              $('#addSaleGiftForm')
+                                      .show();
+                              $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                              $('#discount_product').val('').trigger('chosen:updated');
+                              $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
+                              $(".gift-event-product-search-fields").addClass("hidden");
+                              $("#modal_form_btn_add_event_gift_product").addClass("hidden");
+                              $("#sale_event_gift_product_color_field_container").html("");
+                              $("#sale_event_gift_product_size_field_container").html("");
+                          }).on('hide.bs.modal', function (e) {
+                              $('#addSaleGiftForm').hide().appendTo('body');
+                          }).modal('show');
+                      });
+
+                      $("#btn-change-discount-gift-event").click(function () {
+                          bootboxDialogFormGiftEvent = bootbox
+                                  .dialog({
+                                      title: 'Add Gift',
+                                      message: $('#addSaleGiftForm'),
+                                      show: false, /* We will show it manually later */
+                                      onEscape: true
+                                  }).on('shown.bs.modal', function () {
+                              $('#addSaleGiftForm')
+                                      .show();
+                              $("#discount_product").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+                              $('#discount_product').val('').trigger('chosen:updated');
+                              $("#sale_event_gift_discount_amount_field_layout").addClass("hidden");
+                              $(".gift-event-product-search-fields").addClass("hidden");
+                              $("#modal_form_btn_add_event_gift_product").addClass("hidden");
+                              $("#sale_event_gift_product_color_field_container").html("");
+                              $("#sale_event_gift_product_size_field_container").html("");
+                          }).on('hide.bs.modal', function (e) {
+                              $('#addSaleGiftForm').hide().appendTo('body');
+                          }).modal('show');
+                      });
+        <% if params[:print_receipt].present? %>
+                        $.get("/sales/<%= params[:print_receipt] %>/print", {
+                            update_sale_row: false
+                        });
+        <% end %>
+        <% if !@cashier_opened %>
+                        bootbox.alert({
+                            message: 'Please open the cashier first',
+                            size: 'small',
+                            callback: function () {
+                                window.location = '<%= new_cashier_opening_path %>';
+                            }
+                        });
+        <% end %>
+      <% else %>
+                      $("#search-sale-btn").click(function () {
+                          $("#filter_payment_method").val($("#filter-payment-method").val());
+                          $("#filter_date").val($("#filter-sale-transaction-time").val());
+                          $("#filter_string").val($("#filter-string").val());
+                          $(".smart-listing-controls").submit();
+                      });
+      <% end %>
+    <% elsif controller_name.eql?("welcome") && alert.present? %>
+                    bootbox.alert({
+                        message: '<%= alert %>',
+                        size: 'small'
+                    });
+    <% end %>
+              });
+            </script>
+          <% else %>
+            <div>
+                <!--<a class="hiddenanchor" id="signup"></a>-->
+                <!--<a class="hiddenanchor" id="signin"></a>-->
+
+                <div class="login_wrapper">
+                    <div class="animate form login_form">
+                        <section class="login_content">
+                            <% if alert && alert.include?("Invalid") %>
+                              <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                  <%= alert %>
+                              </div>
+                            <% end %>
+                            <%= yield %>
+                        </section>
+                    </div>
+
+                    <!--<div id="register" class="animate form registration_form">
+                        <section class="login_content">
+                            <form>
+                                <h1>Create Account</h1>
+                                <div>
+                                    <input type="text" class="form-control" placeholder="Username" required="" />
                                 </div>
-                              <% end %>
-                              <%= yield %>
-                          </section>
-                      </div>
+                                <div>
+                                    <input type="email" class="form-control" placeholder="Email" required="" />
+                                </div>
+                                <div>
+                                    <input type="password" class="form-control" placeholder="Password" required="" />
+                                </div>
+                                <div>
+                                    <a class="btn btn-default submit" href="index.html">Submit</a>
+                                </div>
 
-                      <!--<div id="register" class="animate form registration_form">
-                          <section class="login_content">
-                              <form>
-                                  <h1>Create Account</h1>
-                                  <div>
-                                      <input type="text" class="form-control" placeholder="Username" required="" />
-                                  </div>
-                                  <div>
-                                      <input type="email" class="form-control" placeholder="Email" required="" />
-                                  </div>
-                                  <div>
-                                      <input type="password" class="form-control" placeholder="Password" required="" />
-                                  </div>
-                                  <div>
-                                      <a class="btn btn-default submit" href="index.html">Submit</a>
-                                  </div>
+                                <div class="clearfix"></div>
 
-                                  <div class="clearfix"></div>
+                                <div class="separator">
+                                    <p class="change_link">Already a member ?
+                                        <a href="#signin" class="to_register"> Log in </a>
+                                    </p>
 
-                                  <div class="separator">
-                                      <p class="change_link">Already a member ?
-                                          <a href="#signin" class="to_register"> Log in </a>
-                                      </p>
+                                    <div class="clearfix"></div>
+                                    <br />
 
-                                      <div class="clearfix"></div>
-                                      <br />
+                                    <div>
+                                        <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
+                                        <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and Terms</p>
+                                    </div>
+                                </div>
+                            </form>
+                        </section>
+                    </div>-->
+                </div>
+            </div>
+            <script>
+              window.onload = function () {
+                  document.getElementById("new_user").style.display = "block";
+              };
 
-                                      <div>
-                                          <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
-                                          <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and Terms</p>
-                                      </div>
-                                  </div>
-                              </form>
-                          </section>
-                      </div>-->
-                  </div>
-              </div>
-              <script>
-                window.onload = function () {
-                    document.getElementById("new_user").style.display = "block";
-                };
+            </script>
+          <% end %>
 
-              </script>
-            <% end %>
-
-            <%= yield :bottom_assets %>
-        </body>
-    </html>
+          <%= yield :bottom_assets %>
+      </body>
+  </html>

@@ -1,0 +1,31 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-courier-price-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Courier", "code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "City", "city_name" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Effective date", "effective_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Price type", "price_type" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Price", "price" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |courier_price| %>
+          <tr class="editable" data-id="<%= courier_price.id %>">
+              <%= smart_listing.render object: courier_price, partial: "courier_prices/courier_price", locals: {object: courier_price} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_courier_price_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-courier-price-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-courier-price-thead").show();
+      }
+  }, 0);
+
+</script>
