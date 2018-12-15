@@ -18,11 +18,11 @@
           %b=j.description
         %td
         %td
-      - j.details.joins(:coa).select("accounting_accounts.code, accounting_accounts.description.description, accounting_jurnal_transction_details.*").sort(:is_debit).each do |d|
-        %tr{class: "#{ "last-jurnal credit" if !d.is_dabit}"}
+      - j.detail_jurnals.each do |d|
+        %tr{class: "#{ "last-jurnal credit" if !d.is_debit}"}
           %td
           %td= d.code
-          %td{class: "#{ "credit" if !d.is_dabit}"}= d.description
-          %td= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if d.is_dabit
-          %td= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if !d.is_dabit
+          %td{class: "#{ "credit" if !d.is_debit}"}= d.description
+          %td= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if d.is_debit
+          %td= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if !d.is_debit
 
