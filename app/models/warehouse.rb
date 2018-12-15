@@ -1,4 +1,6 @@
 class Warehouse < ApplicationRecord
+  include Accounting::Warehouse
+
   audited on: [:create, :update]
   belongs_to :supervisor
   belongs_to :region
@@ -98,7 +100,7 @@ class Warehouse < ApplicationRecord
                 def self.not_in_transit
                   where("warehouse_type <> 'in_transit'")
                 end
-                
+
                 def self.not_direct_sales
                   where("warehouse_type <> 'direct_sales'")
                 end
@@ -112,7 +114,7 @@ class Warehouse < ApplicationRecord
                 end
 
                 private
-                
+
                 def city_available
                   errors.add(:city_id, "does not exist!") if province_id.present? && city_id.present? && City.select("1 AS one").where(id: city_id, province_id: province_id).blank?
                 end
@@ -264,7 +266,7 @@ class Warehouse < ApplicationRecord
                 def price_code_not_changed
                   errors.add(:price_code_id, "change is not allowed!") if price_code_id_changed? && persisted? && (cashier_opening_relation.present? || consignment_sale_relation.present?)
                 end
-                
+
                 def counter_type_not_changed
                   errors.add(:counter_type, "change is not allowed!") if counter_type_changed? && persisted? && (destination_warehouse_order_booking_relation.present? || adjustment_relation.present?)
                 end

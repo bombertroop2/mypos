@@ -1,11 +1,11 @@
 class AccountingAccount < ApplicationRecord
   belongs_to :category, class_name: "AccountingAccountCategory",  foreign_key: :category_id
-  has_many :accounting_account_saldos
+  has_many :saldos, class_name: "AccountingAccountSaldo",  foreign_key: :coa_id
   validates :code, :description, :category_id, :classification, presence: true
   validates :code, :description, uniqueness: true
 
   default_scope {joins(:category).select("accounting_accounts.*, accounting_account_categories.name AS cat_name") }
-  scope :classifications, -> (q=1) {  where(classification: q )} 
+  scope :classifications, -> (q=1) {  where(classification: q )}
 
   def self.filters(q={})
     if q[:filter].present?
