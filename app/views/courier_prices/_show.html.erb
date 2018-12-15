@@ -1,0 +1,46 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Courier</dt>
+        <dd><%= "#{object.code} - #{object.name}" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Via</dt>
+        <dd><%= object.via %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Unit</dt>
+        <dd><%= object.unit %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>City</dt>
+        <dd><%= object.city_name %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Effective date</dt>
+        <dd><%= object.effective_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Price type</dt>
+        <dd><%= object.price_type %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Price</dt>
+        <dd><%= number_to_currency(object.price,
+              :separator => ",",
+              :delimiter => ".",
+              :unit => "Rp",
+              :precision => 2) %></dd>
+    </dl>
+
+</td>

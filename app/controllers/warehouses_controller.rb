@@ -135,6 +135,6 @@ class WarehousesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def warehouse_params
-    params.require(:warehouse).permit(:code, :name, :address, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type, :province_id, :city_id)
+    params.require(:warehouse).permit(:code, :name, :address, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type, :province_id, :city_id, :coa_id)
   end
 end
