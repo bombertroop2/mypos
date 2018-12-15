@@ -74,6 +74,7 @@ gem 'activerecord-import'
 gem 'rails-jquery-autocomplete'
 
 gem 'tag-it-rails'
+gem 'haml'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

@@ -1,0 +1,11 @@
+.page-header
+  %h1 Chart Of Accounts
+= smart_listing_controls_for(:settings, {class: "form-inline text-right"}) do
+  .form-group.filter.input-append
+    = text_field_tag "q[filter]", '', class: "search form-control", |
+      placeholder: "Search...", autocomplete: :off                  |
+  .form-group.filter.input-append
+    = select_tag "q[year]", options_for_select(@years)
+  %button.btn.btn-primary.disabled{:type => "submit"}
+    %span.glyphicon.glyphicon-search
+= smart_listing_render(:settings)

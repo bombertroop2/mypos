@@ -1,0 +1,2 @@
+module Accounting::JurnalTransctionsHelper
+end

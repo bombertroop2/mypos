@@ -1,0 +1,28 @@
+.page-header
+  %h1 Jurnal Transctions #{params[:jurnals].capitalize}
+
+%table.table.table-striped.jurnal{:style => "table-layout: fixed;word-wrap: break-word;"}
+  %thead#listing-coa-thead
+    %tr
+      %th.col-md-1 No
+      %th.col-md-1 Code
+      %th.col-md-6 Description
+      %th.col-md-2 Debit
+      %th.col-md-2 Credit
+  %tbody
+    - @jurnals.each_with_index do |j, i|
+      %tr
+        %td= i + 1
+        %td
+        %td
+          %b=j.description
+        %td
+        %td
+      - j.details.joins(:coa).select("accounting_accounts.code, accounting_accounts.description.description, accounting_jurnal_transction_details.*").sort(:is_debit).each do |d|
+        %tr{class: "#{ "last-jurnal credit" if !d.is_dabit}"}
+          %td
+          %td= d.code
+          %td{class: "#{ "credit" if !d.is_dabit}"}= d.description
+          %td= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if d.is_dabit
+          %td= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if !d.is_dabit
+

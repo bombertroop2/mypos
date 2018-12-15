@@ -1,0 +1,17 @@
+%td{:colspan => "4"}
+  %div{:style => "padding-top: 20px"}
+  = form_for(@setting, url: (@setting.new_record? ? accounting_account_settings_path : accounting_account_setting_path(params[:jurnals],@setting)) ,remote: true, html: {class: "form-horizontal"}) do |f|
+    %div{:class => "form-group#{control_group_error(@setting, :coa_id)}"}
+      = f.label :coa_id, class: "col-sm-3 control-label"
+      .col-sm-9
+        = f.select :coa_id, options_for_select(@setting.coas.map{|x| [x.description, x.id]}, @setting.coa_id), {include_blank: true}, {tabindex: "8", class: "form-control"}
+        = error_help_text(@setting, :coa_id)
+    %div{:class => "form-group#{control_group_error(@setting, :is_debit)}"}
+      = f.label :is_debit, class: "col-sm-3 control-label"
+      .col-sm-9
+        = f.check_box :is_debit
+        = error_help_text(@setting, :is_debit)
+    .form-group
+      .col-sm-offset-3.col-sm-9
+        = f.submit "Save", class: "btn btn-primary"
+        %button.btn.btn-link.cancel Cancel

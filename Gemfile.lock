@@ -142,6 +142,9 @@ GEM
     geocoder (1.4.9)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
+    haml (5.0.4)
+      temple (>= 0.8.0)
+      tilt
     http (3.0.0)
       addressable (~> 2.3)
       http-cookie (~> 1.0)
@@ -301,6 +304,7 @@ GEM
     tag-it-rails (2.0.0)
       jquery-ui-rails
       railties
+    temple (0.8.0)
     thor (0.20.0)
     thread_safe (0.3.6)
     tilt (2.0.8)
@@ -363,6 +367,7 @@ DEPENDENCIES
   devise
   figaro
   geocoder
+  haml
   jbuilder (~> 2.0)
   jquery-rails
   jwt
@@ -396,4 +401,4 @@ RUBY VERSION
    ruby 2.2.3p173
 
 BUNDLED WITH
-   1.16.3
+   1.16.6

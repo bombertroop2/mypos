@@ -1,6 +1,6 @@
-<td colspan="4">
+<td colspan="5">
   <div style="padding-top: 20px"></div>
-  <%= form_for(@coa, remote: true, html: {class: "form-horizontal"}) do |f| %>
+  <%= form_for(@coa, url: (@coa.new_record? ? coas_path : coa_path(@coa)) ,remote: true, html: {class: "form-horizontal"}) do |f| %>
       <div class="form-group<%= control_group_error(@coa, :code) %>">
         <%= f.label :code, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">
@@ -8,20 +8,22 @@
           <%= error_help_text(@coa, :code) %>
         </div>
       </div>
-      <div class="form-group<%= control_group_error(@coa, :name) %>">
-        <%= f.label :name, class: "col-sm-3 control-label" %>
+      <div class="form-group<%= control_group_error(@coa, :classification) %>">
+        <%= f.label :classification, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">
-            <%= f.text_field :name, class: "form-control inputs" %>
-            <%= error_help_text(@coa, :name) %>
+            <%= f.select :classification, options_for_select(CLASSIFICATIONS.map{|x| [ x[:name], x[:id]] }, @coa.classification), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
+            <%= error_help_text(@coa, :classification) %>
         </div>
       </div>
-      <div class="form-group<%= control_group_error(@coa, :transaction_type) %>">
-        <%= f.label :transaction_type, class: "col-sm-3 control-label" %>
+
+      <div class="form-group<%= control_group_error(@coa, :category_id) %>">
+        <%= f.label :category, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">
-            <%= f.select :transaction_type, options_for_select(Coa::TRANSACTION_TYPE, @coa.transaction_type), {include_blank: true}, {tabindex: "8", class: "form-control"} %>
-            <%= error_help_text(@coa, :transaction_type) %>
+            <%= f.select :category_id, options_for_select(@coa.categories.map{|x| [x.name, x.id]}, @coa.category_id), {include_blank: true}, {tabindex: "9", class: "form-control"} %>
+            <%= error_help_text(@coa, :category_id) %>
         </div>
       </div>
+
       <div class="form-group<%= control_group_error(@coa, :description) %>">
         <%= f.label :description, class: "col-sm-3 control-label" %>
         <div class="col-sm-9">

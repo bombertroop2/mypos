@@ -1,0 +1,21 @@
+%table.table.table-striped{:style => "table-layout: fixed;word-wrap: break-word;"}
+  %thead#listing-coa-thead
+    %tr
+      %th.col-md-3= smart_listing.sortable "Code", "code"
+      %th.col-md-3= smart_listing.sortable "Name", "name"
+      %th.col-md-3= smart_listing.sortable "Saldo", "saldo"
+      %th.col-md-1
+  %tbody
+    - smart_listing.collection.each do |setting|
+      %tr.editable{"data-id" => "#{setting.id}"}
+        = smart_listing.render object: setting, partial: "setting", locals: {object: setting}
+
+= smart_listing.paginate
+:javascript
+  var processId = setInterval(function () {
+      if ($("#listing-coa-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-coa-thead").show();
+      }
+  }, 0);

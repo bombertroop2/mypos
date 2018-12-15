@@ -1,9 +1,1 @@
 <%= smart_listing_update(:coas) %>
-
-<% if cannot?(:manage, Coa) %>
-  $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
-  $('#new-item-btn').unbind("click");
-  $('#new-item-btn').click(function (e) {
-  return false;
-  });
-<% end %>
