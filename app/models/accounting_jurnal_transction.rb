@@ -2,6 +2,10 @@ class AccountingJurnalTransction < ApplicationRecord
   has_many :details, class_name: "AccountingJurnalTransctionDetail", foreign_key: :transction_id, dependent: :destroy
 
   scope :load_jurnals, -> {joins(details: [coa: :category] )}
+  scope :find_by_model, ->(model) {where(model_id: model.id, model_type: model.class.to_s).first}
+
+  def self.find_by_model(model)
+  end
 
   def self.use_setting(setting="cashin")
     AccountingAccountSetting.jurnal(setting)

@@ -5,7 +5,8 @@ module Accounting::TransactionCashOut
   include Accounting::Transaction
 
   included do
-    after_save    :save_record_data_accounting
+    after_create    :save_record_data_accounting
+    after_update    :update_record_data_accounting
   end
 
   protected
@@ -23,7 +24,5 @@ module Accounting::TransactionCashOut
     transcation.save
     self.update_saldo
   end
-
-
 
 end
