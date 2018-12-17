@@ -28,6 +28,11 @@ module Accounting::Transaction
     end
   end
 
+  def update_saldo
+    if self.class == CashDisbursement
+    end
+  end
+
   def update_record_data_accounting
     transcation = AccountingJurnalTransction.find_by_model(self)
     if self.class == CashDisbursement
