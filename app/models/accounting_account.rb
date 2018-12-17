@@ -16,6 +16,10 @@ class AccountingAccount < ApplicationRecord
     return classifications( (q[:classification] || 1))
   end
 
+  def self.select_on_view
+    select("accounting_accounts.id, concat(accounting_accounts.code, ' ' ,accounting_accounts.description) AS description")
+  end
+
   def categories
     AccountingAccountCategory.select(:id, :name)
   end
