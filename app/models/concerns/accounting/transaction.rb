@@ -20,7 +20,7 @@ module Accounting::Transaction
         { coa_id:   11,
           is_debit: true,
           total: self.price},
-        { coa_id: warehouse.coa_id,
+        { coa_id: self.warehouse.coa_id,
           is_debit: false,
           total: self.price}
       ]
@@ -37,7 +37,7 @@ module Accounting::Transaction
     transcation = AccountingJurnalTransction.find_by_model(self)
     if self.class == CashDisbursement
       transcation.update(description: check_description_is_exits?)
-      transcation.details.update_all(saldo: self.price)
+      transcation.details.update_all(total: self.price)
     end
   end
 end
