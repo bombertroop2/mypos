@@ -22,7 +22,7 @@ module Accounting::TransactionCashOut
 
     transcation.set_detail_record_transaction(self)
     transcation.save
-    self.update_saldo
+    # self.update_saldo
   end
 
 end

@@ -320,7 +320,9 @@ Rails.application.routes.draw do
   end
 
   # accounting
-  resources :coas
+  scope "accounting" do
+    resources :coas
+  end
   namespace :accounting do
     scope ":jurnals" do
       resources :account_settings, except: :show
