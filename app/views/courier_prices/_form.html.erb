@@ -1,91 +1,104 @@
 <td colspan="6">
     <div style="padding-top: 20px"></div>
     <%= form_for(@courier_price, remote: true, html: {class: "form-horizontal"}) do |f| %>
-        <% if @courier_price.new_record? %>
-          <div class="form-group<%= control_group_error(f.object, :courier_id) %>">
-              <%= f.label :courier_id, class: "col-sm-2 control-label" %>
-                <div class="col-sm-10">
-                    <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External").order(:code), :id, "code_and_name", f.object.courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
-                      <%= error_help_text(f.object, :courier_id) %>
-                  </div>
-              </div>
-            <% else %>
-              <div class="form-group">
-                  <label class="col-sm-2 control-label">
-                      Courier
-                  </label>
+        <div class="form-group<%= control_group_error(f.object, :attr_courier_id) %>">
+            <%= f.label :attr_courier_id, "Courier", class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.select :attr_courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External").order(:code), :id, "code_and_name", f.object.attr_courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                    <%= error_help_text(f.object, :attr_courier_id) %>
+                </div>
+            </div>
+            <%
+            courier_ways = if @courier_price.attr_courier_id.present?                          
+              options_from_collection_for_select(CourierWay.select(:id, :name).where(courier_id: @courier_price.attr_courier_id).order(:name), :id, :name, @courier_price.attr_courier_way_id.to_s)
+              else
+              ""
+              end
+          %>          
+            <div class="form-group<%= control_group_error(f.object, :attr_courier_way_id) %>">
+                <%= f.label :attr_courier_way_id, "Via", class: "col-sm-2 control-label" %>
                   <div class="col-sm-10">
-                      <span class="form-control" style="cursor: not-allowed;display: inline-block;width: auto"><%= "#{@courier_price.code} - #{@courier_price.name}" %></span>
-                  </div>
-              </div>
-              <div class="form-group">
-                  <label class="col-sm-2 control-label">
-                      Via
-                  </label>
-                  <div class="col-sm-10">
-                      <span class="form-control" style="cursor: not-allowed;display: inline-block;width: auto"><%= @courier_price.via %></span>
-                  </div>
-              </div>
-              <div class="form-group">
-                  <label class="col-sm-2 control-label">
-                      Unit
-                  </label>
-                  <div class="col-sm-10">
-                      <span class="form-control" style="cursor: not-allowed;display: inline-block;width: auto"><%= @courier_price.unit %></span>
-                  </div>
-              </div>
-            <% end %>
-            <div class="form-group<%= control_group_error(f.object, :city_id) %>">
-                <%= f.label :city_id, class: "col-sm-2 control-label" %>
-                  <div class="col-sm-10">
-                      <%= f.select :city_id, options_from_collection_for_select(City.select(:id, :name).order(:name), :id, :name, f.object.city_id.to_s), {include_blank: true}, {class: "form-control"} %>
-                        <%= error_help_text(f.object, :city_id) %>
+                      <%= f.select :attr_courier_way_id, courier_ways, {include_blank: true}, {class: "form-control"} %>
+                        <%= error_help_text(f.object, :attr_courier_way_id) %>
                     </div>
                 </div>
-
-                <div class="form-group<%= control_group_error(f.object, :effective_date) %>">
-                    <%= f.label :effective_date, class: "col-sm-2 control-label" %>
+                <%
+                courier_units = if @courier_price.attr_courier_way_id.present?                          
+                  options_from_collection_for_select(CourierUnit.select(:id, :name).where(courier_way_id: @courier_price.attr_courier_way_id).order(:name), :id, :name, @courier_price.courier_unit_id.to_s)
+                  else
+                  ""
+                  end
+              %>          
+                <div class="form-group<%= control_group_error(f.object, :courier_unit_id) %>">
+                    <%= f.label :courier_unit_id, "Unit", class: "col-sm-2 control-label" %>
                       <div class="col-sm-10">
-                          <%= f.text_field :effective_date, readonly: true, class: "form-control" %>
-                            <%= error_help_text(f.object, :effective_date) %>
+                          <%= f.select :courier_unit_id, courier_units, {include_blank: true}, {class: "form-control"} %>
+                            <%= error_help_text(f.object, :courier_unit_id) %>
                         </div>
                     </div>
-
-                    <div class="form-group<%= control_group_error(f.object, :price_type) %>">
-                        <%= f.label :price_type, class: "col-sm-2 control-label" %>
+                    <div class="form-group<%= control_group_error(f.object, :city_id) %>">
+                        <%= f.label :city_id, class: "col-sm-2 control-label" %>
                           <div class="col-sm-10">
-                              <%= f.select :price_type, options_for_select(CourierPrice::PRICE_TYPES, f.object.price_type), {include_blank: true}, {class: "form-control"} %>
-                                <%= error_help_text(f.object, :price_type) %>
+                              <%= f.select :city_id, options_from_collection_for_select(City.select(:id, :name).order(:name), :id, :name, f.object.city_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                <%= error_help_text(f.object, :city_id) %>
                             </div>
                         </div>
 
-                        <div class="form-group<%= control_group_error(f.object, :price) %>">
-                            <%= f.label :price, class: "col-sm-2 control-label" %>
+                        <div class="form-group<%= control_group_error(f.object, :effective_date) %>">
+                            <%= f.label :effective_date, class: "col-sm-2 control-label" %>
                               <div class="col-sm-10">
-                                  <%= f.text_field :price, class: "form-control money-fields", "data-a-sep" => ".",
-                                      "data-a-dec" => ",", "data-a-sign" => "Rp" %>
-                                    <%= error_help_text(f.object, :price) %>
+                                  <%= f.text_field :effective_date, readonly: true, class: "form-control" %>
+                                    <%= error_help_text(f.object, :effective_date) %>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <div class="col-sm-offset-2 col-sm-10">
-                                    <%= f.submit "Save", class: "btn btn-primary" %>
-                                      <button class="btn btn-link cancel">Cancel</button>
-                                  </div>
-                              </div>
-                            <% end %>
-                        </td>
+                            <div class="form-group<%= control_group_error(f.object, :price_type) %>">
+                                <%= f.label :price_type, class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.select :price_type, options_for_select(CourierPrice::PRICE_TYPES, f.object.price_type), {include_blank: true}, {class: "form-control"} %>
+                                        <%= error_help_text(f.object, :price_type) %>
+                                    </div>
+                                </div>
 
-                        <script>
-                          $(function () {
-                              if ($("#courier_price_courier_id").length > 0)
-                                  $("#courier_price_courier_id").attr("data-placeholder", "Please select").chosen();
-                              $("#courier_price_city_id").attr("data-placeholder", "Please select").chosen();
-                              $("#courier_price_price_type").attr("data-placeholder", "Please select").chosen();
-                              $("#courier_price_effective_date").datepicker({
-                                  dateFormat: "dd/mm/yy"
-                              });
-                              $('#courier_price_price').autoNumeric('init');
-                          })
-                        </script>
+                                <div class="form-group<%= control_group_error(f.object, :price) %>">
+                                    <%= f.label :price, class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.text_field :price, class: "form-control money-fields", "data-a-sep" => ".",
+                                              "data-a-dec" => ",", "data-a-sign" => "Rp" %>
+                                            <%= error_help_text(f.object, :price) %>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <%= f.submit "Save", class: "btn btn-primary" %>
+                                              <button class="btn btn-link cancel">Cancel</button>
+                                          </div>
+                                      </div>
+                                    <% end %>
+                                </td>
+
+                                <script>
+                                  $(function () {
+                                      if ($("#courier_price_attr_courier_id").length > 0)
+                                          $("#courier_price_attr_courier_id").attr("data-placeholder", "Please select").chosen();
+                                      $("#courier_price_attr_courier_way_id").attr("data-placeholder", "Please select").chosen();
+                                      $("#courier_price_courier_unit_id").attr("data-placeholder", "Please select").chosen();
+                                      $("#courier_price_city_id").attr("data-placeholder", "Please select").chosen();
+                                      $("#courier_price_price_type").attr("data-placeholder", "Please select").chosen();
+                                      $("#courier_price_effective_date").datepicker({
+                                          dateFormat: "dd/mm/yy"
+                                      });
+                                      $('#courier_price_price').autoNumeric('init');
+                                      $("#courier_price_attr_courier_id").change(function () {
+                                          $.get("/courier_prices/get_courier_ways", {
+                                              courier_id: $("#courier_price_attr_courier_id").val()
+                                          });
+                                      });
+                                      $("#courier_price_attr_courier_way_id").change(function () {
+                                          $.get("/courier_prices/get_courier_units", {
+                                              courier_way_id: $("#courier_price_attr_courier_way_id").val()
+                                          });
+                                      });
+                                  })
+                                </script>

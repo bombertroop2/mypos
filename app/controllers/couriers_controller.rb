@@ -8,11 +8,9 @@ class CouriersController < ApplicationController
   # GET /couriers.json
   def index
     like_command = "ILIKE"
-    couriers_scope = Courier.select(:id, :code, :name, :via, :unit, :status)
+    couriers_scope = Courier.select(:id, :code, :name, :status)
     couriers_scope = couriers_scope.where(["code #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(couriers_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(couriers_scope.where(["via #{like_command} ?", "%"+params[:filter]+"%"])).
-      or(couriers_scope.where(["unit #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
+      or(couriers_scope.where(["name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter]
     @couriers = smart_listing_create(:couriers, couriers_scope, partial: 'couriers/listing', default_sort: {code: "asc"})
   end
 
@@ -24,21 +22,63 @@ class CouriersController < ApplicationController
   # GET /couriers/new
   def new
     @courier = Courier.new
+    courier_way = @courier.courier_ways.build name: "Land"
+    courier_way.courier_units.build name: "Cubic"
+    courier_way.courier_units.build name: "Kilogram"
+    courier_way = @courier.courier_ways.build name: "Sea"
+    courier_way.courier_units.build name: "Cubic"
+    courier_way.courier_units.build name: "Kilogram"
+    courier_way = @courier.courier_ways.build name: "Air"
+    courier_way.courier_units.build name: "Cubic"
+    courier_way.courier_units.build name: "Kilogram"
   end
 
   # GET /couriers/1/edit
   def edit
+    if (courier_way = @courier.courier_ways.select{|cw| cw.name.eql?("Land")}.first).blank?
+      courier_way = @courier.courier_ways.build name: "Land"
+      courier_way.courier_units.build name: "Cubic"
+      courier_way.courier_units.build name: "Kilogram"
+    else
+      if courier_way.courier_units.select("1 AS one").where(name: "Cubic").blank?
+        courier_way.courier_units.build name: "Cubic"
+      end
+      if courier_way.courier_units.select("1 AS one").where(name: "Kilogram").blank?        
+        courier_way.courier_units.build name: "Kilogram"
+      end
+    end
+    if (courier_way = @courier.courier_ways.select{|cw| cw.name.eql?("Sea")}.first).blank?
+      courier_way = @courier.courier_ways.build name: "Sea"
+      courier_way.courier_units.build name: "Cubic"
+      courier_way.courier_units.build name: "Kilogram"
+    else
+      if courier_way.courier_units.select("1 AS one").where(name: "Cubic").blank?        
+        courier_way.courier_units.build name: "Cubic"
+      end
+      if courier_way.courier_units.select("1 AS one").where(name: "Kilogram").blank?        
+        courier_way.courier_units.build name: "Kilogram"
+      end
+    end
+    if (courier_way = @courier.courier_ways.select{|cw| cw.name.eql?("Air")}.first).blank?
+      courier_way = @courier.courier_ways.build name: "Air"
+      courier_way.courier_units.build name: "Cubic"
+      courier_way.courier_units.build name: "Kilogram"
+    else
+      if courier_way.courier_units.select("1 AS one").where(name: "Cubic").blank?        
+        courier_way.courier_units.build name: "Cubic"
+      end
+      if courier_way.courier_units.select("1 AS one").where(name: "Kilogram").blank?        
+        courier_way.courier_units.build name: "Kilogram"
+      end
+    end
   end
 
   # POST /couriers
   # POST /couriers.json
   def create
-    convert_price_to_numeric
     @courier = Courier.new(courier_params)
 
     @invalid = !@courier.save
-  rescue ActiveRecord::RecordNotUnique => e
-    render js: "bootbox.alert({message: 'Price should be unique!', size: 'small'})"
   end
 
   # PATCH/PUT /couriers/1
@@ -66,16 +106,13 @@ class CouriersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def courier_params
     if action_name.eql?("create")
-      params.require(:courier).permit(:code, :name, :via, :unit, :status,
-        courier_prices_attributes: [:city_id, :effective_date, :price_type, :price, :_destroy])
+      params.require(:courier).permit(:code, :name, :status,
+        courier_ways_attributes: [:name, :_destroy,
+          courier_units_attributes: [:name, :_destroy]])
     else
-      params.require(:courier).permit(:code, :name, :via, :unit, :status)
+      params.require(:courier).permit(:code, :name, :status,
+        courier_ways_attributes: [:name, :_destroy, :id,
+          courier_units_attributes: [:name, :_destroy, :id]])
     end
-  end
-  
-  def convert_price_to_numeric
-    params[:courier][:courier_prices_attributes].each do |key, value|
-      params[:courier][:courier_prices_attributes][key][:price] = params[:courier][:courier_prices_attributes][key][:price].gsub("Rp","").gsub(".","").gsub(",",".")
-    end if params[:courier][:courier_prices_attributes].present?
   end
 end

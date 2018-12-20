@@ -13,8 +13,8 @@ class CourierPricesController < ApplicationController
         end_effective_date = splitted_effective_date_range[1].strip.to_date
       end
 
-      courier_prices_scope = CourierPrice.select(:id, :effective_date, :price_type, :price, "couriers.code", "couriers.name", "cities.name AS city_name").joins(:courier, :city).where(["couriers.status = ?", "External"])
-      courier_prices_scope = courier_prices_scope.where(["courier_id = ?", params[:filter_courier]]) if params[:filter_courier].present?
+      courier_prices_scope = CourierPrice.select(:id, :effective_date, :price_type, :price, "couriers.code", "couriers.name", "cities.name AS city_name").joins([courier_unit: [courier_way: :courier]], :city).where(["couriers.status = ?", "External"])
+      courier_prices_scope = courier_prices_scope.where(["couriers.id = ?", params[:filter_courier]]) if params[:filter_courier].present?
       courier_prices_scope = courier_prices_scope.where(["city_id = ?", params[:filter_city]]) if params[:filter_city].present?
       courier_prices_scope = courier_prices_scope.where(["effective_date BETWEEN ? AND ?", start_effective_date, end_effective_date]) if params[:filter_effective_date].present?
       courier_prices_scope = courier_prices_scope.where(["price_type = ?", params[:filter_price_type]]) if params[:filter_price_type].present?
@@ -34,6 +34,8 @@ class CourierPricesController < ApplicationController
     # GET /courier_prices/1/edit
     def edit
       @courier_price.effective_date = @courier_price.effective_date.strftime("%d/%m/%Y")
+      @courier_price.attr_courier_id = @courier_price.courier_id
+      @courier_price.attr_courier_way_id = @courier_price.courier_way_id
     end
 
     # POST /courier_prices
@@ -41,7 +43,6 @@ class CourierPricesController < ApplicationController
     def create
       convert_price_to_numeric
       @courier_price = CourierPrice.new(courier_price_params)
-      @courier_price.attr_add_price_from_menu_courier_price = true
       @invalid = !@courier_price.save
     rescue ActiveRecord::RecordNotUnique => e
       render js: "bootbox.alert({message: 'Price should be unique!', size: 'small'})"
@@ -72,6 +73,14 @@ class CourierPricesController < ApplicationController
         @deleted = true
       end
     end
+    
+    def get_courier_ways
+      @courier_ways = CourierWay.select(:id, :name).where(courier_id: params[:courier_id]).order(:name)
+    end
+
+    def get_courier_units
+      @courier_units = CourierUnit.select(:id, :name).where(courier_way_id: params[:courier_way_id]).order(:name)
+    end
 
     private
     
@@ -81,15 +90,11 @@ class CourierPricesController < ApplicationController
   
     # Use callbacks to share common setup or constraints between actions.
     def set_courier_price
-      @courier_price = CourierPrice.select(:id, :effective_date, :price_type, :price, :city_id, :courier_id, "couriers.code", "couriers.name", "cities.name AS city_name", "couriers.via", "couriers.unit").joins(:courier, :city).find(params[:id])
+      @courier_price = CourierPrice.joins(:city, courier_unit: [courier_way: :courier]).select(:id, :effective_date, :price_type, :price, :city_id, :courier_unit_id, "couriers.code", "couriers.name", "cities.name AS city_name", "courier_ways.name AS via", "courier_units.name AS unit", "courier_ways.courier_id", "courier_units.courier_way_id").find(params[:id])
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def courier_price_params
-      if action_name.eql?("update")
-        params.require(:courier_price).permit(:city_id, :effective_date, :price_type, :price)
-      else
-        params.require(:courier_price).permit(:courier_id, :city_id, :effective_date, :price_type, :price)
-      end
+      params.require(:courier_price).permit(:city_id, :effective_date, :price_type, :price, :attr_courier_id, :attr_courier_way_id, :courier_unit_id)
     end
   end
