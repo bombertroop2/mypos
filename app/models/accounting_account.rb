@@ -6,7 +6,8 @@ class AccountingAccount < ApplicationRecord
 
   default_scope {joins(:category).select("accounting_accounts.*, accounting_account_categories.name AS cat_name") }
   scope :classifications, -> (q=1) {  where(classification: q )}
-
+  scope :select_on_view, -> { select("accounting_accounts.id, concat(accounting_accounts.code, ' ' ,accounting_accounts.description) AS description") }
+  scope :category_cash_on_view, -> { select_on_view.where(accounting_accounts: {category_id: 1 }) }
   def self.filters(q={})
     if q[:filter].present?
       query = []
@@ -14,10 +15,6 @@ class AccountingAccount < ApplicationRecord
       return classifications( (q[:classification] || 1) ).where(query.join(" OR "), filter: "%"+q[:filter]+"%")
     end
     return classifications( (q[:classification] || 1))
-  end
-
-  def self.select_on_view
-    select("accounting_accounts.id, concat(accounting_accounts.code, ' ' ,accounting_accounts.description) AS description")
   end
 
   def categories
