@@ -1,0 +1,12 @@
+$('#courier_price_attr_courier_way_id').find('option').remove();
+$('#courier_price_courier_unit_id').find('option').remove();
+var o = new Option("", "");
+$("#courier_price_attr_courier_way_id").append(o);
+var o = new Option("", "");
+$("#courier_price_courier_unit_id").append(o);
+<% @courier_ways.each do |courier_way| %>
+  var o = new Option("<%= courier_way.name %>", "<%= courier_way.id %>");
+  $("#courier_price_attr_courier_way_id").append(o);
+<% end %>
+$("#courier_price_attr_courier_way_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+$("#courier_price_courier_unit_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
