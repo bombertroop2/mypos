@@ -17,7 +17,8 @@ module Accounting::TransactionCashIn
       type_jurnal:  "cashin",
       model_type:   self.class.to_s,
       model_id:     self.id,
-      description:  check_description_is_exits?
+      description:  check_description_is_exits?,
+      warehouse_id: (self.warehouse.id rescue nil)
     })
 
     transcation.set_detail_record_transaction(self)

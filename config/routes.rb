@@ -327,6 +327,9 @@ Rails.application.routes.draw do
     scope ":jurnals" do
       resources :account_settings, except: :show
       resources :jurnal_transctions, except: :show
+      scope ":showroom" do
+        resources :jurnal_transctions, except: :show, as: :jurnal_transction_showrooms
+      end
     end
 
     resources :account_saldos, except: [:show, :destroy, :new, :create]
