@@ -18,7 +18,7 @@ File.open(full_path, 'wb') { |f| f.write blob }
         <td align="center" colspan="3"><%= @shipment.delivery_order_number %></td>
     </tr>
     <tr>
-        <td align="center" colspan="3"><%= image_tag "/barcode_#{@shipment.id}.png", height: "100px" %></td>
+        <td align="center" colspan="3"><%= image_tag "/barcode_#{@shipment.id}.png", style: "height:'100%';width:'auto'" %></td>
     </tr>
     <tr>
         <td style="width: 50%" valign="top">
