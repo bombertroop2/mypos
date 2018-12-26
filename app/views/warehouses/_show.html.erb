@@ -55,6 +55,11 @@
         <dd><%= object.warehouse_type.titleize %></dd>
     </dl>
 
+    <dl class="dl-horizontal">
+        <dt>Estimated delivery time</dt>
+        <dd><%= object.estimated_delivery_time %> day(s)</dd>
+    </dl>
+
     <% if object.counter_type.present? %>
       <dl class="dl-horizontal">
           <dt>Counter type</dt>
