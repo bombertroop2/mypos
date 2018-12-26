@@ -18,8 +18,9 @@
           %b=j.id.eql?(0) ? (j.group_description) : j.description
         %td
         %td
-      - (j.id.eql?(0) ? j.detail_groups : j.detail_jurnals).each do |d|
-        %tr{class: "#{ "last-jurnal credit" if !d.is_debit}"}
+      - detials = j.id.eql?(0) ? j.detail_groups : j.detail_jurnals
+      - detials.each_with_index do |d, x|
+        %tr{class: "#{ "credit" if !d.is_debit} #{ "last-jurnal" if detials.size.eql?(x + 1) }"}
           %td
           %td= d.code
           %td{class: "#{ "credit" if !d.is_debit}"}= d.description

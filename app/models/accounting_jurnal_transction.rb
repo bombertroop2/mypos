@@ -5,7 +5,7 @@ class AccountingJurnalTransction < ApplicationRecord
 
   scope :load_jurnals, -> {joins(details: [coa: :category] )}
   scope :find_by_model, ->(model) {where(model_id: model.id, model_type: model.class.to_s).first}
-  scope :warehouse_is_nil, -> {where(warehouse_id: nil)}
+  scope :warehouse_is_central, -> {joins(:warehouse).where(warehouses: {warehouse_type: "central"})}
   # scope :only_cash_disbursements, -> {collection_filed_group_by_model_type.where(model_type: "CashDisbursement")}
 
   def self.year_and_month_queries(year=Date.today.year, month=Date.today.month)
@@ -29,6 +29,7 @@ class AccountingJurnalTransction < ApplicationRecord
     array_agg(accounting_jurnal_transctions.model_id) as model_ids,
     (array_agg(accounting_jurnal_transctions.created_at ORDER BY accounting_jurnal_transctions.created_at DESC))[1] as created_at,
     (array_agg(accounting_jurnal_transctions.updated_at ORDER BY accounting_jurnal_transctions.updated_at DESC))[1] as updated_at")
+    .where.not(warehouses: {warehouse_type: "central"})
     .group("accounting_jurnal_transctions.model_type, accounting_jurnal_transctions.warehouse_id").to_a
   end
 
@@ -55,7 +56,7 @@ class AccountingJurnalTransction < ApplicationRecord
 
   def self.cashin(warehouse_id)
     if warehouse_id.eql?(nil)
-      load_jurnals.where(queries(type_jurnal="cashin")).warehouse_is_nil.to_a +
+      load_jurnals.where(queries(type_jurnal="cashin")).warehouse_is_central.to_a +
       load_jurnals.where(queries(type_jurnal="cashin")).collection_filed_group_by_model_type
     else
       load_jurnals.where(queries(type_jurnal="cashin")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id})
@@ -64,7 +65,7 @@ class AccountingJurnalTransction < ApplicationRecord
 
   def self.cashout(warehouse_id)
     if warehouse_id.eql?(nil)
-      load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_nil.to_a +
+      load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_central.to_a +
       load_jurnals.where(queries(type_jurnal="cashout")).collection_filed_group_by_model_type
     else
       load_jurnals.where(queries(type_jurnal="cashout")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id})
