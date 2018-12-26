@@ -77,9 +77,11 @@ class AccountingJurnalTransction < ApplicationRecord
     end
   end
 
-  def self.total(type_jurnal)
+  def self.total(type_jurnal, warehouse_id=nil)
+    querie_filters = {type_jurnal: type_jurnal}
+    querie_filters[:warehouse_id] = warehouse_id if !warehouse_id.eql?(nil)
     joins(:details).select("#{total_query('t')} AS total_debit, #{total_query('f')} AS total_credit").year_and_month_queries
-    .where(type_jurnal: type_jurnal).to_a.first.attributes.to_hash rescue {total_debit: 0.0, total_credit: 0.0}
+    .where(querie_filters).to_a.first.attributes.to_hash rescue {total_debit: 0.0, total_credit: 0.0}
   end
 
   def self.queries(type_jurnal="cashin")
