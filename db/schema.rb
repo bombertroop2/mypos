@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181210025031) do
+ActiveRecord::Schema.define(version: 20181226030428) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.integer  "vendor_id"
     t.datetime "created_at",      precision: 6, null: false
     t.datetime "updated_at",      precision: 6, null: false
+    t.text     "note"
     t.index ["number"], name: "index_account_payables_on_number", unique: true, using: :btree
     t.index ["vendor_id"], name: "index_account_payables_on_vendor_id", using: :btree
   end
@@ -84,12 +85,13 @@ ActiveRecord::Schema.define(version: 20181210025031) do
   end
 
   create_table "accounting_jurnal_transctions", force: :cascade do |t|
-    t.string   "type"
+    t.string   "type_jurnal"
     t.string   "description"
     t.integer  "model_id"
     t.string   "model_type"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+    t.integer  "warehouse_id"
   end
 
   create_table "adjustment_product_details", force: :cascade do |t|
@@ -221,6 +223,11 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.index ["warehouse_id", "opened_by", "open_date"], name: "index_cashier_openings_on_warehouse_id_opened_by_open_date", unique: true, using: :btree
     t.index ["warehouse_id", "station", "shift", "open_date"], name: "idx_cashier_openings_on_warehouse_id_station_shift_open_date", unique: true, using: :btree
     t.index ["warehouse_id"], name: "index_cashier_openings_on_warehouse_id", using: :btree
+  end
+
+  create_table "cities", force: :cascade do |t|
+    t.string "province_id"
+    t.string "name"
   end
 
   create_table "coa_cashes", force: :cascade do |t|
@@ -362,6 +369,18 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.boolean  "is_active",                        default: true
   end
 
+  create_table "courier_prices", force: :cascade do |t|
+    t.integer  "courier_id"
+    t.integer  "city_id"
+    t.date     "effective_date"
+    t.decimal  "price"
+    t.string   "price_type"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+    t.index ["city_id"], name: "index_courier_prices_on_city_id", using: :btree
+    t.index ["courier_id", "city_id", "effective_date", "price_type"], name: "index_cp_on_courier_id_n_city_id_n_effective_date_n_price_type", unique: true, using: :btree
+  end
+
   create_table "couriers", force: :cascade do |t|
     t.string   "code"
     t.string   "name"
@@ -369,6 +388,7 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.string   "unit",       limit: 8
     t.datetime "created_at",           precision: 6, null: false
     t.datetime "updated_at",           precision: 6, null: false
+    t.string   "status"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -773,6 +793,10 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.index ["model_id"], name: "index_products_on_model_id", using: :btree
     t.index ["size_group_id"], name: "index_products_on_size_group_id", using: :btree
     t.index ["vendor_id"], name: "index_products_on_vendor_id", using: :btree
+  end
+
+  create_table "provinces", force: :cascade do |t|
+    t.string "name"
   end
 
   create_table "purchase_order_details", force: :cascade do |t|
@@ -1208,7 +1232,6 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.date     "delivery_date"
     t.date     "received_date"
     t.integer  "quantity"
-    t.integer  "courier_id"
     t.integer  "origin_warehouse_id"
     t.string   "number"
     t.integer  "destination_warehouse_id"
@@ -1216,7 +1239,6 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.datetime "updated_at",               precision: 6,                 null: false
     t.date     "approved_date"
     t.boolean  "is_receive_date_changed",                default: false
-    t.index ["courier_id"], name: "index_stock_mutations_on_courier_id", using: :btree
     t.index ["destination_warehouse_id"], name: "index_stock_mutations_on_destination_warehouse_id", using: :btree
     t.index ["number"], name: "index_stock_mutations_on_number", unique: true, using: :btree
     t.index ["origin_warehouse_id"], name: "index_stock_mutations_on_origin_warehouse_id", using: :btree
@@ -1343,8 +1365,13 @@ ActiveRecord::Schema.define(version: 20181210025031) do
     t.string   "fifth_message"
     t.string   "sku"
     t.string   "counter_type"
+    t.integer  "province_id"
+    t.integer  "city_id"
+    t.integer  "coa_id"
+    t.index ["city_id"], name: "index_warehouses_on_city_id", using: :btree
     t.index ["code"], name: "index_warehouses_on_code", unique: true, using: :btree
     t.index ["price_code_id"], name: "index_warehouses_on_price_code_id", using: :btree
+    t.index ["province_id"], name: "index_warehouses_on_province_id", using: :btree
     t.index ["region_id"], name: "index_warehouses_on_region_id", using: :btree
     t.index ["supervisor_id"], name: "index_warehouses_on_supervisor_id", using: :btree
   end
@@ -1360,6 +1387,8 @@ ActiveRecord::Schema.define(version: 20181210025031) do
   add_foreign_key "beginning_stock_products", "warehouses"
   add_foreign_key "coa_cashes", "coas"
   add_foreign_key "coas", "coa_types"
+  add_foreign_key "courier_prices", "cities"
+  add_foreign_key "courier_prices", "couriers"
   add_foreign_key "journal_detail_bogos", "journals"
   add_foreign_key "journal_detail_bogos", "products"
   add_foreign_key "journal_detail_gifts", "journals"
@@ -1371,4 +1400,6 @@ ActiveRecord::Schema.define(version: 20181210025031) do
   add_foreign_key "journals", "coas"
   add_foreign_key "order_bookings", "customers"
   add_foreign_key "targets", "warehouses"
+  add_foreign_key "warehouses", "cities"
+  add_foreign_key "warehouses", "provinces"
 end

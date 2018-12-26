@@ -55,17 +55,26 @@ class AccountingJurnalTransction < ApplicationRecord
     AccountingAccountSetting.jurnal(setting)
   end
 
-  def self.jurnals(jurnal="cashin")
-    eval "AccountingJurnalTransction.year_and_month_queries.#{jurnal}"
+  def self.jurnals(jurnal="cashin", warehouse_id=nil)
+    eval "AccountingJurnalTransction.year_and_month_queries.#{jurnal}(warehouse_id)"
   end
 
-  def self.cashin
-    load_jurnals.where(queries(type_jurnal="cashin"))
+  def self.cashin(warehouse_id)
+    if warehouse_id.eql?(nil)
+      load_jurnals.where(queries(type_jurnal="cashin")).warehouse_is_nil.to_a +
+      load_jurnals.where(queries(type_jurnal="cashin")).collection_filed_group_by_model_type
+    else
+      load_jurnals.where(queries(type_jurnal="cashin")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id})
+    end
   end
 
-  def self.cashout
-    load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_nil.to_a +
-    load_jurnals.where(queries(type_jurnal="cashout")).collection_filed_group_by_model_type
+  def self.cashout(warehouse_id)
+    if warehouse_id.eql?(nil)
+      load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_nil.to_a +
+      load_jurnals.where(queries(type_jurnal="cashout")).collection_filed_group_by_model_type
+    else
+      load_jurnals.where(queries(type_jurnal="cashout")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id})
+    end
   end
 
   def self.total(type_jurnal)

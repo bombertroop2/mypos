@@ -10,7 +10,7 @@ class Accounting::JurnalTransctionsController < ApplicationController
   #
   def set_model
     @setting_model = AccountingJurnalTransction.use_setting(params[:jurnals])
-    @jurnals = AccountingJurnalTransction.jurnals(params[:jurnals])
+    @jurnals = AccountingJurnalTransction.jurnals(params[:jurnals], params[:showroom])
     @total = AccountingJurnalTransction.total(params[:jurnals])
   end
 end
