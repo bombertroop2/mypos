@@ -1,6 +1,7 @@
 class AccountingJurnalTransction < ApplicationRecord
   has_many :details, class_name: "AccountingJurnalTransctionDetail", foreign_key: :transction_id, dependent: :destroy
   belongs_to :warehouse
+  belongs_to :model, polymorphic: true
 
   scope :load_jurnals, -> {joins(details: [coa: :category] )}
   scope :find_by_model, ->(model) {where(model_id: model.id, model_type: model.class.to_s).first}
@@ -12,13 +13,6 @@ class AccountingJurnalTransction < ApplicationRecord
   end
 
   def self.total_query(is_debit='t')
-    "SUM(Case
-            When accounting_jurnal_transction_details.is_debit='#{is_debit}' Then accounting_jurnal_transction_details.total
-            ELse 0
-          END)"
-  end
-
-  def total_query(is_debit='t')
     "SUM(Case
             When accounting_jurnal_transction_details.is_debit='#{is_debit}' Then accounting_jurnal_transction_details.total
             ELse 0
