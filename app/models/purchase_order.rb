@@ -17,20 +17,20 @@ class PurchaseOrder < ApplicationRecord
 
   before_validation :set_type, :set_status, on: :create
 
-  # validates :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po }
-  #   validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
-  #     validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: proc{|po| po.is_po_date_validable && po.request_delivery_date.present?}
-  #       validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|po| po.is_po_date_validable}
-  #         validate :prevent_update_if_article_received, on: :update
-  #         validate :disable_receive_po_if_finish, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
-  #           #            validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po }
-  #           validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
-  #             validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && po.first_discount.present?}
-  #               validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.second_discount.present?}
-  #                 validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| po.second_discount.present?}
-  #                   validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.receiving_po && po.second_discount.present? && !po.is_additional_disc_from_net}
-  #                     validates :first_discount, presence: true, if: proc {|po| po.second_discount.present?}
-  #                       validate :vendor_available, :warehouse_available
+  validates :vendor_id, :request_delivery_date, :warehouse_id, :purchase_order_date, presence: true, if: proc { |po| !po.receiving_po }
+    validates :request_delivery_date, date: {after: proc { Date.current }, message: 'must be after today' }, if: :is_validable
+      validates :purchase_order_date, date: {before_or_equal_to: proc { |po| po.request_delivery_date }, message: 'must be before or equal to request delivery date' }, if: proc{|po| po.is_po_date_validable && po.request_delivery_date.present?}
+        validates :purchase_order_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|po| po.is_po_date_validable}
+          validate :prevent_update_if_article_received, on: :update
+          validate :disable_receive_po_if_finish, :disable_receive_po_if_po_closed, if: proc { |po| po.receiving_po }
+            #            validate :minimum_one_color_per_product, if: proc {|po| !po.receiving_po && !po.closing_po }
+            validate :prevent_close_if_article_status_not_partial, if: proc { |po| po.closing_po }
+              validates :first_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| !po.receiving_po && po.first_discount.present?}
+                validates :second_discount, numericality: {greater_than: 0, less_than_or_equal_to: 100}, if: proc {|po| po.second_discount.present?}
+                  validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| po.second_discount.present?}
+                    validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.receiving_po && po.second_discount.present? && !po.is_additional_disc_from_net}
+                      validates :first_discount, presence: true, if: proc {|po| po.second_discount.present?}
+                        validate :vendor_available, :warehouse_available
 
                         before_save :set_nil_to_is_additional_disc_from_net, if: proc {|po| !po.receiving_po && !po.closing_po}
                           before_update :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.edit_document}

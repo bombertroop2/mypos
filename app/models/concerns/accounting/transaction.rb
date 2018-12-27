@@ -2,6 +2,25 @@ require 'active_support/concern'
 
 module Accounting::Transaction
 
+  def set_record_data_accounting(type_jurnal)
+    if !(transcation = self.check_transaction_is_exits?(type_jurnal) ).present?
+      transcation = AccountingJurnalTransction.new({
+        type_jurnal:  type_jurnal,
+        model_type:   self.class.to_s,
+        model_id:     self.id,
+        description:  check_description_is_exits?,
+        warehouse_id: (self.warehouse.id rescue nil)
+      })
+    else
+      transcation.details.destroy_all
+    end
+    transcation.set_detail_record_transaction(self)
+    transcation.save if transcation.details.present?
+  end
+
+  def check_transaction_is_exits?(type_jurnal)
+    AccountingJurnalTransction.where(model_id: self.id, model_type: self.class.to_s, type_jurnal: type_jurnal).first
+  end
 
   def check_description_is_exits?
     if self.attributes.keys.include?("description")
@@ -15,7 +34,7 @@ module Accounting::Transaction
   end
 
   def set_detail_coa_jurnal
-    if self.class == CashDisbursement
+    if self.class.to_s == "CashDisbursement"
       return [ { coa_id:   11,
         is_debit: true,
         total: self.price},
@@ -24,9 +43,11 @@ module Accounting::Transaction
           total: self.price}
         ]
       #
-    elsif [PurchaseOrder,  DirectPurchase].include?(self.class)
-      if self.status.eql?("Finish")
+    elsif ["PurchaseOrder",  "DirectPurchase"].include?(self.class.to_s)
+      if !self.status.eql?("Open")
         return set_purchase
+      else
+        set_purchase = []
       end
     end
   end
@@ -35,8 +56,8 @@ module Accounting::Transaction
   def set_purchase
     acc                     = []
     discs                   = get_discount_purchase_order
-    total_purchase          = self.net_amount.to_f
-    tax_purchase            = self.net_amount.to_f * 0.1
+    total_purchase          = self.receiving_value.to_f
+    tax_purchase            = self.receiving_value.to_f * 0.1
     total_purchase_whit_tax = total_purchase + tax_purchase
     total                   = total_purchase_whit_tax
 
@@ -71,8 +92,8 @@ module Accounting::Transaction
   end
 
   def get_price_purchase_order
-    if self.class == PurchaseOrder
-      self.net_amount.to_f
+    if self.class.to_s == "PurchaseOrder"
+      self.receiving_value.to_f
     else
       self.direct_purchase_details.sum(&:total_unit_price).to_f
     end
@@ -89,15 +110,8 @@ module Accounting::Transaction
 # ========================= Purchase END =========================
 
   def update_saldo
-    if self.class == CashDisbursement
+    if self.class.to_s == "CashDisbursement"
     end
   end
 
-  def update_record_data_accounting
-    transcation = AccountingJurnalTransction.find_by_model(self)
-    if self.class == CashDisbursement
-      transcation.update(description: check_description_is_exits?)
-      transcation.details.update_all(total: self.price)
-    end
-  end
 end
