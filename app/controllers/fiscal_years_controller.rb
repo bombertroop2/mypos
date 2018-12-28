@@ -35,19 +35,31 @@ class FiscalYearsController < ApplicationController
   # POST /fiscal_years.json
   def create
     @fiscal_year = FiscalYear.new(fiscal_year_params)
-    @valid = @fiscal_year.save
+    unless @valid = @fiscal_year.save
+      if @fiscal_year.errors[:"fiscal_months.base"].present?
+        render js: "bootbox.alert({message: \"#{@fiscal_year.errors[:"fiscal_months.base"].join("<br/>")}\",size: 'small'});"
+      end
+    end
   end
 
   # PATCH/PUT /fiscal_years/1
   # PATCH/PUT /fiscal_years/1.json
   def update
-    @valid = @fiscal_year.update(fiscal_year_params)
+    unless @valid = @fiscal_year.update(fiscal_year_params)
+      if @fiscal_year.errors[:"fiscal_months.base"].present?
+        render js: "bootbox.alert({message: \"#{@fiscal_year.errors[:"fiscal_months.base"].join("<br/>")}\",size: 'small'});"
+      end
+    end
   end
 
   # DELETE /fiscal_years/1
   # DELETE /fiscal_years/1.json
-  def destroy
-    @fiscal_year.destroy
+  def destroy    
+    unless @fiscal_year.destroy
+      @deleted = false
+    else
+      @deleted = true
+    end
   end
 
   private

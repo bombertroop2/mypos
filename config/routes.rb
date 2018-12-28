@@ -1,5 +1,15 @@
 Rails.application.routes.draw do
-  resources :courier_prices
+  resources :packing_lists, except: [:edit, :update] do
+    member do
+      get 'print'
+    end
+  end
+  resources :courier_prices do
+    collection do
+      get "get_courier_ways"
+      get "get_courier_units"
+    end
+  end
   resources :account_payable_payments
   resources :adjustments, except: [:edit, :update, :destroy] do
     collection do
@@ -208,7 +218,7 @@ Rails.application.routes.draw do
       get "print"
     end
   end
-  resources :couriers, except: :show
+  resources :couriers
   resources :order_bookings do
     collection do
       get "get_warehouse_products"

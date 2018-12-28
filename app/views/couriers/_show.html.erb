@@ -1,0 +1,32 @@
+<td colspan="4">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Code</dt>
+        <dd><%= object.code %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Name</dt>
+        <dd><%= object.name %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Status</dt>
+        <dd><%= object.status %></dd>
+    </dl>
+
+    <% object.courier_ways.each do |cw| %>
+      <dl class="dl-horizontal">
+          <dt>Via</dt>
+          <dd><%= cw.name %></dd>
+      </dl>
+      <dl class="dl-horizontal">
+          <dt>Unit(s)</dt>
+          <dd><%= cw.courier_units.select(:name).map(&:name).join(", ") %></dd>
+      </dl>
+    <% end %>
+</td>

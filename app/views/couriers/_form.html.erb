@@ -1,4 +1,4 @@
-<td colspan="6">
+<td colspan="4">
     <div style="padding-top: 20px"></div>
     <%= form_for(@courier, remote: true, html: {class: "form-horizontal"}) do |f| %>
         <div class="form-group<%= control_group_error(@courier, :code) %>">
@@ -24,48 +24,59 @@
                             <%= error_help_text(@courier, :status) %>
                         </div>
                     </div>
-                    <div class="form-group<%= control_group_error(@courier, :via) %>">
-                        <%= f.label :via, class: "col-sm-2 control-label" %>
-                          <div class="col-sm-10">
-                              <%= f.select :via, options_for_select(Courier::SHIPPING_WAYS, @courier.via), {prompt: true}, {tabindex: "3", class: "form-control"} %>
-                                <%= error_help_text(@courier, :via) %>
-                            </div>
+                    <%= f.fields_for :courier_ways do |courier_way_form| %>
+                      <div class="form-group<%= control_group_error(courier_way_form.object, :name) %>">
+                          <%= courier_way_form.label :name, "Via", class: "col-sm-2 control-label" %>
+                            <div class="col-sm-10">
+                                <%= courier_way_form.text_field :name, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
+                                  <%= error_help_text(courier_way_form.object, :name) %>
+                              </div>
 
-                        </div>
-
-                        <div class="form-group<%= control_group_error(@courier, :unit) %>">
-                            <%= f.label :unit, class: "col-sm-2 control-label" %>
+                          </div>
+                          <div class="form-group">
+                              <label class="col-sm-2 control-label"></label>
                               <div class="col-sm-10">
-                                  <%= f.select :unit, options_for_select(Courier::UNITS, @courier.unit), {prompt: true}, {tabindex: "4", class: "form-control"} %>
-                                    <%= error_help_text(@courier, :unit) %>
-                                </div>
+                                  <%= courier_way_form.check_box :_destroy %> Delete
+                              </div>
 
-                            </div>
+                          </div>
+                          <%= courier_way_form.fields_for :courier_units do |courier_unit_form| %>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"></label>
+                                <div class="col-sm-10">
+                                    <div class="form-group<%= control_group_error(courier_unit_form.object, :name) %>">
+                                        <%= courier_unit_form.label :name, "Unit", class: "col-sm-1 control-label" %>
+                                          <div class="col-sm-11">
+                                              <%= courier_unit_form.text_field :name, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
+                                                <%= error_help_text(courier_unit_form.object, :name) %>
+                                            </div>
 
-                            <% if f.object.new_record? %>                    
-                              <div id="courier_prices">
-                                  <%= f.fields_for :courier_prices do |courier_price| %>
-                                    <%= render 'courier_price_fields', f: courier_price %>
-                                  <% end %>
-                                  <div class="form-group">
-                                      <%= link_to_add_association 'add price', f, :courier_prices, class: "col-sm-2 control-label" %>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-1 control-label"></label>
+                                            <div class="col-sm-11">
+                                                <%= courier_unit_form.check_box :_destroy %> Delete
+                                            </div>
+
+                                        </div>
                                     </div>
-                                </div>
-                              <% end %>
 
-                              <div class="form-group">
-                                  <div class="col-sm-offset-2 col-sm-10">
-                                      <%= f.submit "Save", class: "btn btn-primary" %>
-                                        <button class="btn btn-link cancel">Cancel</button>
-                                    </div>
-                                </div>
-                              <% end %>
-                          </td>
+                                </div>                            
+                              <% end %>                              
+                            <% end %>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <%= f.submit "Save", class: "btn btn-primary" %>
+                                      <button class="btn btn-link cancel">Cancel</button>
+                                  </div>
+                              </div>
+                            <% end %>
+                        </td>
 
-                          <script>
-                            $(function () {
-                                $('#courier_code').on("input", function () {
-                                    $(this).val($(this).val().replace(/ /g, ""));
-                                });
-                            });
-                          </script>
+                        <script>
+                          $(function () {
+                              $('#courier_code').on("input", function () {
+                                  $(this).val($(this).val().replace(/ /g, ""));
+                              });
+                          });
+                        </script>

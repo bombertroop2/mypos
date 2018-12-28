@@ -1,5 +1,3 @@
-var bootboxDialogFormConsale = null;
-
 $(function () {
     $('#filter-courier-price-effective-date').daterangepicker(
             {

@@ -1,5 +1,7 @@
 <% if @valid %>
   <%= smart_listing_item :courier_prices, :update, @courier_price, "courier_prices/courier_price" %>
+  <% courier_unit = CourierUnit.joins(courier_way: :courier).select("couriers.code", "couriers.name").find(@courier_price.courier_unit_id) %>
+  $("#courier-price-courier-<%= @courier_price.id %>").html("<%= "#{courier_unit.code} - #{courier_unit.name}" %>");
   $("#courier-price-city-<%= @courier_price.id %>").html("<%= City.select(:name).find(@courier_price.city_id).name %>");
 <% else %>
   <%= smart_listing_item :courier_prices, :edit, @courier_price, "courier_prices/form" %>
