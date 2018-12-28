@@ -4,7 +4,7 @@ class AccountPayable < ApplicationRecord
   
   audited on: :create
 
-  attr_accessor :amount_to_be_paid, :total_amount_returned, :payment_for_dp, :debt
+  attr_accessor :amount_to_be_paid, :total_amount_returned, :payment_for_dp, :debt, :attr_previous_invoice
   
   INVOICE_STATUSES = [
     ["Invoiced", "Invoiced"],
@@ -172,12 +172,12 @@ class AccountPayable < ApplicationRecord
                           end
 
                           # kalkulasi pembayaran pembayaran sebelumnya
-                          previous_paid = 0
+                          self.attr_previous_invoice = 0
                           previous_account_payables.uniq.each do |previous_account_payable|
-                            previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
+                            self.attr_previous_invoice += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
                           end
                               
-                          self.amount_to_be_paid = amount_to_be_paid - total_amount_returned - previous_paid
+                          self.amount_to_be_paid = amount_to_be_paid - total_amount_returned - self.attr_previous_invoice
                         end
           
                       end
