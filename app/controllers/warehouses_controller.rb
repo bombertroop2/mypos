@@ -42,7 +42,7 @@ class WarehousesController < ApplicationController
   # POST /warehouses.json
   def create
     @warehouse = Warehouse.new(warehouse_params)
-    
+
     begin
       if @created = @warehouse.save
         unless @warehouse.warehouse_type.eql?("in_transit")
@@ -63,7 +63,7 @@ class WarehousesController < ApplicationController
       first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
       second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
       @warehouse.code = "#{first_code}-#{second_code}"
-      if e.cause.to_s.include?("code")      
+      if e.cause.to_s.include?("code")
         @warehouse.errors.messages[:code] = ["has already been taken"]
       end
     end
@@ -71,7 +71,7 @@ class WarehousesController < ApplicationController
 
   # PATCH/PUT /warehouses/1
   # PATCH/PUT /warehouses/1.json
-  def update    
+  def update
     begin
       supervisor_id_was = @warehouse.supervisor_id_was
       region_id_was = @warehouse.region_id_was
@@ -81,7 +81,7 @@ class WarehousesController < ApplicationController
           unless supervisor_id_was.to_s.eql?(params[:warehouse][:supervisor_id])
             @new_supervisor_name = Supervisor.select(:name).where(id: params[:warehouse][:supervisor_id]).first.name
           end
-        
+
           #cek apakah region diganti
           unless region_id_was.to_s.eql?(params[:warehouse][:region_id])
             @new_region_code = Region.select(:code).where(id: params[:warehouse][:region_id]).first.code
@@ -101,7 +101,7 @@ class WarehousesController < ApplicationController
       first_code = splitted_code[0].gsub(" ", "_").rjust(4, "_") rescue "____"
       second_code = splitted_code[1].gsub(" ", "_").ljust(4, "_") rescue "____"
       @warehouse_code = "#{first_code}-#{second_code}"
-      if e.cause.to_s.include?("code")      
+      if e.cause.to_s.include?("code")
         @warehouse.errors.messages[:code] = ["has already been taken"]
       end
     end
@@ -116,7 +116,7 @@ class WarehousesController < ApplicationController
       render js: "window.location = '#{warehouses_url}'"
     end
   end
-  
+
   def get_cities
     @cities = City.select(:id, :name).where(province_id: params[:province_id]).order(:name)
   end
@@ -130,11 +130,11 @@ class WarehousesController < ApplicationController
       joins("LEFT JOIN common_fields price_codes_warehouses ON price_codes_warehouses.id = warehouses.price_code_id AND price_codes_warehouses.type IN ('PriceCode')").
       where(id: params[:id]).
       select("warehouses.id, warehouses.code, warehouses.name, warehouses.address, is_active, supervisors.name AS supervisor_name, common_fields.code AS region_code, price_codes_warehouses.code AS price_code_code, warehouse_type, supervisor_id, region_id, price_code_id").
-      select(:province_id, :city_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type).first
+      select(:province_id, :city_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type, :estimated_delivery_time).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def warehouse_params
-    params.require(:warehouse).permit(:code, :name, :address, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type, :province_id, :city_id, :coa_id)
+    params.require(:warehouse).permit(:code, :name, :address, :supervisor_id, :region_id, :warehouse_type, :price_code_id, :first_message, :second_message, :third_message, :fourth_message, :fifth_message, :sku, :counter_type, :province_id, :city_id, :estimated_delivery_time)
   end
 end
