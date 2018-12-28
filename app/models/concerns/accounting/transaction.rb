@@ -4,6 +4,11 @@ module Accounting::Transaction
   include Accounting::Transaction::PurchaseOrder
   include Accounting::Transaction::Invoice
 
+
+  def destroy_transaction(type_jurnal)
+    AccountingJurnalTransction.where(model_id: self.id, model_type: self.class.to_s).first.destroy
+  end
+
   def set_record_data_accounting(type_jurnal)
     if !(transcation = self.check_transaction_is_exits?(type_jurnal) ).present?
       transcation = AccountingJurnalTransction.new({

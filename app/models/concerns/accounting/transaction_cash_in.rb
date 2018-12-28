@@ -5,7 +5,8 @@ module Accounting::TransactionCashIn
   include Accounting::Transaction
 
   included do
-    after_save    :save_record_data_accounting
+    after_save        :save_record_data_accounting
+    before_destroy    :remove_record
   end
 
   protected
@@ -13,6 +14,10 @@ module Accounting::TransactionCashIn
 
   def save_record_data_accounting
     set_record_data_accounting("cashin")
+  end
+
+  def remove_record
+    destroy_transaction("cashin")
   end
 
 end

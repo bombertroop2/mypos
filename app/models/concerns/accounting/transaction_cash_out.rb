@@ -5,7 +5,8 @@ module Accounting::TransactionCashOut
   include Accounting::Transaction
 
   included do
-    after_save   :save_record_data_accounting
+    after_save        :save_record_data_accounting
+    before_destroy    :remove_record
   end
 
   protected
@@ -13,6 +14,10 @@ module Accounting::TransactionCashOut
 
   def save_record_data_accounting
     set_record_data_accounting("cashout")
+  end
+
+  def remove_record
+    destroy_transaction("cashout")
   end
 
 end
