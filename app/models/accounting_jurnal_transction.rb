@@ -29,7 +29,7 @@ class AccountingJurnalTransction < ApplicationRecord
     array_agg(accounting_jurnal_transctions.model_id) as model_ids,
     (array_agg(accounting_jurnal_transctions.created_at ORDER BY accounting_jurnal_transctions.created_at DESC))[1] as created_at,
     (array_agg(accounting_jurnal_transctions.updated_at ORDER BY accounting_jurnal_transctions.updated_at DESC))[1] as updated_at")
-    .where.not(warehouses: {warehouse_type: "central"})
+    .where.not(warehouses: {warehouse_type: "central"}).distinct
     .group("accounting_jurnal_transctions.model_type, accounting_jurnal_transctions.warehouse_id").to_a
   end
 
@@ -42,7 +42,7 @@ class AccountingJurnalTransction < ApplicationRecord
       sum(accounting_jurnal_transction_details.total) as total,
       (array_agg(accounting_jurnal_transction_details.created_at ORDER BY accounting_jurnal_transction_details.created_at DESC))[1] as created_at,
       (array_agg(accounting_jurnal_transction_details.updated_at ORDER BY accounting_jurnal_transction_details.updated_at DESC))[1] as updated_at")
-    .group("accounting_jurnal_transction_details.coa_id, accounting_jurnal_transction_details.is_debit").order("is_debit DESC").to_a
+    .group("accounting_jurnal_transction_details.coa_id, accounting_jurnal_transction_details.is_debit").order("is_debit DESC")
 
   end
 
@@ -56,19 +56,19 @@ class AccountingJurnalTransction < ApplicationRecord
 
   def self.cashin(warehouse_id)
     if warehouse_id.eql?(nil)
-      load_jurnals.where(queries(type_jurnal="cashin")).warehouse_is_central.to_a +
+      load_jurnals.where(queries(type_jurnal="cashin")).warehouse_is_central.distinct.to_a +
       load_jurnals.where(queries(type_jurnal="cashin")).collection_filed_group_by_model_type
     else
-      load_jurnals.where(queries(type_jurnal="cashin")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id})
+      load_jurnals.where(queries(type_jurnal="cashin")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id}).distinct
     end
   end
 
   def self.cashout(warehouse_id)
     if warehouse_id.eql?(nil)
-      load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_central.to_a +
+      load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_central.distinct.to_a +
       load_jurnals.where(queries(type_jurnal="cashout")).collection_filed_group_by_model_type
     else
-      load_jurnals.where(queries(type_jurnal="cashout")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id})
+      load_jurnals.where(queries(type_jurnal="cashout")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id}).distinct
     end
   end
 
@@ -80,7 +80,7 @@ class AccountingJurnalTransction < ApplicationRecord
   end
 
   def self.queries(type_jurnal="cashin")
-    return {accounting_account_categories: {classification: [1,4]}, accounting_jurnal_transction_details: {is_debit: true} } if type_jurnal.eql?("cashin") ||  type_jurnal.eql?("sales")
+    return {accounting_accounts: {classification: [1,4]}, accounting_jurnal_transction_details: {is_debit: true} } if type_jurnal.eql?("cashin") ||  type_jurnal.eql?("sales")
     return {accounting_account_categories: {classification: 1}, accounting_jurnal_transction_details: {is_debit: false} } if type_jurnal.eql?("cashout") || type_jurnal.eql?("payable")
   end
 
@@ -93,7 +93,9 @@ class AccountingJurnalTransction < ApplicationRecord
   end
 
   def detail_jurnals
-    details.joins(:coa).select("accounting_accounts.code, accounting_accounts.description, accounting_jurnal_transction_details.*")
+    details.joins(:coa)
+    .select("accounting_accounts.code, accounting_accounts.description, accounting_jurnal_transction_details.*")
+    .order("accounting_jurnal_transction_details.is_debit DESC")
   end
 
 end
