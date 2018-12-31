@@ -5,7 +5,7 @@ class AccountingJurnalTransction < ApplicationRecord
 
   scope :load_jurnals, -> {joins(details: [coa: :category] )}
   scope :find_by_model, ->(model) {where(model_id: model.id, model_type: model.class.to_s).first}
-  scope :warehouse_is_central, -> {joins(:warehouse).where(warehouses: {warehouse_type: "central"})}
+  scope :warehouse_is_central, -> {joins(:warehouse).where("warehouses.warehouse_type = ? ", "central")}
   # scope :only_cash_disbursements, -> {collection_filed_group_by_model_type.where(model_type: "CashDisbursement")}
 
   def self.year_and_month_queries(year=Date.today.year, month=Date.today.month)

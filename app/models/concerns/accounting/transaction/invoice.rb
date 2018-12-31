@@ -5,11 +5,13 @@ module Accounting::Transaction::Invoice
     acc = []
     acc << { coa_id:   18,
       is_debit: true,
-      total: self.amount_paid}
+      total: self.amount_paid + self.amount_returned}
     acc << { coa_id:   3,
       is_debit: false,
-      total: self.amount_paid}
-
+      total: (self.amount_paid}
+    acc << { coa_id:   15,
+      is_debit: false,
+      total: (self.amount_returned} if !self.amount_returned.eql?(0)
     return acc
   end
 end
