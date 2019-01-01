@@ -296,6 +296,9 @@
                                                       <li><%= link_to "Couriers", couriers_path, method: :get %></li>
                                                       <li><%= link_to "Courier Prices", courier_prices_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, PackingList %>
+                                                      <li><%= link_to "Packing Lists", packing_lists_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>

@@ -58,7 +58,7 @@ class Ability
     elsif user_roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user_roles.first)}.present?
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing")
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable Payment") && !user_menu.name.eql?("Packing List")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -248,10 +248,20 @@ class Ability
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("ListingStock") && user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("PackingList")
+            if !user_roles.include?("area_manager")
+              can ability, class_name.gsub(/\s+/, "").constantize
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
-            can :read, class_name.gsub(/\s+/, "").constantize
+            if class_name.eql?("Account Payable Payment")
+              can ability, class_name.gsub(/\s+/, "").constantize
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           end
         end
       end

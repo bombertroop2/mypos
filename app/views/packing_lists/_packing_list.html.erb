@@ -1,0 +1,9 @@
+<td><%= object.number %></td>
+<td><%= object.departure_date.strftime("%d/%m/%Y") %></td>
+<td id="packing-list-courier-<%= object.id %>"><%= "#{object.code} - #{object.name}" rescue "" %></td>
+<td><%= object.status %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, packing_list_path(object), data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, PackingList), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_packing_list_path(object), :remote => true, :method => :get, title: "Print" ) %>
+    <%= link_to_if(can?(:manage, PackingList) && object.status.eql?("Delivered"), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+</td>

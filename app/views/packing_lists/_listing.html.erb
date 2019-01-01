@@ -1,0 +1,30 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-packing-list-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "PL date", "departure_date" %></th>
+            <th class="col-md-4"><%= smart_listing.sortable "Courier", "couriers.code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Status", "status" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |packing_list| %>
+          <tr class="editable" data-id="<%= packing_list.id %>">
+              <%= smart_listing.render object: packing_list, partial: "packing_lists/packing_list", locals: {object: packing_list} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 5, link: new_packing_list_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var processId = setInterval(function () {
+      if ($("#listing-packing-list-thead").is(":visible")) {
+          clearInterval(processId);
+      } else {
+          $("#listing-packing-list-thead").show();
+      }
+  }, 0);
+
+</script>

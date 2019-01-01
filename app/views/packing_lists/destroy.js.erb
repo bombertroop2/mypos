@@ -1,0 +1,10 @@
+<% if @deleted %>
+  <%= smart_listing_item :packing_lists, :destroy, @packing_list %>
+<% else %>
+  <% if @packing_list.errors[:base].present? %>
+    bootbox.alert({message: "<%= @packing_list.errors[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+  <%= smart_listing_item :packing_lists, :update, @packing_list, "packing_lists/packing_list" %>
+  <% courier = Courier.select(:code, :name).find(@packing_list.attr_courier_id) %>
+  $("#packing-list-courier-<%= @packing_list.id %>").html("<%= courier.code_and_name %>");
+<% end %>

@@ -1,0 +1,168 @@
+<td colspan="5">
+    <div style="padding-top: 20px"></div>
+    <%= form_for(@packing_list, remote: true, html: {class: "form-horizontal"}) do |f| %>
+        <div class="form-group<%= control_group_error(f.object, :departure_date) %>">
+            <%= f.label :departure_date, "Date", class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.text_field :departure_date, readonly: true, class: "form-control" %>
+                    <%= error_help_text(f.object, :departure_date) %>
+                </div>
+            </div>                            
+            <div class="form-group<%= control_group_error(f.object, :attr_courier_id) %>">
+                <%= f.label :attr_courier_id, "Courier", class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.select :attr_courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).order(:code), :id, "code_and_name", f.object.attr_courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                        <%= error_help_text(f.object, :attr_courier_id) %>
+                    </div>
+                </div>
+                <%
+                courier_ways = if @packing_list.attr_courier_id.present?                          
+                  options_from_collection_for_select(CourierWay.select(:id, :name).where(courier_id: @packing_list.attr_courier_id).order(:name), :id, :name, @packing_list.attr_courier_way_id.to_s)
+                  else
+                  ""
+                  end
+              %>          
+                <div class="form-group<%= control_group_error(f.object, :attr_courier_way_id) %>">
+                    <%= f.label :attr_courier_way_id, "Via", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.select :attr_courier_way_id, courier_ways, {include_blank: true}, {class: "form-control"} %>
+                            <%= error_help_text(f.object, :attr_courier_way_id) %>
+                        </div>
+                    </div>
+                    <%
+                    courier_units = if @packing_list.attr_courier_way_id.present?                          
+                      options_from_collection_for_select(CourierUnit.select(:id, :name).where(courier_way_id: @packing_list.attr_courier_way_id).order(:name), :id, :name, @packing_list.courier_unit_id.to_s)
+                      else
+                      ""
+                      end
+                  %>          
+                    <div class="form-group<%= control_group_error(f.object, :courier_unit_id) %>">
+                        <%= f.label :courier_unit_id, "Unit", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.select :courier_unit_id, courier_units, {include_blank: true}, {class: "form-control"} %>
+                                <%= error_help_text(f.object, :courier_unit_id) %>
+                            </div>
+                        </div>
+                        <%
+                        courier_cities = if @packing_list.courier_unit_id.present?                          
+                          options_from_collection_for_select(City.joins(:courier_prices).select(:id, :name).where(["courier_prices.courier_unit_id = ?", @packing_list.courier_unit_id]).order(:name).distinct, :id, :name, @packing_list.attr_city_id.to_s)
+                          else
+                          ""
+                          end
+                      %>          
+                        <div class="form-group<%= control_group_error(f.object, :attr_city_id) %>">
+                            <%= f.label :attr_city_id, "City", class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.select :attr_city_id, courier_cities, {include_blank: true}, {class: "form-control"} %>
+                                    <%= error_help_text(f.object, :attr_city_id) %>
+                                </div>
+                            </div>
+                            <%
+                            courier_price_types = if @packing_list.courier_unit_id.present? && @packing_list.attr_city_id.present?
+                              options_from_collection_for_select(CourierPrice.select(:price_type).where(courier_unit_id: @packing_list.courier_unit_id, city_id: @packing_list.attr_city_id).order(:price_type).distinct, :price_type, :price_type, @packing_list.attr_courier_price_type)
+                              else
+                              ""
+                              end
+                          %>
+                            <div class="form-group<%= control_group_error(f.object, :attr_courier_price_type) %>">
+                                <%= f.label :attr_courier_price_type, "Courier type", class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.select :attr_courier_price_type, courier_price_types, {include_blank: true}, {class: "form-control"} %>
+                                        <%= error_help_text(f.object, :attr_courier_price_type) %>
+                                    </div>
+                                </div>                        
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Shipments</label>
+                                    <div class="col-sm-10">                                        
+                                        <%= text_field_tag :packing_list_shipments, params[:packing_list_shipments], class: "form-control" %>
+                                          <a class="btn btn-default active" id="generate_packing_list_item_form" style="float: right;margin-top: 10px;">Add weight/volume</a>
+                                      </div>
+                                  </div>
+                                  <div id="forms_container_packing_list">
+                                      <% if @packing_list.packing_list_items.present? %>
+                                        <% @packing_list_items = @packing_list.packing_list_items %>
+                                        <%= render partial: "packing_list_item_fields" %>
+                                      <% end %>
+                                  </div>
+                                  <div class="form-group">
+                                      <div class="col-sm-offset-2 col-sm-10">
+                                          <%= f.submit "Save", class: "btn btn-primary" %>
+                                            <button class="btn btn-link cancel">Cancel</button>
+                                        </div>
+                                    </div>
+                                  <% end %>
+                              </td>
+
+                              <script>
+                                $(function () {
+                                    $("#packing_list_attr_courier_id").attr("data-placeholder", "Please select").chosen();
+                                    $("#packing_list_attr_courier_way_id").attr("data-placeholder", "Please select").chosen();
+                                    $("#packing_list_courier_unit_id").attr("data-placeholder", "Please select").chosen();
+                                    $("#packing_list_attr_city_id").attr("data-placeholder", "Please select").chosen();
+                                    $("#packing_list_attr_courier_price_type").attr("data-placeholder", "Please select").chosen();
+                                    $("#packing_list_departure_date").datepicker({
+                                        dateFormat: "dd/mm/yy"
+                                    });
+                                    $("#packing_list_attr_courier_id").change(function () {
+                                        $.get("/packing_lists/get_courier_ways", {
+                                            courier_id: $("#packing_list_attr_courier_id").val()
+                                        });
+                                    });
+                                    $("#packing_list_attr_courier_way_id").change(function () {
+                                        $.get("/packing_lists/get_courier_units", {
+                                            courier_way_id: $("#packing_list_attr_courier_way_id").val()
+                                        });
+                                    });
+                                    $("#packing_list_courier_unit_id").change(function () {
+                                        $.get("/packing_lists/get_courier_cities", {
+                                            courier_unit_id: $("#packing_list_courier_unit_id").val()
+                                        });
+                                    });
+                                    $("#packing_list_attr_city_id").change(function () {
+                                        $.get("/packing_lists/get_courier_price_types", {
+                                            courier_unit_id: $("#packing_list_courier_unit_id").val(),
+                                            city_id: $("#packing_list_attr_city_id").val()
+                                        });
+                                    });
+
+                                    $("#generate_packing_list_item_form").click(function () {
+                                        if ($("#packing_list_courier_unit_id").val().trim() == "")
+                                            bootbox.alert({message: "Please select unit first!", size: 'small'});
+                                        else if ($('#packing_list_shipments').tagit('assignedTags').length == 0)
+                                            bootbox.alert({message: "You have not selected shipment yet!", size: 'small'});
+                                        else {
+                                            var shipmentNumbers = [];
+                                            $("#packing_list_shipments").val().split(",").forEach(function (element) {
+                                                shipmentNumbers.push(element);
+                                            });
+                                            $.get("/packing_lists/generate_packing_list_item_form", {
+                                                shipment_numbers: shipmentNumbers,
+                                                courier_unit_id: $("#packing_list_courier_unit_id").val().trim()
+                                            });
+                                        }
+
+                                        return false;
+                                    });
+
+                                    $("#packing_list_shipments").tagit({
+                                        autocomplete: {
+                                            delay: 0,
+                                            minLength: 1,
+                                            source: function (search, response) {
+                                                $.ajax({
+                                                    url: "/packing_lists/autocomplete_shipment_number",
+                                                    data: {term: search.term},
+                                                    success: function (data) {
+                                                        response($.map(data, function (item) {
+                                                            return {
+                                                                id: item.id,
+                                                                label: item.label
+                                                            }
+                                                        }));
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                })
+                              </script>

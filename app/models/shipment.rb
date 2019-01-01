@@ -7,8 +7,10 @@ class Shipment < ApplicationRecord
   belongs_to :order_booking
   belongs_to :courier
 
+  has_many :packing_list_items, dependent: :restrict_with_error
   has_many :shipment_products, dependent: :destroy
   has_many :shipment_product_items, through: :shipment_products
+  has_one :packing_list_item_relation, -> {select("1 AS one")}, class_name: "PackingListItem"
 
   accepts_nested_attributes_for :shipment_products, allow_destroy: true#, reject_if: :child_blank
 

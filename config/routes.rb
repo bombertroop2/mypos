@@ -3,6 +3,14 @@ Rails.application.routes.draw do
     member do
       get 'print'
     end
+    collection do
+      get 'get_courier_ways'
+      get 'get_courier_units'
+      get 'get_courier_price_types'
+      get 'get_courier_cities'
+      get 'generate_packing_list_item_form'
+      get :autocomplete_shipment_number
+    end
   end
   resources :courier_prices do
     collection do
