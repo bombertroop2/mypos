@@ -1,0 +1,20 @@
+$('#packing_list_attr_courier_way_id').find('option').remove();
+$('#packing_list_courier_unit_id').find('option').remove();
+$('#packing_list_attr_city_id').find('option').remove();
+$('#packing_list_attr_courier_price_type').find('option').remove();
+var o = new Option("", "");
+$("#packing_list_attr_courier_way_id").append(o);
+var o = new Option("", "");
+$("#packing_list_courier_unit_id").append(o);
+var o = new Option("", "");
+$("#packing_list_attr_city_id").append(o);
+var o = new Option("", "");
+$("#packing_list_attr_courier_price_type").append(o);
+<% @courier_ways.each do |courier_way| %>
+  var o = new Option("<%= courier_way.name %>", "<%= courier_way.id %>");
+  $("#packing_list_attr_courier_way_id").append(o);
+<% end %>
+$("#packing_list_attr_courier_way_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+$("#packing_list_courier_unit_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+$("#packing_list_attr_city_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+$("#packing_list_attr_courier_price_type").attr("data-placeholder", "Please select").chosen("destroy").chosen();

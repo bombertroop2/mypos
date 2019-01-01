@@ -4,7 +4,9 @@ class CourierPrice < ApplicationRecord
 
   belongs_to :courier_unit
   belongs_to :city
-  
+  has_many :packing_lists, dependent: :restrict_with_error
+  has_one :packing_list_relation, -> {select("1 AS one")}, class_name: "PackingList"
+
 
   PRICE_TYPES = [
     ["Regular", "Regular"],
@@ -19,34 +21,39 @@ class CourierPrice < ApplicationRecord
           validate :courier_available, if: proc{|cp| cp.attr_courier_id.present?}
             validate :via_available, if: proc{|cp| cp.attr_courier_way_id.present?}
               validate :unit_available, if: proc{|cp| cp.courier_unit_id.present? && cp.courier_unit_id_changed?}
+                validate :editable, if: proc{|cp| cp.persisted?}
     
-                before_destroy :delete_tracks
+                  before_destroy :delete_tracks
 
-                private
+                  private
+                  
+                  def editable
+                    errors.add(:base, "The record cannot be edited") if packing_list_relation.present?
+                  end
                 
-                def unit_available                  
-                  errors.add(:courier_unit_id, "does not exist!") if CourierUnit.joins(courier_way: :courier).select("1 AS one").where(id: courier_unit_id).where(["couriers.status = ? AND couriers.id = ? AND courier_ways.id = ?", "External", attr_courier_id, attr_courier_way_id]).blank?
-                end
+                  def unit_available                  
+                    errors.add(:courier_unit_id, "does not exist!") if CourierUnit.joins(courier_way: :courier).select("1 AS one").where(id: courier_unit_id).where(["couriers.status = ? AND couriers.id = ? AND courier_ways.id = ?", "External", attr_courier_id, attr_courier_way_id]).blank?
+                  end
               
-                def via_available
-                  errors.add(:attr_courier_way_id, "does not exist!") if CourierWay.joins(:courier).select("1 AS one").where(id: attr_courier_way_id).where(["couriers.status = ? AND couriers.id = ?", "External", attr_courier_id]).blank?
-                end
+                  def via_available
+                    errors.add(:attr_courier_way_id, "does not exist!") if CourierWay.joins(:courier).select("1 AS one").where(id: attr_courier_way_id).where(["couriers.status = ? AND couriers.id = ?", "External", attr_courier_id]).blank?
+                  end
             
-                def courier_available
-                  errors.add(:attr_courier_id, "does not exist!") if Courier.select("1 AS one").where(status: "External").find(attr_courier_id).blank?
-                end
+                  def courier_available
+                    errors.add(:attr_courier_id, "does not exist!") if Courier.select("1 AS one").where(status: "External").find(attr_courier_id).blank?
+                  end
           
-                def delete_tracks
-                  audits.destroy_all
-                end
+                  def delete_tracks
+                    audits.destroy_all
+                  end
   
-                def city_available
-                  errors.add(:city_id, "does not exist!") if City.select("1 AS one").where(id: city_id).blank?
-                end
+                  def city_available
+                    errors.add(:city_id, "does not exist!") if City.select("1 AS one").where(id: city_id).blank?
+                  end
       
-                def price_type_available
-                  CourierPrice::PRICE_TYPES.select{ |x| x[1] == price_type }.first.first
-                rescue
-                  errors.add(:price_type, "does not exist!")
+                  def price_type_available
+                    CourierPrice::PRICE_TYPES.select{ |x| x[1] == price_type }.first.first
+                  rescue
+                    errors.add(:price_type, "does not exist!")
+                  end
                 end
-              end

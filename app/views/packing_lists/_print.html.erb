@@ -1,0 +1,158 @@
+<table width="100%" id="pl_print_doc">
+    <tr>
+        <td colspan="3"><strong><%= Company.display_name %></strong></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="3"><strong>PACKING LIST</strong></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="3"><%= @packing_list.number %></td>
+    </tr>
+    <tr>
+        <td style="width: 50%" valign="top">
+            <table class="table-condensed table-responsive">
+                <tr>
+                    <td>Date</td>
+                    <td>:</td>
+                    <td><%= @packing_list.departure_date.strftime("%d/%m/%Y") %></td>
+                </tr>
+                <tr>
+                    <td>Courier</td>
+                    <td>:</td>
+                    <td><%= "#{@packing_list.courier_code} - #{@packing_list.courier_name}" %></td>
+                </tr>
+                <tr>
+                    <td>Via</td>
+                    <td>:</td>
+                    <td><%= @packing_list.courier_way_name %></td>
+                </tr>
+                <tr>
+                    <td>Unit</td>
+                    <td>:</td>
+                    <td><%= @packing_list.courier_unit_name %></td>
+                </tr>
+                <% if @packing_list.price_type.present? %>                                
+                  <tr>
+                      <td>Courier Type</td>
+                      <td>:</td>
+                      <td><%= @packing_list.price_type %></td>
+                  </tr>
+                <% end %>
+            </table>
+        </td>
+        <td style="width: 50%" valign="top" align="right">
+            <table class="table-condensed table-responsive">
+                <% if @packing_list.city_name.present? %>                                
+                  <tr>
+                      <td>City</td>
+                      <td>:</td>
+                      <td><%= @packing_list.city_name %></td>
+                  </tr>
+                <% end %>
+                <tr>
+                    <td>Quantity</td>
+                    <td>:</td>
+                    <td><%= number_to_currency(@packing_list.total_quantity,
+                          :separator => ",",
+                          :delimiter => ".",
+                          :unit => "",
+                          :precision => 0) %></td>
+                </tr>
+                <% if @packing_list.total_volume.present? %>                                
+                  <tr>
+                      <td>Volume</td>
+                      <td>:</td>
+                      <td><%= number_to_currency(@packing_list.total_volume,
+                            :separator => ",",
+                            :delimiter => ".",
+                            :unit => "",
+                            :precision => 2) %></td>
+                  </tr>
+                <% elsif @packing_list.total_weight.present? %>
+                  <tr>
+                      <td>Weight</td>
+                      <td>:</td>
+                      <td><%= number_to_currency(@packing_list.total_weight,
+                            :separator => ",",
+                            :delimiter => ".",
+                            :unit => "",
+                            :precision => 2) %></td>
+                  </tr>
+                <% end %>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2">
+            <table class="table table-condensed table-responsive table-bordered">
+                <tbody>
+                    <tr style="text-align: center">
+                        <td><strong>No</strong></td>
+                        <td><strong>DO. Number</strong></td>
+                        <td><strong>Quantity</strong></td>
+                        <% if @packing_list.total_volume.present? %>
+                          <td><strong>Volume</strong></td>
+                        <% else %>
+                          <td><strong>Weight</strong></td>
+                        <% end %>
+                    </tr>
+                    <% @packing_list.packing_list_items.joins(:shipment).select(:volume, :weight).select("shipments.delivery_order_number", "shipments.quantity").each_with_index do |packing_list_item, idx| %>
+                      <tr align="center">
+                          <td style="vertical-align: middle"><%= idx.succ %></td>
+                          <td style="vertical-align: middle"><%= packing_list_item.delivery_order_number %></td>
+                          <td style="vertical-align: middle;text-align: right"><%= number_to_currency(packing_list_item.quantity,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "",
+                                :precision => 0) %></td>
+                          <% if packing_list_item.volume.present? %>
+                            <td style="vertical-align: middle;text-align: right"><%= number_to_currency(packing_list_item.volume,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "",
+                                  :precision => 2) %></td>
+                          <% elsif packing_list_item.weight.present? %>
+                            <td style="vertical-align: middle;text-align: right"><%= number_to_currency(packing_list_item.weight,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "",
+                                  :precision => 2) %></td>
+                          <% end %>
+                      </tr>
+                    <% end %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" align="right"><strong>Total</strong></td>
+                        <td align="right"><strong><%= number_to_currency(@packing_list.total_quantity,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "",
+                                  :precision => 0) %></strong></td>
+                        <td align="right"><strong>
+                                <% if @packing_list.total_volume.present? %>
+                                  <%= number_to_currency(@packing_list.total_volume,
+                                    :separator => ",",
+                                    :delimiter => ".",
+                                    :unit => "",
+                                    :precision => 2) %>
+                                <% else %>
+                                  <%= number_to_currency(@packing_list.total_weight,
+                                    :separator => ",",
+                                    :delimiter => ".",
+                                    :unit => "",
+                                    :precision => 2) %>
+                                <% end %></strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>Created by</td>
+    </tr>
+    <tr>
+        <td style="padding-top: 50px"><%= @packing_list.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+    </tr>
+</table>

@@ -38,7 +38,7 @@ module ApplicationHelper
     return true if can? :read, ReceivedPurchaseOrder
     return true if can? :read, PurchaseReturn
     return true if can? :read, AccountPayable
-#    return true if can? :read, AccountPayablePayment
+    #    return true if can? :read, AccountPayablePayment
   end
 
   def booking_control_menu_active?
@@ -85,6 +85,7 @@ module ApplicationHelper
 
   def expedition_menu_active?
     return true if can? :read, Courier
+    return true if can? :read, PackingList
   end
 
   def cashier_menu_active?

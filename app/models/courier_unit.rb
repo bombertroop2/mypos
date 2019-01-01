@@ -1,6 +1,8 @@
 class CourierUnit < ApplicationRecord
 	audited associated_with: :courier_way, on: :create
   belongs_to :courier_way
+  has_many :courier_prices, dependent: :destroy
+  has_many :packing_lists, dependent: :restrict_with_error
 
   validates :name, presence: true
   validate :unit_available
