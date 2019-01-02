@@ -15,23 +15,26 @@
   %thead#listing-coa-thead
     %tr
       %th.col-md-1 No
+      %th.col-md-6 Transaction
       %th.col-md-1 Code
       %th.col-md-6 Description
       %th.col-md-2 Debit
       %th.col-md-2 Credit
   %tbody
     - @jurnals.each_with_index do |j, i|
-      %tr
-        %td= i + 1
-        %td
-        %td
-          %b=j.id.eql?(0) ? (j.group_description) : j.description
-        %td
-        %td
       - detials = j.id.eql?(0) ? j.detail_groups : j.detail_jurnals
+      %tr{class: "last-jurnal"}
+        %td{rowspan: detials.to_a.size}
+          = i + 1
+        %td{rowspan: detials.to_a.size}
+          %b=j.id.eql?(0) ? (j.group_description) : j.description
+        %td= detials.first.code
+        %td{class: "#{ "credit" if !detials.first.is_debit}"}= detials.first.description
+        %td.text-right= number_to_currency(detials.first.total, unit: "Rp ", separator: ",", delimiter: ".") if detials.first.is_debit
+        %td.text-right= number_to_currency(detials.first.total, unit: "Rp ", separator: ",", delimiter: ".") if !detials.first.is_debit
       - detials.each_with_index do |d, x|
+        - next if x.eql?(0)
         %tr{class: "#{ "credit" if !d.is_debit} #{ "last-jurnal" if detials.size.eql?(x + 1) }"}
-          %td
           %td= d.code
           %td{class: "#{ "credit" if !d.is_debit}"}= d.description
           %td.text-right= number_to_currency(d.total, unit: "Rp ", separator: ",", delimiter: ".") if d.is_debit
@@ -39,7 +42,7 @@
 
   %tfoot
     %tr
-      %th{colspan: 3}
+      %th{colspan: 4}
         %b Total
       %th.text-right= number_to_currency(@total["total_debit"], unit: "Rp ", separator: ",", delimiter: ".")
       %th.text-right= number_to_currency(@total["total_credit"], unit: "Rp ", separator: ",", delimiter: ".")
