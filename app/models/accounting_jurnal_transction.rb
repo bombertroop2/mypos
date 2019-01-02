@@ -3,9 +3,10 @@ class AccountingJurnalTransction < ApplicationRecord
   belongs_to :warehouse
   belongs_to :model, polymorphic: true
 
+  scope :start_year, -> {select("created_at").order("created_at ASC").limit(1).first.created_at.year rescue Date.today.year}
   scope :load_jurnals, -> {joins(details: [coa: :category] )}
   scope :find_by_model, ->(model) {where(model_id: model.id, model_type: model.class.to_s).first}
-  scope :warehouse_is_central, -> {joins(:warehouse).where("warehouses.warehouse_type = ? ", "central")}
+  scope :warehouse_is_central, -> {joins("INNER JOIN warehouses ON accounting_jurnal_transctions.warehouse_id  = warehouses.id OR accounting_jurnal_transctions.warehouse_id IS NULL").where("warehouses.warehouse_type = 'central' OR accounting_jurnal_transctions.warehouse_id = NULL ")}
   # scope :only_cash_disbursements, -> {collection_filed_group_by_model_type.where(model_type: "CashDisbursement")}
 
   def self.year_and_month_queries(year=Date.today.year, month=Date.today.month)
@@ -50,8 +51,8 @@ class AccountingJurnalTransction < ApplicationRecord
     AccountingAccountSetting.jurnal(setting)
   end
 
-  def self.jurnals(jurnal="cashin", warehouse_id=nil)
-    eval "AccountingJurnalTransction.year_and_month_queries.#{jurnal}(warehouse_id)"
+  def self.jurnals(jurnal="cashin", warehouse_id=nil, year=Date.today.year, month=Date.today.month)
+    eval "AccountingJurnalTransction.year_and_month_queries(year, month).#{jurnal}(warehouse_id)"
   end
 
   def self.cashin(warehouse_id)
@@ -72,10 +73,10 @@ class AccountingJurnalTransction < ApplicationRecord
     end
   end
 
-  def self.total(type_jurnal, warehouse_id=nil)
+  def self.total(type_jurnal, warehouse_id=nil, year=Date.today.year, month=Date.today.month)
     querie_filters = {type_jurnal: type_jurnal}
     querie_filters[:warehouse_id] = warehouse_id if !warehouse_id.eql?(nil)
-    joins(:details).select("#{total_query('t')} AS total_debit, #{total_query('f')} AS total_credit").year_and_month_queries
+    joins(:details).select("#{total_query('t')} AS total_debit, #{total_query('f')} AS total_credit").year_and_month_queries(year, month)
     .where(querie_filters).to_a.first.attributes.to_hash rescue {total_debit: 0.0, total_credit: 0.0}
   end
 

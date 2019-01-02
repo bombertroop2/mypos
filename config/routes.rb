@@ -336,9 +336,12 @@ Rails.application.routes.draw do
   namespace :accounting do
     scope ":jurnals" do
       resources :account_settings, except: :show
-      resources :jurnal_transctions, except: :show
-      scope ":showroom" do
-        resources :jurnal_transctions, except: :show, as: :jurnal_transction_showrooms
+      resources :jurnal_transctions, except: :show do
+        collection do
+          post :by_date, to: "jurnal_transctions#index"
+          get ":showroom", to: "jurnal_transctions#index", as: :showroom
+          post ":showroom/by_date", to: "jurnal_transctions#index", as: :showroom_by_date
+        end
       end
     end
 

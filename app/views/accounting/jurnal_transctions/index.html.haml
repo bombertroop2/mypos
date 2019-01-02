@@ -1,5 +1,15 @@
+- url = params[:showroom].present? ? showroom_by_date_accounting_jurnal_transctions_path(params[:jurnals], params[:showroom]) : by_date_accounting_jurnal_transctions_path(params[:jurnals])
 .page-header
   %h1 Jurnal Transctions #{params[:jurnals].capitalize}
+#search-form-container.form-inline.text-right
+  = form_tag url do
+    .form-group.text-left
+      = select_tag "date[year]", options_for_select(@start_year..Date.today.year, (params[:date].present? ? params[:date][:year] : Date.today.year))
+    .form-group.text-left
+      = select_tag "date[month]", options_for_select(Date::MONTHNAMES.compact, (params[:date].present? ? params[:date][:month] : Date.today.month))
+    %button#search-adjustment-btn.btn.btn-primary{:type => "submit"}
+      %span.glyphicon.glyphicon-search
+
 
 %table.table.table-striped.jurnal{:style => "table-layout: fixed;word-wrap: break-word;"}
   %thead#listing-coa-thead
