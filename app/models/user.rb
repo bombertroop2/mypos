@@ -68,7 +68,7 @@ class User < ApplicationRecord
                       "Order Booking", "Courier", "Shipment", "Stock Mutation", "Goods In Transit",
                       "Fiscal Reopening/Closing", "Stock Movement", "Listing Stocks", "Event", "Point of Sale", "Bank Master",
                       "Member", "Company", "Consignment", "Growth Report", "Pie Chart of Qty Sold", "Sell Thru Report", "Customer",
-                      "Adjustment", "Account Payable Payment", "Packing List"]
+                      "Adjustment", "Account Payable Payment", "Packing List", "General Variable"]
 
                     #  def name
                     #    sales_promotion_girl.name
