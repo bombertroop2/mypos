@@ -85,6 +85,10 @@ class CouriersController < ApplicationController
   # PATCH/PUT /couriers/1.json
   def update
     @invalid = !@courier.update(courier_params)
+  rescue ActiveRecord::InvalidForeignKey => e
+    render js: "bootbox.alert({message: \"Cannot delete record because dependent packing lists exist\",size: 'small'});"
+  rescue ActiveRecord::RecordNotDestroyed => e
+    render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
   end
 
   # DELETE /couriers/1

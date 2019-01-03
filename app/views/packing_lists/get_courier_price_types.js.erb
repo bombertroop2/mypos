@@ -1,0 +1,8 @@
+$('#packing_list_attr_courier_price_type').find('option').remove();
+var o = new Option("", "");
+$("#packing_list_attr_courier_price_type").append(o);
+<% @courier_price_types.each do |courier_price_type| %>
+  var o = new Option("<%= courier_price_type.price_type %>", "<%= courier_price_type.price_type %>");
+  $("#packing_list_attr_courier_price_type").append(o);
+<% end %>
+$("#packing_list_attr_courier_price_type").attr("data-placeholder", "Please select").chosen("destroy").chosen();
