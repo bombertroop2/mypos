@@ -7,7 +7,6 @@ class AccountingJurnalTransction < ApplicationRecord
   scope :load_jurnals, -> {joins(details: [coa: :category] )}
   scope :find_by_model, ->(model) {where(model_id: model.id, model_type: model.class.to_s).first}
   scope :warehouse_is_central, -> {joins("INNER JOIN warehouses ON accounting_jurnal_transctions.warehouse_id  = warehouses.id OR accounting_jurnal_transctions.warehouse_id IS NULL").where("warehouses.warehouse_type = 'central' OR accounting_jurnal_transctions.warehouse_id = NULL ")}
-  # scope :only_cash_disbursements, -> {collection_filed_group_by_model_type.where(model_type: "CashDisbursement")}
 
   def self.year_and_month_queries(year=Date.today.year, month=Date.today.month)
     where("extract(year  from accounting_jurnal_transctions.created_at) = ? AND extract(month  from accounting_jurnal_transctions.created_at) = ?", year, month)
@@ -56,20 +55,19 @@ class AccountingJurnalTransction < ApplicationRecord
   end
 
   def self.cashin(warehouse_id)
-    if warehouse_id.eql?(nil)
-      load_jurnals.where(queries(type_jurnal="cashin")).warehouse_is_central.distinct.to_a +
-      load_jurnals.where(queries(type_jurnal="cashin")).collection_filed_group_by_model_type
-    else
-      load_jurnals.where(queries(type_jurnal="cashin")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id}).distinct
-    end
+    load_type_jurnal("cashin", warehouse_id)
   end
 
   def self.cashout(warehouse_id)
+    load_type_jurnal("cashout", warehouse_id)
+  end
+
+  def self.load_type_jurnal(type_jurnal, warehouse_id)
     if warehouse_id.eql?(nil)
-      load_jurnals.where(queries(type_jurnal="cashout")).warehouse_is_central.distinct.to_a +
-      load_jurnals.where(queries(type_jurnal="cashout")).collection_filed_group_by_model_type
+      load_jurnals.where(queries(type_jurnal)).warehouse_is_central.distinct.to_a +
+      load_jurnals.where(queries(type_jurnal)).collection_filed_group_by_model_type
     else
-      load_jurnals.where(queries(type_jurnal="cashout")).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id}).distinct
+      load_jurnals.where(queries(type_jurnal)).where(accounting_jurnal_transctions: {warehouse_id: warehouse_id}).distinct
     end
   end
 

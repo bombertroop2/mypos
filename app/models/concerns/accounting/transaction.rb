@@ -3,6 +3,7 @@ require 'active_support/concern'
 module Accounting::Transaction
   include Accounting::Transaction::PurchaseOrder
   include Accounting::Transaction::Invoice
+  include Accounting::Transaction::Shipment
 
 
   def destroy_transaction(type_jurnal)
