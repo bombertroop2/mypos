@@ -2,18 +2,24 @@ class Vendor < ApplicationRecord
   audited on: [:create, :update]
   before_validation :strip_string_values
 
-  validates :code, presence: true, uniqueness: true
-  validates :name, :address, :terms_of_payment, presence: true
+  validates :code, :taxpayer_identification_number, uniqueness: true
+  validates :code, :name, :address, :terms_of_payment, :vendor_type, :taxpayer_identification_number, :taxpayer_identification_number_address, presence: true
   validates :value_added_tax, presence: true, if: proc {|vendor| vendor.is_taxable_entrepreneur}
     #  validates :email, uniqueness: true, if: proc {|vendor| vendor.email.present?}
     #    validates :pic_email, uniqueness: true, if: proc {|vendor| vendor.pic_email.present?}
     validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|vendor| vendor.terms_of_payment.present?}
-      validate :code_not_changed, :vat_available
+      validate :code_not_changed, :vat_available, :type_available
 
       
       VAT = [
         ["Include", "include"],
         ["Exclude", "exclude"],
+      ]
+
+      TYPES = [
+        ["Local", "Local"],
+        ["Import", "Import"],
+        ["Intercompany", "Intercompany"]
       ]
 
       has_many :products, dependent: :restrict_with_error
@@ -52,6 +58,12 @@ class Vendor < ApplicationRecord
           Vendor::VAT.select{ |x| x[1] == value_added_tax }.first.first
         rescue
           errors.add(:value_added_tax, "does not exist!") if value_added_tax.present?
+        end
+        
+        def type_available
+          Vendor::TYPES.select{ |x| x[1] == vendor_type }.first.first
+        rescue
+          errors.add(:vendor_type, "does not exist!") if vendor_type.present?
         end
     
         def remove_vat
