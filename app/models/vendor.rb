@@ -2,8 +2,8 @@ class Vendor < ApplicationRecord
   audited on: [:create, :update]
   before_validation :strip_string_values
 
-  validates :code, presence: true, uniqueness: true
-  validates :name, :address, :terms_of_payment, :vendor_type, presence: true
+  validates :code, :taxpayer_identification_number, uniqueness: true
+  validates :code, :name, :address, :terms_of_payment, :vendor_type, :taxpayer_identification_number, :taxpayer_identification_number_address, presence: true
   validates :value_added_tax, presence: true, if: proc {|vendor| vendor.is_taxable_entrepreneur}
     #  validates :email, uniqueness: true, if: proc {|vendor| vendor.email.present?}
     #    validates :pic_email, uniqueness: true, if: proc {|vendor| vendor.pic_email.present?}
