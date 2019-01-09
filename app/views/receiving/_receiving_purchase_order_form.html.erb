@@ -45,9 +45,9 @@
                                     <tbody>
                                         <tr style="text-align: center">
                                             <td style="vertical-align: middle;width: 20% !important;"><strong>Article Code</strong></td>
-                                            <% if current_user.has_managerial_role? %>
-                                              <td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>
-                                            <% end %>
+                                            <%# if current_user.has_managerial_role? %>
+                                              <!--<td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>-->
+                                            <%# end %>
                                             <td style="vertical-align: middle;width: auto !important;"><strong>Details</strong></td>
                                         </tr>
                                         <%= received_purchase_order_form.fields_for :received_purchase_order_products do |received_purchase_order_product_form| %>
@@ -57,9 +57,9 @@
                                           <% sizes = @sizes[received_purchase_order_product.purchase_order_product_id] rescue [] %>
                                           <tr align="center">
                                               <td style="vertical-align: middle;width: 20% !important;"><%= "#{received_purchase_order_product.prdct_code} - #{received_purchase_order_product.prdct_name}" %></td>
-                                              <% if current_user.has_managerial_role? %>
-                                                <td style="vertical-align: middle;width: 20% !important;"><%= number_to_currency(received_purchase_order_product.prdct_cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-                                              <% end %>
+                                              <%# if current_user.has_managerial_role? %>
+                                                <!--<td style="vertical-align: middle;width: 20% !important;"><%#= number_to_currency(received_purchase_order_product.prdct_cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>-->
+                                              <%# end %>
                                               <td style="vertical-align: middle;width: auto !important;">                                    
                                                   <div class="table-responsive">
                                                       <table class="table table-condensed table-responsive table-bordered">
