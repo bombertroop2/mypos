@@ -24,7 +24,7 @@ class PurchaseReturnsController < ApplicationController
 
   # GET /purchase_returns/new
   def new
-    @vendors = Vendor.select(:id, :name).order(:name)
+    @vendors = Vendor.select(:id, :name).where(is_active: true).order(:name)
   end
 
   # GET /purchase_returns/1/edit
@@ -56,13 +56,13 @@ class PurchaseReturnsController < ApplicationController
       end
       
       @do_numbers = if params[:received_date].present? && params[:vendor_id].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(receiving_date) BETWEEN ? AND ? #{params[:query_operator].strip} vendor_id = ?", start_received_date, end_received_date, params[:vendor_id].strip]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["(DATE(received_purchase_orders.receiving_date) BETWEEN ? AND ? #{params[:query_operator].strip} received_purchase_orders.vendor_id = ?) AND vendors.is_active = ?", start_received_date, end_received_date, params[:vendor_id].strip, true]).order(:delivery_order_number)
       elsif params[:received_date].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(receiving_date) BETWEEN ? AND ?", start_received_date, end_received_date]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["DATE(received_purchase_orders.receiving_date) BETWEEN ? AND ? AND vendors.is_active = ?", start_received_date, end_received_date, true]).order(:delivery_order_number)
       elsif params[:vendor_id].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["vendor_id = ?", params[:vendor_id].strip]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["received_purchase_orders.vendor_id = ? AND vendors.is_active = ?", params[:vendor_id].strip, true]).order(:delivery_order_number)
       else
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["vendors.is_active = ?", true]).order(:delivery_order_number)
       end
 
       render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
@@ -101,13 +101,13 @@ class PurchaseReturnsController < ApplicationController
       end
     
       @purchase_orders = if params[:po_date].present? && params[:vendor_id].present?
-        PurchaseOrder.where(["status != 'Open' AND DATE(purchase_order_date) BETWEEN ? AND ? #{params[:query_operator].strip} vendor_id = ?", start_po_date, end_po_date, params[:vendor_id].strip]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND (DATE(purchase_order_date) BETWEEN ? AND ? #{params[:query_operator].strip} vendor_id = ?)", true, start_po_date, end_po_date, params[:vendor_id].strip]).select :id, :number
       elsif params[:po_date].present?
-        PurchaseOrder.where(["status != 'Open' AND DATE(purchase_order_date) BETWEEN ? AND ?", start_po_date, end_po_date]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND DATE(purchase_order_date) BETWEEN ? AND ?", true, start_po_date, end_po_date]).select :id, :number
       elsif params[:vendor_id].present?
-        PurchaseOrder.where(["status != 'Open' AND vendor_id = ?", params[:vendor_id].strip]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND vendor_id = ?", true, params[:vendor_id].strip]).select :id, :number
       else
-        PurchaseOrder.where("status != 'Open'").select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open'", true]).select :id, :number
       end
 
       render js: "bootbox.alert({message: \"#{@purchase_return.errors[:base].join("\\n")}\",size: 'small'});" if @purchase_return.errors[:base].present?
@@ -189,15 +189,15 @@ class PurchaseReturnsController < ApplicationController
       end
 
       @purchase_orders = if params[:po_date].present? && params[:vendor_id].present?
-        PurchaseOrder.where(["status != 'Open' AND DATE(purchase_order_date) BETWEEN ? AND ? #{params[:query_operator].strip} vendor_id = ?", start_po_date, end_po_date, params[:vendor_id].strip]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND (DATE(purchase_order_date) BETWEEN ? AND ? #{params[:query_operator].strip} vendor_id = ?)", true, start_po_date, end_po_date, params[:vendor_id].strip]).select :id, :number
       elsif params[:po_date].present?
-        PurchaseOrder.where(["status != 'Open' AND DATE(purchase_order_date) BETWEEN ? AND ?", start_po_date, end_po_date]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND DATE(purchase_order_date) BETWEEN ? AND ?", true, start_po_date, end_po_date]).select :id, :number
       elsif params[:vendor_id].present?
-        PurchaseOrder.where(["status != 'Open' AND vendor_id = ?", params[:vendor_id].strip]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND vendor_id = ?", true, params[:vendor_id].strip]).select :id, :number
       elsif params[:po_number].present?
-        PurchaseOrder.where(["status != 'Open' AND number = ?", params[:po_number]]).select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open' AND number = ?", true, params[:po_number]]).select :id, :number
       else
-        PurchaseOrder.where("status != 'Open'").select :id, :number
+        PurchaseOrder.joins(:vendor).where(["vendors.is_active = ? AND status != 'Open'", true]).select :id, :number
       end
     
       if @purchase_orders.blank? && params[:po_number].present?
@@ -223,15 +223,15 @@ class PurchaseReturnsController < ApplicationController
       end
       
       @do_numbers = if params[:received_date].present? && params[:vendor_id].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(direct_purchases.receiving_date) BETWEEN ? AND ? #{params[:query_operator].strip} direct_purchases.vendor_id = ?", start_received_date, end_received_date, params[:vendor_id].strip]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["(DATE(direct_purchases.receiving_date) BETWEEN ? AND ? #{params[:query_operator].strip} direct_purchases.vendor_id = ?) AND vendors.is_active = ?", start_received_date, end_received_date, params[:vendor_id].strip, true]).order(:delivery_order_number)
       elsif params[:received_date].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["DATE(direct_purchases.receiving_date) BETWEEN ? AND ?", start_received_date, end_received_date]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["DATE(direct_purchases.receiving_date) BETWEEN ? AND ? AND vendors.is_active = ?", start_received_date, end_received_date, true]).order(:delivery_order_number)
       elsif params[:vendor_id].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").where(["direct_purchases.vendor_id = ?", params[:vendor_id].strip]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["direct_purchases.vendor_id = ? AND vendors.is_active = ?", params[:vendor_id].strip, true]).order(:delivery_order_number)
       elsif params[:do_number].present?
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id, direct_purchase_id").where(["delivery_order_number = ?", params[:do_number]]).order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id, direct_purchase_id").where(["delivery_order_number = ? AND vendors.is_active = ?", params[:do_number], true]).order(:delivery_order_number)
       else
-        ReceivedPurchaseOrder.joins(:direct_purchase).select("delivery_order_number, received_purchase_orders.id").order(:delivery_order_number)
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["vendors.is_active = ?", true]).order(:delivery_order_number)
       end
 
       if @do_numbers.blank? && params[:do_number].present?

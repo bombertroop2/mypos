@@ -37,7 +37,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
                           end
                   
                           def purchase_order_receivable
-                            errors.add(:base, "Not able to receive selected PO") unless PurchaseOrder.select("1 AS one").where("(status = 'Open' OR status = 'Partial') AND id = '#{purchase_order_id}' AND vendor_id = '#{vendor_id}'").present?
+                            errors.add(:base, "Not able to receive selected PO") unless PurchaseOrder.joins(:vendor).select("1 AS one").where(["vendors.is_active = ?", true]).where("(purchase_orders.status = 'Open' OR purchase_orders.status = 'Partial') AND purchase_orders.id = '#{purchase_order_id}' AND purchase_orders.vendor_id = '#{vendor_id}'").present?
                           end
                 
                           def calculate_total_quantity

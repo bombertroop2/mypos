@@ -230,7 +230,7 @@ class ProductsController < ApplicationController
             error_message = "Error for row (##{i}) : Brand #{brand_code} doesn't exist"
             break
           end
-          vendor_id = Vendor.where(code: vendor_code).pluck(:id).first
+          vendor_id = Vendor.where(code: vendor_code, is_active: true).pluck(:id).first
           if vendor_id.blank?
             error_message = "Error for row (##{i}) : Vendor #{vendor_code} doesn't exist"
             break

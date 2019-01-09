@@ -71,7 +71,7 @@ class AccountPayable < ApplicationRecord
                         end
                     
                         def vendor_available
-                          errors.add(:vendor_id, "does not exist!") if Vendor.select("1 AS one").where(id: vendor_id).blank?
+                          errors.add(:vendor_id, "does not exist!") if Vendor.select("1 AS one").where(id: vendor_id, is_active: true).blank?
                         end
                     
                         def payment_method_available

@@ -84,7 +84,7 @@ class ImportDataJob < ApplicationJob
               end
               brand_id = Brand.select(:id).where(code: row["B#{idx + 1}"].strip).first.id
               sex = Product::SEX.select{ |x| x[1] == (row["C#{idx + 1}"].strip.eql?("B") || row["C#{idx + 1}"].strip.eql?("BAGS") ? "ladies" : (row["C#{idx + 1}"].strip.eql?("MENS") ? "men" : row["C#{idx + 1}"].strip.downcase)) }.first.first.downcase
-              vendor_id = Vendor.select(:id).where(code: row["D#{idx + 1}"].strip).first.id
+              vendor_id = Vendor.select(:id).where(code: row["D#{idx + 1}"].strip, is_active: true).first.id
               target = Product::TARGETS.select{ |x| x[1] == target_value }.first.first.downcase
               model_id = Model.select(:id).where(code: row["F#{idx + 1}"].strip).first.id
               goods_type_id = GoodsType.select(:id).where(code: goods_type_code).first.id
