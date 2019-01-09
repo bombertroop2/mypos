@@ -165,7 +165,7 @@ class Product < ApplicationRecord
   end
 
   def vendor_available
-    errors.add(:vendor_id, "does not exist!") if vendor_id.present? && Vendor.where(id: vendor_id).select("1 AS one").blank?
+    errors.add(:vendor_id, "does not exist!") if vendor_id.present? && Vendor.where(id: vendor_id, is_active: true).select("1 AS one").blank?
   end
 
   def model_available

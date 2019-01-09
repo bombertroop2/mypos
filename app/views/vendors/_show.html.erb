@@ -73,5 +73,9 @@
         <dt>Value added tax</dt>
         <dd><%= object.value_added_tax.capitalize %></dd>
     </dl>
+    <dl class="dl-horizontal">
+        <dt>Active</dt>
+        <dd><%= object.is_active ? "Yes" : "No" %></dd>
+    </dl>
 
 </td>

@@ -15,7 +15,7 @@
             <div role="tabpanel" class="tab-pane fade in active" id="purchase_order" style="padding-top: 20px">
                 <div id="search-form-container" class="form-inline text-right">
                     <div class="form-group text-left">
-                        <%= select_tag "filter-vendor", options_from_collection_for_select(Vendor.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                        <%= select_tag "filter-vendor", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
                       </div>
                       <div class="form-group">
                           <input type="text" class="form-control" readonly="true" id="filter-po-date" placeholder="PO date" style="width: 180px">
@@ -115,7 +115,7 @@
                 <div role="tabpanel" class="tab-pane fade" id="direct_purchase" style="padding-top: 20px">
                     <div id="search-form-container-dp" class="form-inline text-right">
                         <div class="form-group text-left">
-                            <%= select_tag "filter-vendor-dp", options_from_collection_for_select(Vendor.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                            <%= select_tag "filter-vendor-dp", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
                           </div>
                           <div class="form-group">
                               <input type="text" class="form-control" readonly="true" id="filter-receipt-date-dp" placeholder="Receipt date" style="width: 180px">

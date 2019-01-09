@@ -228,7 +228,7 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def populate_combobox_list
-    @suppliers = Vendor.select(:id, :name)
+    @suppliers = Vendor.select(:id, :name).where(is_active: true)
     @warehouses = Warehouse.where("warehouse_type = 'central'").select(:id, :code)
   end
 

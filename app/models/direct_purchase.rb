@@ -49,7 +49,7 @@ class DirectPurchase < ApplicationRecord
                     end
               
                     def vendor_exist
-                      errors.add(:vendor_id, "does not exist!") unless (@vendor = Vendor.select(:value_added_tax, :is_taxable_entrepreneur).where(id: vendor_id).first).present?
+                      errors.add(:vendor_id, "does not exist!") unless (@vendor = Vendor.select(:value_added_tax, :is_taxable_entrepreneur).where(id: vendor_id, is_active: true).first).present?
                     end
               
                     def warehouse_exist

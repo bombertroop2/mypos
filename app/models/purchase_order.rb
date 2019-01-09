@@ -75,7 +75,7 @@ class PurchaseOrder < ApplicationRecord
                                 end
 
                                 def vendor_available
-                                  @vendor = Vendor.where(id: vendor_id).select(:value_added_tax, :is_taxable_entrepreneur, :code).first
+                                  @vendor = Vendor.where(id: vendor_id, is_active: true).select(:value_added_tax, :is_taxable_entrepreneur, :code).first
                                   errors.add(:vendor_id, "does not exist!") if vendor_id.present? && @vendor.blank?
                                 end
 
