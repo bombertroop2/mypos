@@ -1,4 +1,5 @@
 class AccountingJurnalTransction < ApplicationRecord
+
   has_many :details, class_name: "AccountingJurnalTransctionDetail", foreign_key: :transction_id, dependent: :destroy
   belongs_to :warehouse
   belongs_to :model, polymorphic: true

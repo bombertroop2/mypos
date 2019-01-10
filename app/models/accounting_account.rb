@@ -24,4 +24,22 @@ class AccountingAccount < ApplicationRecord
   def classification_name
     CLASSIFICATIONS.select{|x| x[:id].eql?(classification)}.first[:name]
   end
+
+  def code_parts
+    codes = {}
+    0.upto(code.size) do |x|
+      codes["code_#{x}"] = code[x]
+    end
+    return codes
+  end
+
+  def last_3_code
+    code_parts.last(3).to_i
+  end
+
+  def first_2_code
+    code_parts.first(2).to_s
+  end
+
+
 end
