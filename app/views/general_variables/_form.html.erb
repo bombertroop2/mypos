@@ -9,18 +9,25 @@
                 <%= form_for(@general_variable, html: {class: "form-horizontal"}) do |f| %>
 
                     <div class="form-group<%= control_group_error(@general_variable, :pieces_per_koli) %>">
-                        <%= f.label :pieces_per_koli, class: "col-sm-2 control-label" %>
-                          <div class="col-sm-10">
+                        <%= f.label :pieces_per_koli, class: "col-sm-3 control-label" %>
+                          <div class="col-sm-9">
                               <%= f.number_field :pieces_per_koli, class: "form-control" %>
                                 <%= error_help_text(@general_variable, :pieces_per_koli) %>
                             </div>
                         </div>
-                        <div class="ln_solid"></div>
-                        <%= f.submit "Save", class: "btn btn-primary", style: "float: right" %>
+                        <div class="form-group<%= control_group_error(@general_variable, :inventory_valuation_method) %>">
+                            <%= f.label :inventory_valuation_method, class: "col-sm-3 control-label" %>
+                              <div class="col-sm-9">
+                                  <%= f.select :inventory_valuation_method, options_for_select(GeneralVariable::INVENTORY_VALUATION_METHODS, @general_variable.inventory_valuation_method), {prompt: true}, {class: "form-control"} %>
+                                    <%= error_help_text(@general_variable, :inventory_valuation_method) %>
+                                </div>
+                            </div>
+                            <div class="ln_solid"></div>
+                            <%= f.submit "Save", class: "btn btn-primary", style: "float: right" %>
 
-                        <% end %>
+                            <% end %>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 

@@ -6,20 +6,20 @@
   <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= dpp.product_id %>" style="table-layout: fixed;width: 100%">
       <tr style="text-align: center">
           <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
-          <% if current_user.has_managerial_role? %>
-            <td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>
-          <% end %>
+          <%# if current_user.has_managerial_role? %>
+            <!--<td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>-->
+          <%# end %>
           <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
       </tr>    
       <tr style="text-align: center">
           <td style="vertical-align: middle;width: 20% !important;">
               <%= "#{dpp.prdct_code} - #{dpp.prdct_name}" %>
           </td>
-          <% if current_user.has_managerial_role? %>
-            <td style="vertical-align: middle;width: 20% !important;" id="dp_product_table_cost_<%= dpp.product_id %>">
-                <%= number_to_currency((dpp.dp_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
-            </td>
-          <% end %>
+          <%# if current_user.has_managerial_role? %>
+            <!--<td style="vertical-align: middle;width: 20% !important;" id="dp_product_table_cost_<%#= dpp.product_id %>">
+                <%#= number_to_currency((dpp.dp_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+            </td>-->
+          <%# end %>
           <td style="vertical-align: middle;width: auto !important;">
               <div class="table-responsive">
                   <% direct_purchase_product_array_index = create_direct_purchase_product_array_variable_name(dpp.product_id) %>
