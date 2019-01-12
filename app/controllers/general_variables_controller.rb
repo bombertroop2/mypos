@@ -78,6 +78,6 @@ class GeneralVariablesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def general_variable_params
-    params.require(:general_variable).permit(:pieces_per_koli, :inventory_valuation_method)
+    params.require(:general_variable).permit(:pieces_per_koli, :inventory_valuation_method, :beginning_of_debt_recording)
   end
 end
