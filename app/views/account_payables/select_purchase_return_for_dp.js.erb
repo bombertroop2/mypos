@@ -1,7 +1,7 @@
 <% if params[:purchase_return_ids].present? %>
   $("#allocated_return_items_for_dp").html("<%= j(render(partial: "allocated_return_items")) %>");
 <% else %>
-  <% amount_to_pay = params[:total_amount_received].to_f - params[:previous_paid].to_f %>
+  <% amount_to_pay = params[:total_amount_received].to_f %>
   $("#allocated_return_items_for_dp").html("");
   $("#amount-to-pay-for-dp").html("<strong><%= number_to_currency(amount_to_pay,
         :separator => ",",

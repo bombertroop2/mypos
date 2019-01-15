@@ -2,7 +2,7 @@
   $("#allocated_return_items").html("<%= j(render(partial: "allocated_return_items")) %>");
 <% else %>
   $("#allocated_return_items").html("");
-  <% amount_to_pay = params[:total_amount_received].to_f - params[:previous_paid].to_f %>
+  <% amount_to_pay = params[:total_amount_received].to_f %>
   $("#amount-to-pay").html("<strong><%= number_to_currency(amount_to_pay,
         :separator => ",",
         :delimiter => ".",
