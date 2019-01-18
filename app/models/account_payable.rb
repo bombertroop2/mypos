@@ -19,6 +19,7 @@ class AccountPayable < ApplicationRecord
   belongs_to :vendor
   has_many :account_payable_purchases, dependent: :destroy
   has_many :allocated_return_items, dependent: :destroy
+  has_many :account_payable_payment_invoices, dependent: :restrict_with_error
   
   accepts_nested_attributes_for :account_payable_purchases
   accepts_nested_attributes_for :allocated_return_items

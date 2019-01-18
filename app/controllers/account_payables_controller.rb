@@ -42,6 +42,7 @@ class AccountPayablesController < ApplicationController
       select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :invoice_status).
       select("vendors.name AS vendor_name").
       joins(:received_purchase_order, :vendor).
+      where(invoice_status: "").
       order(:receiving_date)
   end
 

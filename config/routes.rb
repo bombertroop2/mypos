@@ -19,7 +19,11 @@ Rails.application.routes.draw do
       get "get_courier_units"
     end
   end
-  resources :account_payable_payments
+  resources :account_payable_payments, except: [:edit, :update, :destroy] do
+    collection do
+      get "generate_form"
+    end
+  end
   resources :adjustments, except: [:edit, :update, :destroy] do
     collection do
       get :autocomplete_product_code
