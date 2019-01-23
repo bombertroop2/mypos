@@ -46,7 +46,7 @@
                                   :precision => 2) %> (<%= "#{(purchase_return.purchase_order.second_discount rescue purchase_return.direct_purchase.second_discount)}%" %> from <%= (purchase_return.purchase_order && purchase_return.purchase_order.is_additional_disc_from_net) || (purchase_return.direct_purchase && purchase_return.direct_purchase.is_additional_disc_from_net) ? "net" : "gross" %>)
                               <% end %>
                           </td>
-                          <td>
+                          <td style="text-align: right">
                               <% if purchase_return.purchase_order && purchase_return.purchase_order.is_taxable_entrepreneur %>
                                 <%
                                 vat_in_money = if purchase_return.purchase_order.value_added_tax.eql?("include")
@@ -55,11 +55,11 @@
                                   get_vat_in_money_pr(purchase_return)
                                   end
                               %>
-                                <%= number_to_currency(vat_in_money,
+                                (<%= purchase_return.purchase_order.value_added_tax %>) <%= number_to_currency(vat_in_money,
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
-                                  :precision => 2) %> (<%= purchase_return.purchase_order.value_added_tax %>)
+                                  :precision => 2) %>
                               <% elsif purchase_return.direct_purchase && purchase_return.direct_purchase.is_taxable_entrepreneur %>
                                 <%
                                 vat_in_money = if purchase_return.direct_purchase.vat_type.eql?("include")
@@ -68,11 +68,11 @@
                                   get_vat_in_money_pr(purchase_return)
                                   end
                               %>
-                                <%= number_to_currency(vat_in_money,
+                                (<%= purchase_return.direct_purchase.vat_type %>) <%= number_to_currency(vat_in_money,
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
-                                  :precision => 2) %> (<%= purchase_return.direct_purchase.vat_type %>)
+                                  :precision => 2) %>
                               <% end %>
                           </td>
                           <td align="right"><%= number_to_currency(value_after_ppn_pr(purchase_return),
@@ -85,9 +85,9 @@
                     <% end %>
                   <% end %>
                   <% amount_to_pay = if !params[:action].eql?("create") && !params[:action].eql?("create_dp_payment")
-                    params[:total_amount_received].to_f - total_amount_returned - params[:previous_paid].to_f
+                    params[:total_amount_received].to_f - total_amount_returned
                     else
-                    total_amount_received - total_amount_returned - previous_paid
+                    total_amount_received - total_amount_returned
                     end %>
               </tbody>
               <tfoot>
@@ -124,7 +124,6 @@
               $.get("/account_payables/select_purchase_return", {
                   purchase_return_ids: purchaseReturnIds.join(","),
                   vendor_id: $("#account_payable_vendor_id").val(),
-                  previous_paid: previousPaid,
                   total_amount_received: totalAmountReceived
               });
           });
@@ -139,7 +138,6 @@
               $.get("/account_payables/select_purchase_return_for_dp", {
                   purchase_return_ids: purchaseReturnIds.join(","),
                   vendor_id: $("#account_payable_vendor_id_for_dp").val(),
-                  previous_paid: previousPaidForDPPayment,
                   total_amount_received: totalAmountReceivedForDPPayment
               });
           });

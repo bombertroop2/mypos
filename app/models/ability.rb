@@ -221,10 +221,12 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif class_name.eql?("Account Payable") && user_roles.include?("staff")
-            can :read, AccountPayable
-          elsif class_name.eql?("Account Payable") && !user_roles.include?("area_manager")
-            can ability, AccountPayable
+          elsif class_name.eql?("Account Payable")
+            if user_roles.include?("staff")
+              can :read, AccountPayable
+            elsif !user_roles.include?("area_manager")
+              can ability, AccountPayable
+            end
           elsif class_name.eql?("FiscalYear") && !user_roles.include?("area_manager")
             if user_roles.include?("staff")
               can :read, FiscalYear

@@ -15,7 +15,7 @@
                     <td align="center" colspan="2"><%= @account_payable.present? ? @account_payable.number : "" %></td>
                 </tr>
                 <tr>
-                    <td>
+                    <td style="vertical-align: top;width: 70%">
                         <table>
                             <tr>
                                 <td>Vendor</td>
@@ -23,19 +23,33 @@
                                 <td><%= @account_payable.present? ? @account_payable.vendor.name : "" %></td>
                             </tr>
                             <tr>
+                                <td>Vendor Inv. Number</td>
+                                <td>:</td>
+                                <td><%= @account_payable.present? ? @account_payable.vendor_invoice_number : "" %></td>
+                            </tr>
+                            <tr>
+                                <td>Vendor Inv. Date</td>
+                                <td>:</td>
+                                <td><%= @account_payable.present? ? @account_payable.vendor_invoice_date.strftime("%d/%m/%Y") : "" %></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="vertical-align: top;width: 30%">
+                        <table align="right">
+                            <tr>
                                 <td>Payment Date</td>
                                 <td>:</td>
                                 <td><%= @account_payable.present? ? @account_payable.payment_date.strftime("%d/%m/%Y") : "" %></td>
                             </tr>
-                            <tr>
+                            <tr style="white-space: nowrap">
                                 <td>Payment Method</td>
                                 <td>:</td>
                                 <td><%= @account_payable.present? ? @account_payable.payment_method : "" %></td>
                             </tr>
                             <% if @account_payable.present? && @account_payable.payment_method.eql?("Giro") %>
                               <tr>
-                                  <td>Giro Number</td>
-                                  <td>:</td>
+                                  <td style="vertical-align: top">Giro Number</td>
+                                  <td style="vertical-align: top">:</td>
                                   <td><%= @account_payable.giro_number %></td>
                               </tr>                                
                               <tr>
@@ -44,6 +58,11 @@
                                   <td><%= @account_payable.giro_date.strftime("%d/%m/%Y") rescue "" %></td>
                               </tr>
                             <% end %>
+                            <tr>
+                                <td style="vertical-align: top">Note</td>
+                                <td style="vertical-align: top">:</td>
+                                <td style="word-wrap: break-word"><%= @account_payable.present? ? @account_payable.note : "" %></td>
+                            </tr>
                         </table>
                     </td>
                 </tr>
@@ -220,48 +239,10 @@
                                   </tr>                                    
                                 <% end %>
                             </tbody>
-                            <%
-                            if @account_payable.present?
-                              previous_account_payables = []
-                              @account_payable.account_payable_purchases.select(:purchase_id, :purchase_type).each do |account_payable_purchase|
-                                account_payables = if account_payable_purchase.purchase_type.eql?("DirectPurchase")
-                                  AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = #{account_payable_purchase.purchase_id} AND purchase_type = 'DirectPurchase' AND account_payables.id <> #{@account_payable.id}").where(["account_payables.id < ?", @account_payable.id])
-                                  else
-                                  AccountPayable.select(:id, :amount_paid, :amount_returned).joins(:account_payable_purchases).where("purchase_id = #{account_payable_purchase.purchase_id} AND purchase_type = 'PurchaseOrder' AND account_payables.id <> #{@account_payable.id}").where(["account_payables.id < ?", @account_payable.id])
-                                  end
-                                account_payables.each do |account_payable|        
-                                  previous_account_payables << account_payable
-                                end
-                                end
-
-                              previous_paid = 0
-                              previous_account_payables.uniq.each do |previous_account_payable|
-                                previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
-                                end
-
-                              debt = total_amount_received - total_amount_returned - previous_paid - @account_payable.amount_paid
-                              end
-                          %>
                             <tfoot bgcolor="#337ab7" style="color: white">
                                 <tr>
-                                    <td colspan="8" align="right"><strong>Previous Invoice</strong></td>
-                                    <td align="right"><strong><%= number_to_currency((@account_payable.present? ? previous_paid : 0),
-                                              :separator => ",",
-                                              :delimiter => ".",
-                                              :unit => "Rp",
-                                              :precision => 2) %></strong></td>
-                                </tr>
-                                <tr>
                                     <td colspan="8" align="right"><strong>Amount To Pay</strong></td>
-                                    <td align="right"><strong><%= number_to_currency((@account_payable.present? ? @account_payable.amount_paid : 0),
-                                              :separator => ",",
-                                              :delimiter => ".",
-                                              :unit => "Rp",
-                                              :precision => 2) %></strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="8" align="right"><strong>Remaining Debt</strong></td>
-                                    <td align="right"><strong><%= number_to_currency((@account_payable.present? ? debt : 0),
+                                    <td align="right"><strong><%= number_to_currency((@account_payable.present? ? total_amount_received - total_amount_returned : 0),
                                               :separator => ",",
                                               :delimiter => ".",
                                               :unit => "Rp",

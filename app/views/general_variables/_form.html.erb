@@ -22,12 +22,19 @@
                                     <%= error_help_text(@general_variable, :inventory_valuation_method) %>
                                 </div>
                             </div>
-                            <div class="ln_solid"></div>
-                            <%= f.submit "Save", class: "btn btn-primary", style: "float: right" %>
+                            <div class="form-group<%= control_group_error(@general_variable, :beginning_of_debt_recording) %>">
+                                <%= f.label :beginning_of_debt_recording, class: "col-sm-3 control-label" %>
+                                  <div class="col-sm-9">
+                                      <%= f.select :beginning_of_debt_recording, options_for_select(GeneralVariable::BEGINNING_OF_DEBT_RECORDINGS, @general_variable.beginning_of_debt_recording), {prompt: true}, {class: "form-control"} %>
+                                        <%= error_help_text(@general_variable, :beginning_of_debt_recording) %>
+                                    </div>
+                                </div>
+                                <div class="ln_solid"></div>
+                                <%= f.submit "Save", class: "btn btn-primary", style: "float: right" %>
 
-                            <% end %>
+                                <% end %>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 

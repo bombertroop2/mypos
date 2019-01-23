@@ -13,7 +13,7 @@ class AccountPayablesController < ApplicationController
       start_date = splitted_date_range[0].strip.to_date
       end_date = splitted_date_range[1].strip.to_date
     end
-    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date, amount_paid").joins(:vendor)
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date, total, remaining_debt").joins(:vendor)
     account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
       or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     account_payables_scope = account_payables_scope.where(["DATE(payment_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_payment_date].present?
@@ -36,12 +36,13 @@ class AccountPayablesController < ApplicationController
       :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur,
       :value_added_tax,:is_additional_disc_from_net, :net_amount, :invoice_status).
       select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).
-      where("(status = 'Finish' OR status = 'Closed') AND (invoice_status = 'Invoiced' OR invoice_status = '')").
+      where("(status = 'Finish' OR status = 'Closed') AND invoice_status = ''").
       order("received_purchase_orders.receiving_date")
     @direct_purchases = DirectPurchase.
       select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :invoice_status).
       select("vendors.name AS vendor_name").
       joins(:received_purchase_order, :vendor).
+      where(invoice_status: "").
       order(:receiving_date)
   end
 
@@ -53,25 +54,8 @@ class AccountPayablesController < ApplicationController
   # POST /account_payables.json
   def create
     add_additional_params_to_child
-    convert_amount_to_numeric
     @account_payable = AccountPayable.new(account_payable_params)
-    unless @account_payable.save
-      previous_account_payables = []
-      @account_payable.account_payable_purchases.map(&:purchase_id).each do |purchase_order_id|
-        account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
-          joins(:account_payable_purchases).
-          where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
-        account_payables.each do |account_payable|        
-          previous_account_payables << account_payable
-        end
-      end    
-    
-      # kalkulasi pembayaran pembayaran sebelumnya
-      @previous_paid = 0
-      previous_account_payables.uniq.each do |previous_account_payable|
-        @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
-      end
-    
+    unless @account_payable.save    
       if @account_payable.errors[:"account_payable_purchases.base"].present?
         render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
       elsif @account_payable.errors[:base].present?
@@ -89,27 +73,10 @@ class AccountPayablesController < ApplicationController
   
   def create_dp_payment
     add_additional_params_to_child
-    convert_amount_to_numeric
     @account_payable = AccountPayable.new(account_payable_params)
     @account_payable.payment_for_dp = true
     unless @account_payable.save
-      @payment_for_dp = true
-      previous_account_payables = []
-      @account_payable.account_payable_purchases.map(&:purchase_id).each do |direct_purchase_id|
-        account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
-          joins(:account_payable_purchases).
-          where("purchase_id = '#{direct_purchase_id}' AND purchase_type = 'DirectPurchase'")
-        account_payables.each do |account_payable|        
-          previous_account_payables << account_payable
-        end
-      end    
-    
-      # kalkulasi pembayaran pembayaran sebelumnya
-      @previous_paid = 0
-      previous_account_payables.uniq.each do |previous_account_payable|
-        @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
-      end
-    
+      @payment_for_dp = true    
       if @account_payable.errors[:"account_payable_purchases.base"].present?
         render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
       elsif @account_payable.errors[:base].present?
@@ -150,40 +117,7 @@ class AccountPayablesController < ApplicationController
   end
   
   def generate_form
-    # ambil seluruh purchase order dari payment sebelumnya
-    purchase_order_ids = []
-    params[:purchase_order_ids].split(",").each do |purchase_order_id|
-      account_payables = AccountPayable.select(:id, :amount_paid).
-        joins(:account_payable_purchases).
-        where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
-      if account_payables.present?
-        account_payables.each do |account_payable|        
-          account_payable.account_payable_purchases.pluck(:purchase_id).each do |purchase_id|
-            purchase_order_ids << purchase_id if PurchaseOrder.select("1 AS one").where(["id = ? AND invoice_status <> 'Invoiced'", purchase_id]).present?
-          end
-        end
-      else
-        purchase_order_ids << purchase_order_id
-      end
-    end    
-    purchase_order_ids.uniq!
-    
-    # kalkulasi pembayaran pembayaran sebelumnya
-    previous_account_payables = []
-    purchase_order_ids.each do |purchase_order_id|
-      account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
-        joins(:account_payable_purchases).
-        where("purchase_id = '#{purchase_order_id}' AND purchase_type = 'PurchaseOrder'")
-      account_payables.each do |account_payable|        
-        previous_account_payables << account_payable
-      end
-    end    
-    @previous_paid = 0
-    previous_account_payables.uniq.each do |previous_account_payable|
-      @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
-    end
-    
-    selected_purchase_orders = PurchaseOrder.where(id: purchase_order_ids).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(invoice_status: "")
+    selected_purchase_orders = PurchaseOrder.where(id: params[:purchase_order_ids].split(",").uniq).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(invoice_status: "")
     selected_purchase_orders.each_with_index do |selected_purchase_order, index|
       @account_payable = AccountPayable.new vendor_id: selected_purchase_order.vendor_id if index == 0
       @account_payable.account_payable_purchases.build purchase_id: selected_purchase_order.id, purchase_type: selected_purchase_order.class.name
@@ -193,40 +127,7 @@ class AccountPayablesController < ApplicationController
   end
   
   def generate_dp_payment_form
-    # ambil seluruh direct purchase dari payment sebelumnya
-    direct_purchase_ids = []
-    params[:direct_purchase_ids].split(",").each do |direct_purchase_id|
-      account_payables = AccountPayable.select(:id, :amount_paid).
-        joins(:account_payable_purchases).
-        where("purchase_id = '#{direct_purchase_id}' AND purchase_type = 'DirectPurchase'")
-      if account_payables.present?
-        account_payables.each do |account_payable|        
-          account_payable.account_payable_purchases.pluck(:purchase_id).each do |purchase_id|
-            direct_purchase_ids << purchase_id if DirectPurchase.select("1 AS one").where(["id = ? AND invoice_status <> 'Invoiced'", purchase_id]).present?
-          end
-        end
-      else
-        direct_purchase_ids << direct_purchase_id
-      end
-    end    
-    direct_purchase_ids.uniq!
-    
-    # kalkulasi pembayaran pembayaran sebelumnya
-    previous_account_payables = []
-    direct_purchase_ids.each do |direct_purchase_id|
-      account_payables = AccountPayable.select(:id, :amount_paid, :amount_returned).
-        joins(:account_payable_purchases).
-        where("purchase_id = '#{direct_purchase_id}' AND purchase_type = 'DirectPurchase'")
-      account_payables.each do |account_payable|        
-        previous_account_payables << account_payable
-      end
-    end    
-    @previous_paid = 0
-    previous_account_payables.uniq.each do |previous_account_payable|
-      @previous_paid += previous_account_payable.amount_paid + previous_account_payable.amount_returned.to_f
-    end
-    
-    selected_direct_purchases = DirectPurchase.where(id: direct_purchase_ids).select(:id, :vendor_id).where(invoice_status: "")
+    selected_direct_purchases = DirectPurchase.where(id: params[:direct_purchase_ids].split(",").uniq).select(:id, :vendor_id).where(invoice_status: "")
     selected_direct_purchases.each_with_index do |selected_direct_purchase, index|
       @account_payable = AccountPayable.new vendor_id: selected_direct_purchase.vendor_id if index == 0
       @account_payable.account_payable_purchases.build purchase_id: selected_direct_purchase.id, purchase_type: selected_direct_purchase.class.name
@@ -271,14 +172,9 @@ class AccountPayablesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
     params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id,
-      :giro_number, :giro_date, :amount_paid, :debt, :note,
+      :giro_number, :giro_date, :note, :vendor_invoice_number, :vendor_invoice_date,
       account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id],
       allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp])
-  end
-  
-  def convert_amount_to_numeric
-    params[:account_payable][:amount_paid] = params[:account_payable][:amount_paid].gsub("Rp","").gsub(".","").gsub(",",".") if params[:account_payable][:amount_paid].present?
-    params[:account_payable][:debt] = params[:account_payable][:debt].gsub("Rp","").gsub(".","").gsub(",",".") if params[:account_payable][:debt].present?
   end
   
   def add_additional_params_to_child

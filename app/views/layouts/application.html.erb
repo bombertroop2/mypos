@@ -158,11 +158,11 @@
                                                       <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, AccountPayable %>
-                                                      <li><%= link_to "AP Invoice", account_payables_path, method: :get %></li>
+                                                      <li><%= link_to "AP Invoices", account_payables_path, method: :get %></li>
                                                     <% end %>
-                                                    <%# if can? :read, AccountPayablePayment %>
-                                                      <%#*<li><%= link_to "AP Payments", account_payable_payments_path, method: :get %></li>%>
-                                                    <%# end %>
+                                                    <% if can? :read, AccountPayablePayment %>
+                                                      <li><%= link_to "AP Payments", account_payable_payments_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -439,12 +439,12 @@
                       <!-- /page content -->
 
                       <!-- footer content -->
-                      <footer>
+                      <!--<footer>
                           <div class="pull-right">
                               Gentelella - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
                           </div>
                           <div class="clearfix"></div>
-                      </footer>
+                      </footer>-->
                       <!-- /footer content -->
                     <% else %>
                       <%= yield %>
