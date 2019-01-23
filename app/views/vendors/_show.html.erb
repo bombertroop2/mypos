@@ -20,6 +20,21 @@
     </dl>
 
     <dl class="dl-horizontal">
+        <dt>Type</dt>
+        <dd><%= object.vendor_type %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>TIN</dt>
+        <dd><%= object.taxpayer_identification_number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>TIN address</dt>
+        <dd><%= object.taxpayer_identification_number_address %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
         <dt>Phone</dt>
         <dd><%= remove_empty_space_from_phone_number(object.phone) %></dd>
     </dl>
@@ -57,6 +72,10 @@
     <dl class="dl-horizontal">
         <dt>Value added tax</dt>
         <dd><%= object.value_added_tax.capitalize %></dd>
+    </dl>
+    <dl class="dl-horizontal">
+        <dt>Active</dt>
+        <dd><%= object.is_active ? "Yes" : "No" %></dd>
     </dl>
 
 </td>

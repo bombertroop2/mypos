@@ -13,9 +13,9 @@ class AllocatedReturnItem < ApplicationRecord
   
   def return_item_is_valid
     pr = if payment_for_dp.eql?("false")
-      PurchaseReturn.select(:id).joins(purchase_order: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ?", false, vendor_id, purchase_return_id]).first
+      PurchaseReturn.select(:id).joins(purchase_order: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ? AND vendors.is_active = ?", false, vendor_id, purchase_return_id, true]).first
     else
-      PurchaseReturn.select(:id).joins(direct_purchase: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ?", false, vendor_id, purchase_return_id]).first
+      PurchaseReturn.select(:id).joins(direct_purchase: :vendor).where(["is_allocated = ? AND vendor_id = ? AND purchase_returns.id = ? AND vendors.is_active = ?", false, vendor_id, purchase_return_id, true]).first
     end
     errors.add(:base, "Not able to allocate return item #{purchase_return.number}") unless pr
   end

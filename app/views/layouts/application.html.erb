@@ -338,6 +338,9 @@
                                                     <% if can? :manage, Adjustment %>
                                                       <li><%= link_to "Adjustments", adjustments_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :manage, GeneralVariable %>
+                                                      <li><%= link_to "General Variables", new_general_variable_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -1188,6 +1191,11 @@
     <% elsif controller_name.eql?("welcome") && alert.present? %>
                     bootbox.alert({
                         message: '<%= alert %>',
+                        size: 'small'
+                    });
+    <% elsif controller_name.eql?("general_variables") && notice.present? %>
+                    bootbox.alert({
+                        message: '<%= notice %>',
                         size: 'small'
                     });
     <% end %>

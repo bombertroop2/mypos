@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :general_variables, except: [:show, :destroy, :index]
   resources :packing_lists, except: [:edit, :update] do
     member do
       get 'print'

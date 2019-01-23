@@ -33,8 +33,8 @@ class ReceivingController < ApplicationController
     def new
       @purchase_orders = PurchaseOrder.joins(:warehouse, :vendor).
         select("purchase_orders.id, number, status, vendors.name as vendors_name, warehouses.name as warehouses_name").
-        where("status = 'Open' OR status = 'Partial'")
-      @suppliers = Vendor.select(:id, :name)
+        where("status = 'Open' OR status = 'Partial'").where(["vendors.is_active = ?", true])
+      @suppliers = Vendor.select(:id, :name).where(is_active: true)
       @warehouses = Warehouse.central.select :id, :code
       @direct_purchase = DirectPurchase.new
       @direct_purchase.build_received_purchase_order is_using_delivery_order: true
@@ -157,7 +157,7 @@ class ReceivingController < ApplicationController
         unless @direct_purchase.save
           @colors = []
           @sizes = []
-          @suppliers = Vendor.select(:id, :name)
+          @suppliers = Vendor.select(:id, :name).where(is_active: true)
           @warehouses = Warehouse.central.select :id, :code
           #        @colors = Color.select(:id, :code).order :code
           products = Product.joins(:brand).where(id: @direct_purchase.direct_purchase_products.map(&:product_id)).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
@@ -192,7 +192,7 @@ class ReceivingController < ApplicationController
       rescue ActiveRecord::RecordNotUnique => e
         @colors = []
         @sizes = []
-        @suppliers = Vendor.select(:id, :name)
+        @suppliers = Vendor.select(:id, :name).where(is_active: true)
         @warehouses = Warehouse.central.select :id, :code
         #      @colors = Color.select(:id, :code).order :code
         products = Product.joins(:brand).where(id: @direct_purchase.direct_purchase_products.map(&:product_id)).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
@@ -229,7 +229,7 @@ class ReceivingController < ApplicationController
     end
 
     def set_purchase_order
-      @purchase_order = PurchaseOrder.where(id: params[:id]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, vendor_id, warehouse_id").joins(:vendor).first
+      @purchase_order = PurchaseOrder.where(id: params[:id]).where(["vendors.is_active = ?", true]).select("purchase_orders.id, number, name, purchase_order_date, status, first_discount, second_discount, vendor_id, warehouse_id").joins(:vendor).first
     end
 
     def set_received_order
