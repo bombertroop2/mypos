@@ -123,8 +123,7 @@
               var purchaseReturnIds = [];
               $.get("/account_payables/select_purchase_return", {
                   purchase_return_ids: purchaseReturnIds.join(","),
-                  vendor_id: $("#account_payable_vendor_id").val(),
-                  total_amount_received: totalAmountReceived
+                  vendor_id: $("#account_payable_vendor_id").val()
               });
           });
   <% else %>
@@ -137,8 +136,7 @@
               var purchaseReturnIds = [];
               $.get("/account_payables/select_purchase_return_for_dp", {
                   purchase_return_ids: purchaseReturnIds.join(","),
-                  vendor_id: $("#account_payable_vendor_id_for_dp").val(),
-                  total_amount_received: totalAmountReceivedForDPPayment
+                  vendor_id: $("#account_payable_vendor_id_for_dp").val()
               });
           });
   <% end %>

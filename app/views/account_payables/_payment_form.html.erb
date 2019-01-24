@@ -90,11 +90,14 @@
               </table>
           </div>
       </div>
-      <div id="allocated_return_items">
-          <% if params[:action].eql?("create") && @account_payable.allocated_return_items.present? %>
-            <%= render partial: "allocated_return_items", locals: {total_amount_received: total_amount_received} %>
-          <% end %>
-      </div>
+      <!--
+      SUDAH TIDAK DIPAKAI
+            <div id="allocated_return_items">
+      <%# if params[:action].eql?("create") && @account_payable.allocated_return_items.present? %>
+      <%#= render partial: "allocated_return_items", locals: {total_amount_received: total_amount_received} %>
+      <%# end %>
+            </div>
+      -->
       <div class="form-group">          
           <label class="col-sm-2 control-label">Amount Due</label>
           <div class="col-sm-10">              
@@ -132,82 +135,26 @@
                     <%= f.text_field :vendor_invoice_date, size: 10, readonly: true, class: "form-control" %>
                       <%= error_help_text(@account_payable, :vendor_invoice_date) %>
                   </div>
-              </div>
-              <div class="form-group<%= control_group_error(@account_payable, :payment_method) %>">
-                  <%= f.label :payment_method, class: "col-sm-2 control-label" %>
+              </div>              
+              <div class="form-group<%= control_group_error(@account_payable, :note) %>">
+                  <%= f.label :note, class: "col-sm-2 control-label" %>
                     <div class="col-sm-10">
-                        <%= f.select :payment_method, options_for_select(AccountPayable::PAYMENT_METHODS, @account_payable.payment_method), {prompt: true}, {tabindex: "1", class: "form-control"} %>
-                          <%= error_help_text(@account_payable, :payment_method) %>
+                        <%= f.text_area :note, rows: 6, class: "form-control" %>
+                          <%= error_help_text(@account_payable, :note) %>
                       </div>
                   </div>
-                  <div class="form-group<%= control_group_error(@account_payable, :payment_date) %>">
-                      <%= f.label :payment_date, class: "col-sm-2 control-label" %>
-                        <div class="col-sm-10">
-                            <%= f.text_field :payment_date, size: 10, readonly: true, class: "form-control" %>
-                              <%= error_help_text(@account_payable, :payment_date) %>
-                          </div>
-                      </div>
-                      <div class="form-group<%= control_group_error(@account_payable, :giro_number) %>" id="giro_number" style="display: none">
-                          <%= f.label :giro_number, class: "col-sm-2 control-label" %>
-                            <div class="col-sm-10">
-                                <%= f.text_field :giro_number, class: "form-control upcase inputs", tabindex: "2" %>
-                                  <%= error_help_text(@account_payable, :giro_number) %>
-                              </div>
-                          </div>
-                          <div class="form-group<%= control_group_error(@account_payable, :giro_date) %>" id="giro_date" style="display: none">
-                              <%= f.label :giro_date, class: "col-sm-2 control-label" %>
-                                <div class="col-sm-10">
-                                    <%= f.text_field :giro_date, size: 10, readonly: true, class: "form-control" %>
-                                      <%= error_help_text(@account_payable, :giro_date) %>
-                                  </div>
-                              </div>                      
-                              <div class="form-group<%= control_group_error(@account_payable, :note) %>">
-                                  <%= f.label :note, class: "col-sm-2 control-label" %>
-                                    <div class="col-sm-10">
-                                        <%= f.text_area :note, rows: 6, class: "form-control" %>
-                                          <%= error_help_text(@account_payable, :note) %>
-                                      </div>
-                                  </div>
-                                  <div class="form-group">
-                                      <div class="col-sm-offset-2 col-sm-10">
-                                          <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn" %>
-                                            <button class="btn btn-link cancel">Cancel</button>
-                                        </div>
-                                    </div>
-                                  <% end %>
+                  <div class="form-group">
+                      <div class="col-sm-offset-2 col-sm-10">
+                          <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn" %>
+                            <button class="btn btn-link cancel">Cancel</button>
+                        </div>
+                    </div>
+                  <% end %>
 
-                                  <script>
-                                    $(function () {
-                                        totalAmountReceived = <%= total_amount_received %>;
-                                        $("#account_payable_payment_method").change(function () {
-                                            if ($(this).val() == "Giro") {
-                                                $("#giro_number").show();
-                                                $("#giro_date").show();
-                                            } else {
-                                                $("#giro_number").hide();
-                                                $("#giro_date").hide();
-                                            }
-                                        });
-
-                                        $("#account_payable_giro_date").datepicker({
-                                            dateFormat: "dd/mm/yy"
-                                        });
-
-                                        $("#account_payable_payment_date").datepicker({
-                                            dateFormat: "dd/mm/yy"
-                                        });
-
-                                        $("#account_payable_vendor_invoice_date").datepicker({
-                                            dateFormat: "dd/mm/yy"
-                                        });
-
-                                        if ($("#account_payable_payment_method").val() == "Giro") {
-                                            $("#giro_number").show();
-                                            $("#giro_date").show();
-                                        } else {
-                                            $("#giro_number").hide();
-                                            $("#giro_date").hide();
-                                        }
-
-                                    });
-                                  </script>
+                  <script>
+                    $(function () {
+                        $("#account_payable_vendor_invoice_date").datepicker({
+                            dateFormat: "dd/mm/yy"
+                        });
+                    });
+                  </script>

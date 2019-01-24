@@ -1,5 +1,4 @@
 <td><%= object.number %></td>
-<td><%= object.payment_date.strftime("%d/%m/%Y") %></td>
 <td id="vendor_name_<%= object.id %>"><%= object.name rescue "" %></td>
 <td><%= number_to_currency(object.total,
       :separator => ",",
