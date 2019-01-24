@@ -7,6 +7,4 @@
 <% if @vendor_name.present? %>
   $("#vendor_name_<%= @account_payable.id %>").html("<%= @vendor_name %>");
   $("#show_detail_ap_<%= @account_payable.id %>").click();
-<% else %>
-  $("#return-item-allocation-dp").removeClass("hidden");
 <% end %>

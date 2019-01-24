@@ -1,4 +1,4 @@
-<td colspan="6">
+<td colspan="5">
     <button type="button" class="close cancel" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -25,7 +25,10 @@
                       </div>
                       <button id="search-po-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
                       <button id="pay-btn" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
+                      <!--
+                      sudah tidak dipakai
                       <button id="return-item-allocation" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
+                      -->
                   </div>
                   <table id="ap_listing_po_table" class="display" width="100%">
                       <thead>
@@ -117,7 +120,10 @@
                         </div>
                         <button id="search-dp-btn" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
                         <button id="pay-btn-dp" type="submit" class="btn btn-primary" title="Generate form"><span class="glyphicon glyphicon-credit-card"></span></button>
+                        <!--
+                        sudah tidak dipakai
                         <button id="return-item-allocation-dp" type="submit" class="btn btn-primary hidden" title="Return items allocation"><span class="glyphicon glyphicon-scissors"></span></button>
+                        -->
                     </div>
                     <table id="ap_listing_dp_table" class="display" width="100%">
                         <thead>
@@ -243,19 +249,23 @@
           });
           $("#search-po-btn").click(function () {
               activeTab = "purchase_order";
-              var vendorName = $('#filter-vendor option:selected').text().split(" - ")[1].trim();
-              aPpOdataTable
-                      .columns(2)
-                      .search(vendorName)
-                      .draw();
+              if ($('#filter-vendor option:selected').text().split(" - ")[1] != undefined) {
+                  var vendorName = $('#filter-vendor option:selected').text().split(" - ")[1].trim();
+                  aPpOdataTable
+                          .columns(2)
+                          .search(vendorName)
+                          .draw();
+              }
           });
           $("#search-dp-btn").click(function () {
               activeTab = "direct_purchase";
-              var vendorName = $('#filter-vendor-dp option:selected').text().split(" - ")[1].trim();
-              aPdPdataTable
-                      .columns(2)
-                      .search(vendorName)
-                      .draw();
+              if ($('#filter-vendor-dp option:selected').text().split(" - ")[1] != undefined) {
+                  var vendorName = $('#filter-vendor-dp option:selected').text().split(" - ")[1].trim();
+                  aPdPdataTable
+                          .columns(2)
+                          .search(vendorName)
+                          .draw();
+              }
           });
           $('#filter-po-date').daterangepicker(
                   {
@@ -325,156 +335,160 @@
                   });
               }
           });
-          $("#return-item-allocation").click(function () {
-              // split isi dari action attributnya form untuk ambil id produk
-              $.get("/account_payables/get_purchase_returns", {
-                  vendor_id: $("#account_payable_vendor_id").val()
-              }).done(function (data) {
-                  bootbox.confirm({
-                      size: "large",
-                      title: "Unallocated Return Items of " + $("#vendor_id").html(),
-                      message: data,
-                      callback: function (result) {
-                          if (result) {
-                              if (aPpRdataTable.rows('.selected').data().length == 0) {
-                                  bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
-                                  return false;
-                              } else {
-                                  var purchaseReturnIds = [];
-                                  $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
-                                      purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
-                                  });
-                                  $.get("/account_payables/select_purchase_return", {
-                                      purchase_return_ids: purchaseReturnIds.join(","),
-                                      vendor_id: $("#account_payable_vendor_id").val(),
-                                      total_amount_received: totalAmountReceived
-                                  });
-                              }
-                          }
-                      }
-                  }).on("shown.bs.modal", function () {
-                      aPpRdataTable = $('#ap_listing_pr_table').DataTable({
-                          order: [1, 'asc'],
-                          dom: 'T<"clear">lfrtip',
-                          columns: [
-                              {data: null, defaultContent: '', orderable: false},
-                              {data: 'pr_number'},
-                              {data: 'po_do_number'},
-                              {data: 'quantity'},
-                              {data: 'gross_amount'},
-                              {data: 'first_discount'},
-                              {data: 'second_discount'},
-                              {data: 'value_added_tax'},
-                              {data: 'net_amount'}
-
-                          ],
-                          tableTools: {
-                              sRowSelect: 'os',
-                              //sRowSelector: 'td:first-child',
-                              aButtons: ['select_all', 'select_none']
-                          },
-                          paging: false,
-                          info: false,
-                          scrollY: "250px",
-                          scrollX: true,
-                          scrollCollapse: true
-                                  /*,
-                                   bFilter: false*/
-                      });
-                      // ambil kumpulan id PR apabila ada untuk default selected di popup
-                      var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids");
-                      $.each(allocatedPurchaseReturnIds, function (index, value) {
-                          var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids")[index]).val();
-                          if (allocatedPurchaseReturnId != "") {
-                              var e = jQuery.Event("click");
-                              e.ctrlKey = true;
-                              var clickRowProcessId = setInterval(function () {
-                                  if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
-                                      $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
-                                  } else {
-                                      clearInterval(clickRowProcessId);
-                                  }
-                              }, 0);
-                          }
-                      });
-                  });
-              });
-          });
-          $("#return-item-allocation-dp").click(function () {
-              // split isi dari action attributnya form untuk ambil id produk
-              $.get("/account_payables/get_purchase_returns_for_dp", {
-                  vendor_id: $("#account_payable_vendor_id_for_dp").val()
-              }).done(function (data) {
-                  bootbox.confirm({
-                      size: "large",
-                      title: "Unallocated Return Items of " + $("#vendor_id_for_dp").html(),
-                      message: data,
-                      callback: function (result) {
-                          if (result) {
-                              if (aPpRdataTable.rows('.selected').data().length == 0) {
-                                  bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
-                                  return false;
-                              } else {
-                                  var purchaseReturnIds = [];
-                                  $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
-                                      purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
-                                  });
-                                  $.get("/account_payables/select_purchase_return_for_dp", {
-                                      purchase_return_ids: purchaseReturnIds.join(","),
-                                      vendor_id: $("#account_payable_vendor_id_for_dp").val(),
-                                      total_amount_received: totalAmountReceivedForDPPayment
-                                  });
-                              }
-                          }
-                      }
-                  }).on("shown.bs.modal", function () {
-                      aPpRdataTable = $('#ap_listing_pr_table').DataTable({
-                          order: [1, 'asc'],
-                          dom: 'T<"clear">lfrtip',
-                          columns: [
-                              {data: null, defaultContent: '', orderable: false},
-                              {data: 'pr_number'},
-                              {data: 'po_do_number'},
-                              {data: 'quantity'},
-                              {data: 'gross_amount'},
-                              {data: 'first_discount'},
-                              {data: 'second_discount'},
-                              {data: 'value_added_tax'},
-                              {data: 'net_amount'}
-
-                          ],
-                          tableTools: {
-                              sRowSelect: 'os',
-                              //sRowSelector: 'td:first-child',
-                              aButtons: ['select_all', 'select_none']
-                          },
-                          paging: false,
-                          info: false,
-                          scrollY: "250px",
-                          scrollX: true,
-                          scrollCollapse: true
-                                  /*,
-                                   bFilter: false*/
-                      });
-                      // ambil kumpulan id PR apabila ada untuk default selected di popup
-                      var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids-for-dp");
-                      $.each(allocatedPurchaseReturnIds, function (index, value) {
-                          var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids-for-dp")[index]).val();
-                          if (allocatedPurchaseReturnId != "") {
-                              var e = jQuery.Event("click");
-                              e.ctrlKey = true;
-                              var clickRowProcessId = setInterval(function () {
-                                  if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
-                                      $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
-                                  } else {
-                                      clearInterval(clickRowProcessId);
-                                  }
-                              }, 0);
-                          }
-                      });
-                  });
-              });
-          });
+          /*
+           SUDAH TIDAK DIPAKAI
+           $("#return-item-allocation").click(function () {
+           // split isi dari action attributnya form untuk ambil id produk
+           $.get("/account_payables/get_purchase_returns", {
+           vendor_id: $("#account_payable_vendor_id").val()
+           }).done(function (data) {
+           bootbox.confirm({
+           size: "large",
+           title: "Unallocated Return Items of " + $("#vendor_id").html(),
+           message: data,
+           callback: function (result) {
+           if (result) {
+           if (aPpRdataTable.rows('.selected').data().length == 0) {
+           bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
+           return false;
+           } else {
+           var purchaseReturnIds = [];
+           $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
+           purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+           });
+           $.get("/account_payables/select_purchase_return", {
+           purchase_return_ids: purchaseReturnIds.join(","),
+           vendor_id: $("#account_payable_vendor_id").val(),
+           total_amount_received: totalAmountReceived
+           });
+           }
+           }
+           }
+           }).on("shown.bs.modal", function () {
+           aPpRdataTable = $('#ap_listing_pr_table').DataTable({
+           order: [1, 'asc'],
+           dom: 'T<"clear">lfrtip',
+           columns: [
+           {data: null, defaultContent: '', orderable: false},
+           {data: 'pr_number'},
+           {data: 'po_do_number'},
+           {data: 'quantity'},
+           {data: 'gross_amount'},
+           {data: 'first_discount'},
+           {data: 'second_discount'},
+           {data: 'value_added_tax'},
+           {data: 'net_amount'}
+       
+           ],
+           tableTools: {
+           sRowSelect: 'os',
+           //sRowSelector: 'td:first-child',
+           aButtons: ['select_all', 'select_none']
+           },
+           paging: false,
+           info: false,
+           scrollY: "250px",
+           scrollX: true,
+           scrollCollapse: true
+           //,
+           //bFilter: false
+           });
+           // ambil kumpulan id PR apabila ada untuk default selected di popup
+           var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids");
+           $.each(allocatedPurchaseReturnIds, function (index, value) {
+           var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids")[index]).val();
+           if (allocatedPurchaseReturnId != "") {
+           var e = jQuery.Event("click");
+           e.ctrlKey = true;
+           var clickRowProcessId = setInterval(function () {
+           if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
+           $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
+           } else {
+           clearInterval(clickRowProcessId);
+           }
+           }, 0);
+           }
+           });
+           });
+           });
+           });*/
+          /*
+           SUDAH TIDAK DIPAKAI
+           $("#return-item-allocation-dp").click(function () {
+           // split isi dari action attributnya form untuk ambil id produk
+           $.get("/account_payables/get_purchase_returns_for_dp", {
+           vendor_id: $("#account_payable_vendor_id_for_dp").val()
+           }).done(function (data) {
+           bootbox.confirm({
+           size: "large",
+           title: "Unallocated Return Items of " + $("#vendor_id_for_dp").html(),
+           message: data,
+           callback: function (result) {
+           if (result) {
+           if (aPpRdataTable.rows('.selected').data().length == 0) {
+           bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
+           return false;
+           } else {
+           var purchaseReturnIds = [];
+           $.each(aPpRdataTable.rows('.selected')[0], function (index, value) {
+           purchaseReturnIds.push(aPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+           });
+           $.get("/account_payables/select_purchase_return_for_dp", {
+           purchase_return_ids: purchaseReturnIds.join(","),
+           vendor_id: $("#account_payable_vendor_id_for_dp").val(),
+           total_amount_received: totalAmountReceivedForDPPayment
+           });
+           }
+           }
+           }
+           }).on("shown.bs.modal", function () {
+           aPpRdataTable = $('#ap_listing_pr_table').DataTable({
+           order: [1, 'asc'],
+           dom: 'T<"clear">lfrtip',
+           columns: [
+           {data: null, defaultContent: '', orderable: false},
+           {data: 'pr_number'},
+           {data: 'po_do_number'},
+           {data: 'quantity'},
+           {data: 'gross_amount'},
+           {data: 'first_discount'},
+           {data: 'second_discount'},
+           {data: 'value_added_tax'},
+           {data: 'net_amount'}
+       
+           ],
+           tableTools: {
+           sRowSelect: 'os',
+           //sRowSelector: 'td:first-child',
+           aButtons: ['select_all', 'select_none']
+           },
+           paging: false,
+           info: false,
+           scrollY: "250px",
+           scrollX: true,
+           scrollCollapse: true
+           //,
+           //bFilter: false
+           });
+           // ambil kumpulan id PR apabila ada untuk default selected di popup
+           var allocatedPurchaseReturnIds = $(".allocated-purchase-return-ids-for-dp");
+           $.each(allocatedPurchaseReturnIds, function (index, value) {
+           var allocatedPurchaseReturnId = $($(".allocated-purchase-return-ids-for-dp")[index]).val();
+           if (allocatedPurchaseReturnId != "") {
+           var e = jQuery.Event("click");
+           e.ctrlKey = true;
+           var clickRowProcessId = setInterval(function () {
+           if ($("#purchase_return_" + allocatedPurchaseReturnId).length > 0 && (!$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("DTTT_selected") || !$("#purchase_return_" + allocatedPurchaseReturnId).hasClass("selected"))) {
+           $("#purchase_return_" + allocatedPurchaseReturnId).find("td:first-child").trigger(e);
+           } else {
+           clearInterval(clickRowProcessId);
+           }
+           }, 0);
+           }
+           });
+           });
+           });
+           });*/
           $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
               var target = $(e.target).attr("href"); // activated tab
               if (target == "#direct_purchase" && aPdPdataTable == null) {
