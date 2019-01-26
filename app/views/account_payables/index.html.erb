@@ -2,21 +2,17 @@
     <h1>AP Invoices</h1>
 </div>
 
-<div id="search-form-container" class="form-inline text-right">
-    <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-payment-date" placeholder="Payment date">
-    </div>
-    <div class="form-group">
-        <input type="text" id="filter-string" class="form-control" placeholder="Number/Vendor">
-    </div>
-    <button id="search-ap-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-</div>
+<%= smart_listing_controls_for(:account_payables, {class: "form-inline text-right"}) do %>
 
-<div class="hidden">
-    <%= smart_listing_controls_for(:account_payables, {class: "form-inline text-right"}) do %>
-        <%= text_field_tag :filter_payment_date, '', class: "search form-control", autocomplete: :off %>
-          <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-          <% end %>
+    <div class="form-group filter input-append">
+        <%= text_field_tag :filter, '', class: "search form-control", 
+            placeholder: "Number/Vendor", autocomplete: :off %>
       </div>
-      <%= smart_listing_render(:account_payables) %>
-      <div id="print_ap_invoice_container"></div>
+
+      <button class="btn btn-primary disabled" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+      </button>
+    <% end %>
+    <%= smart_listing_render(:account_payables) %>
+
+    <div id="print_ap_invoice_container"></div>

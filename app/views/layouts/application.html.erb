@@ -535,11 +535,6 @@
                       });
       <% end %>
     <% elsif controller_name.eql?("account_payables") %>
-                    $("#search-ap-btn").click(function () {
-                        $("#filter_payment_date").val($("#filter-payment-date").val());
-                        $("#filter_string").val($("#filter-string").val());
-                        $(".smart-listing-controls").submit();
-                    });
       <% if cannot? :manage, AccountPayable %>
                       $('#new-item-btn').css({'opacity': 0.0, 'cursor': 'default'});
                       $('#new-item-btn').unbind("click");

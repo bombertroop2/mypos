@@ -8,15 +8,9 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables.json
   def index
     like_command = "ILIKE"
-    if params[:filter_payment_date].present?
-      splitted_date_range = params[:filter_payment_date].split("-")
-      start_date = splitted_date_range[0].strip.to_date
-      end_date = splitted_date_range[1].strip.to_date
-    end
-    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, payment_date, total, remaining_debt").joins(:vendor)
-    account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
-      or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
-    account_payables_scope = account_payables_scope.where(["DATE(payment_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_payment_date].present?
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, total, remaining_debt").joins(:vendor)
+    account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).
+      or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter].present?
     @account_payables = smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {number: "asc"})
   end
 
@@ -60,11 +54,9 @@ class AccountPayablesController < ApplicationController
         render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
       elsif @account_payable.errors[:base].present?
         render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
-      elsif @account_payable.errors[:"allocated_return_items.base"].present?
-        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
       end
     else
-      SendEmailJob.perform_later(@account_payable)
+      #      SendEmailJob.perform_later(@account_payable)
       @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
     end
   rescue ActiveRecord::RecordNotUnique => e
@@ -81,11 +73,9 @@ class AccountPayablesController < ApplicationController
         render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
       elsif @account_payable.errors[:base].present?
         render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
-      elsif @account_payable.errors[:"allocated_return_items.base"].present?
-        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"allocated_return_items.base"].join("<br/>")}\",size: 'small'});"
       end
     else
-      SendEmailJob.perform_later(@account_payable)
+      #      SendEmailJob.perform_later(@account_payable)
       @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
     end
   rescue ActiveRecord::RecordNotUnique => e
@@ -145,23 +135,24 @@ class AccountPayablesController < ApplicationController
     @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.dp_returns
     render partial: 'show_return_items'
   end
-  
-  def select_purchase_return
-    @account_payable = AccountPayable.new
-    params[:purchase_return_ids].split(",").each do |purchase_return_id|
-      purchase_return = PurchaseReturn.where(["vendor_id = ? AND purchase_returns.id = ? AND is_allocated = ? AND purchase_order_id IS NOT NULL", params[:vendor_id], purchase_return_id, false]).joins(purchase_order: :vendor).select("purchase_returns.id").first
-      @account_payable.allocated_return_items.build purchase_return_id: purchase_return.id, payment_for_dp: false if purchase_return
-    end
-  end
-  
-  def select_purchase_return_for_dp
-    @payment_for_dp = true
-    @account_payable = AccountPayable.new
-    params[:purchase_return_ids].split(",").each do |purchase_return_id|
-      purchase_return = PurchaseReturn.where(["vendor_id = ? AND purchase_returns.id = ? AND is_allocated = ? AND direct_purchase_id IS NOT NULL", params[:vendor_id], purchase_return_id, false]).joins(direct_purchase: :vendor).select("purchase_returns.id").first
-      @account_payable.allocated_return_items.build purchase_return_id: purchase_return.id, payment_for_dp: true if purchase_return
-    end
-  end
+  # SUDAH TIDAK DIPAKAI
+  #  def select_purchase_return
+  #    @account_payable = AccountPayable.new
+  #    params[:purchase_return_ids].split(",").each do |purchase_return_id|
+  #      purchase_return = PurchaseReturn.where(["vendor_id = ? AND purchase_returns.id = ? AND is_allocated = ? AND purchase_order_id IS NOT NULL", params[:vendor_id], purchase_return_id, false]).joins(purchase_order: :vendor).select("purchase_returns.id").first
+  #      @account_payable.allocated_return_items.build purchase_return_id: purchase_return.id, payment_for_dp: false if purchase_return
+  #    end
+  #  end
+
+  # SUDAH TIDAK DIPAKAI
+  #  def select_purchase_return_for_dp
+  #    @payment_for_dp = true
+  #    @account_payable = AccountPayable.new
+  #    params[:purchase_return_ids].split(",").each do |purchase_return_id|
+  #      purchase_return = PurchaseReturn.where(["vendor_id = ? AND purchase_returns.id = ? AND is_allocated = ? AND direct_purchase_id IS NOT NULL", params[:vendor_id], purchase_return_id, false]).joins(direct_purchase: :vendor).select("purchase_returns.id").first
+  #      @account_payable.allocated_return_items.build purchase_return_id: purchase_return.id, payment_for_dp: true if purchase_return
+  #    end
+  #  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
@@ -171,20 +162,15 @@ class AccountPayablesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def account_payable_params
-    params.require(:account_payable).permit(:payment_date, :payment_method, :vendor_id,
-      :giro_number, :giro_date, :note, :vendor_invoice_number, :vendor_invoice_date,
-      account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id],
-      allocated_return_items_attributes: [:purchase_return_id, :vendor_id, :payment_for_dp])
+    params.require(:account_payable).permit(:vendor_id,
+      :note, :vendor_invoice_number, :vendor_invoice_date,
+      account_payable_purchases_attributes: [:purchase_id, :purchase_type, :vendor_id])
   end
   
   def add_additional_params_to_child
     params[:account_payable][:account_payable_purchases_attributes].each do |key, value|
       params[:account_payable][:account_payable_purchases_attributes][key].merge! vendor_id: params[:account_payable][:vendor_id]
     end if params[:account_payable][:account_payable_purchases_attributes].present?
-    
-    params[:account_payable][:allocated_return_items_attributes].each do |key, value|
-      params[:account_payable][:allocated_return_items_attributes][key].merge! vendor_id: params[:account_payable][:vendor_id]
-    end if params[:account_payable][:allocated_return_items_attributes].present?
   end
 
 end
