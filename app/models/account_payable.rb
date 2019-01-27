@@ -4,8 +4,6 @@ class AccountPayable < ApplicationRecord
   
   audited on: :create
 
-  attr_accessor :payment_for_dp
-  
   INVOICE_STATUSES = [
     ["Invoiced", "Invoiced"],
     ["Not Yet Invoiced", ""]
