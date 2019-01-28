@@ -11,8 +11,11 @@ class AccountPayablePurchase < ApplicationRecord
   private
   
   def purchase_payable
-    errors.add(:base, "Not able to pay selected purchases") if purchase_type.eql?("PurchaseOrder") && PurchaseOrder.select("1 AS one").joins(:vendor).where(id: purchase_id).where(["vendors.id = ? AND vendors.is_active = ?", vendor_id, true]).blank?
-    errors.add(:base, "Not able to pay selected purchases") if purchase_type.eql?("DirectPurchase") && DirectPurchase.select("1 AS one").joins(:vendor).where(id: purchase_id).where(["vendors.id = ? AND vendors.is_active = ?", vendor_id, true]).blank?
+    if purchase_type.eql?("PurchaseOrder")
+      errors.add(:base, "Not able to pay selected purchases") if PurchaseOrder.select("1 AS one").joins(:vendor).where(id: purchase_id).where(["vendors.id = ? AND vendors.is_active = ?", vendor_id, true]).blank?
+    else
+      errors.add(:base, "Not able to pay selected purchases") if DirectPurchase.select("1 AS one").joins(:vendor).where(id: purchase_id).where(["vendors.id = ? AND vendors.is_active = ?", vendor_id, true]).blank?
+    end
   end
   
   def check_invoice_status

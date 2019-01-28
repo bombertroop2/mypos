@@ -63,24 +63,24 @@ class AccountPayablesController < ApplicationController
     render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
   end
   
-  def create_dp_payment
-    add_additional_params_to_child
-    @account_payable = AccountPayable.new(account_payable_params)
-    @account_payable.payment_for_dp = true
-    unless @account_payable.save
-      @payment_for_dp = true    
-      if @account_payable.errors[:"account_payable_purchases.base"].present?
-        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
-      elsif @account_payable.errors[:base].present?
-        render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
-      end
-    else
-      #      SendEmailJob.perform_later(@account_payable)
-      @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
-    end
-  rescue ActiveRecord::RecordNotUnique => e
-    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
-  end
+  #  def create_dp_payment
+  #    add_additional_params_to_child
+  #    @account_payable = AccountPayable.new(account_payable_params)
+  #    @account_payable.payment_for_dp = true
+  #    unless @account_payable.save
+  #      @payment_for_dp = true    
+  #      if @account_payable.errors[:"account_payable_purchases.base"].present?
+  #        render js: "bootbox.alert({message: \"#{@account_payable.errors[:"account_payable_purchases.base"].join("<br/>")}\",size: 'small'});"
+  #      elsif @account_payable.errors[:base].present?
+  #        render js: "bootbox.alert({message: \"#{@account_payable.errors[:base].join("<br/>")}\",size: 'small'});"
+  #      end
+  #    else
+  #      #      SendEmailJob.perform_later(@account_payable)
+  #      @vendor_name = Vendor.select(:name).where(id: @account_payable.vendor_id).first.name
+  #    end
+  #  rescue ActiveRecord::RecordNotUnique => e
+  #    render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+  #  end
 
   # PATCH/PUT /account_payables/1
   # PATCH/PUT /account_payables/1.json
@@ -107,34 +107,41 @@ class AccountPayablesController < ApplicationController
   end
   
   def generate_form
-    selected_purchase_orders = PurchaseOrder.where(id: params[:purchase_order_ids].split(",").uniq).select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(invoice_status: "")
-    selected_purchase_orders.each_with_index do |selected_purchase_order, index|
-      @account_payable = AccountPayable.new vendor_id: selected_purchase_order.vendor_id if index == 0
-      @account_payable.account_payable_purchases.build purchase_id: selected_purchase_order.id, purchase_type: selected_purchase_order.class.name
+    selected_purchases = []
+    params[:purchase_types].each_with_index do |pt, index|
+      if pt.eql?("purchase_order")
+        selected_purchases << PurchaseOrder.select(:id, :number, :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur, :value_added_tax, :is_additional_disc_from_net, :vendor_id, :name).select("vendors.id AS vendor_id").joins(:vendor).where("status = 'Finish' OR status = 'Closed'").where(invoice_status: "").where(["vendors.is_active = ?", true]).find(params[:purchase_ids][index])
+      else
+        selected_purchases << DirectPurchase.select(:id, :vendor_id).joins(:vendor).where(invoice_status: "").where(["vendors.is_active = ?", true]).find(params[:purchase_ids][index])
+      end
     end
-    render js: "bootbox.alert({message: \"Please choose one vendor to make a payment\",size: 'small'});" if selected_purchase_orders.pluck(:vendor_id).uniq.length > 1
-    render js: "bootbox.alert({message: \"Please select another purchase order\",size: 'small'});" if selected_purchase_orders.length == 0
+    selected_purchases.each_with_index do |selected_purchase, index|
+      @account_payable = AccountPayable.new vendor_id: selected_purchase.vendor_id if index == 0
+      @account_payable.account_payable_purchases.build purchase_id: selected_purchase.id, purchase_type: selected_purchase.class.name
+    end
+    render js: "bootbox.alert({message: \"Please choose one vendor to make a payment\",size: 'small'});" if selected_purchases.pluck(:vendor_id).uniq.length > 1
+    render js: "bootbox.alert({message: \"Please select another purchase order\",size: 'small'});" if selected_purchases.length == 0
   end
   
-  def generate_dp_payment_form
-    selected_direct_purchases = DirectPurchase.where(id: params[:direct_purchase_ids].split(",").uniq).select(:id, :vendor_id).where(invoice_status: "")
-    selected_direct_purchases.each_with_index do |selected_direct_purchase, index|
-      @account_payable = AccountPayable.new vendor_id: selected_direct_purchase.vendor_id if index == 0
-      @account_payable.account_payable_purchases.build purchase_id: selected_direct_purchase.id, purchase_type: selected_direct_purchase.class.name
-    end
-    render js: "bootbox.alert({message: \"Please choose one vendor to make a payment\",size: 'small'});" if selected_direct_purchases.pluck(:vendor_id).uniq.length > 1
-    render js: "bootbox.alert({message: \"Please select another purchase record\",size: 'small'});" if selected_direct_purchases.length == 0
-  end
+  #  def generate_dp_payment_form
+  #    selected_direct_purchases = DirectPurchase.where(id: params[:direct_purchase_ids].split(",").uniq).select(:id, :vendor_id).where(invoice_status: "")
+  #    selected_direct_purchases.each_with_index do |selected_direct_purchase, index|
+  #      @account_payable = AccountPayable.new vendor_id: selected_direct_purchase.vendor_id if index == 0
+  #      @account_payable.account_payable_purchases.build purchase_id: selected_direct_purchase.id, purchase_type: selected_direct_purchase.class.name
+  #    end
+  #    render js: "bootbox.alert({message: \"Please choose one vendor to make a payment\",size: 'small'});" if selected_direct_purchases.pluck(:vendor_id).uniq.length > 1
+  #    render js: "bootbox.alert({message: \"Please select another purchase record\",size: 'small'});" if selected_direct_purchases.length == 0
+  #  end
   
-  def get_purchase_returns
-    @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.po_returns
-    render partial: 'show_return_items'
-  end
+  #  def get_purchase_returns
+  #    @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.po_returns
+  #    render partial: 'show_return_items'
+  #  end
 
-  def get_purchase_returns_for_dp
-    @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.dp_returns
-    render partial: 'show_return_items'
-  end
+  #  def get_purchase_returns_for_dp
+  #    @purchase_returns = Vendor.where(["id = ?", params[:vendor_id]]).select(:id).first.dp_returns
+  #    render partial: 'show_return_items'
+  #  end
   # SUDAH TIDAK DIPAKAI
   #  def select_purchase_return
   #    @account_payable = AccountPayable.new

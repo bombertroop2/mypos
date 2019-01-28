@@ -2,7 +2,7 @@
 <%= form_for(@account_payable, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
     <%= f.hidden_field :vendor_id %>
     <div class="form-group<%= control_group_error(@account_payable, :total) %>">
-        <label class="col-sm-2 control-label">Purchase Orders</label>
+        <label class="col-sm-2 control-label">Purchases</label>
         <div class="col-sm-10">              
             <table class="table">
                 <thead>
@@ -12,7 +12,7 @@
                         <th>Gross Amount</th>
                         <th>1st Disc</th>
                         <th>2nd Disc</th>
-                        <th>Value Added Tax (10%)</th>
+                        <th>VAT (10%)</th>
                         <th>Net Amount</th>
                     </tr>
                 </thead>
@@ -22,7 +22,7 @@
                         <%= account_payable_purchase_form.hidden_field :purchase_type %>
                         <% purchase_order = account_payable_purchase_form.object.purchase %>
                         <tr id="purchase_order_<%= purchase_order.id %>">
-                            <td><%= purchase_order.number %></td>
+                            <td><%= purchase_order.class.name.eql?("PurchaseOrder") ? purchase_order.number : purchase_order.received_purchase_order.delivery_order_number %></td>
                             <td align="right"><%= purchase_order.quantity_received %></td>
                             <td align="right"><%= number_to_currency(purchase_order.receiving_value,
                                   :separator => ",",
@@ -50,13 +50,21 @@
                             <td style="text-align: right">
                                 <% if purchase_order.is_taxable_entrepreneur %>
                                   <%
-                                  vat_in_money = if purchase_order.value_added_tax.eql?("include")
-                                    get_include_vat_in_money_for_ap(purchase_order)
+                                  vat_in_money = if purchase_order.class.name.eql?("PurchaseOrder")
+                                    if purchase_order.value_added_tax.eql?("include")
+                                      get_include_vat_in_money_for_ap(purchase_order)
+                                      else
+                                      get_vat_in_money_for_ap(purchase_order)
+                                    end
                                     else
-                                    get_vat_in_money_for_ap(purchase_order)
+                                    if purchase_order.vat_type.eql?("include")
+                                      get_include_vat_in_money_for_ap(purchase_order)
+                                      else
+                                      get_vat_in_money_for_ap(purchase_order)
+                                    end
                                     end
                                 %>
-                                  (<%= purchase_order.value_added_tax %>) <%= number_to_currency(vat_in_money,
+                                  (<%= purchase_order.class.name.eql?("PurchaseOrder") ? purchase_order.value_added_tax : purchase_order.vat_type %>) <%= number_to_currency(vat_in_money,
                                     :separator => ",",
                                     :delimiter => ".",
                                     :unit => "Rp",
@@ -74,7 +82,7 @@
                   </tbody>
                   <tfoot>
                       <tr>
-                          <td colspan="6" align="right"><strong>Total Amount Received</strong></td>
+                          <td colspan="6" align="right"><strong>Amount Due</strong></td>
                           <td align="right"><strong><%= number_to_currency(total_amount_received,
                                     :separator => ",",
                                     :delimiter => ".",
@@ -86,30 +94,6 @@
                             <td colspan="7" align="right"><%= error_help_text(@account_payable, :total) %></td>
                         </tr>
                       <% end %>
-                  </tfoot>
-              </table>
-          </div>
-      </div>
-      <!--
-      SUDAH TIDAK DIPAKAI
-            <div id="allocated_return_items">
-      <%# if params[:action].eql?("create") && @account_payable.allocated_return_items.present? %>
-      <%#= render partial: "allocated_return_items", locals: {total_amount_received: total_amount_received} %>
-      <%# end %>
-            </div>
-      -->
-      <div class="form-group">          
-          <label class="col-sm-2 control-label">Amount Due</label>
-          <div class="col-sm-10">              
-              <table class="table">
-                  <tfoot>
-                      <tr>
-                          <td align="right" id="amount-to-pay"><strong><%= number_to_currency(total_amount_received,
-                                    :separator => ",",
-                                    :delimiter => ".",
-                                    :unit => "Rp",
-                                    :precision => 2) %></strong></td>
-                      </tr>
                   </tfoot>
               </table>
           </div>
