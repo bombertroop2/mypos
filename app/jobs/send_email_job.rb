@@ -1,8 +1,8 @@
 class SendEmailJob < ApplicationJob
   queue_as :default
 
-  def perform(object, type="account payable")
-    if type.eql?("account payable")
+  def perform(object, type="account payable payment")
+    if type.eql?("account payable payment")
       DuosMailer.payment_email(object, object.vendor.email).deliver if object.vendor.email.present?
       Email.account_payable_officers.each do |account_payable_officer_email|
         DuosMailer.payment_email(object, account_payable_officer_email.address).deliver

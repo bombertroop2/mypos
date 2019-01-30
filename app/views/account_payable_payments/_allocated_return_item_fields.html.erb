@@ -1,0 +1,36 @@
+<div class="form-group">
+    <label class="col-sm-2 control-label"></label>
+    <div class="col-sm-10">
+        <% if action_name.eql?("create") %>
+          <%
+          class_name = if params[:account_payable_payment][:payment_method].eql?("Giro")
+            "account_payable_payment_invoice_purchase_return_id_fields_giro"
+            elsif params[:account_payable_payment][:payment_method].eql?("Transfer")
+            "account_payable_payment_invoice_purchase_return_id_fields_transfer"
+            else
+            "account_payable_payment_invoice_purchase_return_id_fields"
+            end
+        %>
+          <% account_payable_payment_invoice.allocated_return_items.each_with_index do |ari, index| %>        
+            <%= fields_for "account_payable_payment[account_payable_payment_invoices_attributes][#{appi_form_index}][allocated_return_items_attributes][#{index}]", ari do |ari_form| %>
+              <%= ari_form.hidden_field :purchase_return_id, class: class_name %>
+              <% end %>
+            <% end %>
+          <% else %>
+            <%
+            class_name = if params[:payment_method].eql?("Giro")
+              "account_payable_payment_invoice_purchase_return_id_fields_giro"
+              elsif params[:payment_method].eql?("Transfer")
+              "account_payable_payment_invoice_purchase_return_id_fields_transfer"
+              else
+              "account_payable_payment_invoice_purchase_return_id_fields"
+              end
+          %>
+            <% @account_payable_payment_invoice.allocated_return_items.each_with_index do |ari, index| %>        
+              <%= fields_for "account_payable_payment[account_payable_payment_invoices_attributes][#{params[:appi_form_index]}][allocated_return_items_attributes][#{index}]", ari do |ari_form| %>
+                <%= ari_form.hidden_field :purchase_return_id, class: class_name %>
+                <% end %>
+              <% end %>
+            <% end %>
+        </div>
+    </div>

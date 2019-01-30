@@ -1,8 +1,11 @@
-<td colspan="3">
+<td colspan="6">
     <button type="button" class="close cancel" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
-    <div style="padding-top: 20px"></div>
+    <div style="padding-top: 35px"></div>
+    <div class="alert alert-warning">
+        <h4><i class="fa fa-warning"></i> Warning!</h4> <h4>Please create a payment in order starting with the earliest date.</h4>
+    </div>
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
@@ -17,9 +20,6 @@
                     <div class="form-group">
                         <input type="text" class="form-control" id="filter-no-invoice-app-cash" placeholder="No. Invoice">
                     </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control" readonly="true" id="filter-payment-date-app-cash" placeholder="Payment date" style="width: 180px">
-                    </div>
                     <div class="form-group text-left">
                         <%= select_tag "filter-vendor-app-cash", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
                       </div>
@@ -30,17 +30,21 @@
                           <tr>
                               <th></th>
                               <th>No. Invoice</th>
-                              <th>Payment Date</th>
                               <th>Vendor</th>
+                              <th>Debt</th>
                           </tr>
                       </thead>
                       <tbody>
-                          <% AccountPayable.joins(:vendor).select(:id, :number, :payment_date, "vendors.code", "vendors.name").where(payment_method: "Cash").where(["vendors.is_active = ? AND account_payables.remaining_debt > 0", true]).order(:number).each do |ap| %>
+                          <% AccountPayable.joins(:vendor).select(:id, :number, :remaining_debt, "vendors.code", "vendors.name").where(["vendors.is_active = ? AND account_payables.remaining_debt > 0", true]).order(:number).each do |ap| %>
                             <tr id="app_ap_<%= ap.id %>">
                                 <td></td>
                                 <td><%= ap.number %></td>
-                                <td><%= ap.payment_date.strftime("%d/%m/%Y") %></td>
                                 <td><%= "#{ap.code} - #{ap.name}" %></td>
+                                <td><%= number_to_currency(ap.remaining_debt,
+                                      :separator => ",",
+                                      :delimiter => ".",
+                                      :unit => "Rp",
+                                      :precision => 2) %></td>
                             </tr>
                           <% end %>
                       </tbody>
@@ -53,9 +57,6 @@
                       <div class="form-group">
                           <input type="text" class="form-control" id="filter-no-invoice-app-giro" placeholder="No. Invoice">
                       </div>
-                      <div class="form-group">
-                          <input type="text" class="form-control" readonly="true" id="filter-payment-date-app-giro" placeholder="Payment date" style="width: 180px">
-                      </div>
                       <div class="form-group text-left">
                           <%= select_tag "filter-vendor-app-giro", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
                         </div>
@@ -66,17 +67,21 @@
                             <tr>
                                 <th></th>
                                 <th id="app_listing_api_table_no_invoice_giro">No. Invoice</th>
-                                <th>Payment Date</th>
                                 <th>Vendor</th>
+                                <th>Debt</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% AccountPayable.joins(:vendor).select(:id, :number, :payment_date, "vendors.code", "vendors.name").where(payment_method: "Giro").where(["vendors.is_active = ? AND account_payables.remaining_debt > 0", true]).order(:number).each do |ap| %>
+                            <% AccountPayable.joins(:vendor).select(:id, :number, :remaining_debt, "vendors.code", "vendors.name").where(["vendors.is_active = ? AND account_payables.remaining_debt > 0", true]).order(:number).each do |ap| %>
                               <tr id="app_ap_<%= ap.id %>_giro">
                                   <td></td>
                                   <td><%= ap.number %></td>
-                                  <td><%= ap.payment_date.strftime("%d/%m/%Y") %></td>
                                   <td><%= "#{ap.code} - #{ap.name}" %></td>
+                                  <td><%= number_to_currency(ap.remaining_debt,
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %></td>
                               </tr>
                             <% end %>
                         </tbody>
@@ -89,9 +94,6 @@
                         <div class="form-group">
                             <input type="text" class="form-control" id="filter-no-invoice-app-transfer" placeholder="No. Invoice">
                         </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" readonly="true" id="filter-payment-date-app-transfer" placeholder="Payment date" style="width: 180px">
-                        </div>
                         <div class="form-group text-left">
                             <%= select_tag "filter-vendor-app-transfer", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
                           </div>
@@ -102,17 +104,21 @@
                               <tr>
                                   <th></th>
                                   <th id="app_listing_api_table_no_invoice_transfer">No. Invoice</th>
-                                  <th>Payment Date</th>
                                   <th>Vendor</th>
+                                  <th>Debt</th>
                               </tr>
                           </thead>
                           <tbody>
-                              <% AccountPayable.joins(:vendor).select(:id, :number, :payment_date, "vendors.code", "vendors.name").where(payment_method: "Transfer").where(["vendors.is_active = ? AND account_payables.remaining_debt > 0", true]).order(:number).each do |ap| %>
+                              <% AccountPayable.joins(:vendor).select(:id, :number, :remaining_debt, "vendors.code", "vendors.name").where(["vendors.is_active = ? AND account_payables.remaining_debt > 0", true]).order(:number).each do |ap| %>
                                 <tr id="app_ap_<%= ap.id %>_transfer">
                                     <td></td>
                                     <td><%= ap.number %></td>
-                                    <td><%= ap.payment_date.strftime("%d/%m/%Y") %></td>
                                     <td><%= "#{ap.code} - #{ap.name}" %></td>
+                                    <td><%= number_to_currency(ap.remaining_debt,
+                                          :separator => ",",
+                                          :delimiter => ".",
+                                          :unit => "Rp",
+                                          :precision => 2) %></td>
                                 </tr>
                               <% end %>
                           </tbody>
@@ -133,8 +139,8 @@
                 columns: [
                     {data: null, defaultContent: '', orderable: false},
                     {data: 'number'},
-                    {data: 'payment_date'},
-                    {data: 'vendor'}
+                    {data: 'vendor'},
+                    {data: 'debt'}
                 ],
                 tableTools: {
                     sRowSelect: 'os',
@@ -151,8 +157,8 @@
                 columns: [
                     {data: null, defaultContent: '', orderable: false},
                     {data: 'number'},
-                    {data: 'payment_date'},
-                    {data: 'vendor'}
+                    {data: 'vendor'},
+                    {data: 'debt'}
                 ],
                 tableTools: {
                     sRowSelect: 'os',
@@ -169,8 +175,8 @@
                 columns: [
                     {data: null, defaultContent: '', orderable: false},
                     {data: 'number'},
-                    {data: 'payment_date'},
-                    {data: 'vendor'}
+                    {data: 'vendor'},
+                    {data: 'debt'}
                 ],
                 tableTools: {
                     sRowSelect: 'os',
@@ -182,48 +188,6 @@
                 scrollCollapse: true
             });
 
-            $('#filter-payment-date-app-cash').daterangepicker(
-                    {
-                        locale: {
-                            format: 'DD/MM/YYYY'
-                        },
-                        opens: "left",
-                        autoUpdateInput: false
-                    });
-            $('#filter-payment-date-app-cash').on('apply.daterangepicker', function (ev, picker) {
-                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-            });
-            $('#filter-payment-date-app-cash').on('cancel.daterangepicker', function (ev, picker) {
-                $(this).val('');
-            });
-            $('#filter-payment-date-app-transfer').daterangepicker(
-                    {
-                        locale: {
-                            format: 'DD/MM/YYYY'
-                        },
-                        opens: "left",
-                        autoUpdateInput: false
-                    });
-            $('#filter-payment-date-app-transfer').on('apply.daterangepicker', function (ev, picker) {
-                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-            });
-            $('#filter-payment-date-app-transfer').on('cancel.daterangepicker', function (ev, picker) {
-                $(this).val('');
-            });
-            $('#filter-payment-date-app-giro').daterangepicker(
-                    {
-                        locale: {
-                            format: 'DD/MM/YYYY'
-                        },
-                        opens: "left",
-                        autoUpdateInput: false
-                    });
-            $('#filter-payment-date-app-giro').on('apply.daterangepicker', function (ev, picker) {
-                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-            });
-            $('#filter-payment-date-app-giro').on('cancel.daterangepicker', function (ev, picker) {
-                $(this).val('');
-            });
             $("#filter-vendor-app-cash").attr("data-placeholder", "Vendor").chosen();
             $("#filter-vendor-app-transfer").attr("data-placeholder", "Vendor").chosen({width: "200px"});
             $("#filter-vendor-app-giro").attr("data-placeholder", "Vendor").chosen({width: "200px"});
@@ -236,7 +200,7 @@
                         .draw();
                 var vendor = $('#filter-vendor-app-cash option:selected').text().trim();
                 appApInvoiceDataTable
-                        .columns(3)
+                        .columns(2)
                         .search(vendor)
                         .draw();
             });
@@ -249,7 +213,7 @@
                         .draw();
                 var vendor = $('#filter-vendor-app-transfer option:selected').text().trim();
                 appApInvoiceDataTableTransfer
-                        .columns(3)
+                        .columns(2)
                         .search(vendor)
                         .draw();
             });
@@ -262,7 +226,7 @@
                         .draw();
                 var vendor = $('#filter-vendor-app-giro option:selected').text().trim();
                 appApInvoiceDataTableGiro
-                        .columns(3)
+                        .columns(2)
                         .search(vendor)
                         .draw();
             });
@@ -313,74 +277,10 @@
                 if (target == "#giro" && ($('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
                     $("#app_listing_api_table_no_invoice_giro").click();
                     $("#app_listing_api_table_no_invoice_giro").click();
-                }else if (target == "#transfer" && ($('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                } else if (target == "#transfer" && ($('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
                     $("#app_listing_api_table_no_invoice_transfer").click();
                     $("#app_listing_api_table_no_invoice_transfer").click();
                 }
             });
         });
-
-        $.fn.dataTable.ext.search.push(
-                function (settings, data, dataIndex) {
-                    if (appActiveTab == "cash") {
-                        if ($("#filter-payment-date-app-cash").val() != "") {
-                            var apiDate = $("#filter-payment-date-app-cash").val();
-                            var splittedStartAndEndDate = apiDate.split(" - ");
-                            var startDate = splittedStartAndEndDate[0];
-                            var endDate = splittedStartAndEndDate[1];
-                            var splittedStartDate = startDate.split("/");
-                            var splittedEndDate = endDate.split("/");
-                            var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
-                            var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
-                            var tableApiDate = data[2]; // use data for the api date column
-                            var splittedTableApiDate = tableApiDate.split("/");
-                            var convertedTableApiDate = new Date(splittedTableApiDate[1] + "/" + splittedTableApiDate[0] + "/" + splittedTableApiDate[2]);
-                            if (convertedStartDate <= convertedTableApiDate && convertedTableApiDate <= convertedEndDate)
-                            {
-                                return true;
-                            }
-                            return false;
-                        }
-                    } else if (appActiveTab == "transfer") {
-                        if ($("#filter-payment-date-app-transfer").val() != "") {
-                            var apiDate = $("#filter-payment-date-app-transfer").val();
-                            var splittedStartAndEndDate = apiDate.split(" - ");
-                            var startDate = splittedStartAndEndDate[0];
-                            var endDate = splittedStartAndEndDate[1];
-                            var splittedStartDate = startDate.split("/");
-                            var splittedEndDate = endDate.split("/");
-                            var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
-                            var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
-                            var tableApiDate = data[2]; // use data for the api date column
-                            var splittedTableApiDate = tableApiDate.split("/");
-                            var convertedTableApiDate = new Date(splittedTableApiDate[1] + "/" + splittedTableApiDate[0] + "/" + splittedTableApiDate[2]);
-                            if (convertedStartDate <= convertedTableApiDate && convertedTableApiDate <= convertedEndDate)
-                            {
-                                return true;
-                            }
-                            return false;
-                        }
-                    } else {
-                        if ($("#filter-payment-date-app-giro").val() != "") {
-                            var apiDate = $("#filter-payment-date-app-giro").val();
-                            var splittedStartAndEndDate = apiDate.split(" - ");
-                            var startDate = splittedStartAndEndDate[0];
-                            var endDate = splittedStartAndEndDate[1];
-                            var splittedStartDate = startDate.split("/");
-                            var splittedEndDate = endDate.split("/");
-                            var convertedStartDate = new Date(splittedStartDate[1] + "/" + splittedStartDate[0] + "/" + splittedStartDate[2]);
-                            var convertedEndDate = new Date(splittedEndDate[1] + "/" + splittedEndDate[0] + "/" + splittedEndDate[2]);
-                            var tableApiDate = data[2]; // use data for the api date column
-                            var splittedTableApiDate = tableApiDate.split("/");
-                            var convertedTableApiDate = new Date(splittedTableApiDate[1] + "/" + splittedTableApiDate[0] + "/" + splittedTableApiDate[2]);
-                            if (convertedStartDate <= convertedTableApiDate && convertedTableApiDate <= convertedEndDate)
-                            {
-                                return true;
-                            }
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-        );
       </script>
