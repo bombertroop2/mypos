@@ -1,9 +1,9 @@
 include AccountPayablesHelper
 include PurchaseReturnsHelper
 class DuosMailer < ApplicationMailer
-  def payment_email(account_payable, recipient)
-    @account_payable = account_payable
-    mail to: recipient, subject: "Account Payable Document"
+  def payment_email(account_payable_payment, recipient)
+    @account_payable_payment = account_payable_payment
+    mail to: recipient, subject: "AP Payment Document"
   end
   
   #  def closing_cashier_report_email(cashier_opening_id, recipient)

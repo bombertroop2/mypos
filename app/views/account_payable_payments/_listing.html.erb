@@ -1,9 +1,12 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
     <thead id="listing-ap-payment-thead">
         <tr>
-            <th class="col-md-5"><%= smart_listing.sortable "Payment Date", "payment_date" %></th>
-            <th class="col-md-5"><%= smart_listing.sortable "Amount", "amount" %></th>
-            <th class="col-md-2"></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Vendor", "vendors.code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Payment Date", "payment_date" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Payment Method", "payment_method" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Amount", "amount" %></th>
+            <th class="col-md-1"></th>
         </tr>
     </thead>
     <tbody>
@@ -12,7 +15,7 @@
               <%= smart_listing.render object: app, partial: "account_payable_payments/account_payable_payment", locals: {object: app} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 3, link: new_account_payable_payment_path %>
+        <%= smart_listing.item_new colspan: 6, link: new_account_payable_payment_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

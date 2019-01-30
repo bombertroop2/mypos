@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :packing_list_payments
   resources :general_variables, except: [:show, :destroy, :index]
   resources :packing_lists, except: [:edit, :update] do
     member do
@@ -22,6 +23,11 @@ Rails.application.routes.draw do
   resources :account_payable_payments, except: [:edit, :update, :destroy] do
     collection do
       get "generate_form"
+      get 'get_purchase_returns'
+      get 'select_purchase_return'
+    end
+    member do
+      get "print"
     end
   end
   resources :adjustments, except: [:edit, :update, :destroy] do
@@ -246,9 +252,7 @@ Rails.application.routes.draw do
     collection do
       get 'generate_form'
       get 'generate_dp_payment_form'
-      get 'get_purchase_returns'
       get 'get_purchase_returns_for_dp'
-      get 'select_purchase_return'
       get 'select_purchase_return_for_dp'
       post 'create_dp_payment'
     end

@@ -1,0 +1,31 @@
+<% if params[:payment_method].eql?("Giro") %>
+  $("#allocated-return-item-fields-container-<%= params[:appi_form_index] %>-giro").html("<%= j(render(partial: "allocated_return_item_fields")) %>");
+  $("#account_payable_payment_account_payable_payment_invoices_attributes_<%= params[:appi_form_index] %>_amount_returned_giro").val("<%= @total_amount_returned %>");
+  $("#account_payable_payment_account_payable_payment_invoices_attributes_<%= params[:appi_form_index] %>_amount_returned_display_giro").html("<%= number_to_currency(@total_amount_returned,
+    :separator => ",",
+    :delimiter => ".",
+    :unit => "Rp",
+    :precision => 2) %>");
+  $("#btn_delete_allocate_returned_items_giro_<%= params[:appi_form_index] %>").removeClass("hidden");
+  $("#btn_allocate_returned_items_giro_<%= params[:appi_form_index] %>").addClass("hidden");
+<% elsif params[:payment_method].eql?("Transfer") %>
+  $("#allocated-return-item-fields-container-<%= params[:appi_form_index] %>-transfer").html("<%= j(render(partial: "allocated_return_item_fields")) %>");
+  $("#account_payable_payment_account_payable_payment_invoices_attributes_<%= params[:appi_form_index] %>_amount_returned_transfer").val("<%= @total_amount_returned %>");
+  $("#account_payable_payment_account_payable_payment_invoices_attributes_<%= params[:appi_form_index] %>_amount_returned_display_transfer").html("<%= number_to_currency(@total_amount_returned,
+    :separator => ",",
+    :delimiter => ".",
+    :unit => "Rp",
+    :precision => 2) %>");
+  $("#btn_delete_allocate_returned_items_transfer_<%= params[:appi_form_index] %>").removeClass("hidden");
+  $("#btn_allocate_returned_items_transfer_<%= params[:appi_form_index] %>").addClass("hidden");
+<% else %>
+  $("#allocated-return-item-fields-container-<%= params[:appi_form_index] %>").html("<%= j(render(partial: "allocated_return_item_fields")) %>");
+  $("#account_payable_payment_account_payable_payment_invoices_attributes_<%= params[:appi_form_index] %>_amount_returned").val("<%= @total_amount_returned %>");
+  $("#account_payable_payment_account_payable_payment_invoices_attributes_<%= params[:appi_form_index] %>_amount_returned_display").html("<%= number_to_currency(@total_amount_returned,
+    :separator => ",",
+    :delimiter => ".",
+    :unit => "Rp",
+    :precision => 2) %>");
+  $("#btn_delete_allocate_returned_items_cash_<%= params[:appi_form_index] %>").removeClass("hidden");
+  $("#btn_allocate_returned_items_cash_<%= params[:appi_form_index] %>").addClass("hidden");
+<% end %>
