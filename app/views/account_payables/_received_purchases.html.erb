@@ -1,0 +1,152 @@
+<div class="form-group">
+    <!--
+    <label class="col-sm-2 control-label">Purchases</label>
+    -->
+    <div class="col-sm-12">              
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-center">DO Number</th>
+                    <th class="text-center">PO Number</th>
+                    <th class="text-center">Rec. Date</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Gross Amt</th>
+                    <th class="text-center">1st Disc</th>
+                    <th class="text-center">2nd Disc</th>
+                    <th class="text-center">VAT</th>
+                    <th class="text-center">Net Amt</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% total_amount_received = 0 %>
+                <% if action_name.eql?("create") %>
+                  <%= f.fields_for :account_payable_purchase_partials do |account_payable_purchase_partial_form| %>
+                    <%= account_payable_purchase_partial_form.hidden_field :received_purchase_order_id %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_delivery_order_number %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_purchase_order_number %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_received_quantity %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_gross_amount %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_first_discount_money %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_second_discount_money %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_vat_in_money %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_net_amount %>
+                    <%= account_payable_purchase_partial_form.hidden_field :attr_receiving_date %>
+                    <tr id="api_received_purchase_order_<%= account_payable_purchase_partial_form.object.received_purchase_order_id %>">
+                        <td style="vertical-align: middle"><%= account_payable_purchase_partial_form.object.attr_delivery_order_number %></td>
+                        <td style="vertical-align: middle"><%= account_payable_purchase_partial_form.object.attr_purchase_order_number %></td>
+                        <td style="vertical-align: middle"><%= account_payable_purchase_partial_form.object.attr_receiving_date.class.name.eql?("Date") ? account_payable_purchase_partial_form.object.attr_receiving_date.strftime("%d/%m/%Y") : account_payable_purchase_partial_form.object.attr_receiving_date.to_date.strftime("%d/%m/%Y") %></td>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(account_payable_purchase_partial_form.object.attr_received_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(account_payable_purchase_partial_form.object.attr_gross_amount,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></td>
+                        <td class="text-right" style="vertical-align: middle">
+                            <% if account_payable_purchase_partial_form.object.attr_first_discount_money.present? %>
+                              <%= number_to_currency(account_payable_purchase_partial_form.object.attr_first_discount_money,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %>
+                            <% end %>
+                        </td>
+                        <td class="text-right" style="vertical-align: middle">
+                            <% if account_payable_purchase_partial_form.object.attr_second_discount_money.present? %>
+                              <%= number_to_currency(account_payable_purchase_partial_form.object.attr_second_discount_money,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %>
+                            <% end %>
+                        </td>
+                        <td class="text-right" style="vertical-align: middle">
+                            <% if account_payable_purchase_partial_form.object.attr_vat_in_money.present? %>
+                              <%= number_to_currency(account_payable_purchase_partial_form.object.attr_vat_in_money,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %>
+                            <% end %>
+                        </td>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(account_payable_purchase_partial_form.object.attr_net_amount,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></td>
+                    </tr>
+                    <% total_amount_received += account_payable_purchase_partial_form.object.attr_net_amount.to_f %>
+                  <% end %>
+                <% else %>
+                  <% @account_payable_purchase_partials.each_with_index do |account_payable_purchase_partial, index| %>
+                    <%= fields_for "account_payable[account_payable_purchase_partials_attributes][#{index}]", account_payable_purchase_partial do |account_payable_purchase_partial_form| %>
+                      <%= account_payable_purchase_partial_form.hidden_field :received_purchase_order_id %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_delivery_order_number %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_purchase_order_number %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_received_quantity %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_gross_amount %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_first_discount_money %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_second_discount_money %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_vat_in_money %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_net_amount %>
+                      <%= account_payable_purchase_partial_form.hidden_field :attr_receiving_date %>
+                      <tr id="api_received_purchase_order_<%= account_payable_purchase_partial.received_purchase_order_id %>">
+                          <td style="vertical-align: middle"><%= account_payable_purchase_partial.attr_delivery_order_number %></td>
+                          <td style="vertical-align: middle"><%= account_payable_purchase_partial.attr_purchase_order_number %></td>
+                          <td style="vertical-align: middle"><%= account_payable_purchase_partial.attr_receiving_date.strftime("%d/%m/%Y") %></td>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(account_payable_purchase_partial.attr_received_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(account_payable_purchase_partial.attr_gross_amount,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                          <td class="text-right" style="vertical-align: middle">
+                              <% if account_payable_purchase_partial.attr_first_discount_money.present? %>
+                                <%= number_to_currency(account_payable_purchase_partial.attr_first_discount_money,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %>
+                              <% end %>
+                          </td>
+                          <td class="text-right" style="vertical-align: middle">
+                              <% if account_payable_purchase_partial.attr_second_discount_money.present? %>
+                                <%= number_to_currency(account_payable_purchase_partial.attr_second_discount_money,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %>
+                              <% end %>
+                          </td>
+                          <td class="text-right" style="vertical-align: middle">
+                              <% if account_payable_purchase_partial.attr_vat_in_money.present? %>
+                                <%= number_to_currency(account_payable_purchase_partial.attr_vat_in_money,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %>
+                              <% end %>
+                          </td>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(account_payable_purchase_partial.attr_net_amount,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                      </tr>
+                    <% end %>
+                    <% total_amount_received += account_payable_purchase_partial.attr_net_amount %>
+                  <% end %>
+                <% end %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="8" align="right"><strong>Amount Due</strong></td>
+                    <td align="right"><strong><%= number_to_currency(total_amount_received,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

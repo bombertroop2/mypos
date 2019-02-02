@@ -1,7 +1,11 @@
 <% if @account_payable.valid? %>
   <%= smart_listing_item :account_payables, :create, @account_payable, "account_payables/account_payable" %>
 <% else %>
-  $("#form_container").html("<%= j(render(partial: "payment_form")) %>");
+  <% if params[:account_payable][:beginning_of_account_payable_creating].eql?("Partial") %>
+    <%= smart_listing_item :account_payables, :create, @account_payable, "account_payables/form_partial" %>
+  <% else %>
+    $("#form_container").html("<%= j(render(partial: "payment_form")) %>");
+  <% end %>
 <% end %>
 
 <% if @vendor_name.present? %>

@@ -11,6 +11,7 @@ class PurchaseOrder < ApplicationRecord
   has_many :products, through: :purchase_order_products
   has_many :received_purchase_orders
   has_many :purchase_returns
+  has_many :account_payable_purchase_partials, through: :received_purchase_orders
 
   attr_accessor :receiving_po, :closing_po, :edit_document
 

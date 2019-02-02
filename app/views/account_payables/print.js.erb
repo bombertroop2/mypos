@@ -1,4 +1,8 @@
-$("#print_ap_invoice_container").html("<%= j(render(partial: "print")) %>");
+<% if @account_payable.beginning_of_account_payable_creating.eql?("Partial") %>
+  $("#print_ap_invoice_container").html("<%= j(render(partial: "print_partial")) %>");
+<% else %>
+  $("#print_ap_invoice_container").html("<%= j(render(partial: "print")) %>");
+<% end %>
 $("#ap_invoice_print_doc").removeClass("hidden");
 $("#ap_invoice_print_doc").print();
 $("#ap_invoice_print_doc").addClass("hidden");

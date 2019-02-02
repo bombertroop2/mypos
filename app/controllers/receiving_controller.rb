@@ -20,8 +20,7 @@ class ReceivingController < ApplicationController
       received_orders_scope = received_orders_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
         or(received_orders_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])).
         or(received_orders_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"])).
-        or(received_orders_scope.where(["status #{like_command} ?", "%"+params[:filter_string]+"%"])).
-        or(received_orders_scope.where(["quantity #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+        or(received_orders_scope.where(["status #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
       received_orders_scope = received_orders_scope.where(["DATE(receiving_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_receiving_date].present?
       @received_orders = smart_listing_create(:receiving_purchase_orders, received_orders_scope, partial: 'receiving/listing', default_sort: {receiving_date: "asc"})
     end

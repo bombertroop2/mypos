@@ -1,1 +1,5 @@
-<%= smart_listing_item :account_payables, :new, @account_payable, "account_payables/form" %>
+<% if @account_payable.beginning_of_account_payable_creating.eql?("Closed/Finish") %>
+  <%= smart_listing_item :account_payables, :new, @account_payable, "account_payables/form" %>
+<% else %>
+  <%= smart_listing_item :account_payables, :new, @account_payable, "account_payables/form_partial" %>
+<% end %>

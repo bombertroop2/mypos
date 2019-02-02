@@ -8,6 +8,7 @@ class DirectPurchase < ApplicationRecord
   has_one :received_purchase_order, dependent: :destroy
   has_many :direct_purchase_products, dependent: :destroy
   has_many :purchase_returns
+  has_many :account_payable_purchase_partials, through: :received_purchase_order
   
   accepts_nested_attributes_for :direct_purchase_products
   accepts_nested_attributes_for :received_purchase_order
