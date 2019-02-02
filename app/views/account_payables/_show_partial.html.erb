@@ -1,0 +1,204 @@
+<td colspan="5">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <table class="table table-condensed table-responsive table-bordered">
+        <tr>
+            <td style="padding: 20px">
+                <table width="100%">
+                    <tr>
+                        <td colspan="2"><strong><%= Company.display_name %></strong></td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2"><strong>AP INVOICE</strong></td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2"><%= @account_payable.number %></td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;width: 70%">
+                            <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td>Vendor</td>
+                                    <td>:</td>
+                                    <td><%= @account_payable.vendor.name %></td>
+                                </tr>
+                                <tr>
+                                    <td>Vendor Inv. Number</td>
+                                    <td>:</td>
+                                    <td><%= @account_payable.vendor_invoice_number %></td>
+                                </tr>
+                                <tr>
+                                    <td>Vendor Inv. Date</td>
+                                    <td>:</td>
+                                    <td><%= @account_payable.vendor_invoice_date.strftime("%d/%m/%Y") %></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="vertical-align: top;width: 30%">
+                            <table class="table-condensed table-responsive" align="right">
+                                <tr>
+                                    <td style="vertical-align: top">Note</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="word-wrap: break-word"><%= @account_payable.note %></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <table class="table table-condensed table-responsive table-bordered">
+                                <tbody>
+                                    <tr><th colspan="10" style="text-align: center">Items Received</th></tr>
+                                    <tr style="text-align: center">
+                                        <td><strong>No</strong></td>
+                                        <td><strong>DO Number</strong></td>
+                                        <td><strong>PO Number</strong></td>
+                                        <td><strong>Rec. Date</strong></td>
+                                        <td><strong>Qty</strong></td>
+                                        <td><strong>Gross Amt</strong></td>
+                                        <td><strong>1st Disc</strong></td>
+                                        <td><strong>2nd Disc</strong></td>
+                                        <td><strong>VAT</strong></td>
+                                        <td><strong>Net Amt</strong></td>
+                                    </tr>
+                                    <% total_amount_received = 0 %>
+                                    <%
+                                    @account_payable.account_payable_purchase_partials.
+                                      joins(:received_purchase_order).
+                                      joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
+                                      joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
+                                      includes(received_purchase_order_products: [:received_purchase_order_items, purchase_order_product: :cost_list, direct_purchase_product: :cost_list]).
+                                      select(:received_purchase_order_id, "received_purchase_orders.delivery_order_number", "purchase_orders.number AS po_number", "received_purchase_orders.receiving_date", "received_purchase_orders.quantity AS received_qty", "received_purchase_orders.purchase_order_id", "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
+                                      each_with_index do |appp, idx|
+                                    %>
+                                      <tr align="center">
+                                          <td style="vertical-align: middle"><%= idx.succ %></td>
+                                          <td style="vertical-align: middle"><%= appp.delivery_order_number %></td>
+                                          <td style="vertical-align: middle"><%= appp.po_number %></td>
+                                          <td style="vertical-align: middle"><%= appp.receiving_date.strftime("%d/%m/%Y") %></td>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(appp.received_qty, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                                          <%
+                                          gross_amount = 0
+                                          appp.received_purchase_order_products.each do |rpop|
+                                            rpop.received_purchase_order_items.each do |rpoi|
+                                              if rpop.purchase_order_product_id.present?
+                                                gross_amount += rpoi.quantity * rpop.purchase_order_product.cost_list.cost
+                                                else
+                                                gross_amount += rpoi.quantity * rpop.direct_purchase_product.cost_list.cost
+                                              end
+                                            end
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(gross_amount,
+                                                :separator => ",",
+                                                :delimiter => ".",
+                                                :unit => "Rp",
+                                                :precision => 2) %></td>
+                                          <%
+                                          first_discount_money = if appp.po_first_discount.present?
+                                            (appp.po_first_discount.to_f / 100) * gross_amount
+                                            elsif appp.dp_first_discount.present?
+                                            (appp.dp_first_discount.to_f / 100) * gross_amount
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle">
+                                              <% if first_discount_money.present? %>
+                                                <%= number_to_currency(first_discount_money,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %>
+                                              <% end %>
+                                          </td>
+                                          <%
+                                          second_discount_money = if appp.po_second_discount.present?
+                                            get_second_discount_in_money_for_ap_partial appp, "order", gross_amount
+                                            elsif appp.dp_second_discount.present?
+                                            get_second_discount_in_money_for_ap_partial appp, "direct", gross_amount        
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle">
+                                              <% if second_discount_money.present? %>
+                                                <%= number_to_currency(second_discount_money,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %>
+                                              <% end %>
+                                          </td>
+                                          <%
+                                          is_taxable_entrepreneur = if appp.po_number.present?
+                                            appp.po_is_taxable_entrepreneur
+                                            else
+                                            appp.dp_is_taxable_entrepreneur
+                                            end
+                                          vat_in_money = if is_taxable_entrepreneur && appp.po_number.present?
+                                            if appp.po_vat_type.eql?("include")
+                                              get_include_vat_in_money_for_ap_partial appp, "order", gross_amount
+                                              else
+                                              get_vat_in_money_for_ap_partial appp, "order", gross_amount
+                                            end
+                                            elsif is_taxable_entrepreneur
+                                            if appp.dp_vat_type.eql?("include")
+                                              get_include_vat_in_money_for_ap_partial appp, "direct", gross_amount
+                                              else
+                                              get_vat_in_money_for_ap_partial appp, "direct", gross_amount
+                                            end
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle">
+                                              <% if vat_in_money.present? %>
+                                                <%= number_to_currency(vat_in_money,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %>
+                                              <% end %>
+                                          </td>
+                                          <%
+                                          net_amount = if appp.po_number.present?
+                                            value_after_ppn_for_ap_partial appp, "order", gross_amount
+                                            else
+                                            value_after_ppn_for_ap_partial appp, "direct", gross_amount
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(net_amount,
+                                                :separator => ",",
+                                                :delimiter => ".",
+                                                :unit => "Rp",
+                                                :precision => 2) %></td>
+                                      </tr>
+                                      <% total_amount_received += net_amount %>
+                                    <% end %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9" align="right"><strong>Amount To Pay</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(total_amount_received,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </td>
+                    </tr>                    
+                    <tr>
+                        <td>Created by</td>
+                        <td style="text-align: right">Approved by</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top: 50px"><%= @account_payable.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+                        <td style="text-align: right"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+
+</td>

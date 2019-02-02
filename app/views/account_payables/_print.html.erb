@@ -109,16 +109,6 @@
                       <% total_amount_received += value_after_ppn_for_ap(purchase_order) %>
                     <% end %>
                     <tr>
-                        <td colspan="8" align="right"><strong>Total Amount Received</strong></td>
-                        <td align="right"><strong><%= number_to_currency(total_amount_received,
-                                  :separator => ",",
-                                  :delimiter => ".",
-                                  :unit => "Rp",
-                                  :precision => 2) %></strong></td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
                         <td colspan="8" align="right"><strong>Amount To Pay</strong></td>
                         <td align="right"><strong><%= number_to_currency(total_amount_received,
                                   :separator => ",",
@@ -126,7 +116,7 @@
                                   :unit => "Rp",
                                   :precision => 2) %></strong></td>
                     </tr>
-                </tfoot>
+                </tbody>
             </table>
         </td>
     </tr>                    

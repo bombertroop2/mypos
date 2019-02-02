@@ -34,12 +34,10 @@ class AccountPayablePayment < ApplicationRecord
                 def payment_date_after_or_equal_to_latest_payment_date
                   if payment_date.present?
                     account_payable_payment_invoices.each do |account_payable_payment_invoice|
-                      latest_account_payable_payment_invoices = AccountPayablePaymentInvoice.select("account_payable_payments.payment_date").joins(:account_payable_payment).where(account_payable_id: account_payable_payment_invoice.account_payable_id)
-                      latest_account_payable_payment_invoices.each do |latest_account_payable_payment_invoice|
-                        if payment_date < latest_account_payable_payment_invoice.payment_date
-                          errors.add(:payment_date, "must be after or equal to #{latest_account_payable_payment_invoice.payment_date.strftime("%d/%m/%Y")}")
-                          break
-                        end
+                      latest_account_payable_payment_invoice = AccountPayablePaymentInvoice.select("account_payable_payments.payment_date").joins(:account_payable_payment).where(account_payable_id: account_payable_payment_invoice.account_payable_id).order("account_payable_payments.payment_date DESC").first
+                      if latest_account_payable_payment_invoice.present? && payment_date < latest_account_payable_payment_invoice.payment_date
+                        errors.add(:payment_date, "must be after or equal to #{latest_account_payable_payment_invoice.payment_date.strftime("%d/%m/%Y")}")
+                        break
                       end
                     end
                   end

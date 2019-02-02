@@ -255,6 +255,7 @@ Rails.application.routes.draw do
       get 'get_purchase_returns_for_dp'
       get 'select_purchase_return_for_dp'
       post 'create_dp_payment'
+      get 'get_received_purchases'
     end
     member do
       get 'print'

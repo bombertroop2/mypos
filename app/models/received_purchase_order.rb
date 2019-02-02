@@ -5,6 +5,7 @@ class ReceivedPurchaseOrder < ApplicationRecord
   belongs_to :direct_purchase
   belongs_to :vendor
   has_many :received_purchase_order_products, dependent: :destroy
+  has_many :account_payable_purchase_partials, dependent: :restrict_with_error
   
   
   accepts_nested_attributes_for :received_purchase_order_products, reject_if: :child_blank
