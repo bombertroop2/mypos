@@ -125,31 +125,19 @@ class AccountPayable < ApplicationRecord
               end
             end
           end
-          first_discount = if rpo.purchase_order_id.present? && rpo.po_first_discount.present?
-            rpo.po_first_discount
-          elsif rpo.direct_purchase_id.present? && rpo.dp_first_discount.present?
-            rpo.dp_first_discount
-          end
+          account_payable_purchase_partial.attr_gross_amount = gross_amount
           first_discount_money = if rpo.purchase_order_id.present? && rpo.po_first_discount.present?
             (rpo.po_first_discount.to_f / 100) * gross_amount
           elsif rpo.direct_purchase_id.present? && rpo.dp_first_discount.present?
             (rpo.dp_first_discount.to_f / 100) * gross_amount
           end
-          second_discount = if rpo.purchase_order_id.present? && rpo.po_second_discount.present?
-            rpo.po_second_discount
-          elsif rpo.direct_purchase_id.present? && rpo.dp_second_discount.present?
-            rpo.dp_second_discount
-          end
+          account_payable_purchase_partial.attr_first_discount_money = first_discount_money
           second_discount_money = if rpo.purchase_order_id.present? && rpo.po_second_discount.present?
             get_second_discount_in_money_for_ap_partial rpo, "order", gross_amount
           elsif rpo.direct_purchase_id.present? && rpo.dp_second_discount.present?
             get_second_discount_in_money_for_ap_partial rpo, "direct", gross_amount        
           end
-          is_additional_disc_from_net = if rpo.purchase_order_id.present? && rpo.po_second_discount.present?
-            rpo.po_is_additional_disc_from_net
-          elsif rpo.direct_purchase_id.present? && rpo.dp_second_discount.present?
-            rpo.dp_is_additional_disc_from_net
-          end
+          account_payable_purchase_partial.attr_second_discount_money = second_discount_money
           is_taxable_entrepreneur = if rpo.purchase_order_id.present?
             rpo.po_is_taxable_entrepreneur
           else
@@ -168,21 +156,38 @@ class AccountPayable < ApplicationRecord
               get_vat_in_money_for_ap_partial rpo, "direct", gross_amount
             end
           end
-          vat_type = if is_taxable_entrepreneur && rpo.purchase_order_id.present?
-            rpo.po_vat_type
-          elsif is_taxable_entrepreneur
-            rpo.dp_vat_type
-          end
+          account_payable_purchase_partial.attr_vat_in_money = vat_in_money
           net_amount = if rpo.purchase_order_id.present?
             value_after_ppn_for_ap_partial rpo, "order", gross_amount
           else
             value_after_ppn_for_ap_partial rpo, "direct", gross_amount
           end
+          account_payable_purchase_partial.attr_net_amount = net_amount
           self.total += net_amount
         end
       else
         account_payable_purchases.each do |account_payable_purchase|
-          self.total += value_after_ppn_for_ap(account_payable_purchase.purchase)
+          account_payable_purchase.attr_gross_amount = account_payable_purchase.purchase.receiving_value
+          account_payable_purchase.attr_first_discount_money = (account_payable_purchase.purchase.first_discount.to_f / 100) * account_payable_purchase.purchase.receiving_value if account_payable_purchase.purchase.first_discount.present?
+          account_payable_purchase.attr_second_discount_money = get_second_discount_in_money_for_ap(account_payable_purchase.purchase) if account_payable_purchase.purchase.second_discount.present?
+          if account_payable_purchase.purchase.is_taxable_entrepreneur
+            vat_in_money = if account_payable_purchase.purchase.class.name.eql?("PurchaseOrder")
+              if account_payable_purchase.purchase.value_added_tax.eql?("include")
+                get_include_vat_in_money_for_ap(account_payable_purchase.purchase)
+              else
+                get_vat_in_money_for_ap(account_payable_purchase.purchase)
+              end
+            else
+              if account_payable_purchase.purchase.vat_type.eql?("include")
+                get_include_vat_in_money_for_ap(account_payable_purchase.purchase)
+              else
+                get_vat_in_money_for_ap(account_payable_purchase.purchase)
+              end
+            end
+            account_payable_purchase.attr_vat_in_money = vat_in_money
+          end
+          account_payable_purchase.attr_net_amount = value_after_ppn_for_ap(account_payable_purchase.purchase)
+          self.total += account_payable_purchase.attr_net_amount
         end
       end
     end

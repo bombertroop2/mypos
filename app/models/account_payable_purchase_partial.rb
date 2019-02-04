@@ -1,5 +1,7 @@
 class AccountPayablePurchasePartial < ApplicationRecord
-  attr_accessor :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity, :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money, :attr_is_additional_disc_from_net, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date
+  attr_accessor :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity,
+    :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money,
+    :attr_is_additional_disc_from_net, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date
   
   belongs_to :account_payable
   belongs_to :received_purchase_order
@@ -9,7 +11,7 @@ class AccountPayablePurchasePartial < ApplicationRecord
   after_destroy :remove_invoiced_mark_from_received_purchase, :remove_partial_mark_from_purchase_document
   
   private
-  
+    
   def remove_partial_mark_from_purchase_document
     if received_purchase_order.purchase_order_id.present?
       if received_purchase_order.purchase_order.account_payable_purchase_partials.blank?
