@@ -1,22 +1,24 @@
 class AccountPayablePurchase < ApplicationRecord
-  attr_accessor :vendor_id, :attr_vendor_invoice_date
+  attr_accessor :vendor_id, :attr_vendor_invoice_date,
+    :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money,
+    :attr_vat_in_money, :attr_net_amount
   
   belongs_to :account_payable
   belongs_to :purchase, polymorphic: true
-  
+    
   validate :purchase_is_payable, :check_invoice_status, :purchase_payable, :attr_vendor_invoice_date_valid
   
   after_destroy :remove_invoiced_mark_from_purchase_doc
   
   private
-  
+    
   def attr_vendor_invoice_date_valid
     if purchase_type.eql?("PurchaseOrder")
       latest_received_purchase = purchase.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first
     else
       latest_received_purchase = purchase.received_purchase_order
     end
-    if latest_received_purchase.receiving_date > attr_vendor_invoice_date.to_date
+    if attr_vendor_invoice_date.present? && latest_received_purchase.receiving_date > attr_vendor_invoice_date.to_date
       errors.add(:base, "Vendor invoice date must be after or equal to #{latest_received_purchase.receiving_date.strftime("%d/%m/%Y")}")
     end
   end
