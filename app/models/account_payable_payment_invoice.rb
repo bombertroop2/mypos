@@ -6,6 +6,7 @@ class AccountPayablePaymentInvoice < ApplicationRecord
   belongs_to :account_payable
   has_many :allocated_return_items, dependent: :destroy
   has_many :account_payable_purchases, through: :account_payable
+  has_many :account_payable_purchase_partials, through: :account_payable
 
   accepts_nested_attributes_for :allocated_return_items
   
