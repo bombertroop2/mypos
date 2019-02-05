@@ -6,5 +6,5 @@
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, vendor_path(object), data: {remote: true}, title: "Show" %>
     <%= link_to_if(can?(:manage, Vendor), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_vendor_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, Vendor) && !object.product_relation.present? && !object.purchase_order_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+      <%= link_to_if(can?(:manage, Vendor) && !object.product_relation.present? && !object.purchase_order_relation.present? && !object.account_payable_relation.present? && !object.direct_purchase_relation.present? && !object.account_payable_payment_relation.present?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
   </td>
