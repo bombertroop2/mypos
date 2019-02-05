@@ -24,94 +24,116 @@
                             <%= error_help_text(@courier, :status) %>
                         </div>
                     </div>
-                    <%= f.fields_for :courier_ways do |courier_way_form| %>    
-                      <div class="form-group<%= control_group_error(courier_way_form.object, :name) %>">
-                          <%= courier_way_form.label :name, "Via", class: "col-sm-2 control-label" %>
-                            <div class="col-sm-10">
-                                <%= courier_way_form.text_field :name, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
-                                  <%= error_help_text(courier_way_form.object, :name) %>
-                              </div>
-
-                          </div>
-                          <% checked = false %>
-                          <% if !@courier.new_record? %>
-                            <% if courier_way_form.object.new_record? %>
-                              <% checked = true %>
-                            <% end %>
-                          <% end %>
-                          <div class="form-group">
-                              <label class="col-sm-2 control-label"></label>
+    <div id="external_courier_additional_fields"<% unless @courier.status.eql?("External") %> class="hidden"<% end %>>
+                        <div class="form-group<%= control_group_error(@courier, :terms_of_payment) %>">
+                            <%= f.label :terms_of_payment, class: "col-sm-2 control-label" %>
                               <div class="col-sm-10">
-                                  <%= courier_way_form.check_box :_destroy, checked: checked, class: "courier-way-delete-fields" %> Delete
+                                  <%= f.number_field :terms_of_payment, class: "form-control" %>
+                                    <%= error_help_text(@courier, :terms_of_payment) %>
                                 </div>
-
                             </div>
-                            <%= courier_way_form.fields_for :courier_units do |courier_unit_form| %>
-                              <div class="form-group">
-                                  <label class="col-sm-2 control-label"></label>
+                            <div class="form-group<%= control_group_error(@courier, :value_added_tax_type) %>">
+                                <%= f.label :value_added_tax_type, "VAT type", class: "col-sm-2 control-label" %>
                                   <div class="col-sm-10">
-                                      <div class="form-group<%= control_group_error(courier_unit_form.object, :name) %>">
-                                          <%= courier_unit_form.label :name, "Unit", class: "col-sm-1 control-label" %>
-                                            <div class="col-sm-11">
-                                                <%= courier_unit_form.text_field :name, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
-                                                  <%= error_help_text(courier_unit_form.object, :name) %>
-                                              </div>
+                                      <%= f.select :value_added_tax_type, options_for_select(Courier::VAT_TYPES, @courier.value_added_tax_type), {prompt: true}, {class: "form-control"} %>
+                                        <%= error_help_text(@courier, :value_added_tax_type) %>
+                                    </div>
+                                </div>
+                            </div>
+                            <%= f.fields_for :courier_ways do |courier_way_form| %>    
+                              <div class="form-group<%= control_group_error(courier_way_form.object, :name) %>">
+                                  <%= courier_way_form.label :name, "Via", class: "col-sm-2 control-label" %>
+                                    <div class="col-sm-10">
+                                        <%= courier_way_form.text_field :name, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
+                                          <%= error_help_text(courier_way_form.object, :name) %>
+                                      </div>
 
-                                          </div>
-                                          <% checked = false %>
-                                          <% if !@courier.new_record? %>
-                                            <% if courier_unit_form.object.new_record? %>
-                                              <% checked = true %>
-                                            <% end %>
-                                          <% end %>
-                                          <div class="form-group">
-                                              <label class="col-sm-1 control-label"></label>
-                                              <div class="col-sm-11">
-                                                  <%= courier_unit_form.check_box :_destroy, checked: checked, class: "courier-unit-#{courier_way_form.options[:child_index]}-delete-fields courier-unit-delete-fields" %> Delete
-                                                </div>
-
-                                            </div>
+                                  </div>
+                                  <% checked = false %>
+                                  <% if !@courier.new_record? %>
+                                    <% if courier_way_form.object.new_record? %>
+                                      <% checked = true %>
+                                    <% end %>
+                                  <% end %>
+                                  <div class="form-group">
+                                      <label class="col-sm-2 control-label"></label>
+                                      <div class="col-sm-10">
+                                          <%= courier_way_form.check_box :_destroy, checked: checked, class: "courier-way-delete-fields" %> Delete
                                         </div>
 
-                                    </div>                            
-                                  <% end %>                              
-                                <% end %>
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <%= f.submit "Save", class: "btn btn-primary" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
-                                      </div>
-                                  </div>
-                                <% end %>
-                            </td>
+                                    </div>
+                                    <%= courier_way_form.fields_for :courier_units do |courier_unit_form| %>
+                                      <div class="form-group">
+                                          <label class="col-sm-2 control-label"></label>
+                                          <div class="col-sm-10">
+                                              <div class="form-group<%= control_group_error(courier_unit_form.object, :name) %>">
+                                                  <%= courier_unit_form.label :name, "Unit", class: "col-sm-1 control-label" %>
+                                                    <div class="col-sm-11">
+                                                        <%= courier_unit_form.text_field :name, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
+                                                          <%= error_help_text(courier_unit_form.object, :name) %>
+                                                      </div>
 
-                            <script>
-                              $(function () {
-                                  $('#courier_code').on("input", function () {
-                                      $(this).val($(this).val().replace(/ /g, ""));
-                                  });
-                                  $(".courier-way-delete-fields").off("change");
-                                  $(".courier-way-delete-fields").change(function () {
-                                      var courierWayIndex = $(this).attr('id').split("_")[4];
-                                      if ($(this).is(":checked")) {
-                                          $(".courier-unit-" + courierWayIndex + "-delete-fields").prop('checked', true);
-                                      } else
-                                          $(".courier-unit-" + courierWayIndex + "-delete-fields").prop('checked', false);
-                                  });
-                                  $(".courier-unit-delete-fields").off("change");
-                                  $(".courier-unit-delete-fields").change(function () {
-                                      var courierWayIndex = $(this).attr('id').split("_")[4];
-                                      if (!$(this).is(":checked")) {
-                                          $("#courier_courier_ways_attributes_" + courierWayIndex + "__destroy").prop('checked', false);
-                                      } else {
-                                          var deleteWay = true;
-                                          $.each($(".courier-unit-" + courierWayIndex + "-delete-fields"), function (key, value) {
-                                              if (!$(value).is(":checked"))
-                                                  deleteWay = false;
+                                                  </div>
+                                                  <% checked = false %>
+                                                  <% if !@courier.new_record? %>
+                                                    <% if courier_unit_form.object.new_record? %>
+                                                      <% checked = true %>
+                                                    <% end %>
+                                                  <% end %>
+                                                  <div class="form-group">
+                                                      <label class="col-sm-1 control-label"></label>
+                                                      <div class="col-sm-11">
+                                                          <%= courier_unit_form.check_box :_destroy, checked: checked, class: "courier-unit-#{courier_way_form.options[:child_index]}-delete-fields courier-unit-delete-fields" %> Delete
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                            </div>                            
+                                          <% end %>                              
+                                        <% end %>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-10">
+                                                <%= f.submit "Save", class: "btn btn-primary" %>
+                                                  <button class="btn btn-link cancel">Cancel</button>
+                                              </div>
+                                          </div>
+                                        <% end %>
+                                    </td>
+
+                                    <script>
+                                      $(function () {
+                                          $('#courier_code').on("input", function () {
+                                              $(this).val($(this).val().replace(/ /g, ""));
                                           });
-                                          if (deleteWay)
-                                              $("#courier_courier_ways_attributes_" + courierWayIndex + "__destroy").prop('checked', true);
-                                      }
-                                  });
-                              });
-                            </script>
+                                          $(".courier-way-delete-fields").off("change");
+                                          $(".courier-way-delete-fields").change(function () {
+                                              var courierWayIndex = $(this).attr('id').split("_")[4];
+                                              if ($(this).is(":checked")) {
+                                                  $(".courier-unit-" + courierWayIndex + "-delete-fields").prop('checked', true);
+                                              } else
+                                                  $(".courier-unit-" + courierWayIndex + "-delete-fields").prop('checked', false);
+                                          });
+                                          $(".courier-unit-delete-fields").off("change");
+                                          $(".courier-unit-delete-fields").change(function () {
+                                              var courierWayIndex = $(this).attr('id').split("_")[4];
+                                              if (!$(this).is(":checked")) {
+                                                  $("#courier_courier_ways_attributes_" + courierWayIndex + "__destroy").prop('checked', false);
+                                              } else {
+                                                  var deleteWay = true;
+                                                  $.each($(".courier-unit-" + courierWayIndex + "-delete-fields"), function (key, value) {
+                                                      if (!$(value).is(":checked"))
+                                                          deleteWay = false;
+                                                  });
+                                                  if (deleteWay)
+                                                      $("#courier_courier_ways_attributes_" + courierWayIndex + "__destroy").prop('checked', true);
+                                              }
+                                          });
+                                          $("#courier_status").unbind().change(function () {
+                                              if ($(this).val() == "External")
+                                                  $("#external_courier_additional_fields").removeClass("hidden");
+                                              else
+                                                  $("#external_courier_additional_fields").addClass("hidden");
+                                          });
+                                      });
+                                    </script>

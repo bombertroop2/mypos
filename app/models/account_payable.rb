@@ -30,13 +30,17 @@ class AccountPayable < ApplicationRecord
   validates :vendor_invoice_date, date: {before_or_equal_to: proc { Date.current }, message: 'must be before or equal to today' }, if: proc {|ap| ap.vendor_invoice_date.present?}
     validates :total, numericality: {greater_than: 0}
     validate :vendor_available, :beginning_of_account_payable_creating_available, :check_min_purchase_per_invoice, on: :create
-
+    validate :transaction_open
     
     before_create :generate_number, :set_remaining_debt
     after_create :mark_purchase_doc_as_paid              
     before_destroy :delete_tracks
                                           
     private
+    
+    def transaction_open
+      errors.add(:base, "Sorry, you can't perform this transaction") if vendor_invoice_date.present? && FiscalYear.joins(:fiscal_months).where(year: vendor_invoice_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[vendor_invoice_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+    end
     
     def check_min_purchase_per_invoice
       errors.add(:base, "Invoice must have at least one purchase") if beginning_of_account_payable_creating.eql?("Closed/Finish") && account_payable_purchases.blank?

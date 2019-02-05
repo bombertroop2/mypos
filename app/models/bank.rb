@@ -6,7 +6,9 @@ class Bank < ApplicationRecord
   ]
   
   has_one :sale_relation, -> {select("1 AS one")}, class_name: "Sale"
+  has_one :account_payable_payment_relation, -> {select("1 AS one")}, class_name: "AccountPayablePayment"
   has_many :sales, dependent: :restrict_with_error
+  has_many :account_payable_payments, dependent: :restrict_with_error
 
   validates :code, :name, :card_type, presence: true
   validate :card_type_available
@@ -25,11 +27,11 @@ class Bank < ApplicationRecord
   private
   
   def code_not_changed
-    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && sale_relation.present?
+    errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (sale_relation.present? || account_payable_payment_relation.present?)
   end
 
   def type_not_changed
-    errors.add(:card_type, "change is not allowed!") if card_type_changed? && persisted? && sale_relation.present?
+    errors.add(:card_type, "change is not allowed!") if card_type_changed? && persisted? && (sale_relation.present? || account_payable_payment_relation.present?)
   end
   
   def delete_tracks

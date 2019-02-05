@@ -42,13 +42,28 @@ class AccountPayablePaymentsController < ApplicationController
     convert_amount_value
     calculate_total_amount
     @account_payable_payment = AccountPayablePayment.new(account_payable_payment_params)
-    unless @created = @account_payable_payment.save
-      if @account_payable_payment.errors[:base].present?
-        render js: "bootbox.alert({message: \"#{@account_payable_payment.errors[:base].join("<br/>")}\",size: 'small'});"
+    recreate = false
+    recreate_counter = 1
+    begin
+      begin
+        recreate = false
+        unless @created = @account_payable_payment.save
+          if @account_payable_payment.errors[:base].present?
+            render js: "bootbox.alert({message: \"#{@account_payable_payment.errors[:base].join("<br/>")}\",size: 'small'});"
+          end
+        else
+          SendEmailJob.perform_later(@account_payable_payment)
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        if recreate_counter < 5
+          recreate = true
+          recreate_counter += 1
+        else
+          recreate = false
+          render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+        end
       end
-    else
-      SendEmailJob.perform_later(@account_payable_payment)
-    end
+    end while recreate
   end
 
   # PATCH/PUT /account_payable_payments/1

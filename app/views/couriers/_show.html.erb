@@ -19,6 +19,18 @@
         <dd><%= object.status %></dd>
     </dl>
 
+    <% if object.status.eql?("External") %>
+      <dl class="dl-horizontal">
+          <dt>Terms of payment</dt>
+          <dd><%= object.terms_of_payment %> days</dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>VAT type</dt>
+          <dd><%= object.value_added_tax_type.capitalize %></dd>
+      </dl>
+    <% end %>
+
     <% object.courier_ways.each do |cw| %>
       <dl class="dl-horizontal">
           <dt>Via</dt>

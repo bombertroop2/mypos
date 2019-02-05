@@ -110,11 +110,11 @@ class CouriersController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def courier_params
     if action_name.eql?("create")
-      params.require(:courier).permit(:code, :name, :status,
+      params.require(:courier).permit(:code, :name, :status, :terms_of_payment, :value_added_tax_type,
         courier_ways_attributes: [:name, :_destroy,
           courier_units_attributes: [:name, :_destroy]])
     else
-      params.require(:courier).permit(:code, :name, :status,
+      params.require(:courier).permit(:code, :name, :status, :terms_of_payment, :value_added_tax_type,
         courier_ways_attributes: [:name, :_destroy, :id,
           courier_units_attributes: [:name, :_destroy, :id]])
     end
