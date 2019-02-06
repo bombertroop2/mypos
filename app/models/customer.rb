@@ -1,18 +1,20 @@
 class Customer < ApplicationRecord
 	audited on: [:create, :update]
   
+  belongs_to :province
+  belongs_to :city
   has_one :order_booking_relation, -> {select("1 AS one")}, class_name: "OrderBooking"
   has_many :order_bookings, dependent: :restrict_with_error
   
 	before_validation :strip_string_values
 
 	validates :code, presence: true, uniqueness: true
-	validates :name, :address, :terms_of_payment, :limit_value, :deliver_to, presence: true
+	validates :name, :address, :terms_of_payment, :limit_value, :deliver_to, :province_id, :city_id, presence: true
 	validates :value_added_tax, presence: true, if: proc {|customer| customer.is_taxable_entrepreneur}  
     validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|customer| customer.terms_of_payment.present?}
       validate :vat_available
       validates :limit_value, numericality: {greater_than: 0}, if: proc { |c| c.limit_value.present? && c.limit_value.is_a?(Numeric) }
-        validate :code_not_changed
+        validate :code_not_changed, :city_available, :city_id_not_changed
 
         VAT = [
           ["Include", "include"],
@@ -28,9 +30,17 @@ class Customer < ApplicationRecord
           end
 
           private
+          
+          def city_available
+            errors.add(:city_id, "does not exist!") if province_id.present? && city_id.present? && (province_id_changed? || city_id_changed?) && City.select("1 AS one").where(id: city_id, province_id: province_id).blank?
+          end
 
           def code_not_changed
             errors.add(:code, "change is not allowed!") if code_changed? && persisted? && order_booking_relation.present?
+          end
+
+          def city_id_not_changed
+            errors.add(:city_id, "change is not allowed!") if province_id.present? && city_id.present? && (province_id_changed? || city_id_changed?) && (province_id_was.present? || city_id_was.present?) && persisted? && order_booking_relation.present?
           end
 
           def delete_tracks
