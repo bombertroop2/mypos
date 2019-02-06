@@ -62,34 +62,33 @@ class AccountPayable < ApplicationRecord
     def generate_number
       is_taxable_entrepreneur = vendor.is_taxable_entrepreneur rescue nil
       pkp_code = is_taxable_entrepreneur ? "1" : "0"
-      today = Date.current
-      current_month = today.month.to_s.rjust(2, '0')
-      current_year = today.strftime("%y").rjust(2, '0')
-      existed_numbers = AccountPayable.where("number LIKE '#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}%'").select(:number).order(:number)
+      vendor_invoice_date_month = vendor_invoice_date.month.to_s.rjust(2, '0')
+      vendor_invoice_date_year = vendor_invoice_date.strftime("%y").rjust(2, '0')
+      existed_numbers = AccountPayable.where("number LIKE '#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}%'").select(:number).order(:number)
       if existed_numbers.blank?
-        new_number = "#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}0001"
+        new_number = "#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}0001"
       else
         if existed_numbers.length == 1
-          seq_number = existed_numbers[0].number.split("#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}").last
+          seq_number = existed_numbers[0].number.split("#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}").last
           if seq_number.to_i > 1
-            new_number = "#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}0001"
+            new_number = "#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}0001"
           else
-            new_number = "#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}#{seq_number.succ}"
+            new_number = "#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}#{seq_number.succ}"
           end
         else
           last_seq_number = ""
           existed_numbers.each_with_index do |existed_number, index|
-            seq_number = existed_number.number.split("#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}").last
+            seq_number = existed_number.number.split("#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}").last
             if seq_number.to_i > 1 && index == 0
-              new_number = "#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}0001"
+              new_number = "#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}0001"
               break                              
             elsif last_seq_number.eql?("")
               last_seq_number = seq_number
             elsif (seq_number.to_i - last_seq_number.to_i) > 1
-              new_number = "#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}#{last_seq_number.succ}"
+              new_number = "#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}#{last_seq_number.succ}"
               break
             elsif index == existed_numbers.length - 1
-              new_number = "#{pkp_code}INV#{vendor.code}#{current_month}#{current_year}#{seq_number.succ}"
+              new_number = "#{pkp_code}INV#{vendor.code}#{vendor_invoice_date_month}#{vendor_invoice_date_year}#{seq_number.succ}"
             else
               last_seq_number = seq_number
             end

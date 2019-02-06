@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :account_payable_couriers, except: [:edit, :update]
   resources :packing_list_payments
   resources :general_variables, except: [:show, :destroy, :index]
   resources :packing_lists, except: [:edit, :update] do
@@ -79,7 +80,11 @@ Rails.application.routes.draw do
     devise_for :users, only: :sessions
   end
 
-  resources :customers
+  resources :customers do
+    collection do
+      get "get_cities"
+    end
+  end
   resources :consignment_sales do
     collection do
       get "get_product"

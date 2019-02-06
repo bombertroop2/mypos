@@ -1,5 +1,5 @@
 class PackingListItem < ApplicationRecord
-  attr_accessor :attr_do_number, :attr_delivery_date, :attr_courier_id, :attr_city_id, :attr_packing_list_date, :attr_courier_unit_id, :attr_quantity
+  attr_accessor :attr_do_number, :attr_delivery_date, :attr_courier_id, :attr_city_id, :attr_packing_list_date, :attr_courier_unit_id, :attr_quantity, :attr_received_date
   belongs_to :shipment
   belongs_to :packing_list
   
@@ -12,6 +12,7 @@ class PackingListItem < ApplicationRecord
   validates :volume, :numericality => {:greater_than => 0}, :if => proc { |pli| pli.volume.present? && pli.volume_changed? && pli.volume.is_a?(Numeric) && @courier_unit.name.eql?("Cubic") }
   validate :shipment_available, :if => proc{|pli| pli.shipment_id.present? && pli.shipment_id_changed?}
   validate :shipment_delivery_date_valid, :if => proc{|pli|pli.attr_packing_list_date.present? && @shipment.present?}
+  validate :shipment_received_date_valid, :if => proc{|pli|pli.attr_packing_list_date.present? && @shipment.present?}
   
   after_create :update_quantity, :mark_shipment_packed_up
   after_destroy :unmark_packed_up_shipment
@@ -48,13 +49,17 @@ class PackingListItem < ApplicationRecord
   def shipment_available
     courier = Courier.select(:status).find(attr_courier_id)
     if courier.status.eql?("External")
-      errors.add(:shipment_id, "does not exist!") if attr_city_id.present? && (@shipment = Shipment.select(:id, :delivery_date, :quantity, :is_packed_up).joins(:order_booking => :destination_warehouse).where(:id => shipment_id, :is_packed_up => false).where(["warehouses.city_id = ?", attr_city_id]).first).blank?
+      errors.add(:shipment_id, "does not exist!") if attr_city_id.present? && (@shipment = Shipment.select(:id, :delivery_date, :quantity, :is_packed_up, :received_date).joins(:order_booking => :destination_warehouse).where(:id => shipment_id, :is_packed_up => false).where(["warehouses.city_id = ?", attr_city_id]).first).blank?
     else
-      errors.add(:shipment_id, "does not exist!") if (@shipment = Shipment.select(:id, :delivery_date, :quantity, :is_packed_up).where(:id => shipment_id, :is_packed_up => false).first).blank?
+      errors.add(:shipment_id, "does not exist!") if (@shipment = Shipment.select(:id, :delivery_date, :quantity, :is_packed_up, :received_date).where(:id => shipment_id, :is_packed_up => false).first).blank?
     end
   end
   
   def shipment_delivery_date_valid
     errors.add(:attr_delivery_date, "must be before or equal to #{attr_packing_list_date}") if @shipment.delivery_date > attr_packing_list_date.to_date
+  end
+
+  def shipment_received_date_valid
+    errors.add(:attr_received_date, "must be after or equal to #{attr_packing_list_date}") if @shipment.received_date.present? && attr_packing_list_date.to_date > @shipment.received_date
   end
 end
