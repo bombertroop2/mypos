@@ -6,8 +6,8 @@ class PackingListItem < ApplicationRecord
   before_validation :get_courier_unit, :remove_unused_unit_value
   
   validates :shipment_id, :presence => true
-  validates :weight, :presence => true, :if => proc{@courier_unit.name.eql?("Kilogram")}
-  validates :volume, :presence => true, :if => proc{@courier_unit.name.eql?("Cubic")}
+  validates :weight, :presence => true, :if => proc{@courier_unit.present? && @courier_unit.name.eql?("Kilogram")}
+  validates :volume, :presence => true, :if => proc{@courier_unit.present? && @courier_unit.name.eql?("Cubic")}
   validates :weight, :numericality => {:greater_than => 0}, :if => proc { |pli| pli.weight.present? && pli.weight_changed? && pli.weight.is_a?(Numeric) && @courier_unit.name.eql?("Kilogram") }
   validates :volume, :numericality => {:greater_than => 0}, :if => proc { |pli| pli.volume.present? && pli.volume_changed? && pli.volume.is_a?(Numeric) && @courier_unit.name.eql?("Cubic") }
   validate :shipment_available, :if => proc{|pli| pli.shipment_id.present? && pli.shipment_id_changed?}
@@ -38,18 +38,26 @@ class PackingListItem < ApplicationRecord
   end
   
   def remove_unused_unit_value
-    self.volume = nil if @courier_unit.name.eql?("Kilogram")
-    self.weight = nil if @courier_unit.name.eql?("Cubic")
+    self.volume = nil if @courier_unit.present? && @courier_unit.name.eql?("Kilogram")
+    self.weight = nil if @courier_unit.present? && @courier_unit.name.eql?("Cubic")
   end
   
   def get_courier_unit
-    @courier_unit = CourierUnit.select(:name).find(attr_courier_unit_id)
+    @courier_unit = CourierUnit.select(:name).find(attr_courier_unit_id) if attr_courier_unit_id.present?
   end
   
   def shipment_available
     courier = Courier.select(:status).find(attr_courier_id)
     if courier.status.eql?("External")
-      errors.add(:shipment_id, "does not exist!") if attr_city_id.present? && (@shipment = Shipment.select(:id, :delivery_date, :quantity, :is_packed_up, :received_date).joins(:order_booking => :destination_warehouse).where(:id => shipment_id, :is_packed_up => false).where(["warehouses.city_id = ?", attr_city_id]).first).blank?
+      if attr_city_id.present?
+        @shipment = Shipment.
+          select(:id, :delivery_date, :quantity, :is_packed_up, :received_date).
+          joins(:order_booking => :destination_warehouse).
+          joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
+          where(:id => shipment_id, :is_packed_up => false).
+          where(["warehouses.city_id = ? OR customers.city_id = ?", attr_city_id, attr_city_id]).first
+        errors.add(:shipment_id, "does not exist!") if @shipment.blank?
+      end
     else
       errors.add(:shipment_id, "does not exist!") if (@shipment = Shipment.select(:id, :delivery_date, :quantity, :is_packed_up, :received_date).where(:id => shipment_id, :is_packed_up => false).first).blank?
     end

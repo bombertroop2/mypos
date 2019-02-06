@@ -107,7 +107,9 @@ class PackingListsController < ApplicationController
   def generate_packing_list_item_form
     @courier_unit = CourierUnit.select(:name).find(params[:courier_unit_id])
     packing_list = PackingList.new
-    shipments = Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).select("cities.name").joins(order_booking: [destination_warehouse: :city]).where(delivery_order_number: params[:shipment_numbers], is_packed_up: false)
+    shipments = Shipment.
+      select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity).
+      where(delivery_order_number: params[:shipment_numbers], is_packed_up: false)
     @packing_list_items = []
     shipments.each do |shipment|
       @packing_list_items << packing_list.packing_list_items.build(shipment_id: shipment.id, attr_quantity: shipment.quantity, attr_do_number: shipment.delivery_order_number, attr_delivery_date: shipment.delivery_date.strftime("%d/%m/%Y"), attr_received_date: (shipment.received_date.strftime("%d/%m/%Y") rescue nil))
