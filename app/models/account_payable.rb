@@ -5,8 +5,9 @@ class AccountPayable < ApplicationRecord
   audited on: :create
 
   INVOICE_STATUSES = [
-    ["Invoiced", "Invoiced"],
-    ["Not Yet Invoiced", ""]
+    ["All", "All"],
+    ["Paid off", "Paid off"],
+    ["Not yet paid off", "Not yet paid off"]
   ]
 
   BEGINNING_OF_AP_CREATINGS = [
