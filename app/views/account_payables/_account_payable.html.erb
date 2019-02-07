@@ -1,16 +1,18 @@
-<td><%= object.number %></td>
-<td id="vendor_name_<%= object.id %>"><%= object.name rescue "" %></td>
-<td><%= number_to_currency(object.total,
+<td class="text-center"><%= object.number %></td>
+<td class="text-center" id="vendor_name_<%= object.id %>"><%= object.name rescue "" %></td>
+<td class="text-center"><%= object.vendor_invoice_number %></td>
+<td class="text-center"><%= object.vendor_invoice_date.strftime("%d/%m/%Y") %></td>
+<td class="text-center"><%= number_to_currency(object.total,
       :separator => ",",
       :delimiter => ".",
       :unit => "Rp",
       :precision => 2) %></td>
-<td><%= number_to_currency(object.remaining_debt,
+<td class="text-center"><%= number_to_currency(object.remaining_debt,
       :separator => ",",
       :delimiter => ".",
       :unit => "Rp",
       :precision => 2) %></td>
-<td class="actions" style="text-align: right">
+<td class="actions text-center" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, account_payable_path(object), data: {remote: true}, id: "show_detail_ap_#{object.id}", title: "Show" %>
     <%= link_to_if(can?(:manage, AccountPayable), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_path(object), :remote => true, :method => :get, title: "Print" ) %>
     <%= link_to_if(can?(:manage, AccountPayable) && object.account_payable_payment_invoices.select("1 AS one").blank?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>

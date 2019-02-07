@@ -1,4 +1,4 @@
-<td colspan="5">
+<td colspan="7">
     <%= form_for(@account_payable, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
         <%= f.hidden_field :beginning_of_account_payable_creating %>
         <div class="form-group<%= control_group_error(@account_payable, :vendor_id) %>">

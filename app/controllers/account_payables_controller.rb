@@ -8,11 +8,28 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables
   # GET /account_payables.json
   def index
-    like_command = "ILIKE"
-    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, total, remaining_debt").joins(:vendor)
-    account_payables_scope = account_payables_scope.where(["number #{like_command} ?", "%"+params[:filter]+"%"]).
-      or(account_payables_scope.where(["vendors.name #{like_command} ?", "%"+params[:filter]+"%"])) if params[:filter].present?
-    @account_payables = smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {number: "asc"})
+    if params[:filter_ap_invoice_vendor_invoice_date].present?
+      splitted_date_range = params[:filter_ap_invoice_vendor_invoice_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
+    
+    if params[:filter_ap_invoice_status].present?
+      remaining_debt_query = if params[:filter_ap_invoice_status].eql?("All")
+        "remaining_debt >= 0"
+      elsif params[:filter_ap_invoice_status].eql?("Paid off")
+        "remaining_debt = 0"
+      else
+        "remaining_debt > 0"
+      end
+    end
+
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, total, remaining_debt", :vendor_invoice_number, :vendor_invoice_date).joins(:vendor)
+    account_payables_scope = account_payables_scope.where(["number ILIKE ? OR vendor_invoice_number ILIKE ?", "%"+params[:filter_ap_invoice_invoice_number]+"%", "%"+params[:filter_ap_invoice_invoice_number]+"%"]) if params[:filter_ap_invoice_invoice_number].present?
+    account_payables_scope = account_payables_scope.where(["vendor_id = ?", params[:filter_ap_invoice_vendor_id]]) if params[:filter_ap_invoice_vendor_id].present?
+    account_payables_scope = account_payables_scope.where(["vendor_invoice_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_ap_invoice_vendor_invoice_date].present?
+    account_payables_scope = account_payables_scope.where(remaining_debt_query) if params[:filter_ap_invoice_status].present?
+    smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {number: "asc"})
   end
 
   # GET /account_payables/1
