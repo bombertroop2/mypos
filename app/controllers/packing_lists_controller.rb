@@ -13,7 +13,7 @@ class PackingListsController < ApplicationController
       end_departure_date = splitted_departure_date_range[1].strip.to_date
     end
 
-    packing_lists_scope = PackingList.select(:id, :number, :departure_date, :status, "couriers.code", "couriers.name").joins(courier_unit: [courier_way: :courier])
+    packing_lists_scope = PackingList.select(:id, :number, :departure_date, :status, "couriers.code", "couriers.name", :account_payable_courier_id).joins(courier_unit: [courier_way: :courier])
     packing_lists_scope = packing_lists_scope.where(["number ILIKE ?", "%"+params[:filter_number]+"%"]) if params[:filter_number].present?
     packing_lists_scope = packing_lists_scope.where(["courier_id = ?", params[:filter_courier]]) if params[:filter_courier].present?
     packing_lists_scope = packing_lists_scope.where(["departure_date BETWEEN ? AND ?", start_departure_date, end_departure_date]) if params[:filter_departure_date].present?
@@ -141,7 +141,7 @@ class PackingListsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_packing_list
     @packing_list = PackingList.
-      select(:id, :number, :departure_date, :total_quantity, :total_volume, :total_weight, :status, :courier_unit_id).
+      select(:id, :number, :departure_date, :total_quantity, :total_volume, :total_weight, :status, :courier_unit_id, :account_payable_courier_id).
       select("couriers.code AS courier_code", "couriers.name AS courier_name").
       select("courier_ways.name AS courier_way_name").
       select("courier_units.name AS courier_unit_name").

@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
-  resources :account_payable_couriers, except: [:edit, :update]
+  resources :account_payable_couriers, except: [:edit, :update] do
+    collection do
+      get "get_packing_lists"
+    end
+    member do
+      get "print"
+    end
+  end  
   resources :packing_list_payments
   resources :general_variables, except: [:show, :destroy, :index]
   resources :packing_lists, except: [:edit, :update] do

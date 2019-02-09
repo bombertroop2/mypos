@@ -50,7 +50,14 @@ class Ability
             can :manage, ConsignmentSale
             cannot [:approve, :unapprove], ConsignmentSale
           else
-            can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
+            if user_menu.eql?("Account Payable (Vendor)")
+              can :manage, AccountPayable
+              can :manage, AccountPayablePayment
+            elsif user_menu.eql?("Account Payable (Courier)")
+              can :manage, AccountPayableCourier
+            else
+              can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
+            end
           end
         end
       end
@@ -58,7 +65,7 @@ class Ability
     elsif user_roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user_roles.first)}.present?
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable Payment") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable")
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable (Vendor)") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable (Courier)") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -221,11 +228,28 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif class_name.eql?("Account Payable")
+          elsif class_name.eql?("Account Payable (Vendor)")
             if user_roles.include?("staff")
               can :read, AccountPayable
+              can :read, AccountPayablePayment
             elsif !user_roles.include?("area_manager")
               can ability, AccountPayable
+              if user_roles.include?("accountant")
+                can ability, AccountPayablePayment
+              else
+                can :read, AccountPayablePayment
+              end
+            end
+          elsif class_name.eql?("Account Payable (Courier)")
+            if user_roles.include?("staff")
+              can :read, AccountPayableCourier
+            elsif !user_roles.include?("area_manager")
+              can ability, AccountPayableCourier
+              #              if user_roles.include?("accountant")
+              #                can ability, AccountPayablePayment
+              #              else
+              #                can :read, AccountPayablePayment
+              #              end
             end
           elsif class_name.eql?("FiscalYear") && !user_roles.include?("area_manager")
             if user_roles.include?("staff")
@@ -261,11 +285,7 @@ class Ability
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
-            if class_name.eql?("Account Payable Payment")
-              can ability, class_name.gsub(/\s+/, "").constantize
-            else
-              can :read, class_name.gsub(/\s+/, "").constantize
-            end
+            can :read, class_name.gsub(/\s+/, "").constantize
           end
         end
       end

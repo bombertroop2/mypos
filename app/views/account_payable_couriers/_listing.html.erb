@@ -1,0 +1,35 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-ap-invoice-courier-thead">
+        <tr>
+            <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-5 text-center" colspan="3">Courier</th>
+            <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Total", "total" %></th>
+            <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Rem. Debt", "remaining_debt" %></th>
+            <th class="col-md-1" rowspan="2"></th>
+        </tr>
+        <tr>
+            <th class="col-md-4 text-center"><%= smart_listing.sortable "Name", "couriers.code" %></th>
+            <th class="col-md-4 text-center"><%= smart_listing.sortable "Inv. Number", "courier_invoice_number" %></th>
+            <th class="col-md-4 text-center"><%= smart_listing.sortable "Inv. Date", "courier_invoice_date" %></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |apic| %>
+          <tr class="editable" data-id="<%= apic.id %>">
+              <%= smart_listing.render object: apic, partial: "account_payable_couriers/account_payable_courier", locals: {object: apic} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 7, link: new_account_payable_courier_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var apicProcessId = setInterval(function () {
+      if ($("#listing-ap-invoice-courier-thead").is(":visible")) {
+          clearInterval(apicProcessId);
+      } else {
+          $("#listing-ap-invoice-courier-thead").show();
+      }
+  }, 0);
+
+</script>

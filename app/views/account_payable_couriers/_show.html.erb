@@ -1,0 +1,144 @@
+<td colspan="7">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <table class="table table-condensed table-responsive table-bordered">
+        <tr>
+            <td style="padding: 20px">
+                <table width="100%">
+                    <tr>
+                        <td colspan="2"><strong><%= Company.display_name %></strong></td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2"><strong>AP INVOICE</strong></td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2"><%= @account_payable_courier.number %></td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;width: 70%">
+                            <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td>Courier</td>
+                                    <td>:</td>
+                                    <td><%= "#{@account_payable_courier.courier_code} - #{@account_payable_courier.courier_name}" %></td>
+                                </tr>
+                                <tr>
+                                    <td>Courier Inv. Number</td>
+                                    <td>:</td>
+                                    <td><%= @account_payable_courier.courier_invoice_number %></td>
+                                </tr>
+                                <tr>
+                                    <td>Courier Inv. Date</td>
+                                    <td>:</td>
+                                    <td><%= @account_payable_courier.courier_invoice_date.strftime("%d/%m/%Y") %></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="vertical-align: top;width: 30%">
+                            <table class="table-condensed table-responsive" align="right">
+                                <tr>
+                                    <td style="vertical-align: top">Note</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="word-wrap: break-word"><%= @account_payable_courier.note %></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <table class="table table-condensed table-responsive table-bordered">
+                                <tbody>
+                                    <tr><th colspan="8" style="text-align: center">Packing Lists</th></tr>
+                                    <tr style="text-align: center">
+                                        <td><strong>No</strong></td>
+                                        <td><strong>PL Number</strong></td>
+                                        <td><strong>Dep. Date</strong></td>
+                                        <td><strong>Weight</strong></td>
+                                        <td><strong>Volume</strong></td>
+                                        <td><strong>Gross Amount</strong></td>
+                                        <td><strong>VAT</strong></td>
+                                        <td><strong>Net Amount</strong></td>
+                                    </tr>                                    
+                                    <% total_amount_packed = 0 %>
+                                    <% @account_payable_courier.
+                                      packing_lists.
+                                      select(:number, :departure_date, :total_volume, :total_weight, "courier_prices.price AS courier_prc").
+                                      joins(:courier_price).
+                                      each_with_index do |packing_list, idx| %>
+                                      <tr align="center">
+                                          <td style="vertical-align: middle"><%= idx.succ %></td>
+                                          <td style="vertical-align: middle"><%= packing_list.number %></td>
+                                          <td style="vertical-align: middle"><%= packing_list.departure_date.strftime("%d/%m/%Y") %></td>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(packing_list.total_weight, :separator => ",", :delimiter => ".", :unit => "", :precision => 2) %></td>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(packing_list.total_volume, :separator => ",", :delimiter => ".", :unit => "", :precision => 2) %></td>
+                                          <%
+                                          gross_amt = if packing_list.total_volume.present? && packing_list.total_volume > 0
+                                            packing_list.total_volume * packing_list.courier_prc
+                                            else
+                                            packing_list.total_weight * packing_list.courier_prc
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(gross_amt,
+                                                :separator => ",",
+                                                :delimiter => ".",
+                                                :unit => "Rp",
+                                                :precision => 2) %></td>
+                                          <%
+                                          vat_in_money = if @account_payable_courier.courier_vat_type.eql?("include")
+                                            get_include_vat_in_money_for_ap_invoice_courier gross_amt
+                                            else
+                                            get_vat_in_money_for_ap_invoice_courier gross_amt
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(vat_in_money,
+                                                :separator => ",",
+                                                :delimiter => ".",
+                                                :unit => "Rp",
+                                                :precision => 2) %></td>
+                                          <%
+                                          net_amount = if @account_payable_courier.courier_vat_type.eql?("exclude")
+                                            gross_amt + get_vat_in_money_for_ap_invoice_courier(gross_amt)
+                                            else
+                                          gross_amt
+                                            end
+                                        %>
+                                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(net_amount,
+                                                :separator => ",",
+                                                :delimiter => ".",
+                                                :unit => "Rp",
+                                                :precision => 2) %></td>
+                                      </tr>
+                                      <% total_amount_packed += net_amount %>
+                                    <% end %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="7" align="right"><strong>Amount To Pay</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(total_amount_packed,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </td>
+                    </tr>                    
+                    <tr>
+                        <td>Created by</td>
+                        <td style="text-align: right">Approved by</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top: 50px"><%= @account_payable_courier.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+                        <td style="text-align: right"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+
+</td>
