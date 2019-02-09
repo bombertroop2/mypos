@@ -87,6 +87,7 @@ module ApplicationHelper
   def expedition_menu_active?
     return true if can? :read, Courier
     return true if can? :read, PackingList
+    return true if can? :read, AccountPayableCourier
   end
 
   def cashier_menu_active?

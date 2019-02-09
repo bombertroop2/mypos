@@ -31,6 +31,8 @@
                   <% opened_menu_name = "Showroom Events" %>
                 <% else %>
                 <% end %>
+              <% elsif params[:controller].eql?("account_payable_couriers") %>
+                <% opened_menu_name = "AP Invoices (Courier)" %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -298,6 +300,9 @@
                                                     <% end %>
                                                     <% if can? :read, PackingList %>
                                                       <li><%= link_to "Packing Lists", packing_lists_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountPayableCourier %>
+                                                      <li><%= link_to "AP Invoices", account_payable_couriers_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>

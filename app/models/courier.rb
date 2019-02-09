@@ -2,8 +2,10 @@ class Courier < ApplicationRecord
   audited on: [:create, :update]
 
   has_many :shipments, dependent: :restrict_with_error
+  has_many :account_payable_couriers, dependent: :restrict_with_error
   has_many :courier_ways, dependent: :destroy
   has_one :shipment_relation, -> {select("1 AS one")}, class_name: "Shipment"
+  has_one :account_payable_courier_relation, -> {select("1 AS one")}, class_name: "AccountPayableCourier"
 
   accepts_nested_attributes_for :courier_ways, allow_destroy: true
 
@@ -60,7 +62,7 @@ class Courier < ApplicationRecord
           end
   
           def code_not_changed
-            errors.add(:code, "change is not allowed!") if code_changed? && persisted? && shipment_relation.present?
+            errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (shipment_relation.present? || account_payable_courier_relation.present?)
           end
 
           def status_not_changed

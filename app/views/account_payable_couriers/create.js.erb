@@ -1,0 +1,7 @@
+<% if @created %>
+  <%= smart_listing_item :account_payable_couriers, :create, @account_payable_courier, "account_payable_couriers/account_payable_courier" %>
+  <% courier = Courier.select(:id, :code, :name).find(@account_payable_courier.courier_id) %>  
+  $("#listing_ap_invoice_courier_courier_detail_<%= @account_payable_courier.id %>").html("<%= courier.code_and_name %>");
+<% else %>
+  <%= smart_listing_item :account_payable_couriers, :create, @account_payable_courier, "account_payable_couriers/form" %>
+<% end %>
