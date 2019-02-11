@@ -44,4 +44,23 @@
         <dd><%= Warehouse.where("warehouse_type LIKE 'ctr%'").select(:id).count %></dd>
     </dl>
 
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-center">No.</th>
+                <th class="text-center">Bank Account Number</th>
+                <th class="text-center">Bank</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% CompanyBankAccountNumber.joins(:company_bank).select(:account_number, "company_banks.code AS bank_code", "company_banks.name AS bank_name").where(["company_banks.company_id = ?", @company.id]).each_with_index do |cban, index| %>
+              <tr>
+                  <td style="vertical-align: middle" class="text-center"><%= index + 1 %></td>
+                  <td style="vertical-align: middle" class="text-center"><%= cban.account_number %></td>
+                  <td style="vertical-align: middle" class="text-center"><%= "#{cban.bank_code} - #{cban.bank_name}" %></td>
+              </tr>
+            <% end %>
+        </tbody>
+    </table>
+
 </td>
