@@ -10,6 +10,10 @@ class CompanyBank < ApplicationRecord
   validates :code, uniqueness: { scope: :company_id }, if: proc{|cb| cb.code.present? && cb.code_changed?}
 
     before_save :upcase_code
+    
+    def code_and_name
+      "#{code} - #{name}"
+    end
 
     private
   

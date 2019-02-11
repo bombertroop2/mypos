@@ -15,20 +15,27 @@
                   <%= error_help_text(@account_payable_payment, :payment_date) %>
               </div>
           </div>
-          <div class="form-group<%= control_group_error(@account_payable_payment, :bank_id) %>">
-              <%= f.label :bank_id, class: "col-sm-2 control-label" %>
+          <div class="form-group<%= control_group_error(@account_payable_payment, :attr_company_bank_id) %>">
+              <%= f.label :attr_company_bank_id, "Bank", class: "col-sm-2 control-label" %>
                 <div class="col-sm-10">
-                    <%= f.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', @account_payable_payment.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
-                      <%= error_help_text(@account_payable_payment, :bank_id) %>
+                    <%= f.select :attr_company_bank_id, options_from_collection_for_select(CompanyBank.select(:id, :code, :name).where(company_id: Company.select(:id).first.id).order(:code), 'id', 'code_and_name', @account_payable_payment.attr_company_bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                      <%= error_help_text(@account_payable_payment, :attr_company_bank_id) %>
                   </div>
               </div>
-              <div class="form-group<%= control_group_error(@account_payable_payment, :bank_account_number) %>">
-                  <%= f.label :bank_account_number, class: "col-sm-2 control-label" %>
+              <%
+              company_bank_account_numbers = if @account_payable_payment.attr_company_bank_id.present?
+                options_from_collection_for_select(CompanyBankAccountNumber.select(:id, :account_number).where(company_bank_id: @account_payable_payment.attr_company_bank_id).order(:account_number), :id, :account_number, @account_payable_payment.company_bank_account_number_id.to_s)
+                else
+                ""
+                end
+            %>
+              <div class="form-group<%= control_group_error(@account_payable_payment, :company_bank_account_number_id) %>">
+                  <%= f.label :company_bank_account_number_id, "Bank account number", class: "col-sm-2 control-label" %>
                     <div class="col-sm-10">
-                        <%= f.text_field :bank_account_number, class: "form-control" %>
-                          <%= error_help_text(@account_payable_payment, :bank_account_number) %>
+                        <%= f.select :company_bank_account_number_id, company_bank_account_numbers, {include_blank: true}, {class: "form-control"} %>
+                          <%= error_help_text(@account_payable_payment, :company_bank_account_number_id) %>
                       </div>
-                  </div>
+                  </div>                  
                   <div class="ln_solid"></div>
                   <%= f.fields_for :account_payable_payment_invoices do |account_payable_payment_invoice_form| %>
                     <%= account_payable_payment_invoice_form.hidden_field :account_payable_id %>
@@ -185,7 +192,7 @@
                                             $("#btn_delete_allocate_returned_items_transfer_" + appiFormIndex).addClass("hidden");
                                             $("#btn_allocate_returned_items_transfer_" + appiFormIndex).removeClass("hidden");
                                         });
-                                        
+
                                         $(".btn_allocate_returned_items_transfer").click(function () {
                                             var appiFormIndex = $(this).attr("id").split("_")[5];
                                             var selectedPurchaseReturnIds = [];
@@ -251,6 +258,13 @@
                                                                  bFilter: false*/
                                                     });
                                                 });
+                                            });
+                                        });
+                                        $("#account_payable_payment_attr_company_bank_id").attr("data-placeholder", "Please select").chosen();
+                                        $("#account_payable_payment_company_bank_account_number_id").attr("data-placeholder", "Please select").chosen();
+                                        $("#account_payable_payment_attr_company_bank_id").change(function () {
+                                            $.get("/account_payable_payments/get_account_numbers", {
+                                                company_bank_id: $("#account_payable_payment_attr_company_bank_id").val()
                                             });
                                         });
                                     });
