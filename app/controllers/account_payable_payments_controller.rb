@@ -149,14 +149,19 @@ class AccountPayablePaymentsController < ApplicationController
   
   def print
   end
+  
+  def get_account_numbers
+    @account_numbers = CompanyBankAccountNumber.select(:id, :account_number).where(company_bank_id: params[:company_bank_id]).order(:account_number)
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_account_payable_payment
     @account_payable_payment = AccountPayablePayment.
-      select(:id, :payment_date, :amount, :payment_method, :number, :giro_number, :giro_date, :bank_account_number, :vendor_id, :bank_id, :created_at, "vendors.code", "vendors.name", "banks.code AS bank_code", "banks.name AS bank_name", "banks.card_type").
+      select(:id, :payment_date, :amount, :payment_method, :number, :giro_number, :giro_date, :vendor_id, :created_at, :company_bank_account_number_id, "vendors.code", "vendors.name", "company_banks.code AS bank_code", "company_banks.name AS bank_name", "company_bank_account_numbers.account_number AS bank_account_number").
       joins(:vendor).
-      joins("LEFT JOIN banks ON account_payable_payments.bank_id = banks.id").
+      joins("LEFT JOIN company_bank_account_numbers ON account_payable_payments.company_bank_account_number_id = company_bank_account_numbers.id").
+      joins("LEFT JOIN company_banks ON company_bank_account_numbers.company_bank_id = company_banks.id").
       find(params[:id])
   end
 
@@ -167,7 +172,7 @@ class AccountPayablePaymentsController < ApplicationController
         account_payable_payment_invoices_attributes: [:account_payable_id, :attr_invoice_number, :attr_amount_received, :amount_returned, :attr_remaining_debt, :amount, :_destroy, :attr_payment_date, :attr_vendor_invoice_number, :attr_vendor_invoice_date, :attr_vendor_id,
           allocated_return_items_attributes: :purchase_return_id])
     elsif params[:account_payable_payment][:payment_method].eql?("Transfer")
-      params.require(:account_payable_payment).permit(:payment_date, :amount, :vendor_id, :attr_vendor_code_and_name, :payment_method, :bank_id, :bank_account_number,
+      params.require(:account_payable_payment).permit(:payment_date, :amount, :vendor_id, :attr_vendor_code_and_name, :payment_method, :attr_company_bank_id, :company_bank_account_number_id,
         account_payable_payment_invoices_attributes: [:account_payable_id, :attr_invoice_number, :attr_amount_received, :amount_returned, :attr_remaining_debt, :amount, :_destroy, :attr_payment_date, :attr_vendor_invoice_number, :attr_vendor_invoice_date, :attr_vendor_id,
           allocated_return_items_attributes: :purchase_return_id])
     else

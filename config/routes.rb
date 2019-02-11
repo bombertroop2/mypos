@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :account_payable_courier_payments, except: [:edit, :update, :destroy] do
+    collection do
+      get "generate_form"
+    end
+  end
   resources :account_payable_couriers, except: [:edit, :update] do
     collection do
       get "get_packing_lists"
@@ -7,7 +12,6 @@ Rails.application.routes.draw do
       get "print"
     end
   end  
-  resources :packing_list_payments
   resources :general_variables, except: [:show, :destroy, :index]
   resources :packing_lists, except: [:edit, :update] do
     member do
@@ -33,6 +37,7 @@ Rails.application.routes.draw do
       get "generate_form"
       get 'get_purchase_returns'
       get 'select_purchase_return'
+      get "get_account_numbers"
     end
     member do
       get "print"

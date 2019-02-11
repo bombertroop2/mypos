@@ -3,5 +3,5 @@
 <td><%= object.card_type %></td>
 <td class="actions" style="text-align: right">
     <%= link_to_if(can?(:manage, Bank), content_tag(:i, "", :class => "glyphicon glyphicon-pencil"), edit_bank_path(object), :remote => true, class: :edit, method: :get, title: "Edit" ) %>
-      <%= link_to_if(can?(:manage, Bank) && object.sale_relation.blank? && object.account_payable_payment_relation.blank?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+      <%= link_to_if(can?(:manage, Bank) && object.sale_relation.blank?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
   </td>

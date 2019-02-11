@@ -1,20 +1,21 @@
 class AccountPayablePayment < ApplicationRecord
-  attr_accessor :attr_vendor_code_and_name
+  attr_accessor :attr_vendor_code_and_name, :attr_company_bank_id
   audited on: :create
   has_many :account_payable_payment_invoices, dependent: :destroy
   belongs_to :vendor
   belongs_to :bank
+  belongs_to :company_bank_account_number
   
   accepts_nested_attributes_for :account_payable_payment_invoices, allow_destroy: true
   
   before_validation :strip_string_values
 
   validates :payment_date, :payment_method, :vendor_id, presence: true
-  validates :bank_id, :bank_account_number, presence: true, if: proc{|app| app.payment_method.eql?("Transfer")}
+  validates :attr_company_bank_id, :company_bank_account_number_id, presence: true, if: proc{|app| app.payment_method.eql?("Transfer")}
     validates :payment_date, date: {before_or_equal_to: proc { Date.current }, message: 'must be before or equal to today' }, if: proc {|app| app.payment_date.present?}
       validate :check_min_invoice_per_payment, on: :create
       validate :transaction_open, :payment_method_available, :vendor_available, :payment_date_after_or_equal_to_latest_payment_date
-      validate :bank_available, if: proc{|app| app.payment_method.eql?("Transfer")}
+      validate :bank_account_number_available, if: proc{|app| app.payment_method.eql?("Transfer") && app.company_bank_account_number_id.present?}
         validates :giro_number, :giro_date, presence: true, if: proc {|app| app.payment_method.eql?("Giro")}
           validates :giro_date, date: {before_or_equal_to: proc {|app| app.payment_date}, message: 'must be before or equal to payment date' }, if: proc {|app| app.giro_date.present? && app.payment_date.present? && app.payment_method.eql?("Giro")}
             validates :giro_date, date: {before_or_equal_to: proc {Date.current}, message: 'must be before or equal to today' }, if: proc {|app| app.giro_date.present? && app.payment_method.eql?("Giro")}
@@ -44,7 +45,6 @@ class AccountPayablePayment < ApplicationRecord
                 end
     
                 def strip_string_values
-                  self.bank_account_number = bank_account_number.strip if payment_method.eql?("Transfer")
                   self.giro_number = giro_number.strip if payment_method.eql?("Giro")
                 end
     
@@ -70,8 +70,8 @@ class AccountPayablePayment < ApplicationRecord
                   errors.add(:vendor_id, "does not exist!") if (@vendor = Vendor.select(:code, :is_taxable_entrepreneur).where(id: vendor_id, is_active: true).first).blank?
                 end
 
-                def bank_available
-                  errors.add(:bank_id, "does not exist!") if Bank.select("1 AS one").where(id: bank_id).blank?
+                def bank_account_number_available
+                  errors.add(:company_bank_account_number_id, "does not exist!") if CompanyBankAccountNumber.select("1 AS one").where(id: company_bank_account_number_id, company_bank_id: attr_company_bank_id).blank?
                 end
     
                 def generate_number

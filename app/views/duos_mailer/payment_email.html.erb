@@ -15,7 +15,7 @@
                     <td align="center" colspan="2"><%= @account_payable_payment.number %></td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: top;width: 70%">
+                    <td style="vertical-align: top;width: 65%">
                         <table>
                             <tr>
                                 <td>Vendor</td>
@@ -34,7 +34,7 @@
                             </tr>
                         </table>
                     </td>
-                    <td style="vertical-align: top;width: 30%">
+                    <td style="vertical-align: top;width: 35%">
                         <table align="right">
                             <% if @account_payable_payment.payment_method.eql?("Giro") %>
                               <tr>
@@ -51,12 +51,12 @@
                               <tr>
                                   <td style="vertical-align: top">Bank</td>
                                   <td style="vertical-align: top">:</td>
-                                  <td><%= "#{@account_payable_payment.bank.code} - #{@account_payable_payment.bank.name} (#{@account_payable_payment.bank.card_type})" %></td>
+                                  <td><%= "#{@account_payable_payment.company_bank_account_number.company_bank.code} - #{@account_payable_payment.company_bank_account_number.company_bank.name}" %></td>
                               </tr>                                
                               <tr>
                                   <td>Account Number</td>
                                   <td>:</td>
-                                  <td><%= @account_payable_payment.bank_account_number %></td>
+                                  <td><%= @account_payable_payment.company_bank_account_number.account_number %></td>
                               </tr>
                             <% end %>
                         </table>

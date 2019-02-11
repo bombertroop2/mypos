@@ -35,7 +35,11 @@ class CompaniesController < ApplicationController
   def create
     add_additional_params_to_child
     @company = Company.new(company_params)
-    @created = @company.save
+    unless @created = @company.save
+      if @company.errors[:base].present?
+        render js: "bootbox.alert({message: \"#{@company.errors[:base].join("<br/>")}\",size: 'small'});"
+      end
+    end
   rescue ActiveRecord::RecordNotUnique => e
     if e.message.index("index_company_banks_on_company_id_and_code").present?
       render js: "bootbox.alert({message: 'Bank code should be unique!', size: 'small'})"
@@ -55,12 +59,16 @@ class CompaniesController < ApplicationController
     elsif e.message.index("index_cban_on_company_bank_id_and_account_number").present?
       render js: "bootbox.alert({message: 'Bank account number should be unique!', size: 'small'})"     
     end
+  rescue ActiveRecord::RecordNotDestroyed => e
+    render js: "bootbox.alert({message: 'Failed to remove account number', size: 'small'})"     
   end
 
   # DELETE /companies/1
   # DELETE /companies/1.json
   def destroy
-    @company.destroy
+    if !@company.destroy && @company.errors.messages[:base].present?
+      render js: "bootbox.alert({message: \"#{@company.errors.messages[:base].join("<br/>")}\",size: 'small'});"
+    end
   end
 
   private
