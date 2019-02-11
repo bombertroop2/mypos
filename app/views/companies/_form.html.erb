@@ -51,29 +51,51 @@
                                     </div>
 
                                 </div>
-
-                                <div class="form-group">
-                                    <div class="col-sm-offset-3 col-sm-9">
-                                        <%= f.submit "Save", class: "btn btn-primary" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
+                                <div id="company_bank_fields_container">
+                                    <%= f.fields_for :company_banks do |company_bank| %>
+                                      <%= render 'company_bank_fields', f: company_bank %>
+                                    <% end %>
+                                    <div class="form-group">
+                                        <%= link_to_add_association 'add bank', f, :company_banks, class: "col-sm-3 control-label" %>
                                       </div>
                                   </div>
-                                <% end %>
-                            </td>
-                            <script>
-                              $(function () {
-                                  MaskedInput({
-                                      elm: document.getElementById('company_phone'),
-                                      format: '____-_______',
-                                      separator: '-'
-                                  });
-                                  MaskedInput({
-                                      elm: document.getElementById('company_fax'),
-                                      format: '____-_______',
-                                      separator: '-'
-                                  });
-                                  $('#company_code').on("input", function () {
-                                      $(this).val($(this).val().replace(/ /g, ""));
-                                  });
-                              });
-                            </script>
+                                  <div class="form-group">
+                                      <div class="col-sm-offset-3 col-sm-9">
+                                          <%= f.submit "Save", class: "btn btn-primary" %>
+                                            <button class="btn btn-link cancel">Cancel</button>
+                                        </div>
+                                    </div>
+                                  <% end %>
+                              </td>
+                              <script>
+                                $(function () {
+                                    MaskedInput({
+                                        elm: document.getElementById('company_phone'),
+                                        format: '____-_______',
+                                        separator: '-'
+                                    });
+                                    MaskedInput({
+                                        elm: document.getElementById('company_fax'),
+                                        format: '____-_______',
+                                        separator: '-'
+                                    });
+                                    $('#company_code').on("input", function () {
+                                        $(this).val($(this).val().replace(/ /g, ""));
+                                    });
+                                    $("#company_bank_fields_container").
+                                            on('cocoon:after-insert', function (e, insertedItem) {
+                                                var bankCodeFieldId = $($(insertedItem[0]).find("input:text")[0]).attr("id");
+                                                $('#' + bankCodeFieldId).on("input", function () {
+                                                    $(this).val($(this).val().replace(/ /g, ""));
+                                                });
+                                            });
+                              <% if @company.company_banks.present? %>
+                                      $(".company-bank-code-fields").on("input", function () {
+                                          $(this).val($(this).val().replace(/ /g, ""));
+                                      });
+                                      $(".company-bank-account-number-fields").on("input", function () {
+                                          $(this).val($(this).val().replace(/ /g, ""));
+                                      });
+                              <% end %>
+                                });
+                              </script>

@@ -1,4 +1,8 @@
 class Company < ApplicationRecord
+  has_many :company_banks, dependent: :destroy
+
+  accepts_nested_attributes_for :company_banks, allow_destroy: true
+
   before_validation :strip_field_values
 
   validates :code, :name, :taxpayer_registration_number, :address, presence: true

@@ -1,0 +1,16 @@
+<div class="nested-fields">
+    <div class="form-group<%= control_group_error(f.object, :account_number) %>">
+        <%= f.label :account_number, class: "col-sm-3 control-label" %>
+          <div class="col-sm-9">
+              <%= f.text_field :account_number, class: "form-control upcase company-bank-account-number-fields" %>
+                <%= error_help_text(f.object, :account_number) %>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-9">
+                <%= link_to_remove_association "remove account number", f %>
+            </div>
+        </div>
+    </div>

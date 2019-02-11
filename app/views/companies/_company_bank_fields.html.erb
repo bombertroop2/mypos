@@ -1,0 +1,44 @@
+<div class="nested-fields">
+    <div class="form-group<%= control_group_error(f.object, :code) %>">
+        <%= f.label :code, "Bank code", class: "col-sm-3 control-label" %>
+          <div class="col-sm-9">
+              <%= f.text_field :code, class: "form-control upcase company-bank-code-fields" %>
+                <%= error_help_text(f.object, :code) %>
+            </div>
+        </div>
+
+        <div class="form-group<%= control_group_error(f.object, :name) %>">
+            <%= f.label :name, "Bank name", class: "col-sm-3 control-label" %>
+              <div class="col-sm-9">
+                  <%= f.text_field :name, class: "form-control" %>
+                    <%= error_help_text(f.object, :name) %>
+                </div>
+            </div>
+            <div class="company_bank_account_number_fields_containers">
+                <%= f.fields_for :company_bank_account_numbers do |company_bank_account_number| %>
+                  <%= render 'company_bank_account_number_fields', f: company_bank_account_number %>
+                <% end %>
+                <div class="form-group">
+                    <%= link_to_add_association 'add account number', f, :company_bank_account_numbers, class: "col-sm-3 control-label" %>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <div class="col-sm-3 text-right"></div>
+                  <div class="col-sm-9">
+                      <%= link_to_remove_association "remove bank", f %>
+                  </div>
+              </div>
+              <div class="ln_solid"></div>
+          </div>
+          <script>
+            $(function () {
+                $(".company_bank_account_number_fields_containers").
+                        on('cocoon:after-insert', function (e, insertedItem) {
+                            var accountNumberFieldId = $($(insertedItem[0]).find("input:text")[0]).attr("id");
+                            $('#' + accountNumberFieldId).off();
+                            $('#' + accountNumberFieldId).on("input", function () {
+                                $(this).val($(this).val().replace(/ /g, ""));
+                            });
+                        });
+            });
+          </script>
