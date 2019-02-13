@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   resources :account_payable_courier_payments, except: [:edit, :update, :destroy] do
     collection do
       get "generate_form"
+      get "get_account_numbers"
+    end
+    member do
+      get "print"
     end
   end
   resources :account_payable_couriers, except: [:edit, :update] do

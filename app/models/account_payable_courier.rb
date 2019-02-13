@@ -4,6 +4,7 @@ class AccountPayableCourier < ApplicationRecord
 
   belongs_to :courier
   has_many :packing_lists
+  has_many :account_payable_courier_payment_invoices, dependent: :restrict_with_error
 
   before_validation :strip_string_values
 

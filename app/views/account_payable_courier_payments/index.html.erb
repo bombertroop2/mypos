@@ -1,0 +1,31 @@
+<div class="page-header">
+    <h1>AP Payments (Courier)</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" class="form-control" id="filter-ap-courier-payment-number" placeholder="Number">
+    </div>
+    <div class="form-group text-left">
+        <%= select_tag "courier_id", options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External"), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-ap-courier-payment-courier-id"} %>
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-ap-courier-payment-date" placeholder="Payment date">
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "payment_method", options_for_select(AccountPayableCourierPayment::PAYMENT_METHODS), {include_blank: true, class: "form-control", id: "filter-ap-courier-payment-method"} %>
+        </div>
+        <button id="search-ap-courier-payment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:account_payable_courier_payments, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_ap_courier_payment_number, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_ap_courier_payment_courier_id, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_ap_courier_payment_date, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_ap_courier_payment_method, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+              </div>
+
+              <%= smart_listing_render(:account_payable_courier_payments) %>
+              <div id="print_ap_courier_payment_container"></div>
