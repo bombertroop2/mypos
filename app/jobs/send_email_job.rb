@@ -23,6 +23,10 @@ class SendEmailJob < ApplicationJob
       Email.sales_officers.each do |sales_officer_email|        
         DuosMailer.sales_general_summary_email(object, sales_officer_email.address).deliver
       end
+    elsif type.eql?("account payable courier payment")
+      Email.account_payable_officers.each do |account_payable_officer_email|
+        DuosMailer.payment_email(object, account_payable_officer_email.address, "courier").deliver
+      end
     end
   end
 end

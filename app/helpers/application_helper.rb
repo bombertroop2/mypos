@@ -88,6 +88,7 @@ module ApplicationHelper
     return true if can? :read, Courier
     return true if can? :read, PackingList
     return true if can? :read, AccountPayableCourier
+    return true if can? :read, AccountPayableCourierPayment
   end
 
   def cashier_menu_active?
