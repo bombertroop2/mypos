@@ -1,1 +1,5 @@
-<%= smart_listing_item :account_payables, :edit, @account_payable, "account_payables/show" %>
+<% if @account_payable.beginning_of_account_payable_creating.eql?("Partial") %>
+  <%= smart_listing_item :account_payables, :edit, @account_payable, "account_payables/show_partial" %>
+<% else %>
+  <%= smart_listing_item :account_payables, :edit, @account_payable, "account_payables/show" %>
+<% end %>

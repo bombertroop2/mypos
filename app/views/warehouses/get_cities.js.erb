@@ -1,0 +1,8 @@
+$('#warehouse_city_id').find('option').remove();
+var o = new Option("", "");
+$("#warehouse_city_id").append(o);
+<% @cities.each do |city| %>
+  var o = new Option("<%= city.name %>", "<%= city.id %>");
+  $("#warehouse_city_id").append(o);
+<% end %>
+$("#warehouse_city_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();

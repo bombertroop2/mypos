@@ -166,7 +166,7 @@ class ShipmentsController < ApplicationController
       render js: "bootbox.alert({message: \"Order booking #{unavailable_obs.to_sentence} is not available\",size: 'small'});"
     elsif unavailable_obs.length > 1
       render js: "bootbox.alert({message: \"Order booking #{unavailable_obs.to_sentence} are not available\"});"
-    else
+    else      
       @shipments = []
       order_bookings.each do |order_booking|
         shipment = Shipment.new order_booking_id: order_booking.id, order_booking_number: order_booking.number, delivery_date: params[:delivery_date], courier_id: params[:courier_id]
@@ -222,7 +222,7 @@ class ShipmentsController < ApplicationController
         render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
       end
     end
-  end
+  end   
 
   private
   # Use callbacks to share common setup or constraints between actions.

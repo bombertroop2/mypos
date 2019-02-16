@@ -1,0 +1,19 @@
+<td class="text-center"><%= object.number %></td>
+<td class="text-center" id="listing_ap_invoice_courier_courier_detail_<%= object.id %>"><%= "#{object.courier_code} - #{object.courier_name}" rescue "" %></td>
+<td class="text-center"><%= object.courier_invoice_number %></td>
+<td class="text-center"><%= object.courier_invoice_date.strftime("%d/%m/%Y") %></td>
+<td class="text-center"><%= number_to_currency(object.total,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="text-center"><%= number_to_currency(object.remaining_debt,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="actions text-right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, account_payable_courier_path(object), data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, AccountPayableCourier), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_courier_path(object), :remote => true, :method => :get, title: "Print" ) %>
+    <%= link_to_if(can?(:manage, AccountPayableCourier) && object.account_payable_courier_payment_invoices.select("1 AS one").blank?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+</td>

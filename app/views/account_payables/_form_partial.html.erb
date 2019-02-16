@@ -1,0 +1,66 @@
+<td colspan="7">
+    <%= form_for(@account_payable, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
+        <%= f.hidden_field :beginning_of_account_payable_creating %>
+        <div class="form-group<%= control_group_error(@account_payable, :vendor_id) %>">
+            <%= f.label :vendor_id, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.select :vendor_id, options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true), :id, "code_and_name", @account_payable.vendor_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                    <%= error_help_text(@account_payable, :vendor_id) %>
+                </div>
+            </div>
+            <div class="form-group<%= control_group_error(@account_payable, :vendor_invoice_date) %>">
+                <%= f.label :vendor_invoice_date, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :vendor_invoice_date, size: 10, readonly: true, class: "form-control" %>
+                        <%= error_help_text(@account_payable, :vendor_invoice_date) %>
+                    </div>
+                </div>
+                <div id="ap_invoice_received_purchases_container">
+                    <% if @account_payable.account_payable_purchase_partials.present? %>
+                      <%= render partial: "received_purchases", locals: {f: f} %>
+                    <% end %>
+                </div>
+                <div class="form-group<%= control_group_error(@account_payable, :vendor_invoice_number) %>">
+                    <%= f.label :vendor_invoice_number, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :vendor_invoice_number, class: "form-control" %>
+                            <%= error_help_text(@account_payable, :vendor_invoice_number) %>
+                        </div>
+                    </div>                
+                    <div class="form-group<%= control_group_error(@account_payable, :note) %>">
+                        <%= f.label :note, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_area :note, rows: 6, class: "form-control" %>
+                                <%= error_help_text(@account_payable, :note) %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <%= f.submit "Save", class: "btn btn-primary", id: "ap_save_btn" %>
+                                  <button class="btn btn-link cancel">Cancel</button>
+                              </div>
+                          </div>
+                        <% end %>
+                    </td>
+                    <script>
+                      $(function () {
+                          $("#account_payable_vendor_id").attr("data-placeholder", "Vendor").chosen();
+                          $("#account_payable_vendor_invoice_date").datepicker({
+                              dateFormat: "dd/mm/yy"
+                          });
+                          $("#account_payable_vendor_id").change(function () {
+                              if ($("#account_payable_vendor_invoice_date").val() != "")
+                                  $.get("/account_payables/get_received_purchases", {
+                                      vendor_id: $("#account_payable_vendor_id").val(),
+                                      vendor_invoice_date: $("#account_payable_vendor_invoice_date").val()
+                                  });
+                          });
+                          $("#account_payable_vendor_invoice_date").change(function () {
+                              if ($("#account_payable_vendor_id").val() != "")
+                                  $.get("/account_payables/get_received_purchases", {
+                                      vendor_id: $("#account_payable_vendor_id").val(),
+                                      vendor_invoice_date: $("#account_payable_vendor_invoice_date").val()
+                                  });
+                          });
+                      });
+                    </script>

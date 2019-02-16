@@ -1,0 +1,31 @@
+<div class="page-header">
+    <h1>AP Invoices (Courier)</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" class="form-control" id="filter-ap-invoice-courier-invoice-number" placeholder="Invoice number">
+    </div>
+    <div class="form-group text-left">
+        <%= select_tag "courier_id", options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External"), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-ap-invoice-courier-courier-id"} %>
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-ap-invoice-courier-courier-invoice-date" placeholder="Courier Inv. Date">
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "invoice_status", options_for_select(AccountPayableCourier::INVOICE_STATUSES), {include_blank: true, class: "form-control", id: "filter-ap-invoice-courier-status"} %>
+        </div>
+        <button id="search-ap-invoice-courier-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:account_payable_couriers, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_ap_invoice_courier_invoice_number, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_ap_invoice_courier_courier_id, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_ap_invoice_courier_courier_invoice_date, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_ap_invoice_courier_status, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+              </div>
+
+              <%= smart_listing_render(:account_payable_couriers) %>
+              <div id="print_ap_invoice_courier_container"></div>

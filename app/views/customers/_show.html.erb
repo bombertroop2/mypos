@@ -54,13 +54,24 @@
         <dt>Value added tax</dt>
         <dd><%= object.value_added_tax.capitalize %></dd>
     </dl>
+    <% unless object.unlimited %>    
+      <dl class="dl-horizontal">
+          <dt>Limit value</dt>
+          <dd><%= number_to_currency(object.limit_value,
+                :separator => ",",
+                :delimiter => ".",
+                :unit => "Rp",
+                :precision => 2) %></dd>
+      </dl>
+    <% end %>
     <dl class="dl-horizontal">
-        <dt>Limit value</dt>
-        <dd><%= number_to_currency(object.limit_value,
-              :separator => ",",
-              :delimiter => ".",
-              :unit => "Rp",
-              :precision => 2) %></dd>
+        <dt>Province</dt>
+        <dd><%= object.province.name rescue "" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>City</dt>
+        <dd><%= object.city.name rescue "" %></dd>
     </dl>
     <dl class="dl-horizontal">
         <dt>Deliver to</dt>

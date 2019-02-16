@@ -1,0 +1,8 @@
+$('#courier_price_courier_unit_id').find('option').remove();
+var o = new Option("", "");
+$("#courier_price_courier_unit_id").append(o);
+<% @courier_units.each do |courier_unit| %>
+  var o = new Option("<%= courier_unit.name %>", "<%= courier_unit.id %>");
+  $("#courier_price_courier_unit_id").append(o);
+<% end %>
+$("#courier_price_courier_unit_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();

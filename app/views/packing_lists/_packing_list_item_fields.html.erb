@@ -1,0 +1,64 @@
+<% @packing_list_items.each_with_index do |packing_list_item, index| %>
+  <%= fields_for "packing_list[packing_list_items_attributes][#{index}]", packing_list_item do |packing_list_item_form| %>
+    <%= packing_list_item_form.hidden_field :shipment_id %>
+    <div class="form-group<%= control_group_error(packing_list_item_form.object, :shipment_id) %>">
+        <label class="col-sm-2 control-label">
+            DO. number
+        </label>
+        <div class="col-sm-10">
+            <%= packing_list_item_form.text_field :attr_do_number, class: "form-control", readonly: true, style: "cursor: not-allowed" %>
+              <%= error_help_text(packing_list_item_form.object, :shipment_id) %>
+          </div>
+      </div>
+      <div class="form-group<%= control_group_error(packing_list_item_form.object, :attr_delivery_date) %>">
+          <label class="col-sm-2 control-label">
+              Delivery date
+          </label>
+          <div class="col-sm-10">
+              <%= packing_list_item_form.text_field :attr_delivery_date, class: "form-control", readonly: true, style: "cursor: not-allowed" %>
+                <%= error_help_text(packing_list_item_form.object, :attr_delivery_date) %>
+            </div>
+        </div>
+        <div class="form-group<%= control_group_error(packing_list_item_form.object, :attr_received_date) %>">
+            <label class="col-sm-2 control-label">
+                Received date
+            </label>
+            <div class="col-sm-10">
+                <%= packing_list_item_form.text_field :attr_received_date, class: "form-control", readonly: true, style: "cursor: not-allowed" %>
+                  <%= error_help_text(packing_list_item_form.object, :attr_received_date) %>
+              </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">
+                  Quantity
+              </label>
+              <div class="col-sm-10">
+                  <%= packing_list_item_form.text_field :attr_quantity, class: "form-control", readonly: true, style: "cursor: not-allowed" %>
+                </div>
+            </div>
+            <% if @courier_unit.present? && @courier_unit.name.eql?("Kilogram") %>
+              <div class="form-group<%= control_group_error(packing_list_item_form.object, :weight) %>">
+                  <%= packing_list_item_form.label :weight, class: "col-sm-2 control-label" %>
+                    <div class="col-sm-10">
+                        <%= packing_list_item_form.number_field :weight, class: "form-control", step: "any" %>
+                          <%= error_help_text(packing_list_item_form.object, :weight) %>
+                      </div>
+                  </div>
+                <% else %>
+                  <div class="form-group<%= control_group_error(packing_list_item_form.object, :volume) %>">
+                      <%= packing_list_item_form.label :volume, class: "col-sm-2 control-label" %>
+                        <div class="col-sm-10">
+                            <%= packing_list_item_form.number_field :volume, class: "form-control", step: "any" %>
+                              <%= error_help_text(packing_list_item_form.object, :volume) %>
+                          </div>
+                      </div>
+                    <% end %>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <%= packing_list_item_form.check_box :_destroy %> Delete
+                        </div>
+
+                    </div>
+                  <% end %>
+                <% end %>

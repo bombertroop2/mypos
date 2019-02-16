@@ -50,7 +50,15 @@ class Ability
             can :manage, ConsignmentSale
             cannot [:approve, :unapprove], ConsignmentSale
           else
-            can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
+            if user_menu.eql?("Account Payable (Vendor)")
+              can :manage, AccountPayable
+              can :manage, AccountPayablePayment
+            elsif user_menu.eql?("Account Payable (Courier)")
+              can :manage, AccountPayableCourier
+              can :manage, AccountPayableCourierPayment
+            else
+              can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
+            end
           end
         end
       end
@@ -58,7 +66,7 @@ class Ability
     elsif user_roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user_roles.first)}.present?
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable") && !user_menu.name.eql?("Fiscal Reopening/Closing")
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable (Vendor)") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable (Courier)") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -82,7 +90,8 @@ class Ability
               class_name.eql?("Courier") || class_name.eql?("Event") ||
               class_name.eql?("Email") || class_name.eql?("Bank") ||
               class_name.eql?("Growth Report") || class_name.eql?("Pie Chart of Qty Sold") ||
-              class_name.eql?("Sell Thru Report")
+              class_name.eql?("Sell Thru Report") || class_name.eql?("Adjustment") ||
+              class_name.eql?("Company")
             #            can :read, class_name.gsub(/\s+/, "").constantize
             #            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
@@ -126,7 +135,7 @@ class Ability
           elsif class_name.eql?("Member")
             can :read, Member
           else
-            can :read, class_name.gsub(/\s+/, "").constantize unless class_name.eql?("Company")
+            can :read, class_name.gsub(/\s+/, "").constantize
           end
         end
       end
@@ -221,17 +230,37 @@ class Ability
             alias_action :mutation_goods, :returned_goods, :show_mutation_goods, :show_returned_goods, to: :read_mutation_goods
             can :read_shipment_goods, Shipment
             can :read_mutation_goods, StockMutation
-          elsif class_name.eql?("Account Payable") && user_roles.include?("staff")
-            can :read, AccountPayable
-          elsif class_name.eql?("Account Payable") && !user_roles.include?("area_manager")
-            can ability, AccountPayable
+          elsif class_name.eql?("Account Payable (Vendor)")
+            if user_roles.include?("staff")
+              can :read, AccountPayable
+              can :read, AccountPayablePayment
+            elsif !user_roles.include?("area_manager")
+              can ability, AccountPayable
+              if user_roles.include?("accountant")
+                can ability, AccountPayablePayment
+              else
+                can :read, AccountPayablePayment
+              end
+            end
+          elsif class_name.eql?("Account Payable (Courier)")
+            if user_roles.include?("staff")
+              can :read, AccountPayableCourier
+              can :read, AccountPayableCourierPayment
+            elsif !user_roles.include?("area_manager")
+              can ability, AccountPayableCourier
+              if user_roles.include?("accountant")
+                can ability, AccountPayableCourierPayment
+              else
+                can :read, AccountPayableCourierPayment
+              end
+            end
           elsif class_name.eql?("FiscalYear") && !user_roles.include?("area_manager")
             if user_roles.include?("staff")
               can :read, FiscalYear
             else
               can ability, FiscalYear
             end
-          elsif class_name.eql?("Point of Sale") || class_name.eql?("Company")
+          elsif class_name.eql?("Point of Sale") || class_name.eql?("Company") || class_name.eql?("Adjustment") || class_name.eql?("General Variable")
           elsif class_name.eql?("ConsignmentSale")
             if user_roles.include?("area_manager") && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
               can ability, ConsignmentSale
@@ -248,6 +277,12 @@ class Ability
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("ListingStock") && user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
+          elsif class_name.eql?("PackingList")
+            if !user_roles.include?("area_manager")
+              can ability, class_name.gsub(/\s+/, "").constantize
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")

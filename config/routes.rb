@@ -1,4 +1,58 @@
 Rails.application.routes.draw do
+  resources :account_payable_courier_payments, except: [:edit, :update, :destroy] do
+    collection do
+      get "generate_form"
+      get "get_account_numbers"
+    end
+    member do
+      get "print"
+    end
+  end
+  resources :account_payable_couriers, except: [:edit, :update] do
+    collection do
+      get "get_packing_lists"
+    end
+    member do
+      get "print"
+    end
+  end  
+  resources :general_variables, except: [:show, :destroy, :index]
+  resources :packing_lists, except: [:edit, :update] do
+    member do
+      get 'print'
+    end
+    collection do
+      get 'get_courier_ways'
+      get 'get_courier_units'
+      get 'get_courier_price_types'
+      get 'get_courier_cities'
+      get 'generate_packing_list_item_form'
+      get :autocomplete_shipment_number
+    end
+  end
+  resources :courier_prices do
+    collection do
+      get "get_courier_ways"
+      get "get_courier_units"
+    end
+  end
+  resources :account_payable_payments, except: [:edit, :update, :destroy] do
+    collection do
+      get "generate_form"
+      get 'get_purchase_returns'
+      get 'select_purchase_return'
+      get "get_account_numbers"
+    end
+    member do
+      get "print"
+    end
+  end
+  resources :adjustments, except: [:edit, :update, :destroy] do
+    collection do
+      get :autocomplete_product_code
+      get :get_product
+    end
+  end
   get 'import_beginning_stocks' => 'import_beginning_stocks#new'
 
   post 'import_beginning_stocks/create'
@@ -42,7 +96,11 @@ Rails.application.routes.draw do
     devise_for :users, only: :sessions
   end
 
-  resources :customers
+  resources :customers do
+    collection do
+      get "get_cities"
+    end
+  end
   resources :consignment_sales do
     collection do
       get "get_product"
@@ -200,7 +258,7 @@ Rails.application.routes.draw do
       get "print"
     end
   end
-  resources :couriers, except: :show
+  resources :couriers
   resources :order_bookings do
     collection do
       get "get_warehouse_products"
@@ -215,11 +273,13 @@ Rails.application.routes.draw do
     collection do
       get 'generate_form'
       get 'generate_dp_payment_form'
-      get 'get_purchase_returns'
       get 'get_purchase_returns_for_dp'
-      get 'select_purchase_return'
       get 'select_purchase_return_for_dp'
       post 'create_dp_payment'
+      get 'get_received_purchases'
+    end
+    member do
+      get 'print'
     end
   end
   resources :emails
@@ -286,7 +346,11 @@ Rails.application.routes.draw do
   end
   resources :size_groups, except: :show
   resources :sales_promotion_girls
-  resources :warehouses
+  resources :warehouses do
+    collection do
+      get 'get_cities'
+    end
+  end
   resources :price_codes, except: :show
   resources :area_managers do
     member do

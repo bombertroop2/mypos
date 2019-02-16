@@ -1,0 +1,8 @@
+<td><%= object.number %></td>
+<td id="adjustment-warehouse-code-and-name-<%= object.id %>"><%= "#{object.code} - #{object.name}" rescue nil %></td>
+<td><%= object.adj_date.strftime("%d/%m/%Y") %></td>
+<td><%= object.adj_type %></td>
+<td><%= object.quantity %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, adjustment_path(object), data: {remote: true}, title: "Show" %>
+</td>

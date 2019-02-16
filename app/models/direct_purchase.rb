@@ -8,6 +8,7 @@ class DirectPurchase < ApplicationRecord
   has_one :received_purchase_order, dependent: :destroy
   has_many :direct_purchase_products, dependent: :destroy
   has_many :purchase_returns
+  has_many :account_payable_purchase_partials, through: :received_purchase_order
   
   accepts_nested_attributes_for :direct_purchase_products
   accepts_nested_attributes_for :received_purchase_order
@@ -49,7 +50,7 @@ class DirectPurchase < ApplicationRecord
                     end
               
                     def vendor_exist
-                      errors.add(:vendor_id, "does not exist!") unless (@vendor = Vendor.select(:value_added_tax, :is_taxable_entrepreneur).where(id: vendor_id).first).present?
+                      errors.add(:vendor_id, "does not exist!") unless (@vendor = Vendor.select(:value_added_tax, :is_taxable_entrepreneur).where(id: vendor_id, is_active: true).first).present?
                     end
               
                     def warehouse_exist

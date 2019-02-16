@@ -1,0 +1,31 @@
+<div class="page-header">
+    <h1>AP Payments</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" class="form-control" id="filter-ap-payment-number" placeholder="Number">
+    </div>
+    <div class="form-group text-left">
+        <%= select_tag "vendor_id", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-ap-payment-vendor-id"} %>
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-ap-payment-date" placeholder="Payment date">
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "payment_method", options_for_select(AccountPayablePayment::PAYMENT_METHODS), {include_blank: true, class: "form-control", id: "filter-ap-payment-method"} %>
+        </div>
+        <button id="search-ap-payment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:account_payable_payments, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_ap_payment_number, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_ap_payment_vendor_id, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_ap_payment_date, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_ap_payment_method, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+              </div>
+
+              <%= smart_listing_render(:account_payable_payments) %>
+              <div id="print_ap_payment_container"></div>

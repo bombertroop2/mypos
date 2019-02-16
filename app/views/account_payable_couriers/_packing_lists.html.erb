@@ -1,0 +1,119 @@
+<div class="form-group">
+    <div class="col-sm-12">              
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-center">PL Number</th>
+                    <th class="text-center">Dep. Date</th>
+                    <th class="text-center">Weight</th>
+                    <th class="text-center">Volume</th>
+                    <th class="text-center">Gross Amt</th>
+                    <th class="text-center">VAT</th>
+                    <th class="text-center">Net Amt</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% total_amount_received = 0 %>
+                <% if action_name.eql?("create") %>
+                  <%= f.fields_for :packing_lists do |packing_list_form| %>
+                    <% packing_list = packing_list_form.object %>
+                    <tr>
+                        <td style="vertical-align: middle"><%= packing_list.number %></td>
+                        <td style="vertical-align: middle"><%= packing_list.departure_date.strftime("%d/%m/%Y") %></td>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(packing_list.total_weight, :separator => ",", :delimiter => ".", :unit => "", :precision => 2) %></td>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(packing_list.total_volume, :separator => ",", :delimiter => ".", :unit => "", :precision => 2) %></td>
+                        <%
+                        gross_amt = if packing_list.total_volume.present? && packing_list.total_volume > 0
+                          packing_list.total_volume * packing_list.courier_prc
+                          else
+                          packing_list.total_weight * packing_list.courier_prc
+                          end
+                      %>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(gross_amt,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></td>
+                        <%
+                        vat_in_money = if packing_list.courier_vat_type.eql?("include")
+                          get_include_vat_in_money_for_ap_invoice_courier gross_amt
+                          else
+                          get_vat_in_money_for_ap_invoice_courier gross_amt
+                          end
+                      %>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(vat_in_money,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></td>
+                        <%
+                        net_amount = value_after_ppn_for_ap_invoice_courier packing_list, gross_amt
+                      %>
+                        <td class="text-right" style="vertical-align: middle"><%= number_to_currency(net_amount,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></td>
+                    </tr>
+                    <% total_amount_received += net_amount %>
+                  <% end %>
+                <% else %>
+                  <% @packing_lists.each_with_index do |packing_list, index| %>
+                    <%= fields_for "account_payable_courier[packing_lists_attributes][#{index}]", packing_list do |packing_list_form| %>
+                      <%= packing_list_form.hidden_field :id %>
+                      <tr>
+                          <td style="vertical-align: middle"><%= packing_list.number %></td>
+                          <td style="vertical-align: middle"><%= packing_list.departure_date.strftime("%d/%m/%Y") %></td>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(packing_list.total_weight, :separator => ",", :delimiter => ".", :unit => "", :precision => 2) %></td>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(packing_list.total_volume, :separator => ",", :delimiter => ".", :unit => "", :precision => 2) %></td>
+                          <%
+                          gross_amt = if packing_list.total_volume.present? && packing_list.total_volume > 0
+                            packing_list.total_volume * packing_list.courier_prc
+                            else
+                            packing_list.total_weight * packing_list.courier_prc
+                            end
+                        %>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(gross_amt,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                          <%
+                          vat_in_money = if packing_list.courier_vat_type.eql?("include")
+                            get_include_vat_in_money_for_ap_invoice_courier gross_amt
+                            else
+                            get_vat_in_money_for_ap_invoice_courier gross_amt
+                            end
+                        %>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(vat_in_money,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                          <%
+                          net_amount = value_after_ppn_for_ap_invoice_courier packing_list, gross_amt
+                        %>
+                          <td class="text-right" style="vertical-align: middle"><%= number_to_currency(net_amount,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></td>
+                      </tr>
+                      <% total_amount_received += net_amount %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" align="right"><strong>Amount Due</strong></td>
+                    <td align="right"><strong><%= number_to_currency(total_amount_received,
+                              :separator => ",",
+                              :delimiter => ".",
+                              :unit => "Rp",
+                              :precision => 2) %></strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

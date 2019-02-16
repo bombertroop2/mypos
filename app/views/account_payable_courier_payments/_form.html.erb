@@ -1,0 +1,286 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 35px"></div>
+    <div class="alert alert-warning">
+        <h4><i class="fa fa-warning"></i> Warning!</h4> <h4>Please create a payment in order starting with the earliest date.</h4>
+    </div>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#cash" aria-controls="cash" role="tab" data-toggle="tab">Cash</a></li>
+            <li role="presentation"><a href="#giro" aria-controls="giro" role="tab" data-toggle="tab">Giro</a></li>
+            <li role="presentation"><a href="#transfer" aria-controls="transfer" role="tab" data-toggle="tab">Transfer</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cash" style="padding-top: 20px">
+                <div class="form-inline text-right">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="filter-no-invoice-app-cash" placeholder="No. Invoice">
+                    </div>
+                    <div class="form-group text-left">
+                        <%= select_tag "filter-courier-app-cash", options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External").order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                      </div>
+                      <button id="search-btn-app-cash" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                  </div>
+                  <table id="app_listing_api_table" class="display" width="100%">
+                      <thead>
+                          <tr>
+                              <th></th>
+                              <th>No. Invoice</th>
+                              <th>Courier</th>
+                              <th>Debt</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name").where("account_payable_couriers.remaining_debt > 0").order(:number).each do |ap| %>
+                            <tr id="app_ap_<%= ap.id %>">
+                                <td></td>
+                                <td><%= ap.number %></td>
+                                <td><%= "#{ap.courier_code} - #{ap.courier_name}" %></td>
+                                <td><%= number_to_currency(ap.remaining_debt,
+                                      :separator => ",",
+                                      :delimiter => ".",
+                                      :unit => "Rp",
+                                      :precision => 2) %></td>
+                            </tr>
+                          <% end %>
+                      </tbody>
+                  </table>
+                  <a class="btn btn-default active" id="select_invoices_btn_app_cash" style="margin-top: 10px;width: 100%">Select</a>
+                  <div id="form_ap_payment_container_cash"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane fade" id="giro" style="padding-top: 20px">
+                  <div id="search-form-container-app-giro" class="form-inline text-right">
+                      <div class="form-group">
+                          <input type="text" class="form-control" id="filter-no-invoice-app-giro" placeholder="No. Invoice">
+                      </div>
+                      <div class="form-group text-left">
+                          <%= select_tag "filter-courier-app-giro", options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External").order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                        </div>
+                        <button id="search-btn-app-giro" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                    <table id="app_listing_api_table_giro" class="display" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th id="app_listing_api_table_no_invoice_giro">No. Invoice</th>
+                                <th>Courier</th>
+                                <th>Debt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name").where("account_payable_couriers.remaining_debt > 0").order(:number).each do |ap| %>
+                              <tr id="app_ap_<%= ap.id %>_giro">
+                                  <td></td>
+                                  <td><%= ap.number %></td>
+                                  <td><%= "#{ap.courier_code} - #{ap.courier_name}" %></td>
+                                  <td><%= number_to_currency(ap.remaining_debt,
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %></td>
+                              </tr>
+                            <% end %>
+                        </tbody>
+                    </table>
+                    <a class="btn btn-default active" id="select_invoices_btn_app_giro" style="margin-top: 10px;width: 100%">Select</a>
+                    <div id="form_ap_payment_container_giro"></div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="transfer" style="padding-top: 20px">
+                    <div id="search-form-container-app-transfer" class="form-inline text-right">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="filter-no-invoice-app-transfer" placeholder="No. Invoice">
+                        </div>
+                        <div class="form-group text-left">
+                            <%= select_tag "filter-courier-app-transfer", options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External").order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                          </div>
+                          <button id="search-btn-app-transfer" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                      </div>
+                      <table id="app_listing_api_table_transfer" class="display" width="100%">
+                          <thead>
+                              <tr>
+                                  <th></th>
+                                  <th id="app_listing_api_table_no_invoice_transfer">No. Invoice</th>
+                                  <th>Courier</th>
+                                  <th>Debt</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name").where("account_payable_couriers.remaining_debt > 0").order(:number).each do |ap| %>
+                                <tr id="app_ap_<%= ap.id %>_transfer">
+                                    <td></td>
+                                    <td><%= ap.number %></td>
+                                    <td><%= "#{ap.courier_code} - #{ap.courier_name}" %></td>
+                                    <td><%= number_to_currency(ap.remaining_debt,
+                                          :separator => ",",
+                                          :delimiter => ".",
+                                          :unit => "Rp",
+                                          :precision => 2) %></td>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                      <a class="btn btn-default active" id="select_invoices_btn_app_transfer" style="margin-top: 10px;width: 100%">Select</a>
+                      <div id="form_ap_payment_container_transfer"></div>
+                  </div>
+              </div>
+          </div>      
+      </td>
+
+      <script>
+        var appCourierActiveTab = "";
+        $(function () {
+            var appApInvoiceDataTable = $('#app_listing_api_table').DataTable({
+                order: [1, 'asc'],
+                dom: 'T<"clear">lrtip',
+                columns: [
+                    {data: null, defaultContent: '', orderable: false},
+                    {data: 'number'},
+                    {data: 'courier'},
+                    {data: 'debt'}
+                ],
+                tableTools: {
+                    sRowSelect: 'os',
+                    aButtons: []
+                },
+                paging: false,
+                info: false,
+                scrollY: "250px",
+                scrollCollapse: true
+            });
+            var appApInvoiceDataTableTransfer = $('#app_listing_api_table_transfer').DataTable({
+                order: [1, 'asc'],
+                dom: 'T<"clear">lrtip',
+                columns: [
+                    {data: null, defaultContent: '', orderable: false},
+                    {data: 'number'},
+                    {data: 'courier'},
+                    {data: 'debt'}
+                ],
+                tableTools: {
+                    sRowSelect: 'os',
+                    aButtons: []
+                },
+                paging: false,
+                info: false,
+                scrollY: "250px",
+                scrollCollapse: true
+            });
+            var appApInvoiceDataTableGiro = $('#app_listing_api_table_giro').DataTable({
+                order: [1, 'asc'],
+                dom: 'T<"clear">lrtip',
+                columns: [
+                    {data: null, defaultContent: '', orderable: false},
+                    {data: 'number'},
+                    {data: 'courier'},
+                    {data: 'debt'}
+                ],
+                tableTools: {
+                    sRowSelect: 'os',
+                    aButtons: []
+                },
+                paging: false,
+                info: false,
+                scrollY: "250px",
+                scrollCollapse: true
+            });
+
+            $("#filter-courier-app-cash").attr("data-placeholder", "Courier").chosen();
+            $("#filter-courier-app-transfer").attr("data-placeholder", "Courier").chosen({width: "200px"});
+            $("#filter-courier-app-giro").attr("data-placeholder", "Courier").chosen({width: "200px"});
+            $("#search-btn-app-cash").click(function () {
+                appCourierActiveTab = "cash";
+                var noInvoice = $('#filter-no-invoice-app-cash').val().trim();
+                appApInvoiceDataTable
+                        .columns(1)
+                        .search(noInvoice)
+                        .draw();
+                var vendor = $('#filter-courier-app-cash option:selected').text().trim();
+                appApInvoiceDataTable
+                        .columns(2)
+                        .search(vendor)
+                        .draw();
+            });
+            $("#search-btn-app-transfer").click(function () {
+                appCourierActiveTab = "transfer";
+                var noInvoice = $('#filter-no-invoice-app-transfer').val().trim();
+                appApInvoiceDataTableTransfer
+                        .columns(1)
+                        .search(noInvoice)
+                        .draw();
+                var vendor = $('#filter-courier-app-transfer option:selected').text().trim();
+                appApInvoiceDataTableTransfer
+                        .columns(2)
+                        .search(vendor)
+                        .draw();
+            });
+            $("#search-btn-app-giro").click(function () {
+                appCourierActiveTab = "giro";
+                var noInvoice = $('#filter-no-invoice-app-giro').val().trim();
+                appApInvoiceDataTableGiro
+                        .columns(1)
+                        .search(noInvoice)
+                        .draw();
+                var vendor = $('#filter-courier-app-giro option:selected').text().trim();
+                appApInvoiceDataTableGiro
+                        .columns(2)
+                        .search(vendor)
+                        .draw();
+            });
+            $("#select_invoices_btn_app_cash").click(function () {
+                if (appApInvoiceDataTable.rows('.selected').data().length == 0)
+                    bootbox.alert({message: "You have not selected AP invoice yet!", size: 'small'});
+                else {
+                    var apInvoiceIds = [];
+                    $.each(appApInvoiceDataTable.rows('.selected')[0], function (index, value) {
+                        apInvoiceIds.push(appApInvoiceDataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                    });
+                    $.get("/account_payable_courier_payments/generate_form", {
+                        ap_invoice_ids: apInvoiceIds
+                    });
+                }
+            });
+            $("#select_invoices_btn_app_transfer").click(function () {
+                if (appApInvoiceDataTableTransfer.rows('.selected').data().length == 0)
+                    bootbox.alert({message: "You have not selected AP invoice yet!", size: 'small'});
+                else {
+                    var apInvoiceIds = [];
+                    $.each(appApInvoiceDataTableTransfer.rows('.selected')[0], function (index, value) {
+                        apInvoiceIds.push(appApInvoiceDataTableTransfer.rows(value).nodes().to$().attr("id").split("_")[2]);
+                    });
+                    $.get("/account_payable_courier_payments/generate_form", {
+                        ap_invoice_ids: apInvoiceIds,
+                        tab: "transfer"
+                    });
+                }
+            });
+            $("#select_invoices_btn_app_giro").click(function () {
+                if (appApInvoiceDataTableGiro.rows('.selected').data().length == 0)
+                    bootbox.alert({message: "You have not selected AP invoice yet!", size: 'small'});
+                else {
+                    var apInvoiceIds = [];
+                    $.each(appApInvoiceDataTableGiro.rows('.selected')[0], function (index, value) {
+                        apInvoiceIds.push(appApInvoiceDataTableGiro.rows(value).nodes().to$().attr("id").split("_")[2]);
+                    });
+                    $.get("/account_payable_courier_payments/generate_form", {
+                        ap_invoice_ids: apInvoiceIds,
+                        tab: "giro"
+                    });
+                }
+            });
+
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var target = $(e.target).attr("href") // activated tab
+                if (target == "#giro" && ($('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                    $("#app_listing_api_table_no_invoice_giro").click();
+                    $("#app_listing_api_table_no_invoice_giro").click();
+                } else if (target == "#transfer" && ($('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                    $("#app_listing_api_table_no_invoice_transfer").click();
+                    $("#app_listing_api_table_no_invoice_transfer").click();
+                }
+            });
+        });
+      </script>

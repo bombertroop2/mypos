@@ -1,0 +1,29 @@
+<div class="page-header">
+    <h1>Courier Prices</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group text-left">
+        <%= select_tag "courier", options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External"), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-courier-price-courier"} %>
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "city", options_from_collection_for_select(City.select(:id, :name), :id, "name"), {include_blank: true, class: "form-control", id: "filter-courier-price-city"} %>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" readonly="true" id="filter-courier-price-effective-date" placeholder="Effective date">
+        </div>
+        <div class="form-group text-left">
+            <%= select_tag "price_type", options_for_select(CourierPrice::PRICE_TYPES), {include_blank: true, class: "form-control", id: "filter-courier-price-price-type"} %>
+          </div>
+          <button id="search-courier-price-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+      </div>
+
+      <div class="hidden">
+          <%= smart_listing_controls_for(:courier_prices, {class: "form-inline text-right"}) do %>
+              <%= text_field_tag :filter_courier, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_city, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_effective_date, '', class: "search form-control", autocomplete: :off %>
+                    <%= text_field_tag :filter_price_type, '', class: "search form-control", autocomplete: :off %>
+                    <% end %>
+                </div>
+                <%= smart_listing_render(:courier_prices) %>

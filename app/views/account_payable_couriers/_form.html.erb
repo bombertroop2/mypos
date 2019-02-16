@@ -1,0 +1,69 @@
+<td colspan="7">
+    <%= form_for(@account_payable_courier, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
+        <div class="form-group<%= control_group_error(@account_payable_courier, :courier_id) %>">
+            <%= f.label :courier_id, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.select :courier_id, options_from_collection_for_select(Courier.select(:id, :code, :name).where(status: "External"), :id, "code_and_name", @account_payable_courier.courier_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                    <%= error_help_text(@account_payable_courier, :courier_id) %>
+                </div>
+            </div>
+            <div class="form-group<%= control_group_error(@account_payable_courier, :courier_invoice_date) %>">
+                <%= f.label :courier_invoice_date, class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= f.text_field :courier_invoice_date, size: 10, readonly: true, class: "form-control" %>
+                        <%= error_help_text(@account_payable_courier, :courier_invoice_date) %>
+                    </div>
+                </div>
+                <div id="ap_invoice_courier_packing_lists_container">
+                    <% if @account_payable_courier.packing_lists.present? %>
+                      <%= render partial: "packing_lists", locals: {f: f} %>
+                    <% end %>
+                </div>
+                <div class="form-group<%= control_group_error(@account_payable_courier, :courier_invoice_number) %>">
+                    <%= f.label :courier_invoice_number, class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :courier_invoice_number, class: "form-control" %>
+                            <%= error_help_text(@account_payable_courier, :courier_invoice_number) %>
+                        </div>
+                    </div>                
+                    <div class="form-group<%= control_group_error(@account_payable_courier, :note) %>">
+                        <%= f.label :note, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_area :note, rows: 6, class: "form-control" %>
+                                <%= error_help_text(@account_payable_courier, :note) %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <%= f.submit "Save", class: "btn btn-primary" %>
+                                  <button class="btn btn-link cancel">Cancel</button>
+                              </div>
+                          </div>
+                        <% end %>
+                    </td>
+                    <script>
+                      $(function () {
+                          $("#account_payable_courier_courier_id").attr("data-placeholder", "Courier").chosen();
+                          $("#account_payable_courier_courier_invoice_date").datepicker({
+                              dateFormat: "dd/mm/yy"
+                          });
+                          $("#account_payable_courier_courier_id").change(function () {
+                              if ($("#account_payable_courier_courier_invoice_date").val() != "")
+                                  $.get("/account_payable_couriers/get_packing_lists", {
+                                      courier_id: $("#account_payable_courier_courier_id").val(),
+                                      courier_invoice_date: $("#account_payable_courier_courier_invoice_date").val()
+                                  }).done(function (data) {
+                                      $("#ap_invoice_courier_packing_lists_container").html(data);
+                                  });
+                          });
+                          $("#account_payable_courier_courier_invoice_date").change(function () {
+                              if ($("#account_payable_courier_courier_id").val() != "")
+                                  $.get("/account_payable_couriers/get_packing_lists", {
+                                      courier_id: $("#account_payable_courier_courier_id").val(),
+                                      courier_invoice_date: $("#account_payable_courier_courier_invoice_date").val()
+                                  }).done(function (data) {
+                                      $("#ap_invoice_courier_packing_lists_container").html(data);
+                                  });
+                          });
+                      });
+                    </script>

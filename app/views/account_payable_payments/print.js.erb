@@ -1,0 +1,5 @@
+$("#print_ap_payment_container").html("<%= j(render(partial: "print")) %>");
+$("#ap_payment_print_doc").removeClass("hidden");
+$("#ap_payment_print_doc").print();
+$("#ap_payment_print_doc").addClass("hidden");
+<%= smart_listing_item :account_payable_payments, :update, @account_payable_payment, "account_payable_payments/account_payable_payment" %>

@@ -1,0 +1,240 @@
+<%= form_for(@account_payable_payment, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
+    <%= f.hidden_field :payment_method, value: "Cash" %>
+    <%= f.hidden_field :vendor_id, id: "account_payable_payment_vendor_id_cash" %>
+    <div class="form-group">
+        <%= f.label :attr_vendor_code_and_name, "Vendor", class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.hidden_field :attr_vendor_code_and_name %>
+              <span class="form-control" style="cursor: not-allowed;display: inline-block;width: auto" readonly="readonly" id="account_payable_payment_vendor_code_name_cash"><%= f.object.attr_vendor_code_and_name %></span>
+          </div>
+      </div>
+      <div class="form-group<%= control_group_error(@account_payable_payment, :payment_date) %>">
+          <%= f.label :payment_date, class: "col-sm-2 control-label" %>
+            <div class="col-sm-10">
+                <%= f.text_field :payment_date, size: 10, readonly: true, class: "form-control" %>
+                  <%= error_help_text(@account_payable_payment, :payment_date) %>
+              </div>
+          </div>                                                                              
+          <div class="ln_solid"></div>
+          <%= f.fields_for :account_payable_payment_invoices do |account_payable_payment_invoice_form| %>
+            <%= account_payable_payment_invoice_form.hidden_field :account_payable_id %>
+            <div class="form-group">
+                <%= account_payable_payment_invoice_form.label :attr_invoice_number, "No. Invoice", class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= account_payable_payment_invoice_form.hidden_field :attr_invoice_number %>
+                      <span class="form-control" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= account_payable_payment_invoice_form.object.attr_invoice_number %></span>
+                  </div>
+              </div>
+              <div class="form-group<%= control_group_error(account_payable_payment_invoice_form.object, :attr_vendor_invoice_number) %>">
+                  <%= account_payable_payment_invoice_form.label :attr_vendor_invoice_number, "Ven. Invoice number", class: "col-sm-2 control-label" %>
+                    <div class="col-sm-10">
+                        <%= account_payable_payment_invoice_form.hidden_field :attr_vendor_invoice_number %>
+                        <span class="form-control" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= account_payable_payment_invoice_form.object.attr_vendor_invoice_number %></span>
+                        <%= error_help_text(account_payable_payment_invoice_form.object, :attr_vendor_invoice_number) %>
+                    </div>
+                </div>
+                <div class="form-group<%= control_group_error(account_payable_payment_invoice_form.object, :attr_vendor_invoice_date) %>">
+                    <%= account_payable_payment_invoice_form.label :attr_vendor_invoice_date, "Ven. Invoice date", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= account_payable_payment_invoice_form.hidden_field :attr_vendor_invoice_date %>
+                          <span class="form-control" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= !account_payable_payment_invoice_form.object.attr_vendor_invoice_date.class.eql?("Date") ? account_payable_payment_invoice_form.object.attr_vendor_invoice_date.to_date.strftime("%d/%m/%Y") : account_payable_payment_invoice_form.object.attr_vendor_invoice_date.strftime("%d/%m/%Y") %></span>
+                          <%= error_help_text(account_payable_payment_invoice_form.object, :attr_vendor_invoice_date) %>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <%= account_payable_payment_invoice_form.label :attr_amount_received, "Amount received", class: "col-sm-2 control-label" %>
+                        <div class="col-sm-10">
+                            <%= account_payable_payment_invoice_form.hidden_field :attr_amount_received %>
+                            <span class="form-control text-right" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= number_to_currency(account_payable_payment_invoice_form.object.attr_amount_received,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <%= account_payable_payment_invoice_form.label :attr_remaining_debt, "Debt", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= account_payable_payment_invoice_form.hidden_field :attr_remaining_debt %>
+                              <span class="form-control text-right" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= number_to_currency(account_payable_payment_invoice_form.object.attr_remaining_debt,
+                                    :separator => ",",
+                                    :delimiter => ".",
+                                    :unit => "Rp",
+                                    :precision => 2) %></span>
+                          </div>
+                      </div>
+                      <div class="form-group<%= control_group_error(account_payable_payment_invoice_form.object, :amount_returned) %>">
+                          <%= account_payable_payment_invoice_form.label :amount_returned, "Amount returned", class: "col-sm-2 control-label" %>
+                            <div class="col-sm-10">
+                                <div class="form-inline">
+                                    <%= account_payable_payment_invoice_form.hidden_field :amount_returned %>
+                                    <span class="form-control text-right" style="cursor: not-allowed;display: inline-block" readonly="readonly" id="account_payable_payment_account_payable_payment_invoices_attributes_<%= account_payable_payment_invoice_form.options[:child_index] %>_amount_returned_display">
+                                        <% if account_payable_payment_invoice_form.object.amount_returned.present? %>
+                                          <%= number_to_currency(account_payable_payment_invoice_form.object.amount_returned,
+                                            :separator => ",",
+                                            :delimiter => ".",
+                                            :unit => "Rp",
+                                            :precision => 2) %>
+                                        <% end %>
+                                    </span>
+                                    <% if account_payable_payment_invoice_form.object.allocated_return_items.present? %>
+                                      <% btn_add_hidden_class = " hidden" %>
+                                    <% else %>
+                                      <% btn_add_hidden_class = "" %>
+                                    <% end %>
+                                    <% if account_payable_payment_invoice_form.object.allocated_return_items.present? %>
+                                      <% btn_delete_hidden_class = "" %>
+                                    <% else %>
+                                      <% btn_delete_hidden_class = " hidden" %>
+                                    <% end %>
+                                    <button type="button" class="btn btn-default btn_allocate_returned_items_cash<%= btn_add_hidden_class %>" style="margin-bottom: 0px !important" id="btn_allocate_returned_items_cash_<%= account_payable_payment_invoice_form.options[:child_index] %>">
+                                        <span class="glyphicon glyphicon-plus"></span> Add
+                                    </button>
+                                    <button type="button" class="btn btn-default btn_delete_allocate_returned_items_cash<%= btn_delete_hidden_class %>" style="margin-bottom: 0px !important" id="btn_delete_allocate_returned_items_cash_<%= account_payable_payment_invoice_form.options[:child_index] %>">
+                                        <span class="glyphicon glyphicon-minus"></span> Delete
+                                    </button>
+                                </div>
+                                <%= error_help_text(account_payable_payment_invoice_form.object, :amount_returned) %>
+                            </div>
+                        </div>
+                        <div id="allocated-return-item-fields-container-<%= account_payable_payment_invoice_form.options[:child_index] %>" class="hidden">
+                            <% if account_payable_payment_invoice_form.object.allocated_return_items.present? %>
+                              <%= render partial: "allocated_return_item_fields", locals: {account_payable_payment_invoice: account_payable_payment_invoice_form.object, appi_form_index: account_payable_payment_invoice_form.options[:child_index]} %>
+                            <% end %>
+                        </div>
+                        <div class="form-group<%= control_group_error(account_payable_payment_invoice_form.object, :amount) %>">
+                            <%= account_payable_payment_invoice_form.label :amount, class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= account_payable_payment_invoice_form.text_field :amount, class: "form-control account-payable-payment-invoice-amount-fields", "data-a-sep" => ".", "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;" %>
+                                    <%= error_help_text(account_payable_payment_invoice_form.object, :amount) %>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"></label>
+                                <div class="col-sm-10">
+                                    <%= account_payable_payment_invoice_form.check_box :_destroy %> Delete
+                                </div>
+
+                            </div>
+                            <div class="ln_solid"></div>
+                          <% end %>
+                          <div class="form-group">
+                              <div class="col-sm-offset-2 col-sm-10">
+                                  <%= f.submit "Save", class: "btn btn-primary" %>
+                                    <button class="btn btn-link cancel">Cancel</button>
+                                </div>
+                            </div>
+                          <% end %>
+
+                          <script>
+                            $(function () {
+                                $("#account_payable_payment_payment_date").datepicker({
+                                    dateFormat: "dd/mm/yy"
+                                });
+
+                                $('.account-payable-payment-invoice-amount-fields').autoNumeric('init');
+
+                                $("#new_account_payable_payment").submit(function () {
+                                    if (submitAppFormCash) {
+                                        submitAppFormCash = false;
+                                        return true;
+                                    } else {
+                                        bootbox.confirm({
+                                            message: "Please double check all of the data before you create payment, make sure everything is correct.<br>Once you create payment, you'll not be able to change or delete it<br>Are you ABSOLUTELY sure?",
+                                            buttons: {
+                                                confirm: {
+                                                    label: '<i class="fa fa-check"></i> Confirm'
+                                                },
+                                                cancel: {
+                                                    label: '<i class="fa fa-times"></i> Cancel'
+                                                }
+                                            },
+                                            callback: function (result) {
+                                                if (result) {
+                                                    $("body").css('padding-right', '0px');
+                                                    submitAppFormCash = true;
+                                                    $("#new_account_payable_payment").submit();
+                                                }
+                                            },
+                                            size: "small"
+                                        });
+                                        return false;
+                                    }
+                                });
+
+                                $(".btn_delete_allocate_returned_items_cash").click(function () {
+                                    var appiFormIndex = $(this).attr("id").split("_")[6];
+                                    $("#allocated-return-item-fields-container-" + appiFormIndex).html("");
+                                    $("#account_payable_payment_account_payable_payment_invoices_attributes_" + appiFormIndex + "_amount_returned").val("");
+                                    $("#account_payable_payment_account_payable_payment_invoices_attributes_" + appiFormIndex + "_amount_returned_display").html("");
+                                    $("#btn_delete_allocate_returned_items_cash_" + appiFormIndex).addClass("hidden");
+                                    $("#btn_allocate_returned_items_cash_" + appiFormIndex).removeClass("hidden");
+                                });
+
+                                $(".btn_allocate_returned_items_cash").click(function () {
+                                    var appiFormIndex = $(this).attr("id").split("_")[5];
+                                    var selectedPurchaseReturnIds = [];
+                                    $(".account_payable_payment_invoice_purchase_return_id_fields").each(function () {
+                                        selectedPurchaseReturnIds.push($(this).val());
+                                    });
+                                    $.get("/account_payable_payments/get_purchase_returns", {
+                                        vendor_id: $("#account_payable_payment_vendor_id_cash").val(),
+                                        selected_purchase_return_ids: selectedPurchaseReturnIds
+                                    }).done(function (data) {
+                                        bootbox.confirm({
+                                            size: "large",
+                                            title: "Purchase Returns of " + $("#account_payable_payment_vendor_code_name_cash").html(),
+                                            message: data,
+                                            callback: function (result) {
+                                                if (result) {
+                                                    if (aPPpRdataTable.rows('.selected').data().length == 0) {
+                                                        bootbox.alert({message: "You have not selected PR yet!", size: 'small'});
+                                                        return false;
+                                                    } else {
+                                                        var purchaseReturnIds = [];
+                                                        $.each(aPPpRdataTable.rows('.selected')[0], function (index, value) {
+                                                            purchaseReturnIds.push(aPPpRdataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                                                        });
+                                                        $.get("/account_payable_payments/select_purchase_return", {
+                                                            purchase_return_ids: purchaseReturnIds,
+                                                            vendor_id: $("#account_payable_payment_vendor_id_cash").val(),
+                                                            total_amount_received: $("#account_payable_payment_account_payable_payment_invoices_attributes_" + appiFormIndex + "_amount_received").val(),
+                                                            appi_form_index: appiFormIndex
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }).on("shown.bs.modal", function () {
+                                            aPPpRdataTable = $('#app_listing_pr_table').DataTable({
+                                                order: [1, 'asc'],
+                                                dom: 'T<"clear">lfrtip',
+                                                columns: [
+                                                    {data: null, defaultContent: '', orderable: false},
+                                                    {data: 'pr_number'},
+                                                    {data: 'po_do_number'},
+                                                    {data: 'quantity'},
+                                                    {data: 'gross_amount'},
+                                                    {data: 'first_discount'},
+                                                    {data: 'second_discount'},
+                                                    {data: 'value_added_tax'},
+                                                    {data: 'net_amount'}
+
+                                                ],
+                                                tableTools: {
+                                                    sRowSelect: 'os',
+                                                    //sRowSelector: 'td:first-child',
+                                                    aButtons: ['select_all', 'select_none']
+                                                },
+                                                paging: false,
+                                                info: false,
+                                                scrollY: "250px",
+                                                scrollX: true,
+                                                scrollCollapse: true
+                                                        /*,
+                                                         bFilter: false*/
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                          </script>

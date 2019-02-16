@@ -1,0 +1,12 @@
+$('#packing_list_attr_city_id').find('option').remove();
+$('#packing_list_attr_courier_price_type').find('option').remove();
+var o = new Option("", "");
+$("#packing_list_attr_city_id").append(o);
+var o = new Option("", "");
+$("#packing_list_attr_courier_price_type").append(o);
+<% @courier_cities.each do |courier_city| %>
+  var o = new Option("<%= courier_city.name %>", "<%= courier_city.id %>");
+  $("#packing_list_attr_city_id").append(o);
+<% end %>
+$("#packing_list_attr_city_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
+$("#packing_list_attr_courier_price_type").attr("data-placeholder", "Please select").chosen("destroy").chosen();

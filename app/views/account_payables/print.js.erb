@@ -1,0 +1,10 @@
+<% if @account_payable.beginning_of_account_payable_creating.eql?("Partial") %>
+  $("#print_ap_invoice_container").html("<%= j(render(partial: "print_partial")) %>");
+<% else %>
+  $("#print_ap_invoice_container").html("<%= j(render(partial: "print")) %>");
+<% end %>
+$("#ap_invoice_print_doc").removeClass("hidden");
+$("#ap_invoice_print_doc").print();
+$("#ap_invoice_print_doc").addClass("hidden");
+<%= smart_listing_item :account_payables, :update, @account_payable, "account_payables/account_payable" %>
+$("#vendor_name_<%= @account_payable.id %>").html("<%= @vendor_name %>");

@@ -80,6 +80,15 @@
                                         <% end %>
                                     </td>
                                 </tr>
+                                <% if (gv = GeneralVariable.select(:pieces_per_koli).first).present? %>
+                                  <tr>
+                                      <td style="vertical-align: top">Total koli</td>
+                                      <td style="vertical-align: top">:</td>
+                                      <td>
+                                          <%= (@order_booking.quantity / gv.pieces_per_koli.to_f).ceil %>
+                                      </td>
+                                  </tr>
+                                <% end %>
                             </table>
                         </td>
                     </tr>

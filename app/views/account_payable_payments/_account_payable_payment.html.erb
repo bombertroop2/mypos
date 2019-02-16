@@ -1,0 +1,13 @@
+<td><%= object.number %></td>
+<td id="listing-app-vendor-<%= object.id %>"><%= "#{object.code} - #{object.name}" rescue nil %></td>
+<td><%= object.payment_date.strftime("%d/%m/%Y") %></td>
+<td><%= object.payment_method %></td>
+<td id="td-app-amount-<%= object.id %>"><%= number_to_currency(object.amount,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, account_payable_payment_path(object), data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, AccountPayablePayment), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_payment_path(object), :remote => true, :method => :get, title: "Print" ) %>
+</td>

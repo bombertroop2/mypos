@@ -30,6 +30,16 @@
     </dl>
 
     <dl class="dl-horizontal">
+        <dt>Province</dt>
+        <dd><%= object.province.name rescue "" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>City</dt>
+        <dd><%= object.city.name rescue "" %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
         <dt>Region</dt>
         <dd><%= object.region_code %></dd>
     </dl>
@@ -43,6 +53,11 @@
     <dl class="dl-horizontal">
         <dt>Type</dt>
         <dd><%= object.warehouse_type.titleize %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Estimated delivery time</dt>
+        <dd><%= object.estimated_delivery_time %> day(s)</dd>
     </dl>
 
     <% if object.counter_type.present? %>

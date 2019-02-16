@@ -1,0 +1,31 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-ap-courier-payment-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "Number", "number" %></th>
+            <th class="col-md-4"><%= smart_listing.sortable "Courier", "couriers.code" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Date", "payment_date" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Method", "payment_method" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Amount", "amount" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |app| %>
+          <tr class="editable" data-id="<%= app.id %>">
+              <%= smart_listing.render object: app, partial: "account_payable_courier_payments/account_payable_courier_payment", locals: {object: app} %>
+          </tr>
+        <% end %>
+        <%= smart_listing.item_new colspan: 6, link: new_account_payable_courier_payment_path %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var appProcessId = setInterval(function () {
+      if ($("#listing-ap-courier-payment-thead").is(":visible")) {
+          clearInterval(appProcessId);
+      } else {
+          $("#listing-ap-courier-payment-thead").show();
+      }
+  }, 0);
+
+</script>

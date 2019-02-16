@@ -4,18 +4,28 @@
 
 <div id="search-form-container" class="form-inline text-right">
     <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-payment-date" placeholder="Payment date">
+        <input type="text" class="form-control" id="filter-ap-invoice-invoice-number" placeholder="Invoice number">
     </div>
-    <div class="form-group">
-        <input type="text" id="filter-string" class="form-control" placeholder="Number/Vendor">
-    </div>
-    <button id="search-ap-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-</div>
-
-<div class="hidden">
-    <%= smart_listing_controls_for(:account_payables, {class: "form-inline text-right"}) do %>
-        <%= text_field_tag :filter_payment_date, '', class: "search form-control", autocomplete: :off %>
-          <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-          <% end %>
+    <div class="form-group text-left">
+        <%= select_tag "vendor_id", options_from_collection_for_select(Vendor.select(:id, :code, :name).where(is_active: true), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-ap-invoice-vendor-id"} %>
       </div>
-      <%= smart_listing_render(:account_payables) %>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-ap-invoice-vendor-invoice-date" placeholder="Vendor Inv. Date">
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "invoice_status", options_for_select(AccountPayable::INVOICE_STATUSES), {include_blank: true, class: "form-control", id: "filter-ap-invoice-status"} %>
+        </div>
+        <button id="search-ap-invoice-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:account_payables, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_ap_invoice_invoice_number, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_ap_invoice_vendor_id, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_ap_invoice_vendor_invoice_date, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_ap_invoice_status, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+              </div>
+
+              <%= smart_listing_render(:account_payables) %>
+              <div id="print_ap_invoice_container"></div>

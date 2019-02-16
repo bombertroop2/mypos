@@ -1,0 +1,6 @@
+<% if @valid %>
+  <%= smart_listing_item :adjustments, :create, @adjustment, "adjustments/adjustment" %>
+  $("#adjustment-warehouse-code-and-name-<%= @adjustment.id %>").html("<%= @warehouse.code_and_name %>")
+<% else %>
+  <%= smart_listing_item :adjustments, :create, @adjustment, "adjustments/form" %>
+<% end %>

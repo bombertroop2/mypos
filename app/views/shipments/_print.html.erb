@@ -18,7 +18,7 @@ File.open(full_path, 'wb') { |f| f.write blob }
         <td align="center" colspan="3"><%= @shipment.delivery_order_number %></td>
     </tr>
     <tr>
-        <td align="center" colspan="3"><%= image_tag "/barcode_#{@shipment.id}.png", height: "100px" %></td>
+        <td align="center" colspan="3"><%= image_tag "/barcode_#{@shipment.id}.png", style: "height:'100%';width:'auto'" %></td>
     </tr>
     <tr>
         <td style="width: 50%" valign="top">
@@ -76,6 +76,15 @@ File.open(full_path, 'wb') { |f| f.write blob }
                         <% end %>
                     </td>
                 </tr>
+                <% if (gv = GeneralVariable.select(:pieces_per_koli).first).present? %>
+                  <tr>
+                      <td style="vertical-align: top">Total koli</td>
+                      <td style="vertical-align: top">:</td>
+                      <td>
+                          <%= (@shipment.quantity / gv.pieces_per_koli.to_f).ceil %>
+                      </td>
+                  </tr>
+                <% end %>                
             </table>
         </td>
     </tr>

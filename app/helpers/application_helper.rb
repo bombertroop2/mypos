@@ -38,12 +38,12 @@ module ApplicationHelper
     return true if can? :read, ReceivedPurchaseOrder
     return true if can? :read, PurchaseReturn
     return true if can? :read, AccountPayable
+    return true if can? :read, AccountPayablePayment
   end
 
   def booking_control_menu_active?
     return true if can? :read, OrderBooking
     return true if can? :read_action_for_staff, Shipment
-    return true if can? :read, Courier
   end
 
   def inventory_receipt_menu_active?
@@ -75,11 +75,20 @@ module ApplicationHelper
     return true if can? :manage, Company
     return true if can? :manage, BeginningStockProduct
     return true if can? :read, Customer
+    return true if can? :manage, Adjustment
+    return true if can? :manage, GeneralVariable
   end
 
   def event_menu_active?
     return true if can? :read, Event
     return true if can? :read, CounterEvent
+  end
+
+  def expedition_menu_active?
+    return true if can? :read, Courier
+    return true if can? :read, PackingList
+    return true if can? :read, AccountPayableCourier
+    return true if can? :read, AccountPayableCourierPayment
   end
 
   def cashier_menu_active?

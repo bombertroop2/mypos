@@ -1,0 +1,7 @@
+<% if @invalid %>
+  <%= smart_listing_item :packing_lists, :create, @packing_list, "packing_lists/form" %>
+<% else %>
+  <%= smart_listing_item :packing_lists, :create, @packing_list, "packing_lists/packing_list" %>
+  <% courier = Courier.select(:code, :name).find(@packing_list.attr_courier_id) %>
+  $("#packing-list-courier-<%= @packing_list.id %>").html("<%= courier.code_and_name %>");
+<% end %>

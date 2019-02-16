@@ -1,0 +1,12 @@
+<% if @created %>
+  <%= smart_listing_item :account_payable_payments, :create, @account_payable_payment, "account_payable_payments/account_payable_payment" %>
+  $("#listing-app-vendor-<%= @account_payable_payment.id %>").html("<%= "#{@account_payable_payment.vendor.code} - #{@account_payable_payment.vendor.name}" %>");
+<% else %>
+  <% if params[:account_payable_payment][:payment_method].eql?("Cash") %>
+    $("#form_ap_payment_container_cash").html("<%= j(render(partial: "form_cash")) %>");
+  <% elsif params[:account_payable_payment][:payment_method].eql?("Giro") %>
+    $("#form_ap_payment_container_giro").html("<%= j(render(partial: "form_giro")) %>");
+  <% else %>
+    $("#form_ap_payment_container_transfer").html("<%= j(render(partial: "form_transfer")) %>");
+  <% end %>
+<% end %>

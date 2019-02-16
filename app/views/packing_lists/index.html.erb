@@ -1,0 +1,30 @@
+<div class="page-header">
+    <h1>Packing Lists</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" class="form-control" id="filter-packing-list-number" placeholder="Number">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-packing-list-departure-date" placeholder="Packing list date">
+    </div>
+    <div class="form-group text-left">
+        <%= select_tag "courier", options_from_collection_for_select(Courier.select(:id, :code, :name), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-packing-list-courier"} %>
+      </div>
+      <div class="form-group text-left">
+          <%= select_tag "status", options_for_select(PackingList::STATUSES), {include_blank: true, class: "form-control", id: "filter-packing-list-status"} %>
+        </div>
+        <button id="search-packing-list-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+    </div>
+
+    <div class="hidden">
+        <%= smart_listing_controls_for(:packing_lists, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_number, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_departure_date, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_courier, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_status, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+              </div>
+              <%= smart_listing_render(:packing_lists) %>
+              <div id="print_pl_doc_container"></div>
