@@ -71,7 +71,7 @@ class Courier < ApplicationRecord
           end
 
           def status_not_changed
-            errors.add(:status, "change is not allowed!") if status_changed? && persisted?
+            errors.add(:status, "change is not allowed!") if status_was.present? && status_changed? && persisted?
           end
   
           def strip_string_values
