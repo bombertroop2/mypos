@@ -11,7 +11,7 @@ class Vendor < ApplicationRecord
           #  validates :email, uniqueness: true, if: proc {|vendor| vendor.email.present?}
           #    validates :pic_email, uniqueness: true, if: proc {|vendor| vendor.pic_email.present?}
           validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|vendor| vendor.terms_of_payment.present?}
-            validate :code_not_changed, :vat_available, :type_available
+            validate :code_not_changed, :vat_available, :type_available, :value_added_tax_not_changed
 
       
             VAT = [
@@ -82,5 +82,9 @@ class Vendor < ApplicationRecord
     
               def code_not_changed
                 errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (product_relation.present? || purchase_order_relation.present? || account_payable_relation.present? || direct_purchase_relation.present? || account_payable_payment_relation.present?)
+              end
+
+              def value_added_tax_not_changed
+                errors.add(:value_added_tax, "change is not allowed!") if value_added_tax_changed? && persisted? && purchase_order_relation.present? || account_payable_relation.present? || direct_purchase_relation.present? || account_payable_payment_relation.present?
               end
             end
