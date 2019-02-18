@@ -13,7 +13,7 @@ class PurchaseOrder < ApplicationRecord
   has_many :purchase_returns
   has_many :account_payable_purchase_partials, through: :received_purchase_orders
 
-  attr_accessor :receiving_po, :closing_po, :edit_document
+  attr_accessor :receiving_po, :closing_po, :edit_document, :attr_total_qty, :attr_total_gross_amt
 
   before_validation :set_type, :set_status, on: :create
       

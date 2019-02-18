@@ -39,6 +39,8 @@ class PurchaseOrdersController < ApplicationController
   def edit
     @purchase_order.request_delivery_date = @purchase_order.request_delivery_date.strftime("%d/%m/%Y")
     @purchase_order.purchase_order_date = @purchase_order.purchase_order_date.strftime("%d/%m/%Y") if @purchase_order.purchase_order_date
+    @purchase_order.attr_total_qty = PurchaseOrderDetail.joins(:purchase_order_product).where(["purchase_order_products.purchase_order_id = ?", @purchase_order.id]).sum(:quantity)
+    @purchase_order.attr_total_gross_amt = @purchase_order.order_value
     @products = @purchase_order.products
     @colors = []
     @sizes = []
@@ -221,7 +223,7 @@ class PurchaseOrdersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_order_params
-    params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value,
+    params.require(:purchase_order).permit(:note, :is_additional_disc_from_net, :first_discount, :second_discount, :receiving_po, :number, :po_type, :status, :vendor_id, :request_delivery_date, :order_value, :receiving_value, :attr_total_qty, :attr_total_gross_amt,
       :warehouse_id, :purchase_order_date, purchase_order_products_attributes: [:_destroy, :id, :po_cost, :product_id, :purchase_order_date,
         purchase_order_details_attributes: [:id, :size_id, :color_id, :quantity, :product_id]], received_purchase_orders_attributes: [:is_using_delivery_order, :delivery_order_number,
         received_purchase_order_products_attributes: [:purchase_order_product_id, received_purchase_order_items_attributes: [:purchase_order_detail_id, :quantity]]])
