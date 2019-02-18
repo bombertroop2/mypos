@@ -53,7 +53,7 @@
                   <Cell><Data ss:Type="String"><%= po.target %></Data></Cell>
                   <Cell><Data ss:Type="String"><%= po.request_delivery_date %></Data></Cell>
                   <Cell><Data ss:Type="String"><%= po.number %></Data></Cell>
-                  <Cell><Data ss:Type="Number"><%= po.quantity rescue 0 %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= number_to_currency((po.quantity rescue 0), :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></Data></Cell>
               </Row>
             <% end %>
         </Table>
