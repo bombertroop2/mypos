@@ -287,6 +287,13 @@ class OrderBookingsController < ApplicationController
       end
     end
   end
+  
+  def search_dest_warehouse
+    @warehouses = Warehouse.not_central.not_in_transit.actived.where(["code ILIKE ?", params[:term]+"%"]).pluck(:code)
+    respond_to do |format|
+      format.json  { render :json => @warehouses.to_json } # don't do msg.to_json
+    end
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.
