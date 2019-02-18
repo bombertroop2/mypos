@@ -101,7 +101,7 @@
                             else
                                 qty = parseInt($(this).val());
                             totalQty = totalQty + qty;
-                            var productId = $(this).attr("class").split(" ")[1].split("-")[1];
+                            var productId = $(this).attr("class").split(" ")[0].split("-")[1];
                             var cost = $("#product_table_cost_" + productId).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
                             var grossAmt = cost * qty;
                             totalGrossAmt = totalGrossAmt + grossAmt;
@@ -140,7 +140,7 @@
                         else
                             qty = parseInt($(this).val());
                         totalQty = totalQty + qty;
-                        var productId = $(this).attr("class").split(" ")[1].split("-")[1];
+                        var productId = $(this).attr("class").split(" ")[0].split("-")[1];
                         var cost = $("#product_table_cost_" + productId).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
                         var grossAmt = cost * qty;
                         totalGrossAmt = totalGrossAmt + grossAmt;
@@ -177,7 +177,7 @@
                         else
                             qty = parseInt($(this).val());
                         totalQty = totalQty + qty;
-                        var productId = $(this).attr("class").split(" ")[1].split("-")[1];
+                        var productId = $(this).attr("class").split(" ")[0].split("-")[1];
                         var cost = $("#product_table_cost_" + productId).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
                         var grossAmt = cost * qty;
                         totalGrossAmt = totalGrossAmt + grossAmt;
