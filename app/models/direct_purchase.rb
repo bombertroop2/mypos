@@ -1,4 +1,5 @@
 class DirectPurchase < ApplicationRecord
+  attr_accessor :attr_total_qty, :attr_total_gross_amt
   audited on: :create
 
   belongs_to :vendor
