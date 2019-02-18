@@ -108,21 +108,21 @@
                                                               <% po_detail = purchase_order_details.select{|pod| pod.color_id.eql?(color.id) && pod.size_id.eql?(size.id)}.first %>
                                                               <td style="text-align: center;vertical-align: middle">
                                                                   <% if po_detail %>
-                                                                    <%= po_detail.quantity %>
+                                                                    <%= number_to_currency(po_detail.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
                                                                     <% total_quantity += po_detail.quantity %>
                                                                     <% qty_per_color += po_detail.quantity %>
                                                                   <% end %>
                                                               </td>
                                                             <% end %>
                                                             <td style="text-align: center;vertical-align: middle">
-                                                                <%= qty_per_color %>
+                                                                <%= number_to_currency(qty_per_color, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
                                                             </td>
                                                         </tr>
                                                       <% end %>
                                                   </tbody>
                                               </table>
                                           </td>
-                                          <td align="right" style="vertical-align: middle"><%= total_quantity %></td>
+                                          <td align="right" style="vertical-align: middle"><%= number_to_currency(total_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                                           <td align="right" style="vertical-align: middle">
                                               <% if current_user.has_managerial_role? %>
                                                 <%= number_to_currency((po_product.cost rescue 0),
@@ -149,7 +149,7 @@
                                 <tfoot>
                                     <tr>
                                         <td colspan="5" align="right"><strong>Total Quantity</strong></td>
-                                        <td align="right"><%= total_qty_all_products if current_user.has_managerial_role? %></td>
+                                        <td align="right"><%= number_to_currency(total_qty_all_products, :separator => "", :delimiter => ".", :unit => "", :precision => 0) if current_user.has_managerial_role? %></td>
                                     </tr>
                                     <tr>
                                         <td colspan="5" align="right"><strong>Gross Amount</strong></td>
