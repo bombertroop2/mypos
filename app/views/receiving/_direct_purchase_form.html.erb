@@ -57,179 +57,195 @@
                                     <label class="col-sm-2 control-label">Products</label>
                                     <div class="col-sm-10">
                                         <%= autocomplete_field_tag 'product', params[:receiving_product_ids], autocomplete_product_code_receiving_index_path, class: "form-control",'data-delimiter' => ',', :multiple => true %>
-                                        <!-- <table id="listing_product_table_receiving" class="display" width="100%">
-                                            <thead>
-                                                <tr>
-                                                    <th></th>
-                                                    <th id="code_th">Code</th>
-                                                    <th>Brand</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-                                                <%# Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
-                                                  <tr id="product_<%#= product.id %>">
-                                                      <td></td>
-                                                      <td><%#= product.code %></td>
-                                                      <td><%#= product.name %></td>
+                                          <!-- <table id="listing_product_table_receiving" class="display" width="100%">
+                                              <thead>
+                                                  <tr>
+                                                      <th></th>
+                                                      <th id="code_th">Code</th>
+                                                      <th>Brand</th>
                                                   </tr>
-                                                <%# end %>
-                                            </tbody>
-                                        </table> -->
-                                        <a class="btn btn-default active" id="generate_dp_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <div id="products_detail">
-                                            <% if params[:action].eql?("create") %>
-                                              <%= render 'product_quantities' %>
-                                            <% end %>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                <%#= f.submit "Save", class: "btn btn-primary", id: "dp-save-btn" %>
-                                        <a class="btn btn-primary" id="dp-save-btn">Save</a>
-                                        <a class="btn btn-link cancel" id="dp-cancel-btn">Cancel</a>
-                                    </div>
-                                </div>
-                              <% end %>
-                              <script>
-                                $(function () {
-                                    $("#dp-cancel-btn").click(function () {
-                                        $(".new-item-placeholder.info").html("");
-                                        $(".new-item-placeholder.info").addClass("hidden");
-                                        $(".new-item-action.info").removeClass("hidden");
-                                    });
-                                    if ($(".discount-fields").length > 0)
-                                        $(".discount-fields").numeric();
+                                              </thead>
 
-                                    $("#direct_purchase_receiving_date").datepicker({
-                                        dateFormat: "dd/mm/yy"
-                                    });
+                                              <tbody>
+                                  <%# Product.joins(:brand).select("products.id, products.code, common_fields.name").order("products.code").each_with_index do |product, index| %>
+                                                    <tr id="product_<%#= product.id %>">
+                                                        <td></td>
+                                                        <td><%#= product.code %></td>
+                                                        <td><%#= product.name %></td>
+                                                    </tr>
+                                  <%# end %>
+                                              </tbody>
+                                          </table> -->
+                                          <a class="btn btn-default active" id="generate_dp_detail_form" style="float: right;margin-top: 10px;">Generate form</a>
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <div class="col-sm-offset-2 col-sm-10">
+                                          <div id="products_detail">
+                                              <% if params[:action].eql?("create") %>
+                                                <%= render 'product_quantities' %>
+                                              <% end %>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="form-group<%= control_group_error(@direct_purchase, :attr_total_qty) %>">
+                                      <%= f.label :attr_total_qty, "Total quantity", class: "col-sm-2 control-label" %>
+                                        <div class="col-sm-10">
+                                            <%= f.hidden_field :attr_total_qty, class: "form-control" %>
+                                              <span class="form-control" style="cursor: not-allowed;text-align: right" readonly="readonly" id="direct_purchase_attr_total_qty_display"><%= number_to_currency(f.object.attr_total_qty, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></span>
+                                              <%= error_help_text(@direct_purchase, :attr_total_qty) %>
+                                          </div>
+                                      </div>
+                                      <div class="hidden form-group<%= control_group_error(@direct_purchase, :attr_total_gross_amt) %>">
+                                          <%= f.label :attr_total_gross_amt, "Total gross amount", class: "col-sm-2 control-label" %>
+                                            <div class="col-sm-10">
+                                                <%= f.hidden_field :attr_total_gross_amt, class: "form-control" %>
+                                                  <span class="form-control" style="cursor: not-allowed;text-align: right" readonly="readonly" id="direct_purchase_attr_total_gross_amt_display"><%= number_to_currency(f.object.attr_total_gross_amt, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></span>
+                                                  <%= error_help_text(@direct_purchase, :attr_total_gross_amt) %>
+                                              </div>
+                                          </div>
+                                          <div class="form-group">
+                                              <div class="col-sm-offset-2 col-sm-10">
+                                          <%#= f.submit "Save", class: "btn btn-primary", id: "dp-save-btn" %>
+                                                  <a class="btn btn-primary" id="dp-save-btn">Save</a>
+                                                  <a class="btn btn-link cancel" id="dp-cancel-btn">Cancel</a>
+                                              </div>
+                                          </div>
+                                        <% end %>
+                                        <script>
+                                          $(function () {
+                                              $("#dp-cancel-btn").click(function () {
+                                                  $(".new-item-placeholder.info").html("");
+                                                  $(".new-item-placeholder.info").addClass("hidden");
+                                                  $(".new-item-action.info").removeClass("hidden");
+                                              });
+                                              if ($(".discount-fields").length > 0)
+                                                  $(".discount-fields").numeric();
 
-                                    // var receivingDataTableDirectPurchase = $('#listing_product_table_receiving').DataTable({
-                                    //     order: [1, 'asc'],
-                                    //     dom: 'T<"clear">lfrtip',
-                                    //     columns: [
-                                    //         {data: null, defaultContent: '', orderable: false},
-                                    //         {data: 'code'},
-                                    //         {data: 'brand'}
-                                    //     ],
-                                    //     tableTools: {
-                                    //         sRowSelect: 'os',
-                                    //         //sRowSelector: 'td:first-child',
-                                    //         aButtons: ['select_all', 'select_none']
-                                    //     },
-                                    //     paging: false,
-                                    //     info: false,
-                                    //     scrollY: "250px",
-                                    //     scrollCollapse: true
-                                    // });
-                                    //
-                                    $("#product").tagit({
-                                      autocomplete: {
-                                        delay: 0,
-                                        minLength: 2,
-                                        source: function(search, response){
-                                          $.ajax({
-                                            url: "/receiving/autocomplete_product_code",
-                                            data: {term: search.term},
-                                            success: function(data) {
-                                              response($.map(data, function (item) {
-                                                return {
-                                                    id: item.id,
-                                                    label: item.label
-                                                }
-                                              }));
-                                            }
+                                              $("#direct_purchase_receiving_date").datepicker({
+                                                  dateFormat: "dd/mm/yy"
+                                              });
+
+                                              // var receivingDataTableDirectPurchase = $('#listing_product_table_receiving').DataTable({
+                                              //     order: [1, 'asc'],
+                                              //     dom: 'T<"clear">lfrtip',
+                                              //     columns: [
+                                              //         {data: null, defaultContent: '', orderable: false},
+                                              //         {data: 'code'},
+                                              //         {data: 'brand'}
+                                              //     ],
+                                              //     tableTools: {
+                                              //         sRowSelect: 'os',
+                                              //         //sRowSelector: 'td:first-child',
+                                              //         aButtons: ['select_all', 'select_none']
+                                              //     },
+                                              //     paging: false,
+                                              //     info: false,
+                                              //     scrollY: "250px",
+                                              //     scrollCollapse: true
+                                              // });
+                                              //
+                                              $("#product").tagit({
+                                                  autocomplete: {
+                                                      delay: 0,
+                                                      minLength: 2,
+                                                      source: function (search, response) {
+                                                          $.ajax({
+                                                              url: "/receiving/autocomplete_product_code",
+                                                              data: {term: search.term},
+                                                              success: function (data) {
+                                                                  response($.map(data, function (item) {
+                                                                      return {
+                                                                          id: item.id,
+                                                                          label: item.label
+                                                                      }
+                                                                  }));
+                                                              }
+                                                          });
+                                                      }
+                                                  }
+                                              });
+
+                                              $("#generate_dp_detail_form").click(function () {
+                                                  if ($('#product').tagit('assignedTags').length == 0)
+                                                      bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
+                                                  else if ($("#direct_purchase_receiving_date").val() == "")
+                                                      bootbox.alert({message: "Please fill in receiving date first", size: 'small'});
+                                                  else {
+                                                      var productIds = [];
+                                                      // $.each(receivingDataTableDirectPurchase.rows('.selected')[0], function (index, value) {
+                                                      //     productIds.push(receivingDataTableDirectPurchase.rows(value).nodes().to$().attr("id").split("_")[1]);
+                                                      // });
+                                                      products = $("#product").val().split(",")
+                                                      products.forEach(function (element) {
+                                                          productIds.push(element.split(" ")[0]);
+                                                      });
+
+                                                      $.get("/receiving/get_product_details", {
+                                                          product_ids: productIds.join(","),
+                                                          previous_selected_product_ids: $("#receiving_product_ids").val(),
+                                                          dp_date: $("#direct_purchase_receiving_date").val()
+                                                      });
+                                                  }
+
+                                                  return false;
+                                              });
+
+                                              $('#direct_purchase_first_discount').keypress(function (e) {
+                                                  if (e.which == 13) {
+                                                      if ($(this).val().trim() != "") {
+                                                          $("#direct_purchase_second_discount").prop("disabled", false);
+                                                          $("#direct_purchase_second_discount").focus();
+                                                      }
+                                                  }
+                                              });
+                                              if ($("#receiving_product_ids").val() != undefined && $("#receiving_product_ids").val() != "") {
+                                                  var splittedProductIds = $("#receiving_product_ids").val().split(",");
+                                                  $.each(splittedProductIds, function (index, value) {
+                                                      var e = jQuery.Event("click");
+                                                      e.ctrlKey = true;
+                                                      $("#product_" + value).find("td:first-child").trigger(e);
+                                                  });
+                                              }
+
+                                              $(".do-radio-button-direct-purchase").click(function () {
+                                                  if ($(this).val() == "yes")
+                                                      $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", false);
+                                                  else {
+                                                      $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").val("");
+                                                      $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", true);
+                                                  }
+                                              });
+
+                                              $("#dp-save-btn").click(function () {
+                                                  bootbox.confirm({
+                                                      message: "Once you receive the article, you'll not be able to change or cancel it<br/>Are you sure?",
+                                                      buttons: {
+                                                          confirm: {
+                                                              label: '<i class="fa fa-check"></i> Confirm'
+                                                          },
+                                                          cancel: {
+                                                              label: '<i class="fa fa-times"></i> Cancel'
+                                                          }
+                                                      },
+                                                      callback: function (result) {
+                                                          if (result) {
+                                                              $("#new_direct_purchase").submit();
+                                                          }
+                                                      },
+                                                      size: "small"
+                                                  });
+                                                  return false;
+                                              });
+
+                                              $("#new_direct_purchase").submit(function (event) {
+                                                  $("body").css('padding-right', '0px');
+                                                  // untuk kebutuhan auto do number
+                                                  //$("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
+                                                  // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
+                                                  //$(".receiving-date").val($("#direct_purchase_receiving_date").val());
+                                                  //$(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
+                                              });
+
                                           });
-                                        }
-                                      }
-                                    });
-
-                                    $("#generate_dp_detail_form").click(function () {
-                                        if ($('#product').tagit('assignedTags').length == 0)
-                                            bootbox.alert({message: "You have not selected a product yet!", size: 'small'});
-                                        else if ($("#direct_purchase_receiving_date").val() == "")
-                                            bootbox.alert({message: "Please fill in receiving date first", size: 'small'});
-                                        else {
-                                            var productIds = [];
-                                            // $.each(receivingDataTableDirectPurchase.rows('.selected')[0], function (index, value) {
-                                            //     productIds.push(receivingDataTableDirectPurchase.rows(value).nodes().to$().attr("id").split("_")[1]);
-                                            // });
-                                            products = $("#product").val().split(",")
-                                            products.forEach(function(element) {
-                                              productIds.push(element.split(" ")[0]);
-                                            });
-
-                                            $.get("/receiving/get_product_details", {
-                                                product_ids: productIds.join(","),
-                                                previous_selected_product_ids: $("#receiving_product_ids").val(),
-                                                dp_date: $("#direct_purchase_receiving_date").val()
-                                            });
-                                        }
-
-                                        return false;
-                                    });
-
-                                    $('#direct_purchase_first_discount').keypress(function (e) {
-                                        if (e.which == 13) {
-                                            if ($(this).val().trim() != "") {
-                                                $("#direct_purchase_second_discount").prop("disabled", false);
-                                                $("#direct_purchase_second_discount").focus();
-                                            }
-                                        }
-                                    });
-                                    if ($("#receiving_product_ids").val() != undefined && $("#receiving_product_ids").val() != "") {
-                                        var splittedProductIds = $("#receiving_product_ids").val().split(",");
-                                        $.each(splittedProductIds, function (index, value) {
-                                            var e = jQuery.Event("click");
-                                            e.ctrlKey = true;
-                                            $("#product_" + value).find("td:first-child").trigger(e);
-                                        });
-                                    }
-
-                                    $(".do-radio-button-direct-purchase").click(function () {
-                                        if ($(this).val() == "yes")
-                                            $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", false);
-                                        else {
-                                            $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").val("");
-                                            $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").prop("disabled", true);
-                                        }
-                                    });
-
-                                    $("#dp-save-btn").click(function () {
-                                        bootbox.confirm({
-                                            message: "Once you receive the article, you'll not be able to change or cancel it<br/>Are you sure?",
-                                            buttons: {
-                                                confirm: {
-                                                    label: '<i class="fa fa-check"></i> Confirm'
-                                                },
-                                                cancel: {
-                                                    label: '<i class="fa fa-times"></i> Cancel'
-                                                }
-                                            },
-                                            callback: function (result) {
-                                                if (result) {
-                                                    $("#new_direct_purchase").submit();
-                                                }
-                                            },
-                                            size: "small"
-                                        });
-                                        return false;
-                                    });
-
-                                    $("#new_direct_purchase").submit(function (event) {
-                                        $("body").css('padding-right', '0px');
-                                        // untuk kebutuhan auto do number
-                                        //$("#direct_purchase_received_purchase_order_attributes_vendor_id").val($("#direct_purchase_vendor_id").val());
-                                        // ini untuk validasi di DirectPurchaseProduct model, untuk cek apakah ada cost yang aktif pada tanggal PO
-                                        //$(".receiving-date").val($("#direct_purchase_receiving_date").val());
-                                        //$(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
-                                    });
-
-                                });
-                              </script>
+                                        </script>
