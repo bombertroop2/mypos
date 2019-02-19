@@ -40,6 +40,7 @@
                 <% end %>
             </table>
         </td>
+        <td></td>
         <td style="width: 50%" valign="top" align="right">
             <table class="table-condensed table-responsive">
                 <% if @packing_list.city_name.present? %>                                
@@ -92,7 +93,7 @@
         </td>
     </tr>
     <tr>
-        <td align="center" colspan="2">
+        <td align="center" colspan="3">
             <table class="table table-condensed table-responsive table-bordered">
                 <tbody>
                     <tr style="text-align: center">
@@ -160,8 +161,12 @@
     </tr>
     <tr>
         <td>Created by</td>
+        <td style="text-align: center">Driver</td>
+        <td style="text-align: right">Recipient</td>
     </tr>
     <tr>
         <td style="padding-top: 50px"><%= @packing_list.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+        <td style="text-align: center"></td>
+        <td style="text-align: right"></td>
     </tr>
 </table>
