@@ -182,6 +182,25 @@
                                                 </ul>
                                             </li>
                                           <% end %>
+                                          <% if expedition_menu_active? %>
+                                            <li><a><i class="fa fa-truck"></i> Expedition <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can? :read, Courier %>
+                                                      <li><%= link_to "Couriers", couriers_path, method: :get %></li>
+                                                      <li><%= link_to "Courier Prices", courier_prices_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, PackingList %>
+                                                      <li><%= link_to "Packing Lists", packing_lists_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountPayableCourier %>
+                                                      <li><%= link_to "AP Invoices", account_payable_couriers_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountPayableCourierPayment %>
+                                                      <li><%= link_to "AP Payments", account_payable_courier_payments_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
                                           <% if inventory_receipt_menu_active? %>
                                             <li><a><i class="fa fa-download"></i> Inventory Receipts <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
@@ -289,25 +308,6 @@
                                                     <% end %>
                                                     <% if can? :read, CounterEvent %>
                                                       <li><%= link_to "Counter Events", counter_events_path, method: :get %></li>
-                                                    <% end %>
-                                                </ul>
-                                            </li>
-                                          <% end %>
-                                          <% if expedition_menu_active? %>
-                                            <li><a><i class="fa fa-truck"></i> Expedition <span class="fa fa-chevron-down"></span></a>
-                                                <ul class="nav child_menu">
-                                                    <% if can? :read, Courier %>
-                                                      <li><%= link_to "Couriers", couriers_path, method: :get %></li>
-                                                      <li><%= link_to "Courier Prices", courier_prices_path, method: :get %></li>
-                                                    <% end %>
-                                                    <% if can? :read, PackingList %>
-                                                      <li><%= link_to "Packing Lists", packing_lists_path, method: :get %></li>
-                                                    <% end %>
-                                                    <% if can? :read, AccountPayableCourier %>
-                                                      <li><%= link_to "AP Invoices", account_payable_couriers_path, method: :get %></li>
-                                                    <% end %>
-                                                    <% if can? :read, AccountPayableCourierPayment %>
-                                                      <li><%= link_to "AP Payments", account_payable_courier_payments_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
