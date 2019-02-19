@@ -73,7 +73,7 @@
                                       <%= pod_form.hidden_field :product_id, value: pop.product_id %>
                                       <%= pod_form.hidden_field :id unless pod_form.object.new_record? %>
                                       <div class="<%= control_group_error(pod, :quantity) %>">
-                                          <%= pod_form.text_field :quantity, placeholder: "qty", class: "quantity-#{pop.product_id}-#{size.id} quantity-#{pop.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                          <%= pod_form.text_field :quantity, placeholder: "qty", class: "quantity-#{pop.product_id}-#{size.id} quantity-#{pop.product_id} quantity form-control quantity-fields quantity-fields-child quantity-fields-child-#{pop.product_id}", size: 16, style: "width: 50px !important" %>
                                             <%= error_help_text(pod, :quantity) %>
                                         </div>
                                       <% end %>
@@ -89,13 +89,121 @@
               </tr>              
               <script>
                 $.each(colorSizes, function (index, value) {
+                    $('#quantity_<%= pop.product_id %>_' + value).unbind();
                     $('#quantity_<%= pop.product_id %>_' + value).keyup(function () {
                         $('.quantity-<%= pop.product_id %>-' + value).val($('#quantity_<%= pop.product_id %>_' + value).val());
+                        var totalQty = 0;
+                        var totalGrossAmt = 0;
+                        $(".quantity-fields-child").each(function () {
+                            var qty = 0;
+                            if ($(this).val().trim() == "")
+                                qty = 0;
+                            else
+                                qty = parseInt($(this).val());
+                            totalQty = totalQty + qty;
+                            var productId = $(this).attr("class").split(" ")[0].split("-")[1];
+                            var cost = $("#product_table_cost_" + productId).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+                            var grossAmt = cost * qty;
+                            totalGrossAmt = totalGrossAmt + grossAmt;
+                        });
+                        $("#purchase_order_attr_total_qty").val(totalQty);
+                        $("#purchase_order_attr_total_qty_display").html(totalQty);
+                        $("#purchase_order_attr_total_qty_display").toCurrency({
+                            precision: 0, // decimal precision
+                            delimiter: ".", // thousands delimiter
+                            separator: "", // decimal separator
+                            unit: "", // unit
+                            format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                            negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                        });
+                        $("#purchase_order_attr_total_gross_amt").val(totalGrossAmt);
+                        $("#purchase_order_attr_total_gross_amt_display").html(totalGrossAmt);
+                        $("#purchase_order_attr_total_gross_amt_display").toCurrency({
+                            precision: 2, // decimal precision
+                            delimiter: ".", // thousands delimiter
+                            separator: ",", // decimal separator
+                            unit: "Rp", // unit
+                            format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                            negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                        });
                     });
                 });
+                $('#<%= "quantity_#{pop.product_id}" %>').unbind();
                 $('#<%= "quantity_#{pop.product_id}" %>').keyup(function () {
                     $('.quantity-<%= pop.product_id %>').val($('#<%= "quantity_#{pop.product_id}" %>').val());
+                    var totalQty = 0;
+                    var totalGrossAmt = 0;
+                    $(".quantity-fields-child").each(function () {
+                        var qty = 0;
+                        if ($(this).val().trim() == "")
+                            qty = 0;
+                        else
+                            qty = parseInt($(this).val());
+                        totalQty = totalQty + qty;
+                        var productId = $(this).attr("class").split(" ")[0].split("-")[1];
+                        var cost = $("#product_table_cost_" + productId).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+                        var grossAmt = cost * qty;
+                        totalGrossAmt = totalGrossAmt + grossAmt;
+                    });
+                    $("#purchase_order_attr_total_qty").val(totalQty);
+                    $("#purchase_order_attr_total_qty_display").html(totalQty);
+                    $("#purchase_order_attr_total_qty_display").toCurrency({
+                        precision: 0, // decimal precision
+                        delimiter: ".", // thousands delimiter
+                        separator: "", // decimal separator
+                        unit: "", // unit
+                        format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                        negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                    });
+                    $("#purchase_order_attr_total_gross_amt").val(totalGrossAmt);
+                    $("#purchase_order_attr_total_gross_amt_display").html(totalGrossAmt);
+                    $("#purchase_order_attr_total_gross_amt_display").toCurrency({
+                        precision: 2, // decimal precision
+                        delimiter: ".", // thousands delimiter
+                        separator: ",", // decimal separator
+                        unit: "Rp", // unit
+                        format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                        negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                    });
                 });
+                $(".quantity-fields-child-<%= pop.product_id %>").unbind();
+                $(".quantity-fields-child-<%= pop.product_id %>").keyup(function () {
+                    var totalQty = 0;
+                    var totalGrossAmt = 0;
+                    $(".quantity-fields-child").each(function () {
+                        var qty = 0;
+                        if ($(this).val().trim() == "")
+                            qty = 0;
+                        else
+                            qty = parseInt($(this).val());
+                        totalQty = totalQty + qty;
+                        var productId = $(this).attr("class").split(" ")[0].split("-")[1];
+                        var cost = $("#product_table_cost_" + productId).html().trim().replace(/\Rp/g, '').replace(/\./g, '').replace(/\,/g, '.');
+                        var grossAmt = cost * qty;
+                        totalGrossAmt = totalGrossAmt + grossAmt;
+                    });
+                    $("#purchase_order_attr_total_qty").val(totalQty);
+                    $("#purchase_order_attr_total_qty_display").html(totalQty);
+                    $("#purchase_order_attr_total_qty_display").toCurrency({
+                        precision: 0, // decimal precision
+                        delimiter: ".", // thousands delimiter
+                        separator: "", // decimal separator
+                        unit: "", // unit
+                        format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                        negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                    });
+                    $("#purchase_order_attr_total_gross_amt").val(totalGrossAmt);
+                    $("#purchase_order_attr_total_gross_amt_display").html(totalGrossAmt);
+                    $("#purchase_order_attr_total_gross_amt_display").toCurrency({
+                        precision: 2, // decimal precision
+                        delimiter: ".", // thousands delimiter
+                        separator: ",", // decimal separator
+                        unit: "Rp", // unit
+                        format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                        negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                    });
+                });
+
               </script>
           </table>
           <% number += 1 %>
@@ -117,6 +225,11 @@
             this.value = "";
             this.focus();
         });
-
+      <% if @purchase_order.attr_total_qty.blank? %>
+          $("#purchase_order_attr_total_qty").val("");
+          $("#purchase_order_attr_total_qty_display").html("");
+          $("#purchase_order_attr_total_gross_amt").val("");
+          $("#purchase_order_attr_total_gross_amt_display").html("");
+      <% end %>
       </script>
 

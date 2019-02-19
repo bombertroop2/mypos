@@ -2,24 +2,24 @@
   <% if dpp.errors && dpp.errors.messages[:base] %>
     <span class='help-block'><%= dpp.errors.messages[:base][0] %></span>
   <% end %>
-
+  <span class="hidden" id="product_table_cost_<%= dpp.product_id %>"><%= dpp.dp_cost %></span>
   <table border="1" class="product-table table table-condensed table-responsive table-bordered" id="product_table_<%= dpp.product_id %>" style="table-layout: fixed;width: 100%">
       <tr style="text-align: center">
           <td style="vertical-align: middle;width: 20% !important;"><strong>Product code</strong></td>
-          <%# if current_user.has_managerial_role? %>
-            <!--<td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>-->
-          <%# end %>
+  <%# if current_user.has_managerial_role? %>
+          <!--<td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>-->
+  <%# end %>
           <td style="vertical-align: middle;width: auto !important;"><strong>Color X Size</strong></td>
       </tr>    
       <tr style="text-align: center">
           <td style="vertical-align: middle;width: 20% !important;">
               <%= "#{dpp.prdct_code} - #{dpp.prdct_name}" %>
           </td>
-          <%# if current_user.has_managerial_role? %>
+  <%# if current_user.has_managerial_role? %>
             <!--<td style="vertical-align: middle;width: 20% !important;" id="dp_product_table_cost_<%#= dpp.product_id %>">
-                <%#= number_to_currency((dpp.dp_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+  <%#= number_to_currency((dpp.dp_cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
             </td>-->
-          <%# end %>
+  <%# end %>
           <td style="vertical-align: middle;width: auto !important;">
               <div class="table-responsive">
                   <% direct_purchase_product_array_index = create_direct_purchase_product_array_variable_name(dpp.product_id) %>
@@ -64,7 +64,7 @@
                                     <%= direct_purchase_detail_detail_form.hidden_field :size_id %>
                                     <%= direct_purchase_detail_detail_form.hidden_field :color_id %>
                                     <div class="<%= control_group_error(direct_purchase_detail_detail, :quantity) %>">
-                                        <%= direct_purchase_detail_detail_form.text_field :quantity, placeholder: "qty", class: "quantity-#{dpp.product_id}-#{size.size} quantity-#{dpp.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important" %>
+                                        <%= direct_purchase_detail_detail_form.text_field :quantity, placeholder: "qty", class: "quantity-#{dpp.product_id}-#{size.size} quantity-#{dpp.product_id} quantity form-control quantity-fields quantity-fields-child quantity-fields-child-#{dpp.product_id}", size: 16, style: "width: 50px !important" %>
                                           <%= error_help_text(direct_purchase_detail_detail, :quantity) %>
                                       </div>
                                     <% end %>
@@ -80,12 +80,119 @@
             </tr>
             <script>
               $.each(sizeSizes, function (index, value) {
+                  $('#quantity_<%= dpp.product_id %>_' + value).unbind();
                   $('#quantity_<%= dpp.product_id %>_' + value).keyup(function () {
                       $('.quantity-<%= dpp.product_id %>-' + value).val($('#quantity_<%= dpp.product_id %>_' + value).val());
+                      var totalQty = 0;
+                      var totalGrossAmt = 0;
+                      $(".quantity-fields-child").each(function () {
+                          var qty = 0;
+                          if ($(this).val().trim() == "")
+                              qty = 0;
+                          else
+                              qty = parseInt($(this).val());
+                          totalQty = totalQty + qty;
+                          var productId = $(this).attr("class").split(" ")[0].split("-")[1];
+                          var cost = $("#product_table_cost_" + productId).html().trim();
+                          var grossAmt = cost * qty;
+                          totalGrossAmt = totalGrossAmt + grossAmt;
+                      });
+                      $("#direct_purchase_attr_total_qty").val(totalQty);
+                      $("#direct_purchase_attr_total_qty_display").html(totalQty);
+                      $("#direct_purchase_attr_total_qty_display").toCurrency({
+                          precision: 0, // decimal precision
+                          delimiter: ".", // thousands delimiter
+                          separator: "", // decimal separator
+                          unit: "", // unit
+                          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                      });
+                      $("#direct_purchase_attr_total_gross_amt").val(totalGrossAmt);
+                      $("#direct_purchase_attr_total_gross_amt_display").html(totalGrossAmt);
+                      $("#direct_purchase_attr_total_gross_amt_display").toCurrency({
+                          precision: 2, // decimal precision
+                          delimiter: ".", // thousands delimiter
+                          separator: ",", // decimal separator
+                          unit: "Rp", // unit
+                          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                      });
                   });
               });
+              $('#<%= "quantity_#{dpp.product_id}" %>').unbind();
               $('#<%= "quantity_#{dpp.product_id}" %>').keyup(function () {
                   $('.quantity-<%= dpp.product_id %>').val($('#<%= "quantity_#{dpp.product_id}" %>').val());
+                  var totalQty = 0;
+                  var totalGrossAmt = 0;
+                  $(".quantity-fields-child").each(function () {
+                      var qty = 0;
+                      if ($(this).val().trim() == "")
+                          qty = 0;
+                      else
+                          qty = parseInt($(this).val());
+                      totalQty = totalQty + qty;
+                      var productId = $(this).attr("class").split(" ")[0].split("-")[1];
+                      var cost = $("#product_table_cost_" + productId).html().trim();
+                      var grossAmt = cost * qty;
+                      totalGrossAmt = totalGrossAmt + grossAmt;
+                  });
+                  $("#direct_purchase_attr_total_qty").val(totalQty);
+                  $("#direct_purchase_attr_total_qty_display").html(totalQty);
+                  $("#direct_purchase_attr_total_qty_display").toCurrency({
+                      precision: 0, // decimal precision
+                      delimiter: ".", // thousands delimiter
+                      separator: "", // decimal separator
+                      unit: "", // unit
+                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                  });
+                  $("#direct_purchase_attr_total_gross_amt").val(totalGrossAmt);
+                  $("#direct_purchase_attr_total_gross_amt_display").html(totalGrossAmt);
+                  $("#direct_purchase_attr_total_gross_amt_display").toCurrency({
+                      precision: 2, // decimal precision
+                      delimiter: ".", // thousands delimiter
+                      separator: ",", // decimal separator
+                      unit: "Rp", // unit
+                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                  });
+              });
+              $(".quantity-fields-child-<%= dpp.product_id %>").unbind();
+              $(".quantity-fields-child-<%= dpp.product_id %>").keyup(function () {
+                  var totalQty = 0;
+                  var totalGrossAmt = 0;
+                  $(".quantity-fields-child").each(function () {
+                      var qty = 0;
+                      if ($(this).val().trim() == "")
+                          qty = 0;
+                      else
+                          qty = parseInt($(this).val());
+                      totalQty = totalQty + qty;
+                      var productId = $(this).attr("class").split(" ")[0].split("-")[1];
+                      var cost = $("#product_table_cost_" + productId).html().trim();
+                      var grossAmt = cost * qty;
+                      totalGrossAmt = totalGrossAmt + grossAmt;
+                  });
+                  $("#direct_purchase_attr_total_qty").val(totalQty);
+                  $("#direct_purchase_attr_total_qty_display").html(totalQty);
+                  $("#direct_purchase_attr_total_qty_display").toCurrency({
+                      precision: 0, // decimal precision
+                      delimiter: ".", // thousands delimiter
+                      separator: "", // decimal separator
+                      unit: "", // unit
+                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                  });
+                  $("#direct_purchase_attr_total_gross_amt").val(totalGrossAmt);
+                  $("#direct_purchase_attr_total_gross_amt_display").html(totalGrossAmt);
+                  $("#direct_purchase_attr_total_gross_amt_display").toCurrency({
+                      precision: 2, // decimal precision
+                      delimiter: ".", // thousands delimiter
+                      separator: ",", // decimal separator
+                      unit: "Rp", // unit
+                      format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                      negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                  });
               });
             </script>
         </table>
@@ -100,6 +207,11 @@
             this.value = "";
             this.focus();
         });
-
+      <% if @direct_purchase.attr_total_qty.blank? %>
+          $("#direct_purchase_attr_total_qty").val("");
+          $("#direct_purchase_attr_total_qty_display").html("");
+          $("#direct_purchase_attr_total_gross_amt").val("");
+          $("#direct_purchase_attr_total_gross_amt_display").html("");
+      <% end %>
       </script>
 

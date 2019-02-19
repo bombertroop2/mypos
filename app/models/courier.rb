@@ -15,7 +15,7 @@ class Courier < ApplicationRecord
   validates :terms_of_payment, :value_added_tax_type, presence: true, if: proc{|c| c.status.eql?("External")}
     validates :code, uniqueness: true
     validates :status, uniqueness: true, if: proc{|c| c.status.eql?("Internal")}
-      validate :code_not_changed, :status_available, :status_not_changed
+      validate :code_not_changed, :status_available, :status_not_changed, :value_added_tax_type_not_changed
       validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|c| c.terms_of_payment.present? && c.status.eql?("External")}
         validate :value_added_tax_type_available, if: proc{|c| c.status.eql?("External")}
         
@@ -37,6 +37,10 @@ class Courier < ApplicationRecord
 
   
           private
+          
+          def value_added_tax_type_not_changed
+            errors.add(:value_added_tax_type, "change is not allowed!") if value_added_tax_type_changed? && persisted? && account_payable_courier_relation.present?
+          end
           
           # hapus fields courier external apabila status internal
           def remove_external_courier_additional_fields
@@ -67,7 +71,7 @@ class Courier < ApplicationRecord
           end
 
           def status_not_changed
-            errors.add(:status, "change is not allowed!") if status_changed? && persisted?
+            errors.add(:status, "change is not allowed!") if status_was.present? && status_changed? && persisted?
           end
   
           def strip_string_values

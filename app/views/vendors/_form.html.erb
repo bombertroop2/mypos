@@ -29,80 +29,80 @@
                                 <%= error_help_text(@vendor, :vendor_type) %>
                             </div>
                         </div>
-                        <div class="form-group<%= control_group_error(@vendor, :taxpayer_identification_number) %>">
-                            <%= f.label :taxpayer_identification_number, "TIN", class: "col-sm-2 control-label" %>
+                        <div class="form-group<%= control_group_error(@vendor, :phone) %>">
+                            <%= f.label :phone, class: "col-sm-2 control-label" %>
                               <div class="col-sm-10">
-                                  <%= f.text_field :taxpayer_identification_number, class: "form-control" %>
-                                    <%= error_help_text(@vendor, :taxpayer_identification_number) %>
+                                  <%= f.telephone_field :phone, class: "inputs form-control", tabindex: "4", size: 10 %>
+                                    <%= error_help_text(@vendor, :phone) %>
                                 </div>
                             </div>
-                            <div class="form-group<%= control_group_error(@vendor, :taxpayer_identification_number_address) %>">
-                                <%= f.label :taxpayer_identification_number_address, "TIN address", class: "col-sm-2 control-label" %>
+                            <div class="form-group<%= control_group_error(@vendor, :facsimile) %>">
+                                <%= f.label :facsimile, class: "col-sm-2 control-label" %>
                                   <div class="col-sm-10">
-                                      <%= f.text_area :taxpayer_identification_number_address, rows: 6, class: "form-control" %>
-                                        <%= error_help_text(@vendor, :taxpayer_identification_number_address) %>
+                                      <%= f.telephone_field :facsimile, class: "form-control inputs", tabindex: "5", size: 10 %>
+                                        <%= error_help_text(@vendor, :facsimile) %>
                                     </div>
                                 </div>
-                                <div class="form-group<%= control_group_error(@vendor, :phone) %>">
-                                    <%= f.label :phone, class: "col-sm-2 control-label" %>
+                                <div class="form-group<%= control_group_error(@vendor, :email) %>">
+                                    <%= f.label :email, class: "col-sm-2 control-label" %>
                                       <div class="col-sm-10">
-                                          <%= f.telephone_field :phone, class: "inputs form-control", tabindex: "4", size: 10 %>
-                                            <%= error_help_text(@vendor, :phone) %>
+                                          <%= f.email_field :email, class: "form-control inputs", tabindex: "6" %>
+                                            <%= error_help_text(@vendor, :email) %>
                                         </div>
                                     </div>
-                                    <div class="form-group<%= control_group_error(@vendor, :facsimile) %>">
-                                        <%= f.label :facsimile, class: "col-sm-2 control-label" %>
+                                    <div class="form-group<%= control_group_error(@vendor, :pic_name) %>">
+                                        <%= f.label :pic_name, class: "col-sm-2 control-label" %>
                                           <div class="col-sm-10">
-                                              <%= f.telephone_field :facsimile, class: "form-control inputs", tabindex: "5", size: 10 %>
-                                                <%= error_help_text(@vendor, :facsimile) %>
+                                              <%= f.text_field :pic_name, class: "form-control inputs", tabindex: "7" %>
+                                                <%= error_help_text(@vendor, :pic_name) %>
                                             </div>
                                         </div>
-                                        <div class="form-group<%= control_group_error(@vendor, :email) %>">
-                                            <%= f.label :email, class: "col-sm-2 control-label" %>
+                                        <div class="form-group<%= control_group_error(@vendor, :pic_phone) %>">
+                                            <%= f.label :pic_phone, class: "col-sm-2 control-label" %>
                                               <div class="col-sm-10">
-                                                  <%= f.email_field :email, class: "form-control inputs", tabindex: "6" %>
-                                                    <%= error_help_text(@vendor, :email) %>
+                                                  <%= f.telephone_field :pic_phone, class: "form-control inputs", tabindex: "8", size: 10 %>
+                                                    <%= error_help_text(@vendor, :pic_phone) %>
                                                 </div>
                                             </div>
-                                            <div class="form-group<%= control_group_error(@vendor, :pic_name) %>">
-                                                <%= f.label :pic_name, class: "col-sm-2 control-label" %>
+                                            <div class="form-group<%= control_group_error(@vendor, :pic_mobile_phone) %>">
+                                                <%= f.label :pic_mobile_phone, class: "col-sm-2 control-label" %>
                                                   <div class="col-sm-10">
-                                                      <%= f.text_field :pic_name, class: "form-control inputs", tabindex: "7" %>
-                                                        <%= error_help_text(@vendor, :pic_name) %>
+                                                      <%= f.telephone_field :pic_mobile_phone, class: "form-control inputs", tabindex: "9", size: 12 %>
+                                                        <%= error_help_text(@vendor, :pic_mobile_phone) %>
                                                     </div>
                                                 </div>
-                                                <div class="form-group<%= control_group_error(@vendor, :pic_phone) %>">
-                                                    <%= f.label :pic_phone, class: "col-sm-2 control-label" %>
+                                                <div class="form-group<%= control_group_error(@vendor, :pic_email) %>">
+                                                    <%= f.label :pic_email, class: "col-sm-2 control-label" %>
                                                       <div class="col-sm-10">
-                                                          <%= f.telephone_field :pic_phone, class: "form-control inputs", tabindex: "8", size: 10 %>
-                                                            <%= error_help_text(@vendor, :pic_phone) %>
+                                                          <%= f.email_field :pic_email, class: "form-control inputs", tabindex: "10" %>
+                                                            <%= error_help_text(@vendor, :pic_email) %>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group<%= control_group_error(@vendor, :pic_mobile_phone) %>">
-                                                        <%= f.label :pic_mobile_phone, class: "col-sm-2 control-label" %>
+                                                    <div class="form-group<%= control_group_error(@vendor, :terms_of_payment) %>">
+                                                        <%= f.label :terms_of_payment, class: "col-sm-2 control-label" %>
                                                           <div class="col-sm-10">
-                                                              <%= f.telephone_field :pic_mobile_phone, class: "form-control inputs", tabindex: "9", size: 12 %>
-                                                                <%= error_help_text(@vendor, :pic_mobile_phone) %>
+                                                              <%= f.number_field :terms_of_payment, class: "form-control inputs", tabindex: "11" %>
+                                                                <%= error_help_text(@vendor, :terms_of_payment) %>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group<%= control_group_error(@vendor, :pic_email) %>">
-                                                            <%= f.label :pic_email, class: "col-sm-2 control-label" %>
+                                                        <div class="form-group<%= control_group_error(@vendor, :is_taxable_entrepreneur) %>" id="taxable_entrepreneur" style="display: none">
+                                                            <label class="col-sm-2 control-label"></label>
+                                                            <div class="col-sm-10">
+                                                                <%= f.check_box :is_taxable_entrepreneur %> Taxable entrepreneur
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group<%= control_group_error(@vendor, :taxpayer_identification_number) %>" id="taxpayer_identification_number_field_container" <% unless @vendor.is_taxable_entrepreneur %>style="display: none"<% end %>>
+                                                            <%= f.label :taxpayer_identification_number, "TIN", class: "col-sm-2 control-label" %>
                                                               <div class="col-sm-10">
-                                                                  <%= f.email_field :pic_email, class: "form-control inputs", tabindex: "10" %>
-                                                                    <%= error_help_text(@vendor, :pic_email) %>
+                                                                  <%= f.text_field :taxpayer_identification_number, class: "form-control" %>
+                                                                    <%= error_help_text(@vendor, :taxpayer_identification_number) %>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group<%= control_group_error(@vendor, :terms_of_payment) %>">
-                                                                <%= f.label :terms_of_payment, class: "col-sm-2 control-label" %>
+                                                            <div class="form-group<%= control_group_error(@vendor, :taxpayer_identification_number_address) %>" id="taxpayer_identification_number_address_field_container" <% unless @vendor.is_taxable_entrepreneur %>style="display: none"<% end %>>
+                                                                <%= f.label :taxpayer_identification_number_address, "TIN address", class: "col-sm-2 control-label" %>
                                                                   <div class="col-sm-10">
-                                                                      <%= f.number_field :terms_of_payment, class: "form-control inputs", tabindex: "11" %>
-                                                                        <%= error_help_text(@vendor, :terms_of_payment) %>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group<%= control_group_error(@vendor, :is_taxable_entrepreneur) %>" id="taxable_entrepreneur" <% if @vendor.is_taxable_entrepreneur %>style="display: none"<% end %>>
-                                                                    <label class="col-sm-2 control-label"></label>
-                                                                    <div class="col-sm-10">
-                                                                        <%= f.check_box :is_taxable_entrepreneur %> Taxable entrepreneur
+                                                                      <%= f.text_area :taxpayer_identification_number_address, rows: 6, class: "form-control" %>
+                                                                        <%= error_help_text(@vendor, :taxpayer_identification_number_address) %>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group<%= control_group_error(@vendor, :value_added_tax) %>" id="value_added_tax" <% unless @vendor.is_taxable_entrepreneur %>style="display: none"<% end %>>
@@ -161,8 +161,12 @@
                                                                               // $this will contain a reference to the checkbox   
                                                                               if ($(this).is(':checked')) {
                                                                                   $("#value_added_tax").show();
+                                                                                  $("#taxpayer_identification_number_field_container").show();
+                                                                                  $("#taxpayer_identification_number_address_field_container").show();
                                                                               } else {
                                                                                   $("#value_added_tax").hide();
+                                                                                  $("#taxpayer_identification_number_field_container").hide();
+                                                                                  $("#taxpayer_identification_number_address_field_container").hide();
                                                                               }
                                                                           });
                                                                       }

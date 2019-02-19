@@ -75,12 +75,12 @@ class CustomersController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_customer
-    @customer = Customer.where(id: params[:id]).select(:id, :code, :name, :address, :phone, :facsimile, :email, :pic_name, :pic_mobile_phone, :pic_email, :terms_of_payment, :value_added_tax, :is_taxable_entrepreneur, :limit_value, :deliver_to, :province_id, :city_id).first
+    @customer = Customer.where(id: params[:id]).select(:id, :code, :name, :address, :phone, :facsimile, :email, :pic_name, :pic_mobile_phone, :pic_email, :terms_of_payment, :value_added_tax, :is_taxable_entrepreneur, :limit_value, :deliver_to, :province_id, :city_id, :unlimited).first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def customer_params
-    params.require(:customer).permit(:province_id, :city_id, :is_taxable_entrepreneur, :terms_of_payment, :value_added_tax, :code, :name, :phone, :facsimile, :email, :pic_name,  :pic_mobile_phone, :pic_email, :address, :limit_value, :deliver_to)
+    params.require(:customer).permit(:province_id, :city_id, :is_taxable_entrepreneur, :terms_of_payment, :value_added_tax, :code, :name, :phone, :facsimile, :email, :pic_name,  :pic_mobile_phone, :pic_email, :address, :limit_value, :deliver_to, :unlimited)
   end
   
   def convert_limit_value_to_numeric

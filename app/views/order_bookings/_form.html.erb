@@ -1,4 +1,9 @@
 <td colspan="7">
+    <style>
+        .ui-autocomplete .ui-menu-item {
+            padding-left: 5px !important;
+        }
+    </style>
     <div style="padding-top: 20px"></div>
     <%= form_for(@order_booking, remote: true, html: {class: "form-horizontal"}) do |f| %>
         <%= hidden_field_tag "warehouse_to_ids", params[:warehouse_to_ids] %>
@@ -46,13 +51,13 @@
                     </div>
 
                     <% unless @order_booking.new_record? %>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <!--<div class="form-group<%#= control_group_error(@order_booking, :destination_warehouse_id) %>">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <!--<div class="form-group<%#= control_group_error(@order_booking, :destination_warehouse_id) %>">
                   <%#= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-2 control-label" %>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <div class="col-sm-10">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <div class="col-sm-10">
                   <%#= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
                   <%#= error_help_text(@order_booking, :destination_warehouse_id) %>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>-->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </div>-->
                     <% else %>
                       <div class="form-group">
                           <label class="col-sm-2 control-label">Dest. Warehouse code</label>
@@ -62,30 +67,7 @@
                                     <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_warehouse">
                                         <span class="glyphicon glyphicon-plus"></span> Add
                                     </button>
-                                    <!--
-                                      <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_all_product">
-                                          <span class="glyphicon glyphicon-plus"></span> Add All
-                                      </button>-->
                                 </div>
-                                <!--<table id="listing_warehouse_to_table" class="display">
-                                    <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>Code</th>
-                                            <th>Name</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                    <%# @destination_warehouses.each do |destination_warehouse| %>
-                                                  <tr id="destination_warehouse_<%#= destination_warehouse.id %>">
-                                                      <td></td>
-                                                      <td><%#= destination_warehouse.code %></td>
-                                                      <td><%#= destination_warehouse.name %></td>
-                                                  </tr>
-                    <%# end %>
-                                    </tbody>
-                                </table>-->
                             </div>
                         </div>
 
@@ -119,6 +101,9 @@
 
                       <script>
                         $(function () {
+                            $("#warehouse_code").autocomplete({
+                                source: "/order_bookings/search_dest_warehouse"
+                            });
                             $("#order_booking_origin_warehouse_id").change(function () {
                                 $("#warehouse_product_items_form_container").html("");
                                 $($("#warehouse_product_items_form_container").parent().parent()).addClass("hidden");
