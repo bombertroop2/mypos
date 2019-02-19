@@ -264,6 +264,7 @@ Rails.application.routes.draw do
       get "get_warehouse_products"
       get "generate_product_item_form"
       get "add_destination_warehouse"
+      get "search_dest_warehouse"
     end
     member do
       get "picking_note"
