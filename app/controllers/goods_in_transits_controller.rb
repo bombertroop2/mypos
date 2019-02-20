@@ -45,12 +45,12 @@ class GoodsInTransitsController < ApplicationController
   
   def show_shipment_goods
     @shipment = if current_user.has_non_spg_role?
-      Shipment.joins(order_booking: [:origin_warehouse, :destination_warehouse]).where(id: params[:id]).where(["received_date IS NULL AND warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).first
+      Shipment.select("shipments.*", "order_bookings.note AS ob_note").joins(order_booking: [:origin_warehouse, :destination_warehouse]).where(id: params[:id]).where(["received_date IS NULL AND warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).first
     else
       Shipment.joins(order_booking: [:origin_warehouse, :destination_warehouse]).where(id: params[:id]).
         where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id} AND received_date IS NULL").
         where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
-        select("shipments.*").first
+        select("shipments.*", "order_bookings.note AS ob_note").first
     end
     authorize! :read_shipment_goods, @shipment
   end

@@ -66,7 +66,7 @@ class ShipmentsController < ApplicationController
   end
 
   def multiprint
-    @shipments = Shipment.where(id: params[:check]).order(:id)
+    @shipments = Shipment.select("shipments.*", "order_bookings.note AS ob_note").joins(:order_booking).where(id: params[:check]).order(:id)
     @shipments.update_all(is_document_printed: true)
     respond_to do |format|
       format.js
@@ -228,11 +228,11 @@ class ShipmentsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_shipment
     @shipment = if current_user.has_non_spg_role?
-      Shipment.find(params[:id])
+      Shipment.select("shipments.*", "order_bookings.note AS ob_note").joins(:order_booking).find(params[:id])
     else
       Shipment.joins(:order_booking).where(id: params[:id]).
         where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").
-        select("shipments.*").first
+        select("shipments.*", "order_bookings.note AS ob_note").first
     end
   end
 
