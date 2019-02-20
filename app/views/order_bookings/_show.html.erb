@@ -49,11 +49,6 @@
                                     <td>:</td>
                                     <td><%= @order_booking.status %></td>
                                 </tr>
-                                <tr>
-                                    <td style="vertical-align: top">Note</td>
-                                    <td style="vertical-align: top">:</td>
-                                    <td><%= @order_booking.note %></td>
-                                </tr>
                             </table>
                         </td>
                         <td style="width: 50%" valign="top" align="right">
@@ -80,15 +75,25 @@
                                         <% end %>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
                                 <% if (gv = GeneralVariable.select(:pieces_per_koli).first).present? %>
                                   <tr>
                                       <td style="vertical-align: top">Total koli</td>
                                       <td style="vertical-align: top">:</td>
                                       <td>
-                                          <%= (@order_booking.quantity / gv.pieces_per_koli.to_f).ceil %>
+                                          <%= number_to_currency((@order_booking.quantity / gv.pieces_per_koli.to_f).ceil, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
                                       </td>
                                   </tr>
                                 <% end %>
+                                <tr>
+                                    <td style="vertical-align: top">Note</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td><%= @order_booking.note %></td>
+                                </tr>
                             </table>
                         </td>
                     </tr>
@@ -99,16 +104,18 @@
                                     <tr style="text-align: center">
                                         <td><strong>No</strong></td>
                                         <td><strong>Article Code</strong></td>
+                                        <td><strong>Description</strong></td>
                                         <td><strong>Quantity</strong></td>
                                         <td><strong>Quantity Per Article</strong></td>
                                     </tr>
-                                    <% @order_booking.order_booking_products.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code").each_with_index do |order_booking_product, idx| %>
+                                    <% @order_booking.order_booking_products.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code, products.description AS product_desc").each_with_index do |order_booking_product, idx| %>
                                       <% product_sizes = order_booking_product.sizes %>
                                       <% product_colors = order_booking_product.colors %>
                                       <tr align="center">
-                                          <td style="vertical-align: middle"><%= idx.succ %></td>
-                                          <td style="vertical-align: middle"><%= "#{order_booking_product.prdct_code} - #{order_booking_product.name}" %></td>
-                                          <td style="vertical-align: middle">
+                                          <td style="vertical-align: top"><%= idx.succ %></td>
+                                          <td style="vertical-align: top"><%= "#{order_booking_product.prdct_code} - #{order_booking_product.name}" %></td>
+                                          <td style="vertical-align: top;text-align: left"><%= order_booking_product.product_desc %></td>
+                                          <td style="vertical-align: top">
                                               <table class="table table-condensed table-responsive table-bordered">
                                                   <tbody>
                                                       <!--
@@ -135,23 +142,23 @@
                                                               <td align="center" style="vertical-align: middle">
                                                                   <% if order_booking_product_item %>
                                                                     <% qty_per_color += order_booking_product_item.quantity %>
-                                                                    <%= order_booking_product_item.quantity %>
+                                                                    <%= number_to_currency(order_booking_product_item.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
                                                                   <% end %>
                                                               </td>
                                                             <% end %>
-                                                            <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
+                                                            <td align="center" style="vertical-align: middle"><%= number_to_currency(qty_per_color, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                                                         </tr>
                                                       <% end %>
                                                   </tbody>
                                               </table>
                                           </td>
-                                          <td align="right" style="vertical-align: middle"><%= order_booking_product.quantity %></td>
+                                          <td align="right" style="vertical-align: top"><%= number_to_currency(order_booking_product.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                                       </tr>
                                     <% end %>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="3" align="right"><strong>Total Quantity</strong></td>
-                                        <td align="right"><%= @order_booking.quantity %></td>
+                                        <td colspan="4" align="right"><strong>Total Quantity</strong></td>
+                                        <td align="right"><%= number_to_currency(@order_booking.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                                     </tr>
                                 </tfoot>
                                 </tbody>

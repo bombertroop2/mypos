@@ -44,7 +44,7 @@
 
                         <tr style="text-align: center">
                             <% sizes.each do |size| %>
-                              <td align="center"><%= size.size %><br /><%= text_field_tag "quantity_#{dpp.product_id}_#{size.size}", "", {placeholder: "qty", class: "quantity-#{dpp.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %></td>
+                              <td align="center"><%= size.size %><br /><%= text_field_tag "quantity_#{dpp.product_id}_#{size.id}", "", {placeholder: "qty", class: "quantity-#{dpp.product_id} quantity form-control quantity-fields", size: 16, style: "width: 50px !important"} %></td>
                               <% end %>
                           </tr>
 
@@ -54,7 +54,7 @@
                                 <% sizes.each do |size| %>
                                   <% if idx == 0 %>
                                 <script>
-                                  sizeSizes.push('<%= size.size %>');
+                                  sizeSizes.push('<%= size.id %>');
                                 </script>
                               <% end %>
                               <% direct_purchase_detail_detail = dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(size.id) and dpd.color_id.eql?(color.id)}.first %>
@@ -64,7 +64,7 @@
                                     <%= direct_purchase_detail_detail_form.hidden_field :size_id %>
                                     <%= direct_purchase_detail_detail_form.hidden_field :color_id %>
                                     <div class="<%= control_group_error(direct_purchase_detail_detail, :quantity) %>">
-                                        <%= direct_purchase_detail_detail_form.text_field :quantity, placeholder: "qty", class: "quantity-#{dpp.product_id}-#{size.size} quantity-#{dpp.product_id} quantity form-control quantity-fields quantity-fields-child quantity-fields-child-#{dpp.product_id}", size: 16, style: "width: 50px !important" %>
+                                        <%= direct_purchase_detail_detail_form.text_field :quantity, placeholder: "qty", class: "quantity-#{dpp.product_id}-#{size.id} quantity-#{dpp.product_id} quantity form-control quantity-fields quantity-fields-child quantity-fields-child-#{dpp.product_id}", size: 16, style: "width: 50px !important" %>
                                           <%= error_help_text(direct_purchase_detail_detail, :quantity) %>
                                       </div>
                                     <% end %>
