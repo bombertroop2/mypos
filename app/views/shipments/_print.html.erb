@@ -76,15 +76,25 @@ File.open(full_path, 'wb') { |f| f.write blob }
                         <% end %>
                     </td>
                 </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td></td>
+                    <td></td>
+                </tr>
                 <% if (gv = GeneralVariable.select(:pieces_per_koli).first).present? %>
                   <tr>
                       <td style="vertical-align: top">Total koli</td>
                       <td style="vertical-align: top">:</td>
                       <td>
-                          <%= (@shipment.quantity / gv.pieces_per_koli.to_f).ceil %>
+                          <%= number_to_currency((@shipment.quantity / gv.pieces_per_koli.to_f).ceil, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
                       </td>
                   </tr>
                 <% end %>                
+                <tr>
+                    <td style="vertical-align: top">Note</td>
+                    <td style="vertical-align: top">:</td>
+                    <td><%= @shipment.ob_note %></td>
+                </tr>
             </table>
         </td>
     </tr>
@@ -95,17 +105,19 @@ File.open(full_path, 'wb') { |f| f.write blob }
                     <tr style="text-align: center">
                         <td><strong>No</strong></td>
                         <td><strong>Article Code</strong></td>
+                        <td><strong>Description</strong></td>
                         <td><strong>Quantity</strong></td>
                         <td><strong>Quantity Per Article</strong></td>
                     </tr>
                     <% @shipment.shipment_products.select(:id, :quantity, :order_booking_product_id).each_with_index do |shipment_product, idx| %>
-                      <% order_booking_product = OrderBookingProduct.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code").where(id: shipment_product.order_booking_product_id).first %>
+                      <% order_booking_product = OrderBookingProduct.joins(product: :brand).select("order_booking_products.id, order_booking_products.quantity, common_fields.name, products.code AS prdct_code, products.description AS product_desc").where(id: shipment_product.order_booking_product_id).first %>
                       <% product_sizes = order_booking_product.sizes %>
                       <% product_colors = order_booking_product.colors %>
                       <tr align="center">
-                          <td style="vertical-align: middle"><%= idx.succ %></td>
-                          <td style="vertical-align: middle"><%= "#{order_booking_product.prdct_code} - #{order_booking_product.name}" %></td>
-                          <td style="vertical-align: middle">
+                          <td style="vertical-align: top"><%= idx.succ %></td>
+                          <td style="vertical-align: top"><%= "#{order_booking_product.prdct_code} - #{order_booking_product.name}" %></td>
+                          <td style="vertical-align: top;text-align: left"><%= order_booking_product.product_desc %></td>
+                          <td style="vertical-align: top">
                               <table class="table table-condensed table-bordered">
                                   <tbody>
                                       <!--
@@ -132,22 +144,22 @@ File.open(full_path, 'wb') { |f| f.write blob }
                                               <td align="center" style="vertical-align: middle">
                                                   <% if shipment_product_item %>
                                                     <% qty_per_color += shipment_product_item.quantity %>
-                                                    <%= shipment_product_item.quantity %>
+                                                    <%= number_to_currency(shipment_product_item.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
                                                   <% end %>
                                               </td>
                                             <% end %>
-                                            <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
+                                            <td align="center" style="vertical-align: middle"><%= number_to_currency(qty_per_color, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                                         </tr>
                                       <% end %>
                                   </tbody>
                               </table>
                           </td>
-                          <td align="right" style="vertical-align: middle"><%= shipment_product.quantity %></td>
+                          <td align="right" style="vertical-align: top"><%= number_to_currency(shipment_product.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                       </tr>
                     <% end %>
                     <tr>
-                        <td colspan="3" align="right"><strong>Total Quantity</strong></td>
-                        <td align="right"><%= @shipment.quantity %></td>
+                        <td colspan="4" align="right"><strong>Total Quantity</strong></td>
+                        <td align="right"><%= number_to_currency(@shipment.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                     </tr>
                 </tbody>
             </table>
