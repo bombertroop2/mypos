@@ -241,7 +241,7 @@ class ShipmentsController < ApplicationController
     params.permit(:order_booking_number, :quantity, :delivery_date, :order_booking_id, :courier_id,
       shipment_products_attributes: [:order_booking_product_id, :order_booking_id, :quantity,
         shipment_product_items_attributes: [:order_booking_product_item_id, :quantity,
-          :order_booking_product_id, :order_booking_id]])
+          :order_booking_product_id, :order_booking_id, :attr_delivery_date]])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -276,7 +276,7 @@ class ShipmentsController < ApplicationController
         params[:shipments][shipments_key][:shipment_products_attributes][key][:shipment_product_items_attributes].each do |spi_key, value|
           total_quantity_shipment += params[:shipments][shipments_key][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key][:quantity].to_i
           total_quantity_shipment_product += params[:shipments][shipments_key][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key][:quantity].to_i
-          params[:shipments][shipments_key][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key].merge! order_booking_product_id: params[:shipments][shipments_key][:shipment_products_attributes][key][:order_booking_product_id], order_booking_id: params[:shipments][shipments_key][:order_booking_id]
+          params[:shipments][shipments_key][:shipment_products_attributes][key][:shipment_product_items_attributes][spi_key].merge! order_booking_product_id: params[:shipments][shipments_key][:shipment_products_attributes][key][:order_booking_product_id], order_booking_id: params[:shipments][shipments_key][:order_booking_id], attr_delivery_date: params[:shipments][shipments_key][:delivery_date]
         end if params[:shipments][shipments_key][:shipment_products_attributes][key][:shipment_product_items_attributes].present?
         params[:shipments][shipments_key][:shipment_products_attributes][key].merge! quantity: total_quantity_shipment_product
       end if params[:shipments][shipments_key][:shipment_products_attributes].present?

@@ -1,5 +1,5 @@
 class ShipmentProductItem < ApplicationRecord
-  attr_accessor :order_booking_id, :order_booking_product_id
+  attr_accessor :order_booking_id, :order_booking_product_id, :attr_delivery_date
 
   audited associated_with: :shipment_product, on: [:create, :update]
 
@@ -8,7 +8,7 @@ class ShipmentProductItem < ApplicationRecord
   has_many :listing_stock_transactions, as: :transactionable
   validates :quantity, presence: true
   validates :quantity, numericality: {greater_than_or_equal_to: 0, only_integer: true}, if: proc { |spi| spi.quantity.present? }
-    validate :item_available
+    validate :item_available, :price_available
     validate :quantity_available, if: proc{|spi| spi.quantity.present? && spi.quantity.is_a?(Numeric)}
       validate :transaction_after_beginning_stock_added
 
@@ -246,21 +246,33 @@ class ShipmentProductItem < ApplicationRecord
   
       def item_available
         @order_booking_product_item = if new_record?
-          OrderBookingProductItem.joins(order_booking_product: [order_booking: [:origin_warehouse, :destination_warehouse]]).
+          OrderBookingProductItem.joins(:size, order_booking_product: [:product, order_booking: [:origin_warehouse, :destination_warehouse]]).
             where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
             where(:"order_bookings.status" => "P").
             where(:"order_bookings.id" => order_booking_id).
             where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
-            select(:quantity, :size_id, :color_id, :origin_warehouse_id, "destination_warehouses_order_bookings.warehouse_type", "order_bookings.destination_warehouse_id", "order_booking_products.product_id AS prdct_id").first
+            select(:quantity, :size_id, :color_id, :origin_warehouse_id, "destination_warehouses_order_bookings.warehouse_type", "order_bookings.destination_warehouse_id", "order_booking_products.product_id AS prdct_id", "warehouses.price_code_id AS origin_warehouse_price_code_id", "sizes.size AS product_size", "products.code AS product_code").first
         else
-          OrderBookingProductItem.joins(order_booking_product: [order_booking: [:origin_warehouse, :destination_warehouse]]).
+          OrderBookingProductItem.joins(:size, order_booking_product: [:product, order_booking: [:origin_warehouse, :destination_warehouse]]).
             where(id: order_booking_product_item_id, order_booking_product_id: order_booking_product_id).
             where(:"order_bookings.status" => "F").
             where(:"order_bookings.id" => order_booking_id).
             where(["warehouses.is_active = ? AND destination_warehouses_order_bookings.is_active = ?", true, true]).
-            select(:quantity, :size_id, :color_id, :origin_warehouse_id, "destination_warehouses_order_bookings.warehouse_type", "order_bookings.destination_warehouse_id", "order_booking_products.product_id AS prdct_id").first
+            select(:quantity, :size_id, :color_id, :origin_warehouse_id, "destination_warehouses_order_bookings.warehouse_type", "order_bookings.destination_warehouse_id", "order_booking_products.product_id AS prdct_id", "warehouses.price_code_id AS origin_warehouse_price_code_id", "sizes.size AS product_size", "products.code AS product_code").first
         end
         errors.add(:base, "Not able to deliver selected items") if @order_booking_product_item.blank?
+      end
+
+      def price_available
+        if attr_delivery_date.present? && price_list_id.blank? && @order_booking_product_item.present?
+          pl = PriceList.select(:id).joins(:product_detail).
+            where(["price_lists.effective_date <= ? AND product_details.size_id = ? AND product_details.product_id = ? AND product_details.price_code_id = ?", attr_delivery_date.to_date, @order_booking_product_item.size_id, @order_booking_product_item.prdct_id, @order_booking_product_item.origin_warehouse_price_code_id]).order("price_lists.effective_date DESC").first
+          if pl.blank?
+            errors.add(:base, "Price (article: #{@order_booking_product_item.product_code}, size: #{@order_booking_product_item.product_size}) is not available")
+          else
+            self.price_list_id = pl.id
+          end
+        end
       end
       
       def quantity_available
