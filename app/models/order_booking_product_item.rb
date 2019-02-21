@@ -7,6 +7,7 @@ class OrderBookingProductItem < ApplicationRecord
   belongs_to :order_booking_product
   belongs_to :size
   belongs_to :color
+  belongs_to :origin_warehouse, class_name: "Warehouse", foreign_key: :origin_warehouse_id
 
   validates :quantity, presence: true, unless: proc{|obpi| obpi.disable_validation}
     validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |dpd| dpd.quantity.present? }
