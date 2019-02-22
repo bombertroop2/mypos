@@ -1,0 +1,172 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close" id="btn-close-show-page-ari-<%= @accounts_receivable_invoice.id %>">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+    <table class="table table-condensed table-responsive table-bordered">
+        <tr>
+            <td style="padding: 20px">
+                <table width="100%">
+                    <tr>
+                        <td align="center" colspan="2"><strong>INVOICE</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;width: 50%">
+                            <table class="table-condensed table-responsive">
+                                <tr>
+                                    <td colspan="3"><%= @company.name %></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"><%= @company.address %></td>
+                                </tr>
+                                <tr>
+                                    <td>Phone</td>
+                                    <td>:</td>
+                                    <td><%= remove_empty_space_from_phone_number @company.phone %></td>
+                                </tr>
+                                <tr>
+                                    <td>Fax</td>
+                                    <td>:</td>
+                                    <td><%= remove_empty_space_from_phone_number @company.fax %></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Customer</td>
+                                    <td>:</td>
+                                    <td><%= @accounts_receivable_invoice.customer_name %></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Phone: <%= remove_empty_space_from_phone_number @accounts_receivable_invoice.customer_phone %>&nbsp;&nbsp;Fax: <%= remove_empty_space_from_phone_number @accounts_receivable_invoice.customer_facsimile %></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="vertical-align: top;width: 50%">
+                            <table class="table-condensed table-responsive" align="right">
+                                <tr>
+                                    <td style="vertical-align: top">Number</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="vertical-align: top"><%= @accounts_receivable_invoice.number %></td>
+                                </tr>
+                                <tr style="white-space: nowrap">
+                                    <td style="vertical-align: top">Invoice Date</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="vertical-align: top"><%= @accounts_receivable_invoice.created_at.to_date.strftime("%d/%m/%Y") %></td>
+                                </tr>
+                                <tr style="white-space: nowrap">
+                                    <td style="vertical-align: top">Due Date</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="vertical-align: top"><%= @accounts_receivable_invoice.due_date.to_date.strftime("%d/%m/%Y") %></td>
+                                </tr>
+                                <tr style="white-space: nowrap">
+                                    <td style="vertical-align: top">Shipment No.</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="vertical-align: top"><%= @accounts_receivable_invoice.delivery_order_number %></td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top">Note</td>
+                                    <td style="vertical-align: top">:</td>
+                                    <td style="vertical-align: top"><%= @accounts_receivable_invoice.note %></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <table class="table table-condensed table-responsive table-bordered">
+                                <tbody>
+                                    <tr style="text-align: center">
+                                        <th>No.</th>
+                                        <th>Article</th>
+                                        <th>Color</th>
+                                        <th>Size</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Amount</th>
+                                    </tr>                                    
+                                    <% gross_total = 0 %>
+                                    <% @accounts_receivable_invoice.shipment_product_items.each_with_index do |spi, idx| %>
+                                      <tr>
+                                          <td style="vertical-align: middle;text-align: center"><%= idx.succ %></td>
+                                          <td style="vertical-align: middle"><%= "#{spi.order_booking_product_item.order_booking_product.product.code} - #{spi.order_booking_product_item.order_booking_product.product.brand.name}, #{spi.order_booking_product_item.order_booking_product.product.description}" %></td>
+                                          <td style="vertical-align: middle"><%= "#{spi.order_booking_product_item.color.code} - #{spi.order_booking_product_item.color.name}" %></td>
+                                          <td style="vertical-align: middle"><%= spi.order_booking_product_item.size.size %></td>
+                                          <td style="vertical-align: middle;text-align: right"><%= number_to_currency(spi.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %> pcs</td>
+                                          <td style="vertical-align: middle;text-align: right"><%= number_to_currency(spi.price_list.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                          <td style="vertical-align: middle;text-align: right"><%= number_to_currency(spi.quantity * spi.price_list.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                                      </tr>
+                                      <% gross_total += spi.quantity * spi.price_list.price %>
+                                    <% end %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6" align="right"><strong>Gross Total</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(gross_total,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                    <%
+                                    vat = if @accounts_receivable_invoice.customer_is_taxable_entrepreneur
+                                      if @accounts_receivable_invoice.customer_vat_type.eql?("include")
+                                        (gross_total / 1.1 * 0.1).round(2)
+                                        else
+                                        gross_total * 0.1
+                                      end
+                                      else
+                                    0
+                                      end
+                                  %>
+                                    <tr>
+                                        <td colspan="6" align="right"><strong>VAT</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(vat,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                    <%
+                                    net_total = if @accounts_receivable_invoice.customer_is_taxable_entrepreneur
+                                      if @accounts_receivable_invoice.customer_vat_type.eql?("include")
+                                      gross_total
+                                        else
+                                        gross_total + gross_total * 0.1
+                                      end
+                                      else
+                                    gross_total
+                                      end  
+                                  %>
+                                    <tr>
+                                        <td colspan="6" align="right"><strong>Net Total</strong></td>
+                                        <td align="right"><strong><%= number_to_currency(net_total,
+                                                  :separator => ",",
+                                                  :delimiter => ".",
+                                                  :unit => "Rp",
+                                                  :precision => 2) %></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </td>
+                    </tr>                    
+                    <tr>
+                        <td>Created by</td>
+                        <td style="text-align: right">Approved by</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top: 50px"><%= @accounts_receivable_invoice.audits.where(action: "create").select(:user_id, :user_type).first.user.name %></td>
+                        <td style="text-align: right"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+
+</td>
