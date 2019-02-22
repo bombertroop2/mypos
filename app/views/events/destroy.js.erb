@@ -6,7 +6,5 @@
     bbox.on("hidden.bs.modal", function () { 
       window.location = '<%= events_path %>';
     });
-  <% else %>
-    <%= smart_listing_item :events, :update, @event, "events/event" %>
   <% end %>
 <% end %>

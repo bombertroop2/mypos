@@ -4,5 +4,4 @@
   <% if @stock_mutation.errors.present? && @stock_mutation.errors.messages[:base].present? %>
     bootbox.alert({message: "<%= @stock_mutation.errors.messages[:base].join("<br/>") %>",size: 'small'});
   <% end %>
-  <%= smart_listing_item :stock_mutations, :update, @stock_mutation, "stock_mutations/stock_mutation" %>
 <% end %>
