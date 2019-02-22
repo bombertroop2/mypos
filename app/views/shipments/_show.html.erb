@@ -8,7 +8,7 @@ blob = Barby::PngOutputter.new(barcode).to_png
 File.open(full_path, 'wb') { |f| f.write blob }
 %>
 <td colspan="5">
-    <button type="button" class="close cancel" aria-label="Close">
+    <button type="button" class="close cancel" aria-label="Close" id="btn-close-show-page-shipment-<%= @shipment.id %>">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>

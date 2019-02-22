@@ -1,5 +1,5 @@
 <td colspan="5">
-    <button type="button" class="close cancel" aria-label="Close">
+    <button type="button" class="close cancel" aria-label="Close" id="btn-close-show-page-sales-<%= object.id %>">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>
@@ -27,7 +27,7 @@
     </dl>
 
 
-    <% if object.event_type.eql?("Gift") && object.gift_event_product_id.blank? %>
+    <% if !action_name.eql?("print_return_receipt") && object.event_type.eql?("Gift") && object.gift_event_product_id.blank? %>
       <dl class="dl-horizontal">
           <dt>Subtotal</dt>
           <dd><%= number_to_currency(object.total + object.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
@@ -73,7 +73,7 @@
       </dl>
     <% end %>
 
-    <% if object.product_code.present? && object.brand_code.present? && object.brand_name.present? && object.product_size.present? && object.color_code.present? && object.color_name.present? %>
+    <% if !action_name.eql?("print_return_receipt") && object.product_code.present? && object.brand_code.present? && object.brand_name.present? && object.product_size.present? && object.color_code.present? && object.color_name.present? %>
       <dl class="dl-horizontal">
           <dt>Gift Item</dt>
           <dd><%= "Product code: #{object.product_code}, Brand: #{object.brand_code} - #{object.brand_name}, Color: #{object.color_code} - #{object.color_name}, Size: #{object.product_size}" %></dd>

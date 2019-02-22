@@ -6,5 +6,9 @@
 $("#ap_invoice_print_doc").removeClass("hidden");
 $("#ap_invoice_print_doc").print();
 $("#ap_invoice_print_doc").addClass("hidden");
-<%= smart_listing_item :account_payables, :update, @account_payable, "account_payables/account_payable" %>
-$("#vendor_name_<%= @account_payable.id %>").html("<%= @vendor_name %>");
+<% if @account_payable.beginning_of_account_payable_creating.eql?("Partial") %>
+  <%= smart_listing_item :account_payables, :edit, @account_payable, "account_payables/show_partial" %>
+<% else %>
+  <%= smart_listing_item :account_payables, :edit, @account_payable, "account_payables/show" %>
+<% end %>
+$("#btn-close-show-page-api-<%= @account_payable.id %>").click();

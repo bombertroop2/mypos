@@ -4,5 +4,4 @@
   <% if @courier_price.errors[:base].present? %>
     bootbox.alert({message: "<%= @courier_price.errors[:base].join("<br/>") %>",size: 'small'});
   <% end %>
-  <%= smart_listing_item :courier_prices, :update, @courier_price, "courier_prices/courier_price" %>
 <% end %>

@@ -2,6 +2,5 @@ $("#print_ap_invoice_courier_container").html("<%= j(render(partial: "print")) %
 $("#ap_invoice_courier_print_doc").removeClass("hidden");
 $("#ap_invoice_courier_print_doc").print();
 $("#ap_invoice_courier_print_doc").addClass("hidden");
-<%= smart_listing_item :account_payable_couriers, :update, @account_payable_courier, "account_payable_couriers/account_payable_courier" %>
-<% courier = Courier.select(:id, :code, :name).find(@account_payable_courier.courier_id) %>  
-$("#listing_ap_invoice_courier_courier_detail_<%= @account_payable_courier.id %>").html("<%= courier.code_and_name %>");
+<%= smart_listing_item :account_payable_couriers, :edit, @account_payable_courier, "account_payable_couriers/show" %>
+$("#btn-close-show-page-apic-<%= @account_payable_courier.id %>").click();

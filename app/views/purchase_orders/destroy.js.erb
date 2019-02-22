@@ -4,5 +4,4 @@
   <% if @purchase_order.errors.present? && @purchase_order.errors.messages[:base].present? %>
     bootbox.alert({message: "<%= @purchase_order.errors.messages[:base].join("<br/>") %>",size: 'small'});
   <% end %>
-  <%= smart_listing_item :purchase_orders, :update, @purchase_order, "purchase_orders/purchase_order" %>
 <% end %>
