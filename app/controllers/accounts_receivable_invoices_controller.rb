@@ -64,6 +64,8 @@ class AccountsReceivableInvoicesController < ApplicationController
           if @accounts_receivable_invoice.errors[:base].present?
             render js: "bootbox.alert({message: \"#{@accounts_receivable_invoice.errors[:base].join("<br/>")}\",size: 'small'});"
           end
+        else
+          SendEmailJob.perform_later(@accounts_receivable_invoice, "AR invoice")
         end
       rescue ActiveRecord::RecordNotUnique => e
         if recreate_counter < 5
