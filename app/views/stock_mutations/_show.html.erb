@@ -8,7 +8,7 @@ blob = Barby::PngOutputter.new(barcode).to_png
 File.open(full_path, 'wb') { |f| f.write blob }
 %>
 <td colspan="<%= @stock_mutation.destination_warehouse.warehouse_type.eql?("central") ? "5" : "6" %>">
-    <button type="button" class="close cancel" aria-label="Close">
+    <button type="button" class="close cancel" aria-label="Close" id="btn-close-show-page-sm-<%= @stock_mutation.id %>">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>

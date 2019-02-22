@@ -2,4 +2,5 @@ $("#print_ap_courier_payment_container").html("<%= j(render(partial: "print")) %
 $("#ap_courier_payment_print_doc").removeClass("hidden");
 $("#ap_courier_payment_print_doc").print();
 $("#ap_courier_payment_print_doc").addClass("hidden");
-<%= smart_listing_item :account_payable_courier_payments, :update, @account_payable_courier_payment, "account_payable_courier_payments/account_payable_courier_payment" %>
+<%= smart_listing_item :account_payable_courier_payments, :edit, @account_payable_courier_payment, "account_payable_courier_payments/show" %>
+$("#btn-close-show-page-appc-<%= @account_payable_courier_payment.id %>").click();

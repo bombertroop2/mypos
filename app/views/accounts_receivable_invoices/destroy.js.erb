@@ -1,0 +1,7 @@
+<% if @deleted %>
+  <%= smart_listing_item :accounts_receivable_invoices, :destroy, @accounts_receivable_invoice %>
+<% else %>
+  <% if @accounts_receivable_invoice.errors[:base].present? %>
+    bootbox.alert({message: "<%= @accounts_receivable_invoice.errors[:base].join("<br/>") %>",size: 'small'});
+  <% end %>
+<% end %>
