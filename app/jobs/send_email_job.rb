@@ -27,6 +27,9 @@ class SendEmailJob < ApplicationJob
       Email.account_payable_officers.each do |account_payable_officer_email|
         DuosMailer.payment_email(object, account_payable_officer_email.address, "courier").deliver
       end
+    elsif type.eql?("AR invoice")      
+      recipient = Customer.select(:email).joins(order_bookings: :shipment).where(["shipments.id = ?", object.shipment_id]).first
+      DuosMailer.ar_invoice_email(object, recipient.email).deliver
     end
   end
 end

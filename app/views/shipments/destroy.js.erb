@@ -4,5 +4,4 @@
   <% if @shipment.errors[:base].present? %>
     bootbox.alert({message: "<%= @shipment.errors[:base].join("<br/>") %>",size: 'small'});
   <% end %>
-  <%= smart_listing_item :shipments, :update, @shipment, "shipments/shipment" %>
 <% end %>

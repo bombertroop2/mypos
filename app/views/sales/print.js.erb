@@ -4,5 +4,6 @@ $("#receipt_doc").print();
 $("#receipt_doc").addClass("hidden");
 <% unless params[:update_sale_row].eql?("false") %>
   <% @sale.attr_print_receipt = true %>
-  <%= smart_listing_item :sales, :update, @sale, "sales/sale" %>
+  <%= smart_listing_item :sales, :edit, @sale, "sales/show" %>
+  $("#btn-close-show-page-sales-<%= @sale.id %>").click();
 <% end %>

@@ -1,0 +1,6 @@
+$("#print_ar_invoice_ds_container").html("<%= j(render(partial: "print")) %>");
+$("#ar_invoice_print_doc").removeClass("hidden");
+$("#ar_invoice_print_doc").print();
+$("#ar_invoice_print_doc").addClass("hidden");
+<%= smart_listing_item :accounts_receivable_invoices, :edit, @accounts_receivable_invoice, "accounts_receivable_invoices/show" %>
+$("#btn-close-show-page-ari-<%= @accounts_receivable_invoice.id %>").click();

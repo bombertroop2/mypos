@@ -5,6 +5,7 @@ class ShipmentProductItem < ApplicationRecord
 
   belongs_to :order_booking_product_item
   belongs_to :shipment_product
+  belongs_to :price_list
   has_many :listing_stock_transactions, as: :transactionable
   validates :quantity, presence: true
   validates :quantity, numericality: {greater_than_or_equal_to: 0, only_integer: true}, if: proc { |spi| spi.quantity.present? }

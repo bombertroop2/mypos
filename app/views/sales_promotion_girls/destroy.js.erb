@@ -1,6 +1,5 @@
 <% if @destroyed %>
   <%= smart_listing_item :sales_promotion_girls, :destroy, @sales_promotion_girl %>
 <% else %>
-  <%= smart_listing_item :sales_promotion_girls, :update, @sales_promotion_girl, "sales_promotion_girls/sales_promotion_girl" %>
   bootbox.alert({message: "Sorry, you can't delete <%= @sales_promotion_girl.name %>",size: 'small'});
 <% end %>
