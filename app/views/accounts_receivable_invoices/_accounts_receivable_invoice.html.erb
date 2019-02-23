@@ -1,0 +1,14 @@
+<td><%= object.number %></td>
+<td id="listing-ar-invoice-do-number-<%= object.id %>"><%= object.shipment_do_number rescue "" %></td>
+<td><%= object.due_date.strftime("%d/%m/%Y") %></td>
+<td id="listing-ar-invoice-customer-<%= object.id %>"><%= "#{object.customer_code} - #{object.customer_name}" rescue "" %></td>
+<td><%= number_to_currency(object.remaining_debt,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="actions text-right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, accounts_receivable_invoice_path(object), data: {remote: true}, title: "Show" %>
+    <%= link_to_if(can?(:manage, AccountsReceivableInvoice), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_accounts_receivable_invoice_path(object), :remote => true, :method => :get, title: "Print" ) %>
+    <%= link_to_if(can?(:manage, AccountsReceivableInvoice), content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+</td>
