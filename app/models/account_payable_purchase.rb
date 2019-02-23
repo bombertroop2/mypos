@@ -1,7 +1,7 @@
 class AccountPayablePurchase < ApplicationRecord
   attr_accessor :vendor_id, :attr_vendor_invoice_date,
     :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money,
-    :attr_vat_in_money, :attr_net_amount
+    :attr_vat_in_money, :attr_net_amount, :attr_purchase_number
   
   belongs_to :account_payable
   belongs_to :purchase, polymorphic: true
