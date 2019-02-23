@@ -9,22 +9,22 @@
                 <%= form_for(@general_variable, html: {class: "form-horizontal"}) do |f| %>
 
                     <div class="form-group<%= control_group_error(@general_variable, :pieces_per_koli) %>">
-                        <%= f.label :pieces_per_koli, class: "col-sm-3 control-label" %>
-                          <div class="col-sm-9">
+                        <%= f.label :pieces_per_koli, class: "col-sm-4 control-label" %>
+                          <div class="col-sm-8">
                               <%= f.number_field :pieces_per_koli, class: "form-control" %>
                                 <%= error_help_text(@general_variable, :pieces_per_koli) %>
                             </div>
                         </div>
                         <div class="form-group<%= control_group_error(@general_variable, :beginning_of_account_payable_creating) %>">
-                            <%= f.label :beginning_of_account_payable_creating, "Beginning of AP invoice creating", class: "col-sm-3 control-label" %>
-                              <div class="col-sm-9">
+                            <%= f.label :beginning_of_account_payable_creating, "Beginning of AP invoice creating (Purchasing)", class: "col-sm-4 control-label" %>
+                              <div class="col-sm-8">
                                   <%= f.select :beginning_of_account_payable_creating, options_for_select(GeneralVariable::BEGINNING_OF_AP_CREATINGS, @general_variable.beginning_of_account_payable_creating), {prompt: true}, {class: "form-control"} %>
                                     <%= error_help_text(@general_variable, :beginning_of_account_payable_creating) %>
                                 </div>
                             </div>
                             <div class="form-group<%= control_group_error(@general_variable, :beginning_of_due_date_calculating) %>">
-                                <%= f.label :beginning_of_due_date_calculating, class: "col-sm-3 control-label" %>
-                                  <div class="col-sm-9">
+                                <%= f.label :beginning_of_due_date_calculating, "Beginning of due date calculating (Expedition)", class: "col-sm-4 control-label" %>
+                                  <div class="col-sm-8">
                                       <%= f.select :beginning_of_due_date_calculating, options_for_select(GeneralVariable::BEGINNING_OF_DUE_DATE_CALCULATINGS, @general_variable.beginning_of_due_date_calculating), {prompt: true}, {class: "form-control"} %>
                                         <%= error_help_text(@general_variable, :beginning_of_due_date_calculating) %>
                                     </div>
