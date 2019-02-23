@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  resources :accounts_receivable_invoices, except: [:edit, :update] do    
+    collection do
+      get "get_shipment_detail"
+    end
+    member do
+      get "print"
+    end
+  end
   resources :account_payable_courier_payments, except: [:edit, :update, :destroy] do
     collection do
       get "generate_form"

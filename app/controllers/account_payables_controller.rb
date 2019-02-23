@@ -44,8 +44,12 @@ class AccountPayablesController < ApplicationController
   # GET /account_payables/new
   def new
     gv = GeneralVariable.select(:beginning_of_account_payable_creating).first
-    @account_payable = AccountPayable.new beginning_of_account_payable_creating: gv.beginning_of_account_payable_creating
-    if gv.beginning_of_account_payable_creating.eql?("Closed/Finish")
+    @account_payable = if gv.present?
+      AccountPayable.new beginning_of_account_payable_creating: gv.beginning_of_account_payable_creating
+    else
+      AccountPayable.new beginning_of_account_payable_creating: "Closed/Finish"
+    end
+    if @account_payable.beginning_of_account_payable_creating.eql?("Closed/Finish")
       @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date,
         :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur,
         :value_added_tax,:is_additional_disc_from_net, :net_amount, :invoice_status).

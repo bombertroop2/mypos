@@ -1,0 +1,65 @@
+<td colspan="6">
+    <%= form_for(@accounts_receivable_invoice, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
+        <div class="form-group<%= control_group_error(@accounts_receivable_invoice, :shipment_id) %>">
+            <%= f.label :shipment_id, class: "col-sm-2 control-label" %>
+              <div class="col-sm-10">
+                  <%= f.select :shipment_id, options_from_collection_for_select(Shipment.select(:id, :delivery_order_number).joins(:order_booking).where(invoiced: false).where("order_bookings.customer_id IS NOT NULL"), :id, :delivery_order_number, @accounts_receivable_invoice.shipment_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                    <%= error_help_text(@accounts_receivable_invoice, :shipment_id) %>
+                </div>
+            </div>
+            <div id="shipment-detail-container"<% if @accounts_receivable_invoice.shipment_id.blank? %> class="hidden"<% end %>>
+                <div class="form-group">
+                    <%= f.label :attr_customer_info, "Customer", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= f.text_field :attr_customer_info, readonly: true, class: "form-control", style: "cursor: not-allowed" %>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <%= f.label :attr_shipment_quantity, "Quantity", class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= f.text_field :attr_shipment_quantity, readonly: true, class: "form-control", style: "cursor: not-allowed;text-align: right" %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <%= f.label :attr_gross_amount, "Gross amount", class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= f.text_field :attr_gross_amount, readonly: true, class: "form-control", style: "cursor: not-allowed;text-align: right" %>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <%= f.label :attr_vat_value, "VAT", class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= f.text_field :attr_vat_value, readonly: true, class: "form-control", style: "cursor: not-allowed;text-align: right" %>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <%= f.label :attr_net_amount, "Net amount", class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.text_field :attr_net_amount, readonly: true, class: "form-control", style: "cursor: not-allowed;text-align: right" %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <%= f.label :note, class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.text_area :note, rows: 6, class: "form-control" %>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <%= f.submit "Save", class: "btn btn-primary" %>
+                                              <button class="btn btn-link cancel">Cancel</button>
+                                          </div>
+                                      </div>
+                                    <% end %>
+                                </td>
+                                <script>
+                                  $(function () {
+                                      $("#accounts_receivable_invoice_shipment_id").attr("data-placeholder", "Please select").chosen();
+                                      $("#accounts_receivable_invoice_shipment_id").change(function () {
+                                          $.get("/accounts_receivable_invoices/get_shipment_detail", {
+                                              shipment_id: $(this).val()
+                                          });
+                                      });
+                                  });
+                                </script>

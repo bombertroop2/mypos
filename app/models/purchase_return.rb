@@ -1,5 +1,5 @@
 class PurchaseReturn < ApplicationRecord
-  attr_accessor :delivery_order_number, :direct_purchase_return
+  attr_accessor :delivery_order_number, :direct_purchase_return, :attr_purchase_return_number, :attr_purchase_return_net_amount
   
   audited on: :create
 
@@ -7,14 +7,14 @@ class PurchaseReturn < ApplicationRecord
   has_many :purchase_return_products, dependent: :destroy
   belongs_to :purchase_order
   belongs_to :direct_purchase
-  
+    
   validate :purchase_order_is_returnable, if: proc {|pr| pr.purchase_order_id.present? && !pr.direct_purchase_return}
     validate :direct_purchase_is_returnable, if: proc {|pr| pr.direct_purchase_id.present? && pr.direct_purchase_return}
       validates :purchase_order_id, presence: true, unless: proc{|pr| pr.direct_purchase_return}
         validates :delivery_order_number, :direct_purchase_id, presence: true, if: proc{|pr| pr.direct_purchase_return}
           validate :check_min_return_quantity, if: proc{|pr| pr.delivery_order_number.present? || pr.purchase_order_id.present?}
   
-            before_create :generate_number
+            before_create :generate_number, :set_attr_purchase_return_number, :calculate_net_amount
   
             accepts_nested_attributes_for :purchase_return_products, reject_if: :quantity_blank
 
@@ -32,6 +32,78 @@ class PurchaseReturn < ApplicationRecord
             end
     
             private
+            
+            def calculate_net_amount
+              self.attr_purchase_return_net_amount = if purchase_order_id.present?
+                # hitung gross return amount
+                total_return_value = 0
+                purchase_return_products.each do |purchase_return_product|
+                  purchase_order_product = @purchase_doc.purchase_order_products.select{|pop| pop.id == purchase_return_product.purchase_order_product_id}.first
+                  product_cost = purchase_order_product.cost_list.cost
+                  purchase_return_product.purchase_return_items.each do |purchase_return_item|
+                    total_return_value += purchase_return_item.quantity * product_cost
+                  end
+                end
+                
+                # potong gross return amount dengan diskon
+                value_after_first_discount = total_return_value - total_return_value * (@purchase_doc.first_discount.to_f / 100)
+                value_after_second_discount = if @purchase_doc.is_additional_disc_from_net
+                  value_after_first_discount - value_after_first_discount * (@purchase_doc.second_discount.to_f / 100)
+                elsif @purchase_doc.second_discount.present?
+                  total_return_value - total_return_value * ((@purchase_doc.first_discount.to_f + @purchase_doc.second_discount.to_f) / 100)
+                end
+                value_after_discount = value_after_second_discount || value_after_first_discount
+                
+                # hitung net amount
+                if @purchase_doc.is_taxable_entrepreneur                
+                  if @purchase_doc.value_added_tax.eql?("exclude")
+                    value_after_discount + value_after_discount * 0.1
+                  else
+                    value_after_discount                    
+                  end
+                else
+                  value_after_discount                    
+                end
+              else
+                # hitung gross return amount
+                total_return_value = 0
+                purchase_return_products.each do |purchase_return_product|
+                  direct_purchase_product = @purchase_doc.direct_purchase_products.select{|dpp| dpp.id == purchase_return_product.direct_purchase_product_id}.first
+                  product_cost = direct_purchase_product.cost_list.cost
+                  purchase_return_product.purchase_return_items.each do |purchase_return_item|
+                    total_return_value += purchase_return_item.quantity * product_cost
+                  end
+                end
+                
+                # potong gross return amount dengan diskon
+                value_after_first_discount = total_return_value - total_return_value * (@purchase_doc.first_discount.to_f / 100)
+                value_after_second_discount = if @purchase_doc.is_additional_disc_from_net
+                  value_after_first_discount - value_after_first_discount * (@purchase_doc.second_discount.to_f / 100)
+                elsif @purchase_doc.second_discount.present?
+                  total_return_value - total_return_value * ((@purchase_doc.first_discount.to_f + @purchase_doc.second_discount.to_f) / 100)
+                end
+                value_after_discount = value_after_second_discount || value_after_first_discount
+                
+                # hitung net amount
+                if @purchase_doc.is_taxable_entrepreneur                
+                  if @purchase_doc.vat_type.eql?("exclude")
+                    value_after_discount + value_after_discount * 0.1
+                  else
+                    value_after_discount                    
+                  end
+                else
+                  value_after_discount                    
+                end
+              end
+            end
+            
+            def set_attr_purchase_return_number
+              self.attr_purchase_return_number = if purchase_order_id.present?
+                @purchase_doc.number
+              else
+                @purchase_doc.delivery_order_number
+              end              
+            end
       
             def quantity_blank(attributed)
               return false if attributed[:purchase_return_items_attributes].select{|key, hash| !hash["quantity"].strip.eql?("")}.present?
@@ -39,11 +111,11 @@ class PurchaseReturn < ApplicationRecord
             end
   
             def purchase_order_is_returnable
-              errors.add(:purchase_order_id, "does not exist!") if PurchaseOrder.where(["status != 'Open' AND id = ?", purchase_order_id]).select("1 AS one").blank?
+              errors.add(:purchase_order_id, "does not exist!") if (@purchase_doc = PurchaseOrder.where(["status != 'Open' AND id = ?", purchase_order_id]).select(:id, :number, :value_added_tax, :is_taxable_entrepreneur, :first_discount, :second_discount, :is_additional_disc_from_net).includes(purchase_order_products: :cost_list).first).blank?
             end
 
             def direct_purchase_is_returnable
-              errors.add(:delivery_order_number, "does not exist!") if DirectPurchase.where(["id = ?", direct_purchase_id]).select("1 AS one").blank?
+              errors.add(:delivery_order_number, "does not exist!") if (@purchase_doc = DirectPurchase.where(["direct_purchases.id = ?", direct_purchase_id]).select(:id, :vat_type, :is_taxable_entrepreneur, :first_discount, :second_discount, :is_additional_disc_from_net, "received_purchase_orders.delivery_order_number").joins(:received_purchase_order).includes(direct_purchase_products: :cost_list).first).blank?
             end
   
             def check_min_return_quantity

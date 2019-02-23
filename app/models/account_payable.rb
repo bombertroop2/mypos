@@ -112,7 +112,7 @@ class AccountPayable < ApplicationRecord
       if beginning_of_account_payable_creating.eql?("Partial")
         account_payable_purchase_partials.each do |account_payable_purchase_partial|
           rpo = ReceivedPurchaseOrder.
-            select(:id, :direct_purchase_id, :purchase_order_id, :quantity, "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
+            select(:id, :delivery_order_number, :direct_purchase_id, :purchase_order_id, :quantity, "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
             joins(:vendor).
             joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
             joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
@@ -129,6 +129,7 @@ class AccountPayable < ApplicationRecord
               end
             end
           end
+          account_payable_purchase_partial.attr_purchase_number = rpo.delivery_order_number
           account_payable_purchase_partial.attr_gross_amount = gross_amount
           first_discount_money = if rpo.purchase_order_id.present? && rpo.po_first_discount.present?
             (rpo.po_first_discount.to_f / 100) * gross_amount
@@ -171,6 +172,11 @@ class AccountPayable < ApplicationRecord
         end
       else
         account_payable_purchases.each do |account_payable_purchase|
+          account_payable_purchase.attr_purchase_number = if account_payable_purchase.purchase.class.name.eql?("PurchaseOrder")
+            account_payable_purchase.purchase.number
+          else
+            account_payable_purchase.purchase.received_purchase_order.delivery_order_number
+          end
           account_payable_purchase.attr_gross_amount = account_payable_purchase.purchase.receiving_value
           account_payable_purchase.attr_first_discount_money = (account_payable_purchase.purchase.first_discount.to_f / 100) * account_payable_purchase.purchase.receiving_value if account_payable_purchase.purchase.first_discount.present?
           account_payable_purchase.attr_second_discount_money = get_second_discount_in_money_for_ap(account_payable_purchase.purchase) if account_payable_purchase.purchase.second_discount.present?

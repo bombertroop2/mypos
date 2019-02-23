@@ -3,6 +3,7 @@ include PurchaseReturnsHelper
 include AccountPayablePaymentsHelper
 include AccountPayableCouriersHelper
 include AccountPayableCourierPaymentsHelper
+include ApplicationHelper
 class DuosMailer < ApplicationMailer
   def payment_email(account_payable_payment, recipient, type="vendor")
     subject = ""
@@ -19,6 +20,14 @@ class DuosMailer < ApplicationMailer
     mail to: recipient, subject: subject, template_name: template_name
   end
   
+  def ar_invoice_email(accounts_receivable_invoice, recipient)
+    @company = Company.select(:id, :name, :address, :phone, :fax).first
+    @accounts_receivable_invoice = accounts_receivable_invoice
+    @customer = Customer.select(:name, :phone, :facsimile, :is_taxable_entrepreneur, :value_added_tax).joins(order_bookings: :shipment).where(["shipments.id = ?", @accounts_receivable_invoice.shipment_id]).first
+    @shipment = Shipment.select(:delivery_order_number).find(@accounts_receivable_invoice.shipment_id)
+    mail to: recipient, subject: "Invoice"
+  end
+
   #  def closing_cashier_report_email(cashier_opening_id, recipient)
   #    @cashier_opening = @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: cashier_opening_id).
   #      select("sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, cashier_openings.warehouse_id, opened_by").first
