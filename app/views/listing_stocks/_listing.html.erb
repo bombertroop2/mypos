@@ -33,7 +33,7 @@
             <% total_price += stock_transaction.total_product_price %>
           <% elsif stock_transaction.transaction_type.eql?("PO") %>
             <% total_qty += stock_transaction.quantity %>
-            <% total_price += stock_transaction.total_product_price %>
+            <% total_price += stock_transaction.total_product_price.to_f %>
           <% elsif stock_transaction.transaction_type.eql?("PR") %>
             <% total_qty -= stock_transaction.quantity %>
             <% total_price -= stock_transaction.total_product_price %>

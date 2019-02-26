@@ -4,9 +4,16 @@ $(function () {
   // funny solution for silly bug
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var target = $(e.target).attr("href") // activated tab
-    if (target == "#direct_purchase" && ($('#listing_product_table_receiving').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#listing_product_table_receiving').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
-      $("#code_th").click();
-      $("#code_th").click();
+    if (target == "#direct_purchase") {
+      $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").autocomplete({
+          source: function (request, response) {
+              $.getJSON("/receiving/search_do_numbers", {
+                  receiving_date: $("#direct_purchase_receiving_date").val(),
+                  term: request.term
+              }, response);
+          },
+          minLength: 2
+      });
     } 
   });
 });
