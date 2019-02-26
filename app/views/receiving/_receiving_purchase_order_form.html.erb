@@ -34,7 +34,7 @@
                             <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button" %> No
                           </div>
                           <div class="col-sm-10">
-                              <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control do-number-field" %>
+                              <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control do-number-field upcase" %>
                                 <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
                             </div>
                         </div>
@@ -45,9 +45,9 @@
                                     <tbody>
                                         <tr style="text-align: center">
                                             <td style="vertical-align: middle;width: 20% !important;"><strong>Article Code</strong></td>
-                                            <%# if current_user.has_managerial_role? %>
-                                              <!--<td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>-->
-                                            <%# end %>
+                    <%# if current_user.has_managerial_role? %>
+                                            <!--<td style="vertical-align: middle;width: 20% !important;"><strong>Cost</strong></td>-->
+                    <%# end %>
                                             <td style="vertical-align: middle;width: auto !important;"><strong>Details</strong></td>
                                         </tr>
                                         <%= received_purchase_order_form.fields_for :received_purchase_order_products do |received_purchase_order_product_form| %>
@@ -57,9 +57,9 @@
                                           <% sizes = @sizes[received_purchase_order_product.purchase_order_product_id] rescue [] %>
                                           <tr align="center">
                                               <td style="vertical-align: middle;width: 20% !important;"><%= "#{received_purchase_order_product.prdct_code} - #{received_purchase_order_product.prdct_name}" %></td>
-                                              <%# if current_user.has_managerial_role? %>
+                      <%# if current_user.has_managerial_role? %>
                                                 <!--<td style="vertical-align: middle;width: 20% !important;"><%#= number_to_currency(received_purchase_order_product.prdct_cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>-->
-                                              <%# end %>
+                      <%# end %>
                                               <td style="vertical-align: middle;width: auto !important;">                                    
                                                   <div class="table-responsive">
                                                       <table class="table table-condensed table-responsive table-bordered">
@@ -186,5 +186,18 @@
                             $(".do-number-field").prop("disabled", true);
                         }
 
+                        $('.do-number-field').on("input", function () {
+                            $(this).val($(this).val().replace(/ /g, ""));
+                        });
+
+                        $(".do-number-field").autocomplete({
+                            source: function (request, response) {
+                                $.getJSON("/receiving/search_do_numbers", {
+                                    receiving_date: $(".receiving-po-date").val(),
+                                    term: request.term
+                                }, response);
+                            },
+                            minLength: 2
+                        });
                     });
                   </script>
