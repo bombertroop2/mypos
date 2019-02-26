@@ -250,9 +250,9 @@ class ProductsController < ApplicationController
             error_message = "Error for row (##{i}) : Size group #{size_group_code} doesn't exist"
             break
           end
-          size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].strip).where(["size_groups.id = ?", size_group_id]).pluck(:id).first
+          size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].to_s.strip).where(["size_groups.id = ?", size_group_id]).pluck(:id).first
           if size_id.blank?
-            error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].to_s.strip} doesn't exist"
             break
           end
           price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].strip).pluck(:id).first
@@ -277,9 +277,9 @@ class ProductsController < ApplicationController
           product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
           product_color = product.product_colors.build color_id: color_id, attr_importing_data: true
-          if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
-            product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
-            added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+          if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].to_s.strip}.blank?
+            product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
+            added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].to_s.strip}
           else
             if barcode.blank?                        
               prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
@@ -295,9 +295,9 @@ class ProductsController < ApplicationController
           end
           products << product
         else
-          size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].strip).where(["size_groups.id = ?", prdct.size_group_id]).pluck(:id).first
+          size_id = Size.joins(:size_group).where(size: spreadsheet.row(i)[11].to_s.strip).where(["size_groups.id = ?", prdct.size_group_id]).pluck(:id).first
           if size_id.blank?
-            error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].strip} doesn't exist"
+            error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].to_s.strip} doesn't exist"
             break
           end
           price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].strip).pluck(:id).first
@@ -314,9 +314,9 @@ class ProductsController < ApplicationController
           product_color = prdct.product_colors.select{|pc| pc.color_id == color_id}.first
           if product_color.blank?
             product_color = prdct.product_colors.build color_id: color_id, attr_importing_data: true
-            if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
-              product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
-              added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+            if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].to_s.strip}.blank?
+              product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
+              added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].to_s.strip}
             else
               if barcode.blank?                        
                 prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
@@ -333,9 +333,9 @@ class ProductsController < ApplicationController
           else
             product_barcode = product_color.product_barcodes.select{|pb| pb.size_id == size_id}.first
             if product_barcode.blank?
-              if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].strip}.blank?
-                product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].strip
-                added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].strip}
+              if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].to_s.strip}.blank?
+                product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
+                added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].to_s.strip}
               else
                 if barcode.blank?                        
                   prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
@@ -360,43 +360,45 @@ class ProductsController < ApplicationController
         ActiveRecord::Base.transaction do
           products.each do |pr|
             begin
-              product_price_codes = []
-              pr.product_details.each do |pd|
-                product_price_codes << pd.price_code_id
-              end
-              if valid
-                SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
-                  product_price_codes.uniq.each do |ppc|
-                    if pr.product_details.select{|pd| pd.price_code_id == ppc && pd.size_id == size.id}.blank?
-                      existed_product_detail = pr.product_details.select{|pd| pd.price_code_id == ppc}.first
-                      other_size_price = existed_product_detail.price_lists.last.price
-                      product_detail = pr.product_details.build size_id: size.id, price_code_id: ppc, size_group_id: pr.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-                      product_detail.price_lists.build effective_date: current_date, price: other_size_price, user_is_adding_new_price: true, attr_importing_data: true
-                    end
-                  end
-                  pr.product_colors.each do |pc|
-                    if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
-                      if barcode.blank?                        
-                        prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
-                        barcode = if prb.present?
-                          "1S#{prb.barcode.split("1S")[1].succ}"
-                        else
-                          "1S00001"
-                        end
-                      else
-                        barcode = "1S#{barcode.split("1S")[1].succ}"
-                      end
-                      pc.product_barcodes.build size_id: size.id, barcode: barcode
-                    end
-                  end
+              if Product.select("1 AS one").where(code: pr.code).blank? 
+                product_price_codes = []
+                pr.product_details.each do |pd|
+                  product_price_codes << pd.price_code_id
                 end
-                unless valid = pr.save
-                  message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
-                  error_message = message
+                if valid
+                  SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
+                    product_price_codes.uniq.each do |ppc|
+                      if pr.product_details.select{|pd| pd.price_code_id == ppc && pd.size_id == size.id}.blank?
+                        existed_product_detail = pr.product_details.select{|pd| pd.price_code_id == ppc}.first
+                        other_size_price = existed_product_detail.price_lists.last.price
+                        product_detail = pr.product_details.build size_id: size.id, price_code_id: ppc, size_group_id: pr.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
+                        product_detail.price_lists.build effective_date: current_date, price: other_size_price, user_is_adding_new_price: true, attr_importing_data: true
+                      end
+                    end
+                    pr.product_colors.each do |pc|
+                      if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                        if barcode.blank?                        
+                          prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                          barcode = if prb.present?
+                            "1S#{prb.barcode.split("1S")[1].succ}"
+                          else
+                            "1S00001"
+                          end
+                        else
+                          barcode = "1S#{barcode.split("1S")[1].succ}"
+                        end
+                        pc.product_barcodes.build size_id: size.id, barcode: barcode
+                      end
+                    end
+                  end
+                  unless valid = pr.save
+                    message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
+                    error_message = message
+                    raise ActiveRecord::Rollback
+                  end
+                else
                   raise ActiveRecord::Rollback
                 end
-              else
-                raise ActiveRecord::Rollback
               end
             rescue ActiveRecord::RecordNotUnique => e
               valid = false
