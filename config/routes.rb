@@ -302,6 +302,7 @@ Rails.application.routes.draw do
     get :autocomplete_product_code, :on => :collection
     collection do
       get "get_product_details"
+      get "search_do_numbers"
     end
 
     member do

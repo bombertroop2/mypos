@@ -48,7 +48,7 @@
                                       <%= received_purchase_order_form.radio_button :is_using_delivery_order, "no", class: "do-radio-button-direct-purchase" %> No
                                     </div>
                                     <div class="col-sm-10">
-                                        <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
+                                        <%= received_purchase_order_form.text_field :delivery_order_number, size: 10, class: "form-control upcase", disabled: received_purchase_order_form.object.is_using_delivery_order.eql?("no") %>
                                           <%= error_help_text(received_purchase_order_form.object, :delivery_order_number) %>
                                       </div>
                                   </div>
@@ -247,5 +247,20 @@
                                                   //$(".direct-purchase-vendor-id").val($("#direct_purchase_vendor_id").val());
                                               });
 
+                                              $('#direct_purchase_received_purchase_order_attributes_delivery_order_number').on("input", function () {
+                                                  $(this).val($(this).val().replace(/ /g, ""));
+                                              });
+
+                                        <% if action_name.eql?("create") %>
+                                                $("#direct_purchase_received_purchase_order_attributes_delivery_order_number").autocomplete({
+                                                    source: function (request, response) {
+                                                        $.getJSON("/receiving/search_do_numbers", {
+                                                            receiving_date: $("#direct_purchase_receiving_date").val(),
+                                                            term: request.term
+                                                        }, response);
+                                                    },
+                                                    minLength: 2
+                                                });
+                                        <% end %>
                                           });
                                         </script>
