@@ -180,6 +180,8 @@ class ReceivingController < ApplicationController
             render js: "bootbox.alert({message: \"#{error_message}\",size: 'small'});" if @direct_purchase.errors[:"direct_purchase_products.base"].to_sentence.eql?(error_message)
           elsif @direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.base"].present?
             render js: "bootbox.alert({message: \"#{@direct_purchase.errors[:"direct_purchase_products.direct_purchase_details.base"].join("<br/>")}\",size: 'small'});"
+          elsif @direct_purchase.received_purchase_order.present? && @direct_purchase.received_purchase_order.errors[:base].present?
+            render js: "bootbox.alert({message: \"#{@direct_purchase.received_purchase_order.errors[:base].join("<br/>")}\",size: 'small'});"
           end
         else
           @product_received = true
@@ -209,6 +211,33 @@ class ReceivingController < ApplicationController
           end
         end
         @direct_purchase.received_purchase_order.errors.messages[:delivery_order_number] = ["has already been taken"]
+      rescue RuntimeError => e
+        @colors = []
+        @sizes = []
+        @suppliers = Vendor.select(:id, :name).where(is_active: true)
+        @warehouses = Warehouse.central.select :id, :code
+        products = Product.joins(:brand).where(id: @direct_purchase.direct_purchase_products.map(&:product_id)).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
+
+        @direct_purchase.direct_purchase_products.each do |dpp|
+          product = products.select{|prdct| prdct.id == dpp.product_id}.first
+          dpp.prdct_code = product.code
+          dpp.prdct_name = product.name
+          @colors[product.id] = product.colors.distinct
+          @sizes[product.id] = product.sizes.distinct
+          @colors[product.id].each do |color|
+            @sizes[product.id].each do |size|
+              dpp.direct_purchase_details.build size_id: size.id, color_id: color.id if dpp.direct_purchase_details.select{|dpd| dpd.size_id.eql?(size.id) and dpd.color_id.eql?(color.id)}.blank?
+            end
+          end
+        end
+        @direct_purchase.received_purchase_order.errors.messages[:delivery_order_number] = [e.message]
+      end
+    end
+    
+    def search_do_numbers      
+      @received_purchase_orders = ReceivedPurchaseOrder.where(["delivery_order_number ILIKE ? AND receiving_date = ?", params[:term]+"%", params[:receiving_date].to_date]).pluck(:delivery_order_number).uniq
+      respond_to do |format|
+        format.json  { render :json => @received_purchase_orders.to_json }
       end
     end
 
