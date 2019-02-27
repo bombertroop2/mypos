@@ -400,14 +400,18 @@
                                           $.get("/events/new_add_general_products", {
                                               products: productIds,
                                               selected_products: selectedProductIds,
-                                              event_type: "cash discount"
+                                              event_type: "cash discount",
+                                              brand_id: $("#brand_general_products_cash_discount").val(),
+                                              target: $("#target_general_products_cash_discount").val()
                                           });
                               <% else %>
                                           $.get("/events/new_add_general_products", {
                                               products: productIds,
                                               selected_products: selectedProductIds,
                                               event_type: "cash discount",
-                                              event_id: "<%= @event.id %>"
+                                              event_id: "<%= @event.id %>",
+                                              brand_id: $("#brand_general_products_cash_discount").val(),
+                                              target: $("#target_general_products_cash_discount").val()
                                           });
                               <% end %>
                                         $('#code_general_products_cash_discount').tagit('removeAll');

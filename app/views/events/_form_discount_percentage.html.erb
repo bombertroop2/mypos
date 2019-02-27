@@ -353,14 +353,18 @@
                                               $.get("/events/new_add_general_products", {
                                                   products: productIds,
                                                   selected_products: selectedProductIds,
-                                                  event_type: ""
+                                                  event_type: "",
+                                                  brand_id: $("#brand_general_products_percentage_discount").val(),
+                                                  target: $("#target_general_products_percentage_discount").val()
                                               });
                                   <% else %>
                                               $.get("/events/new_add_general_products", {
                                                   products: productIds,
                                                   selected_products: selectedProductIds,
                                                   event_type: "",
-                                                  event_id: "<%= @event.id %>"
+                                                  event_id: "<%= @event.id %>",
+                                                  brand_id: $("#brand_general_products_percentage_discount").val(),
+                                                  target: $("#target_general_products_percentage_discount").val()
                                               });
                                   <% end %>
                                             $('#code_general_products_percentage_discount').tagit('removeAll');

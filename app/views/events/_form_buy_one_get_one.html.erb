@@ -385,14 +385,18 @@
                                       $.get("/events/new_add_general_products", {
                                           products: productIds,
                                           selected_products: selectedProductIds,
-                                          event_type: "buy one get one"
+                                          event_type: "buy one get one",
+                                          brand_id: $("#brand_general_products_bogo").val(),
+                                          target: $("#target_general_products_bogo").val()
                                       });
                           <% else %>
                                       $.get("/events/new_add_general_products", {
                                           products: productIds,
                                           selected_products: selectedProductIds,
                                           event_type: "buy one get one",
-                                          event_id: "<%= @event.id %>"
+                                          event_id: "<%= @event.id %>",
+                                          brand_id: $("#brand_general_products_bogo").val(),
+                                          target: $("#target_general_products_bogo").val()
                                       });
                           <% end %>
                                     $('#code_general_products_bogo').tagit('removeAll');

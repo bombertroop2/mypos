@@ -256,7 +256,9 @@
                           warehouse_id: warehouseId,
                           products: productIds,
                           selected_products: selectedProductIds,
-                          event_type: "gift"
+                          event_type: "gift",
+                          brand_id: $("#article_brand_gift_" + warehouseId).val(),
+                          target: $("#article_target_gift_" + warehouseId).val()
                       });
           <% else %>
                       $.get("/events/new_add_products", {
@@ -264,7 +266,9 @@
                           products: productIds,
                           selected_products: selectedProductIds,
                           event_type: "gift",
-                          event_id: "<%= @event.id %>"
+                          event_id: "<%= @event.id %>",
+                          brand_id: $("#article_brand_gift_" + warehouseId).val(),
+                          target: $("#article_target_gift_" + warehouseId).val()
                       });
           <% end %>
                     $('#article_code_gift_' + warehouseId).tagit('removeAll');
