@@ -20,7 +20,9 @@
           <thead>
               <tr>
                   <th></th>
-                  <th>Number</th>
+                  <th>Transaction No.</th>
+                  <th>DO No.</th>
+                  <th>PO No.</th>
                   <th>Vendor</th>
                   <th>PO Date</th>
                   <th>Rec. Date</th>
@@ -39,6 +41,8 @@
                   <% displayed_pos << purchase_order.id %>
                   <% latest_receiving_date = purchase_order.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first.receiving_date.strftime("%d/%m/%Y") %>
                   <tr id="purchase_order_<%= purchase_order.id %>">
+                      <td></td>
+                      <td></td>
                       <td></td>
                       <td><%= purchase_order.number %></td>
                       <td><%= purchase_order.vendor_name %></td>
@@ -95,7 +99,9 @@
               <% @direct_purchases.each_with_index do |direct_purchase, index| %>
                 <tr id="direct_purchase_<%= direct_purchase.id %>">
                     <td></td>
+                    <td><%= direct_purchase.rpo_transaction_number %></td>
                     <td><%= direct_purchase.delivery_order_number %></td>
+                    <td></td>
                     <td><%= direct_purchase.vendor_name %></td>
                     <td></td>
                     <td><%= direct_purchase.receiving_date.strftime("%d/%m/%Y") %></td>
@@ -165,13 +171,17 @@
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
             ],
             order: [1, 'asc'],
             dom: 'T<"clear">lrtip',
             columns: [
                 {data: null, defaultContent: '', orderable: false},
-                {data: 'number'},
+                {data: 'transaction_number'},
+                {data: 'do_number'},
+                {data: 'po_number'},
                 {data: 'name'},
                 {data: 'po_date'},
                 {data: 'receiving_date'},
