@@ -99,307 +99,325 @@
                                         </div>
                                         <div class="form-group">
                                             <div class="col-sm-12">
-                                                <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_bogo"} %>
+                                                <%= select_tag "goods_type", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {include_blank: true, class: "form-control", id: "goods_type_general_products_bogo"} %>
                                               </div>
                                           </div>
                                           <div class="form-group">
                                               <div class="col-sm-12">
-                                                  <button type="button" class="btn btn-success" id="add-btn-bogo-products" style="float: right">Add</button>
+                                                  <%= select_tag "sex", options_for_select(Product::SEX), {include_blank: true, class: "form-control", id: "sex_general_products_bogo"} %>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-12">
+                                                    <%= text_field_tag "code", "", {class: "form-control", id: "code_general_products_bogo"} %>
+                                                  </div>
                                               </div>
-                                          </div>
-                                          <div id="listing-general-products-buy-one-get-one">
-                                              <% if action_name.eql?("edit") %>
-                                                <% event_general_products = @event.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
-                                              <% else %>
-                                                <% event_general_products = @event.event_general_products %>
-                                              <% end %>
-                                              <% if event_general_products.present? %>                        
-                                                <%= render partial: "listing_general_products", locals: {event_general_products: event_general_products, event_type: "buy one get one"} %>
-                                              <% end %>
-                                          </div>
-                                          <!--</div>-->
+                                              <div class="form-group">
+                                                  <div class="col-sm-12">
+                                                      <button type="button" class="btn btn-success" id="add-btn-bogo-products" style="float: right">Add</button>
+                                                  </div>
+                                              </div>
+                                              <div id="listing-general-products-buy-one-get-one">
+                                                  <% if action_name.eql?("edit") %>
+                                                    <% event_general_products = @event.event_general_products.joins(product: :brand).select(:id, :product_id, "products.code AS product_code", "common_fields.name AS product_name") %>
+                                                  <% else %>
+                                                    <% event_general_products = @event.event_general_products %>
+                                                  <% end %>
+                                                  <% if event_general_products.present? %>                        
+                                                    <%= render partial: "listing_general_products", locals: {event_general_products: event_general_products, event_type: "buy one get one"} %>
+                                                  <% end %>
+                                              </div>
+                                              <!--</div>-->
 
-                                          <!--<div class="ln_solid"></div>-->
+                                              <!--<div class="ln_solid"></div>-->
 
+                                          </div>
                                       </div>
                                   </div>
                               </div>
-                          </div>
 
-                          <div class="form-group">
-                              <label class="col-sm-2 control-label">Warehouses</label>
-                              <div class="col-sm-10">
-                                  <table id="listing_event_warehouses_table_buy_one_get_one" class="display">
-                                      <thead>
-                                          <tr>
-                                              <th></th>
-                                              <th id="code_th_bogo">Code</th>
-                                              <th>Name</th>
-                                          </tr>
-                                      </thead>
+                              <div class="form-group">
+                                  <label class="col-sm-2 control-label">Warehouses</label>
+                                  <div class="col-sm-10">
+                                      <table id="listing_event_warehouses_table_buy_one_get_one" class="display">
+                                          <thead>
+                                              <tr>
+                                                  <th></th>
+                                                  <th id="code_th_bogo">Code</th>
+                                                  <th>Name</th>
+                                              </tr>
+                                          </thead>
 
-                                      <tbody>
-                                          <% @warehouses.each do |warehouse| %>
-                                            <tr id="warehouse_<%= warehouse.id %>_buy_one_get_one">
-                                                <td></td>
-                                                <td><%= warehouse.code %></td>
-                                                <td><%= warehouse.name %></td>
-                                            </tr>
-                                          <% end %>
-                                      </tbody>
-                                  </table>
-                                  <a class="btn btn-default active" id="generate_event_warehouse_form_buy_one_get_one" style="float: right;margin-top: 10px;">Generate form</a>
+                                          <tbody>
+                                              <% @warehouses.each do |warehouse| %>
+                                                <tr id="warehouse_<%= warehouse.id %>_buy_one_get_one">
+                                                    <td></td>
+                                                    <td><%= warehouse.code %></td>
+                                                    <td><%= warehouse.name %></td>
+                                                </tr>
+                                              <% end %>
+                                          </tbody>
+                                      </table>
+                                      <a class="btn btn-default active" id="generate_event_warehouse_form_buy_one_get_one" style="float: right;margin-top: 10px;">Generate form</a>
+                                  </div>
                               </div>
-                          </div>
 
-                          <div id="listing-warehouse-details-bogo">
-                              <% if action_name.eql?("create") || !@event.new_record? %>
-                                <%= render partial: "warehouse_form", locals: {event_type: "buy one get one"} %>
-                              <% end %>
-                          </div>
+                              <div id="listing-warehouse-details-bogo">
+                                  <% if action_name.eql?("create") || !@event.new_record? %>
+                                    <%= render partial: "warehouse_form", locals: {event_type: "buy one get one"} %>
+                                  <% end %>
+                              </div>
 
-                          <div class="form-group">
-                              <div class="col-sm-offset-2 col-sm-10">
-                                  <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-buy-one-get-one" %>
-                                    <button class="btn btn-link cancel">Cancel</button>
+                              <div class="form-group">
+                                  <div class="col-sm-offset-2 col-sm-10">
+                                      <%= f.submit "Save", class: "btn btn-primary", id: "submit-btn-buy-one-get-one" %>
+                                        <button class="btn btn-link cancel">Cancel</button>
+                                    </div>
                                 </div>
-                            </div>
-                          <% end %>
+                              <% end %>
 
-                          <script type="text/javascript">
-                            $(function () {
-                                $("#brand_general_products_bogo").attr("data-placeholder", "Select brand").chosen({width: "200px"});
-                                $("#target_general_products_bogo").attr("data-placeholder", "Select target").chosen({width: "200px"});
-                                $("#code_general_products_bogo").tagit({
-                                    autocomplete: {
-                                        delay: 0,
-                                        minLength: 1,
-                                        source: function (search, response) {
-                                            $.ajax({
-                                                url: "/events/autocomplete_events",
-                                                data: {
-                                                    brand: $("#brand_general_products_bogo").val(),
-                                                    target: $("#target_general_products_bogo").val(),
-                                                    term: search.term
-                                                },
-                                                success: function (data) {
-                                                    response($.map(data, function (item) {
-                                                        return {
-                                                            id: item.id,
-                                                            label: item.label
-                                                        }
-                                                    }));
-                                                }
+                              <script type="text/javascript">
+                                $(function () {
+                                    $("#brand_general_products_bogo").attr("data-placeholder", "Select brand").chosen({width: "200px"});
+                                    $("#target_general_products_bogo").attr("data-placeholder", "Select target").chosen({width: "200px"});
+                                    $("#goods_type_general_products_bogo").attr("data-placeholder", "Select goods type").chosen({width: "200px"});
+                                    $("#sex_general_products_bogo").attr("data-placeholder", "Select sex").chosen({width: "200px"});
+                                    $("#code_general_products_bogo").tagit({
+                                        autocomplete: {
+                                            delay: 0,
+                                            minLength: 1,
+                                            source: function (search, response) {
+                                                $.ajax({
+                                                    url: "/events/autocomplete_events",
+                                                    data: {
+                                                        brand: $("#brand_general_products_bogo").val(),
+                                                        target: $("#target_general_products_bogo").val(),
+                                                        goods_type_id: $("#goods_type_general_products_bogo").val(),
+                                                        sex: $("#sex_general_products_bogo").val(),
+                                                        term: search.term
+                                                    },
+                                                    success: function (data) {
+                                                        response($.map(data, function (item) {
+                                                            return {
+                                                                id: item.id,
+                                                                label: item.label
+                                                            }
+                                                        }));
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        placeholderText: 'Article code'
+                                    });
+                                    $("#event_start_date_time_buy_one_get_one").datetimepicker({
+                                        format: "dd/mm/yyyy hh:ii",
+                                        autoclose: true,
+                                        minuteStep: 1
+                                    });
+                                    $("#event_end_date_time_buy_one_get_one").datetimepicker({
+                                        format: "dd/mm/yyyy hh:ii",
+                                        autoclose: true,
+                                        minuteStep: 1
+                                    });
+                                    var eventWarehousesBuyOneGetOneDataTable = $('#listing_event_warehouses_table_buy_one_get_one').DataTable({
+                                        order: [1, 'asc'],
+                                        dom: 'T<"clear">lfrtip',
+                                        columns: [
+                                            {data: null, defaultContent: '', orderable: false},
+                                            {data: 'code'},
+                                            {data: 'name'}
+                                        ],
+                                        tableTools: {
+                                            sRowSelect: 'os',
+                                            aButtons: ['select_all', 'select_none']
+                                        },
+                                        paging: false,
+                                        info: false,
+                                        scrollY: "250px",
+                                        scrollCollapse: true
+                                    });
+
+                                    $("#generate_event_warehouse_form_buy_one_get_one").click(function (e) {
+                                        if (eventWarehousesBuyOneGetOneDataTable.rows('.selected').data().length == 0) {
+                                            e.preventDefault();
+                                            bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
+                                        } else {
+                                            var warehouseIds = [];
+                                            $.each(eventWarehousesBuyOneGetOneDataTable.rows('.selected')[0], function (index, value) {
+                                                warehouseIds.push(eventWarehousesBuyOneGetOneDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
                                             });
+                              <% if @event.new_record? %>
+                                              $.get("/events/generate_warehouse_form", {
+                                                  warehouse_ids: warehouseIds.join(","),
+                                                  event_type: "buy one get one"
+                                              });
+                              <% else %>
+                                              $.get("/events/generate_warehouse_form", {
+                                                  warehouse_ids: warehouseIds.join(","),
+                                                  event_type: "buy one get one",
+                                                  event_id: "<%= @event.id %>"
+                                              });
+                              <% end %>
                                         }
-                                    },
-                                    placeholderText: 'Article code'
-                                });
-                                $("#event_start_date_time_buy_one_get_one").datetimepicker({
-                                    format: "dd/mm/yyyy hh:ii",
-                                    autoclose: true,
-                                    minuteStep: 1
-                                });
-                                $("#event_end_date_time_buy_one_get_one").datetimepicker({
-                                    format: "dd/mm/yyyy hh:ii",
-                                    autoclose: true,
-                                    minuteStep: 1
-                                });
-                                var eventWarehousesBuyOneGetOneDataTable = $('#listing_event_warehouses_table_buy_one_get_one').DataTable({
-                                    order: [1, 'asc'],
-                                    dom: 'T<"clear">lfrtip',
-                                    columns: [
-                                        {data: null, defaultContent: '', orderable: false},
-                                        {data: 'code'},
-                                        {data: 'name'}
-                                    ],
-                                    tableTools: {
-                                        sRowSelect: 'os',
-                                        aButtons: ['select_all', 'select_none']
-                                    },
-                                    paging: false,
-                                    info: false,
-                                    scrollY: "250px",
-                                    scrollCollapse: true
-                                });
 
-                                $("#generate_event_warehouse_form_buy_one_get_one").click(function (e) {
-                                    if (eventWarehousesBuyOneGetOneDataTable.rows('.selected').data().length == 0) {
-                                        e.preventDefault();
-                                        bootbox.alert({message: "You have not selected warehouse yet!", size: 'small'});
-                                    } else {
-                                        var warehouseIds = [];
-                                        $.each(eventWarehousesBuyOneGetOneDataTable.rows('.selected')[0], function (index, value) {
-                                            warehouseIds.push(eventWarehousesBuyOneGetOneDataTable.rows(value).nodes().to$().attr("id").split("_")[1]);
-                                        });
-                          <% if @event.new_record? %>
-                                          $.get("/events/generate_warehouse_form", {
-                                              warehouse_ids: warehouseIds.join(","),
-                                              event_type: "buy one get one"
-                                          });
-                          <% else %>
-                                          $.get("/events/generate_warehouse_form", {
-                                              warehouse_ids: warehouseIds.join(","),
-                                              event_type: "buy one get one",
-                                              event_id: "<%= @event.id %>"
-                                          });
-                          <% end %>
-                                    }
+                                    });
 
-                                });
-
-                                $("#submit-btn-buy-one-get-one").click(function () {
-                                    if ($("#listing-warehouse-details-bogo").html().trim() == "") {
-                                        bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-                                        return false;
-                                    } else {
-                                        if ($(".event_warehouse_id_fields_buy_one_get_one").length > 0) {
-                                            var valid = true;
-                                            $(".event_warehouse_id_fields_buy_one_get_one").each(function () {
-                                                if ($("#event_event_warehouses_attributes_" + $(this).val() + "_select_different_products_buy_one_get_one").is(':checked')) {
-                                                    if ($("#event_product_fields_container_" + $(this).val() + "_buy_one_get_one").length == 0) {
+                                    $("#submit-btn-buy-one-get-one").click(function () {
+                                        if ($("#listing-warehouse-details-bogo").html().trim() == "") {
+                                            bootbox.alert({message: "Please generate warehouse form", size: 'small'});
+                                            return false;
+                                        } else {
+                                            if ($(".event_warehouse_id_fields_buy_one_get_one").length > 0) {
+                                                var valid = true;
+                                                $(".event_warehouse_id_fields_buy_one_get_one").each(function () {
+                                                    if ($("#event_event_warehouses_attributes_" + $(this).val() + "_select_different_products_buy_one_get_one").is(':checked')) {
+                                                        if ($("#event_product_fields_container_" + $(this).val() + "_buy_one_get_one").length == 0) {
+                                                            valid = false;
+                                                            return false;
+                                                        } else if ($("#event_product_fields_container_" + $(this).val() + "_buy_one_get_one").html().trim() == "") {
+                                                            valid = false;
+                                                            return false;
+                                                        }
+                                                    } else
+                                                    if ($("#event_general_product_fields_container_buy_one_get_one").length == 0) {
                                                         valid = false;
                                                         return false;
-                                                    } else if ($("#event_product_fields_container_" + $(this).val() + "_buy_one_get_one").html().trim() == "") {
+                                                    } else if ($("#event_general_product_fields_container_buy_one_get_one").html().trim() == "") {
                                                         valid = false;
                                                         return false;
                                                     }
+                                                });
+                                                if (!valid) {
+                                                    bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
+                                                    return false;
                                                 } else
-                                                if ($("#event_general_product_fields_container_buy_one_get_one").length == 0) {
-                                                    valid = false;
-                                                    return false;
-                                                } else if ($("#event_general_product_fields_container_buy_one_get_one").html().trim() == "") {
-                                                    valid = false;
-                                                    return false;
-                                                }
-                                            });
-                                            if (!valid) {
-                                                bootbox.alert({message: "Please select product(s) for selected warehouse(s)", size: 'small'});
+                                                    return true;
+                                            } else {
+                                                bootbox.alert({message: "Please generate warehouse form", size: 'small'});
                                                 return false;
-                                            } else
-                                                return true;
-                                        } else {
-                                            bootbox.alert({message: "Please generate warehouse form", size: 'small'});
-                                            return false;
+                                            }
+
                                         }
-
-                                    }
-                                });
-
-                          <% @event.event_warehouses.each do |event_warehouse| %>
-                            <% unless event_warehouse._destroy %>
-                                    var e = jQuery.Event("click");
-                                    e.ctrlKey = true;
-                                    $("#warehouse_<%= event_warehouse.warehouse_id %>_buy_one_get_one").find("td:first-child").trigger(e);
-                            <% end %>
-                          <% end %>
-
-                                /*$("#add-btn-general-products-buy-one-get-one").click(function () {
-                                 var productIds = [];
-                                 $(".event-general-products-product-id-fields-buy-one-get-one").each(function () {
-                                 var attrId = $(this).attr('id');
-                                 productIds.push(attrId.split("_")[5]);
-                                 });
-                                 var addProductParams = {};
-                                 <%# if @event.new_record? %>
-                                 addProductParams = {
-                                 brand_id: $("#brand_general_products_buy_one_get_one").val(),
-                                 goods_type_id: $("#goods_type_general_products_buy_one_get_one").val(),
-                                 model_id: $("#model_general_products_buy_one_get_one").val(),
-                                 selected_product_ids: productIds.join(","),
-                                 event_type: "buy one get one"
-                                 };
-                                 <%# else %>
-                                 addProductParams = {
-                                 brand_id: $("#brand_general_products_buy_one_get_one").val(),
-                                 goods_type_id: $("#goods_type_general_products_buy_one_get_one").val(),
-                                 model_id: $("#model_general_products_buy_one_get_one").val(),
-                                 selected_product_ids: productIds.join(","),
-                                 event_type: "buy one get one",
-                                 event_id: "<%#= @event.id %>"
-                                 };
-                                 <%# end %>
-                                 $.get("/events/add_general_products", addProductParams);
-                                 $("#brand_general_products_buy_one_get_one").prop('selectedIndex', 0);
-                                 $("#goods_type_general_products_buy_one_get_one").prop('selectedIndex', 0);
-                                 $("#model_general_products_buy_one_get_one").prop('selectedIndex', 0);
-                                 return false;
-                                 });*/
-
-                                /*$('#code_general_products_buy_one_get_one').keypress(function (e) {
-                                 var key = e.which;
-                                 if (key == 13)  // the enter key code
-                                 {
-                                 if ($("#code_general_products_buy_one_get_one").val().trim() != "") {
-                                 $("#add-btn-by-code-general-products-buy-one-get-one").click();
-                                 }
-                                 return false;
-                                 }
-                                 });*/
-
-                                /*$("#add-btn-by-code-general-products-buy-one-get-one").click(function () {
-                                 if ($("#code_general_products_buy_one_get_one").val().trim() == "")
-                                 bootbox.alert({message: "Please fill out the field above", size: "small"});
-                                 else {
-                                 var productIds = [];
-                                 $(".event-general-products-product-id-fields-buy-one-get-one").each(function () {
-                                 var attrId = $(this).attr('id');
-                                 productIds.push(attrId.split("_")[5]);
-                                 });
-                                 var addProductParams = {};
-                                 <%# if @event.new_record? %>
-                                 addProductParams = {
-                                 product_code: $("#code_general_products_buy_one_get_one").val(),
-                                 selected_product_ids: productIds.join(","),
-                                 event_type: "buy one get one"
-                                 };
-                                 <%# else %>
-                                 addProductParams = {
-                                 product_code: $("#code_general_products_buy_one_get_one").val(),
-                                 selected_product_ids: productIds.join(","),
-                                 event_type: "buy one get one",
-                                 event_id: "<%#= @event.id %>"
-                                 };
-                                 <%# end %>
-                                 $.get("/events/add_general_products", addProductParams);
-                                 $("#code_general_products_buy_one_get_one").val("");
-                                 }
-                                 return false;
-                                 });*/
-                                $('#event_code_bogo').on("input", function () {
-                                    $(this).val($(this).val().replace(/ /g, ""));
-                                });
-
-                                $("#add-btn-bogo-products").click(function () {
-                                    var productIds = [];
-                                    var products = $("#code_general_products_bogo").val().split(",");
-                                    products.forEach(function (element) {
-                                        productIds.push(element.split(";")[0]);
                                     });
-                                    var selectedProductIds = [];
-                                    $(".event-general-products-product-id-fields-buy-one-get-one").each(function () {
-                                        var attrId = $(this).attr('id');
-                                        selectedProductIds.push(attrId.split("_")[5]);
+
+                              <% @event.event_warehouses.each do |event_warehouse| %>
+                                <% unless event_warehouse._destroy %>
+                                        var e = jQuery.Event("click");
+                                        e.ctrlKey = true;
+                                        $("#warehouse_<%= event_warehouse.warehouse_id %>_buy_one_get_one").find("td:first-child").trigger(e);
+                                <% end %>
+                              <% end %>
+
+                                    /*$("#add-btn-general-products-buy-one-get-one").click(function () {
+                                     var productIds = [];
+                                     $(".event-general-products-product-id-fields-buy-one-get-one").each(function () {
+                                     var attrId = $(this).attr('id');
+                                     productIds.push(attrId.split("_")[5]);
+                                     });
+                                     var addProductParams = {};
+                                     <%# if @event.new_record? %>
+                                     addProductParams = {
+                                     brand_id: $("#brand_general_products_buy_one_get_one").val(),
+                                     goods_type_id: $("#goods_type_general_products_buy_one_get_one").val(),
+                                     model_id: $("#model_general_products_buy_one_get_one").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "buy one get one"
+                                     };
+                                     <%# else %>
+                                     addProductParams = {
+                                     brand_id: $("#brand_general_products_buy_one_get_one").val(),
+                                     goods_type_id: $("#goods_type_general_products_buy_one_get_one").val(),
+                                     model_id: $("#model_general_products_buy_one_get_one").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "buy one get one",
+                                     event_id: "<%#= @event.id %>"
+                                     };
+                                     <%# end %>
+                                     $.get("/events/add_general_products", addProductParams);
+                                     $("#brand_general_products_buy_one_get_one").prop('selectedIndex', 0);
+                                     $("#goods_type_general_products_buy_one_get_one").prop('selectedIndex', 0);
+                                     $("#model_general_products_buy_one_get_one").prop('selectedIndex', 0);
+                                     return false;
+                                     });*/
+
+                                    /*$('#code_general_products_buy_one_get_one').keypress(function (e) {
+                                     var key = e.which;
+                                     if (key == 13)  // the enter key code
+                                     {
+                                     if ($("#code_general_products_buy_one_get_one").val().trim() != "") {
+                                     $("#add-btn-by-code-general-products-buy-one-get-one").click();
+                                     }
+                                     return false;
+                                     }
+                                     });*/
+
+                                    /*$("#add-btn-by-code-general-products-buy-one-get-one").click(function () {
+                                     if ($("#code_general_products_buy_one_get_one").val().trim() == "")
+                                     bootbox.alert({message: "Please fill out the field above", size: "small"});
+                                     else {
+                                     var productIds = [];
+                                     $(".event-general-products-product-id-fields-buy-one-get-one").each(function () {
+                                     var attrId = $(this).attr('id');
+                                     productIds.push(attrId.split("_")[5]);
+                                     });
+                                     var addProductParams = {};
+                                     <%# if @event.new_record? %>
+                                     addProductParams = {
+                                     product_code: $("#code_general_products_buy_one_get_one").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "buy one get one"
+                                     };
+                                     <%# else %>
+                                     addProductParams = {
+                                     product_code: $("#code_general_products_buy_one_get_one").val(),
+                                     selected_product_ids: productIds.join(","),
+                                     event_type: "buy one get one",
+                                     event_id: "<%#= @event.id %>"
+                                     };
+                                     <%# end %>
+                                     $.get("/events/add_general_products", addProductParams);
+                                     $("#code_general_products_buy_one_get_one").val("");
+                                     }
+                                     return false;
+                                     });*/
+                                    $('#event_code_bogo').on("input", function () {
+                                        $(this).val($(this).val().replace(/ /g, ""));
                                     });
-                          <% if @event.new_record? %>
-                                      $.get("/events/new_add_general_products", {
-                                          products: productIds,
-                                          selected_products: selectedProductIds,
-                                          event_type: "buy one get one",
-                                          brand_id: $("#brand_general_products_bogo").val(),
-                                          target: $("#target_general_products_bogo").val()
-                                      });
-                          <% else %>
-                                      $.get("/events/new_add_general_products", {
-                                          products: productIds,
-                                          selected_products: selectedProductIds,
-                                          event_type: "buy one get one",
-                                          event_id: "<%= @event.id %>",
-                                          brand_id: $("#brand_general_products_bogo").val(),
-                                          target: $("#target_general_products_bogo").val()
-                                      });
-                          <% end %>
-                                    $('#code_general_products_bogo').tagit('removeAll');
+
+                                    $("#add-btn-bogo-products").click(function () {
+                                        var productIds = [];
+                                        var products = $("#code_general_products_bogo").val().split(",");
+                                        products.forEach(function (element) {
+                                            productIds.push(element.split(";")[0]);
+                                        });
+                                        var selectedProductIds = [];
+                                        $(".event-general-products-product-id-fields-buy-one-get-one").each(function () {
+                                            var attrId = $(this).attr('id');
+                                            selectedProductIds.push(attrId.split("_")[5]);
+                                        });
+                              <% if @event.new_record? %>
+                                          $.post("/events/new_add_general_products", {
+                                              products: productIds,
+                                              selected_products: selectedProductIds,
+                                              event_type: "buy one get one",
+                                              brand_id: $("#brand_general_products_bogo").val(),
+                                              target: $("#target_general_products_bogo").val(),
+                                              goods_type_id: $("#goods_type_general_products_bogo").val(),
+                                              sex: $("#sex_general_products_bogo").val()
+                                          });
+                              <% else %>
+                                          $.post("/events/new_add_general_products", {
+                                              products: productIds,
+                                              selected_products: selectedProductIds,
+                                              event_type: "buy one get one",
+                                              event_id: "<%= @event.id %>",
+                                              brand_id: $("#brand_general_products_bogo").val(),
+                                              target: $("#target_general_products_bogo").val(),
+                                              goods_type_id: $("#goods_type_general_products_bogo").val(),
+                                              sex: $("#sex_general_products_bogo").val()
+                                          });
+                              <% end %>
+                                        $('#code_general_products_bogo').tagit('removeAll');
+                                    });
                                 });
-                            });
-                          </script>  
+                              </script>  
