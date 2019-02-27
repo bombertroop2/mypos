@@ -95,6 +95,7 @@
                                             <ul class="nav nav-tabs" role="tablist">
                                                 <li role="presentation" class="active"><a href="#search_by_multi_criterias_dp" aria-controls="search_by_multi_criterias_dp" role="tab" data-toggle="tab">Search by received date/vendor</a></li>
                                                 <li role="presentation"><a href="#search_by_do_number" aria-controls="search_by_do_number" role="tab" data-toggle="tab">Search by DO number</a></li>
+                                                <li role="presentation"><a href="#search_by_trans_number" aria-controls="search_by_trans_number" role="tab" data-toggle="tab">Search by transaction number</a></li>
                                             </ul>
                                             <!-- Tab panes -->
                                             <div class="tab-content">
@@ -137,92 +138,117 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                        <div role="tabpanel" class="tab-pane fade" id="search_by_trans_number" style="padding-top: 20px">
+                                                            <div class="form-group">
+                                                                <label class="control-label col-sm-2" for="trans-number">Number</label>
+                                                                <div class="col-sm-10">
+                                                                    <%= text_field_tag "number", "", {class: "form-control", id: "number_trans"} %>
+                                                                  </div>
+                                                              </div>
+                                                              <div class="ln_solid"></div>
+                                                              <div class="form-group">
+                                                                  <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                                                      <button type="submit" class="btn btn-success" id="search-dp-by-trans-number-btn">Search</button>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                      </div>
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="pr_form_container_dp">
-                                </div>
-                            </div>
-                        </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div id="pr_form_container_dp">
+                                  </div>
+                              </div>
+                          </div>
 
-                    </div>    
-                </td>
+                      </div>    
+                  </td>
 
-                <script>
-                  $(function () {
-                      $('#po_date').daterangepicker(
-                              {
-                                  locale: {
-                                      format: 'DD/MM/YYYY'
-                                  },
-                                  opens: "right",
-                                  autoUpdateInput: false
-                              });
-                      $('#po_date').on('apply.daterangepicker', function (ev, picker) {
-                          $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-                      });
+                  <script>
+                    $(function () {
+                        $('#po_date').daterangepicker(
+                                {
+                                    locale: {
+                                        format: 'DD/MM/YYYY'
+                                    },
+                                    opens: "right",
+                                    autoUpdateInput: false
+                                });
+                        $('#po_date').on('apply.daterangepicker', function (ev, picker) {
+                            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+                        });
 
-                      $('#po_date').on('cancel.daterangepicker', function (ev, picker) {
-                          $(this).val('');
-                      });
+                        $('#po_date').on('cancel.daterangepicker', function (ev, picker) {
+                            $(this).val('');
+                        });
 
-                      $('#received_date').daterangepicker(
-                              {
-                                  locale: {
-                                      format: 'DD/MM/YYYY'
-                                  },
-                                  opens: "right",
-                                  autoUpdateInput: false
-                              });
-                      $('#received_date').on('apply.daterangepicker', function (ev, picker) {
-                          $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-                      });
+                        $('#received_date').daterangepicker(
+                                {
+                                    locale: {
+                                        format: 'DD/MM/YYYY'
+                                    },
+                                    opens: "right",
+                                    autoUpdateInput: false
+                                });
+                        $('#received_date').on('apply.daterangepicker', function (ev, picker) {
+                            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+                        });
 
-                      $('#received_date').on('cancel.daterangepicker', function (ev, picker) {
-                          $(this).val('');
-                      });
+                        $('#received_date').on('cancel.daterangepicker', function (ev, picker) {
+                            $(this).val('');
+                        });
 
-                      $("#search-po-btn").click(function () {
-                          $.get("/purchase_returns/filter_purchase_records", {
-                              po_date: $("#po_date").val(),
-                              query_operator: $("#query_operator").val(),
-                              vendor_id: $("#vendor").val()
-                          });
-                      });
+                        $("#search-po-btn").click(function () {
+                            $.get("/purchase_returns/filter_purchase_records", {
+                                po_date: $("#po_date").val(),
+                                query_operator: $("#query_operator").val(),
+                                vendor_id: $("#vendor").val()
+                            });
+                        });
 
-                      $("#search-dp-btn").click(function () {
-                          $.get("/purchase_returns/filter_purchase_records", {
-                              received_date: $("#received_date").val(),
-                              query_operator: $("#query_operator_dp").val(),
-                              vendor_id: $("#vendor_dp").val(),
-                              type: "direct purchase"
-                          });
-                      });
+                        $("#search-dp-btn").click(function () {
+                            $.get("/purchase_returns/filter_purchase_records", {
+                                received_date: $("#received_date").val(),
+                                query_operator: $("#query_operator_dp").val(),
+                                vendor_id: $("#vendor_dp").val(),
+                                type: "direct purchase"
+                            });
+                        });
 
-                      $("#search-po-by-number-btn").click(function () {
-                          if ($("#number").val().trim() == "")
-                              bootbox.alert({message: "Please fill out the field above", size: "small"});
-                          else {
-                              $.get("/purchase_returns/filter_purchase_records", {
-                                  po_number: $("#number").val().trim()
-                              });
-                          }
-                      });
+                        $("#search-po-by-number-btn").click(function () {
+                            if ($("#number").val().trim() == "")
+                                bootbox.alert({message: "Please fill out the field above", size: "small"});
+                            else {
+                                $.get("/purchase_returns/filter_purchase_records", {
+                                    po_number: $("#number").val().trim()
+                                });
+                            }
+                        });
 
-                      $("#search-dp-by-number-btn").click(function () {
-                          if ($("#number_do").val().trim() == "")
-                              bootbox.alert({message: "Please fill out the field above", size: "small"});
-                          else {
-                              $.get("/purchase_returns/filter_purchase_records", {
-                                  do_number: $("#number_do").val().trim(),
-                                  type: "direct purchase"
-                              });
-                          }
-                      });
+                        $("#search-dp-by-number-btn").click(function () {
+                            if ($("#number_do").val().trim() == "")
+                                bootbox.alert({message: "Please fill out the field above", size: "small"});
+                            else {
+                                $.get("/purchase_returns/filter_purchase_records", {
+                                    do_number: $("#number_do").val().trim(),
+                                    type: "direct purchase"
+                                });
+                            }
+                        });
 
-                  });
-                </script>
+                        $("#search-dp-by-trans-number-btn").click(function () {
+                            if ($("#number_trans").val().trim() == "")
+                                bootbox.alert({message: "Please fill out the field above", size: "small"});
+                            else {
+                                $.get("/purchase_returns/filter_purchase_records", {
+                                    number_trans: $("#number_trans").val().trim(),
+                                    type: "direct purchase"
+                                });
+                            }
+                        });
+
+                    });
+                  </script>

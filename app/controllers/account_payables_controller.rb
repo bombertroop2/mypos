@@ -58,7 +58,7 @@ class AccountPayablesController < ApplicationController
         order("received_purchase_orders.receiving_date")
       @direct_purchases = DirectPurchase.
         select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :invoice_status).
-        select("vendors.name AS vendor_name").
+        select("vendors.name AS vendor_name", "received_purchase_orders.transaction_number AS rpo_transaction_number").
         joins(:received_purchase_order, :vendor).
         where(invoice_status: "").
         order(:receiving_date)
@@ -189,7 +189,7 @@ class AccountPayablesController < ApplicationController
   def get_received_purchases
     account_payable = AccountPayable.new
     received_purchase_orders = ReceivedPurchaseOrder.
-      select(:id, :delivery_order_number, :receiving_date, :quantity, :purchase_order_id, :direct_purchase_id, "purchase_orders.number AS po_number", "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
+      select(:transaction_number, :id, :delivery_order_number, :receiving_date, :quantity, :purchase_order_id, :direct_purchase_id, "purchase_orders.number AS po_number", "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
       joins(:vendor).
       joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
       joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
@@ -261,7 +261,7 @@ class AccountPayablesController < ApplicationController
       else
         value_after_ppn_for_ap_partial rpo, "direct", gross_amount
       end
-      @account_payable_purchase_partials << account_payable.account_payable_purchase_partials.build(received_purchase_order_id: rpo.id, attr_delivery_order_number: rpo.delivery_order_number, attr_purchase_order_number: rpo.po_number, attr_received_quantity: rpo.quantity, attr_gross_amount: gross_amount, attr_first_discount_money: first_discount_money, attr_second_discount_money: second_discount_money, attr_is_additional_disc_from_net: is_additional_disc_from_net, attr_vat_in_money: vat_in_money, attr_net_amount: net_amount, attr_receiving_date: rpo.receiving_date)
+      @account_payable_purchase_partials << account_payable.account_payable_purchase_partials.build(received_purchase_order_id: rpo.id, attr_delivery_order_number: rpo.delivery_order_number, attr_purchase_order_number: rpo.po_number, attr_received_quantity: rpo.quantity, attr_gross_amount: gross_amount, attr_first_discount_money: first_discount_money, attr_second_discount_money: second_discount_money, attr_is_additional_disc_from_net: is_additional_disc_from_net, attr_vat_in_money: vat_in_money, attr_net_amount: net_amount, attr_receiving_date: rpo.receiving_date, attr_rpo_transaction_number: rpo.transaction_number)
     end
   end
 
@@ -276,7 +276,7 @@ class AccountPayablesController < ApplicationController
     if params[:account_payable][:beginning_of_account_payable_creating].eql?("Partial")
       params.require(:account_payable).permit(:vendor_id, :beginning_of_account_payable_creating,
         :note, :vendor_invoice_number, :vendor_invoice_date,
-        account_payable_purchase_partials_attributes: [:received_purchase_order_id, :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity, :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date])
+        account_payable_purchase_partials_attributes: [:received_purchase_order_id, :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity, :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date, :attr_rpo_transaction_number])
     else
       params.require(:account_payable).permit(:vendor_id, :beginning_of_account_payable_creating,
         :note, :vendor_invoice_number, :vendor_invoice_date,

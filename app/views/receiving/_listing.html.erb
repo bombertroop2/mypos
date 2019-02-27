@@ -1,11 +1,12 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
     <thead id="listing-ro-thead">
         <tr>
+            <th class="col-md-2"><%= smart_listing.sortable "Trans. Number", "transaction_number" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "DO Number", "delivery_order_number" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "PO Number", "number" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "PO Status", "status" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "PO Sts", "status" %></th>
             <th class="col-md-2"><%= smart_listing.sortable "Vendor", "name" %></th>
-            <th class="col-md-2"><%= smart_listing.sortable "Rec. Date", "receiving_date" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Rec. Dt", "receiving_date" %></th>
             <th class="col-md-1"><%= smart_listing.sortable "Qty", "quantity" %></th>
             <th class="col-md-1"></th>
         </tr>
@@ -16,7 +17,7 @@
               <%= smart_listing.render object: ro, partial: "receiving/received_order", locals: {object: ro} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 7, link: new_receiving_path %>
+        <%= smart_listing.item_new colspan: 8, link: new_receiving_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

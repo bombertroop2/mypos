@@ -230,17 +230,33 @@ class PurchaseReturnsController < ApplicationController
         ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["direct_purchases.vendor_id = ? AND vendors.is_active = ?", params[:vendor_id].strip, true]).order(:delivery_order_number)
       elsif params[:do_number].present?
         ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id, direct_purchase_id").where(["delivery_order_number = ? AND vendors.is_active = ?", params[:do_number], true]).order(:delivery_order_number)
+      elsif params[:number_trans].present?
+        ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id, direct_purchase_id").where(["transaction_number = ? AND vendors.is_active = ?", params[:number_trans], true]).order(:transaction_number)
       else
         ReceivedPurchaseOrder.joins(:direct_purchase, :vendor).select("delivery_order_number, received_purchase_orders.id").where(["vendors.is_active = ?", true]).order(:delivery_order_number)
       end
 
-      if @do_numbers.blank? && params[:do_number].present?
+      if @do_numbers.blank? && (params[:do_number].present? || params[:number_trans].present?)
         render js: "bootbox.alert({message: \"No records found\",size: 'small'});"
       elsif params[:do_number].present?
         @direct_purchase_id = @do_numbers.first.direct_purchase_id
         direct_purchase = DirectPurchase.select(:id).where(id: @direct_purchase_id).first
         @purchase_return.direct_purchase_id = @direct_purchase_id
         @purchase_return.delivery_order_number = params[:do_number]
+        @direct_purchase_products = direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).includes(:direct_purchase_details, :colors, :sizes).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id")
+        @direct_purchase_details = {}
+        @direct_purchase_products.each do |dpp|
+          purchase_return_product = @purchase_return.purchase_return_products.build direct_purchase_product_id: dpp.id, product_cost: dpp.cost, product_code: dpp.code, product_name: dpp.name, product_id: dpp.product_id
+          @direct_purchase_details[dpp.id] = dpp.direct_purchase_details
+          @direct_purchase_details[dpp.id].each do |dpd|
+            purchase_return_product.purchase_return_items.build direct_purchase_detail_id: dpd.id
+          end
+        end
+      elsif params[:number_trans].present?
+        @direct_purchase_id = @do_numbers.first.direct_purchase_id
+        direct_purchase = DirectPurchase.select(:id).where(id: @direct_purchase_id).first
+        @purchase_return.direct_purchase_id = @direct_purchase_id
+        @purchase_return.attr_transaction_number = params[:number_trans]
         @direct_purchase_products = direct_purchase.direct_purchase_products.joins({product: :brand}, :cost_list).includes(:direct_purchase_details, :colors, :sizes).select("direct_purchase_products.id, products.code, common_fields.name, cost, products.id AS product_id")
         @direct_purchase_details = {}
         @direct_purchase_products.each do |dpp|
@@ -279,7 +295,7 @@ class PurchaseReturnsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def purchase_return_params
-    params.require(:purchase_return).permit(:direct_purchase_id, :direct_purchase_return, :delivery_order_number, :number, :vendor_id, :purchase_order_id,
+    params.require(:purchase_return).permit(:direct_purchase_id, :direct_purchase_return, :delivery_order_number, :number, :vendor_id, :purchase_order_id, :attr_transaction_number,
       purchase_return_products_attributes: [:direct_purchase_id, :returning_direct_purchase, :purchase_order_id, :direct_purchase_product_id, :id, :purchase_order_product_id, :product_cost, :product_code, :product_name, :product_id,
         purchase_return_items_attributes: [:direct_purchase_id, :direct_purchase_product_id, :purchase_order_product_id, :purchase_order_id, :direct_purchase_return, :direct_purchase_detail_id, :quantity, :purchase_order_detail_id, :id]])
   end

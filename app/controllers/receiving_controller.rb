@@ -16,8 +16,9 @@ class ReceivingController < ApplicationController
       received_orders_scope = ReceivedPurchaseOrder.
         joins("LEFT JOIN purchase_orders on received_purchase_orders.purchase_order_id = purchase_orders.id").
         joins(:vendor).
-        select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity, :status)
+        select(:id, :number, :transaction_number, :delivery_order_number, :name, :receiving_date, :quantity, :status)
       received_orders_scope = received_orders_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]).
+        or(received_orders_scope.where(["transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"])).
         or(received_orders_scope.where(["name #{like_command} ?", "%"+params[:filter_string]+"%"])).
         or(received_orders_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"])).
         or(received_orders_scope.where(["status #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
@@ -93,7 +94,7 @@ class ReceivingController < ApplicationController
           @valid = true
           @received_order = ReceivedPurchaseOrder.
             joins(:purchase_order, :vendor).
-            select(:id, :number, :delivery_order_number, :name, :receiving_date, :quantity, :status).
+            select(:id, :number, :delivery_order_number, :transaction_number, :name, :receiving_date, :quantity, :status).
             where("purchase_order_id = '#{@purchase_order.id}'").last
         end
       rescue ActiveRecord::RecordNotUnique => e
@@ -187,7 +188,7 @@ class ReceivingController < ApplicationController
           @product_received = true
           @received_order = ReceivedPurchaseOrder.
             joins(:direct_purchase, :vendor).
-            select(:id, :delivery_order_number, :name, :receiving_date, :quantity).
+            select(:id, :delivery_order_number, :transaction_number, :name, :receiving_date, :quantity).
             where("direct_purchase_id = '#{@direct_purchase.id}'").last
         end
       rescue ActiveRecord::RecordNotUnique => e
@@ -261,7 +262,7 @@ class ReceivingController < ApplicationController
     end
 
     def set_received_order
-      @received_order = ReceivedPurchaseOrder.where(id: params[:id]).select(:id, :delivery_order_number, :purchase_order_id, :direct_purchase_id, :receiving_date, :vendor_id, :quantity).first
+      @received_order = ReceivedPurchaseOrder.where(id: params[:id]).select(:id, :delivery_order_number, :purchase_order_id, :direct_purchase_id, :receiving_date, :vendor_id, :quantity, :transaction_number).first
     end
 
     def add_additional_params_to_child
