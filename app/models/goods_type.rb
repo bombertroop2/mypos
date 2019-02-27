@@ -9,6 +9,10 @@ class GoodsType < CommonField
   validate :code_not_changed
  
   before_destroy :delete_tracks
+  
+  def code_and_name
+    "#{code} - #{name}"
+  end
 
   private
 
