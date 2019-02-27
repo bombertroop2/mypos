@@ -37,12 +37,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                   end
                 
                   def create_listing_stock
-                    transaction = unless is_it_direct_purchasing
-                      purchase_order_product = PurchaseOrderProduct.select(:purchase_order_id).where(id: purchase_order_detail.purchase_order_product_id).first
-                      PurchaseOrder.select(:number).where(id: purchase_order_product.purchase_order_id).first
-                    else
-                      ReceivedPurchaseOrder.select(:delivery_order_number).joins(direct_purchase: :direct_purchase_products).where(["direct_purchase_products.id = ?", direct_purchase_detail.direct_purchase_product_id]).first
-                    end
+                    transaction = ReceivedPurchaseOrder.select(:transaction_number).joins(received_purchase_order_products: :received_purchase_order_items).where(["received_purchase_order_items.id = ?", id]).first
                     listing_stock = ListingStock.select(:id).where(warehouse_id: warehouse_id, product_id: product_id).first
                     listing_stock = ListingStock.new warehouse_id: warehouse_id, product_id: product_id if listing_stock.blank?
                     if listing_stock.new_record?                    
@@ -51,7 +46,7 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                       else
                         listing_stock.listing_stock_product_details.build color_id: direct_purchase_detail.color_id, size_id: direct_purchase_detail.size_id
                       end
-                      listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: (is_it_direct_purchasing ? transaction.delivery_order_number : transaction.number), transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                      listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: transaction.transaction_number, transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
                       listing_stock.save
                     else
                       listing_stock_product_detail = unless is_it_direct_purchasing
@@ -65,10 +60,10 @@ class ReceivedPurchaseOrderItem < ApplicationRecord
                         listing_stock.listing_stock_product_details.build color_id: direct_purchase_detail.color_id, size_id: direct_purchase_detail.size_id
                       end if listing_stock_product_detail.blank?
                       if listing_stock_product_detail.new_record?
-                        listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: (is_it_direct_purchasing ? transaction.delivery_order_number : transaction.number), transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                        listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: transaction.transaction_number, transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
                         listing_stock_product_detail.save
                       else
-                        listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: (is_it_direct_purchasing ? transaction.delivery_order_number : transaction.number), transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
+                        listing_stock_transaction = listing_stock_product_detail.listing_stock_transactions.build transaction_date: receiving_date.to_date, transaction_number: transaction.transaction_number, transaction_type: "PO", transactionable_id: self.id, transactionable_type: self.class.name, quantity: quantity
                         listing_stock_transaction.save
                       end
                     end
