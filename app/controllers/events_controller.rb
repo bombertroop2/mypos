@@ -239,9 +239,17 @@ class EventsController < ApplicationController
 
   def new_add_products
     if params[:selected_products].present?
-      products = Product.where(code: params[:products]).where.not(id: params[:selected_products])
+      products = if params[:products].reject(&:empty?).present?
+        Product.where(code: params[:products]).where.not(id: params[:selected_products])
+      elsif params[:brand_id].present? && params[:target].present?
+        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]]).where.not(id: params[:selected_products])
+      end
     else
-      products = Product.where(code: params[:products])
+      products = if params[:products].reject(&:empty?).present?
+        Product.where(code: params[:products])
+      elsif params[:brand_id].present? && params[:target].present?
+        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]])
+      end
     end
     if products.blank?
       render js: "bootbox.alert({message: \"No records found or already added to the list\",size: 'small'});"
@@ -274,10 +282,18 @@ class EventsController < ApplicationController
   end
 
   def new_add_general_products
-    if params[:selected_products].present?
-      products = Product.where(code: params[:products]).where.not(id: params[:selected_products])
+    if params[:selected_products].present?      
+      products = if params[:products].reject(&:empty?).present?
+        Product.where(code: params[:products]).where.not(id: params[:selected_products])
+      elsif params[:brand_id].present? && params[:target].present?
+        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]]).where.not(id: params[:selected_products])
+      end
     else
-      products = Product.where(code: params[:products])
+      products = if params[:products].reject(&:empty?).present?
+        Product.where(code: params[:products])
+      elsif params[:brand_id].present? && params[:target].present?
+        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]])
+      end
     end
     if products.blank?
       render js: "bootbox.alert({message: \"No records found or already added to the list\",size: 'small'});"

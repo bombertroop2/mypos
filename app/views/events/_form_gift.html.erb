@@ -390,7 +390,7 @@
                                         $('#event_code_gift').on("input", function () {
                                             $(this).val($(this).val().replace(/ /g, ""));
                                         });
-                                        
+
                                         $("#add-btn-gift-products").click(function () {
                                             var productIds = [];
                                             products = $("#code_general_products_gift").val().split(",");
@@ -406,14 +406,18 @@
                                               $.get("/events/new_add_general_products", {
                                                   products: productIds,
                                                   selected_products: selectedProductIds,
-                                                  event_type: "gift"
+                                                  event_type: "gift",
+                                                  brand_id: $("#brand_general_products_gift").val(),
+                                                  target: $("#target_general_products_gift").val()
                                               });
                                   <% else %>
                                               $.get("/events/new_add_general_products", {
                                                   products: productIds,
                                                   selected_products: selectedProductIds,
                                                   event_type: "gift",
-                                                  event_id: "<%= @event.id %>"
+                                                  event_id: "<%= @event.id %>",
+                                                  brand_id: $("#brand_general_products_gift").val(),
+                                                  target: $("#target_general_products_gift").val()
                                               });
                                   <% end %>
                                             $('#code_general_products_gift').tagit('removeAll');

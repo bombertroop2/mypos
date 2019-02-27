@@ -395,7 +395,9 @@
                                         warehouse_id: warehouseId,
                                         products: productIds,
                                         selected_products: selectedProductIds,
-                                        event_type: "cash discount"
+                                        event_type: "cash discount",
+                                        brand_id: $("#article_brand_cash_discount_" + warehouseId).val(),
+                                        target: $("#article_target_cash_discount_" + warehouseId).val()
                                     });
             <% else %>
                                     $.get("/events/new_add_products", {
@@ -403,7 +405,9 @@
                                         products: productIds,
                                         selected_products: selectedProductIds,
                                         event_type: "cash discount",
-                                        event_id: "<%= @event.id %>"
+                                        event_id: "<%= @event.id %>",
+                                        brand_id: $("#article_brand_cash_discount_" + warehouseId).val(),
+                                        target: $("#article_target_cash_discount_" + warehouseId).val()
                                     });
             <% end %>
                                   $('#article_code_cash_discount_' + warehouseId).tagit('removeAll');
@@ -536,7 +540,9 @@
                                         warehouse_id: warehouseId,
                                         products: productIds,
                                         selected_products: selectedProductIds,
-                                        event_type: "special price"
+                                        event_type: "special price",
+                                        brand_id: $("#article_brand_special_price_" + warehouseId).val(),
+                                        target: $("#article_target_special_price_" + warehouseId).val()
                                     });
             <% else %>
                                     $.get("/events/new_add_products", {
@@ -544,7 +550,9 @@
                                         products: productIds,
                                         selected_products: selectedProductIds,
                                         event_type: "special price",
-                                        event_id: "<%= @event.id %>"
+                                        event_id: "<%= @event.id %>",
+                                        brand_id: $("#article_brand_special_price_" + warehouseId).val(),
+                                        target: $("#article_target_special_price_" + warehouseId).val()
                                     });
             <% end %>
                                   $('#article_code_special_price_' + warehouseId).tagit('removeAll');
@@ -678,7 +686,9 @@
                                         warehouse_id: warehouseId,
                                         products: productIds,
                                         selected_products: selectedProductIds,
-                                        event_type: "buy one get one"
+                                        event_type: "buy one get one",
+                                        brand_id: $("#article_brand_bogo_" + warehouseId).val(),
+                                        target: $("#article_target_bogo_" + warehouseId).val()
                                     });
             <% else %>
                                     $.get("/events/new_add_products", {
@@ -686,7 +696,9 @@
                                         products: productIds,
                                         selected_products: selectedProductIds,
                                         event_type: "buy one get one",
-                                        event_id: "<%= @event.id %>"
+                                        event_id: "<%= @event.id %>",
+                                        brand_id: $("#article_brand_bogo_" + warehouseId).val(),
+                                        target: $("#article_target_bogo_" + warehouseId).val()
                                     });
             <% end %>
                                   $('#article_code_bogo_' + warehouseId).tagit('removeAll');
@@ -821,7 +833,9 @@
                                         warehouse_id: warehouseId,
                                         products: productIds,
                                         selected_products: selectedProductIds,
-                                        event_type: ""
+                                        event_type: "",
+                                        brand_id: $("#article_brand_percentage_discount_" + warehouseId).val(),
+                                        target: $("#article_target_percentage_discount_" + warehouseId).val()
                                     });
             <% else %>
                                     $.get("/events/new_add_products", {
@@ -829,7 +843,9 @@
                                         products: productIds,
                                         selected_products: selectedProductIds,
                                         event_type: "",
-                                        event_id: "<%= @event.id %>"
+                                        event_id: "<%= @event.id %>",
+                                        brand_id: $("#article_brand_percentage_discount_" + warehouseId).val(),
+                                        target: $("#article_target_percentage_discount_" + warehouseId).val()
                                     });
             <% end %>
                                   $('#article_code_percentage_discount_' + warehouseId).tagit('removeAll');

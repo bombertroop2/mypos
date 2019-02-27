@@ -395,14 +395,18 @@
                                           $.get("/events/new_add_general_products", {
                                               products: productIds,
                                               selected_products: selectedProductIds,
-                                              event_type: "special price"
+                                              event_type: "special price",
+                                              brand_id: $("#brand_general_products_special_price").val(),
+                                              target: $("#target_general_products_special_price").val()
                                           });
                               <% else %>
                                           $.get("/events/new_add_general_products", {
                                               products: productIds,
                                               selected_products: selectedProductIds,
                                               event_type: "special price",
-                                              event_id: "<%= @event.id %>"
+                                              event_id: "<%= @event.id %>",
+                                              brand_id: $("#brand_general_products_special_price").val(),
+                                              target: $("#target_general_products_special_price").val()
                                           });
                               <% end %>
                                         $('#code_general_products_special_price').tagit('removeAll');
