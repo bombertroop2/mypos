@@ -241,14 +241,14 @@ class EventsController < ApplicationController
     if params[:selected_products].present?
       products = if params[:products].reject(&:empty?).present?
         Product.where(code: params[:products]).where.not(id: params[:selected_products])
-      elsif params[:brand_id].present? && params[:target].present?
-        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]]).where.not(id: params[:selected_products])
+      elsif params[:brand_id].present? && params[:target].present? && params[:goods_type_id].present? && params[:sex].present?
+        Product.where(["brand_id = ? AND target = ? AND goods_type_id = ? AND sex = ?", params[:brand_id], params[:target], params[:goods_type_id], params[:sex]]).where.not(id: params[:selected_products])
       end
     else
       products = if params[:products].reject(&:empty?).present?
         Product.where(code: params[:products])
-      elsif params[:brand_id].present? && params[:target].present?
-        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]])
+      elsif params[:brand_id].present? && params[:target].present? && params[:goods_type_id].present? && params[:sex].present?
+        Product.where(["brand_id = ? AND target = ? AND goods_type_id = ? AND sex = ?", params[:brand_id], params[:target], params[:goods_type_id], params[:sex]])
       end
     end
     if products.blank?
@@ -285,14 +285,14 @@ class EventsController < ApplicationController
     if params[:selected_products].present?      
       products = if params[:products].reject(&:empty?).present?
         Product.where(code: params[:products]).where.not(id: params[:selected_products])
-      elsif params[:brand_id].present? && params[:target].present?
-        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]]).where.not(id: params[:selected_products])
+      elsif params[:brand_id].present? && params[:target].present? && params[:goods_type_id].present? && params[:sex].present?
+        Product.where(["brand_id = ? AND target = ? AND goods_type_id = ? AND sex = ?", params[:brand_id], params[:target], params[:goods_type_id], params[:sex]]).where.not(id: params[:selected_products])
       end
     else
       products = if params[:products].reject(&:empty?).present?
         Product.where(code: params[:products])
-      elsif params[:brand_id].present? && params[:target].present?
-        Product.where(["brand_id = ? AND target = ?", params[:brand_id], params[:target]])
+      elsif params[:brand_id].present? && params[:target].present? && params[:goods_type_id].present? && params[:sex].present?
+        Product.where(["brand_id = ? AND target = ? AND goods_type_id = ? AND sex = ?", params[:brand_id], params[:target], params[:goods_type_id], params[:sex]])
       end
     end
     if products.blank?
@@ -378,7 +378,7 @@ class EventsController < ApplicationController
   end
 
   def autocomplete_events
-    products = Product.where("LOWER(code) LIKE LOWER('#{params[:term]}%') AND brand_id = #{params[:brand].to_i} AND target = '#{params[:target]}' ")
+    products = Product.where("LOWER(code) LIKE LOWER('#{params[:term]}%') AND brand_id = #{params[:brand].to_i} AND target = '#{params[:target]}' AND goods_type_id = #{params[:goods_type_id].to_i} AND sex = '#{params[:sex]}'")
     render json: products.map { |product|
       {
         id:    product.id,

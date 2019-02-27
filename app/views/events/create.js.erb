@@ -1,5 +1,6 @@
 <% if @valid %>
   <%= smart_listing_item :events, :create, @event, "events/event" %>
+  $(".new-item-placeholder").html("");
 <% else %>
   <% if params[:event][:event_type].strip.eql?("Discount(%)") %>
     $("#form_container_disc_percentage").html("<%= j(render(partial: "form_discount_percentage")) %>");

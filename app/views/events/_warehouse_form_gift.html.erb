@@ -101,177 +101,197 @@
                               </div>
                               <div class="form-group">
                                   <div class="col-sm-12">
-                                      <%= text_field_tag "code", "", {class: "form-control article_code_gift", id: "article_code_gift_#{event_warehouse.warehouse_id}"} %>
+                                      <%= select_tag "goods_type_id", options_from_collection_for_select(@goods_types, :id, "code_and_name"), {include_blank: true, class: "form-control", id: "article_goods_type_id_gift_#{event_warehouse.warehouse_id}"} %>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-12">
-                                        <button type="button" class="btn btn-success add-buttons-warehouse-gift" id="<%= "add-buttons-warehouse-gift-#{event_warehouse.warehouse_id}" %>" style="float: right">Add</button>
+                                        <%= select_tag "sex", options_for_select(Product::SEX), {include_blank: true, class: "form-control", id: "article_sex_gift_#{event_warehouse.warehouse_id}"} %>
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <div class="col-sm-12">
+                                          <%= text_field_tag "code", "", {class: "form-control article_code_gift", id: "article_code_gift_#{event_warehouse.warehouse_id}"} %>
+                                        </div>
                                     </div>
-                                </div>
-                                <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products-gift">
-                                    <% if (action_name.eql?("edit") && event_products.length > 0) || action_name.eql?("update") %>
-                                      <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_products: event_products, event_type: event_type} %>
-                                    <% elsif event_warehouse.event_products.present? %>
-                                      <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_type: event_type} %>
-                                    <% end %>
-                                </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn btn-success add-buttons-warehouse-gift" id="<%= "add-buttons-warehouse-gift-#{event_warehouse.warehouse_id}" %>" style="float: right">Add</button>
+                                        </div>
+                                    </div>
+                                    <div id="listing-warehouse-<%= event_warehouse.warehouse_id %>-products-gift">
+                                        <% if (action_name.eql?("edit") && event_products.length > 0) || action_name.eql?("update") %>
+                                          <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_products: event_products, event_type: event_type} %>
+                                        <% elsif event_warehouse.event_products.present? %>
+                                          <%= render partial: "listing_warehouse_products", locals: {event_warehouse: event_warehouse, event_type: event_type} %>
+                                        <% end %>
+                                    </div>
 
-                                <div class="ln_solid"></div>
+                                    <div class="ln_solid"></div>
 
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                  <% end %>
+                <% end %>
               <% end %>
-            <% end %>
-          <% end %>
 
-          <script type="text/javascript">
-            $(function () {
-                /*$(".add-buttons-gift").click(function () {
-                 var warehouseId = $(this).attr("id").split("-")[2];
-                 var productIds = [];
-                 $(".event-products-" + warehouseId + "-product-id-fields-gift").each(function () {
-                 var attrId = $(this).attr('id');
-                 productIds.push(attrId.split("_")[8]);
-                 });
-                 var addProductParams = {};
-                 <%# if @event.new_record? %>
-                 addProductParams = {
-                 warehouse_id: warehouseId,
-                 brand_id: $("#brand_" + warehouseId + "_gift").val(),
-                 goods_type_id: $("#goods_type_" + warehouseId + "_gift").val(),
-                 model_id: $("#model_" + warehouseId + "_gift").val(),
-                 selected_product_ids: productIds.join(","),
-                 event_type: "gift"
-                 };
-                 <%# else %>
-                 addProductParams = {
-                 warehouse_id: warehouseId,
-                 brand_id: $("#brand_" + warehouseId + "_gift").val(),
-                 goods_type_id: $("#goods_type_" + warehouseId + "_gift").val(),
-                 model_id: $("#model_" + warehouseId + "_gift").val(),
-                 selected_product_ids: productIds.join(","),
-                 event_type: "gift",
-                 event_id: "<%#= @event.id %>"
-                 };
-                 <%# end %>
-                 $.get("/events/add_products", addProductParams);
-                 $("#brand_" + warehouseId + "_gift").prop('selectedIndex', 0);
-                 $("#goods_type_" + warehouseId + "_gift").prop('selectedIndex', 0);
-                 $("#model_" + warehouseId + "_gift").prop('selectedIndex', 0);
-                 return false;
-                 });*/
-                /*$(".add-buttons-by-code-gift").click(function () {
-                 var warehouseId = $(this).attr("id").split("-")[2];
-                 if ($("#code_" + warehouseId + "_gift").val().trim() == "")
-                 bootbox.alert({message: "Please fill out the field above", size: "small"});
-                 else {
-                 var productIds = [];
-                 $(".event-products-" + warehouseId + "-product-id-fields-gift").each(function () {
-                 var attrId = $(this).attr('id');
-                 productIds.push(attrId.split("_")[8]);
-                 });
-                 var addProductParams = {};
-                 <%# if @event.new_record? %>
-                 addProductParams = {
-                 warehouse_id: warehouseId,
-                 product_code: $("#code_" + warehouseId + "_gift").val(),
-                 selected_product_ids: productIds.join(","),
-                 event_type: "gift"
-                 };
-                 <%# else %>
-                 addProductParams = {
-                 warehouse_id: warehouseId,
-                 product_code: $("#code_" + warehouseId + "_gift").val(),
-                 selected_product_ids: productIds.join(","),
-                 event_type: "gift",
-                 event_id: "<%#= @event.id %>"
-                 };
-                 <%# end %>
-                 $.get("/events/add_products", addProductParams);
-                 $("#code_" + warehouseId + "_gift").val("");
-                 }
-                 return false;
-                 });*/
-                $(".event-warehouse-select-different-products-fields-gift").click(function () {
-                    var warehouseId = $(this).attr("id").split("_")[4];
-                    if ($(this).is(":checked")) {
-                        $("#event-warehouse-" + warehouseId + "-form-container-gift").removeClass("hidden");
-                        $("#article_brand_gift_" + warehouseId).attr("data-placeholder", "Select brand").chosen("destroy").chosen();
-                        $("#article_target_gift_" + warehouseId).attr("data-placeholder", "Select target").chosen("destroy").chosen();
-                    } else {
-                        $("#event-warehouse-" + warehouseId + "-form-container-gift").addClass("hidden");
-                    }
-                });
-                $(".article_code_gift").each(function () {
-                    var warehouseId = $(this).attr("id").split("_")[3];
-                    $(this).tagit({
-                        autocomplete: {
-                            delay: 0,
-                            minLength: 1,
-                            source: function (search, response) {
-                                $.ajax({
-                                    url: "/events/autocomplete_events",
-                                    data: {
-                                        brand: $("#article_brand_gift_" + warehouseId).val().trim(),
-                                        target: $("#article_target_gift_" + warehouseId).val().trim(),
-                                        term: search.term
-                                    },
-                                    success: function (data) {
-                                        response($.map(data, function (item) {
-                                            return {
-                                                id: item.id,
-                                                label: item.label
-                                            }
-                                        }));
-                                    }
-                                });
-                            }
-                        },
-                        placeholderText: 'Article code'
+              <script type="text/javascript">
+                $(function () {
+                    /*$(".add-buttons-gift").click(function () {
+                     var warehouseId = $(this).attr("id").split("-")[2];
+                     var productIds = [];
+                     $(".event-products-" + warehouseId + "-product-id-fields-gift").each(function () {
+                     var attrId = $(this).attr('id');
+                     productIds.push(attrId.split("_")[8]);
+                     });
+                     var addProductParams = {};
+                     <%# if @event.new_record? %>
+                     addProductParams = {
+                     warehouse_id: warehouseId,
+                     brand_id: $("#brand_" + warehouseId + "_gift").val(),
+                     goods_type_id: $("#goods_type_" + warehouseId + "_gift").val(),
+                     model_id: $("#model_" + warehouseId + "_gift").val(),
+                     selected_product_ids: productIds.join(","),
+                     event_type: "gift"
+                     };
+                     <%# else %>
+                     addProductParams = {
+                     warehouse_id: warehouseId,
+                     brand_id: $("#brand_" + warehouseId + "_gift").val(),
+                     goods_type_id: $("#goods_type_" + warehouseId + "_gift").val(),
+                     model_id: $("#model_" + warehouseId + "_gift").val(),
+                     selected_product_ids: productIds.join(","),
+                     event_type: "gift",
+                     event_id: "<%#= @event.id %>"
+                     };
+                     <%# end %>
+                     $.get("/events/add_products", addProductParams);
+                     $("#brand_" + warehouseId + "_gift").prop('selectedIndex', 0);
+                     $("#goods_type_" + warehouseId + "_gift").prop('selectedIndex', 0);
+                     $("#model_" + warehouseId + "_gift").prop('selectedIndex', 0);
+                     return false;
+                     });*/
+                    /*$(".add-buttons-by-code-gift").click(function () {
+                     var warehouseId = $(this).attr("id").split("-")[2];
+                     if ($("#code_" + warehouseId + "_gift").val().trim() == "")
+                     bootbox.alert({message: "Please fill out the field above", size: "small"});
+                     else {
+                     var productIds = [];
+                     $(".event-products-" + warehouseId + "-product-id-fields-gift").each(function () {
+                     var attrId = $(this).attr('id');
+                     productIds.push(attrId.split("_")[8]);
+                     });
+                     var addProductParams = {};
+                     <%# if @event.new_record? %>
+                     addProductParams = {
+                     warehouse_id: warehouseId,
+                     product_code: $("#code_" + warehouseId + "_gift").val(),
+                     selected_product_ids: productIds.join(","),
+                     event_type: "gift"
+                     };
+                     <%# else %>
+                     addProductParams = {
+                     warehouse_id: warehouseId,
+                     product_code: $("#code_" + warehouseId + "_gift").val(),
+                     selected_product_ids: productIds.join(","),
+                     event_type: "gift",
+                     event_id: "<%#= @event.id %>"
+                     };
+                     <%# end %>
+                     $.get("/events/add_products", addProductParams);
+                     $("#code_" + warehouseId + "_gift").val("");
+                     }
+                     return false;
+                     });*/
+                    $(".event-warehouse-select-different-products-fields-gift").click(function () {
+                        var warehouseId = $(this).attr("id").split("_")[4];
+                        if ($(this).is(":checked")) {
+                            $("#event-warehouse-" + warehouseId + "-form-container-gift").removeClass("hidden");
+                            $("#article_brand_gift_" + warehouseId).attr("data-placeholder", "Select brand").chosen("destroy").chosen();
+                            $("#article_target_gift_" + warehouseId).attr("data-placeholder", "Select target").chosen("destroy").chosen();
+                            $("#article_goods_type_id_gift_" + warehouseId).attr("data-placeholder", "Select goods type").chosen("destroy").chosen();
+                            $("#article_sex_gift_" + warehouseId).attr("data-placeholder", "Select sex").chosen("destroy").chosen();
+                        } else {
+                            $("#event-warehouse-" + warehouseId + "-form-container-gift").addClass("hidden");
+                        }
+                    });
+                    $(".article_code_gift").each(function () {
+                        var warehouseId = $(this).attr("id").split("_")[3];
+                        $(this).tagit({
+                            autocomplete: {
+                                delay: 0,
+                                minLength: 1,
+                                source: function (search, response) {
+                                    $.ajax({
+                                        url: "/events/autocomplete_events",
+                                        data: {
+                                            brand: $("#article_brand_gift_" + warehouseId).val().trim(),
+                                            target: $("#article_target_gift_" + warehouseId).val().trim(),
+                                            goods_type_id: $("#article_goods_type_id_gift_" + warehouseId).val().trim(),
+                                            sex: $("#article_sex_gift_" + warehouseId).val().trim(),
+                                            term: search.term
+                                        },
+                                        success: function (data) {
+                                            response($.map(data, function (item) {
+                                                return {
+                                                    id: item.id,
+                                                    label: item.label
+                                                }
+                                            }));
+                                        }
+                                    });
+                                }
+                            },
+                            placeholderText: 'Article code'
+                        });
+
+              <% if action_name.eql?("create") || !@event.new_record? %>
+                          $("#article_brand_gift_" + warehouseId).attr("data-placeholder", "Select brand").chosen("destroy").chosen();
+                          $("#article_target_gift_" + warehouseId).attr("data-placeholder", "Select target").chosen("destroy").chosen();
+                          $("#article_goods_type_id_gift_" + warehouseId).attr("data-placeholder", "Select goods type").chosen("destroy").chosen();
+                          $("#article_sex_gift_" + warehouseId).attr("data-placeholder", "Select sex").chosen("destroy").chosen();
+              <% end %>
                     });
 
-          <% if action_name.eql?("create") || !@event.new_record? %>
-                      $("#article_brand_gift_" + warehouseId).attr("data-placeholder", "Select brand").chosen("destroy").chosen();
-                      $("#article_target_gift_" + warehouseId).attr("data-placeholder", "Select target").chosen("destroy").chosen();
-          <% end %>
-                });
-
-                $(".add-buttons-warehouse-gift").click(function () {
-                    var productIds = [];
-                    var warehouseId = $(this).attr("id").split("-")[4];
-                    var products = $("#article_code_gift_" + warehouseId).val().split(",");
-                    products.forEach(function (element) {
-                        productIds.push(element.split(";")[0]);
+                    $(".add-buttons-warehouse-gift").click(function () {
+                        var productIds = [];
+                        var warehouseId = $(this).attr("id").split("-")[4];
+                        var products = $("#article_code_gift_" + warehouseId).val().split(",");
+                        products.forEach(function (element) {
+                            productIds.push(element.split(";")[0]);
+                        });
+                        var selectedProductIds = [];
+                        $(".event-products-" + warehouseId + "-product-id-fields-gift").each(function () {
+                            var attrId = $(this).attr('id');
+                            selectedProductIds.push(attrId.split("_")[8]);
+                        });
+              <% if @event.new_record? %>
+                          $.post("/events/new_add_products", {
+                              warehouse_id: warehouseId,
+                              products: productIds,
+                              selected_products: selectedProductIds,
+                              event_type: "gift",
+                              brand_id: $("#article_brand_gift_" + warehouseId).val(),
+                              target: $("#article_target_gift_" + warehouseId).val(),
+                              goods_type_id: $("#article_goods_type_id_gift_" + warehouseId).val(),
+                              sex: $("#article_sex_gift_" + warehouseId).val()
+                          });
+              <% else %>
+                          $.post("/events/new_add_products", {
+                              warehouse_id: warehouseId,
+                              products: productIds,
+                              selected_products: selectedProductIds,
+                              event_type: "gift",
+                              event_id: "<%= @event.id %>",
+                              brand_id: $("#article_brand_gift_" + warehouseId).val(),
+                              target: $("#article_target_gift_" + warehouseId).val(),
+                              goods_type_id: $("#article_goods_type_id_gift_" + warehouseId).val(),
+                              sex: $("#article_sex_gift_" + warehouseId).val()
+                          });
+              <% end %>
+                        $('#article_code_gift_' + warehouseId).tagit('removeAll');
                     });
-                    var selectedProductIds = [];
-                    $(".event-products-" + warehouseId + "-product-id-fields-gift").each(function () {
-                        var attrId = $(this).attr('id');
-                        selectedProductIds.push(attrId.split("_")[8]);
-                    });
-          <% if @event.new_record? %>
-                      $.get("/events/new_add_products", {
-                          warehouse_id: warehouseId,
-                          products: productIds,
-                          selected_products: selectedProductIds,
-                          event_type: "gift",
-                          brand_id: $("#article_brand_gift_" + warehouseId).val(),
-                          target: $("#article_target_gift_" + warehouseId).val()
-                      });
-          <% else %>
-                      $.get("/events/new_add_products", {
-                          warehouse_id: warehouseId,
-                          products: productIds,
-                          selected_products: selectedProductIds,
-                          event_type: "gift",
-                          event_id: "<%= @event.id %>",
-                          brand_id: $("#article_brand_gift_" + warehouseId).val(),
-                          target: $("#article_target_gift_" + warehouseId).val()
-                      });
-          <% end %>
-                    $('#article_code_gift_' + warehouseId).tagit('removeAll');
                 });
-            });
-          </script>
+              </script>

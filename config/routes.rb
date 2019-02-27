@@ -179,8 +179,8 @@ Rails.application.routes.draw do
     #    get :autocomplete_product_code, :on => :collection
     collection do
       get :autocomplete_events
-      get :new_add_general_products
-      get :new_add_products
+      post :new_add_general_products
+      post :new_add_products
       get "generate_warehouse_form"
       get "add_products"
       get "add_general_products"
