@@ -110,11 +110,11 @@
                                                           <table cellspacing="0" border="1" cellpadding="5" style="border-color: white;border-style: solid;border-collapse: collapse" width="100%">
                                                               <tbody>
                                                                   <% total_amount_received = 0 %>
-                                                                  <tr bgcolor="#337ab7"><th colspan="9" style="text-align: center;color: white">Items Received</th></tr>
+                                                                  <tr bgcolor="#337ab7"><th colspan="10" style="text-align: center;color: white">Items Received</th></tr>
                                                                   <% if appi.beginning_of_account_payable_creating.eql?("Closed/Finish") %>
                                                                     <tr style="text-align: center;color: white;opacity: 0.65" bgcolor="#337ab7">
                                                                         <td><strong>No</strong></td>
-                                                                        <td colspan="2"><strong>PO/DO Number</strong></td>
+                                                                        <td colspan="3"><strong>PO/DO Number</strong></td>
                                                                         <td><strong>Qty</strong></td>
                                                                         <td><strong>Gross Amount</strong></td>
                                                                         <td><strong>1st Disc</strong></td>
@@ -179,8 +179,9 @@
                                                                   <% else %>
                                                                     <tr style="text-align: center;color: white;opacity: 0.65" bgcolor="#337ab7">
                                                                         <td><strong>No</strong></td>
-                                                                        <td><strong>DO Number</strong></td>
-                                                                        <td><strong>PO Number</strong></td>
+                                                                        <td><strong>Trans. No.</strong></td>
+                                                                        <td><strong>DO No.</strong></td>
+                                                                        <td><strong>PO No.</strong></td>
                                                                         <td><strong>Qty</strong></td>
                                                                         <td><strong>Gross Amount</strong></td>
                                                                         <td><strong>1st Disc</strong></td>
@@ -191,6 +192,7 @@
                                                                     <% appi.account_payable_purchase_partials.each_with_index do |appp, idx| %>
                                                                       <tr align="center">
                                                                           <td style="vertical-align: middle"><%= idx.succ %></td>
+                                                                          <td style="vertical-align: middle"><%= appp.received_purchase_order.transaction_number %></td>
                                                                           <td style="vertical-align: middle"><%= appp.received_purchase_order.delivery_order_number %></td>
                                                                           <td style="vertical-align: middle"><%= appp.received_purchase_order.purchase_order.present? ? appp.received_purchase_order.purchase_order.number : "" %></td>
                                                                           <td style="vertical-align: middle;text-align: right"><%= number_to_currency(appp.received_purchase_order.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
@@ -315,7 +317,7 @@
                                                                     <% end %>
                                                                   <% end %>
                                                                   <tr bgcolor="#337ab7" style="color: white">
-                                                                      <td colspan="8" align="right"><strong>Amount Received</strong></td>
+                                                                      <td colspan="9" align="right"><strong>Amount Received</strong></td>
                                                                       <td align="right"><strong><%= number_to_currency(total_amount_received,
                                                                                 :separator => ",",
                                                                                 :delimiter => ".",
@@ -325,10 +327,10 @@
                                                                   <% total_amount_returned = 0 %>
                                                                   <% allocated_return_items = appi.allocated_return_items.select(:purchase_return_id) %>
                                                                   <% if allocated_return_items.size > 0 %>
-                                                                    <tr bgcolor="#337ab7"><th colspan="9" style="text-align: center;color: white">Allocated Return Items</th></tr>
+                                                                    <tr bgcolor="#337ab7"><th colspan="10" style="text-align: center;color: white">Allocated Return Items</th></tr>
                                                                     <tr style="text-align: center;color: white;opacity: 0.65" bgcolor="#337ab7">
                                                                         <td><strong>No</strong></td>
-                                                                        <td><strong>PR Number</strong></td>
+                                                                        <td colspan="2"><strong>PR Number</strong></td>
                                                                         <td><strong>PO/DO Number</strong></td>
                                                                         <td><strong>Qty</strong></td>
                                                                         <td><strong>Gross Amount</strong></td>
@@ -406,7 +408,7 @@
                                                                       <% total_amount_returned += value_after_ppn_pr(ari.purchase_return) %>
                                                                     <% end %>
                                                                     <tr bgcolor="#337ab7" style="color: white">
-                                                                        <td colspan="8" align="right"><strong>Amount Returned</strong></td>
+                                                                        <td colspan="9" align="right"><strong>Amount Returned</strong></td>
                                                                         <td align="right"><strong><%= number_to_currency(total_amount_returned,
                                                                                   :separator => ",",
                                                                                   :delimiter => ".",
@@ -420,7 +422,7 @@
                                                                     <% previous_payment += prev_appi.amount + prev_appi.amount_returned %>
                                                                   <% end %>
                                                                   <tr bgcolor="#337ab7" style="color: white">
-                                                                      <td colspan="8" align="right"><strong>Previous Payment</strong></td>
+                                                                      <td colspan="9" align="right"><strong>Previous Payment</strong></td>
                                                                       <td align="right"><strong><%= number_to_currency(previous_payment,
                                                                                 :separator => ",",
                                                                                 :delimiter => ".",
@@ -428,7 +430,7 @@
                                                                                 :precision => 2) %></strong></td>
                                                                   </tr>
                                                                   <tr bgcolor="#337ab7" style="color: white">
-                                                                      <td colspan="8" align="right"><strong>Amount Paid</strong></td>
+                                                                      <td colspan="9" align="right"><strong>Amount Paid</strong></td>
                                                                       <td align="right"><strong><%= number_to_currency(appi.amount,
                                                                                 :separator => ",",
                                                                                 :delimiter => ".",
@@ -436,7 +438,7 @@
                                                                                 :precision => 2) %></strong></td>
                                                                   </tr>
                                                                   <tr bgcolor="#337ab7" style="color: white">
-                                                                      <td colspan="8" align="right"><strong>Debt</strong></td>
+                                                                      <td colspan="9" align="right"><strong>Debt</strong></td>
                                                                       <td align="right"><strong><%= number_to_currency(total_amount_received - total_amount_returned - previous_payment - appi.amount,
                                                                                 :separator => ",",
                                                                                 :delimiter => ".",

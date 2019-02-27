@@ -42,9 +42,10 @@
         <td align="center" colspan="2">
             <table class="table table-condensed table-responsive table-bordered">
                 <tbody>
-                    <tr><th colspan="10" style="text-align: center">Items Received</th></tr>
+                    <tr><th colspan="11" style="text-align: center">Items Received</th></tr>
                     <tr style="text-align: center">
                         <td><strong>No</strong></td>
+                        <td><strong>Trans. Number</strong></td>
                         <td><strong>DO Number</strong></td>
                         <td><strong>PO Number</strong></td>
                         <td><strong>Rec. Date</strong></td>
@@ -62,11 +63,12 @@
                       joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
                       joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
                       includes(received_purchase_order_products: [:received_purchase_order_items, purchase_order_product: :cost_list, direct_purchase_product: :cost_list]).
-                      select(:received_purchase_order_id, "received_purchase_orders.delivery_order_number", "purchase_orders.number AS po_number", "received_purchase_orders.receiving_date", "received_purchase_orders.quantity AS received_qty", "received_purchase_orders.purchase_order_id", "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
+                      select(:received_purchase_order_id, "received_purchase_orders.transaction_number", "received_purchase_orders.delivery_order_number", "purchase_orders.number AS po_number", "received_purchase_orders.receiving_date", "received_purchase_orders.quantity AS received_qty", "received_purchase_orders.purchase_order_id", "purchase_orders.first_discount AS po_first_discount", "direct_purchases.first_discount AS dp_first_discount", "purchase_orders.second_discount AS po_second_discount", "direct_purchases.second_discount AS dp_second_discount", "direct_purchases.is_additional_disc_from_net AS dp_is_additional_disc_from_net", "purchase_orders.is_additional_disc_from_net AS po_is_additional_disc_from_net", "purchase_orders.is_taxable_entrepreneur AS po_is_taxable_entrepreneur", "direct_purchases.is_taxable_entrepreneur AS dp_is_taxable_entrepreneur", "purchase_orders.value_added_tax AS po_vat_type", "direct_purchases.vat_type AS dp_vat_type").
                       each_with_index do |appp, idx|
                     %>
                       <tr align="center">
                           <td style="vertical-align: middle"><%= idx.succ %></td>
+                          <td style="vertical-align: middle"><%= appp.transaction_number %></td>
                           <td style="vertical-align: middle"><%= appp.delivery_order_number %></td>
                           <td style="vertical-align: middle"><%= appp.po_number %></td>
                           <td style="vertical-align: middle"><%= appp.receiving_date.strftime("%d/%m/%Y") %></td>
@@ -165,7 +167,7 @@
                       <% total_amount_received += net_amount %>
                     <% end %>
                     <tr>
-                        <td colspan="9" align="right"><strong>Amount To Pay</strong></td>
+                        <td colspan="10" align="right"><strong>Amount To Pay</strong></td>
                         <td align="right"><strong><%= number_to_currency(total_amount_received,
                                   :separator => ",",
                                   :delimiter => ".",
