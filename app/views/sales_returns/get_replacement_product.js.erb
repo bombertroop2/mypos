@@ -15,8 +15,10 @@
       <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["special_price"] = @store_event.special_price %>
     <% end %>
     <% session["sales_return"]["#{@replacement_product.id}"]["effective_price"] = @replacement_product.price %>
+    <% session["sales_return"]["#{@replacement_product.id}"]["attr_effective_cost"] = @cost_list.cost %>
     <% session["sales_return"]["#{@replacement_product.id}"]["stock_detail_id"] = @replacement_product.stock_detail_id %>
     <% session["sales_return"]["#{@replacement_product.id}"]["price_list_id"] = @replacement_product.price_list_id %>
+    <% session["sales_return"]["#{@replacement_product.id}"]["cost_list_id"] = @cost_list.id %>
     $("#detail_form_container").html("<%= j(render(partial: "form_detail")) %>");
   }else{
     if($("input:hidden[value='<%= @replacement_product.id %>']").length == 0){
@@ -32,8 +34,10 @@
         <% session["sales_return"]["#{@replacement_product.id}"]["store_event"]["special_price"] = @store_event.special_price %>
       <% end %>
       <% session["sales_return"]["#{@replacement_product.id}"]["effective_price"] = @replacement_product.price %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["attr_effective_cost"] = @cost_list.cost %>
       <% session["sales_return"]["#{@replacement_product.id}"]["stock_detail_id"] = @replacement_product.stock_detail_id %>
       <% session["sales_return"]["#{@replacement_product.id}"]["price_list_id"] = @replacement_product.price_list_id %>
+      <% session["sales_return"]["#{@replacement_product.id}"]["cost_list_id"] = @cost_list.id %>
     }
     $("#listing-returned-products-table > tbody tr:last").after("<%= j(render(partial: "form_detail_returned_products")) %>");
   }

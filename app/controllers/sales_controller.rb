@@ -83,9 +83,10 @@ class SalesController < ApplicationController
       add_additional_params_to_sale
       if params[:sale][:gift_event_gift_type].strip.eql?("Discount") && @discount_amount.present? && @discount_amount > 0 && @total >= @minimum_purchase_amount && @minimum_purchase_amount > 0
         @total = @total - @discount_amount
+        @gross_profit = @gross_profit - @discount_amount
       end
 
-      params[:sale].merge! total: @total
+      params[:sale].merge! total: @total, gross_profit: @gross_profit
       @sale = Sale.new(sale_params)
 
       recreate = false
@@ -149,11 +150,29 @@ class SalesController < ApplicationController
   def get_product
     sale = Sale.new
     @product = if params[:barcode]
-      ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode]).where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").where(["effective_date <= ?", Date.current]).select(:id, :barcode).select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").order("effective_date DESC").first
+      ProductBarcode.
+        joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode]).
+        where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+        where(["effective_date <= ?", Date.current]).
+        select(:id, :barcode).
+        select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+        order("effective_date DESC").
+        first
     else
-      ProductBarcode.joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, size_id: params[:sale_product_size]).where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").where(["effective_date <= ?", Date.current]).where(["product_colors.color_id = ? AND products.code = ?", params[:sale_product_color], params[:sale_product_code].upcase]).select(:id, :barcode).select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").order("effective_date DESC").first
+      ProductBarcode.
+        joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, size_id: params[:sale_product_size]).
+        where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+        where(["effective_date <= ?", Date.current]).
+        where(["product_colors.color_id = ? AND products.code = ?", params[:sale_product_color], params[:sale_product_code].upcase]).
+        select(:id, :barcode).
+        select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id").
+        order("effective_date DESC").
+        first
     end
     if @product
+      @cost_list = CostList.select(:id, :cost).where(["product_id = ? AND effective_date <= ?", @product.product_id, Date.current]).order(effective_date: :desc).first
       current_time = Time.current
       warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
       
@@ -190,19 +209,29 @@ class SalesController < ApplicationController
   def get_free_product
     @product = if params[:barcode]
       #      StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").select(:id, "sizes.size AS product_size", "common_fields.name", "colors_product_colors.name AS color_name").first
-      StockDetail.joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).where(["price_lists.effective_date <= ?", Date.current]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").select(:id, "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").order("price_lists.effective_date DESC").first
+      StockDetail.
+        joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).
+        where(["price_lists.effective_date <= ?", Date.current]).
+        where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").
+        select(:id, "stock_products.product_id", "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").
+        order("price_lists.effective_date DESC").
+        first
     else
       #      StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: :color], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"products.code" => params[:sale_bogo_product_code].upcase, size_id: params[:sale_bogo_product_size], color_id: params[:sale_bogo_product_color]).where("stock_details.color_id = product_colors.color_id").select(:id, "sizes.size AS product_size", "common_fields.name", "colors_product_colors.name AS color_name").first
-      StockDetail.joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"products.code" => params[:sale_bogo_product_code].upcase, size_id: params[:sale_bogo_product_size], color_id: params[:sale_bogo_product_color]).where(["price_lists.effective_date <= ?", Date.current]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").select(:id, "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").order("price_lists.effective_date DESC").first
+      StockDetail.
+        joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"products.code" => params[:sale_bogo_product_code].upcase, size_id: params[:sale_bogo_product_size], color_id: params[:sale_bogo_product_color]).
+        where(["price_lists.effective_date <= ?", Date.current]).
+        where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").
+        select(:id, "stock_products.product_id", "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").
+        order("price_lists.effective_date DESC").
+        first
     end
 
-    #    if @product.present?
-    #      session["sale"][params[:product_barcode_id]][params[:product_row_index]] ||= {}
-    #      session["sale"][params[:product_barcode_id]][params[:product_row_index]]["free_product_id"] = @product.id
-    #      #      session["sale"][params[:product_barcode_id]]["free_product_id"] = @product.id
-    #    else
-    #      session["sale"][params[:product_barcode_id]].delete(params[:product_row_index]) if session["sale"][params[:product_barcode_id]][params[:product_row_index]].present?
-    #    end
+    if @product.present?
+      @cost_list = CostList.select(:id, :cost).where(["product_id = ? AND effective_date <= ?", @product.product_id, Date.current]).order(effective_date: :desc).first
+    end
   end
   
   def get_product_colors
@@ -282,34 +311,44 @@ class SalesController < ApplicationController
   
   def set_total
     @total = 0
+    @gross_profit = 0
     @minimum_purchase_amount = 0
     params[:sale][:sale_products_attributes].each do |key, value|
       price = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"]
+      cost = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
       quantity = 1
       if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
         if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(%)") && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present? && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"].present?
           first_discounted_subtotal = price * quantity - price * quantity * session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"] / 100
           subtotal = first_discounted_subtotal - first_discounted_subtotal * session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"] / 100
+          gross_profit = subtotal - cost
           @total += subtotal
         elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(%)") && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present?
           subtotal = price * quantity - price * quantity * session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"] / 100
+          gross_profit = subtotal - cost
           @total += subtotal
         elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(Rp)") && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"].present?
           subtotal = price * quantity - session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"].to_f
+          gross_profit = subtotal - cost
           @total += subtotal
         elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
           price = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"].to_f
+          gross_profit = price - cost
           @total += price
         elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Gift")
+          gross_profit = price - cost
           @total += price
           @minimum_purchase_amount = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["minimum_purchase_amount"].to_f
           @discount_amount = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["discount_amount"].to_f
         else
+          gross_profit = price - cost
           @total += price
         end
       else
+        gross_profit = price - cost
         @total += price
       end
+      @gross_profit += gross_profit
     end if params[:sale][:sale_products_attributes].present?
   end
   
@@ -329,9 +368,17 @@ class SalesController < ApplicationController
     params[:sale][:sale_products_attributes].each do |key, value|
       if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
         if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
-          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"], price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
+          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+            effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"],
+            price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+            cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+            attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
         else
-          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"], price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
+          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+            effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
+            price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+            cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+            attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
         end
         params[:sale][:sale_products_attributes][key][:event_id] = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["id"]
         params[:sale][:sale_products_attributes][key].merge! event_type: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"]
@@ -350,7 +397,11 @@ class SalesController < ApplicationController
           params[:sale][:sale_products_attributes][key].merge! cash_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"]
         end
       else
-        params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"], price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
+        params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+          effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
+          price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+          cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+          attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
         params[:sale][:sale_products_attributes][key][:event_id] = nil
         params[:sale][:sale_products_attributes][key].merge! event_type: nil, quantity: 1
         params[:sale][:sale_products_attributes][key][:free_product_id] = nil
@@ -376,7 +427,7 @@ class SalesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def sale_params
-    params.require(:sale).permit(:gift_event_discount_amount, :gift_event_gift_type, :gift_event_id, :gift_event_product_id, :pay, :warehouse_id, :cashier_id, :member_id, :transaction_time, :bank_id, :payment_method, :total, :trace_number, :card_number, :cash, :change, :transaction_number, :cashier_opening_id,
-      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount])
+    params.require(:sale).permit(:gift_event_discount_amount, :gift_event_gift_type, :gift_event_id, :gift_event_product_id, :pay, :warehouse_id, :cashier_id, :member_id, :transaction_time, :bank_id, :payment_method, :total, :trace_number, :card_number, :cash, :change, :transaction_number, :cashier_opening_id, :gross_profit,
+      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost])
   end
 end
