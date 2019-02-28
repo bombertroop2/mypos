@@ -127,7 +127,9 @@
       <% session["sale"]["#{@product.product_barcode_id}"]["store_event"]["minimum_purchase_amount"] = session["sale"]["#{params[:product_barcode_id]}"]["store_event"]["minimum_purchase_amount"] %>
       <% session["sale"]["#{@product.product_barcode_id}"]["store_event"]["discount_amount"] = session["sale"]["#{params[:product_barcode_id]}"]["store_event"]["discount_amount"] %>
       <% session["sale"]["#{@product.product_barcode_id}"]["effective_price"] = @product.price %>
+      <% session["sale"]["#{@product.product_barcode_id}"]["attr_effective_cost"] = @cost_list.cost %>
       <% session["sale"]["#{@product.product_barcode_id}"]["price_list_id"] = @product.price_list_id %>
+      <% session["sale"]["#{@product.product_barcode_id}"]["cost_list_id"] = @cost_list.id %>
       <% session["sale"]["#{@product.product_barcode_id}"][params[:product_row_index]] ||= {} %>
       <% session["sale"]["#{@product.product_barcode_id}"][params[:product_row_index]]["free_product_id"] = session["sale"]["#{params[:product_barcode_id]}"]["stock_detail_id"] %>
       <%# session["sale"].delete(params[:product_barcode_id]) %>

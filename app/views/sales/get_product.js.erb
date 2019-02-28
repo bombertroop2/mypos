@@ -31,8 +31,10 @@
     <%# session["sale"]["#{@product.id}"]["#{current_miliseconds}"] = nil %>
     <%# session["sale"]["#{@product.id}-#{current_miliseconds}"]["free_product_id"] = nil %>
     <% session["sale"]["#{@product.id}"]["effective_price"] = @product.price %>
+    <% session["sale"]["#{@product.id}"]["attr_effective_cost"] = @cost_list.cost %>
     <% session["sale"]["#{@product.id}"]["stock_detail_id"] = @product.stock_detail_id %>
     <% session["sale"]["#{@product.id}"]["price_list_id"] = @product.price_list_id %>
+    <% session["sale"]["#{@product.id}"]["cost_list_id"] = @cost_list.id %>
     <% session["sale"]["event"] ||= {} %>
     <% if @store_event.present? && @store_event.event_type.eql?("Gift") %>
       <% session["sale"]["event"]["id"] = @store_event.id %>
@@ -267,8 +269,10 @@
       <% end %>
       <%# session["sale"]["#{@product.id}"]["free_product_id"] = nil %>
       <% session["sale"]["#{@product.id}"]["effective_price"] = @product.price %>
+      <% session["sale"]["#{@product.id}"]["attr_effective_cost"] = @cost_list.cost %>
       <% session["sale"]["#{@product.id}"]["stock_detail_id"] = @product.stock_detail_id %>
       <% session["sale"]["#{@product.id}"]["price_list_id"] = @product.price_list_id %>
+      <% session["sale"]["#{@product.id}"]["cost_list_id"] = @cost_list.id %>
       <% session["sale"]["event"] ||= {} %>
       <% if @store_event.present? && @store_event.event_type.eql?("Gift") %>
         <% session["sale"]["event"]["id"] = @store_event.id %>

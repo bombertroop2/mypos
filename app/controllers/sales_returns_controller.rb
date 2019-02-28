@@ -43,7 +43,7 @@ class SalesReturnsController < ApplicationController
     convert_money_to_numeric
     add_additional_params_to_sales_return
     set_total
-    params[:sales_return][:sale_attributes].merge! total: @total
+    params[:sales_return][:sale_attributes].merge! total: @total, gross_profit: @gross_profit
 
     @sales_return = SalesReturn.new(sales_return_params)
     recreate = false
@@ -171,6 +171,7 @@ class SalesReturnsController < ApplicationController
       end
 
       if @replacement_product.present?
+        @cost_list = CostList.select(:id, :cost).where(["product_id = ? AND effective_date <= ?", @replacement_product.product_id, @returned_product.transaction_time.to_date]).order(effective_date: :desc).first
         # apabila harga barang pengganti lebih murah dari harga barang retur maka tidak valid
         if @returned_product.price > @replacement_product.price && @returned_product.barcode != @replacement_product.barcode
           render js: "bootbox.alert({message: \"Replacement product price must be greater than or equal to returned product price\",size: 'small'});"
@@ -266,8 +267,8 @@ class SalesReturnsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def sales_return_params
     params.require(:sales_return).permit(:sale_id, :total_return, :total_return_quantity, :attr_receipt_number, :attr_cashier_id, :attr_spg_id, 
-      sale_attributes: [:payment_method, :cash, :bank_id, :card_number, :trace_number, :pay, :cashier_id, :attr_return_sale_products, :total, :warehouse_id, :member_id,
-        sale_products_attributes: [:product_barcode_id, :event_id, :returned_product_id, :sales_promotion_girl_id, :effective_price, :price_list_id, :event_type, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :quantity, :attr_returned_sale_id]],
+      sale_attributes: [:payment_method, :cash, :bank_id, :card_number, :trace_number, :pay, :cashier_id, :attr_return_sale_products, :total, :warehouse_id, :member_id, :gross_profit,
+        sale_products_attributes: [:product_barcode_id, :event_id, :returned_product_id, :sales_promotion_girl_id, :effective_price, :price_list_id, :event_type, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :quantity, :attr_returned_sale_id, :attr_returning_sale, :cost_list_id, :attr_effective_cost]],
       sales_return_products_attributes: [:reason, :sale_product_id, :attr_sale_id, :attr_warehouse_id])
   end
   
@@ -288,9 +289,17 @@ class SalesReturnsController < ApplicationController
       params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! attr_returned_sale_id: params[:sales_return][:sale_id], attr_returning_sale: true
       if session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
         if session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
-          params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"], price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
+          params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+            effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"],
+            price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+            cost_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+            attr_effective_cost: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
         else
-          params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["effective_price"], price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
+          params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+            effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
+            price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+            cost_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+            attr_effective_cost: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
         end
         params[:sales_return][:sale_attributes][:sale_products_attributes][key][:event_id] = session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["id"]
         params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! event_type: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"]
@@ -305,7 +314,11 @@ class SalesReturnsController < ApplicationController
           params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! cash_discount: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"]
         end
       else
-        params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id, effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["effective_price"], price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"]
+        params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+          effective_price: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
+          price_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+          cost_list_id: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+          attr_effective_cost: session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
         params[:sales_return][:sale_attributes][:sale_products_attributes][key][:event_id] = nil
         params[:sales_return][:sale_attributes][:sale_products_attributes][key].merge! event_type: nil, quantity: 1
         #        params[:sales_return][:sale_attributes][:sale_products_attributes][key][:free_product_id] = nil
@@ -320,30 +333,39 @@ class SalesReturnsController < ApplicationController
   end
   
   def set_total
+    @gross_profit = 0
     @total = 0
     params[:sales_return][:sale_attributes][:sale_products_attributes].each do |key, value|
       price = session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["effective_price"]
+      cost = session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
       quantity = 1
       if session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
         if session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(%)") && session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present? && session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"].present?
           first_discounted_subtotal = price * quantity - price * quantity * session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"] / 100
           subtotal = first_discounted_subtotal - first_discounted_subtotal * session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"] / 100
+          gross_profit = subtotal - cost
           @total += subtotal
         elsif session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(%)") && session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present?
           subtotal = price * quantity - price * quantity * session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"] / 100
+          gross_profit = subtotal - cost
           @total += subtotal
         elsif session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(Rp)") && session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"].present?
           subtotal = price * quantity - session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"].to_f
+          gross_profit = subtotal - cost
           @total += subtotal
         elsif session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
           price = session["sales_return"][params[:sales_return][:sale_attributes][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"].to_f
+          gross_profit = price - cost
           @total += price
         else
+          gross_profit = price - cost
           @total += price
         end
       else
+        gross_profit = price - cost
         @total += price
       end
+      @gross_profit += gross_profit
     end if params[:sales_return][:sale_attributes][:sale_products_attributes].present?
   end
 
