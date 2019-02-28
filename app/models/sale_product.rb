@@ -1,5 +1,5 @@
 class SaleProduct < ApplicationRecord
-  attr_accessor :sales_promotion_girl_id, :event_type, :effective_price,
+  attr_accessor :sales_promotion_girl_id, :event_type, :effective_price, :attr_effective_cost,
     :first_plus_discount, :second_plus_discount, :cash_discount, :attr_returned_sale_id, :attr_returning_sale
   
   belongs_to :sale
@@ -10,14 +10,13 @@ class SaleProduct < ApplicationRecord
   belongs_to :returned_product, class_name: "SaleProduct", foreign_key: :returned_product_id
 
   # hapus event_id apabila event gift, cukup di parent Sale
-  before_validation :add_quantity, :update_total
+  before_validation :add_quantity, :update_total, :update_gross_profit
   before_validation :remove_event_id, if: proc{|sp| sp.event_type.eql?("Gift")}
 
-    validates :quantity, presence: true
+    validates :quantity, :cost_list_id, :price_list_id, presence: true
     validates :quantity, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc { |sp| sp.quantity.present? }
       validates :quantity, numericality: {less_than_or_equal_to: :stock_quantity, only_integer: true}, if: proc { |sp| sp.quantity.present? }
         validates :free_product_id, presence: true, if: proc{|sp| sp.event_id.present? && sp.event_type.eql?("Buy 1 Get 1 Free")}
-          validates :price_list_id, presence: true#, unless: proc{|sp| sp.event_type.eql?("Special Price")}
           validates :total, numericality: {greater_than: 0}
           validate :returned_product_exist, if: proc {|sp| sp.attr_returning_sale}
 
@@ -55,6 +54,10 @@ class SaleProduct < ApplicationRecord
               elsif event_id.present? && event_type.eql?("Discount(Rp)")
                 self.total = effective_price.to_f * quantity - cash_discount.to_f
               end
+            end
+
+            def update_gross_profit
+              self.gross_profit = total - attr_effective_cost
             end
       
             def stock_quantity
