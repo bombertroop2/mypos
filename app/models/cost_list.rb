@@ -5,6 +5,7 @@ class CostList < ApplicationRecord
 
   has_many :purchase_order_products#, dependent: :restrict_with_error
   has_many :direct_purchase_products
+  has_many :sale_products, dependent: :restrict_with_error
   has_one :created_purchase_order, -> {select("1 AS one").joins(:purchase_order)}, class_name: "PurchaseOrderProduct"
   has_one :received_purchase_order, -> {select("1 AS one").joins(:purchase_order).where("purchase_orders.status <> 'Open'")}, class_name: "PurchaseOrderProduct"
   has_one :direct_purchase_product, -> {select("1 AS one")}, class_name: "DirectPurchaseProduct"
@@ -77,8 +78,8 @@ class CostList < ApplicationRecord
                     #                      end
                     #                    end
                   end
-                  errors.add(:cost, "change is not allowed!") if cost_changed? && persisted? && (created_purchase_order.present? || direct_purchase_product.present?)
-                  errors.add(:product_id, "change is not allowed!") if product_id_changed? && persisted? && (created_purchase_order.present? || direct_purchase_product.present?)
+                  errors.add(:cost, "change is not allowed!") if cost_changed? && persisted? && (created_purchase_order.present? || direct_purchase_product.present? || sale_products.select("1 AS one").present?)
+                  errors.add(:product_id, "change is not allowed!") if product_id_changed? && persisted? && (created_purchase_order.present? || direct_purchase_product.present? || sale_products.select("1 AS one").present?)
                 end
 
                 def prevent_user_delete_last_record
