@@ -3,25 +3,39 @@
 </div>
 
 <div id="search-form-container" class="form-inline text-right">
-    <div class="form-group">
-        <input type="text" id="filter-string" class="form-control" placeholder="Transaction number">
-    </div>
-    <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-sale-transaction-time" placeholder="Transaction date" style="width: 200px !important">
-    </div>
-    <div class="form-group">
-        <%= select_tag "payment_method", options_for_select(Sale::PAYMENT_METHODS), {prompt: "Payment method", class: "form-control", id: "filter-payment-method"} %>
-      </div>
-    <button id="search-sale-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-</div>
-
-<div class="hidden">
-    <%= smart_listing_controls_for(:sales, {class: "form-inline text-right"}) do %>
-    <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
-    <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-    <%= text_field_tag :filter_payment_method, '', class: "search form-control", autocomplete: :off %>
+    <% if current_user.has_non_spg_role? %>
+      <div class="form-group text-left">
+          <%= select_tag "warehouse_id", options_from_collection_for_select(Warehouse.showroom.actived.select(:id, :code, :name), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-sale-warehouse-id"} %>
+        </div>
       <% end %>
-  </div>
-  <%= smart_listing_render(:sales) %>
+      <div class="form-group">
+          <input type="text" id="filter-string" class="form-control" placeholder="Transaction number">
+      </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-sale-transaction-time" placeholder="Transaction date" style="width: 200px !important">
+      </div>
+      <div class="form-group">
+          <%= select_tag "payment_method", options_for_select(Sale::PAYMENT_METHODS), {prompt: "Payment method", class: "form-control", id: "filter-payment-method"} %>
+        </div>
+        <button id="search-sale-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+        <button id="export-sale-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-export"></span></button>
+    </div>
 
-<div id="receipt-container"></div>
+    <div class="hidden">
+        <%= smart_listing_controls_for(:sales, {class: "form-inline text-right"}) do %>
+            <%= text_field_tag :filter_warehouse, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
+                <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+                  <%= text_field_tag :filter_payment_method, '', class: "search form-control", autocomplete: :off %>
+                  <% end %>
+
+                  <%= form_tag(export_sales_path(format: :xls), method: :get, id: :export_pos) do %>
+                    <%= text_field_tag :filter_warehouse_export, '', class: "search form-control", autocomplete: :off %>
+                      <%= text_field_tag :filter_date_export, '', class: "search form-control", autocomplete: :off %>
+                        <%= text_field_tag :filter_string_export, '', class: "search form-control", autocomplete: :off %>
+                          <%= text_field_tag :filter_payment_method_export, '', class: "search form-control", autocomplete: :off %>
+                          <% end %>
+                      </div>
+                      <%= smart_listing_render(:sales) %>
+
+                      <div id="receipt-container"></div>

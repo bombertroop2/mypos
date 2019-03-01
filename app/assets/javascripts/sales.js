@@ -243,9 +243,9 @@ $(function () {
                 },
                 opens: "left",
                 autoUpdateInput: false/*,
-                timePicker: true,
-                timePicker24Hour: true,
-                timePickerSeconds: true*/
+                 timePicker: true,
+                 timePicker24Hour: true,
+                 timePickerSeconds: true*/
             });
     $('#filter-sale-transaction-time').on('apply.daterangepicker', function (ev, picker) {
 //        $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm:ss') + ' - ' + picker.endDate.format('DD/MM/YYYY HH:mm:ss'));
@@ -255,5 +255,12 @@ $(function () {
     $('#filter-sale-transaction-time').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
-
+    $("#filter-sale-warehouse-id").attr("data-placeholder", "Warehouse").chosen({width: "200px"});
+    $("#export-sale-btn").click(function () {
+        $("#filter_payment_method_export").val($("#filter-payment-method").val());
+        $("#filter_date_export").val($("#filter-sale-transaction-time").val());
+        $("#filter_string_export").val($("#filter-string").val());
+        $("#filter_warehouse_export").val($("#filter-sale-warehouse-id").val());
+        $("#export_pos").submit();
+    });
 });

@@ -1,8 +1,15 @@
-<td colspan="5">
+<td colspan="6">
     <button type="button" class="close cancel" aria-label="Close" id="btn-close-show-page-sales-<%= object.id %>">
         <span aria-hidden="true">&times;</span>
     </button>
     <div style="padding-top: 20px"></div>
+
+    <% if current_user.has_non_spg_role? %>
+      <dl class="dl-horizontal">
+          <dt>Showroom</dt>
+          <dd><%= object.warehouse_name %></dd>
+      </dl>
+    <% end %>
 
     <dl class="dl-horizontal">
         <dt>Transaction Number</dt>
@@ -80,8 +87,15 @@
       </dl>
     <% end %>
 
+    <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+      <dl class="dl-horizontal">
+          <dt>Gross Profit</dt>
+          <dd><%= number_to_currency(object.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>
+    <% end %>
+
     <% sale_products = object.sale_products.
-      joins(:price_list, product_barcode: [:size, product_color: [:color, [product: :brand]]]).
+      joins(:cost_list, :price_list, product_barcode: [:size, product_color: [:color, [product: :brand]]]).
       joins("LEFT JOIN stock_details ON stock_details.id = sale_products.free_product_id").
       joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
       joins("LEFT JOIN products free_products on stock_products.product_id = free_products.id").
@@ -89,7 +103,7 @@
       joins("LEFT JOIN sizes free_products_sizes ON stock_details.size_id = free_products_sizes.id").
       joins("LEFT JOIN common_fields free_products_colors ON free_products_colors.id = stock_details.color_id AND free_products_colors.type IN ('Color')").
       joins("LEFT JOIN events ON events.id = sale_products.event_id").
-      select("product_barcodes.barcode", "brands_products.name AS product_name", "products.code AS product_code", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "free_products_brands.name AS free_product_name", "free_products_colors.name AS free_product_color_name", "free_products_sizes.size AS free_product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "events.event_type AS sale_event_type", "sale_products.total AS subtotal") %>
+      select(:gross_profit, "cost_lists.cost", "product_barcodes.barcode", "brands_products.name AS product_name", "products.code AS product_code", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "price_lists.price", "free_products_brands.name AS free_product_name", "free_products_colors.name AS free_product_color_name", "free_products_sizes.size AS free_product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "events.event_type AS sale_event_type", "sale_products.total AS subtotal") %>
 
     <table class="table table-striped">
         <thead>
@@ -99,9 +113,11 @@
                 <th>Product</th>
                 <th>Color</th>
                 <th>Size</th>
+                <th>Cost</th>
                 <th>Price</th>
                 <th>Event</th>
                 <th>Subtotal</th>
+                <th>Gross Profit</th>
             </tr>
         </thead>
         <tbody>
@@ -112,6 +128,11 @@
                   <td><%= "#{sale_product.product_code} - #{sale_product.product_name}" %></td>
                   <td><%= "#{sale_product.color_code} - #{sale_product.color_name}" %></td>
                   <td><%= sale_product.product_size %></td>
+                  <td>
+                      <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+                        <%= number_to_currency(sale_product.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                      <% end %>
+                  </td>
                   <td><%= number_to_currency(sale_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                   <td>
                       <% if sale_product.free_product_name.present? && sale_product.free_product_color_name.present? && sale_product.free_product_size.present? %>
@@ -142,6 +163,11 @@
   <%#= sale_product.price %>
   <%# end %>
                       <%= number_to_currency(sale_product.subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                  </td>
+                  <td>
+                      <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+                        <%= number_to_currency(sale_product.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                      <% end %>
                   </td>
               </tr>
             <% end %>

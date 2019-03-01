@@ -161,6 +161,7 @@ Rails.application.routes.draw do
       get "get_gift_event_product"
       get "get_gift_event_product_colors"
       get "get_gift_event_product_sizes"
+      get 'export'
     end
     member do
       get "print"

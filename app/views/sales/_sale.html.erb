@@ -2,11 +2,16 @@
 <td><%= object.transaction_time.strftime("%d/%m/%Y %H:%M:%S") %></td>
 <td><%= object.payment_method %></td>
 <td><%= number_to_currency(object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
-<td class="actions" style="text-align: right">
-    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
-    <% if object.sales_return_id.blank? %>    
-      <%= link_to_if(can?(:manage, Sale), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_sale_path(object), :remote => true, :method => :get, title: "Print" ) %>
-    <% else %>    
-      <%= link_to_if(can?(:manage, Sale), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_return_receipt_sale_path(object), :remote => true, :method => :get, title: "Print" ) %>
-    <% end %>    
-</td>
+<td>
+    <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+        <%= number_to_currency(object.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+      <% end %>
+  </td>
+  <td class="actions" style="text-align: right">
+      <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, object, data: {remote: true}, title: "Show" %>
+      <% if object.sales_return_id.blank? %>    
+        <%= link_to_if(can?(:manage, Sale), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_sale_path(object), :remote => true, :method => :get, title: "Print" ) %>
+      <% else %>    
+        <%= link_to_if(can?(:manage, Sale), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_return_receipt_sale_path(object), :remote => true, :method => :get, title: "Print" ) %>
+      <% end %>    
+  </td>

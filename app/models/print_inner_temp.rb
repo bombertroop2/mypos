@@ -1,0 +1,2 @@
+class PrintInnerTemp < ApplicationRecord
+end
