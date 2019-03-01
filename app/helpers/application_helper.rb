@@ -94,11 +94,8 @@ module ApplicationHelper
 
   def cashier_menu_active?
     return true if can? :read, CashierOpening
-    return true if can? :manage, CashierOpening
     return true if can? :read, CashDisbursement
-    return true if can? :manage, Sale
     return true if can? :read, Sale
-    return true if can? :manage, SalesReturn
     return true if can? :read, SalesReturn
   end
 

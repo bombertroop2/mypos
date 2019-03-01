@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:html="http://www.w3.org/TR/REC-html40">
+    <Worksheet ss:Name="Sheet1">
+        <Table>
+            <Row>
+                <Cell><Data ss:Type="String">Showroom</Data></Cell>
+                <Cell><Data ss:Type="String">Date</Data></Cell>
+                <Cell><Data ss:Type="String">Transaction Number</Data></Cell>
+                <Cell><Data ss:Type="String">Article</Data></Cell>
+                <Cell><Data ss:Type="String">Color</Data></Cell>
+                <Cell><Data ss:Type="String">Size</Data></Cell>
+                <Cell><Data ss:Type="String">Quantity</Data></Cell>
+                <Cell><Data ss:Type="String">Gross Amt</Data></Cell>
+                <Cell><Data ss:Type="String">Event</Data></Cell>
+                <Cell><Data ss:Type="String">Net Amt</Data></Cell>
+                <Cell><Data ss:Type="String">Gross Profit</Data></Cell>
+                <Cell><Data ss:Type="String">Payment Method</Data></Cell>
+            </Row>
+
+            <% @sale_products.each do |sale_product| %>
+              <Row>
+                  <Cell><Data ss:Type="String"><%= sale_product.warehouse_name %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= sale_product.transaction_time.to_date.strftime("%d/%m/%Y") %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= sale_product.transaction_number %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= "#{sale_product.product_code} - #{sale_product.brand_name}" %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= "#{sale_product.color_code} - #{sale_product.color_name}" %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= sale_product.product_size %></Data></Cell>
+                  <Cell><Data ss:Type="Number">1</Data></Cell>
+                  <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
+                  <% if sale_product.free_product_id.present? %>
+                    <Cell><Data ss:Type="String">BOGO</Data></Cell>
+                  <% elsif sale_product.sale_first_plus_discount.present? && sale_product.sale_second_plus_discount.present? %>
+                    <Cell><Data ss:Type="String"><%= "#{sale_product.sale_first_plus_discount}% + #{sale_product.sale_second_plus_discount}%" %></Data></Cell>
+                  <% elsif sale_product.sale_first_plus_discount.present? %>                    
+                    <Cell><Data ss:Type="String"><%= "#{sale_product.sale_first_plus_discount}%" %></Data></Cell>
+                  <% elsif sale_product.sale_cash_discount.present? %>
+                    <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.sale_cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>                    
+                  <% elsif sale_product.special_price.present? %>                    
+                    <Cell><Data ss:Type="String"><%= "Special price: #{number_to_currency(sale_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %></Data></Cell>
+                  <% else %>
+                    <Cell><Data ss:Type="String"></Data></Cell>
+                  <% end %>                 
+                  <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
+                  <Cell><Data ss:Type="String"><%= sale_product.payment_method %></Data></Cell>
+              </Row>
+            <% end %>
+        </Table>
+    </Worksheet>
+</Workbook>
