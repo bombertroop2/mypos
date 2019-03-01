@@ -1,6 +1,7 @@
 class SaleProduct < ApplicationRecord
   attr_accessor :sales_promotion_girl_id, :event_type, :effective_price, :attr_effective_cost,
-    :first_plus_discount, :second_plus_discount, :cash_discount, :attr_returned_sale_id, :attr_returning_sale
+    :first_plus_discount, :second_plus_discount, :cash_discount, :attr_returned_sale_id,
+    :attr_returning_sale, :attr_gift_event_discount_amount
   
   belongs_to :sale
   belongs_to :product_barcode
@@ -57,7 +58,11 @@ class SaleProduct < ApplicationRecord
             end
 
             def update_gross_profit
-              self.gross_profit = total - attr_effective_cost
+              self.gross_profit = if event_id.present? && event_type.eql?("Gift")
+                total - attr_gift_event_discount_amount - attr_effective_cost
+              else
+                total - attr_effective_cost
+              end
             end
       
             def stock_quantity
