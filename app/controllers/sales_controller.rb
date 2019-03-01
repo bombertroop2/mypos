@@ -365,48 +365,58 @@ class SalesController < ApplicationController
   end
 
   def add_additional_params_to_sale_products
-    params[:sale][:sale_products_attributes].each do |key, value|
-      if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
-        if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
-          params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
-            effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"],
-            price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
-            cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
-            attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
+    if params[:sale][:sale_products_attributes].present?
+      total_article = params[:sale][:sale_products_attributes].length
+      params[:sale][:sale_products_attributes].each do |key, value|
+        if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
+          if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
+            params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+              effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["special_price"],
+              price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+              cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+              attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
+          elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Gift")
+            params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+              effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
+              price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+              cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+              attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"],
+              attr_gift_event_discount_amount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["discount_amount"].to_f / total_article
+          else
+            params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
+              effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
+              price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
+              cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
+              attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
+          end
+          params[:sale][:sale_products_attributes][key][:event_id] = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["id"]
+          params[:sale][:sale_products_attributes][key].merge! event_type: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"]
+          if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]][key].present? && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]][key]["free_product_id"].present?
+            params[:sale][:sale_products_attributes][key][:free_product_id] = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]][key]["free_product_id"]
+          else
+            params[:sale][:sale_products_attributes][key][:free_product_id] = nil
+          end
+          if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(%)")
+            if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present? && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"].present?
+              params[:sale][:sale_products_attributes][key].merge! first_plus_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"], second_plus_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"]
+            elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present?
+              params[:sale][:sale_products_attributes][key].merge! first_plus_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"]
+            end
+          elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(Rp)")
+            params[:sale][:sale_products_attributes][key].merge! cash_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"]
+          end
         else
           params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
             effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
             price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
             cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
             attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
-        end
-        params[:sale][:sale_products_attributes][key][:event_id] = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["id"]
-        params[:sale][:sale_products_attributes][key].merge! event_type: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"]
-        if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]][key].present? && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]][key]["free_product_id"].present?
-          params[:sale][:sale_products_attributes][key][:free_product_id] = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]][key]["free_product_id"]
-        else
+          params[:sale][:sale_products_attributes][key][:event_id] = nil
+          params[:sale][:sale_products_attributes][key].merge! event_type: nil, quantity: 1
           params[:sale][:sale_products_attributes][key][:free_product_id] = nil
         end
-        if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(%)")
-          if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present? && session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"].present?
-            params[:sale][:sale_products_attributes][key].merge! first_plus_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"], second_plus_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["second_plus_discount"]
-          elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"].present?
-            params[:sale][:sale_products_attributes][key].merge! first_plus_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["first_plus_discount"]
-          end
-        elsif session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Discount(Rp)")
-          params[:sale][:sale_products_attributes][key].merge! cash_discount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["cash_discount"]
-        end
-      else
-        params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
-          effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
-          price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
-          cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
-          attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
-        params[:sale][:sale_products_attributes][key][:event_id] = nil
-        params[:sale][:sale_products_attributes][key].merge! event_type: nil, quantity: 1
-        params[:sale][:sale_products_attributes][key][:free_product_id] = nil
       end
-    end if params[:sale][:sale_products_attributes].present?
+    end
   end
   
   # Use callbacks to share common setup or constraints between actions.
@@ -428,6 +438,6 @@ class SalesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def sale_params
     params.require(:sale).permit(:gift_event_discount_amount, :gift_event_gift_type, :gift_event_id, :gift_event_product_id, :pay, :warehouse_id, :cashier_id, :member_id, :transaction_time, :bank_id, :payment_method, :total, :trace_number, :card_number, :cash, :change, :transaction_number, :cashier_opening_id, :gross_profit,
-      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost])
+      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost, :attr_gift_event_discount_amount])
   end
 end
