@@ -9,6 +9,7 @@ class SaleProduct < ApplicationRecord
   belongs_to :price_list
   belongs_to :event
   belongs_to :returned_product, class_name: "SaleProduct", foreign_key: :returned_product_id
+  belongs_to :cost_list
 
   # hapus event_id apabila event gift, cukup di parent Sale
   before_validation :add_quantity, :update_total, :update_gross_profit

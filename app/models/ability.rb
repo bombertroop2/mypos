@@ -11,6 +11,7 @@ class Ability
       cannot :manage, CashierOpening
       cannot :manage, CashDisbursement
       cannot :manage, Sale
+      can [:read, :export], Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
     elsif user_roles.include? "administrator"
@@ -59,7 +60,11 @@ class Ability
             elsif user_menu.eql?("Accounts Receivable (Direct Sales)")
               can :manage, AccountsReceivableInvoice
             else
-              can :manage, class_name.gsub(/\s+/, "").constantize if !user_menu.eql?("Point of Sale") && !user_menu.eql?("Company")
+              if user_menu.eql?("Point of Sale")
+                can [:read, :export], Sale
+              elsif !user_menu.eql?("Company")
+                can :manage, class_name.gsub(/\s+/, "").constantize
+              end
             end
           end
         end
@@ -268,7 +273,7 @@ class Ability
             else
               can ability, FiscalYear
             end
-          elsif class_name.eql?("Point of Sale") || class_name.eql?("Company") || class_name.eql?("Adjustment") || class_name.eql?("General Variable")
+          elsif class_name.eql?("Company") || class_name.eql?("Adjustment") || class_name.eql?("General Variable")
           elsif class_name.eql?("ConsignmentSale")
             if user_roles.include?("area_manager") && user.supervisor.warehouses.select("1 AS one").where(["warehouses.warehouse_type LIKE 'ctr%' AND warehouses.is_active = ?", true]).present?
               can ability, ConsignmentSale
@@ -291,6 +296,8 @@ class Ability
             else
               can :read, class_name.gsub(/\s+/, "").constantize
             end
+          elsif class_name.eql?("Point of Sale")
+            can [:read, :export], Sale
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")
