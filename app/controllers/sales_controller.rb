@@ -18,11 +18,16 @@ class SalesController < ApplicationController
       end_start_time = Time.zone.parse(splitted_start_time_range[1].strip).end_of_day
     end
 
-    warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+    unless current_user.has_non_spg_role?
+      warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
+      sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id, :gross_profit).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+    else
+      sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id, :gross_profit)
+    end
     sales_scope = sales_scope.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date].present?
     sales_scope = sales_scope.where(["transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     sales_scope = sales_scope.where(["payment_method = ?", params[:filter_payment_method]]) if params[:filter_payment_method].present?
+    sales_scope = sales_scope.where(["cashier_openings.warehouse_id = ?", params[:filter_warehouse]]) if params[:filter_warehouse].present?
     @sales = smart_listing_create(:sales, sales_scope, partial: 'sales/listing', default_sort: {transaction_time: "DESC"})
   end
 
@@ -301,6 +306,45 @@ class SalesController < ApplicationController
   def get_gift_event_product_sizes
     @product_sizes = Size.joins(size_group: [products: [:product_colors, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).select(:id, :size).where(["products.code = ? AND product_colors.color_id = ?", params[:product_code].upcase, params[:product_color]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id).where("stock_details.color_id = product_colors.color_id AND stock_details.size_id = sizes.id").order(:size_order)
   end
+  
+  def export
+    respond_to do |format|
+      format.xls do
+        @sale_products = if current_user.has_non_spg_role?
+          if params[:filter_date_export].present?
+            splitted_start_time_range = params[:filter_date_export].split("-")
+            start_start_time = Time.zone.parse(splitted_start_time_range[0].strip)
+            end_start_time = Time.zone.parse(splitted_start_time_range[1].strip).end_of_day
+          end
+          sale_products = SaleProduct.
+            select(:total, :gross_profit, :free_product_id, "warehouses.name AS warehouse_name", "sales.transaction_time", "sales.transaction_number", "products.code AS product_code", "brands_products.name AS brand_name", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "sales.payment_method", "price_lists.price").
+            joins(:price_list, product_barcode: [:size, product_color: [:color, product: :brand]], sale: [cashier_opening: :warehouse]).
+            joins("LEFT JOIN events ON events.id = sale_products.event_id")
+          sale_products = sale_products.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date_export].present?
+          sale_products = sale_products.where(["transaction_number ILIKE ?", "%"+params[:filter_string_export]+"%"]) if params[:filter_string_export].present?
+          sale_products = sale_products.where(["payment_method = ?", params[:filter_payment_method_export]]) if params[:filter_payment_method_export].present?
+          sale_products = sale_products.where(["cashier_openings.warehouse_id = ?", params[:filter_warehouse_export]]) if params[:filter_warehouse_export].present?
+          sale_products.order("sales.transaction_time ASC")
+        else
+          if params[:filter_date_export].present?
+            splitted_start_time_range = params[:filter_date_export].split("-")
+            start_start_time = Time.zone.parse(splitted_start_time_range[0].strip)
+            end_start_time = Time.zone.parse(splitted_start_time_range[1].strip).end_of_day
+          end
+          sale_products = SaleProduct.
+            select(:total, :gross_profit, :free_product_id, "warehouses.name AS warehouse_name", "sales.transaction_time", "sales.transaction_number", "products.code AS product_code", "brands_products.name AS brand_name", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "sales.payment_method", "price_lists.price").
+            joins(:price_list, product_barcode: [:size, product_color: [:color, product: :brand]], sale: [cashier_opening: [warehouse: :sales_promotion_girls]]).
+            joins("LEFT JOIN events ON events.id = sale_products.event_id").
+            where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id])
+          sale_products = sale_products.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date_export].present?
+          sale_products = sale_products.where(["transaction_number ILIKE ?", "%"+params[:filter_string_export]+"%"]) if params[:filter_string_export].present?
+          sale_products = sale_products.where(["payment_method = ?", params[:filter_payment_method_export]]) if params[:filter_payment_method_export].present?
+          sale_products.order("sales.transaction_time ASC")
+        end
+        headers["Content-Disposition"] = "attachment; filename='pos_report.xls'"
+      end
+    end
+  end
 
   private
   
@@ -421,18 +465,33 @@ class SalesController < ApplicationController
   
   # Use callbacks to share common setup or constraints between actions.
   def set_sale
-    @sale = Sale.joins(cashier_opening: [warehouse: :sales_promotion_girls]).
-      joins("LEFT JOIN members on members.id = sales.member_id").
-      joins("LEFT JOIN banks on banks.id = sales.bank_id").
-      joins("LEFT JOIN stock_details on sales.gift_event_product_id = stock_details.id").
-      joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
-      joins("LEFT JOIN products on stock_products.product_id = products.id").
-      joins("LEFT JOIN common_fields on common_fields.id = products.brand_id AND common_fields.type IN ('Brand')").
-      joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
-      joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
-      joins("LEFT JOIN events ON events.id = sales.gift_event_id").
-      select(:id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
-      where(id: params[:id]).where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
+    @sale = if !current_user.has_non_spg_role?
+      Sale.joins(cashier_opening: [warehouse: :sales_promotion_girls]).
+        joins("LEFT JOIN members on members.id = sales.member_id").
+        joins("LEFT JOIN banks on banks.id = sales.bank_id").
+        joins("LEFT JOIN stock_details on sales.gift_event_product_id = stock_details.id").
+        joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
+        joins("LEFT JOIN products on stock_products.product_id = products.id").
+        joins("LEFT JOIN common_fields on common_fields.id = products.brand_id AND common_fields.type IN ('Brand')").
+        joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
+        joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
+        joins("LEFT JOIN events ON events.id = sales.gift_event_id").
+        select(:id, :gross_profit, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+        where(id: params[:id]).where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
+    else
+      Sale.joins(cashier_opening: [warehouse: :sales_promotion_girls]).
+        joins("LEFT JOIN members on members.id = sales.member_id").
+        joins("LEFT JOIN banks on banks.id = sales.bank_id").
+        joins("LEFT JOIN stock_details on sales.gift_event_product_id = stock_details.id").
+        joins("LEFT JOIN stock_products on stock_details.stock_product_id = stock_products.id").
+        joins("LEFT JOIN products on stock_products.product_id = products.id").
+        joins("LEFT JOIN common_fields on common_fields.id = products.brand_id AND common_fields.type IN ('Brand')").
+        joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
+        joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
+        joins("LEFT JOIN events ON events.id = sales.gift_event_id").
+        select(:id, :gross_profit, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+        where(id: params[:id]).first
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
