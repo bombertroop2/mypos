@@ -116,7 +116,7 @@ class AccountPayable < ApplicationRecord
             joins(:vendor).
             joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
             joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
-            where(vendor_id: vendor_id, invoice_status: "").
+            where(vendor_id: vendor_id, invoice_status: "", checked: true).
             where(["vendors.is_active = ? AND (purchase_orders.invoice_status <> 'Invoiced' OR direct_purchases.invoice_status <> 'Invoiced') AND received_purchase_orders.receiving_date <= ?", true, vendor_invoice_date]).
             find(account_payable_purchase_partial.received_purchase_order_id)
           gross_amount = 0
@@ -175,7 +175,7 @@ class AccountPayable < ApplicationRecord
           account_payable_purchase.attr_purchase_number = if account_payable_purchase.purchase.class.name.eql?("PurchaseOrder")
             account_payable_purchase.purchase.number
           else
-            account_payable_purchase.purchase.received_purchase_order.transaction_number
+            ReceivedPurchaseOrder.select(:transaction_number).where(checked: true, direct_purchase_id: account_payable_purchase.purchase_id).first.transaction_number
           end
           account_payable_purchase.attr_gross_amount = account_payable_purchase.purchase.receiving_value
           account_payable_purchase.attr_first_discount_money = (account_payable_purchase.purchase.first_discount.to_f / 100) * account_payable_purchase.purchase.receiving_value if account_payable_purchase.purchase.first_discount.present?
