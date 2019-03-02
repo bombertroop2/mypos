@@ -304,11 +304,13 @@ Rails.application.routes.draw do
     collection do
       get "get_product_details"
       get "search_do_numbers"
+      get "goods_received_not_invoiced"
     end
 
     member do
       get 'get_purchase_order'
       post 'receive_products_from_purchase_order'
+      get 'check_grni'
     end
   end
 

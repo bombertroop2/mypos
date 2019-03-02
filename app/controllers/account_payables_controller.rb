@@ -53,14 +53,14 @@ class AccountPayablesController < ApplicationController
       @purchase_orders = PurchaseOrder.select(:id, :number, :purchase_order_date,
         :receiving_value, :first_discount, :second_discount, :is_taxable_entrepreneur,
         :value_added_tax,:is_additional_disc_from_net, :net_amount, :invoice_status).
-        select("vendors.name AS vendor_name").joins(:received_purchase_orders, :vendor).
-        where("(status = 'Finish' OR status = 'Closed') AND purchase_orders.invoice_status = ''").
-        order("received_purchase_orders.receiving_date")
+        select("vendors.name AS vendor_name").joins(:vendor).includes(:received_purchase_orders).
+        where("(status = 'Finish' OR status = 'Closed') AND purchase_orders.invoice_status = ''")
       @direct_purchases = DirectPurchase.
         select(:id, :delivery_order_number, :receiving_date, :first_discount, :second_discount, :is_taxable_entrepreneur, :vat_type, :is_additional_disc_from_net, :invoice_status).
         select("vendors.name AS vendor_name", "received_purchase_orders.transaction_number AS rpo_transaction_number").
         joins(:received_purchase_order, :vendor).
         where(invoice_status: "").
+        where(["received_purchase_orders.checked = ?", true]).
         order(:receiving_date)
     end
   end
@@ -194,7 +194,7 @@ class AccountPayablesController < ApplicationController
       joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
       joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
       includes(received_purchase_order_products: [:received_purchase_order_items, purchase_order_product: :cost_list, direct_purchase_product: :cost_list]).
-      where(vendor_id: params[:vendor_id], invoice_status: "").
+      where(vendor_id: params[:vendor_id], invoice_status: "", checked: true).
       where(["vendors.is_active = ? AND (purchase_orders.invoice_status <> 'Invoiced' OR direct_purchases.invoice_status <> 'Invoiced') AND received_purchase_orders.receiving_date <= ?", true, params[:vendor_invoice_date].to_date])
     @account_payable_purchase_partials = []
     received_purchase_orders.each do |rpo|

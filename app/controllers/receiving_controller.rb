@@ -241,6 +241,38 @@ class ReceivingController < ApplicationController
         format.json  { render :json => @received_purchase_orders.to_json }
       end
     end
+    
+    def goods_received_not_invoiced
+      if params[:filter_receiving_date_grni].present?
+        splitted_date_range = params[:filter_receiving_date_grni].split("-")
+        start_date = splitted_date_range[0].strip.to_date
+        end_date = splitted_date_range[1].strip.to_date
+      end
+
+      received_orders_scope = ReceivedPurchaseOrder.
+        select(:id, :delivery_order_number, :receiving_date, :quantity, :transaction_number, :checked, "purchase_orders.number AS po_number", "vendors.code AS vendor_code", "vendors.name AS vendor_name").
+        joins(:vendor).
+        joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
+        joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
+        where("(received_purchase_orders.invoice_status = '' AND purchase_orders.invoice_status = 'Partial') OR purchase_orders.invoice_status = '' OR direct_purchases.invoice_status = ''")
+      
+      received_orders_scope = received_orders_scope.where(["received_purchase_orders.receiving_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_receiving_date_grni].present?
+      received_orders_scope = received_orders_scope.where(["received_purchase_orders.delivery_order_number ILIKE ? OR received_purchase_orders.transaction_number ILIKE ? OR purchase_orders.number ILIKE ?", "%"+params[:filter_string_grni]+"%", "%"+params[:filter_string_grni]+"%", "%"+params[:filter_string_grni]+"%"]) if params[:filter_string_grni].present?
+      received_orders_scope = received_orders_scope.where(["received_purchase_orders.vendor_id = ?", params[:filter_vendor_grni]]) if params[:filter_vendor_grni].present?
+
+      smart_listing_create(:receiving_purchase_orders, received_orders_scope, partial: 'receiving/listing_grni', default_sort: {receiving_date: "asc"})
+    end
+    
+    def check_grni
+      @received_purchase_order = ReceivedPurchaseOrder.
+        select(:id, :delivery_order_number, :receiving_date, :quantity, :transaction_number, :checked, "purchase_orders.number AS po_number", "vendors.code AS vendor_code", "vendors.name AS vendor_name").
+        joins(:vendor).
+        joins("LEFT JOIN purchase_orders ON received_purchase_orders.purchase_order_id = purchase_orders.id").
+        joins("LEFT JOIN direct_purchases ON received_purchase_orders.direct_purchase_id = direct_purchases.id").
+        where("(received_purchase_orders.invoice_status = '' AND purchase_orders.invoice_status = 'Partial') OR purchase_orders.invoice_status = '' OR direct_purchases.invoice_status = ''").
+        find(params[:id])
+      @received_purchase_order.update(checked: (@received_purchase_order.checked ? false : true), attr_check_grni: true)
+    end
 
     private
 

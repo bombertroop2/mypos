@@ -1,5 +1,5 @@
 class ReceivedPurchaseOrder < ApplicationRecord
-  audited on: :create
+  audited on: [:create, :update], only: :checked
 
   belongs_to :purchase_order
   belongs_to :direct_purchase
@@ -20,16 +20,16 @@ class ReceivedPurchaseOrder < ApplicationRecord
               validates :receiving_date, presence: true, on: :create, unless: proc {|rpo| rpo.is_it_direct_purchasing}
                 validates :receiving_date, date: {after: proc {|rpo| rpo.purchase_order.purchase_order_date}, message: 'must be greater than purchase order date' }, on: :create, if: proc {|rpo| !rpo.is_it_direct_purchasing && rpo.receiving_date.present?}
                   validates :receiving_date, date: {before_or_equal_to: proc { Date.current }, message: 'must be before or equal to today' }, on: :create, if: proc {|rpo| !rpo.is_it_direct_purchasing && rpo.receiving_date.present?}
-                    validates :purchase_order_id, presence: true, unless: proc {|rpo| rpo.is_it_direct_purchasing}
-                      validate :purchase_order_receivable, unless: proc{|rpo| rpo.is_it_direct_purchasing}
+                    validates :purchase_order_id, presence: true, if: proc {|rpo| !rpo.is_it_direct_purchasing && !rpo.attr_check_grni}
+                      validate :purchase_order_receivable, if: proc{|rpo| !rpo.is_it_direct_purchasing && !rpo.attr_check_grni}
                         validates :vendor_id, presence: true, if: proc{|rpo| rpo.is_it_direct_purchasing}, on: :create
-                          validate :transaction_open, if: proc{|rpo| !rpo.is_it_direct_purchasing && rpo.receiving_date.present?}
+                          validate :transaction_open, if: proc{|rpo| !rpo.is_it_direct_purchasing && rpo.receiving_date.present? && !rpo.attr_check_grni}
 
                             before_create :direct_purchase_not_received, :direct_purchase_not_double_received_per_today, if: proc{|rpo| rpo.is_it_direct_purchasing}
                               before_create :calculate_total_quantity, unless: proc{|rpo| rpo.is_it_direct_purchasing}
                                 before_create :generate_transaction_number
       
-                                attr_accessor :is_it_direct_purchasing
+                                attr_accessor :is_it_direct_purchasing, :attr_check_grni
   
                                 private
                                                     

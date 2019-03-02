@@ -14,7 +14,12 @@ class AccountPayablePurchase < ApplicationRecord
     
   def attr_vendor_invoice_date_valid
     if purchase_type.eql?("PurchaseOrder")
-      latest_received_purchase = purchase.received_purchase_orders.select(:receiving_date).order("receiving_date DESC").first
+      received_purchase_orders = ReceivedPurchaseOrder.select(:receiving_date, :checked).where(purchase_order_id: purchase_id).order("receiving_date DESC")
+      if received_purchase_orders.select{|rpo| rpo.checked == false}.present?
+        errors.add(:base, "Sorry, some PO #{purchase.number} GRNI items are not yet checked") and return
+      else
+        latest_received_purchase = received_purchase_orders.first
+      end
     else
       latest_received_purchase = purchase.received_purchase_order
     end
