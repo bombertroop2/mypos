@@ -18,21 +18,25 @@ class OrderBookingsController < ApplicationController
     order_bookings_scope = if current_user.has_non_spg_role?
       OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
         select("ow.name AS ow_name, dw.name AS dw_name").
-        select("customers.name AS cust_name").
-        joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
-        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
-        joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id")
-    else
-      OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
-        select("ow.name AS ow_name, dw.name AS dw_name").
-        select("customers.name AS cust_name").
+        select("customers.name AS cust_name", "users.name AS user_name").
         joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
         joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
         joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id").
+        joins(:audits).
+        joins("INNER JOIN users ON users.id = audits.user_id AND audits.user_type = 'User' AND audits.action = 'create'")
+    else
+      OrderBooking.select(:id, :number, :plan_date, :quantity, :status).
+        select("ow.name AS ow_name, dw.name AS dw_name").
+        select("customers.name AS cust_name", "users.name AS user_name").
+        joins("INNER JOIN warehouses ow ON ow.id = order_bookings.origin_warehouse_id").
+        joins("INNER JOIN warehouses dw ON dw.id = order_bookings.destination_warehouse_id").
+        joins("LEFT JOIN customers ON customers.id = order_bookings.customer_id").
+        joins(:audits).
+        joins("INNER JOIN users ON users.id = audits.user_id AND audits.user_type = 'User' AND audits.action = 'create'").
         where(destination_warehouse_id: current_user.sales_promotion_girl.warehouse_id)
     end
     order_bookings_scope = order_bookings_scope.where(["number #{like_command} ?", "%"+params[:filter_string]+"%"]).
-      or(order_bookings_scope.where(["ow.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
+      or(order_bookings_scope.where(["users.name #{like_command} ?", "%"+params[:filter_string]+"%"])) if params[:filter_string].present?
     order_bookings_scope = order_bookings_scope.where(["DATE(plan_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_plan_date].present?
     order_bookings_scope = order_bookings_scope.where(["status = ?", params[:filter_status]]) if params[:filter_status].present?
     order_bookings_scope = order_bookings_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
@@ -184,7 +188,7 @@ class OrderBookingsController < ApplicationController
         end
       else
         @ori_warehouse_name = Warehouse.select(:name).where(id: @order_booking.origin_warehouse_id).first.name
-        #        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
+        @dest_warehouse_name = Warehouse.select(:name).where(id: @order_booking.destination_warehouse_id).first.name
       end
     end
   end
