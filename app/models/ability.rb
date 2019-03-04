@@ -298,6 +298,14 @@ class Ability
             end
           elsif class_name.eql?("Point of Sale")
             can [:read, :export], Sale
+          elsif class_name.eql?("ReceivedPurchaseOrder")
+            if !user_roles.include?("area_manager")
+              if ability.eql?(:read)
+                can [:read, :goods_received_not_invoiced], class_name.constantize
+              else
+                can ability, class_name.constantize
+              end
+            end
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")

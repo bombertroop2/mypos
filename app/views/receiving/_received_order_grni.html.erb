@@ -1,0 +1,21 @@
+<td><%= object.transaction_number %></td>
+<td><%= object.delivery_order_number %></td>
+<td><%= object.po_number %></td>
+<td><%= "#{object.vendor_code} - #{object.vendor_name}" %></td>
+<td><%= object.receiving_date.strftime("%d/%m/%Y") %></td>
+<td><%= number_to_currency(object.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+<td class="actions" style="text-align: center">
+    <%
+    checked_class = if object.checked
+      "glyphicon-check"
+      else
+      "glyphicon-unchecked"
+      end
+    confirmation_title = if object.checked
+      "Uncheck"
+      else
+      "Check"
+      end
+  %>
+    <%= link_to_if(can?(:manage, ReceivedPurchaseOrder), content_tag(:span, "", :class => "glyphicon #{checked_class}"), check_grni_receiving_path(object), :remote => true, :method => :get, :data => {:confirmation => 'Are you sure?', placement: :left}, title: confirmation_title ) %>
+</td>

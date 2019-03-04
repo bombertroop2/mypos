@@ -163,6 +163,9 @@
                                                     <% if can? :read, PurchaseReturn %>
                                                       <li><%= link_to "Purchase Returns", purchase_returns_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, ReceivedPurchaseOrder %>
+                                                      <li><%= link_to "Goods Received Not Invoiced", goods_received_not_invoiced_receiving_index_path, method: :get %></li>
+                                                    <% end %>
                                                     <% if can? :read, AccountPayable %>
                                                       <li><%= link_to "AP Invoices", account_payables_path, method: :get %></li>
                                                     <% end %>
