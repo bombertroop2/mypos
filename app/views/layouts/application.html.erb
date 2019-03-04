@@ -178,7 +178,7 @@
                                                     <% if can? :read, OrderBooking %>
                                                       <li><%= link_to "Order Bookings", order_bookings_path, method: :get %></li>
                                                     <% end %>
-                                                    <% if can? :read_action_for_staff, Shipment %>
+                                                    <% if can?(:read_action_for_staff, Shipment) || can?(:read_action, Shipment) %>
                                                       <li><%= link_to "Shipments", shipments_path, method: :get %></li>
                                                     <% end %>
                                                     <% if can? :read, AccountsReceivableInvoice %>
