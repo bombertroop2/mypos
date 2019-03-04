@@ -14,5 +14,6 @@ $(function () {
     $('#filter-plan-date').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
-
+    $("#filter-status").attr("data-placeholder", "Status").chosen({width: "100px"});
+    $("#filter-destination-warehouse").attr("data-placeholder", "Warehouse to").chosen({width: "200px"});
 });

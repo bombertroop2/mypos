@@ -19,11 +19,20 @@ class ShipmentsController < ApplicationController
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed).joins(:order_booking)
+      Shipment.
+        select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed, "users.name AS user_name").
+        joins(:order_booking).
+        joins(:audits).
+        joins("INNER JOIN users ON users.id = audits.user_id AND audits.user_type = 'User' AND audits.action = 'create'")
     else
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed).joins(:order_booking).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Shipment.
+        select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_document_printed, "users.name AS user_name").
+        joins(:order_booking).
+        joins(:audits).
+        joins("INNER JOIN users ON users.id = audits.user_id AND audits.user_type = 'User' AND audits.action = 'create'").
+        where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
-    shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
+    shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ? OR users.name #{like_command} ?", "%"+params[:filter_string]+"%", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
     shipments_scope = shipments_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
     shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
@@ -45,11 +54,22 @@ class ShipmentsController < ApplicationController
       end_received_date = splitted_received_date_range[1].strip.to_date
     end
     shipments_scope = if current_user.has_non_spg_role?
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where(is_document_printed: true)
+      Shipment.
+        select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed, "users.name AS user_name").
+        joins(:order_booking).
+        joins(:audits).
+        joins("INNER JOIN users ON users.id = audits.user_id AND audits.user_type = 'User' AND audits.action = 'create'").
+        where(is_document_printed: true)
     else
-      Shipment.select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed).joins(:order_booking).where(is_document_printed: true).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Shipment.
+        select(:id, :delivery_order_number, :delivery_date, :received_date, :quantity, :is_receive_date_changed, "users.name AS user_name").
+        joins(:order_booking).
+        joins(:audits).
+        joins("INNER JOIN users ON users.id = audits.user_id AND audits.user_type = 'User' AND audits.action = 'create'").
+        where(is_document_printed: true).
+        where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}")
     end
-    shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
+    shipments_scope = shipments_scope.where(["delivery_order_number #{like_command} ? OR users.name #{like_command} ?", "%"+params[:filter_string]+"%", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     shipments_scope = shipments_scope.where(["DATE(delivery_date) BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_delivery_date].present?
     shipments_scope = shipments_scope.where(["DATE(received_date) BETWEEN ? AND ?", start_received_date, end_received_date]) if params[:filter_received_date].present?
     shipments_scope = shipments_scope.where(["destination_warehouse_id = ?", params[:filter_destination_warehouse]]) if params[:filter_destination_warehouse].present?
@@ -182,7 +202,11 @@ class ShipmentsController < ApplicationController
   end
 
   def receive
-    @shipment = Shipment.where(id: params[:id]).where(is_document_printed: true).first
+    @shipment = if current_user.has_non_spg_role?
+      Shipment.where(id: params[:id], is_document_printed: true).first
+    else
+      Shipment.joins(:order_booking).where(id: params[:id], is_document_printed: true).where("order_bookings.destination_warehouse_id = #{current_user.sales_promotion_girl.warehouse_id}").first
+    end
     if @shipment.present?
       @shipment.with_lock do
         @shipment.update(received_date: params[:receive_date], receiving_inventory: true)

@@ -7,4 +7,6 @@
     $("#dest-warehouse-name-<%= @order_booking.id %>").html("<%= @dest_warehouse_name %>");
     $("#total-quantity-<%= @order_booking.id %>").html("<%= @total_quantity %>");
   <% end %>
+  <% user = User.select(:name).joins("INNER JOIN audits ON audits.user_id = users.id AND audits.user_type = 'User'").where(["audits.auditable_id = ? AND audits.auditable_type = 'OrderBooking' AND audits.action = 'create'", @order_booking.id]).first %>
+  $("#listing-ob-user-name-<%= @order_booking.id %>").html("<%= user.name %>");
 <% end %>
