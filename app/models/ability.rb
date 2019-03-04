@@ -103,7 +103,7 @@ class Ability
             #            can :get_warehouses, class_name.gsub(/\s+/, "").constantize
           elsif class_name.eql?("Shipment")
             # cegah non manager keatas untuk menghapus shipment
-            alias_action :inventory_receipts, :show, to: :read_action
+            alias_action :inventory_receipts, :show, :index, to: :read_action
             can :read_action, class_name.gsub(/\s+/, "").constantize
             can [:receive, :search_do], class_name.gsub(/\s+/, "").constantize if ability.eql?(:manage)
           elsif class_name.eql?("Stock Mutation")
