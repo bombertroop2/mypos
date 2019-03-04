@@ -1,7 +1,8 @@
 <td><%= object.delivery_order_number %></td>
 <td><%= object.delivery_date.strftime("%d/%m/%Y") %></td>
 <td><%= object.received_date.strftime("%d/%m/%Y") if object.received_date.present? %></td>
-<td id="total-quantity-<%= object.id %>"><%= object.quantity %></td>
+<td id="total-quantity-<%= object.id %>"><%= number_to_currency(object.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+<td id="listing-shipment-user-name-<%= object.id %>"><%= object.user_name rescue "" %></td>
 <td class="actions" style="text-align: right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, shipment_path(object), data: {remote: true}, title: "Show" %>
     <%= link_to_if(can?(:receive, Shipment) && object.received_date.nil?, content_tag(:i, "", :class => "glyphicon glyphicon-download-alt"), "javascript:receiveInventory('#{object.id}', '#{object.delivery_order_number}')", title: "Receive" ) %>

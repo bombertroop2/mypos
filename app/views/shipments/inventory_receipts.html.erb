@@ -4,7 +4,7 @@
 
 <div id="search-form-container" class="form-inline text-right">
     <% if current_user.has_non_spg_role? %>
-      <div class="form-group">
+      <div class="form-group text-left">
           <%= select_tag "destination_warehouse", options_from_collection_for_select(Warehouse.not_central.actived.select(:id, :code, :name), :id, "code_and_name"), {prompt: "Warehouse to", class: "form-control", id: "filter-destination-warehouse"} %>
         </div>
       <% end %>
@@ -15,7 +15,7 @@
           <input type="text" class="form-control" readonly="true" id="filter-received-date" placeholder="Received date">
       </div>
       <div class="form-group">
-          <input type="text" id="filter-string" class="form-control" placeholder="DO number/quantity">
+          <input type="text" id="filter-string" class="form-control" placeholder="DO number/Created by">
       </div>
       <button id="search-shipment-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
   </div>

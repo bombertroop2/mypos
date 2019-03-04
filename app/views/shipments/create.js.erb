@@ -5,6 +5,8 @@
   <% @shipments.each do |shipment| %>
     <% do_numbers << shipment.delivery_order_number %>
     <%= smart_listing_item :shipments, :create, shipment, "shipments/shipment" %>
+    <% user = User.select(:name).joins("INNER JOIN audits ON audits.user_id = users.id AND audits.user_type = 'User'").where(["audits.auditable_id = ? AND audits.auditable_type = 'Shipment' AND audits.action = 'create'", shipment.id]).first %>
+    $("#listing-shipment-user-name-<%= shipment.id %>").html("<%= user.name %>");
   <% end %>
   <% if do_numbers.length == 1 %>
     bootbox.alert("Delivery Order <%= do_numbers.to_sentence %> has been successfully created");
