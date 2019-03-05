@@ -110,15 +110,19 @@ class CostPricesController < ApplicationController
       else
         @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
         @price_codes = PriceCode.select(:id, :code).order :code
-        @product.cost_lists.build
+        latest_cost = CostList.select(:cost).where(product_id: @product.id).order(effective_date: :desc).first
+        @product.cost_lists.build cost: latest_cost.present? ? latest_cost.cost : 0
         @sizes.each do |size|
           @price_codes.each do |price_code|
             product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == price_code.id}.first
-            unless product_detail
+            if product_detail.blank?
               product_detail = @product.product_details.build size_id: size.id, price_code_id: price_code.id
+              product_detail.price_lists.build
+            else
+              latest_price = PriceList.select(:price).where(product_detail_id: product_detail.id).order(effective_date: :desc).first
+              product_detail.price_lists.build price: latest_price.present? ? latest_price.price : 0
             end
-            product_detail.price_lists.build
-          end 
+          end
         end
       end
     end
