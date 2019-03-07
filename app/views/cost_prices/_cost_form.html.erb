@@ -27,82 +27,93 @@
                           <%= error_help_text(cost_list_form.object, :cost) %>
                       </div>
                   </div>
-                <% end %>
-              <% end %>
-              <% unless @sizes.blank? %>
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <div id="size_collection_container">
-                            <table class="table table-condensed table-responsive table-bordered">
-                                <tr style="text-align: center">
-                                    <td colspan="2" rowspan="2"></td>
-                                    <td colspan="<%= @price_codes.size %>" align="center"><b>Price</b></td>
-                                </tr>
-                                <tr style="text-align: center">
-                                    <% @price_codes.each do |price_code| %>
-                                      <td align="center"><%= price_code.code %>
-                                          <br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
-                                              "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %>
-                                        </td>
-                                      <% end %>
-                                  </tr>
-                                  <% @sizes.each_with_index do |size, idx| %>
+                  <div class="form-group<%= control_group_error(cost_list_form.object, :additional_information) %>">
+                      <%= cost_list_form.label :additional_information, class: "col-sm-2 control-label" %>
+                        <div class="col-sm-10">
+                            <%= cost_list_form.select :additional_information, options_for_select(CostList::ADDITIONAL_INFORMATIONS, cost_list_form.object.additional_information), {include_blank: true}, {class: "form-control additional-information-field"} %>
+                              <%= error_help_text(cost_list_form.object, :additional_information) %>
+                          </div>
+                      </div>                                          
+                    <% end %>
+                  <% end %>
+                  <% unless @sizes.blank? %>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div id="size_collection_container">
+                                <table class="table table-condensed table-responsive table-bordered">
                                     <tr style="text-align: center">
-                                        <% if idx.eql? 0 %>
-                                          <td rowspan="<%= @sizes.size %>" style="vertical-align:middle"><b>Sizes</b></td>
-                                        <% end %>
-                                        <td><%= size.size %></td>
+                                        <td colspan="2" rowspan="2"></td>
+                                        <td colspan="<%= @price_codes.size %>" align="center"><b>Price</b></td>
+                                    </tr>
+                                    <tr style="text-align: center">
                                         <% @price_codes.each do |price_code| %>
                                           <td align="center">
-                                              <%= f.fields_for :product_details do |product_detail_form| %>
-                                                <% if size.id == product_detail_form.object.size_id && price_code.id == product_detail_form.object.price_code_id %>
-                                                  <% if product_detail_form.object.new_record? %>
-                                                    <%= product_detail_form.hidden_field :size_id %>
-                                                    <%= product_detail_form.hidden_field :price_code_id %>
-                                                  <% end %>
-                                                  <%= product_detail_form.fields_for :price_lists do |price_list_form| %>
-                                                    <% if price_list_form.object.new_record? || (params[:action].eql?("edit") && price_effective_date.present? && price_effective_date.eql?(price_list_form.object.effective_date.strftime("%d/%m/%Y"))) || (params[:action].eql?("update") && price_list_form.object.editable_record) %>
-                                                      <%= price_list_form.hidden_field :editable_record, value: true unless price_list_form.object.new_record? %>
-                                                      <div class="<%= control_group_error(price_list_form.object, :price) %>">
-                                                          <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
-                                                              "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
-                                                            <%= error_help_text(price_list_form.object, :price) %>
-                                                        </div>
-                                                      <% end %>
-                                                      <%= price_list_form.hidden_field :turn_off_date_validation, value: true if price_effective_date.present? %>
-                                                    <% end %>
-                                                  <% end %>
-                                                <% end %>
+                                              <%= check_box_tag "insert_price_code[#{price_code.id}]", "yes", true %>
+                                              <br/>
+                                              <%= price_code.code %>
+                                              <br /><%= text_field_tag "price_"+price_code.code, "", {placeholder: "price", class: "form-control money money-fields", "data-a-sep" => ".",
+                                                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16} %>
                                             </td>
                                           <% end %>
                                       </tr>
-                                    <% end %>
-                                </table>
-                            </div>
-                        </div>     
-                    </div>
-                  <% end %>
-                  <div class="form-group">
-                      <div class="col-sm-offset-2 col-sm-10">
-                          <%= f.submit "Save", class: "btn btn-primary", id: "submit_cost" %>
-                            <button class="btn btn-link cancel" id="btn-cancel-cost">Cancel</button>
+                                      <% @sizes.each_with_index do |size, idx| %>
+                                        <tr style="text-align: center">
+                                            <% if idx.eql? 0 %>
+                                              <td rowspan="<%= @sizes.size %>" style="vertical-align:middle"><b>Sizes</b></td>
+                                            <% end %>
+                                            <td><%= size.size %></td>
+                                            <% @price_codes.each do |price_code| %>
+                                              <td align="center">
+                                                  <%= f.fields_for :product_details do |product_detail_form| %>
+                                                    <% if size.id == product_detail_form.object.size_id && price_code.id == product_detail_form.object.price_code_id %>
+                                                      <% if product_detail_form.object.new_record? %>
+                                                        <%= product_detail_form.hidden_field :size_id %>
+                                                        <%= product_detail_form.hidden_field :price_code_id %>
+                                                      <% end %>
+                                                      <%= product_detail_form.fields_for :price_lists do |price_list_form| %>
+                                                        <% if price_list_form.object.new_record? || (params[:action].eql?("edit") && price_effective_date.present? && price_effective_date.eql?(price_list_form.object.effective_date.strftime("%d/%m/%Y"))) || (params[:action].eql?("update") && price_list_form.object.editable_record) %>
+                                                          <%= price_list_form.hidden_field :editable_record, value: true unless price_list_form.object.new_record? %>
+                                                          <div class="<%= control_group_error(price_list_form.object, :price) %>">
+                                                              <%= price_list_form.text_field :price, placeholder: "price", class: "money-fields form-control money price-"+price_code.code, "data-a-sep" => ".",
+                                                                  "data-a-dec" => ",", "data-a-sign" => "Rp", size: 16 %>
+                                                                <%= error_help_text(price_list_form.object, :price) %>
+                                                            </div>
+                                                          <% end %>
+                                                          <%= price_list_form.hidden_field :turn_off_date_validation, value: true if price_effective_date.present? %>
+                                                        <% end %>
+                                                      <% end %>
+                                                    <% end %>
+                                                </td>
+                                              <% end %>
+                                          </tr>
+                                        <% end %>
+                                    </table>
+                                </div>
+                            </div>     
                         </div>
-                    </div>
-                  <% end %>
-                  <script>
-                    $(function () {
-                        $(".date-field").datepicker({
-                            dateFormat: "dd/mm/yy"
+                      <% end %>
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-10">
+                              <%= f.submit "Save", class: "btn btn-primary", id: "submit_cost" %>
+                                <button class="btn btn-link cancel" id="btn-cancel-cost">Cancel</button>
+                            </div>
+                        </div>
+                      <% end %>
+                      <script>
+                        $(function () {
+                            $(".date-field").datepicker({
+                                dateFormat: "dd/mm/yy"
+                            });
+
+                            $('.money').autoNumeric('init');  //autoNumeric with defaults
+
+                            $(".additional-information-field").attr("data-placeholder", "Please select").chosen();
+
+                      <% @price_codes.each do |price_code| %>
+                              $('#price_<%= price_code.code %>').keyup(function () {
+                                  $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
+                              });
+                      <% end %>
+
                         });
-
-                        $('.money').autoNumeric('init');  //autoNumeric with defaults
-
-
-                  <% @price_codes.each do |price_code| %>
-                          $('#price_<%= price_code.code %>').keyup(function () {
-                              $('.price-<%= price_code.code %>').val($('#<%= "price_"+price_code.code %>').val());
-                          });
-                  <% end %>
-
-                    });
-                  </script>
+                      </script>

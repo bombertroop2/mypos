@@ -22,6 +22,11 @@
     <% end %>
 
     <dl class="dl-horizontal">
+        <dt>Additional information</dt>
+        <dd><%= object.additional_information %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
         <dt>Prices</dt>
         <dd>
             <table class="table table-condensed table-responsive table-bordered">
@@ -43,7 +48,7 @@
                       <% @price_codes.each do |price_code| %>
                         <% product_detail = @product.product_details.select{|pd| pd.size_id.eql?(size.id) && pd.price_code_id.eql?(price_code.id) }.first %>
                         <% price = product_detail.price_lists.select{|pl| pl.effective_date.eql?(object.effective_date)}.first if product_detail.present? %>
-                        <td align="center">                      
+                        <td align="right">                      
                             <%= number_to_currency((price.price rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                         </td>
                       <% end %>
