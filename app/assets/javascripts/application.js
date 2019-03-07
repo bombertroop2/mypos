@@ -117,6 +117,12 @@ $(window).on('load', function () {
     if (!openingNotification)
         $("#json-overlay").hide();
 }).ajaxComplete(function (event, jqxhr, settings, thrownError) {
+    if ($(".new-item-placeholder").length > 0)
+        $(".new-item-placeholder").on('classChanged', function () {
+            if ($(this).hasClass("new-item-placeholder") && $(this).hasClass("info") && $(this).hasClass("hidden")) {
+                $(".new-item-placeholder").html("");
+            }
+        });
     if (jqxhr.status == 401) {
         window.location.replace('/users/sign_in');
     }

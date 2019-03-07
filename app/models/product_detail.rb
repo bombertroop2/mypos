@@ -1,5 +1,5 @@
 class ProductDetail < ApplicationRecord
-  attr_accessor :user_is_adding_new_product, :size_group_id, :adding_new_price, :attr_importing_data
+  attr_accessor :user_is_adding_new_product, :size_group_id, :adding_new_price, :attr_importing_data, :attr_insert_new_product_detail
 
   audited associated_with: :product, on: [:create, :update]
   has_associated_audits
@@ -16,7 +16,7 @@ class ProductDetail < ApplicationRecord
   validates :product_id, presence: true, unless: proc{|product_detail| product_detail.user_is_adding_new_product}
     validate :size_available, :price_code_available, on: :create
 
-    accepts_nested_attributes_for :price_lists#, reject_if: proc {|attributes| attributes[:price].blank?}
+    accepts_nested_attributes_for :price_lists, reject_if: proc {|attr| attr["attr_insert_new_price"].eql?("no")}
 
     #    before_create :create_barcode
     before_destroy :delete_tracks

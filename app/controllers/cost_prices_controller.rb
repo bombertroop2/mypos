@@ -30,21 +30,25 @@ class CostPricesController < ApplicationController
     end
 
     def create
-      @product = Product.where(id: params[:product][:id]).select(:id, :code, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, :size_group_id, :additional_information).first
-      add_additional_params_to_child
-      convert_cost_price_to_numeric
-      params[:product].delete :id
-      unless @product.update(product_params)
-        #        @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
-        @price_codes = PriceCode.select(:id, :code).order :code
-        size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-        @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
+      if params[:insert_price_code].blank?
+        render js: "bootbox.alert({message: \"Product must have at least one price code!\",size: 'small'});" and return
       else
-        effective_date = nil
-        params[:product][:cost_lists_attributes].each do |key, value|
-          effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
-        end if params[:product][:cost_lists_attributes].present?
-        @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name, product_id").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
+        @product = Product.where(id: params[:product][:id]).select(:id, :code, :brand_id, :sex, :vendor_id, :target, :model_id, :goods_type_id, :size_group_id).first
+        add_additional_params_to_child
+        convert_cost_price_to_numeric
+        params[:product].delete :id
+        unless @product.update(product_params)
+          #        @products = Product.joins(:brand).select("products.id, products.code, name").order "products.code"
+          @price_codes = PriceCode.select(:id, :code).order :code
+          size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
+          @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
+        else
+          effective_date = nil
+          params[:product][:cost_lists_attributes].each do |key, value|
+            effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
+          end if params[:product][:cost_lists_attributes].present?
+          @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name, product_id").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
+        end
       end
     end
 
@@ -69,20 +73,24 @@ class CostPricesController < ApplicationController
     end
 
     def update
-      @cost = CostList.select(:id, :product_id, :cost, :effective_date).where(id: params[:id]).first
-      @product = Product.joins(:brand).where(["products.id = ?", @cost.product_id]).select("products.id, products.code, products.brand_id, products.sex, products.vendor_id, products.target, products.model_id, products.goods_type_id, products.size_group_id, name, products.additional_information").first
-      add_additional_params_to_child
-      convert_cost_price_to_numeric
-      unless @product.update(product_params)
-        @price_codes = PriceCode.select(:id, :code).order :code
-        size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
-        @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
+      if params[:insert_price_code].blank?
+        render js: "bootbox.alert({message: \"Product must have at least one price code!\",size: 'small'});" and return
       else
-        effective_date = nil
-        params[:product][:cost_lists_attributes].each do |key, value|
-          effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
-        end if params[:product][:cost_lists_attributes].present?
-        @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name, product_id").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
+        @cost = CostList.select(:id, :product_id, :cost, :effective_date).where(id: params[:id]).first
+        @product = Product.joins(:brand).where(["products.id = ?", @cost.product_id]).select("products.id, products.code, products.brand_id, products.sex, products.vendor_id, products.target, products.model_id, products.goods_type_id, products.size_group_id, name").first
+        add_additional_params_to_child
+        convert_cost_price_to_numeric
+        unless @product.update(product_params)
+          @price_codes = PriceCode.select(:id, :code).order :code
+          size_group = SizeGroup.where(id: @product.size_group_id).select(:id).first
+          @sizes = size_group ? size_group.sizes.select(:id, :size).order(:size_order) : []
+        else
+          effective_date = nil
+          params[:product][:cost_lists_attributes].each do |key, value|
+            effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
+          end if params[:product][:cost_lists_attributes].present?
+          @cost = CostList.joins(product: :brand).select("cost_lists.id, effective_date, cost, products.code, name, product_id").where(["DATE(effective_date) = ? AND product_id = ?", effective_date.to_date, @product.id]).first
+        end
       end
     end
 
@@ -110,16 +118,27 @@ class CostPricesController < ApplicationController
       else
         @sizes = @product.size_group ? @product.size_group.sizes.select(:id, :size).order(:size_order) : []
         @price_codes = PriceCode.select(:id, :code).order :code
-        @product.cost_lists.build
+        latest_cost = CostList.select(:cost).where(product_id: @product.id).where(["cost_lists.effective_date <= ?", Date.current]).order(effective_date: :desc).first
+        @product.cost_lists.build cost: latest_cost.present? ? latest_cost.cost : 0
         @sizes.each do |size|
           @price_codes.each do |price_code|
             product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == price_code.id}.first
-            unless product_detail
+            if product_detail.blank?
               product_detail = @product.product_details.build size_id: size.id, price_code_id: price_code.id
+              product_detail.price_lists.build
+            else
+              latest_price = PriceList.select(:price).where(product_detail_id: product_detail.id).where(["price_lists.effective_date <= ?", Date.current]).order(effective_date: :desc).first
+              product_detail.price_lists.build price: latest_price.present? ? latest_price.price : 0
             end
-            product_detail.price_lists.build
-          end 
+          end
         end
+      end
+    end
+    
+    def autocomplete_product
+      @products = Product.where(["code ILIKE ?", params[:term]+"%"]).pluck(:code).uniq
+      respond_to do |format|
+        format.json  { render :json => @products.to_json }
       end
     end
   
@@ -127,22 +146,15 @@ class CostPricesController < ApplicationController
   
     # Never trust parameters from the scary internet, only allow the white list through.
     def product_params
-      pl_attributes = if @product_additional_information.present?
-        [:editable_record, :turn_off_date_validation, :id, :price, :effective_date, :user_is_adding_price_from_cost_prices_page, :cost, :attr_product_additional_information]
-      else
-        [:editable_record, :turn_off_date_validation, :id, :price, :effective_date, :user_is_adding_price_from_cost_prices_page, :cost]
-      end
-      params.require(:product).permit(#:code, :description, :brand_id, :sex, :vendor_id,
-        #:target, :model_id, :effective_date, :goods_type_id, :image, :image_cache, :remove_image,
-        :size_group_id, :id,
-        product_details_attributes: [:adding_new_price, :id, :size_id, :price_code_id,
-          price_lists_attributes: pl_attributes],
-        cost_lists_attributes: [:effective_date, :cost, :id])
+      params.require(:product).permit(:size_group_id, :id,
+        product_details_attributes: [:adding_new_price, :id, :size_id, :price_code_id, :attr_insert_new_product_detail,
+          price_lists_attributes: [:editable_record, :turn_off_date_validation, :id, :price, :effective_date, :user_is_adding_price_from_cost_prices_page, :cost, :additional_information, :attr_insert_new_price]],
+        cost_lists_attributes: [:effective_date, :cost, :id, :additional_information, :attr_user_is_adding_cost_from_cost_prices_page])
     end
 
   
     def set_cost
-      @cost = CostList.joins(product: :brand).select("name, cost_lists.id, effective_date, cost, products.id AS product_id, products.code").where(id: params[:id]).first
+      @cost = CostList.joins(product: :brand).select(:additional_information, "name, cost_lists.id, effective_date, cost, products.id AS product_id, products.code").where(id: params[:id]).first
     end
   
     def convert_cost_price_to_numeric
@@ -166,26 +178,38 @@ class CostPricesController < ApplicationController
     def add_additional_params_to_child
       effective_date = ""
       cost = ""
-      @product_additional_information = ""
+      additional_information = ""
       params[:product][:cost_lists_attributes].each do |key, value|
-        effective_date = params[:product][:cost_lists_attributes][key][:effective_date]
-        cost = params[:product][:cost_lists_attributes][key][:cost]
+        effective_date = params[:product][:cost_lists_attributes][key][:effective_date] if effective_date.blank?
+        cost = params[:product][:cost_lists_attributes][key][:cost] if cost.blank?
+        additional_information = params[:product][:cost_lists_attributes][key][:additional_information] if additional_information.blank?
+        if params[:product][:cost_lists_attributes][key][:id].blank?
+          params[:product][:cost_lists_attributes][key][:attr_user_is_adding_cost_from_cost_prices_page] = true
+        end
       end if params[:product][:cost_lists_attributes].present?
         
       params[:product][:product_details_attributes].each do |key, value|
+        insert_product_detail = nil
         # tambahkan apabila membuat price baru
-        unless params[:product][:product_details_attributes][key][:id].present?
-          params[:product][:product_details_attributes][key].merge! adding_new_price: true
+        if params[:product][:product_details_attributes][key][:id].blank?
+          price_code_id = params[:product][:product_details_attributes][key][:price_code_id]
+          insert_product_detail = params["insert_price_code"]["#{price_code_id}"]
+          params[:product][:product_details_attributes][key].merge! adding_new_price: true, attr_insert_new_product_detail: (insert_product_detail || "no")
+        else
+          price_code_id = ProductDetail.select(:price_code_id).find(params[:product][:product_details_attributes][key][:id]).price_code_id
+          insert_product_detail = params["insert_price_code"]["#{price_code_id}"]
         end
       
         params[:product][:product_details_attributes][key][:price_lists_attributes].each do |price_list_key, value|
           if params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:price].present?
             # tambahkan apabila membuat price baru
             unless params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:id].present?
-              @product_additional_information = @product.additional_information
-              params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! user_is_adding_price_from_cost_prices_page: true, attr_product_additional_information: @product_additional_information
+              params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! user_is_adding_price_from_cost_prices_page: true
             end
-            params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! effective_date: effective_date, cost: cost
+            params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key].merge! effective_date: effective_date, cost: cost, additional_information: additional_information
+          end
+          if params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:id].blank?
+            params[:product][:product_details_attributes][key][:price_lists_attributes][price_list_key][:attr_insert_new_price] = (insert_product_detail || "no")
           end
         end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
       end if params[:product][:product_details_attributes].present?

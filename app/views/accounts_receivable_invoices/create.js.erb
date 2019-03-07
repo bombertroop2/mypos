@@ -1,6 +1,5 @@
 <% if @created %>
   <%= smart_listing_item :accounts_receivable_invoices, :create, @accounts_receivable_invoice, "accounts_receivable_invoices/accounts_receivable_invoice" %>
-  $(".new-item-placeholder").html("");
   <% shipment = Shipment.select(:delivery_order_number, "customers.code AS customer_code", "customers.name AS customer_name").joins(order_booking: :customer).find(@accounts_receivable_invoice.shipment_id) %>
   $("#listing-ar-invoice-do-number-<%= @accounts_receivable_invoice.id %>").html("<%= shipment.delivery_order_number %>");
   $("#listing-ar-invoice-customer-<%= @accounts_receivable_invoice.id %>").html("<%= "#{shipment.customer_code} - #{shipment.customer_name}" %>");
