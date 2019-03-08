@@ -222,7 +222,6 @@ class ProductsController < ApplicationController
           error_message = "Error for row (##{i}) : Size group code cannot be empty"
           break
         end
-        additional_information = spreadsheet.row(i)[9].strip.upcase rescue nil
         prdct = products.select{|p| p.code.eql?(product_code)}.first
         if prdct.blank?
           brand_id = Brand.where(code: brand_code).pluck(:id).first
@@ -272,7 +271,7 @@ class ProductsController < ApplicationController
           else
             sex
           end
-          product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: additional_information, attr_importing_data_via_web: true
+          product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data_via_web: true
           product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
           product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
@@ -426,20 +425,16 @@ class ProductsController < ApplicationController
   def set_product
     @product = Product.joins(:brand, :vendor, :model, :goods_type).
       where(id: params[:id]).
-      select("products.id, products.code, products.description, common_fields.name AS brand_name, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id, products.additional_information").first
+      select("products.id, products.code, products.description, common_fields.name AS brand_name, vendors.code AS vendor_code, models_products.code AS model_code, goods_types_products.code AS goods_type_code, image, sex, target, size_group_id, brand_id, vendor_id, model_id, goods_type_id").first
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def product_params
-    pl_attributes = if action_name.eql?("create")
-      [:id, :price, :user_is_adding_new_price, :cost, :product_id, :attr_product_additional_information]
-    else
-      [:id, :price, :user_is_adding_new_price, :cost, :product_id]
-    end
+    pl_attributes = [:id, :price, :user_is_adding_new_price, :cost, :product_id]
     
     params.require(:product).permit(:code, :description, :brand_id, :sex, :vendor_id,
       :target, :model_id,# :effective_date,
-      :goods_type_id, :image, :image_cache, :remove_image, :size_group_id, :additional_information,
+      :goods_type_id, :image, :image_cache, :remove_image, :size_group_id,
       product_details_attributes: [:id, :size_id, :price_code_id, :price, :user_is_adding_new_product, :size_group_id,
         price_lists_attributes: pl_attributes],
       cost_lists_attributes: [:id, :cost, :is_user_creating_product],
@@ -486,7 +481,6 @@ class ProductsController < ApplicationController
           end
         end
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:cost] = cost
-        params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key].merge! attr_product_additional_information: params[:product][:additional_information]
         params[:product][:product_details_attributes][key][:price_lists_attributes][price_lists_key][:product_id] = params[:id] if action.eql?("update")
       end if params[:product][:product_details_attributes][key][:price_lists_attributes].present?
     end if params[:product][:product_details_attributes].present?

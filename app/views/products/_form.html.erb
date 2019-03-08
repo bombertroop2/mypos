@@ -104,133 +104,126 @@
                                                       <%= f.check_box :remove_image, tabindex: "10" %> Remove image
                                                   </div>
                                               </div>
-                                              <div class="form-group<%= control_group_error(@product, :additional_information) %>">
-                                                  <%= f.label :additional_information, class: "col-sm-2 control-label" %>
-                                                    <div class="col-sm-10">
-                                                        <%= f.select :additional_information, options_for_select(Product::ADDITIONAL_INFORMATIONS, @product.additional_information), {prompt: true}, {class: "form-control"} %>
-                                                          <%= error_help_text(@product, :additional_information) %>
-                                                      </div>
-                                                  </div>
-                                                  <% if @product.new_record? %>
-                                                    <%= f.fields_for :cost_lists do |cost_list_form| %>
-                                                      <% if f.object.new_record? || f.object.active_cost.id == cost_list_form.object.id %>
-                                                        <div class="form-group<%= control_group_error(cost_list_form.object, :cost) %>">
-                                                            <%= cost_list_form.label :cost, class: "col-sm-2 control-label" %>
-                                                              <div class="col-sm-10">
-                                                                  <%= cost_list_form.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
-                                                                    "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control costs-cost" %>
-                                                                    <%= error_help_text(cost_list_form.object, :cost) %>
+                                              <% if @product.new_record? %>
+                                                <%= f.fields_for :cost_lists do |cost_list_form| %>
+                                                  <% if f.object.new_record? || f.object.active_cost.id == cost_list_form.object.id %>
+                                                    <div class="form-group<%= control_group_error(cost_list_form.object, :cost) %>">
+                                                        <%= cost_list_form.label :cost, class: "col-sm-2 control-label" %>
+                                                          <div class="col-sm-10">
+                                                              <%= cost_list_form.text_field :cost, tabindex: "12", placeholder: "cost", "data-a-sep" => ".",
+                                                                "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;", size: 16, class: "form-control costs-cost" %>
+                                                                <%= error_help_text(cost_list_form.object, :cost) %>
+                                                            </div>
+                                                        </div>
+                                                      <% end %>
+                                                    <% end %>
+                                                    <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
+                                                        <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
+                                                          <div class="col-sm-10">
+                                                              <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.select(:id, :code), :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13", class: "form-control"} %>
+                                                                <%= error_help_text(@product, :size_group_id) %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-sm-offset-2 col-sm-10">
+                                                                <div id="size_collection_container">
+                                                                    <% unless @sizes.blank? %>
+                                                                      <%= render 'size_collections' %>
+                                                                    <% end %>
                                                                 </div>
+                                                            </div>                                                      
+                                                        </div>
+                                                      <% end %>
+                                                      <div class="form-group">
+                                                          <div class="col-sm-offset-2 col-sm-10">
+                                                              <%= f.submit "Save", class: "btn btn-primary", id: "submit_product" %>
+                                                                <button class="btn btn-link cancel">Cancel</button>
                                                             </div>
-                                                          <% end %>
-                                                        <% end %>
-                                                        <div class="form-group<%= control_group_error(@product, :size_group_id) %>">
-                                                            <%= f.label :size_group_id, class: "col-sm-2 control-label" %>
-                                                              <div class="col-sm-10">
-                                                                  <%= f.select :size_group_id, options_from_collection_for_select(SizeGroup.select(:id, :code), :id, :code, @product.size_group_id.to_s), {prompt: true}, {tabindex: "13", class: "form-control"} %>
-                                                                    <%= error_help_text(@product, :size_group_id) %>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-sm-offset-2 col-sm-10">
-                                                                    <div id="size_collection_container">
-                                                                        <% unless @sizes.blank? %>
-                                                                          <%= render 'size_collections' %>
-                                                                        <% end %>
-                                                                    </div>
-                                                                </div>                                                      
-                                                            </div>
-                                                          <% end %>
-                                                          <div class="form-group">
-                                                              <div class="col-sm-offset-2 col-sm-10">
-                                                                  <%= f.submit "Save", class: "btn btn-primary", id: "submit_product" %>
-                                                                    <button class="btn btn-link cancel">Cancel</button>
-                                                                </div>
-                                                            </div>
-                                                          <% end %>
-                                                      </td>
-                                                      <script>
-                                                        $(function () {
-                                                            $("#product_size_group_id").change(function () {
-                                                                // split isi dari action attributnya form untuk ambil id produk
-                                                                var splittedAction = $(".form-horizontal").attr("action").split("/");
-                                                                if (splittedAction.length == 2)
-                                                                    $.get("/products/populate_detail_form", {
-                                                                        id: $(this).val()
-                                                                    });
-                                                                else if (splittedAction.length == 3)
-                                                                    $.get("/products/populate_detail_form", {
-                                                                        id: $(this).val(),
-                                                                        product_id: splittedAction[2]
-                                                                    });
-                                                            });
-
-                                                            /*$("#product_cost_lists_attributes_0_effective_date").datepicker({
-                                                             dateFormat: "dd/mm/yy"
-                                                             });*/
-
-                                                            $('.costs-cost').autoNumeric('init');  //autoNumeric with defaults
-
-                                                            /*
-                                                             if ($("#new_product").length > 0)
-                                                             $("#new_product").submit(function () {
-                                                             $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
-                                                             });
-                                                             else if ($(".form-horizontal").length > 0)
-                                                             $(".form-horizontal").submit(function () {
-                                                             $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
-                                                             });*/
-
-                                                            var productColorDataTable = $('#listing_product_colors_table').DataTable({
-                                                                order: [1, 'asc'],
-                                                                dom: 'T<"clear">lfrtip',
-                                                                columns: [
-                                                                    {data: null, defaultContent: '', orderable: false},
-                                                                    {data: 'code'},
-                                                                    {data: 'name'}
-                                                                ],
-                                                                tableTools: {
-                                                                    sRowSelect: 'os',
-                                                                    //sRowSelector: 'td:first-child',
-                                                                    aButtons: ['select_all', 'select_none']
-                                                                },
-                                                                paging: false,
-                                                                info: false,
-                                                                scrollY: "250px",
-                                                                scrollCollapse: true
-                                                            });
-
-                                                            $("#submit_product").click(function () {
-                                                                //$(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
-                                                                //$(".price-cost-value").val($(".costs-cost").val());
-                                                                $(".selected-colors").val("");
-                                                                $(".color-delete-marker").val("true");
-                                                                $.each(productColorDataTable.rows('.selected')[0], function (index, value) {
-                                                                    var colorId = productColorDataTable.rows(value).nodes().to$().attr("id").split("_")[2];
-                                                                    $("#selected_color_id_" + colorId).val(colorId);
-                                                                    $("#color_delete_marker_" + colorId).val("false");
+                                                        </div>
+                                                      <% end %>
+                                                  </td>
+                                                  <script>
+                                                    $(function () {
+                                                        $("#product_size_group_id").change(function () {
+                                                            // split isi dari action attributnya form untuk ambil id produk
+                                                            var splittedAction = $(".form-horizontal").attr("action").split("/");
+                                                            if (splittedAction.length == 2)
+                                                                $.get("/products/populate_detail_form", {
+                                                                    id: $(this).val()
                                                                 });
-
-                                                            });
-
-                                                            var selectedColorFields = $(".selected-colors");
-                                                            $.each(selectedColorFields, function (index, value) {
-                                                                var selectedColorId = $($(".selected-colors")[index]).val();
-                                                                if (selectedColorId != "") {
-                                                                    var e = jQuery.Event("click");
-                                                                    e.ctrlKey = true;
-                                                                    var clickRowProcessId = setInterval(function () {
-                                                                        if (!$("#product_color_" + selectedColorId).hasClass("DTTT_selected") || !$("#product_color_" + selectedColorId).hasClass("selected")) {
-                                                                            $("#product_color_" + selectedColorId).find("td:first-child").trigger(e);
-                                                                        } else
-                                                                            clearInterval(clickRowProcessId);
-                                                                    }, 0);
-
-
-                                                                }
-                                                            });
-                                                            $('#product_code').on("input", function () {
-                                                                $(this).val($(this).val().replace(/ /g, ""));
-                                                            });
+                                                            else if (splittedAction.length == 3)
+                                                                $.get("/products/populate_detail_form", {
+                                                                    id: $(this).val(),
+                                                                    product_id: splittedAction[2]
+                                                                });
                                                         });
-                                                      </script>
+
+                                                        /*$("#product_cost_lists_attributes_0_effective_date").datepicker({
+                                                         dateFormat: "dd/mm/yy"
+                                                         });*/
+
+                                                        $('.costs-cost').autoNumeric('init');  //autoNumeric with defaults
+
+                                                        /*
+                                                         if ($("#new_product").length > 0)
+                                                         $("#new_product").submit(function () {
+                                                         $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
+                                                         });
+                                                         else if ($(".form-horizontal").length > 0)
+                                                         $(".form-horizontal").submit(function () {
+                                                         $(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
+                                                         });*/
+
+                                                        var productColorDataTable = $('#listing_product_colors_table').DataTable({
+                                                            order: [1, 'asc'],
+                                                            dom: 'T<"clear">lfrtip',
+                                                            columns: [
+                                                                {data: null, defaultContent: '', orderable: false},
+                                                                {data: 'code'},
+                                                                {data: 'name'}
+                                                            ],
+                                                            tableTools: {
+                                                                sRowSelect: 'os',
+                                                                //sRowSelector: 'td:first-child',
+                                                                aButtons: ['select_all', 'select_none']
+                                                            },
+                                                            paging: false,
+                                                            info: false,
+                                                            scrollY: "250px",
+                                                            scrollCollapse: true
+                                                        });
+
+                                                        $("#submit_product").click(function () {
+                                                            //$(".price-effective-date").val($("#product_cost_lists_attributes_0_effective_date").val());
+                                                            //$(".price-cost-value").val($(".costs-cost").val());
+                                                            $(".selected-colors").val("");
+                                                            $(".color-delete-marker").val("true");
+                                                            $.each(productColorDataTable.rows('.selected')[0], function (index, value) {
+                                                                var colorId = productColorDataTable.rows(value).nodes().to$().attr("id").split("_")[2];
+                                                                $("#selected_color_id_" + colorId).val(colorId);
+                                                                $("#color_delete_marker_" + colorId).val("false");
+                                                            });
+
+                                                        });
+
+                                                        var selectedColorFields = $(".selected-colors");
+                                                        $.each(selectedColorFields, function (index, value) {
+                                                            var selectedColorId = $($(".selected-colors")[index]).val();
+                                                            if (selectedColorId != "") {
+                                                                var e = jQuery.Event("click");
+                                                                e.ctrlKey = true;
+                                                                var clickRowProcessId = setInterval(function () {
+                                                                    if (!$("#product_color_" + selectedColorId).hasClass("DTTT_selected") || !$("#product_color_" + selectedColorId).hasClass("selected")) {
+                                                                        $("#product_color_" + selectedColorId).find("td:first-child").trigger(e);
+                                                                    } else
+                                                                        clearInterval(clickRowProcessId);
+                                                                }, 0);
+
+
+                                                            }
+                                                        });
+                                                        $('#product_code').on("input", function () {
+                                                            $(this).val($(this).val().replace(/ /g, ""));
+                                                        });
+                                                    });
+                                                  </script>
