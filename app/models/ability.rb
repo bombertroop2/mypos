@@ -214,9 +214,8 @@ class Ability
           elsif (class_name.eql?("Product") || class_name.eql?("Purchase Order")) && !user.has_managerial_role?
             # cegah staff untuk manage product
             can :read, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
-          elsif class_name.eql?("CostList") && !user.has_managerial_role?
-            # cegah staff untuk manage Cost dan Price
-            can :read, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
+          elsif class_name.eql?("CostList")            
+            can ability, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
           elsif class_name.eql?("Stock Mutation") && !user_roles.include?("area_manager")
             if ability.eql?(:read) || user_roles.include?("accountant")
               alias_action :index, :show, to: :read_store_to_store_mutations

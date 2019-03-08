@@ -89,7 +89,7 @@ class ImportDataJob < ApplicationJob
               model_id = Model.select(:id).where(code: row["F#{idx + 1}"].strip).first.id
               goods_type_id = GoodsType.select(:id).where(code: goods_type_code).first.id
               size_group_id = SizeGroup.select(:id).where(code: row["H#{idx + 1}"].strip).first.id
-              product = Product.new code: row["A#{idx + 1}"].strip, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, additional_information: (row["I#{idx + 1}"].present? ? row["I#{idx + 1}"].strip : nil), attr_importing_data: true
+              product = Product.new code: row["A#{idx + 1}"].strip, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data: true
               unless product.valid?
                 error_messages << product.errors.inspect
                 error_messages << "invalid index => #{idx}"
