@@ -1,6 +1,6 @@
 $("#print_doc_container").html("<%= j(render(partial: "print")) %>");
-$("#shipment_print_doc").removeClass("hidden");
-$("#shipment_print_doc").print();
-$("#shipment_print_doc").addClass("hidden");
+$("#print_doc_container").removeClass("hidden");
+$("#print_doc_container").print();
+$("#print_doc_container").addClass("hidden");
 <%= smart_listing_item :shipments, :edit, @shipment, "shipments/show" %>
 $("#btn-close-show-page-shipment-<%= @shipment.id %>").click();

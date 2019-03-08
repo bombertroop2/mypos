@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class ShipmentsController < ApplicationController
   helper SmartListing::Helper
   authorize_resource except: :create
-  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :print, :change_receive_date]
+  before_action :set_shipment, only: [:show, :edit, :update, :destroy, :change_receive_date]
 
   # GET /shipments
   # GET /shipments.json
@@ -82,11 +82,25 @@ class ShipmentsController < ApplicationController
   end
 
   def print
+    @company = Company.select(:id, :name, :address, :phone, :fax).first
+    @shipment = Shipment.
+      select("shipments.*", "order_bookings.note AS ob_note", "accounts_receivable_invoices.id AS ari_id", "accounts_receivable_invoices.number AS ari_number", "accounts_receivable_invoices.due_date AS ari_due_date", "accounts_receivable_invoices.note AS ari_note", "customers.name AS customer_name", "customers.phone AS customer_phone", "customers.facsimile AS customer_facsimile", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type").
+      includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
+      joins(order_booking: :customer).
+      joins("LEFT JOIN accounts_receivable_invoices ON shipments.id = accounts_receivable_invoices.shipment_id").
+      find(params[:id])
     @shipment.update(is_document_printed: true)
   end
 
   def multiprint
-    @shipments = Shipment.select("shipments.*", "order_bookings.note AS ob_note").joins(:order_booking).where(id: params[:check]).order(:id)
+    @company = Company.select(:id, :name, :address, :phone, :fax).first
+    @shipments = Shipment.
+      select("shipments.*", "order_bookings.note AS ob_note", "accounts_receivable_invoices.id AS ari_id", "accounts_receivable_invoices.number AS ari_number", "accounts_receivable_invoices.due_date AS ari_due_date", "accounts_receivable_invoices.note AS ari_note", "customers.name AS customer_name", "customers.phone AS customer_phone", "customers.facsimile AS customer_facsimile", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type").
+      includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
+      joins(order_booking: :customer).
+      joins("LEFT JOIN accounts_receivable_invoices ON shipments.id = accounts_receivable_invoices.shipment_id").
+      where(id: params[:check]).
+      order(:id)
     @shipments.update_all(is_document_printed: true)
     respond_to do |format|
       format.js
