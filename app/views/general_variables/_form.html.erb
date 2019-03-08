@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                             <div class="form-group<%= control_group_error(@general_variable, :beginning_of_due_date_calculating) %>">
-                                <%= f.label :beginning_of_due_date_calculating, "Beginning of due date calculating (Expedition)", class: "col-sm-4 control-label" %>
+                                <%= f.label :beginning_of_due_date_calculating, class: "col-sm-4 control-label" %>
                                   <div class="col-sm-8">
                                       <%= f.select :beginning_of_due_date_calculating, options_for_select(GeneralVariable::BEGINNING_OF_DUE_DATE_CALCULATINGS, @general_variable.beginning_of_due_date_calculating), {prompt: true}, {class: "form-control"} %>
                                         <%= error_help_text(@general_variable, :beginning_of_due_date_calculating) %>
