@@ -260,7 +260,31 @@ class ShipmentsController < ApplicationController
         render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
       end
     end
-  end   
+  end  
+  
+  def direct_sales
+    if params[:filter_date_direct_sales].present?
+      splitted_date_range = params[:filter_date_direct_sales].split("-")
+      start_delivery_date = splitted_date_range[0].strip.to_date
+      end_delivery_date = splitted_date_range[1].strip.to_date
+    end
+
+    shipments_scope = Shipment.
+      select(:id, :delivery_order_number, :delivery_date, :quantity, "customers.code AS customer_code", "customers.name AS customer_name", "accounts_receivable_invoices.total AS net_total").
+      joins(:accounts_receivable_invoice, order_booking: :customer)
+    
+    shipments_scope = shipments_scope.where(["shipments.delivery_order_number ILIKE ?", "%"+params[:filter_string_direct_sales]+"%"]) if params[:filter_string_direct_sales].present?
+    shipments_scope = shipments_scope.where(["shipments.delivery_date BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_date_direct_sales].present?
+    shipments_scope = shipments_scope.where(["order_bookings.customer_id = ?", params[:filter_customer_direct_sales]]) if params[:filter_customer_direct_sales].present?
+    smart_listing_create(:shipments, shipments_scope, partial: 'shipments/listing_direct_sales', default_sort: {delivery_order_number: "asc"})
+  end
+  
+  def show_direct_sale
+    @shipment = Shipment.
+      select(:id, :delivery_order_number, :delivery_date, :quantity, "customers.code AS customer_code", "customers.name AS customer_name", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "accounts_receivable_invoices.discount AS customer_discount", "accounts_receivable_invoices.total AS net_total").
+      joins(:accounts_receivable_invoice, order_booking: :customer).
+      find(params[:id])
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.

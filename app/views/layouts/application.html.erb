@@ -16,8 +16,12 @@
                 <% else %>
                   <% opened_menu_name = "Stock Mutations (warehouse to store)" %>
                 <% end %>
-              <% elsif params[:controller].eql?("shipments") && action_name.eql?("inventory_receipts") %>
-                <% opened_menu_name = "Delivery Order Receipts" %>
+              <% elsif params[:controller].eql?("shipments") %>
+                <% if action_name.eql?("inventory_receipts") %>
+                  <% opened_menu_name = "Delivery Order Receipts" %>
+                <% elsif action_name.eql?("direct_sales") %>
+                  <% opened_menu_name = "Direct Sales" %>
+                <% end %>
               <% elsif params[:controller].eql?("fake_consignment_sale") %>
                 <% opened_menu_name = "Consignments" %>
               <% elsif params[:controller].eql?("fiscal_years") %>
@@ -45,6 +49,7 @@
               ONE-S
             <% end %>
         </title>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
         <%= stylesheet_link_tag 'application', media: 'all' %>
 <%#= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
         <%= csrf_meta_tags %>
@@ -190,6 +195,15 @@
                                                 </ul>
                                             </li>
                                           <% end %>
+                                          <% if direct_sales_menu_active? %>
+                                            <li><a><i class="fa fa-arrows-h"></i> Direct Sales <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can?(:read_action_for_staff, Shipment) %>
+                                                      <li><%= link_to "Listing Sales", direct_sales_shipments_path, method: :get %></li>
+                                                    <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
                                           <% if expedition_menu_active? %>
                                             <li><a><i class="fa fa-truck"></i> Expedition <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
@@ -285,7 +299,7 @@
                                             </li>
                                           <% end %>
                                           <% if cashier_menu_active? %>
-                                            <li><a><i class="fa fa-calculator"></i> Point of Sale <span class="fa fa-chevron-down"></span></a>
+                                            <li><a><i class="fas fa-cash-register fa-lg"></i>&nbsp;&nbsp;&nbsp;Point of Sale <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :manage, CashierOpening %>
                                                       <li><%= link_to "Cashier Opening", new_cashier_opening_path, method: :get %></li>

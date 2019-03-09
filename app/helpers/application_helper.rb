@@ -47,6 +47,10 @@ module ApplicationHelper
     return true if can? :read, AccountsReceivableInvoice
   end
 
+  def direct_sales_menu_active?
+    return true if can? :read_action_for_staff, Shipment
+  end
+
   def inventory_receipt_menu_active?
     return true if can? :read_action, Shipment
     return true if can? :read_store_to_store_inventory_receipts, StockMutation

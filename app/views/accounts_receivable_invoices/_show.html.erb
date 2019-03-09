@@ -145,12 +145,12 @@
                                     <%
                                     net_total = if @accounts_receivable_invoice.customer_is_taxable_entrepreneur
                                       if @accounts_receivable_invoice.customer_vat_type.eql?("include")
-                                      gross_total - discount
+                                        gross_total - discount
                                         else
                                         (gross_total - discount) + (gross_total - discount) * 0.1
                                       end
                                       else
-                                    gross_total
+                                      gross_total - discount
                                       end  
                                   %>
                                     <tr>

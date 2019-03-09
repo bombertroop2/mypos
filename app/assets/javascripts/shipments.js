@@ -36,33 +36,58 @@ $(function () {
     $("#table-listing-shipments tr.new-item-action").find("td").append("<button type='submit' class='btn btn-link pull-right' id='print-btn'><i class='glyphicon glyphicon-print'></i> Print Checked Rows</button>");
 
     $('.bs-checkbox').bsCheckbox();
-     $("#checkAll").click(function () {
-        checkbox = $(this).find( "input[type=checkbox]" );
-         if (checkbox.is(":checked")){
-            $('span.checkbox-table').each(function(){
+    $("#checkAll").click(function () {
+        checkbox = $(this).find("input[type=checkbox]");
+        if (checkbox.is(":checked")) {
+            $('span.checkbox-table').each(function () {
                 $(this).find("input[type=checkbox]").prop('checked', true);
                 $(this).removeClass('glyphicon-unchecked').addClass('glyphicon-check');
             });
-         }else{
-            $('span.checkbox-table').each(function(){
+        } else {
+            $('span.checkbox-table').each(function () {
                 $(this).find("input[type=checkbox]").prop('checked', false);
                 $(this).removeClass('glyphicon-check').addClass('glyphicon-unchecked');
             });
-         }
-     });
+        }
+    });
 
     $("#print-btn").click(function () {
         var check = [];
         if ($('input:checkbox:checked').length == 0)
             bootbox.alert({message: "Please check the data you want to print", size: "small"});
         else {
-            $('input:checkbox:checked').each(function(){
+            $('input:checkbox:checked').each(function () {
                 check.push(parseInt($(this).val()));
             });
             $.get("/shipments/multiprint", {
                 check: check
             });
         }
+    });
+
+    $("#filter-customer-direct-sales").attr("data-placeholder", "Customer").chosen({width: "200px"});
+
+    $('#filter-date-direct-sales').daterangepicker(
+            {
+                locale: {
+                    format: 'DD/MM/YYYY'
+                },
+                opens: "left",
+                autoUpdateInput: false
+            });
+    $('#filter-date-direct-sales').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+    });
+
+    $('#filter-date-direct-sales').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+    });
+
+    $("#search-direct-sales-btn").click(function () {
+        $("#filter_string_direct_sales").val($("#filter-string-direct-sales").val());
+        $("#filter_date_direct_sales").val($("#filter-date-direct-sales").val());
+        $("#filter_customer_direct_sales").val($("#filter-customer-direct-sales").val());
+        $(".smart-listing-controls").submit();
     });
 });
 
@@ -101,7 +126,7 @@ function receiveInventory(shipmentId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: BootboxContent,
-        title: "Receive inventory "+docNumber+" ?",
+        title: "Receive inventory " + docNumber + " ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'
@@ -127,7 +152,7 @@ function changeReceiveInventoryDate(shipmentId, docNumber) {
 //Show the datepicker in the bootbox
     bootbox.confirm({
         message: changeReceiveDateBootboxContent,
-        title: "Change receive date ("+docNumber+") ?",
+        title: "Change receive date (" + docNumber + ") ?",
         buttons: {
             cancel: {
                 label: '<i class="fa fa-times"></i> Cancel'

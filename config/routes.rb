@@ -263,6 +263,7 @@ Rails.application.routes.draw do
       get "receive"
       get "change_receive_date"
       get "print"
+      get "show_direct_sale"
     end
   end
   resources :couriers
