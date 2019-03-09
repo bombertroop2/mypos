@@ -2,7 +2,7 @@ include SmartListing::Helper::ControllerExtensions
 class AccountsReceivableInvoicesController < ApplicationController
   helper SmartListing::Helper
   authorize_resource
-  before_action :set_accounts_receivable_invoice, only: :destroy
+  #  before_action :set_accounts_receivable_invoice, only: :destroy
 
   # GET /accounts_receivable_invoices
   # GET /accounts_receivable_invoices.json
@@ -43,91 +43,91 @@ class AccountsReceivableInvoicesController < ApplicationController
   end
 
   # GET /accounts_receivable_invoices/new
-  def new
-    @accounts_receivable_invoice = AccountsReceivableInvoice.new
-  end
+  #  def new
+  #    @accounts_receivable_invoice = AccountsReceivableInvoice.new
+  #  end
 
   # GET /accounts_receivable_invoices/1/edit
-  def edit
-  end
+  #  def edit
+  #  end
 
   # POST /accounts_receivable_invoices
   # POST /accounts_receivable_invoices.json
-  def create
-    @accounts_receivable_invoice = AccountsReceivableInvoice.new(accounts_receivable_invoice_params)
-    recreate = false
-    recreate_counter = 1
-    begin
-      begin
-        recreate = false
-        unless @created = @accounts_receivable_invoice.save          
-          if @accounts_receivable_invoice.errors[:base].present?
-            render js: "bootbox.alert({message: \"#{@accounts_receivable_invoice.errors[:base].join("<br/>")}\",size: 'small'});"
-          end
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        if recreate_counter < 5
-          recreate = true
-          recreate_counter += 1
-        else
-          recreate = false
-          render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
-        end
-      end
-    end while recreate
-  end
+  #  def create
+  #    @accounts_receivable_invoice = AccountsReceivableInvoice.new(accounts_receivable_invoice_params)
+  #    recreate = false
+  #    recreate_counter = 1
+  #    begin
+  #      begin
+  #        recreate = false
+  #        unless @created = @accounts_receivable_invoice.save          
+  #          if @accounts_receivable_invoice.errors[:base].present?
+  #            render js: "bootbox.alert({message: \"#{@accounts_receivable_invoice.errors[:base].join("<br/>")}\",size: 'small'});"
+  #          end
+  #        end
+  #      rescue ActiveRecord::RecordNotUnique => e
+  #        if recreate_counter < 5
+  #          recreate = true
+  #          recreate_counter += 1
+  #        else
+  #          recreate = false
+  #          render js: "bootbox.alert({message: \"Something went wrong. Please try again\",size: 'small'});"
+  #        end
+  #      end
+  #    end while recreate
+  #  end
 
   # PATCH/PUT /accounts_receivable_invoices/1
   # PATCH/PUT /accounts_receivable_invoices/1.json
-  def update
-    respond_to do |format|
-      if @accounts_receivable_invoice.update(accounts_receivable_invoice_params)
-        format.html { redirect_to @accounts_receivable_invoice, notice: 'Accounts receivable invoice was successfully updated.' }
-        format.json { render :show, status: :ok, location: @accounts_receivable_invoice }
-      else
-        format.html { render :edit }
-        format.json { render json: @accounts_receivable_invoice.errors, status: :unprocessable_entity }
-      end
-    end
-  end
+  #  def update
+  #    respond_to do |format|
+  #      if @accounts_receivable_invoice.update(accounts_receivable_invoice_params)
+  #        format.html { redirect_to @accounts_receivable_invoice, notice: 'Accounts receivable invoice was successfully updated.' }
+  #        format.json { render :show, status: :ok, location: @accounts_receivable_invoice }
+  #      else
+  #        format.html { render :edit }
+  #        format.json { render json: @accounts_receivable_invoice.errors, status: :unprocessable_entity }
+  #      end
+  #    end
+  #  end
 
   # DELETE /accounts_receivable_invoices/1
   # DELETE /accounts_receivable_invoices/1.json
-  def destroy
-    @deleted = @accounts_receivable_invoice.destroy
-  end
+  #  def destroy
+  #    @deleted = @accounts_receivable_invoice.destroy
+  #  end
   
-  def get_shipment_detail
-    @shipment = Shipment.
-      select(:id, :delivery_order_number, :quantity, "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "customers.code AS customer_code", "customers.name AS customer_name", "customers.discount AS customer_discount").
-      joins(order_booking: :customer).
-      where(invoiced: false).
-      where("order_bookings.customer_id IS NOT NULL").
-      find(params[:shipment_id])
-    @gross_amt = 0
-    @shipment.shipment_product_items.select(:quantity, "price_lists.price").joins(:price_list).each do |spi|
-      @gross_amt += spi.quantity * spi.price
-    end
-    @discount = @gross_amt * (@shipment.customer_discount.to_f / 100)
-    @vat = if @shipment.customer_is_taxable_entrepreneur
-      if @shipment.customer_vat_type.eql?("include")
-        ((@gross_amt - @discount) / 1.1 * 0.1).round(2)
-      else
-        (@gross_amt - @discount) * 0.1
-      end
-    else
-      0
-    end
-    @net_amt = if @shipment.customer_is_taxable_entrepreneur
-      if @shipment.customer_vat_type.eql?("include")
-        (@gross_amt - @discount)
-      else
-        (@gross_amt - @discount) + (@gross_amt - @discount) * 0.1
-      end
-    else
-      (@gross_amt - @discount)
-    end
-  end
+  #  def get_shipment_detail
+  #    @shipment = Shipment.
+  #      select(:id, :delivery_order_number, :quantity, "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "customers.code AS customer_code", "customers.name AS customer_name", "customers.discount AS customer_discount").
+  #      joins(order_booking: :customer).
+  #      where(invoiced: false).
+  #      where("order_bookings.customer_id IS NOT NULL").
+  #      find(params[:shipment_id])
+  #    @gross_amt = 0
+  #    @shipment.shipment_product_items.select(:quantity, "price_lists.price").joins(:price_list).each do |spi|
+  #      @gross_amt += spi.quantity * spi.price
+  #    end
+  #    @discount = @gross_amt * (@shipment.customer_discount.to_f / 100)
+  #    @vat = if @shipment.customer_is_taxable_entrepreneur
+  #      if @shipment.customer_vat_type.eql?("include")
+  #        ((@gross_amt - @discount) / 1.1 * 0.1).round(2)
+  #      else
+  #        (@gross_amt - @discount) * 0.1
+  #      end
+  #    else
+  #      0
+  #    end
+  #    @net_amt = if @shipment.customer_is_taxable_entrepreneur
+  #      if @shipment.customer_vat_type.eql?("include")
+  #        (@gross_amt - @discount)
+  #      else
+  #        (@gross_amt - @discount) + (@gross_amt - @discount) * 0.1
+  #      end
+  #    else
+  #      (@gross_amt - @discount)
+  #    end
+  #  end
   
   def print
     @company = Company.select(:id, :name, :address, :phone, :fax).first
