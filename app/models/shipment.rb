@@ -11,7 +11,7 @@ class Shipment < ApplicationRecord
   has_many :shipment_products, dependent: :destroy
   has_many :shipment_product_items, through: :shipment_products
   has_one :packing_list_item_relation, -> {select("1 AS one")}, class_name: "PackingListItem"
-  has_one :accounts_receivable_invoice, dependent: :restrict_with_error
+  has_one :accounts_receivable_invoice, dependent: :destroy
 
   accepts_nested_attributes_for :shipment_products, allow_destroy: true#, reject_if: :child_blank
   accepts_nested_attributes_for :accounts_receivable_invoice

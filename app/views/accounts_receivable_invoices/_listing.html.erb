@@ -15,7 +15,6 @@
               <%= smart_listing.render object: ari, partial: "accounts_receivable_invoices/accounts_receivable_invoice", locals: {object: ari} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 6, link: new_accounts_receivable_invoice_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>
