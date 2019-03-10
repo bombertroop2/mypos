@@ -17,6 +17,7 @@ class ConsignmentSale < ApplicationRecord
         before_create :delete_counter_event_id, :sale_not_created
         before_create :generate_number, unless: proc{|cs| cs.attr_importing_data}
           before_create :yesterday_transaction_exist
+          before_destroy -> {transaction_open("delete")}
           before_destroy :record_not_deleted, :delete_tracks
           after_update :update_stock_and_afs, unless: proc{|cs| cs.attr_delete_products}
             after_update :create_listing_stock, if: proc{|cs| !cs.approved_was && cs.approved && !cs.attr_delete_products}
@@ -67,8 +68,11 @@ class ConsignmentSale < ApplicationRecord
                   errors.add(:base, "The record cannot be edited") if approved
                 end
 
-                def transaction_open
-                  errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: transaction_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[transaction_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                def transaction_open(action = "not delete")
+                  if FiscalYear.joins(:fiscal_months).where(year: transaction_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[transaction_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                    errors.add(:base, "Sorry, you can't perform this transaction")
+                    throw :abort if action.eql?("delete")
+                  end
                 end
 
                 def create_listing_stock
