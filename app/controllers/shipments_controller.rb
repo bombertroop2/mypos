@@ -86,7 +86,8 @@ class ShipmentsController < ApplicationController
     @shipment = Shipment.
       select("shipments.*", "order_bookings.note AS ob_note", "accounts_receivable_invoices.id AS ari_id", "accounts_receivable_invoices.number AS ari_number", "accounts_receivable_invoices.due_date AS ari_due_date", "accounts_receivable_invoices.note AS ari_note", "customers.name AS customer_name", "customers.phone AS customer_phone", "customers.facsimile AS customer_facsimile", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type").
       includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
-      joins(order_booking: :customer).
+      joins(:order_booking).
+      joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
       joins("LEFT JOIN accounts_receivable_invoices ON shipments.id = accounts_receivable_invoices.shipment_id").
       find(params[:id])
     @shipment.update(is_document_printed: true)
@@ -97,7 +98,8 @@ class ShipmentsController < ApplicationController
     @shipments = Shipment.
       select("shipments.*", "order_bookings.note AS ob_note", "accounts_receivable_invoices.id AS ari_id", "accounts_receivable_invoices.number AS ari_number", "accounts_receivable_invoices.due_date AS ari_due_date", "accounts_receivable_invoices.note AS ari_note", "customers.name AS customer_name", "customers.phone AS customer_phone", "customers.facsimile AS customer_facsimile", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type").
       includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
-      joins(order_booking: :customer).
+      joins(:order_booking).
+      joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
       joins("LEFT JOIN accounts_receivable_invoices ON shipments.id = accounts_receivable_invoices.shipment_id").
       where(id: params[:check]).
       order(:id)
