@@ -126,8 +126,7 @@ class AccountPayablesController < ApplicationController
   def destroy
     @account_payable.destroy
     if @account_payable.errors.present? and @account_payable.errors.messages[:base].present?
-      flash[:alert] = @account_payable.errors.messages[:base].to_sentence
-      render js: "window.location = '#{account_payables_url}'"
+      render js: "bootbox.alert({message: \"#{@account_payable.errors.messages[:base].join("<br/>")}\",size: 'small'});"
     end
   end
   

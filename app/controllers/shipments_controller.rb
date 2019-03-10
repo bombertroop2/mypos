@@ -86,7 +86,8 @@ class ShipmentsController < ApplicationController
     @shipment = Shipment.
       select("shipments.*", "order_bookings.note AS ob_note", "accounts_receivable_invoices.id AS ari_id", "accounts_receivable_invoices.number AS ari_number", "accounts_receivable_invoices.due_date AS ari_due_date", "accounts_receivable_invoices.note AS ari_note", "customers.name AS customer_name", "customers.phone AS customer_phone", "customers.facsimile AS customer_facsimile", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type").
       includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
-      joins(order_booking: :customer).
+      joins(:order_booking).
+      joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
       joins("LEFT JOIN accounts_receivable_invoices ON shipments.id = accounts_receivable_invoices.shipment_id").
       find(params[:id])
     @shipment.update(is_document_printed: true)
@@ -97,7 +98,8 @@ class ShipmentsController < ApplicationController
     @shipments = Shipment.
       select("shipments.*", "order_bookings.note AS ob_note", "accounts_receivable_invoices.id AS ari_id", "accounts_receivable_invoices.number AS ari_number", "accounts_receivable_invoices.due_date AS ari_due_date", "accounts_receivable_invoices.note AS ari_note", "customers.name AS customer_name", "customers.phone AS customer_phone", "customers.facsimile AS customer_facsimile", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type").
       includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
-      joins(order_booking: :customer).
+      joins(:order_booking).
+      joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
       joins("LEFT JOIN accounts_receivable_invoices ON shipments.id = accounts_receivable_invoices.shipment_id").
       where(id: params[:check]).
       order(:id)
@@ -260,7 +262,31 @@ class ShipmentsController < ApplicationController
         render js: "bootbox.alert({message: \"Receive date #{@shipment.errors[:received_date].join("<br/>")}\",size: 'small'});"
       end
     end
-  end   
+  end  
+  
+  def direct_sales
+    if params[:filter_date_direct_sales].present?
+      splitted_date_range = params[:filter_date_direct_sales].split("-")
+      start_delivery_date = splitted_date_range[0].strip.to_date
+      end_delivery_date = splitted_date_range[1].strip.to_date
+    end
+
+    shipments_scope = Shipment.
+      select(:id, :delivery_order_number, :delivery_date, :quantity, "customers.code AS customer_code", "customers.name AS customer_name", "accounts_receivable_invoices.total AS net_total").
+      joins(:accounts_receivable_invoice, order_booking: :customer)
+    
+    shipments_scope = shipments_scope.where(["shipments.delivery_order_number ILIKE ?", "%"+params[:filter_string_direct_sales]+"%"]) if params[:filter_string_direct_sales].present?
+    shipments_scope = shipments_scope.where(["shipments.delivery_date BETWEEN ? AND ?", start_delivery_date, end_delivery_date]) if params[:filter_date_direct_sales].present?
+    shipments_scope = shipments_scope.where(["order_bookings.customer_id = ?", params[:filter_customer_direct_sales]]) if params[:filter_customer_direct_sales].present?
+    smart_listing_create(:shipments, shipments_scope, partial: 'shipments/listing_direct_sales', default_sort: {delivery_order_number: "asc"})
+  end
+  
+  def show_direct_sale
+    @shipment = Shipment.
+      select(:id, :delivery_order_number, :delivery_date, :quantity, "customers.code AS customer_code", "customers.name AS customer_name", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "accounts_receivable_invoices.discount AS customer_discount", "accounts_receivable_invoices.total AS net_total").
+      joins(:accounts_receivable_invoice, order_booking: :customer).
+      find(params[:id])
+  end
 
   private
   # Use callbacks to share common setup or constraints between actions.

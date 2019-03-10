@@ -17,6 +17,7 @@ class AccountPayableCourier < ApplicationRecord
 
     
     before_create :generate_number, :set_remaining_debt, :set_due_date, :set_value_added_tax_type
+    before_destroy -> {transaction_open("delete")}
     before_destroy :delete_tracks, :remove_relationship
     
     accepts_nested_attributes_for :packing_lists
@@ -79,8 +80,13 @@ class AccountPayableCourier < ApplicationRecord
       errors.add(:base, "Invoice must have at least one packing list") if packing_lists.blank?
     end
     
-    def transaction_open
-      errors.add(:base, "Sorry, you can't perform this transaction") if courier_invoice_date.present? && FiscalYear.joins(:fiscal_months).where(year: courier_invoice_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[courier_invoice_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+    def transaction_open(action = "not delete")
+      if courier_invoice_date.present?
+        if FiscalYear.joins(:fiscal_months).where(year: courier_invoice_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[courier_invoice_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+          errors.add(:base, "Sorry, you can't perform this transaction") 
+          throw :abort if action.eql?("delete")
+        end
+      end
     end
     
     def delete_tracks

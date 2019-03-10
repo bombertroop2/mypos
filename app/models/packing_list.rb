@@ -25,6 +25,7 @@ class PackingList < ApplicationRecord
 
                         before_create :generate_number, :set_status
                         before_create :get_courier_price, if: proc{@courier.status.eql?("External")}
+                          before_destroy -> {transaction_open("delete")}
                           before_destroy :record_not_deleted, :delete_tracks
 
                           accepts_nested_attributes_for :packing_list_items, allow_destroy: true
@@ -49,8 +50,13 @@ class PackingList < ApplicationRecord
                             errors.add(:base, "Sorry, courier price is not available on #{departure_date.strftime("%d/%m/%Y")}") if departure_date.present? && attr_courier_id.present? && attr_courier_way_id.present? && courier_unit_id.present? && attr_city_id.present? && attr_courier_price_type.present? && CourierPrice.joins(courier_unit: :courier_way).select("1 AS one").where(city_id: attr_city_id, price_type: attr_courier_price_type, courier_unit_id: courier_unit_id).where(["courier_units.courier_way_id = ? AND courier_ways.courier_id = ? AND courier_prices.effective_date <= ?", attr_courier_way_id, attr_courier_id, departure_date]).blank?
                           end
                 
-                          def transaction_open
-                            errors.add(:base, "Sorry, you can't perform this transaction") if departure_date.present? && FiscalYear.joins(:fiscal_months).where(year: departure_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[departure_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                          def transaction_open(action = "not delete")
+                            if departure_date.present?
+                              if FiscalYear.joins(:fiscal_months).where(year: departure_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[departure_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                                errors.add(:base, "Sorry, you can't perform this transaction")
+                                throw :abort if action.eql?("delete")
+                              end
+                            end
                           end
                   
                           def city_available

@@ -1,1 +1,4 @@
 <%= smart_listing_item :consignment_sales, :destroy, @consignment_sale %>
+<% if @consignment_sale.errors[:base].present? %>
+  bootbox.alert({message: "<%= @consignment_sale.errors[:base].join("<br/>") %>",size: 'small'});
+<% end %>

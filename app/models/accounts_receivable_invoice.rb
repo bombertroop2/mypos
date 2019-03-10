@@ -21,6 +21,7 @@ class AccountsReceivableInvoice < ApplicationRecord
       before_create :generate_number, :set_due_date, unless: proc{|ari| ari.attr_auto_create}
         after_create :mark_shipment_invoiced, unless: proc{|ari| ari.attr_auto_create}
           after_create :send_email_to_customer
+          before_destroy -> {transaction_open("delete")}
           after_destroy :unmark_invoiced_shipment, :delete_tracks
 
           private
@@ -43,8 +44,7 @@ class AccountsReceivableInvoice < ApplicationRecord
           end
   
           def unmark_invoiced_shipment
-            shipment = Shipment.select(:id, :invoiced).find(shipment_id)
-            shipment.update_column(:invoiced, false)
+            @shipment.update_column(:invoiced, false)
           end
   
           def set_due_date
@@ -80,8 +80,16 @@ class AccountsReceivableInvoice < ApplicationRecord
             self.remaining_debt = total
           end
   
-          def transaction_open
-            errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: @shipment.delivery_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[@shipment.delivery_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+          def transaction_open(action = "not delete")
+            if action.eql?("not delete")
+              errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: @shipment.delivery_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[@shipment.delivery_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+            else
+              @shipment = Shipment.select(:id, :invoiced, :delivery_date).find(shipment_id)
+              if FiscalYear.joins(:fiscal_months).where(year: @shipment.delivery_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[@shipment.delivery_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                errors.add(:base, "Sorry, you can't perform this transaction")
+                throw :abort if action.eql?("delete")
+              end
+            end
           end
   
           def strip_string_values

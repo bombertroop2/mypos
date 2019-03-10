@@ -200,7 +200,7 @@ class Ability
           elsif class_name.eql?("Shipment") && !user_roles.include?("area_manager")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, :print, :change_receive_date, to: :undelete_action
-            alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
+            alias_action :index, :inventory_receipts, :show, :direct_sales, :show_direct_sale, to: :read_action_for_staff
             alias_action :edit, :update, :destroy, to: :edit_action
             if ability.eql?(:manage) && user_roles.first.eql?("staff")
               can [:read_action_for_staff, :undelete_action], class_name.gsub(/\s+/, "").constantize
