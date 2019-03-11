@@ -122,6 +122,8 @@ class EventsController < ApplicationController
     else
       @deleted = true
     end
+  rescue RuntimeError => e
+    render js: "bootbox.alert({message: \"#{e.message}\",size: 'small'});"
   end
 
   def generate_warehouse_form
