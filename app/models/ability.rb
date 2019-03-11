@@ -211,8 +211,8 @@ class Ability
             elsif user_roles.first.eql?("manager")
               can [:read_action_for_staff, :undelete_action, :edit_action], class_name.gsub(/\s+/, "").constantize
             end
-          elsif (class_name.eql?("Product") || class_name.eql?("Purchase Order")) && !user.has_managerial_role?
-            # cegah staff untuk manage product
+          elsif class_name.eql?("Purchase Order") && !user.has_managerial_role?
+            # cegah staff untuk manage PO
             can :read, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
           elsif class_name.eql?("CostList")            
             can ability, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
