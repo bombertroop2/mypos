@@ -5,7 +5,8 @@ class Event < ApplicationRecord
 
   has_many :event_warehouses, dependent: :destroy
   has_many :event_general_products, dependent: :destroy
-  has_many :sale_products
+  has_many :sale_products, dependent: :restrict_with_error
+  has_many :sales, foreign_key: :gift_event_id, dependent: :restrict_with_error
   
   before_validation :remove_white_space, :upcase_code
   validates :code, :name, :start_date_time, :end_date_time, :event_type, presence: true
@@ -30,7 +31,7 @@ class Event < ApplicationRecord
                                 accepts_nested_attributes_for :event_warehouses, allow_destroy: true
                                 accepts_nested_attributes_for :event_general_products, allow_destroy: true
                     
-                                before_destroy :deletable, :delete_tracks
+                                before_destroy :delete_tracks
                             
                                 private
                             
@@ -39,7 +40,7 @@ class Event < ApplicationRecord
                                     if is_active_changed? && persisted?
                                       cashier_opened = false
                                       event_warehouses.select(:warehouse_id).each do |event_warehouse|
-                                        cashier_opened = CashierOpening.select("1 AS one").joins(:warehouse).where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ? AND warehouses.is_active = ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date, true]).present?
+                                        cashier_opened = CashierOpening.select("1 AS one").joins(:warehouse).where(["warehouse_id = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ? AND warehouses.is_active = ?", event_warehouse.warehouse_id, start_date_time.to_date, end_date_time.to_date, true]).present?
                                         break
                                       end
                                       errors.add(:base, "Please close some cashiers and try again") if cashier_opened
@@ -48,23 +49,25 @@ class Event < ApplicationRecord
                                     if start_date_time.present? && end_date_time.present?
                                       cashier_opened = false
                                       event_warehouses.each do |event_warehouse|
-                                        cashier_opened = CashierOpening.select("1 AS one").joins(:warehouse).where(["warehouse_id = ? AND DATE(open_date) = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ? AND warehouses.is_active = ?", event_warehouse.warehouse_id, Date.current, start_date_time.to_date, end_date_time.to_date, true]).present?
+                                        cashier_opened = CashierOpening.select("1 AS one").joins(:warehouse).where(["warehouse_id = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ? AND warehouses.is_active = ?", event_warehouse.warehouse_id, start_date_time.to_date, end_date_time.to_date, true]).present?
                                         break
                                       end
                                       errors.add(:base, "Please close some cashiers and try again") if cashier_opened
                                     end
                                   end
-                                end
-                            
-                                def deletable
-                                  if start_date_time <= Time.current
-                                    errors.add(:base, "The record cannot be deleted")
-                                    throw :abort
-                                  end
-                                end
+                                end                                                            
                           
                                 def editable
-                                  errors.add(:base, "The record cannot be edited") if start_date_time <= Time.current
+                                  if sales.select("1 AS one").present? || sale_products.select("1 AS one").present?
+                                    errors.add(:base, "The record cannot be edited")
+                                  else
+                                    cashier_opened = false
+                                    event_warehouses.each do |event_warehouse|
+                                      cashier_opened = CashierOpening.select("1 AS one").joins(:warehouse).where(["warehouse_id = ? AND closed_at IS NULL AND DATE(open_date) >= ? AND DATE(open_date) <= ? AND warehouses.is_active = ?", event_warehouse.warehouse_id, start_date_time.to_date, end_date_time.to_date, true]).present?
+                                      break
+                                    end
+                                    errors.add(:base, "Please close some cashiers and try again") if cashier_opened
+                                  end
                                 end
                     
                                 def delete_tracks
