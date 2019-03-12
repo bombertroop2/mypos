@@ -10,6 +10,7 @@ class AccountsReceivableInvoice < ApplicationRecord
 
   belongs_to :shipment
   has_many :shipment_product_items, through: :shipment
+  has_many :accounts_receivable_payment_invoices, dependent: :restrict_with_error
   
   before_validation :strip_string_values
   before_validation :set_total, :set_remaining_debt, :set_discount, unless: proc{|ari| ari.attr_auto_create}

@@ -21,6 +21,8 @@
                   <% opened_menu_name = "Delivery Order Receipts" %>
                 <% elsif action_name.eql?("direct_sales") %>
                   <% opened_menu_name = "Direct Sales" %>
+                <% else %>
+                  <% opened_menu_name = params[:controller].humanize.titleize %>
                 <% end %>
               <% elsif params[:controller].eql?("fake_consignment_sale") %>
                 <% opened_menu_name = "Consignments" %>
@@ -41,6 +43,8 @@
                 <% opened_menu_name = "AP Payments (Courier)" %>
               <% elsif params[:controller].eql?("accounts_receivable_invoices") %>
                 <% opened_menu_name = "AR Invoices (Direct Sales)" %>
+              <% elsif params[:controller].eql?("accounts_receivable_payments") %>
+                <% opened_menu_name = "AR Payments (Direct Sales)" %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -189,9 +193,6 @@
                                                     <% if can?(:read_action_for_staff, Shipment) || can?(:read_action, Shipment) %>
                                                       <li><%= link_to "Shipments", shipments_path, method: :get %></li>
                                                     <% end %>
-                                                    <% if can? :read, AccountsReceivableInvoice %>
-                                                      <li><%= link_to "AR Invoices", accounts_receivable_invoices_path, method: :get %></li>
-                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -200,6 +201,12 @@
                                                 <ul class="nav child_menu">
                                                     <% if can?(:read_action_for_staff, Shipment) %>
                                                       <li><%= link_to "Listing Sales", direct_sales_shipments_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountsReceivableInvoice %>
+                                                      <li><%= link_to "AR Invoices", accounts_receivable_invoices_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountsReceivablePayment %>
+                                                      <li><%= link_to "AR Payments", accounts_receivable_payments_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>

@@ -5,7 +5,8 @@ class Customer < ApplicationRecord
   belongs_to :city
   has_one :order_booking_relation, -> {select("1 AS one")}, class_name: "OrderBooking"
   has_many :order_bookings, dependent: :restrict_with_error
-  
+  has_many :accounts_receivable_payments, dependent: :restrict_with_error
+
 	before_validation :strip_string_values, :set_limit_value_to_zero
 
 	validates :code, presence: true, uniqueness: true
@@ -16,7 +17,7 @@ class Customer < ApplicationRecord
         validates :terms_of_payment, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc {|customer| customer.terms_of_payment.present?}
           validate :vat_available
           validates :limit_value, numericality: {greater_than: 0}, if: proc { |c| c.limit_value.present? && c.limit_value.is_a?(Numeric) && !c.unlimited}
-            validate :code_not_changed, :city_available, :city_id_not_changed
+            validate :code_not_changed, :city_available, :city_id_not_changed, :is_taxable_entrepreneur_not_changed, :value_added_tax_not_changed
 
             VAT = [
               ["Include", "include"],
@@ -42,7 +43,15 @@ class Customer < ApplicationRecord
               end
 
               def code_not_changed
-                errors.add(:code, "change is not allowed!") if code_changed? && persisted? && order_booking_relation.present?
+                errors.add(:code, "change is not allowed!") if code_changed? && persisted? && (order_booking_relation.present? || accounts_receivable_payments.select("1 AS one").present?)
+              end
+
+              def is_taxable_entrepreneur_not_changed
+                errors.add(:is_taxable_entrepreneur, "change is not allowed!") if is_taxable_entrepreneur_changed? && persisted? && accounts_receivable_payments.select("1 AS one").present?
+              end
+
+              def value_added_tax_not_changed
+                errors.add(:value_added_tax, "change is not allowed!") if value_added_tax_changed? && persisted? && accounts_receivable_payments.select("1 AS one").present?
               end
 
               def city_id_not_changed

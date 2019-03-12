@@ -59,6 +59,7 @@ class Ability
               can :manage, AccountPayableCourierPayment
             elsif user_menu.eql?("Accounts Receivable (Direct Sales)")
               can :manage, AccountsReceivableInvoice
+              can :manage, AccountsReceivablePayment
             else
               if user_menu.eql?("Point of Sale")
                 can [:read, :export], Sale
@@ -263,8 +264,14 @@ class Ability
           elsif class_name.eql?("Accounts Receivable (Direct Sales)")
             if user_roles.include?("staff")
               can :read, AccountsReceivableInvoice
+              can :read, AccountsReceivablePayment
             elsif !user_roles.include?("area_manager")
               can ability, AccountsReceivableInvoice
+              if user_roles.include?("accountant")
+                can ability, AccountsReceivablePayment
+              else
+                can :read, AccountsReceivablePayment
+              end
             end
           elsif class_name.eql?("FiscalYear") && !user_roles.include?("area_manager")
             if user_roles.include?("staff")

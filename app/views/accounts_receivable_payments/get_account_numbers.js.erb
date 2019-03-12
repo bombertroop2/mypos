@@ -1,0 +1,8 @@
+$('#accounts_receivable_payment_company_bank_account_number_id').find('option').remove();
+var o = new Option("", "");
+$("#accounts_receivable_payment_company_bank_account_number_id").append(o);
+<% @account_numbers.each do |an| %>
+  var o = new Option("<%= an.account_number %>", "<%= an.id %>");
+  $("#accounts_receivable_payment_company_bank_account_number_id").append(o);
+<% end %>
+$("#accounts_receivable_payment_company_bank_account_number_id").attr("data-placeholder", "Please select").chosen("destroy").chosen();
