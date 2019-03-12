@@ -44,11 +44,12 @@ module ApplicationHelper
   def booking_control_menu_active?
     return true if can? :read, OrderBooking
     return true if can? :read_action_for_staff, Shipment
-    return true if can? :read, AccountsReceivableInvoice
   end
 
   def direct_sales_menu_active?
     return true if can? :read_action_for_staff, Shipment
+    return true if can? :read, AccountsReceivableInvoice
+    return true if can? :read, AccountsReceivablePayment
   end
 
   def inventory_receipt_menu_active?

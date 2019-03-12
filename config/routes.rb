@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :accounts_receivable_payments, except: [:edit, :update, :destroy] do
+    collection do
+      get "generate_form"
+      get "get_account_numbers"
+    end
+  end
   resources :accounts_receivable_invoices, only: [:index, :show] do
     member do
       get "print"
