@@ -110,18 +110,34 @@ class Shipment < ApplicationRecord
                                           gross_amt
                                         end
                                       end
-                                      due_date = delivery_date + @order_booking.customer_top.days
-                                      self.attributes = self.attributes.merge(accounts_receivable_invoice_attributes: {
-                                          note: @order_booking.note,
-                                          shipment_id: id,
-                                          discount: @order_booking.cust_discount.to_f,
-                                          total: total,
-                                          remaining_debt: total,
-                                          due_date: due_date,
-                                          number: generate_ari_number,
-                                          attr_auto_create: true
-                                        })
-                                      self.invoiced = true
+                                      limit_reached = if @order_booking.customer_unlimited
+                                        false
+                                      else
+                                        customer_debt = AccountsReceivableInvoice.joins(shipment: :order_booking).where(["order_bookings.customer_id = ?", @order_booking.customer_id]).sum(:remaining_debt)
+                                        available_limit_value = @order_booking.customer_limit_value - customer_debt
+                                        if total > available_limit_value
+                                          true
+                                        else
+                                          false
+                                        end
+                                      end
+                                      unless limit_reached
+                                        due_date = delivery_date + @order_booking.customer_top.days
+                                        self.attributes = self.attributes.merge(accounts_receivable_invoice_attributes: {
+                                            note: @order_booking.note,
+                                            shipment_id: id,
+                                            discount: @order_booking.cust_discount.to_f,
+                                            total: total,
+                                            remaining_debt: total,
+                                            due_date: due_date,
+                                            number: generate_ari_number,
+                                            attr_auto_create: true
+                                          })
+                                        self.invoiced = true
+                                      else
+                                        errors.add(:base, "Sorry, #{@order_booking.customer_name} has reached a limit for buying product")
+                                        throw :abort
+                                      end
                                     end
                                   end
                                   
@@ -188,7 +204,7 @@ class Shipment < ApplicationRecord
                                   def warehouse_is_active
                                     if order_booking_id.present?
                                       @order_booking = OrderBooking.
-                                        select(:id, :status, :origin_warehouse_id, :destination_warehouse_id, :note, "customers.discount AS cust_discount", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "customers.terms_of_payment AS customer_top", "customers.code AS customer_code").
+                                        select(:id, :status, :origin_warehouse_id, :destination_warehouse_id, :note, :customer_id, "customers.discount AS cust_discount", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "customers.terms_of_payment AS customer_top", "customers.code AS customer_code", "customers.name AS customer_name", "customers.unlimited AS customer_unlimited", "customers.limit_value AS customer_limit_value").
                                         joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
                                         where(id: order_booking_id).first
                                       if @order_booking.present?
