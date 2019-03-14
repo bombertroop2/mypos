@@ -132,20 +132,24 @@ class ReceivingController < ApplicationController
       @colors = []
       @sizes = []
       @direct_purchase = DirectPurchase.new
-      products = Product.joins(:brand).where(code: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
-      products.each do |product|
-        active_cost = product.active_cost_by_po_date(params[:dp_date].to_date, product.cost_list_costs_effective_dates_product_ids).cost rescue 0
-        @colors[product.id] = product.colors.distinct
-        @sizes[product.id] = product.sizes.distinct
-        dpp = @direct_purchase.direct_purchase_products.build product_id: product.id, dp_cost: active_cost, prdct_code: product.code, prdct_name: product.name
-        @colors[product.id].each do |color|
-          @sizes[product.id].each do |size|
-            dpp.direct_purchase_details.build size_id: size.id, color_id: color.id
+      product_ids = params[:product_ids].split(",")
+      products = Product.joins(:brand).where(code: product_ids).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
+      unavailable_product_codes = product_ids - products.pluck(:code)
+      if unavailable_product_codes.length > 0
+        render js: "bootbox.alert({message: \"Product #{unavailable_product_codes.first} doesn't exist\",size: 'small'});"
+      else
+        products.each do |product|
+          active_cost = product.active_cost_by_po_date(params[:dp_date].to_date, product.cost_list_costs_effective_dates_product_ids).cost rescue 0
+          @colors[product.id] = product.colors.distinct
+          @sizes[product.id] = product.sizes.distinct
+          dpp = @direct_purchase.direct_purchase_products.build product_id: product.id, dp_cost: active_cost, prdct_code: product.code, prdct_name: product.name
+          @colors[product.id].each do |color|
+            @sizes[product.id].each do |size|
+              dpp.direct_purchase_details.build size_id: size.id, color_id: color.id
+            end
           end
         end
       end
-
-      respond_to { |format| format.js }
     end
 
     def create
