@@ -149,7 +149,10 @@ class SalesController < ApplicationController
   end
   
   def get_member
-    @member = Member.select(:id, :name, :address, :phone, :mobile_phone, :gender, :email, :member_id).where(member_id: params[:member_id]).first
+    @member = Member.
+      select(:id, :name, :address, :phone, :mobile_phone, :gender, :email, :member_id).
+      where(["members.member_id = ? OR members.mobile_phone = ?", params[:member_id], params[:member_id]]).
+      first
   end
 
   def get_product
