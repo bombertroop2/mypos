@@ -1228,11 +1228,18 @@
                         message: '<%= alert %>',
                         size: 'small'
                     });
-    <% elsif controller_name.eql?("general_variables") && notice.present? %>
+    <% elsif controller_name.eql?("general_variables") %>
+      <% if notice.present? %>
                     bootbox.alert({
                         message: '<%= notice %>',
                         size: 'small'
                     });
+      <% elsif @general_variable.present? && @general_variable.errors[:base].present? %>
+                    bootbox.alert({
+                        message: "<%= @general_variable.errors[:base].join("<br/>") %>",
+                        size: 'small'
+                    });
+      <% end %>
     <% end %>
               });
             </script>
