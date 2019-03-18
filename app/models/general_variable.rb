@@ -1,7 +1,7 @@
 class GeneralVariable < ApplicationRecord
   validates :pieces_per_koli, :beginning_of_account_payable_creating, presence: true
   validates :pieces_per_koli, numericality: {greater_than_or_equal_to: 1, only_integer: true}, if: proc{|gv| gv.pieces_per_koli.present? && gv.pieces_per_koli_changed?}
-    validate :beginning_of_account_payable_creating_available, :member_product_discount_not_changed
+    validate :beginning_of_account_payable_creating_available, :member_product_event_not_changed
     
     #    INVENTORY_VALUATION_METHODS = [
     #      ["FIFO", "FIFO"],
@@ -25,8 +25,8 @@ class GeneralVariable < ApplicationRecord
     
     private
     
-    def member_product_discount_not_changed
-      if member_product_discount_changed?
+    def member_product_event_not_changed
+      if member_product_event_changed?
         cashier_opened = CashierOpening.select("1 AS one").where("closed_at IS NULL").present?      
         errors.add(:base, "Please close the cashier first") if cashier_opened
       end

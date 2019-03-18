@@ -49,29 +49,36 @@
                                         <%= error_help_text(@member, :email) %>
                                     </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <%= f.submit "Save", class: "btn btn-primary" %>
-                                          <button class="btn btn-link cancel">Cancel</button>
+                                <div class="form-group<%= control_group_error(@member, :discount) %>">
+                                    <%= f.label :discount, "Discount(%)", class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <%= f.text_field :discount, size: 10, class: "form-control quantity-fields" %>
+                                            <%= error_help_text(@member, :discount) %>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <%= f.submit "Save", class: "btn btn-primary" %>
+                                              <button class="btn btn-link cancel">Cancel</button>
+                                          </div>
                                       </div>
-                                  </div>
-                                <% end %>
-                            </td>
+                                    <% end %>
+                                </td>
 
-                            <script>
-                              $(function () {
-                                  MaskedInput({
-                                      elm: document.getElementById('member_phone'),
-                                      format: '____-_______',
-                                      separator: '-'
+                                <script>
+                                  $(function () {
+                                      MaskedInput({
+                                          elm: document.getElementById('member_phone'),
+                                          format: '____-_______',
+                                          separator: '-'
+                                      });
+
+                                      MaskedInput({
+                                          elm: document.getElementById('member_mobile_phone'),
+                                          format: '____________'
+                                      });
+
+                                      $("#member_gender").attr("data-placeholder", "Select").chosen();
+                                      $("#member_discount").numeric();
                                   });
-
-                                  MaskedInput({
-                                      elm: document.getElementById('member_mobile_phone'),
-                                      format: '____________'
-                                  });
-
-                                  $("#member_gender").attr("data-placeholder", "Select").chosen();
-                              });
-                            </script>
+                                </script>
