@@ -35,14 +35,37 @@
 
 
     <% if !action_name.eql?("print_return_receipt") && object.event_type.eql?("Gift") && object.gift_event_product_id.blank? %>
+      <% if object.member_id.present? %>
+        <% total_before_member_discount = (object.total * 100).to_f / (100 - object.member_discount) %>
+        <% total_before_gift_discount = total_before_member_discount + object.discount_amount %>
+      <% else %>
+        <% total_before_gift_discount = object.total + object.discount_amount %>
+      <% end %>
       <dl class="dl-horizontal">
           <dt>Subtotal</dt>
-          <dd><%= number_to_currency(object.total + object.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+          <dd><%= number_to_currency(total_before_gift_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
       </dl>
 
       <dl class="dl-horizontal">
           <dt>Discount</dt>
           <dd><%= number_to_currency(object.discount_amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>
+      <% if object.member_id.present? %>
+        <dl class="dl-horizontal">
+            <dt>Member Discount</dt>
+            <dd><%= number_to_currency(total_before_member_discount - object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+        </dl>
+      <% end %>
+    <% elsif !action_name.eql?("print_return_receipt") && object.member_id.present? %>
+      <% total_before_member_discount = (object.total * 100).to_f / (100 - object.member_discount) %>
+      <dl class="dl-horizontal">
+          <dt>Subtotal</dt>
+          <dd><%= number_to_currency(total_before_member_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Member Discount</dt>
+          <dd><%= number_to_currency(total_before_member_discount - object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
       </dl>
     <% end %>
 
@@ -116,11 +139,14 @@
                 <th>Cost</th>
                 <th>Price</th>
                 <th>Event</th>
+                <th>Discount</th>
+                <th>Member Discount</th>
                 <th>Subtotal</th>
                 <th>Gross Profit</th>
             </tr>
         </thead>
         <tbody>
+            <% sale_products_count = sale_products.length %>
             <% sale_products.each_with_index do |sale_product, index| %>
               <tr>
                   <td style="vertical-align: middle"><%= index + 1 %></td>
@@ -148,6 +174,32 @@
                       <% end %>
                   </td>
                   <td>
+                      <% if !action_name.eql?("print_return_receipt") && object.event_type.eql?("Gift") && object.gift_event_product_id.blank? %>
+                        <%= "Gift: #{number_to_currency(object.discount_amount.to_f / sale_products_count, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %>
+                      <% end %>
+                  </td>
+                  <td>
+                      <%
+                      member_discount = if !action_name.eql?("print_return_receipt") && object.event_type.eql?("Gift") && object.gift_event_product_id.blank?
+                        if object.member_id.present?
+                          subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - object.member_discount)
+                          subtotal_after_gift_discount = subtotal_before_member_discount - (object.discount_amount.to_f / sale_products_count)
+                          subtotal_after_gift_discount * (object.member_discount.to_f / 100)
+                          else
+                        0
+                        end
+                        else
+                        if object.member_id.present?
+                          subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - object.member_discount)
+                          subtotal_before_member_discount - sale_product.subtotal
+                          else
+                        0
+                        end
+                        end
+                    %>
+                      <%= number_to_currency(member_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                  </td>
+                  <td>
   <%# if sale_product.sale_event_type.eql?("Buy 1 Get 1 Free") %>
   <%#= sale_product.price %>
   <%# elsif sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present? && sale_product.sale_second_plus_discount.present? %>
@@ -162,7 +214,20 @@
   <%# else %>
   <%#= sale_product.price %>
   <%# end %>
-                      <%= number_to_currency(sale_product.subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                      <%
+                      subtotal = if !action_name.eql?("print_return_receipt") && object.event_type.eql?("Gift") && object.gift_event_product_id.blank?
+                        if object.member_id.present?
+                          subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - object.member_discount)
+                          subtotal_after_gift_discount = subtotal_before_member_discount - (object.discount_amount.to_f / sale_products_count)
+                          subtotal_after_gift_discount - (subtotal_after_gift_discount * (object.member_discount.to_f / 100))
+                          else
+                          sale_product.subtotal - (object.discount_amount.to_f / sale_products_count)
+                        end
+                        else
+                        sale_product.subtotal
+                        end
+                    %>
+                      <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                   </td>
                   <td>
                       <% if current_user.has_managerial_role? || current_user.is_accountant? %>

@@ -44,7 +44,13 @@
       <% if (sale_product.sale_event_type.eql?("Discount(Rp)") && sale_product.sale_cash_discount.present?) || (sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present? && sale_product.sale_second_plus_discount.present?) || (sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present?) %>
         <% subtotal = sale_product.product_quantity * price %>
       <% else %>
-        <% subtotal = sale_product.subtotal %>
+        <%
+        subtotal = if @sale.member_id.present?
+          (sale_product.subtotal * 100).to_f / (100 - @sale.member_discount)
+          else
+          sale_product.subtotal
+          end
+      %>
       <% end %>
       <tr>
           <td><%= "#{sale_product.product_code}/#{sale_product.color_name}/#{sale_product.product_size}" %>&nbsp;</td>
@@ -97,9 +103,17 @@
     <tr>
         <td colspan="4" style="border: none;border-top: 1px;border-top-style: dashed"></td>
     </tr>
-    <% if @sale.event_type.eql?("Gift") && @sale.discount_amount.present? && @sale.discount_amount > 0 %>
+    <% if @sale.event_type.eql?("Gift") && @sale.gift_event_product_id.blank? && @sale.discount_amount.present? && @sale.discount_amount > 0 %>
       <% total_label = "Subtotal" %>
-      <% total_value = @sale.total + @sale.discount_amount %>
+      <% if @sale.member_id.present? %>
+        <% total_value_before_member_discount = (@sale.total * 100).to_f / (100 - @sale.member_discount) %>
+        <% total_value = total_value_before_member_discount + @sale.discount_amount %>
+      <% else %>
+        <% total_value = @sale.total + @sale.discount_amount %>
+      <% end %>
+    <% elsif @sale.member_id.present? %>
+      <% total_label = "Subtotal" %>
+      <% total_value = (@sale.total * 100).to_f / (100 - @sale.member_discount) %>
     <% else %>
       <% total_label = "Total" %>
       <% total_value = @sale.total %>
@@ -110,10 +124,25 @@
         <td style="text-align: right"><%= total_label %>&nbsp;</td>
         <td style="text-align: right"><%= number_to_currency(total_value, :delimiter => ".", :unit => "", :precision => 0) %></td>
     </tr>
-    <% if @sale.event_type.eql?("Gift") && @sale.discount_amount.present? && @sale.discount_amount > 0 %>
+    <% if @sale.event_type.eql?("Gift") && @sale.gift_event_product_id.blank? && @sale.discount_amount.present? && @sale.discount_amount > 0 %>
       <tr style="white-space: nowrap">
           <td colspan="3" style="text-align: right">Discount&nbsp;</td>
           <td style="text-align: right;"><%= number_to_currency(@sale.discount_amount, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+      <% if @sale.member_id.present? %>
+        <tr style="white-space: nowrap">
+            <td colspan="3" style="text-align: right">Member disc.&nbsp;</td>
+            <td style="text-align: right;"><%= number_to_currency(total_value_before_member_discount - @sale.total, :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+      <% end %>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Total&nbsp;</td>
+          <td style="text-align: right;"><%= number_to_currency(@sale.total, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+    <% elsif @sale.member_id.present? %>      
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Member disc.&nbsp;</td>
+          <td style="text-align: right;"><%= number_to_currency(total_value - @sale.total, :delimiter => ".", :unit => "", :precision => 0) %></td>
       </tr>
       <tr style="white-space: nowrap">
           <td colspan="3" style="text-align: right">Total&nbsp;</td>

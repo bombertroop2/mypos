@@ -38,13 +38,13 @@ class CashierOpening < ApplicationRecord
                 end
               
                 def calculate_total_sales
-                  sale_products = SaleProduct.joins(:price_list, sale: [cashier_opening: :warehouse]).
+                  sale_products = SaleProduct.joins(:price_list, sale: :cashier_opening).
                     joins("LEFT JOIN banks ON sales.bank_id = banks.id").
                     joins("LEFT JOIN events ON sale_products.event_id = events.id").
                     joins("LEFT JOIN events gift_events ON sales.gift_event_id = gift_events.id").
-                    where(["sales.cashier_opening_id = ? AND warehouses.is_active = ?", id, true]).
-                    select(:sale_id, :quantity, "sale_products.total AS subtotal", :event_id, "sales.gift_event_id", "sales.payment_method", "banks.card_type", "price_lists.price AS article_price", "events.event_type AS article_event_type", "gift_events.discount_amount AS store_discount_amount", "sales.gift_event_product_id").
-                    order("sale_id")
+                    where(["sales.cashier_opening_id = ?", id]).
+                    select(:sale_id, :quantity, "sale_products.total AS subtotal", :event_id, "sales.gift_event_id", "sales.payment_method", "banks.card_type", "price_lists.price AS article_price", "events.event_type AS article_event_type", "gift_events.discount_amount AS store_discount_amount", "sales.gift_event_product_id", "sales.member_discount AS sale_member_discount", "sales.transaction_number").
+                    order("sales.transaction_number ASC")
 
                   gross_sales = 0
                   net_sales = 0
@@ -61,7 +61,7 @@ class CashierOpening < ApplicationRecord
                       net_sales += sale_product.subtotal
                       if sale_product.payment_method.eql?("Cash")
                         cash_payment += sale_product.subtotal
-                      else
+                      elsif sale_product.payment_method.eql?("Card")
                         card_payment += sale_product.subtotal
                         if sale_product.card_type.eql?("Credit")
                           total_credits += sale_product.subtotal
@@ -79,7 +79,7 @@ class CashierOpening < ApplicationRecord
                       net_sales += sale_product.subtotal
                       if sale_product.payment_method.eql?("Cash")
                         cash_payment += sale_product.subtotal
-                      else
+                      elsif sale_product.payment_method.eql?("Card")
                         card_payment += sale_product.subtotal
                         if sale_product.card_type.eql?("Credit")
                           total_credits += sale_product.subtotal
@@ -88,47 +88,102 @@ class CashierOpening < ApplicationRecord
                         end
                       end
                     else
+                      sale_product_quantity_per_transaction_number = sale_products.select{|sp| sp.transaction_number == sale_product.transaction_number}.length
                       total_quantity += 1
                       gross_sales += sale_product.article_price
-                      net_sales += sale_product.subtotal
-                      if sale_product.payment_method.eql?("Cash")
-                        cash_payment += sale_product.subtotal
-                      else
-                        card_payment += sale_product.subtotal
-                        if sale_product.card_type.eql?("Credit")
-                          total_credits += sale_product.subtotal
+                      subtotal = if sale_product.gift_event_product_id.blank?
+                        if sale_product.sale_member_discount.present? && sale_product.sale_member_discount > 0
+                          subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - sale_product.sale_member_discount)
+                          subtotal_after_gift_discount = subtotal_before_member_discount - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                          subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.sale_member_discount.to_f / 100)
                         else
-                          total_debits += sale_product.subtotal
+                          sale_product.subtotal - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                        end
+                      else
+                        sale_product.subtotal
+                      end
+                      net_sales += subtotal
+                      if sale_product.payment_method.eql?("Cash")
+                        cash_subtotal = if sale_product.gift_event_product_id.blank?
+                          if sale_product.sale_member_discount.present? && sale_product.sale_member_discount > 0
+                            subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - sale_product.sale_member_discount)
+                            subtotal_after_gift_discount = subtotal_before_member_discount - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                            subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.sale_member_discount.to_f / 100)
+                          else
+                            sale_product.subtotal - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                          end
+                        else
+                          sale_product.subtotal
+                        end
+                        cash_payment += cash_subtotal
+                      elsif sale_product.payment_method.eql?("Card")
+                        card_subtotal = if sale_product.gift_event_product_id.blank?
+                          if sale_product.sale_member_discount.present? && sale_product.sale_member_discount > 0
+                            subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - sale_product.sale_member_discount)
+                            subtotal_after_gift_discount = subtotal_before_member_discount - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                            subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.sale_member_discount.to_f / 100)
+                          else
+                            sale_product.subtotal - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                          end
+                        else
+                          sale_product.subtotal
+                        end
+                        card_payment += card_subtotal
+                        if sale_product.card_type.eql?("Credit")
+                          credit_card_subtotal = if sale_product.gift_event_product_id.blank?
+                            if sale_product.sale_member_discount.present? && sale_product.sale_member_discount > 0
+                              subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - sale_product.sale_member_discount)
+                              subtotal_after_gift_discount = subtotal_before_member_discount - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                              subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.sale_member_discount.to_f / 100)
+                            else
+                              sale_product.subtotal - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                            end
+                          else
+                            sale_product.subtotal
+                          end
+                          total_credits += credit_card_subtotal
+                        else
+                          debit_card_subtotal = if sale_product.gift_event_product_id.blank?
+                            if sale_product.sale_member_discount.present? && sale_product.sale_member_discount > 0
+                              subtotal_before_member_discount = (sale_product.subtotal * 100).to_f / (100 - sale_product.sale_member_discount)
+                              subtotal_after_gift_discount = subtotal_before_member_discount - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                              subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.sale_member_discount.to_f / 100)
+                            else
+                              sale_product.subtotal - (sale_product.store_discount_amount.to_f / sale_product_quantity_per_transaction_number)
+                            end
+                          else
+                            sale_product.subtotal
+                          end
+                          total_debits += debit_card_subtotal
                         end
                       end
-                      if sale_product.gift_event_product_id.blank? && index == sale_products.length - 1
-                        net_sales -= sale_product.store_discount_amount.to_f
-                        if sale_product.payment_method.eql?("Cash")
-                          cash_payment -= sale_product.store_discount_amount.to_f
-                        else
-                          card_payment -= sale_product.store_discount_amount.to_f
-                          if sale_product.card_type.eql?("Credit")
-                            total_credits -= sale_product.store_discount_amount.to_f
-                          else
-                            total_debits -= sale_product.store_discount_amount.to_f
-                          end
-                        end
-                      elsif sale_product.gift_event_product_id.blank? && sale_products[index + 1].sale_id != sale_product.sale_id
-                        net_sales -= sale_product.store_discount_amount.to_f
-                        if sale_product.payment_method.eql?("Cash")
-                          cash_payment -= sale_product.store_discount_amount.to_f
-                        else
-                          card_payment -= sale_product.store_discount_amount.to_f
-                          if sale_product.card_type.eql?("Credit")
-                            total_credits -= sale_product.store_discount_amount.to_f
-                          else
-                            total_debits -= sale_product.store_discount_amount.to_f
-                          end
-                        end
-                      elsif sale_product.gift_event_product_id.present? && sale_products[index + 1].sale_id != sale_product.sale_id
+                      if sale_product.gift_event_product_id.present? && sale_products[index + 1].transaction_number != sale_product.transaction_number
                         total_gift_quantity += 1
                       elsif sale_product.gift_event_product_id.present? && index == sale_products.length - 1
                         total_gift_quantity += 1
+                      end
+                    end
+                  end
+                  
+                  sales_return_products = SalesReturnProduct.
+                    select("sale_products.event_id", "price_lists.price AS article_price", "sale_products.total AS subtotal", "returned_receipts_sales_returns.payment_method", "banks.card_type").
+                    joins(sale_product: :price_list, sales_return: [:sale, :returned_receipt]).
+                    joins("LEFT JOIN banks ON returned_receipts_sales_returns.bank_id = banks.id").
+                    where(["sales.cashier_opening_id = ?", id]).
+                    order("sales_returns.document_number ASC")
+
+                  sales_return_products.each_with_index do |sales_return_product, index|
+                    total_quantity -= 1
+                    gross_sales -= sales_return_product.article_price
+                    net_sales -= sales_return_product.subtotal
+                    if sales_return_product.payment_method.eql?("Cash")
+                      cash_payment -= sales_return_product.subtotal
+                    elsif sales_return_product.payment_method.eql?("Card")
+                      card_payment -= sales_return_product.subtotal
+                      if sales_return_product.card_type.eql?("Credit")
+                        total_credits -= sales_return_product.subtotal
+                      else
+                        total_debits -= sales_return_product.subtotal
                       end
                     end
                   end
