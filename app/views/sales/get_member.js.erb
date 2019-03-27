@@ -1,19 +1,144 @@
 <% if @member.nil? %>    
   var box = bootbox.alert({message: "No records found",size: 'small'});
   box.on("hidden.bs.modal", function () { 
-  $("#member-id").focus();
+    $("#member-id").focus();
   });
-  $("#member-info").addClass("hidden");
-  $("#sale_member_id").val("");
 <% else %>
-  $("#member-name").html("<%= @member.name %>");
-  $("#member-address").html("<%= @member.address %>");
-  $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
-  $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
-  $("#member-email").html("<%= @member.email %>");
-  $("#member-identifier").html("<%= @member.member_id %>");
-  $("#member-info").removeClass("hidden");
-  $("#member-id").focus();
-  $("#sale_member_id").val("<%= @member.id %>");
+  if($("#sale_member_id").val().trim() == "") {
+    <% if !@member.member_product_event && session["sale"].present? && session["sale"]["event"].present? %>
+      bootbox.confirm({
+        message: "Adding/changing member will delete selected products<br>Are you sure?",
+        buttons: {
+            confirm: {
+                label: '<i class="fa fa-check"></i> Confirm'
+            },
+            cancel: {
+                label: '<i class="fa fa-times"></i> Cancel'
+            }
+        },
+        callback: function (result) {
+            if (result) {
+                $("#listing_purchased_products_table tbody tr").each(function(){
+                  if($(this).attr("id") == undefined) {
+                  } else {
+                    var miliseconds = $(this).attr("id").split("-")[2];
+                    $("#btn-delete-sale-product-"+miliseconds).click();
+                  }
+                });
+                $("#member-name").html("<%= @member.name %>");
+                $("#member-address").html("<%= @member.address %>");
+                $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+                $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+                $("#member-email").html("<%= @member.email %>");
+                $("#member-identifier").html("<%= @member.member_id %>");
+                $("#member-info").removeClass("hidden");
+                $("#sale_member_id").val("<%= @member.id %>");
+                $("#sale_member_discount").val("<%= @member.discount %>");
+                $("#member-id").focus();
+                
+                // hitung total setelah dipotong member discount
+            }
+        },
+        size: "small"
+      });
+    <% elsif !@member.member_product_event %>
+      var productBarcodeIds = [];
+      <% session["sale"].each do |key, value| %>
+        <% if session["sale"][key]["store_event"].present? %>
+          productBarcodeIds.push("<%= key %>");
+        <% end %>
+      <% end if session["sale"].present? %>
+      if(productBarcodeIds.length > 0){
+        var productHasEvent = false;
+        $("#listing_purchased_products_table tbody tr").each(function(){
+          if($(this).attr("id") == undefined) {
+          } else {
+            var miliseconds = $(this).attr("id").split("-")[2];
+            if(productBarcodeIds.includes($("#sale_sale_products_attributes_"+miliseconds+"_product_barcode_id").val()))
+              productHasEvent = true;            
+          }
+        });
+        if(productHasEvent) {
+          bootbox.confirm({
+            message: "Adding/changing member will delete selected products<br>Are you sure?",
+            buttons: {
+                confirm: {
+                    label: '<i class="fa fa-check"></i> Confirm'
+                },
+                cancel: {
+                    label: '<i class="fa fa-times"></i> Cancel'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $("#listing_purchased_products_table tbody tr").each(function(){
+                      if($(this).attr("id") == undefined) {
+                      } else {
+                        var miliseconds = $(this).attr("id").split("-")[2];
+                        $("#btn-delete-sale-product-"+miliseconds).click();
+                      }
+                    });
+                    $("#member-name").html("<%= @member.name %>");
+                    $("#member-address").html("<%= @member.address %>");
+                    $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+                    $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+                    $("#member-email").html("<%= @member.email %>");
+                    $("#member-identifier").html("<%= @member.member_id %>");
+                    $("#member-info").removeClass("hidden");
+                    $("#sale_member_id").val("<%= @member.id %>");
+                    $("#sale_member_discount").val("<%= @member.discount %>");
+                    $("#member-id").focus();
+                }
+            },
+            size: "small"
+          });        
+        } else {
+          $("#member-name").html("<%= @member.name %>");
+          $("#member-address").html("<%= @member.address %>");
+          $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+          $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+          $("#member-email").html("<%= @member.email %>");
+          $("#member-identifier").html("<%= @member.member_id %>");
+          $("#member-info").removeClass("hidden");
+          $("#sale_member_id").val("<%= @member.id %>");
+          $("#sale_member_discount").val("<%= @member.discount %>");
+          $("#member-id").focus();
+        }
+      } else {
+        $("#member-name").html("<%= @member.name %>");
+        $("#member-address").html("<%= @member.address %>");
+        $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+        $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+        $("#member-email").html("<%= @member.email %>");
+        $("#member-identifier").html("<%= @member.member_id %>");
+        $("#member-info").removeClass("hidden");
+        $("#sale_member_id").val("<%= @member.id %>");
+        $("#sale_member_discount").val("<%= @member.discount %>");
+        $("#member-id").focus();
+      }
+    <% else %>
+      $("#member-name").html("<%= @member.name %>");
+      $("#member-address").html("<%= @member.address %>");
+      $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+      $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+      $("#member-email").html("<%= @member.email %>");
+      $("#member-identifier").html("<%= @member.member_id %>");
+      $("#member-info").removeClass("hidden");
+      $("#sale_member_id").val("<%= @member.id %>");
+      $("#sale_member_discount").val("<%= @member.discount %>");
+      $("#member-id").focus();
+    <% end %>
+  } else {
+    $("#member-name").html("<%= @member.name %>");
+    $("#member-address").html("<%= @member.address %>");
+    $("#member-phone").html("<%= remove_empty_space_from_phone_number(@member.phone) %>");
+    $("#member-mobile-phone").html("<%= remove_empty_space_from_phone_number(@member.mobile_phone) %>");
+    $("#member-email").html("<%= @member.email %>");
+    $("#member-identifier").html("<%= @member.member_id %>");
+    $("#member-info").removeClass("hidden");
+    $("#sale_member_id").val("<%= @member.id %>");
+    $("#sale_member_discount").val("<%= @member.discount %>");
+    $("#member-id").focus();
+  }
 <% end %>
 $($(".stepContainer")[0]).css("height", "100%");

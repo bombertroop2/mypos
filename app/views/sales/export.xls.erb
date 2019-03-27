@@ -16,12 +16,15 @@
                 <Cell><Data ss:Type="String">Quantity</Data></Cell>
                 <Cell><Data ss:Type="String">Gross Amt</Data></Cell>
                 <Cell><Data ss:Type="String">Event</Data></Cell>
+                <Cell><Data ss:Type="String">Discount</Data></Cell>
+                <Cell><Data ss:Type="String">Member Discount</Data></Cell>
                 <Cell><Data ss:Type="String">Net Amt</Data></Cell>
                 <Cell><Data ss:Type="String">Gross Profit</Data></Cell>
                 <Cell><Data ss:Type="String">Payment Method</Data></Cell>
             </Row>
 
             <% @sale_products.each do |sale_product| %>
+              <% total_quantity = @sale_products.select{|sp| sp.transaction_number == sale_product.transaction_number}.length %>
               <Row>
                   <Cell><Data ss:Type="String"><%= sale_product.warehouse_name %></Data></Cell>
                   <Cell><Data ss:Type="String"><%= sale_product.transaction_time.to_date.strftime("%d/%m/%Y") %></Data></Cell>
@@ -43,8 +46,40 @@
                     <Cell><Data ss:Type="String"><%= "Special price: #{number_to_currency(sale_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" %></Data></Cell>
                   <% else %>
                     <Cell><Data ss:Type="String"></Data></Cell>
-                  <% end %>                 
-                  <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
+                  <% end %>                                  
+                  <% if sale_product.sale_event_type.eql?("Gift") && sale_product.gift_event_product_id.blank? %>
+                    <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.discount_amount.to_f / total_quantity, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
+                  <% end %>
+                  <%
+                  member_discount = if sale_product.member_id.present?
+                    if sale_product.sale_event_type.eql?("Gift") && sale_product.gift_event_product_id.blank?
+                      subtotal_before_discount_member = (sale_product.total * 100).to_f / (100 - sale_product.member_discount)
+                      subtotal_after_gift_discount = subtotal_before_discount_member - (sale_product.discount_amount.to_f / total_quantity)
+                      subtotal_after_discount_member = subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.member_discount.to_f / 100)
+                      subtotal_after_gift_discount - subtotal_after_discount_member
+                      else
+                      subtotal_before_discount_member = (sale_product.total * 100).to_f / (100 - sale_product.member_discount)
+                      subtotal_before_discount_member - sale_product.total
+                    end
+                    else
+                  0
+                    end
+                %>
+                  <Cell><Data ss:Type="String"><%= number_to_currency(member_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
+                  <%
+                  total = if sale_product.sale_event_type.eql?("Gift") && sale_product.gift_event_product_id.blank?
+                    if sale_product.member_id.present?
+                      subtotal_before_discount_member = (sale_product.total * 100).to_f / (100 - sale_product.member_discount)
+                      subtotal_after_gift_discount = subtotal_before_discount_member - (sale_product.discount_amount.to_f / total_quantity)
+                      subtotal_after_gift_discount - subtotal_after_gift_discount * (sale_product.member_discount.to_f / 100)
+                      else
+                      sale_product.total - (sale_product.discount_amount.to_f / total_quantity)
+                    end
+                    else
+                    sale_product.total
+                    end
+                %>
+                  <Cell><Data ss:Type="String"><%= number_to_currency(total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
                   <Cell><Data ss:Type="String"><%= number_to_currency(sale_product.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></Data></Cell>
                   <Cell><Data ss:Type="String"><%= sale_product.payment_method %></Data></Cell>
               </Row>

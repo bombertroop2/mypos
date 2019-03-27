@@ -9,7 +9,7 @@ class Member < ApplicationRecord
   validates :discount, numericality: {greater_than: 0, less_than: 100}, if: proc {|m| m.discount.present?}
     validates :mobile_phone, uniqueness: true, if: proc {|mbr| mbr.mobile_phone.present?}
       validates :email, uniqueness: true, if: proc {|mbr| mbr.email.present?}
-        validate :gender_available
+        validate :gender_available, :member_product_event_not_changed, :discount_not_changed
   
         before_create :generate_member_id
   
@@ -21,6 +21,20 @@ class Member < ApplicationRecord
         ]
   
         private
+        
+        def discount_not_changed
+          if discount_changed? && persisted?
+            cashier_opened = CashierOpening.select("1 AS one").where("closed_at IS NULL").present?
+            errors.add(:discount, "change is not allowed!") if cashier_opened
+          end
+        end
+        
+        def member_product_event_not_changed
+          if member_product_event_changed? && persisted?
+            cashier_opened = CashierOpening.select("1 AS one").where("closed_at IS NULL").present?
+            errors.add(:base, "Please close the cashier first") if cashier_opened
+          end
+        end
       
         def delete_tracks
           audits.destroy_all

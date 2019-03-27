@@ -46,7 +46,8 @@ class SalesController < ApplicationController
       joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
       joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
       joins("LEFT JOIN events ON events.id = sales.gift_event_id").
-      select(:id, :sales_return_id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+      joins("LEFT JOIN common_fields brands_products on brands_products.id = products.brand_id AND brands_products.type IN ('Brand')").
+      select(:id, :sales_return_id, :member_discount, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message, brands_products.code AS brand_code, brands_products.name AS brand_name").
       where(sales_return_id: nil).
       where(id: params[:id]).
       where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
@@ -56,7 +57,7 @@ class SalesController < ApplicationController
     @sale = Sale.joins(:returned_document, cashier_opening: [warehouse: :sales_promotion_girls]).
       joins("LEFT JOIN members on members.id = sales.member_id").
       joins("LEFT JOIN banks on banks.id = sales.bank_id").
-      select(:id, :gift_event_id, :sales_return_id, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message, sales_returns.total_return").
+      select(:id, :gift_event_id, :sales_return_id, :member_discount, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message, sales_returns.total_return").
       where("sales_return_id IS NOT NULL").
       where(id: params[:id]).
       where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
@@ -89,6 +90,11 @@ class SalesController < ApplicationController
       if params[:sale][:gift_event_gift_type].strip.eql?("Discount") && @discount_amount.present? && @discount_amount > 0 && @total >= @minimum_purchase_amount && @minimum_purchase_amount > 0
         @total = @total - @discount_amount
         @gross_profit = @gross_profit - @discount_amount
+      end
+      
+      if params[:sale][:member_discount].present?
+        @total = @total - @total * (params[:sale][:member_discount].to_f / 100)
+        @gross_profit = @total - @total_cost
       end
 
       params[:sale].merge! total: @total, gross_profit: @gross_profit
@@ -150,7 +156,7 @@ class SalesController < ApplicationController
   
   def get_member
     @member = Member.
-      select(:id, :name, :address, :phone, :mobile_phone, :gender, :email, :member_id).
+      select(:id, :name, :address, :phone, :mobile_phone, :gender, :email, :member_id, :discount, :member_product_event).
       where(["members.member_id = ? OR members.mobile_phone = ?", params[:member_id], params[:member_id]]).
       first
   end
@@ -180,31 +186,39 @@ class SalesController < ApplicationController
         first
     end
     if @product
-      @cost_list = CostList.select(:id, :cost).where(["product_id = ? AND effective_date <= ?", @product.product_id, Date.current]).order(effective_date: :desc).first
-      current_time = Time.current
-      warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-      
-      event_specific_product = Event.joins(event_warehouses: :event_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, true, true, true]).order("events.created_at DESC").first
-      event_general_product = Event.joins(:event_warehouses, :event_general_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, false, true, true]).order("events.created_at DESC").first
-      if event_specific_product.nil? && event_general_product.present?
-        @store_event = event_general_product
-      elsif event_specific_product.present? && event_general_product.nil?
-        @store_event = event_specific_product
-      elsif event_specific_product.present? && event_general_product.present?
-        if event_specific_product.created_at >= event_general_product.created_at
-          @store_event = event_specific_product
-        else          
-          @store_event = event_general_product
-        end
+      if params[:member_id].present? && params[:member_id].strip.present?
+        member = Member.select(:member_product_event).find(params[:member_id])
       else
-        @store_event = nil
+        member = nil
       end
+      @cost_list = CostList.select(:id, :cost).where(["product_id = ? AND effective_date <= ?", @product.product_id, Date.current]).order(effective_date: :desc).first
+      if member.present? && !member.member_product_event
+      else
+        current_time = Time.current
+        warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
+      
+        event_specific_product = Event.joins(event_warehouses: :event_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_products.product_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, true, true, true]).order("events.created_at DESC").first
+        event_general_product = Event.joins(:event_warehouses, :event_general_products).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND event_general_products.product_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift'", current_time, current_time, warehouse_id, @product.product_id, false, true, true]).order("events.created_at DESC").first
+        if event_specific_product.nil? && event_general_product.present?
+          @store_event = event_general_product
+        elsif event_specific_product.present? && event_general_product.nil?
+          @store_event = event_specific_product
+        elsif event_specific_product.present? && event_general_product.present?
+          if event_specific_product.created_at >= event_general_product.created_at
+            @store_event = event_specific_product
+          else          
+            @store_event = event_general_product
+          end
+        else
+          @store_event = nil
+        end
 
-      gift_event = Event.joins(:event_warehouses).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Gift'", current_time, current_time, warehouse_id, true, true]).order("events.created_at DESC").first
-      if @store_event.present? && gift_event.present? && gift_event.created_at > @store_event.created_at
-        @store_event = gift_event
-      elsif @store_event.blank? && gift_event.present?
-        @store_event = gift_event
+        gift_event = Event.joins(:event_warehouses).select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type = 'Gift'", current_time, current_time, warehouse_id, true, true]).order("events.created_at DESC").first
+        if @store_event.present? && gift_event.present? && gift_event.created_at > @store_event.created_at
+          @store_event = gift_event
+        elsif @store_event.blank? && gift_event.present?
+          @store_event = gift_event
+        end
       end
       @sale_product = if @store_event.present?
         sale.sale_products.build product_barcode_id: @product.id, quantity: 1, event_id: @store_event.id
@@ -320,9 +334,10 @@ class SalesController < ApplicationController
             end_start_time = Time.zone.parse(splitted_start_time_range[1].strip).end_of_day
           end
           sale_products = SaleProduct.
-            select(:total, :gross_profit, :free_product_id, "warehouses.name AS warehouse_name", "sales.transaction_time", "sales.transaction_number", "products.code AS product_code", "brands_products.name AS brand_name", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "sales.payment_method", "price_lists.price").
+            select(:total, :gross_profit, :free_product_id, "warehouses.name AS warehouse_name", "sales.transaction_time", "sales.transaction_number", "products.code AS product_code", "brands_products.name AS brand_name", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "sales.payment_method", "price_lists.price", "sales_gift_events.discount_amount", "sales.gift_event_product_id", "sales_gift_events.event_type AS sale_event_type", "sales.member_id", "sales.member_discount").
             joins(:price_list, product_barcode: [:size, product_color: [:color, product: :brand]], sale: [cashier_opening: :warehouse]).
-            joins("LEFT JOIN events ON events.id = sale_products.event_id")
+            joins("LEFT JOIN events ON events.id = sale_products.event_id").
+            joins("LEFT JOIN events sales_gift_events ON sales_gift_events.id = sales.gift_event_id")
           sale_products = sale_products.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date_export].present?
           sale_products = sale_products.where(["transaction_number ILIKE ?", "%"+params[:filter_string_export]+"%"]) if params[:filter_string_export].present?
           sale_products = sale_products.where(["payment_method = ?", params[:filter_payment_method_export]]) if params[:filter_payment_method_export].present?
@@ -335,9 +350,10 @@ class SalesController < ApplicationController
             end_start_time = Time.zone.parse(splitted_start_time_range[1].strip).end_of_day
           end
           sale_products = SaleProduct.
-            select(:total, :gross_profit, :free_product_id, "warehouses.name AS warehouse_name", "sales.transaction_time", "sales.transaction_number", "products.code AS product_code", "brands_products.name AS brand_name", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "sales.payment_method", "price_lists.price").
+            select(:total, :gross_profit, :free_product_id, "warehouses.name AS warehouse_name", "sales.transaction_time", "sales.transaction_number", "products.code AS product_code", "brands_products.name AS brand_name", "common_fields.code AS color_code", "common_fields.name AS color_name", "sizes.size AS product_size", "events.first_plus_discount AS sale_first_plus_discount", "events.second_plus_discount AS sale_second_plus_discount", "events.cash_discount AS sale_cash_discount", "events.special_price", "sales.payment_method", "price_lists.price", "sales_gift_events.discount_amount", "sales.gift_event_product_id", "sales_gift_events.event_type AS sale_event_type", "sales.member_id", "sales.member_discount").
             joins(:price_list, product_barcode: [:size, product_color: [:color, product: :brand]], sale: [cashier_opening: [warehouse: :sales_promotion_girls]]).
             joins("LEFT JOIN events ON events.id = sale_products.event_id").
+            joins("LEFT JOIN events sales_gift_events ON sales_gift_events.id = sales.gift_event_id").
             where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id])
           sale_products = sale_products.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date_export].present?
           sale_products = sale_products.where(["transaction_number ILIKE ?", "%"+params[:filter_string_export]+"%"]) if params[:filter_string_export].present?
@@ -360,6 +376,7 @@ class SalesController < ApplicationController
     @total = 0
     @gross_profit = 0
     @minimum_purchase_amount = 0
+    @total_cost = 0
     params[:sale][:sale_products_attributes].each do |key, value|
       price = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"]
       cost = session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
@@ -396,6 +413,7 @@ class SalesController < ApplicationController
         @total += price
       end
       @gross_profit += gross_profit
+      @total_cost += cost
     end if params[:sale][:sale_products_attributes].present?
   end
   
@@ -405,6 +423,12 @@ class SalesController < ApplicationController
     if @total >= @minimum_purchase_amount && @minimum_purchase_amount > 0
       if params[:sale][:gift_event_gift_type].strip.eql?("Discount")
         params[:sale].merge! gift_event_id: session["sale"]["event"]["id"], gift_event_discount_amount: session["sale"]["event"]["discount_amount"]
+        if params[:sale][:sale_products_attributes].present?
+          total_article = params[:sale][:sale_products_attributes].length
+          params[:sale][:sale_products_attributes].each do |key, value|
+            params[:sale][:sale_products_attributes][key][:attr_gift_event_discount_amount] = session["sale"]["event"]["discount_amount"].to_f / total_article
+          end
+        end
       elsif params[:sale][:gift_event_gift_type].strip.eql?("Product")
         params[:sale].merge! gift_event_id: session["sale"]["event"]["id"], gift_event_product_id: session["sale"]["gift_event_product_id"]
       end
@@ -413,7 +437,6 @@ class SalesController < ApplicationController
 
   def add_additional_params_to_sale_products
     if params[:sale][:sale_products_attributes].present?
-      total_article = params[:sale][:sale_products_attributes].length
       params[:sale][:sale_products_attributes].each do |key, value|
         if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"].present?
           if session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["event_type"].eql?("Special Price")
@@ -427,8 +450,7 @@ class SalesController < ApplicationController
               effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
               price_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["price_list_id"],
               cost_list_id: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["cost_list_id"],
-              attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"],
-              attr_gift_event_discount_amount: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["store_event"]["discount_amount"].to_f / total_article
+              attr_effective_cost: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["attr_effective_cost"]
           else
             params[:sale][:sale_products_attributes][key].merge! sales_promotion_girl_id: current_user.sales_promotion_girl_id,
               effective_price: session["sale"][params[:sale][:sale_products_attributes][key][:product_barcode_id]]["effective_price"],
@@ -462,6 +484,7 @@ class SalesController < ApplicationController
           params[:sale][:sale_products_attributes][key].merge! event_type: nil, quantity: 1
           params[:sale][:sale_products_attributes][key][:free_product_id] = nil
         end
+        params[:sale][:sale_products_attributes][key][:attr_member_discount] = params[:sale][:member_discount]
       end
     end
   end
@@ -479,7 +502,7 @@ class SalesController < ApplicationController
         joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
         joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
         joins("LEFT JOIN events ON events.id = sales.gift_event_id").
-        select(:id, :gross_profit, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+        select(:id, :gross_profit, :member_discount, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
         where(id: params[:id]).where(["sales_promotion_girls.id = ?", current_user.sales_promotion_girl_id]).first
     else
       Sale.joins(cashier_opening: [warehouse: :sales_promotion_girls]).
@@ -492,14 +515,14 @@ class SalesController < ApplicationController
         joins("LEFT JOIN sizes ON stock_details.size_id = sizes.id").
         joins("LEFT JOIN common_fields colors_products ON colors_products.id = stock_details.color_id AND colors_products.type IN ('Color')").
         joins("LEFT JOIN events ON events.id = sales.gift_event_id").
-        select(:id, :gross_profit, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
+        select(:id, :gross_profit, :member_discount, "warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, sales.bank_id, sales.gift_event_id, sales.member_id, members.member_id AS member_identifier, members.name AS member_name, sales.transaction_time, sales.payment_method, sales.total, sales.cash, sales.change, sales.transaction_number, banks.code AS bank_code, banks.name AS bank_name, banks.card_type, sales.card_number, sales.trace_number, products.code AS product_code, common_fields.code AS brand_code, common_fields.name AS brand_name, sizes.size AS product_size, colors_products.code AS color_code, colors_products.name AS color_name, events.event_type, events.discount_amount, sales.gift_event_product_id, sales_promotion_girls.identifier AS cashier_identifier, sales_promotion_girls.name AS cashier_name, warehouses.first_message, warehouses.second_message, warehouses.third_message, warehouses.fourth_message, warehouses.fifth_message").
         where(id: params[:id]).first
     end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def sale_params
-    params.require(:sale).permit(:gift_event_discount_amount, :gift_event_gift_type, :gift_event_id, :gift_event_product_id, :pay, :warehouse_id, :cashier_id, :member_id, :transaction_time, :bank_id, :payment_method, :total, :trace_number, :card_number, :cash, :change, :transaction_number, :cashier_opening_id, :gross_profit,
-      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost, :attr_gift_event_discount_amount])
+    params.require(:sale).permit(:gift_event_discount_amount, :gift_event_gift_type, :gift_event_id, :gift_event_product_id, :pay, :warehouse_id, :cashier_id, :member_id, :transaction_time, :bank_id, :payment_method, :total, :trace_number, :card_number, :cash, :change, :transaction_number, :cashier_opening_id, :gross_profit, :member_discount,
+      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost, :attr_gift_event_discount_amount, :attr_member_discount])
   end
 end

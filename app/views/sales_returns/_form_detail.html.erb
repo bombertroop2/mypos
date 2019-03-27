@@ -37,9 +37,18 @@
                         <%= number_to_currency(@returned_product.event_cash_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if @returned_product.event_cash_discount.present? %>
                         <%= "Special price: #{number_to_currency(@returned_product.special_price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2)}" if @returned_product.special_price.present? %>
                     </td>
-                    <td style="text-align: right"><%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                    <td style="text-align: right">
+                        <%
+                        returned_product_total = if session["member"].present? && session["member"]["discount"].present?
+                          (@returned_product.total * 100).to_f / (100 - session["member"]["discount"].to_f)
+                          else
+                          @returned_product.total
+                          end
+                      %>
+                        <%= number_to_currency(returned_product_total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                    </td>
                 </tr>
-                <% total = @returned_product.total %>
+                <% total = returned_product_total %>
                 <tr>
                     <td><strong>Replacement Product</strong></td>
                     <td><%= @replacement_product.barcode %></td>
@@ -73,14 +82,28 @@
                     <td style="text-align: right">
                         <!-- apabila barang retur dan pengganti sama maka pakai subtotal barang retur -->
                         <% if @returned_product.barcode == @replacement_product.barcode %>
-                          <%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
-                          <% total -= @returned_product.total %>
+                          <%
+                          returned_product_total = if session["member"].present? && session["member"]["discount"].present?
+                            (@returned_product.total * 100).to_f / (100 - session["member"]["discount"].to_f)
+                            else
+                            @returned_product.total
+                            end
+                        %>
+                          <%= number_to_currency(returned_product_total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                          <% total -= returned_product_total %>
                         <% else %>
                           <!-- apabila barang retur dan pengganti berbeda dan keduanya tidak mengikuti event -->
                           <% if @returned_product.event_first_plus_discount.blank? && @returned_product.event_cash_discount.blank? && @returned_product.special_price.blank? && @store_event.blank? %>
                             <% if @returned_product.price == @replacement_product.price %>
-                              <%= number_to_currency(@returned_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
-                              <% total -= @returned_product.total %>
+                              <%
+                              returned_product_total = if session["member"].present? && session["member"]["discount"].present?
+                                (@returned_product.total * 100).to_f / (100 - session["member"]["discount"].to_f)
+                                else
+                                @returned_product.total
+                                end
+                            %>
+                              <%= number_to_currency(returned_product_total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                              <% total -= returned_product_total %>
                             <% else %>
                               <%= number_to_currency(@replacement_product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                               <% total = @replacement_product.price - total %>
@@ -137,8 +160,25 @@
               </tbody>
               <tfoot>
                   <tr>
+                      <th colspan="7" style="text-align:right">Subtotal:</th>
+                      <th id="subtotal-sales-return" style="text-align: right"><%= number_to_currency(total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></th>
+                  </tr>
+                  <tr>
+                      <th colspan="7" style="text-align:right">Member Discount:</th>
+                      <th id="member-discount-sales-return" style="text-align: right">
+                          <%
+                          member_discount = if session["member"].present? && session["member"]["discount"].present?
+                            total * (session["member"]["discount"].to_f / 100)
+                            else
+                          0
+                            end
+                        %>
+                          <%= number_to_currency(member_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+                      </th>
+                  </tr>
+                  <tr>
                       <th colspan="7" style="text-align:right">Total:</th>
-                      <th id="total-sales-return" style="text-align: right"><%= number_to_currency(total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></th>
+                      <th id="total-sales-return" style="text-align: right"><%= number_to_currency(total - member_discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></th>
                   </tr>
               </tfoot>
           </table>

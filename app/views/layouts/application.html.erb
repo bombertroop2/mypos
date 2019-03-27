@@ -1001,9 +1001,34 @@
                           if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
                               giftEventDiscount = 0;
 
-                          var moneyChange = cashValue - (saleTotal - giftEventDiscount);
+                          var memberDiscount = parseFloat($("#sale_member_discount").val());
+                          if (isNaN(memberDiscount))
+                              memberDiscount = 0;
+
+                          var totalAfterGiftDiscount = saleTotal - giftEventDiscount;
+                          var memberDiscountInMoney = totalAfterGiftDiscount * (memberDiscount / 100);
+                          var totalAfterMemberDiscount = totalAfterGiftDiscount - memberDiscountInMoney;
+                          var moneyChange = cashValue - totalAfterMemberDiscount;
                           $("#payment_form_sale_change").html(moneyChange);
                           $("#payment_form_sale_change").toCurrency({
+                              precision: 2, // decimal precision
+                              delimiter: ".", // thousands delimiter
+                              separator: ",", // decimal separator
+                              unit: "Rp", // unit
+                              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                          });
+                          $("#payment_form_member_discount").html(memberDiscountInMoney);
+                          $("#payment_form_member_discount").toCurrency({
+                              precision: 2, // decimal precision
+                              delimiter: ".", // thousands delimiter
+                              separator: ",", // decimal separator
+                              unit: "Rp", // unit
+                              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                          });
+                          $("#payment_form_total_sale_after_discount").html(totalAfterMemberDiscount);
+                          $("#payment_form_total_sale_after_discount").toCurrency({
                               precision: 2, // decimal precision
                               delimiter: ".", // thousands delimiter
                               separator: ",", // decimal separator
@@ -1025,7 +1050,8 @@
                       $("#search-barcode-btn").click(function () {
                           $("#barcode").blur();
                           $.get("/sales/get_product", {
-                              barcode: $("#barcode").val().trim()
+                              barcode: $("#barcode").val().trim(),
+                              member_id: $("#sale_member_id").val().trim()
                           });
 
                       });
@@ -1144,7 +1170,8 @@
                               $.get("/sales/get_product", {
                                   sale_product_code: $("#sale_product_code").val().trim(),
                                   sale_product_color: $("#sale_product_color").val().trim(),
-                                  sale_product_size: $("#sale_product_size").val().trim()
+                                  sale_product_size: $("#sale_product_size").val().trim(),
+                                  member_id: $("#sale_member_id").val().trim()
                               });
                       });
                       $('#sale_cash').keypress(function (e) {

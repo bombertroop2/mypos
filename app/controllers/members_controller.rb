@@ -49,6 +49,9 @@ class MembersController < ApplicationController
   # PATCH/PUT /members/1.json
   def update
     @valid = @member.update(member_params)
+    if !@valid && @member.errors[:base].present?
+      render js: "bootbox.alert({message: \"#{@member.errors[:base].join("<br/>")}\",size: 'small'});"
+    end
   end
 
   # DELETE /members/1
@@ -65,6 +68,6 @@ class MembersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def member_params
-    params.require(:member).permit(:name, :address, :phone, :mobile_phone, :gender, :email, :discount)
+    params.require(:member).permit(:name, :address, :phone, :mobile_phone, :gender, :email, :discount, :member_product_event)
   end
 end
