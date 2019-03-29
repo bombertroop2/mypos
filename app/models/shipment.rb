@@ -11,9 +11,11 @@ class Shipment < ApplicationRecord
   has_many :shipment_products, dependent: :destroy
   has_many :shipment_product_items, through: :shipment_products
   has_one :packing_list_item_relation, -> {select("1 AS one")}, class_name: "PackingListItem"
+  has_one :accounts_receivable_invoice, dependent: :destroy
 
   accepts_nested_attributes_for :shipment_products, allow_destroy: true#, reject_if: :child_blank
-
+  accepts_nested_attributes_for :accounts_receivable_invoice
+  
   validates :delivery_date, :courier_id, :order_booking_id, presence: true
   validates :delivery_date, date: {after_or_equal_to: proc {|shpmnt| shpmnt.order_booking.created_at.to_date}, message: 'must be after or equal to creation date of order booking' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.order_booking_id.present? && !shpmnt.attr_change_receive_date}
     validates :delivery_date, date: {after_or_equal_to: proc { Date.current }, message: 'must be after or equal to today' }, if: proc {|shpmnt| shpmnt.delivery_date.present? && shpmnt.delivery_date_changed? && !shpmnt.receiving_inventory && !shpmnt.attr_change_receive_date}
@@ -31,7 +33,7 @@ class Shipment < ApplicationRecord
                           validate :transaction_after_beginning_stock_added, if: proc{|shpmnt| shpmnt.received_date_changed?}
                             validate :received_date_changeable, if: proc{|shpmnt| shpmnt.received_date.present? && shpmnt.attr_change_receive_date}
 
-                              before_create :generate_do_number, :set_received_date
+                              before_create :generate_do_number, :set_received_date, :create_invoice
                               after_create :finish_ob, :notify_store
                               before_destroy :deletable, :transaction_open, :delete_tracks
                               after_destroy :set_ob_status_to_p
@@ -39,18 +41,117 @@ class Shipment < ApplicationRecord
                                 after_update :empty_in_transit_warehouse, :load_goods_to_destination_warehouse, if: proc{|shpmnt| shpmnt.receiving_inventory}
 
                                   private
+                                                                    
+                                  def generate_ari_number
+                                    two_digits_year = delivery_date.strftime("%y").rjust(2, '0')
+                                    pkp_code = @order_booking.customer_is_taxable_entrepreneur ? "1" : "0"
+                                    existed_numbers = AccountsReceivableInvoice.where("number LIKE '#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}%'").select(:number).order(:number)
+                                    if existed_numbers.blank?
+                                      new_number = "#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}00001"
+                                    else
+                                      if existed_numbers.length == 1
+                                        seq_number = existed_numbers[0].number.split("#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}").last
+                                        if seq_number.to_i > 1
+                                          new_number = "#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}00001"
+                                        else
+                                          new_number = "#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}#{seq_number.succ}"
+                                        end
+                                      else
+                                        last_seq_number = ""
+                                        existed_numbers.each_with_index do |existed_number, index|
+                                          seq_number = existed_number.number.split("#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}").last
+                                          if seq_number.to_i > 1 && index == 0
+                                            new_number = "#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}00001"
+                                            break                              
+                                          elsif last_seq_number.eql?("")
+                                            last_seq_number = seq_number
+                                          elsif (seq_number.to_i - last_seq_number.to_i) > 1
+                                            new_number = "#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}#{last_seq_number.succ}"
+                                            break
+                                          elsif index == existed_numbers.length - 1
+                                            new_number = "#{pkp_code}ARINV#{@order_booking.customer_code}#{two_digits_year}#{seq_number.succ}"
+                                          else
+                                            last_seq_number = seq_number
+                                          end
+                                        end
+                                      end                        
+                                    end
+                                    new_number
+                                  end
+                                  
+                                  def create_invoice
+                                    if @destination_warehouse_type.eql?("direct_sales")
+                                      gross_amt = 0
+                                      shipment_products.each do |sp|
+                                        sp.shipment_product_items.each do |spi|
+                                          price_list = PriceList.select(:price).find(spi.price_list_id)
+                                          gross_amt += spi.quantity * price_list.price
+                                        end
+                                      end
+                                      total = if @order_booking.customer_is_taxable_entrepreneur
+                                        if @order_booking.customer_vat_type.eql?("include")
+                                          if @order_booking.cust_discount.to_f > 0
+                                            gross_amt - gross_amt * (@order_booking.cust_discount.to_f / 100)
+                                          else
+                                            gross_amt
+                                          end
+                                        else
+                                          if @order_booking.cust_discount.to_f > 0
+                                            value_after_discount = gross_amt - gross_amt * (@order_booking.cust_discount.to_f / 100)
+                                            value_after_discount + value_after_discount * 0.1
+                                          else
+                                            gross_amt + gross_amt * 0.1
+                                          end
+                                        end
+                                      else
+                                        if @order_booking.cust_discount.to_f > 0
+                                          gross_amt - gross_amt * (@order_booking.cust_discount.to_f / 100)
+                                        else
+                                          gross_amt
+                                        end
+                                      end
+                                      limit_reached = if @order_booking.customer_unlimited
+                                        false
+                                      else
+                                        customer_debt = AccountsReceivableInvoice.joins(shipment: :order_booking).where(["order_bookings.customer_id = ?", @order_booking.customer_id]).sum(:remaining_debt)
+                                        available_limit_value = @order_booking.customer_limit_value - customer_debt
+                                        if total > available_limit_value
+                                          true
+                                        else
+                                          false
+                                        end
+                                      end
+                                      unless limit_reached
+                                        due_date = delivery_date + @order_booking.customer_top.days
+                                        self.attributes = self.attributes.merge(accounts_receivable_invoice_attributes: {
+                                            note: @order_booking.note,
+                                            shipment_id: id,
+                                            discount: @order_booking.cust_discount.to_f,
+                                            total: total,
+                                            remaining_debt: total,
+                                            due_date: due_date,
+                                            number: generate_ari_number,
+                                            attr_auto_create: true
+                                          })
+                                        self.invoiced = true
+                                      else
+                                        errors.add(:base, "Sorry, #{@order_booking.customer_name} has reached a limit for buying product")
+                                        throw :abort
+                                      end
+                                    end
+                                  end
                                   
                                   def received_date_changeable
                                     errors.add(:base, "Sorry, receive date cannot be changed") if order_booking.destination_warehouse.warehouse_type.eql?("direct_sales")
                                   end
                                   
                                   def set_received_date
-                                    destination_warehouse_type = if @order_booking.present?
+                                    @destination_warehouse_type = if @order_booking.present?
                                       @order_booking.destination_warehouse.warehouse_type
                                     else
                                       order_booking.destination_warehouse.warehouse_type
                                     end
-                                    self.received_date = delivery_date if destination_warehouse_type.eql?("direct_sales")
+                                    self.received_date = delivery_date if @destination_warehouse_type.eql?("direct_sales")
                                   end
                               
                                   def transaction_after_beginning_stock_added
@@ -102,7 +203,10 @@ class Shipment < ApplicationRecord
 
                                   def warehouse_is_active
                                     if order_booking_id.present?
-                                      @order_booking = OrderBooking.select(:id, :status, :origin_warehouse_id, :destination_warehouse_id).where(id: order_booking_id).first
+                                      @order_booking = OrderBooking.
+                                        select(:id, :status, :origin_warehouse_id, :destination_warehouse_id, :note, :customer_id, "customers.discount AS cust_discount", "customers.is_taxable_entrepreneur AS customer_is_taxable_entrepreneur", "customers.value_added_tax AS customer_vat_type", "customers.terms_of_payment AS customer_top", "customers.code AS customer_code", "customers.name AS customer_name", "customers.unlimited AS customer_unlimited", "customers.limit_value AS customer_limit_value").
+                                        joins("LEFT JOIN customers ON order_bookings.customer_id = customers.id").
+                                        where(id: order_booking_id).first
                                       if @order_booking.present?
                                         origin_warehouse = Warehouse.select(:id).where(id: @order_booking.origin_warehouse_id, is_active: true).first
                                         if origin_warehouse.blank?

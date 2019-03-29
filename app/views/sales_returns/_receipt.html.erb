@@ -36,7 +36,13 @@
       <% if (sale_product.sale_event_type.eql?("Discount(Rp)") && sale_product.sale_cash_discount.present?) || (sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present? && sale_product.sale_second_plus_discount.present?) || (sale_product.sale_event_type.eql?("Discount(%)") && sale_product.sale_first_plus_discount.present?) %>
         <% subtotal = sale_product.product_quantity * price %>
       <% else %>
-        <% subtotal = sale_product.subtotal %>
+        <%
+        subtotal = if @sale.member_id.present?
+          (sale_product.subtotal * 100).to_f / (100 - @sale.member_discount)
+          else
+          sale_product.subtotal
+          end
+      %>
       <% end %>
       <tr>
           <td><%= "#{sale_product.product_code}/#{sale_product.color_name}/#{sale_product.product_size}" %>&nbsp;</td>
@@ -78,7 +84,13 @@
       <% if (sale_product.returned_product_event_type.eql?("Discount(Rp)") && sale_product.returned_product_cash_discount.present?) || (sale_product.returned_product_event_type.eql?("Discount(%)") && sale_product.returned_product_first_plus_discount.present? && sale_product.returned_product_second_plus_discount.present?) || (sale_product.returned_product_event_type.eql?("Discount(%)") && sale_product.returned_product_first_plus_discount.present?) %>
         <% returned_product_subtotal = sale_product.returned_product_quantity * returned_product_price %>
       <% else %>
-        <% returned_product_subtotal = sale_product.returned_product_subtotal %>
+        <%
+        returned_product_subtotal = if @sale.member_id.present?
+          (sale_product.returned_product_subtotal * 100).to_f / (100 - @sale.member_discount)
+          else
+          sale_product.returned_product_subtotal
+          end
+      %>
       <% end %>
 
       <tr>
@@ -114,18 +126,38 @@
     <tr>
         <td colspan="4" style="border: none;border-top: 1px;border-top-style: dashed"></td>
     </tr>
-    <% total_label = "Total" %>
-    <% total_value = @sale.total - @sale.total_return %>
+    <% if @sale.member_id.present? %>
+      <% total_label = "Subtotal" %>
+      <% total_value_replacement_before_member_discount = (@sale.total * 100).to_f / (100 - @sale.member_discount) %>
+      <% total_value_returned_before_member_discount = (@sale.total_return * 100).to_f / (100 - @sale.member_discount) %>
+      <% total_value = total_value_replacement_before_member_discount - total_value_returned_before_member_discount %>
+    <% else %>
+      <% total_label = "Total" %>
+      <% total_value = @sale.total - @sale.total_return %>
+    <% end %>
     <tr style="white-space: nowrap">
         <td>Item Count</td>
         <td style="text-align: right"><%= total_quantity %>&nbsp;</td>
         <td style="text-align: right"><%= total_label %>&nbsp;</td>
         <td style="text-align: right"><%= number_to_currency(total_value, :delimiter => ".", :unit => "", :precision => 0) %></td>
     </tr>
+    <% if @sale.member_id.present? %>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Member disc.&nbsp;</td>
+          <td style="text-align: right;"><%= number_to_currency(total_value - (@sale.total - @sale.total_return), :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+      <% net_total = total_value - (total_value - (@sale.total - @sale.total_return)) %>
+      <tr style="white-space: nowrap">
+          <td colspan="3" style="text-align: right">Total&nbsp;</td>
+          <td style="text-align: right;"><%= number_to_currency(net_total, :delimiter => ".", :unit => "", :precision => 0) %></td>
+      </tr>
+    <% else %>
+      <% net_total = total_value %>
+    <% end %>
     <% if @sale.payment_method.eql?("Card") %>
       <tr style="white-space: nowrap">
           <td colspan="3" style="text-align: right">Cashless&nbsp;</td>
-          <td style="text-align: right;"><%= number_to_currency(total_value, :delimiter => ".", :unit => "", :precision => 0) %></td>
+          <td style="text-align: right;"><%= number_to_currency(net_total, :delimiter => ".", :unit => "", :precision => 0) %></td>
       </tr>
       <tr style="white-space: nowrap">
           <td colspan="3" style="text-align: right">Change&nbsp;</td>
@@ -134,11 +166,11 @@
     <% else %>
       <tr style="white-space: nowrap">
           <td colspan="3" style="text-align: right">Cash&nbsp;</td>
-          <td style="text-align: right"><%= number_to_currency(@sale.cash, :delimiter => ".", :unit => "", :precision => 0) %></td>
+          <td style="text-align: right"><%= number_to_currency(@sale.cash.to_f, :delimiter => ".", :unit => "", :precision => 0) %></td>
       </tr>
       <tr style="white-space: nowrap">
           <td colspan="3" style="text-align: right">Change&nbsp;</td>
-          <td style="text-align: right"><%= number_to_currency(@sale.change, :delimiter => ".", :unit => "", :precision => 0) %></td>
+          <td style="text-align: right"><%= number_to_currency(@sale.change.to_f, :delimiter => ".", :unit => "", :precision => 0) %></td>
       </tr>
     <% end %>
     <% if @sale.payment_method.eql?("Card") %>

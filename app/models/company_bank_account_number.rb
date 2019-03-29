@@ -4,6 +4,7 @@ class CompanyBankAccountNumber < ApplicationRecord
   belongs_to :company_bank
   has_many :account_payable_payments, dependent: :restrict_with_error
   has_many :account_payable_courier_payments, dependent: :restrict_with_error
+  has_many :accounts_receivable_payments, dependent: :restrict_with_error
 
   before_validation :strip_field_values
 
@@ -17,7 +18,7 @@ class CompanyBankAccountNumber < ApplicationRecord
         private
         
         def account_number_not_changed
-          errors.add(:account_number, "change is not allowed!") if account_payable_payments.select("1 AS one").present? || account_payable_courier_payments.select("1 AS one").present?
+          errors.add(:account_number, "change is not allowed!") if account_payable_payments.select("1 AS one").present? || account_payable_courier_payments.select("1 AS one").present? || accounts_receivable_payments.select("1 AS one").present?
         end
       
         def account_number_not_duplicated

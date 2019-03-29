@@ -12,11 +12,8 @@
 <% else %>
   if(bootboxDialogFormGiftEvent != null)
     bootboxDialogFormGiftEvent.modal("hide");
-  $("#sale_total_label").html("Total");
   $("#sale_gift_event_discount_field").html("");
   $("#sale_gift_event_discount_field_layout").addClass("hidden");
-  $("#payment_form_total_sale_after_discount").html("");
-  $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
   $("#sale_gift_event_gift_item").removeClass("hidden");
   $("#sale_gift_event_gift_type").val($("#discount_product").val());
   $("#payment_form_gift_item_field").html("<%= "#{@gift_item.name}/#{@gift_item.color_name}/#{@gift_item.product_size}" %>");
@@ -32,7 +29,13 @@
       if (isNaN(saleTotal))
         saleTotal = 0;
 
-      var moneyChange = cashValue - saleTotal;
+      var memberDiscount = parseFloat($("#sale_member_discount").val());
+      if (isNaN(memberDiscount))
+          memberDiscount = 0;
+
+      var memberDiscountInMoney = saleTotal * (memberDiscount / 100);
+      var totalAfterMemberDiscount = saleTotal - memberDiscountInMoney;
+      var moneyChange = cashValue - totalAfterMemberDiscount;
       $("#payment_form_sale_change").html(moneyChange);
       $("#payment_form_sale_change").toCurrency({
         precision: 2, // decimal precision
@@ -41,6 +44,24 @@
         unit: "Rp", // unit
         format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
         negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+      $("#payment_form_member_discount").html(memberDiscountInMoney);
+      $("#payment_form_member_discount").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+      });
+      $("#payment_form_total_sale_after_discount").html(totalAfterMemberDiscount);
+      $("#payment_form_total_sale_after_discount").toCurrency({
+          precision: 2, // decimal precision
+          delimiter: ".", // thousands delimiter
+          separator: ",", // decimal separator
+          unit: "Rp", // unit
+          format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+          negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
       });
     }
     $($(".stepContainer")[0]).css("height", "100%");

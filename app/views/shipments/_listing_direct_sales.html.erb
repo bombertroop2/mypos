@@ -1,0 +1,29 @@
+<table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
+    <thead id="listing-direct-sales-thead">
+        <tr>
+            <th class="col-md-3"><%= smart_listing.sortable "DO Number", "delivery_order_number" %></th>
+            <th class="col-md-1"><%= smart_listing.sortable "Date", "delivery_date" %></th>
+            <th class="col-md-3"><%= smart_listing.sortable "Customer", "customers.code" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Quantity", "quantity" %></th>
+            <th class="col-md-2"><%= smart_listing.sortable "Total", "accounts_receivable_invoices.total" %></th>
+            <th class="col-md-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% smart_listing.collection.each do |shipment| %>
+          <tr class="editable" data-id="<%= shipment.id %>">
+              <%= smart_listing.render object: shipment, partial: "shipments/direct_sale", locals: {object: shipment} %>
+          </tr>
+        <% end %>
+    </tbody>
+</table>
+<%= smart_listing.paginate %>
+<script>
+  var directSalesProcessId = setInterval(function () {
+      if ($("#listing-direct-sales-thead").is(":visible")) {
+          clearInterval(directSalesProcessId);
+      } else {
+          $("#listing-direct-sales-thead").show();
+      }
+  }, 0);
+</script>

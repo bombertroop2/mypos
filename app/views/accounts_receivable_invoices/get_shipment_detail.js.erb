@@ -1,6 +1,7 @@
 $("#accounts_receivable_invoice_attr_customer_info").val("<%= "#{@shipment.customer_code} - #{@shipment.customer_name}" %>");
 $("#accounts_receivable_invoice_attr_shipment_quantity").val("<%= number_to_currency(@shipment.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>");
 $("#accounts_receivable_invoice_attr_gross_amount").val("<%= number_to_currency(@gross_amt, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>");
+$("#accounts_receivable_invoice_attr_discount_in_money").val("<%= number_to_currency(@discount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>");
 $("#accounts_receivable_invoice_attr_vat_value").val("<%= number_to_currency(@vat, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>");
 $("#accounts_receivable_invoice_attr_net_amount").val("<%= number_to_currency(@net_amt, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>");
 $("#shipment-detail-container").removeClass("hidden");

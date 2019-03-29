@@ -1,4 +1,14 @@
-// hapus replacement product form yang lama sebelum buat yang baru
-if($("#replacement-product-form").length > 0)
-  $("#replacement-product-form").remove();
-<%= smart_listing_item :sales_returns, :new, @sales_return, "sales_returns/form" %>
+<% if !@cashier_opened %>
+  bootbox.alert({
+    message: 'Please open the cashier first',
+    size: 'small',
+    callback: function () {
+      window.location = '<%= new_cashier_opening_path %>';
+    }
+  });
+<% else %>
+  // hapus replacement product form yang lama sebelum buat yang baru
+  if($("#replacement-product-form").length > 0)
+    $("#replacement-product-form").remove();
+  <%= smart_listing_item :sales_returns, :new, @sales_return, "sales_returns/form" %>
+<% end %>

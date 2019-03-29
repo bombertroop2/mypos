@@ -103,11 +103,22 @@
                                   :precision => 2) %></strong></td>
                     </tr>
                     <%
+                    discount = gross_total * (@accounts_receivable_invoice.customer_discount.to_f / 100)
+                  %>
+                    <tr>
+                        <td colspan="6" align="right"><strong>Discount</strong></td>
+                        <td align="right"><strong><%= number_to_currency(discount,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %></strong></td>
+                    </tr>
+                    <%
                     vat = if @accounts_receivable_invoice.customer_is_taxable_entrepreneur
                       if @accounts_receivable_invoice.customer_vat_type.eql?("include")
-                        (gross_total / 1.1 * 0.1).round(2)
+                        ((gross_total - discount) / 1.1 * 0.1).round(2)
                         else
-                        gross_total * 0.1
+                        (gross_total - discount) * 0.1
                       end
                       else
                     0
@@ -124,12 +135,12 @@
                     <%
                     net_total = if @accounts_receivable_invoice.customer_is_taxable_entrepreneur
                       if @accounts_receivable_invoice.customer_vat_type.eql?("include")
-                      gross_total
+                        gross_total - discount
                         else
-                        gross_total + gross_total * 0.1
+                        (gross_total - discount) + (gross_total - discount) * 0.1
                       end
                       else
-                    gross_total
+                      gross_total - discount
                       end  
                   %>
                     <tr>

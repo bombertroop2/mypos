@@ -35,12 +35,18 @@ class AccountPayable < ApplicationRecord
     
     before_create :generate_number, :set_remaining_debt
     after_create :mark_purchase_doc_as_paid              
+    before_destroy -> {transaction_open("delete")}
     before_destroy :delete_tracks
                                           
     private
     
-    def transaction_open
-      errors.add(:base, "Sorry, you can't perform this transaction") if vendor_invoice_date.present? && FiscalYear.joins(:fiscal_months).where(year: vendor_invoice_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[vendor_invoice_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+    def transaction_open(action = "not delete")
+      if vendor_invoice_date.present? 
+        if FiscalYear.joins(:fiscal_months).where(year: vendor_invoice_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[vendor_invoice_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+          errors.add(:base, "Sorry, you can't perform this transaction")
+          throw :abort if action.eql?("delete")
+        end
+      end
     end
     
     def check_min_purchase_per_invoice

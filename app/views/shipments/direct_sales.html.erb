@@ -1,0 +1,26 @@
+<div class="page-header">
+    <h1>Direct Sales</h1>
+</div>
+
+<div id="search-form-container" class="form-inline text-right">
+    <div class="form-group">
+        <input type="text" id="filter-string-direct-sales" class="form-control" placeholder="DO number">
+    </div>
+    <div class="form-group">
+        <input type="text" class="form-control" readonly="true" id="filter-date-direct-sales" placeholder="Date">
+    </div>
+    <div class="form-group text-left">
+        <%= select_tag "customer_id", options_from_collection_for_select(Customer.select(:id, :code, :name), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-customer-direct-sales"} %>
+      </div>
+      <button id="search-direct-sales-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+  </div>
+
+
+  <div class="hidden">
+      <%= smart_listing_controls_for(:shipments, {class: "form-inline text-right"}) do %>
+          <%= text_field_tag :filter_date_direct_sales, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_string_direct_sales, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_customer_direct_sales, '', class: "search form-control", autocomplete: :off %>
+              <% end %>
+          </div>
+          <%= smart_listing_render(:shipments) %>          

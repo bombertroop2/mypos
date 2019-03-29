@@ -68,7 +68,7 @@ class User < ApplicationRecord
                       "Order Booking", "Courier", "Shipment", "Stock Mutation", "Goods In Transit",
                       "Fiscal Reopening/Closing", "Stock Movement", "Listing Stocks", "Event", "Point of Sale", "Bank Master",
                       "Member", "Consignment", "Growth Report", "Pie Chart of Qty Sold", "Sell Thru Report", "Customer",
-                      "Adjustment", "Packing List", "General Variable", "Account Payable (Vendor)", "Account Payable (Courier)", "Accounts Receivable (Direct Sales)"]
+                      "Adjustment", "Packing List", "General Variable", "Account Payable (Vendor)", "Account Payable (Courier)", "Target", "Accounts Receivable (Direct Sales)"]
 
                     #  def name
                     #    sales_promotion_girl.name
@@ -82,7 +82,7 @@ class User < ApplicationRecord
                         false
                       end
                     end
-                    
+
                     def is_accountant?
                       roles.select("1 AS one").where(["roles.name = ? AND roles.resource_type IS NULL AND roles.resource_id IS NULL", "accountant"]).present?
                     end

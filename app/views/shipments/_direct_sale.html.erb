@@ -1,0 +1,12 @@
+<td><%= object.delivery_order_number %></td>
+<td><%= object.delivery_date.strftime("%d/%m/%Y") %></td>
+<td><%= "#{object.customer_code} - #{object.customer_name}" %></td>
+<td><%= number_to_currency(object.quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+<td><%= number_to_currency(object.net_total,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, show_direct_sale_shipment_path(object), data: {remote: true}, title: "Show" %>
+</td>

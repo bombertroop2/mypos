@@ -1,0 +1,7 @@
+<% if params[:tab].eql?("transfer") %>
+  $("#form_ar_payment_container_transfer").html("<%= j(render(partial: "form_transfer")) %>");
+<% elsif params[:tab].eql?("giro") %>
+  $("#form_ar_payment_container_giro").html("<%= j(render(partial: "form_giro")) %>");
+<% else %>
+  $("#form_ar_payment_container_cash").html("<%= j(render(partial: "form_cash")) %>");
+<% end %>

@@ -1,0 +1,293 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 35px"></div>
+    <div class="alert alert-warning">
+        <h4><i class="fa fa-warning"></i> Warning!</h4> <h4>Please create a payment in order starting with the earliest date.</h4>
+    </div>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#cash" aria-controls="cash" role="tab" data-toggle="tab">Cash</a></li>
+            <li role="presentation"><a href="#giro" aria-controls="giro" role="tab" data-toggle="tab">Giro</a></li>
+            <li role="presentation"><a href="#transfer" aria-controls="transfer" role="tab" data-toggle="tab">Transfer</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="cash" style="padding-top: 20px">
+                <div id="search-form-container-arp-cash" class="form-inline text-right">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="filter-no-invoice-arp-cash" placeholder="No. Invoice">
+                    </div>
+                    <div class="form-group text-left">
+                        <%= select_tag "filter-customer-arp-cash", options_from_collection_for_select(Customer.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                      </div>
+                      <button id="search-btn-arp-cash" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                  </div>
+                  <table id="arp_listing_ari_table" class="display" width="100%">
+                      <thead>
+                          <tr>
+                              <th></th>
+                              <th>No. Invoice</th>
+                              <th>Customer</th>
+                              <th>Due Date</th>
+                              <th>Debt</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <% AccountsReceivableInvoice.joins(shipment: [order_booking: :customer]).select(:id, :number, "customers.code AS customer_code", "customers.name AS customer_name", :due_date, :remaining_debt).where("accounts_receivable_invoices.remaining_debt > 0").order(:due_date).each do |ari| %>
+                            <tr id="arp_ari_<%= ari.id %>">
+                                <td></td>
+                                <td><%= ari.number %></td>
+                                <td><%= "#{ari.customer_code} - #{ari.customer_name}" %></td>
+                                <td><%= ari.due_date.strftime("%d/%m/%Y") %></td>
+                                <td class="text-right"><%= number_to_currency(ari.remaining_debt,
+                                      :separator => ",",
+                                      :delimiter => ".",
+                                      :unit => "Rp",
+                                      :precision => 2) %></td>
+                            </tr>
+                          <% end %>
+                      </tbody>
+                  </table>
+                  <a class="btn btn-default active" id="select_invoices_btn_arp_cash" style="margin-top: 10px;width: 100%">Select</a>
+                  <div id="form_ar_payment_container_cash"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane fade" id="giro" style="padding-top: 20px">
+                  <div id="search-form-container-arp-giro" class="form-inline text-right">
+                      <div class="form-group">
+                          <input type="text" class="form-control" id="filter-no-invoice-arp-giro" placeholder="No. Invoice">
+                      </div>
+                      <div class="form-group text-left">
+                          <%= select_tag "filter-customer-arp-giro", options_from_collection_for_select(Customer.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                        </div>
+                        <button id="search-btn-arp-giro" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                    <table id="arp_listing_ari_table_giro" class="display" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>No. Invoice</th>
+                                <th>Customer</th>
+                                <th id="arp_listing_ari_table_due_date_giro">Due Date</th>
+                                <th>Debt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% AccountsReceivableInvoice.joins(shipment: [order_booking: :customer]).select(:id, :number, "customers.code AS customer_code", "customers.name AS customer_name", :due_date, :remaining_debt).where("accounts_receivable_invoices.remaining_debt > 0").order(:due_date).each do |ari| %>
+                              <tr id="arp_ari_<%= ari.id %>_giro">
+                                  <td></td>
+                                  <td><%= ari.number %></td>
+                                  <td><%= "#{ari.customer_code} - #{ari.customer_name}" %></td>
+                                  <td><%= ari.due_date.strftime("%d/%m/%Y") %></td>
+                                  <td class="text-right"><%= number_to_currency(ari.remaining_debt,
+                                        :separator => ",",
+                                        :delimiter => ".",
+                                        :unit => "Rp",
+                                        :precision => 2) %></td>
+                              </tr>
+                            <% end %>
+                        </tbody>
+                    </table>
+                    <a class="btn btn-default active" id="select_invoices_btn_arp_giro" style="margin-top: 10px;width: 100%">Select</a>
+                    <div id="form_ar_payment_container_giro"></div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="transfer" style="padding-top: 20px">
+                    <div id="search-form-container-arp-transfer" class="form-inline text-right">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="filter-no-invoice-arp-transfer" placeholder="No. Invoice">
+                        </div>
+                        <div class="form-group text-left">
+                            <%= select_tag "filter-customer-arp-transfer", options_from_collection_for_select(Customer.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control", style: "width: 200px"} %>
+                          </div>
+                          <button id="search-btn-arp-transfer" type="submit" class="btn btn-primary" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                      </div>
+                      <table id="arp_listing_ari_table_transfer" class="display" width="100%">
+                          <thead>
+                              <tr>
+                                  <th></th>
+                                  <th>No. Invoice</th>
+                                  <th>Customer</th>
+                                  <th id="arp_listing_ari_table_due_date_transfer">Due Date</th>
+                                  <th>Debt</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              <% AccountsReceivableInvoice.joins(shipment: [order_booking: :customer]).select(:id, :number, "customers.code AS customer_code", "customers.name AS customer_name", :due_date, :remaining_debt).where("accounts_receivable_invoices.remaining_debt > 0").order(:due_date).each do |ari| %>
+                                <tr id="arp_ari_<%= ari.id %>_transfer">
+                                    <td></td>
+                                    <td><%= ari.number %></td>
+                                    <td><%= "#{ari.customer_code} - #{ari.customer_name}" %></td>
+                                    <td><%= ari.due_date.strftime("%d/%m/%Y") %></td>
+                                    <td class="text-right"><%= number_to_currency(ari.remaining_debt,
+                                          :separator => ",",
+                                          :delimiter => ".",
+                                          :unit => "Rp",
+                                          :precision => 2) %></td>
+                                </tr>
+                              <% end %>
+                          </tbody>
+                      </table>
+                      <a class="btn btn-default active" id="select_invoices_btn_arp_transfer" style="margin-top: 10px;width: 100%">Select</a>
+                      <div id="form_ar_payment_container_transfer"></div>
+                  </div>
+              </div>
+          </div>      
+      </td>
+
+      <script>
+        var arpActiveTab = "";
+        $(function () {
+            $("#filter-customer-arp-cash").attr("data-placeholder", "Customer").chosen();
+            $("#filter-customer-arp-giro").attr("data-placeholder", "Customer").chosen({width: "200px"});
+            $("#filter-customer-arp-transfer").attr("data-placeholder", "Customer").chosen({width: "200px"});
+            var arpArInvoiceDataTable = $('#arp_listing_ari_table').DataTable({
+                order: [3, 'asc'],
+                dom: 'T<"clear">lrtip',
+                columns: [
+                    {data: null, defaultContent: '', orderable: false},
+                    {data: 'number'},
+                    {data: 'customer'},
+                    {data: 'due_date'},
+                    {data: 'debt', "type": "currency"}
+                ],
+                tableTools: {
+                    sRowSelect: 'os',
+                    aButtons: []
+                },
+                paging: false,
+                info: false,
+                scrollY: "250px",
+                scrollCollapse: true
+            });
+            var arpArInvoiceDataTableGiro = $('#arp_listing_ari_table_giro').DataTable({
+                order: [3, 'asc'],
+                dom: 'T<"clear">lrtip',
+                columns: [
+                    {data: null, defaultContent: '', orderable: false},
+                    {data: 'number'},
+                    {data: 'customer'},
+                    {data: 'due_date'},
+                    {data: 'debt', "type": "currency"}
+                ],
+                tableTools: {
+                    sRowSelect: 'os',
+                    aButtons: []
+                },
+                paging: false,
+                info: false,
+                scrollY: "250px",
+                scrollCollapse: true
+            });
+            var arpArInvoiceDataTableTransfer = $('#arp_listing_ari_table_transfer').DataTable({
+                order: [3, 'asc'],
+                dom: 'T<"clear">lrtip',
+                columns: [
+                    {data: null, defaultContent: '', orderable: false},
+                    {data: 'number'},
+                    {data: 'customer'},
+                    {data: 'due_date'},
+                    {data: 'debt', "type": "currency"}
+                ],
+                tableTools: {
+                    sRowSelect: 'os',
+                    aButtons: []
+                },
+                paging: false,
+                info: false,
+                scrollY: "250px",
+                scrollCollapse: true
+            });
+            $("#search-btn-arp-cash").click(function () {
+                arpActiveTab = "cash";
+                var noInvoice = $('#filter-no-invoice-arp-cash').val().trim();
+                arpArInvoiceDataTable
+                        .columns(1)
+                        .search(noInvoice)
+                        .draw();
+                var customer = $('#filter-customer-arp-cash option:selected').text().trim();
+                arpArInvoiceDataTable
+                        .columns(2)
+                        .search(customer)
+                        .draw();
+            });
+            $("#search-btn-arp-giro").click(function () {
+                arpActiveTab = "giro";
+                var noInvoice = $('#filter-no-invoice-arp-giro').val().trim();
+                arpArInvoiceDataTableGiro
+                        .columns(1)
+                        .search(noInvoice)
+                        .draw();
+                var customer = $('#filter-customer-arp-giro option:selected').text().trim();
+                arpArInvoiceDataTableGiro
+                        .columns(2)
+                        .search(customer)
+                        .draw();
+            });
+            $("#search-btn-arp-transfer").click(function () {
+                arpActiveTab = "transfer";
+                var noInvoice = $('#filter-no-invoice-arp-transfer').val().trim();
+                arpArInvoiceDataTableTransfer
+                        .columns(1)
+                        .search(noInvoice)
+                        .draw();
+                var customer = $('#filter-customer-arp-transfer option:selected').text().trim();
+                arpArInvoiceDataTableTransfer
+                        .columns(2)
+                        .search(customer)
+                        .draw();
+            });
+            $("#select_invoices_btn_arp_cash").click(function () {
+                if (arpArInvoiceDataTable.rows('.selected').data().length == 0)
+                    bootbox.alert({message: "You have not selected AR invoice yet!", size: 'small'});
+                else {
+                    var arInvoiceIds = [];
+                    $.each(arpArInvoiceDataTable.rows('.selected')[0], function (index, value) {
+                        arInvoiceIds.push(arpArInvoiceDataTable.rows(value).nodes().to$().attr("id").split("_")[2]);
+                    });
+                    $.get("/accounts_receivable_payments/generate_form", {
+                        ar_invoice_ids: arInvoiceIds
+                    });
+                }
+            });
+            $("#select_invoices_btn_arp_giro").click(function () {
+                if (arpArInvoiceDataTableGiro.rows('.selected').data().length == 0)
+                    bootbox.alert({message: "You have not selected AR invoice yet!", size: 'small'});
+                else {
+                    var arInvoiceIds = [];
+                    $.each(arpArInvoiceDataTableGiro.rows('.selected')[0], function (index, value) {
+                        arInvoiceIds.push(arpArInvoiceDataTableGiro.rows(value).nodes().to$().attr("id").split("_")[2]);
+                    });
+                    $.get("/accounts_receivable_payments/generate_form", {
+                        ar_invoice_ids: arInvoiceIds,
+                        tab: "giro"
+                    });
+                }
+            });
+            $("#select_invoices_btn_arp_transfer").click(function () {
+                if (arpArInvoiceDataTableTransfer.rows('.selected').data().length == 0)
+                    bootbox.alert({message: "You have not selected AR invoice yet!", size: 'small'});
+                else {
+                    var arInvoiceIds = [];
+                    $.each(arpArInvoiceDataTableTransfer.rows('.selected')[0], function (index, value) {
+                        arInvoiceIds.push(arpArInvoiceDataTableTransfer.rows(value).nodes().to$().attr("id").split("_")[2]);
+                    });
+                    $.get("/accounts_receivable_payments/generate_form", {
+                        ar_invoice_ids: arInvoiceIds,
+                        tab: "transfer"
+                    });
+                }
+            });
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var target = $(e.target).attr("href") // activated tab
+                if (target == "#giro" && ($('#arp_listing_ari_table_giro').dataTable().fnSettings().aaSorting[0][0] == 3 || $('#arp_listing_ari_table_giro').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                    $("#arp_listing_ari_table_due_date_giro").click();
+                    $("#arp_listing_ari_table_due_date_giro").click();
+                } else if (target == "#transfer" && ($('#arp_listing_ari_table_transfer').dataTable().fnSettings().aaSorting[0][0] == 3 || $('#arp_listing_ari_table_transfer').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                    $("#arp_listing_ari_table_due_date_transfer").click();
+                    $("#arp_listing_ari_table_due_date_transfer").click();
+                }
+            });
+        });
+      </script>

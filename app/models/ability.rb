@@ -59,6 +59,7 @@ class Ability
               can :manage, AccountPayableCourierPayment
             elsif user_menu.eql?("Accounts Receivable (Direct Sales)")
               can :manage, AccountsReceivableInvoice
+              can :manage, AccountsReceivablePayment
             else
               if user_menu.eql?("Point of Sale")
                 can [:read, :export], Sale
@@ -73,7 +74,7 @@ class Ability
     elsif user_roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user_roles.first)}.present?
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable (Vendor)") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable (Courier)") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable") && !user_menu.name.eql?("Accounts Receivable (Direct Sales)")
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable (Vendor)") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable (Courier)") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable") && !user_menu.name.eql?("Target") && !user_menu.name.eql?("Accounts Receivable (Direct Sales)")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -200,7 +201,7 @@ class Ability
           elsif class_name.eql?("Shipment") && !user_roles.include?("area_manager")
             # cegah non manager keatas untuk menghapus shipment
             alias_action :new, :create, :generate_ob_detail, :print, :change_receive_date, to: :undelete_action
-            alias_action :index, :inventory_receipts, :show, to: :read_action_for_staff
+            alias_action :index, :inventory_receipts, :show, :direct_sales, :show_direct_sale, to: :read_action_for_staff
             alias_action :edit, :update, :destroy, to: :edit_action
             if ability.eql?(:manage) && user_roles.first.eql?("staff")
               can [:read_action_for_staff, :undelete_action], class_name.gsub(/\s+/, "").constantize
@@ -263,8 +264,14 @@ class Ability
           elsif class_name.eql?("Accounts Receivable (Direct Sales)")
             if user_roles.include?("staff")
               can :read, AccountsReceivableInvoice
+              can :read, AccountsReceivablePayment
             elsif !user_roles.include?("area_manager")
               can ability, AccountsReceivableInvoice
+              if user_roles.include?("accountant")
+                can ability, AccountsReceivablePayment
+              else
+                can :read, AccountsReceivablePayment
+              end
             end
           elsif class_name.eql?("FiscalYear") && !user_roles.include?("area_manager")
             if user_roles.include?("staff")

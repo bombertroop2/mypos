@@ -110,6 +110,19 @@ $(window).on('load', function () {
                     .transition({top: '8px', opacity: 1});
         }
     });
+    $.fn.dataTable.moment('DD/MM/YYYY');
+    $.extend($.fn.dataTableExt.oSort, {
+        "currency-pre": function (a) {
+            a = (a === "-") ? 0 : a.replace(/[^\d\-\,]/g, "").replace(/[\,]/g, ".");
+            return parseFloat(a);
+        },
+        "currency-asc": function (a, b) {
+            return a - b;
+        },
+        "currency-desc": function (a, b) {
+            return b - a;
+        }
+    });
 }).ajaxStart(function () {
     if (!openingNotification)
         $("#json-overlay").show();

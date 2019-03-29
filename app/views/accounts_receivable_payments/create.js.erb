@@ -1,0 +1,12 @@
+<% if @created %>
+  <%= smart_listing_item :accounts_receivable_payments, :create, @accounts_receivable_payment, "accounts_receivable_payments/accounts_receivable_payment" %>
+  $("#listing-arp-customer-<%= @accounts_receivable_payment.id %>").html("<%= "#{@accounts_receivable_payment.customer.code} - #{@accounts_receivable_payment.customer.name}" %>");
+<% else %>
+  <% if params[:accounts_receivable_payment][:payment_method].eql?("Cash") %>
+    $("#form_ar_payment_container_cash").html("<%= j(render(partial: "form_cash")) %>");
+  <% elsif params[:accounts_receivable_payment][:payment_method].eql?("Giro") %>
+    $("#form_ar_payment_container_giro").html("<%= j(render(partial: "form_giro")) %>");
+  <% else %>
+    $("#form_ar_payment_container_transfer").html("<%= j(render(partial: "form_transfer")) %>");
+  <% end %>
+<% end %>

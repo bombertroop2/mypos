@@ -1,0 +1,12 @@
+<td><%= object.number %></td>
+<td id="listing-arp-customer-<%= object.id %>"><%= "#{object.customer_code} - #{object.customer_name}" rescue nil %></td>
+<td><%= object.payment_date.strftime("%d/%m/%Y") %></td>
+<td><%= object.payment_method %></td>
+<td id="listing-arp-amount-<%= object.id %>"><%= number_to_currency(object.amount,
+      :separator => ",",
+      :delimiter => ".",
+      :unit => "Rp",
+      :precision => 2) %></td>
+<td class="actions" style="text-align: right">
+    <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, accounts_receivable_payment_path(object), data: {remote: true}, title: "Show" %>
+</td>

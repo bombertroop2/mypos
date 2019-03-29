@@ -23,7 +23,7 @@ class DuosMailer < ApplicationMailer
   def ar_invoice_email(accounts_receivable_invoice, recipient)
     @company = Company.select(:id, :name, :address, :phone, :fax).first
     @accounts_receivable_invoice = accounts_receivable_invoice
-    @customer = Customer.select(:name, :phone, :facsimile, :is_taxable_entrepreneur, :value_added_tax).joins(order_bookings: :shipment).where(["shipments.id = ?", @accounts_receivable_invoice.shipment_id]).first
+    @customer = Customer.select(:name, :phone, :facsimile, :is_taxable_entrepreneur, :value_added_tax, :discount).joins(order_bookings: :shipment).where(["shipments.id = ?", @accounts_receivable_invoice.shipment_id]).first
     @shipment = Shipment.select(:delivery_order_number).find(@accounts_receivable_invoice.shipment_id)
     mail to: recipient, subject: "Invoice"
   end

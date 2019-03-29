@@ -1,0 +1,119 @@
+<%= form_for(@accounts_receivable_payment, remote: true, html: {class: "form-horizontal", style: "padding-top: 20px"}) do |f| %>
+    <%= f.hidden_field :payment_method, value: "Cash" %>
+    <%= f.hidden_field :customer_id, id: "accounts_receivable_payment_customer_id_cash" %>
+    <div class="form-group">
+        <%= f.label :attr_customer_code_and_name, "Customer", class: "col-sm-2 control-label" %>
+          <div class="col-sm-10">
+              <%= f.hidden_field :attr_customer_code_and_name %>
+              <span class="form-control" style="cursor: not-allowed;display: inline-block;width: auto" readonly="readonly" id="accounts_receivable_payment_customer_code_name_cash"><%= f.object.attr_customer_code_and_name %></span>
+          </div>
+      </div>
+      <div class="form-group<%= control_group_error(@accounts_receivable_payment, :payment_date) %>">
+          <%= f.label :payment_date, class: "col-sm-2 control-label" %>
+            <div class="col-sm-10">
+                <%= f.text_field :payment_date, size: 10, readonly: true, class: "form-control" %>
+                  <%= error_help_text(@accounts_receivable_payment, :payment_date) %>
+              </div>
+          </div>                                                                              
+          <div class="ln_solid"></div>
+          <%= f.fields_for :accounts_receivable_payment_invoices do |accounts_receivable_payment_invoice_form| %>
+            <%= accounts_receivable_payment_invoice_form.hidden_field :accounts_receivable_invoice_id %>
+            <div class="form-group">
+                <%= accounts_receivable_payment_invoice_form.label :attr_invoice_number, "No. Invoice", class: "col-sm-2 control-label" %>
+                  <div class="col-sm-10">
+                      <%= accounts_receivable_payment_invoice_form.hidden_field :attr_invoice_number %>
+                      <span class="form-control" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= accounts_receivable_payment_invoice_form.object.attr_invoice_number %></span>
+                  </div>
+              </div>
+              <div class="form-group<%= control_group_error(accounts_receivable_payment_invoice_form.object, :attr_invoice_date) %>">
+                  <%= accounts_receivable_payment_invoice_form.label :attr_invoice_date, "Invoice date", class: "col-sm-2 control-label" %>
+                    <div class="col-sm-10">
+                        <%= accounts_receivable_payment_invoice_form.hidden_field :attr_invoice_date %>
+                        <span class="form-control" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= !accounts_receivable_payment_invoice_form.object.attr_invoice_date.class.eql?("Date") ? accounts_receivable_payment_invoice_form.object.attr_invoice_date.to_date.strftime("%d/%m/%Y") : accounts_receivable_payment_invoice_form.object.attr_invoice_date.strftime("%d/%m/%Y") %></span>
+                        <%= error_help_text(accounts_receivable_payment_invoice_form.object, :attr_invoice_date) %>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <%= accounts_receivable_payment_invoice_form.label :attr_amount_sold, "Amount sold", class: "col-sm-2 control-label" %>
+                      <div class="col-sm-10">
+                          <%= accounts_receivable_payment_invoice_form.hidden_field :attr_amount_sold %>
+                          <span class="form-control text-right" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= number_to_currency(accounts_receivable_payment_invoice_form.object.attr_amount_sold,
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %></span>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <%= accounts_receivable_payment_invoice_form.label :attr_remaining_debt, "Debt", class: "col-sm-2 control-label" %>
+                        <div class="col-sm-10">
+                            <%= accounts_receivable_payment_invoice_form.hidden_field :attr_remaining_debt %>
+                            <span class="form-control text-right" style="cursor: not-allowed;display: inline-block" readonly="readonly"><%= number_to_currency(accounts_receivable_payment_invoice_form.object.attr_remaining_debt,
+                                  :separator => ",",
+                                  :delimiter => ".",
+                                  :unit => "Rp",
+                                  :precision => 2) %></span>
+                        </div>
+                    </div>
+                    <div class="form-group<%= control_group_error(accounts_receivable_payment_invoice_form.object, :amount) %>">
+                        <%= accounts_receivable_payment_invoice_form.label :amount, class: "col-sm-2 control-label" %>
+                          <div class="col-sm-10">
+                              <%= accounts_receivable_payment_invoice_form.text_field :amount, class: "form-control accounts-receivable-payment-invoice-amount-fields", "data-a-sep" => ".", "data-a-dec" => ",", "data-a-sign" => "Rp", style: "text-align:right;" %>
+                                <%= error_help_text(accounts_receivable_payment_invoice_form.object, :amount) %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-10">
+                                <%= accounts_receivable_payment_invoice_form.check_box :_destroy %> Delete
+                            </div>
+
+                        </div>
+                        <div class="ln_solid"></div>
+                      <% end %>
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-10">
+                              <%= f.submit "Save", class: "btn btn-primary" %>
+                                <button class="btn btn-link cancel">Cancel</button>
+                            </div>
+                        </div>
+                      <% end %>
+
+                      <script>
+                        $(function () {
+                            $("#accounts_receivable_payment_payment_date").datepicker({
+                                dateFormat: "dd/mm/yy"
+                            });
+
+                            $('.accounts-receivable-payment-invoice-amount-fields').autoNumeric('init');
+
+                            $("#new_accounts_receivable_payment").submit(function () {
+                                if (submitArpFormCash) {
+                                    submitArpFormCash = false;
+                                    return true;
+                                } else {
+                                    bootbox.confirm({
+                                        message: "Please double check all of the data before you create payment, make sure everything is correct.<br>Once you create payment, you'll not be able to change or delete it<br>Are you ABSOLUTELY sure?",
+                                        buttons: {
+                                            confirm: {
+                                                label: '<i class="fa fa-check"></i> Confirm'
+                                            },
+                                            cancel: {
+                                                label: '<i class="fa fa-times"></i> Cancel'
+                                            }
+                                        },
+                                        callback: function (result) {
+                                            if (result) {
+                                                $("body").css('padding-right', '0px');
+                                                submitArpFormCash = true;
+                                                $("#new_accounts_receivable_payment").submit();
+                                            }
+                                        },
+                                        size: "small"
+                                    });
+                                    return false;
+                                }
+                            });
+
+                        });
+                      </script>
