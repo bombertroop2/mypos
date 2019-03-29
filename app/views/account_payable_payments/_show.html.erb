@@ -69,7 +69,7 @@
                       joins(:account_payable).
                       includes(:account_payable_purchases).
                       includes(account_payable_purchase_partials: [received_purchase_order: [:purchase_order, :direct_purchase], received_purchase_order_products: [:received_purchase_order_items, purchase_order_product: :cost_list, direct_purchase_product: :cost_list]]).
-                      select(:id, :amount, :account_payable_id, "account_payables.number AS ap_invoice_number", "account_payables.note AS ap_invoice_note", "account_payables.total AS ap_invoice_total", "account_payables.vendor_invoice_number", "account_payables.vendor_invoice_date", "account_payables.beginning_of_account_payable_creating").
+                      select(:id, :amount, :account_payable_id, "account_payables.number AS ap_invoice_number", "account_payables.note AS ap_invoice_note", "account_payables.total AS ap_invoice_total", "account_payables.vendor_invoice_number", "account_payables.vendor_invoice_date", "account_payables.beginning_of_account_payable_creating", "account_payables.due_date AS invoice_due_date").
                       each do |appi| %>
                       <tr>
                           <td align="center" colspan="2">
@@ -99,6 +99,11 @@
                                                           </td>
                                                           <td style="vertical-align: top;width: 30%">
                                                               <table class="table-condensed table-responsive" align="right">
+                                                                  <tr>
+                                                                      <td>Due Date</td>
+                                                                      <td>:</td>
+                                                                      <td><%= appi.invoice_due_date.strftime("%d/%m/%Y") rescue "" %></td>
+                                                                  </tr>
                                                                   <tr>
                                                                       <td style="vertical-align: top">Note</td>
                                                                       <td style="vertical-align: top">:</td>

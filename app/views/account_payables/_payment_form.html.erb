@@ -92,7 +92,7 @@
                       </tr>
                       <% if @account_payable && @account_payable.errors[:total].present? %>
                         <tr>
-                            <td colspan="7" align="right"><%= error_help_text(@account_payable, :total) %></td>
+                            <td colspan="8" align="right"><%= error_help_text(@account_payable, :total) %></td>
                         </tr>
                       <% end %>
                   </tfoot>

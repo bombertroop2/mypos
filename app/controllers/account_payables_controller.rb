@@ -13,6 +13,12 @@ class AccountPayablesController < ApplicationController
       start_date = splitted_date_range[0].strip.to_date
       end_date = splitted_date_range[1].strip.to_date
     end
+
+    if params[:filter_ap_invoice_due_date].present?
+      splitted_due_date_range = params[:filter_ap_invoice_due_date].split("-")
+      start_due_date = splitted_due_date_range[0].strip.to_date
+      end_due_date = splitted_due_date_range[1].strip.to_date
+    end
     
     if params[:filter_ap_invoice_status].present?
       remaining_debt_query = if params[:filter_ap_invoice_status].eql?("All")
@@ -24,12 +30,13 @@ class AccountPayablesController < ApplicationController
       end
     end
 
-    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, total, remaining_debt", :vendor_invoice_number, :vendor_invoice_date).joins(:vendor)
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, total, remaining_debt", :vendor_invoice_number, :vendor_invoice_date, :due_date).joins(:vendor)
     account_payables_scope = account_payables_scope.where(["number ILIKE ? OR vendor_invoice_number ILIKE ?", "%"+params[:filter_ap_invoice_invoice_number]+"%", "%"+params[:filter_ap_invoice_invoice_number]+"%"]) if params[:filter_ap_invoice_invoice_number].present?
     account_payables_scope = account_payables_scope.where(["vendor_id = ?", params[:filter_ap_invoice_vendor_id]]) if params[:filter_ap_invoice_vendor_id].present?
     account_payables_scope = account_payables_scope.where(["vendor_invoice_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_ap_invoice_vendor_invoice_date].present?
+    account_payables_scope = account_payables_scope.where(["due_date BETWEEN ? AND ?", start_due_date, end_due_date]) if params[:filter_ap_invoice_due_date].present?
     account_payables_scope = account_payables_scope.where(remaining_debt_query) if params[:filter_ap_invoice_status].present?
-    smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {number: "asc"})
+    smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {due_date: "asc"})
   end
 
   # GET /account_payables/1
@@ -260,7 +267,7 @@ class AccountPayablesController < ApplicationController
       else
         value_after_ppn_for_ap_partial rpo, "direct", gross_amount
       end
-      @account_payable_purchase_partials << account_payable.account_payable_purchase_partials.build(received_purchase_order_id: rpo.id, attr_delivery_order_number: rpo.delivery_order_number, attr_purchase_order_number: rpo.po_number, attr_received_quantity: rpo.quantity, attr_gross_amount: gross_amount, attr_first_discount_money: first_discount_money, attr_second_discount_money: second_discount_money, attr_is_additional_disc_from_net: is_additional_disc_from_net, attr_vat_in_money: vat_in_money, attr_net_amount: net_amount, attr_receiving_date: rpo.receiving_date, attr_rpo_transaction_number: rpo.transaction_number)
+      @account_payable_purchase_partials << account_payable.account_payable_purchase_partials.build(received_purchase_order_id: rpo.id, attr_delivery_order_number: rpo.delivery_order_number, attr_purchase_order_number: rpo.po_number, attr_received_quantity: rpo.quantity, attr_gross_amount: gross_amount, attr_first_discount_money: first_discount_money, attr_second_discount_money: second_discount_money, attr_is_additional_disc_from_net: is_additional_disc_from_net, attr_vat_in_money: vat_in_money, attr_net_amount: net_amount, attr_receiving_date: rpo.receiving_date, attr_rpo_transaction_number: rpo.transaction_number, attr_select: true)
     end
   end
 
@@ -275,7 +282,7 @@ class AccountPayablesController < ApplicationController
     if params[:account_payable][:beginning_of_account_payable_creating].eql?("Partial")
       params.require(:account_payable).permit(:vendor_id, :beginning_of_account_payable_creating,
         :note, :vendor_invoice_number, :vendor_invoice_date,
-        account_payable_purchase_partials_attributes: [:received_purchase_order_id, :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity, :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date, :attr_rpo_transaction_number])
+        account_payable_purchase_partials_attributes: [:received_purchase_order_id, :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity, :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date, :attr_rpo_transaction_number, :attr_select, :_destroy])
     else
       params.require(:account_payable).permit(:vendor_id, :beginning_of_account_payable_creating,
         :note, :vendor_invoice_number, :vendor_invoice_date,
@@ -284,10 +291,19 @@ class AccountPayablesController < ApplicationController
   end
   
   def add_additional_params_to_child
-    params[:account_payable][:account_payable_purchases_attributes].each do |key, value|
-      params[:account_payable][:account_payable_purchases_attributes][key].merge! vendor_id: params[:account_payable][:vendor_id]
-      params[:account_payable][:account_payable_purchases_attributes][key][:attr_vendor_invoice_date] = params[:account_payable][:vendor_invoice_date]
-    end if params[:account_payable][:account_payable_purchases_attributes].present?
+    if params[:account_payable][:beginning_of_account_payable_creating].eql?("Partial")
+      params[:account_payable][:account_payable_purchase_partials_attributes].each do |key, value|
+        if params[:account_payable][:account_payable_purchase_partials_attributes][key][:attr_select].eql?("1")
+        else
+          params[:account_payable][:account_payable_purchase_partials_attributes][key][:_destroy] = true
+        end
+      end if params[:account_payable][:account_payable_purchase_partials_attributes].present?
+    else
+      params[:account_payable][:account_payable_purchases_attributes].each do |key, value|
+        params[:account_payable][:account_payable_purchases_attributes][key].merge! vendor_id: params[:account_payable][:vendor_id]
+        params[:account_payable][:account_payable_purchases_attributes][key][:attr_vendor_invoice_date] = params[:account_payable][:vendor_invoice_date]
+      end if params[:account_payable][:account_payable_purchases_attributes].present?
+    end
   end
 
 end

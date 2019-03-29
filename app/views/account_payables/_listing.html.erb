@@ -2,7 +2,8 @@
     <thead id="listing-ap-thead">
         <tr>
             <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Number", "number" %></th>
-            <th class="col-md-5 text-center" colspan="3">Vendor</th>
+            <th class="col-md-4 text-center" colspan="3">Vendor</th>
+            <th class="col-md-1 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Due Dt", "due_date" %></th>
             <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Total", "total" %></th>
             <th class="col-md-2 text-center" rowspan="2" style="vertical-align: middle"><%= smart_listing.sortable "Rem. Debt", "remaining_debt" %></th>
             <th class="col-md-1 text-center" rowspan="2" style="vertical-align: middle"></th>
@@ -19,7 +20,7 @@
               <%= smart_listing.render object: ap, partial: "account_payables/account_payable", locals: {object: ap} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 7, link: new_account_payable_path %>
+        <%= smart_listing.item_new colspan: 8, link: new_account_payable_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

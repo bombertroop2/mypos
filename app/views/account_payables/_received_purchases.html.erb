@@ -6,6 +6,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th class="text-center">Select</th>
                     <th class="text-center">Transaction No.</th>
                     <th class="text-center">DO No.</th>
                     <th class="text-center">PO No.</th>
@@ -34,6 +35,7 @@
                     <%= account_payable_purchase_partial_form.hidden_field :attr_receiving_date %>
                     <%= account_payable_purchase_partial_form.hidden_field :attr_rpo_transaction_number %>
                     <tr id="api_received_purchase_order_<%= account_payable_purchase_partial_form.object.received_purchase_order_id %>">
+                        <td style="text-align: center;vertical-align: middle"><%= account_payable_purchase_partial_form.check_box :attr_select %></td>
                         <td style="vertical-align: middle"><%= account_payable_purchase_partial_form.object.attr_rpo_transaction_number %></td>
                         <td style="vertical-align: middle"><%= account_payable_purchase_partial_form.object.attr_delivery_order_number %></td>
                         <td style="vertical-align: middle"><%= account_payable_purchase_partial_form.object.attr_purchase_order_number %></td>
@@ -94,6 +96,7 @@
                       <%= account_payable_purchase_partial_form.hidden_field :attr_receiving_date %>
                       <%= account_payable_purchase_partial_form.hidden_field :attr_rpo_transaction_number %>
                       <tr id="api_received_purchase_order_<%= account_payable_purchase_partial.received_purchase_order_id %>">
+                          <td style="text-align: center;vertical-align: middle"><%= account_payable_purchase_partial_form.check_box :attr_select %></td>
                           <td style="vertical-align: middle"><%= account_payable_purchase_partial.attr_rpo_transaction_number %></td>
                           <td style="vertical-align: middle"><%= account_payable_purchase_partial.attr_delivery_order_number %></td>
                           <td style="vertical-align: middle"><%= account_payable_purchase_partial.attr_purchase_order_number %></td>
@@ -144,7 +147,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="9" align="right"><strong>Amount Due</strong></td>
+                    <td colspan="10" align="right"><strong>Amount Due</strong></td>
                     <td align="right"><strong><%= number_to_currency(total_amount_received,
                               :separator => ",",
                               :delimiter => ".",
