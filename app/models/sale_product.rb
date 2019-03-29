@@ -1,7 +1,7 @@
 class SaleProduct < ApplicationRecord
   attr_accessor :sales_promotion_girl_id, :event_type, :effective_price, :attr_effective_cost,
     :first_plus_discount, :second_plus_discount, :cash_discount, :attr_returned_sale_id,
-    :attr_returning_sale, :attr_gift_event_discount_amount
+    :attr_returning_sale, :attr_gift_event_discount_amount, :attr_member_discount
   
   belongs_to :sale
   belongs_to :product_barcode
@@ -45,24 +45,50 @@ class SaleProduct < ApplicationRecord
         
             def update_total
               if event_id.blank? || (event_id.present? && (event_type.eql?("Buy 1 Get 1 Free") || event_type.eql?("Special Price") || event_type.eql?("Gift")))
-                self.total = quantity * effective_price.to_f
+                total_before_member_discount = quantity * effective_price.to_f
+                total_after_member_discount = total_before_member_discount - total_before_member_discount * (attr_member_discount.to_f / 100)
+                self.total = total_after_member_discount
               elsif event_id.present? && event_type.eql?("Discount(%)")
                 if first_plus_discount.present? && second_plus_discount.present?
                   first_discounted_subtotal = effective_price.to_f * quantity - effective_price.to_f * quantity * first_plus_discount.to_f / 100
-                  self.total = first_discounted_subtotal - first_discounted_subtotal * second_plus_discount.to_f / 100
+                  second_discounted_subtotal = first_discounted_subtotal - first_discounted_subtotal * second_plus_discount.to_f / 100
+                  total_after_member_discount = second_discounted_subtotal - second_discounted_subtotal * (attr_member_discount.to_f / 100)
+                  self.total = total_after_member_discount
                 elsif first_plus_discount.present?
-                  self.total = effective_price.to_f * quantity - effective_price.to_f * quantity * first_plus_discount.to_f / 100
+                  total_before_member_discount = effective_price.to_f * quantity - effective_price.to_f * quantity * first_plus_discount.to_f / 100
+                  total_after_member_discount = total_before_member_discount - total_before_member_discount * (attr_member_discount.to_f / 100)
+                  self.total = total_after_member_discount
                 end
               elsif event_id.present? && event_type.eql?("Discount(Rp)")
-                self.total = effective_price.to_f * quantity - cash_discount.to_f
+                total_before_member_discount = effective_price.to_f * quantity - cash_discount.to_f
+                total_after_member_discount = total_before_member_discount - total_before_member_discount * (attr_member_discount.to_f / 100)
+                self.total = total_after_member_discount
               end
             end
 
             def update_gross_profit
               self.gross_profit = if event_id.present? && event_type.eql?("Gift")
-                total - attr_gift_event_discount_amount - attr_effective_cost
+                if attr_gift_event_discount_amount.present?
+                  total_before_gift_discount = quantity * effective_price.to_f
+                  total_after_gift_discount = total_before_gift_discount - attr_gift_event_discount_amount
+                  total_after_member_discount = total_after_gift_discount - total_after_gift_discount * (attr_member_discount.to_f / 100)
+                  total_after_member_discount - attr_effective_cost
+                else
+                  total - attr_effective_cost
+                end
               else
-                total - attr_effective_cost
+                if attr_gift_event_discount_amount.present?
+                  total_before_member_discount = if attr_member_discount.to_f > 0
+                    (total * 100).to_f / (100 - attr_member_discount.to_f)
+                  else
+                    total
+                  end
+                  total_after_gift_discount = total_before_member_discount - attr_gift_event_discount_amount
+                  total_after_member_discount = total_after_gift_discount - total_after_gift_discount * (attr_member_discount.to_f / 100)
+                  total_after_member_discount - attr_effective_cost
+                else
+                  total - attr_effective_cost
+                end
               end
             end
       

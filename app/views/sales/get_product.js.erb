@@ -104,10 +104,8 @@
 
           if (totalSale >= minimumPurchaseAmount) {
             if ($("#sale_gift_event_gift_type").val() == "Discount") {
-                $("#sale_total_label").html("Subtotal");
                 $("#sale_gift_event_discount_field").html("<%= session["sale"]["#{@product.id}"]["store_event"]["discount_amount"] %>");
                 $("#sale_gift_event_discount_field_layout").removeClass("hidden");
-                $("#sale_gift_event_total_after_discount_field_layout").removeClass("hidden");
                 $("#sale_gift_event_discount_field").toCurrency({
                     precision: 2, // decimal precision
                     delimiter: ".", // thousands delimiter
@@ -153,11 +151,8 @@
                 minimumPurchaseAmount = 0;
 
             if (totalSale < minimumPurchaseAmount) {
-                $("#sale_total_label").html("Total");
                 $("#sale_gift_event_discount_field").html("");
                 $("#sale_gift_event_discount_field_layout").addClass("hidden");
-                $("#payment_form_total_sale_after_discount").html("");
-                $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
                 $("#sale_gift_event_gift_item").addClass("hidden");
                 $("#payment_form_gift_item_field").html("");
             }
@@ -165,11 +160,8 @@
         <% end %>
 
         if (totalSale == 0) {
-          $("#sale_total_label").html("Total");
           $("#sale_gift_event_discount_field").html("");
           $("#sale_gift_event_discount_field_layout").addClass("hidden");
-          $("#payment_form_total_sale_after_discount").html("");
-          $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
           $("#sale_gift_event_gift_item").addClass("hidden");
           $("#payment_form_gift_item_field").html("");
         }
@@ -339,10 +331,8 @@
 
           if (totalSale >= minimumPurchaseAmount) {
             if ($("#sale_gift_event_gift_type").val() == "Discount") {
-                $("#sale_total_label").html("Subtotal");
                 $("#sale_gift_event_discount_field").html("<%= @store_event.discount_amount %>");
                 $("#sale_gift_event_discount_field_layout").removeClass("hidden");
-                $("#sale_gift_event_total_after_discount_field_layout").removeClass("hidden");
                 $("#sale_gift_event_discount_field").toCurrency({
                     precision: 2, // decimal precision
                     delimiter: ".", // thousands delimiter
@@ -396,11 +386,8 @@
                 minimumPurchaseAmount = 0;
 
             if (totalSale < minimumPurchaseAmount) {
-                $("#sale_total_label").html("Total");
                 $("#sale_gift_event_discount_field").html("");
                 $("#sale_gift_event_discount_field_layout").addClass("hidden");
-                $("#payment_form_total_sale_after_discount").html("");
-                $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
                 $("#sale_gift_event_gift_item").addClass("hidden");
                 $("#payment_form_gift_item_field").html("");
             }
@@ -408,11 +395,8 @@
         <% end %>
 
         if (totalSale == 0) {
-          $("#sale_total_label").html("Total");
           $("#sale_gift_event_discount_field").html("");
           $("#sale_gift_event_discount_field_layout").addClass("hidden");
-          $("#payment_form_total_sale_after_discount").html("");
-          $("#sale_gift_event_total_after_discount_field_layout").addClass("hidden");
           $("#sale_gift_event_gift_item").addClass("hidden");
           $("#payment_form_gift_item_field").html("");
         }

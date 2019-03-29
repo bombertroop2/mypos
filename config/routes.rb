@@ -1,8 +1,11 @@
 Rails.application.routes.draw do
-  resources :accounts_receivable_invoices, except: [:edit, :update] do    
+  resources :accounts_receivable_payments, except: [:edit, :update, :destroy] do
     collection do
-      get "get_shipment_detail"
+      get "generate_form"
+      get "get_account_numbers"
     end
+  end
+  resources :accounts_receivable_invoices, only: [:index, :show] do
     member do
       get "print"
     end
@@ -260,11 +263,13 @@ Rails.application.routes.draw do
       get "inventory_receipts"
       get "search_do"
       get :multiprint
+      get :direct_sales
     end
     member do
       get "receive"
       get "change_receive_date"
       get "print"
+      get "show_direct_sale"
     end
   end
   resources :couriers

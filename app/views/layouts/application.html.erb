@@ -16,8 +16,14 @@
                 <% else %>
                   <% opened_menu_name = "Stock Mutations (warehouse to store)" %>
                 <% end %>
-              <% elsif params[:controller].eql?("shipments") && action_name.eql?("inventory_receipts") %>
-                <% opened_menu_name = "Delivery Order Receipts" %>
+              <% elsif params[:controller].eql?("shipments") %>
+                <% if action_name.eql?("inventory_receipts") %>
+                  <% opened_menu_name = "Delivery Order Receipts" %>
+                <% elsif action_name.eql?("direct_sales") %>
+                  <% opened_menu_name = "Direct Sales" %>
+                <% else %>
+                  <% opened_menu_name = params[:controller].humanize.titleize %>
+                <% end %>
               <% elsif params[:controller].eql?("fake_consignment_sale") %>
                 <% opened_menu_name = "Consignments" %>
               <% elsif params[:controller].eql?("fiscal_years") %>
@@ -37,6 +43,8 @@
                 <% opened_menu_name = "AP Payments (Courier)" %>
               <% elsif params[:controller].eql?("accounts_receivable_invoices") %>
                 <% opened_menu_name = "AR Invoices (Direct Sales)" %>
+              <% elsif params[:controller].eql?("accounts_receivable_payments") %>
+                <% opened_menu_name = "AR Payments (Direct Sales)" %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -45,6 +53,7 @@
               ONE-S
             <% end %>
         </title>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
         <%= stylesheet_link_tag 'application', media: 'all' %>
 <%#= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
         <%= csrf_meta_tags %>
@@ -184,8 +193,20 @@
                                                     <% if can?(:read_action_for_staff, Shipment) || can?(:read_action, Shipment) %>
                                                       <li><%= link_to "Shipments", shipments_path, method: :get %></li>
                                                     <% end %>
+                                                </ul>
+                                            </li>
+                                          <% end %>
+                                          <% if direct_sales_menu_active? %>
+                                            <li><a><i class="fa fa-arrows-h"></i> Direct Sales <span class="fa fa-chevron-down"></span></a>
+                                                <ul class="nav child_menu">
+                                                    <% if can?(:read_action_for_staff, Shipment) %>
+                                                      <li><%= link_to "Listing Sales", direct_sales_shipments_path, method: :get %></li>
+                                                    <% end %>
                                                     <% if can? :read, AccountsReceivableInvoice %>
                                                       <li><%= link_to "AR Invoices", accounts_receivable_invoices_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountsReceivablePayment %>
+                                                      <li><%= link_to "AR Payments", accounts_receivable_payments_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
@@ -285,7 +306,7 @@
                                             </li>
                                           <% end %>
                                           <% if cashier_menu_active? %>
-                                            <li><a><i class="fa fa-calculator"></i> Point of Sale <span class="fa fa-chevron-down"></span></a>
+                                            <li><a><i class="fas fa-cash-register fa-lg"></i>&nbsp;&nbsp;&nbsp;Point of Sale <span class="fa fa-chevron-down"></span></a>
                                                 <ul class="nav child_menu">
                                                     <% if can? :manage, CashierOpening %>
                                                       <li><%= link_to "Cashier Opening", new_cashier_opening_path, method: :get %></li>
@@ -980,9 +1001,34 @@
                           if (isNaN(giftEventDiscount) || !$("#sale_gift_event_discount_field").is(":visible"))
                               giftEventDiscount = 0;
 
-                          var moneyChange = cashValue - (saleTotal - giftEventDiscount);
+                          var memberDiscount = parseFloat($("#sale_member_discount").val());
+                          if (isNaN(memberDiscount))
+                              memberDiscount = 0;
+
+                          var totalAfterGiftDiscount = saleTotal - giftEventDiscount;
+                          var memberDiscountInMoney = totalAfterGiftDiscount * (memberDiscount / 100);
+                          var totalAfterMemberDiscount = totalAfterGiftDiscount - memberDiscountInMoney;
+                          var moneyChange = cashValue - totalAfterMemberDiscount;
                           $("#payment_form_sale_change").html(moneyChange);
                           $("#payment_form_sale_change").toCurrency({
+                              precision: 2, // decimal precision
+                              delimiter: ".", // thousands delimiter
+                              separator: ",", // decimal separator
+                              unit: "Rp", // unit
+                              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                          });
+                          $("#payment_form_member_discount").html(memberDiscountInMoney);
+                          $("#payment_form_member_discount").toCurrency({
+                              precision: 2, // decimal precision
+                              delimiter: ".", // thousands delimiter
+                              separator: ",", // decimal separator
+                              unit: "Rp", // unit
+                              format: "%u%n", // format. %u is the placeholder for the unit, %n for the number
+                              negativeFormat: false   // format for negative numbers. If false, it defaults to the same format as positive numbers
+                          });
+                          $("#payment_form_total_sale_after_discount").html(totalAfterMemberDiscount);
+                          $("#payment_form_total_sale_after_discount").toCurrency({
                               precision: 2, // decimal precision
                               delimiter: ".", // thousands delimiter
                               separator: ",", // decimal separator
@@ -1004,7 +1050,8 @@
                       $("#search-barcode-btn").click(function () {
                           $("#barcode").blur();
                           $.get("/sales/get_product", {
-                              barcode: $("#barcode").val().trim()
+                              barcode: $("#barcode").val().trim(),
+                              member_id: $("#sale_member_id").val().trim()
                           });
 
                       });
@@ -1123,7 +1170,8 @@
                               $.get("/sales/get_product", {
                                   sale_product_code: $("#sale_product_code").val().trim(),
                                   sale_product_color: $("#sale_product_color").val().trim(),
-                                  sale_product_size: $("#sale_product_size").val().trim()
+                                  sale_product_size: $("#sale_product_size").val().trim(),
+                                  member_id: $("#sale_member_id").val().trim()
                               });
                       });
                       $('#sale_cash').keypress(function (e) {
@@ -1207,11 +1255,18 @@
                         message: '<%= alert %>',
                         size: 'small'
                     });
-    <% elsif controller_name.eql?("general_variables") && notice.present? %>
+    <% elsif controller_name.eql?("general_variables") %>
+      <% if notice.present? %>
                     bootbox.alert({
                         message: '<%= notice %>',
                         size: 'small'
                     });
+      <% elsif @general_variable.present? && @general_variable.errors[:base].present? %>
+                    bootbox.alert({
+                        message: "<%= @general_variable.errors[:base].join("<br/>") %>",
+                        size: 'small'
+                    });
+      <% end %>
     <% end %>
               });
             </script>

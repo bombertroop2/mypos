@@ -65,6 +65,11 @@
       </dl>
     <% end %>
     <dl class="dl-horizontal">
+        <dt>Discount</dt>
+        <dd><%= object.discount %>%</dd>
+    </dl>
+
+    <dl class="dl-horizontal">
         <dt>Province</dt>
         <dd><%= object.province.name rescue "" %></dd>
     </dl>

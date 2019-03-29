@@ -16,7 +16,16 @@
         <% @sale_products.each do |sale_product| %>
           <tr id="sale_product_<%= sale_product.id %>">
               <td><%= "#{sale_product.product_code}/#{sale_product.product_color}/#{sale_product.product_size}" %></td>
-              <td><%= number_to_currency(sale_product.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+              <td>
+                  <%
+                  subtotal = if sale_product.member_id.present?
+                    (sale_product.total * 100).to_f / (100 - sale_product.sale_member_discount)
+                    else
+                    sale_product.total
+                    end
+                %>
+                  <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
+              </td>
               <td style="text-align: right">          
                   <button type="button" class="btn btn-danger" id="btn-return-sale-product-<%= sale_product.id %>" style="margin-bottom: 2px !important">Return</button>
               </td>

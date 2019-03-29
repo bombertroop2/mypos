@@ -1,0 +1,102 @@
+<td colspan="6">
+    <button type="button" class="close cancel" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div style="padding-top: 20px"></div>
+
+    <dl class="dl-horizontal">
+        <dt>Number</dt>
+        <dd><%= @accounts_receivable_payment.number %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Payment date</dt>
+        <dd><%= @accounts_receivable_payment.payment_date.strftime("%d/%m/%Y") %></dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>Payment method</dt>
+        <dd><%= @accounts_receivable_payment.payment_method %></dd>
+    </dl>
+
+    <% if @accounts_receivable_payment.payment_method.eql?("Giro") %>
+      <dl class="dl-horizontal">
+          <dt>Giro number</dt>
+          <dd><%= @accounts_receivable_payment.giro_number %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Giro date</dt>
+          <dd><%= @accounts_receivable_payment.giro_date.strftime("%d/%m/%Y") %></dd>
+      </dl>
+    <% end %>
+
+    <% if @accounts_receivable_payment.payment_method.eql?("Transfer") %>
+      <dl class="dl-horizontal">
+          <dt>Bank</dt>
+          <dd><%= "#{@accounts_receivable_payment.company_bank_code} - #{@accounts_receivable_payment.company_bank_name}" %></dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+          <dt>Bank account number</dt>
+          <dd><%= @accounts_receivable_payment.bank_account_number %></dd>
+      </dl>
+    <% end %>
+
+    <dl class="dl-horizontal">
+        <dt>Customer</dt>
+        <dd><%= "#{@accounts_receivable_payment.customer_code} - #{@accounts_receivable_payment.customer_name}" %></dd>
+    </dl>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Invoice No.</th>
+                <th>Due Date</th>
+                <th>Amount Sold</th>
+                <th>Previous Payment</th>
+                <th>Amount Paid</th>
+                <th>Debt</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% total_amount_sold = 0 %>
+            <% total_previous_payment = 0 %>
+            <% total_debt = 0 %>
+            <% @accounts_receivable_payment.
+              accounts_receivable_payment_invoices.
+              select(:amount, :accounts_receivable_invoice_id, "accounts_receivable_invoices.number AS invoice_number", "accounts_receivable_invoices.due_date AS invoice_due_date", "accounts_receivable_invoices.total AS invoice_amount_sold").
+              joins(:accounts_receivable_invoice).
+              each_with_index do |arpi, idx| %>
+              <% prev_arpis = AccountsReceivablePaymentInvoice.joins(:accounts_receivable_payment).select(:amount).where(accounts_receivable_invoice_id: arpi.accounts_receivable_invoice_id).where(["accounts_receivable_payments.created_at < ?", @accounts_receivable_payment.created_at]) %>
+              <% previous_payment = 0 %>
+              <% prev_arpis.each do |prev_arpi| %>
+                <% previous_payment += prev_arpi.amount %>
+              <% end %>
+              <% debt = arpi.invoice_amount_sold - previous_payment - arpi.amount %>
+              <tr>
+                  <td><%= idx.succ %></td>
+                  <td><%= arpi.invoice_number %></td>
+                  <td><%= arpi.invoice_due_date.strftime("%d/%m/%Y") %></td>
+                  <td style="text-align: right"><%= number_to_currency(arpi.invoice_amount_sold, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                  <td style="text-align: right"><%= number_to_currency(previous_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                  <td style="text-align: right"><%= number_to_currency(arpi.amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                  <td style="text-align: right"><%= number_to_currency(debt, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+              </tr>
+              <% total_amount_sold += arpi.invoice_amount_sold %>
+              <% total_previous_payment += previous_payment %>
+              <% total_debt += debt %>
+            <% end %>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align: right">Total</td>
+                <td style="text-align: right"><%= number_to_currency(total_amount_sold, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                <td style="text-align: right"><%= number_to_currency(total_previous_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                <td style="text-align: right"><%= number_to_currency(@accounts_receivable_payment.amount, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                <td style="text-align: right"><%= number_to_currency(total_debt, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+            </tr>
+        </tfoot>
+    </table>
+</td>

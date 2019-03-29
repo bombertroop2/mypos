@@ -28,6 +28,7 @@ class OrderBooking < ApplicationRecord
 
               before_create :generate_number, :set_status, :remove_customer_id
               before_update :delete_old_products    
+              before_destroy -> {transaction_open("delete")}
               before_destroy :deletable, :delete_tracks
 
     
@@ -60,8 +61,11 @@ class OrderBooking < ApplicationRecord
                 errors.add(:customer_id, "can't be blank") if customer_id.blank? && @dw.warehouse_type.eql?("direct_sales")
               end
           
-              def transaction_open                            
-                errors.add(:base, "Sorry, you can't perform this transaction") if FiscalYear.joins(:fiscal_months).where(year: plan_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[plan_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+              def transaction_open(action = "not delete")
+                if FiscalYear.joins(:fiscal_months).where(year: plan_date.year).where("fiscal_months.month = '#{Date::MONTHNAMES[plan_date.month]}' AND fiscal_months.status = 'Close'").select("1 AS one").present?
+                  errors.add(:base, "Sorry, you can't perform this transaction")
+                  throw :abort if action.eql?("delete")
+                end
               end
     
               def pickable_note
