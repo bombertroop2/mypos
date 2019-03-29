@@ -1,4 +1,4 @@
-<td colspan="7">
+<td colspan="8">
     <button type="button" class="close cancel" aria-label="Close" id="btn-close-show-page-api-<%= @account_payable.id %>">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -38,6 +38,11 @@
                         </td>
                         <td style="vertical-align: top;width: 30%">
                             <table class="table-condensed table-responsive" align="right">
+                                <tr>
+                                    <td>Due Date</td>
+                                    <td>:</td>
+                                    <td><%= @account_payable.due_date.strftime("%d/%m/%Y") rescue "" %></td>
+                                </tr>
                                 <tr>
                                     <td style="vertical-align: top">Note</td>
                                     <td style="vertical-align: top">:</td>

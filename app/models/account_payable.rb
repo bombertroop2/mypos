@@ -21,7 +21,7 @@ class AccountPayable < ApplicationRecord
   has_many :account_payable_payment_invoices, dependent: :restrict_with_error
   
   accepts_nested_attributes_for :account_payable_purchases
-  accepts_nested_attributes_for :account_payable_purchase_partials
+  accepts_nested_attributes_for :account_payable_purchase_partials, allow_destroy: true
   
   before_validation :strip_string_values
   before_validation :set_total, on: :create
@@ -33,12 +33,16 @@ class AccountPayable < ApplicationRecord
     validate :vendor_available, :beginning_of_account_payable_creating_available, :check_min_purchase_per_invoice, on: :create
     validate :transaction_open
     
-    before_create :generate_number, :set_remaining_debt
+    before_create :generate_number, :set_remaining_debt, :set_due_date
     after_create :mark_purchase_doc_as_paid              
     before_destroy -> {transaction_open("delete")}
     before_destroy :delete_tracks
                                           
     private
+    
+    def set_due_date
+      self.due_date = vendor_invoice_date + @vendor.terms_of_payment.days
+    end
     
     def transaction_open(action = "not delete")
       if vendor_invoice_date.present? 
@@ -63,7 +67,7 @@ class AccountPayable < ApplicationRecord
     end
                     
     def vendor_available
-      errors.add(:vendor_id, "does not exist!") if Vendor.select("1 AS one").where(id: vendor_id, is_active: true).blank?
+      errors.add(:vendor_id, "does not exist!") if (@vendor = Vendor.select(:terms_of_payment).where(id: vendor_id, is_active: true).first).blank?
     end
                                         
     def generate_number
