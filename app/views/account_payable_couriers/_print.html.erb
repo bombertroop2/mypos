@@ -31,6 +31,11 @@
         <td style="vertical-align: top;width: 30%">
             <table class="table-condensed table-responsive" align="right">
                 <tr>
+                    <td>Due Date</td>
+                    <td>:</td>
+                    <td><%= @account_payable_courier.due_date.strftime("%d/%m/%Y") %></td>
+                </tr>
+                <tr>
                     <td style="vertical-align: top">Note</td>
                     <td style="vertical-align: top">:</td>
                     <td style="word-wrap: break-word"><%= @account_payable_courier.note %></td>

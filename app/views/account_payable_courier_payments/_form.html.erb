@@ -31,15 +31,17 @@
                               <th></th>
                               <th>No. Invoice</th>
                               <th>Courier</th>
+                              <th>Due Date</th>
                               <th>Debt</th>
                           </tr>
                       </thead>
                       <tbody>
-                          <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name").where("account_payable_couriers.remaining_debt > 0").order(:number).each do |ap| %>
+                          <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name", :due_date).where("account_payable_couriers.remaining_debt > 0").order(:due_date).each do |ap| %>
                             <tr id="app_ap_<%= ap.id %>">
                                 <td></td>
                                 <td><%= ap.number %></td>
                                 <td><%= "#{ap.courier_code} - #{ap.courier_name}" %></td>
+                                <td><%= ap.due_date.strftime("%d/%m/%Y") %></td>
                                 <td><%= number_to_currency(ap.remaining_debt,
                                       :separator => ",",
                                       :delimiter => ".",
@@ -66,17 +68,19 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th id="app_listing_api_table_no_invoice_giro">No. Invoice</th>
+                                <th>No. Invoice</th>
                                 <th>Courier</th>
+                                <th id="app_listing_api_table_due_date_giro">Due Date</th>
                                 <th>Debt</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name").where("account_payable_couriers.remaining_debt > 0").order(:number).each do |ap| %>
+                            <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name", :due_date).where("account_payable_couriers.remaining_debt > 0").order(:due_date).each do |ap| %>
                               <tr id="app_ap_<%= ap.id %>_giro">
                                   <td></td>
                                   <td><%= ap.number %></td>
                                   <td><%= "#{ap.courier_code} - #{ap.courier_name}" %></td>
+                                  <td><%= ap.due_date.strftime("%d/%m/%Y") %></td>
                                   <td><%= number_to_currency(ap.remaining_debt,
                                         :separator => ",",
                                         :delimiter => ".",
@@ -103,17 +107,19 @@
                           <thead>
                               <tr>
                                   <th></th>
-                                  <th id="app_listing_api_table_no_invoice_transfer">No. Invoice</th>
+                                  <th>No. Invoice</th>
                                   <th>Courier</th>
+                                  <th id="app_listing_api_table_due_date_transfer">Due Date</th>
                                   <th>Debt</th>
                               </tr>
                           </thead>
                           <tbody>
-                              <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name").where("account_payable_couriers.remaining_debt > 0").order(:number).each do |ap| %>
+                              <% AccountPayableCourier.joins(:courier).select(:id, :number, :remaining_debt, "couriers.code AS courier_code", "couriers.name AS courier_name", :due_date).where("account_payable_couriers.remaining_debt > 0").order(:due_date).each do |ap| %>
                                 <tr id="app_ap_<%= ap.id %>_transfer">
                                     <td></td>
                                     <td><%= ap.number %></td>
                                     <td><%= "#{ap.courier_code} - #{ap.courier_name}" %></td>
+                                    <td><%= ap.due_date.strftime("%d/%m/%Y") %></td>
                                     <td><%= number_to_currency(ap.remaining_debt,
                                           :separator => ",",
                                           :delimiter => ".",
@@ -134,12 +140,13 @@
         var appCourierActiveTab = "";
         $(function () {
             var appApInvoiceDataTable = $('#app_listing_api_table').DataTable({
-                order: [1, 'asc'],
+                order: [3, 'asc'],
                 dom: 'T<"clear">lrtip',
                 columns: [
                     {data: null, defaultContent: '', orderable: false},
                     {data: 'number'},
                     {data: 'courier'},
+                    {data: 'due_date'},
                     {data: 'debt'}
                 ],
                 tableTools: {
@@ -152,12 +159,13 @@
                 scrollCollapse: true
             });
             var appApInvoiceDataTableTransfer = $('#app_listing_api_table_transfer').DataTable({
-                order: [1, 'asc'],
+                order: [3, 'asc'],
                 dom: 'T<"clear">lrtip',
                 columns: [
                     {data: null, defaultContent: '', orderable: false},
                     {data: 'number'},
                     {data: 'courier'},
+                    {data: 'due_date'},
                     {data: 'debt'}
                 ],
                 tableTools: {
@@ -170,12 +178,13 @@
                 scrollCollapse: true
             });
             var appApInvoiceDataTableGiro = $('#app_listing_api_table_giro').DataTable({
-                order: [1, 'asc'],
+                order: [3, 'asc'],
                 dom: 'T<"clear">lrtip',
                 columns: [
                     {data: null, defaultContent: '', orderable: false},
                     {data: 'number'},
                     {data: 'courier'},
+                    {data: 'due_date'},
                     {data: 'debt'}
                 ],
                 tableTools: {
@@ -274,12 +283,12 @@
 
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var target = $(e.target).attr("href") // activated tab
-                if (target == "#giro" && ($('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
-                    $("#app_listing_api_table_no_invoice_giro").click();
-                    $("#app_listing_api_table_no_invoice_giro").click();
-                } else if (target == "#transfer" && ($('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] == 1 || $('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
-                    $("#app_listing_api_table_no_invoice_transfer").click();
-                    $("#app_listing_api_table_no_invoice_transfer").click();
+                if (target == "#giro" && ($('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] == 3 || $('#app_listing_api_table_giro').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                    $("#app_listing_api_table_due_date_giro").click();
+                    $("#app_listing_api_table_due_date_giro").click();
+                } else if (target == "#transfer" && ($('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] == 3 || $('#app_listing_api_table_transfer').dataTable().fnSettings().aaSorting[0][0] === undefined)) {
+                    $("#app_listing_api_table_due_date_transfer").click();
+                    $("#app_listing_api_table_due_date_transfer").click();
                 }
             });
         });

@@ -2,6 +2,7 @@
 <td class="text-center" id="listing_ap_invoice_courier_courier_detail_<%= object.id %>"><%= "#{object.courier_code} - #{object.courier_name}" rescue "" %></td>
 <td class="text-center"><%= object.courier_invoice_number %></td>
 <td class="text-center"><%= object.courier_invoice_date.strftime("%d/%m/%Y") %></td>
+<td class="text-center"><%= object.due_date.strftime("%d/%m/%Y") %></td>
 <td class="text-center"><%= number_to_currency(object.total,
       :separator => ",",
       :delimiter => ".",
