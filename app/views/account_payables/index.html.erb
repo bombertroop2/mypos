@@ -12,6 +12,9 @@
       <div class="form-group">
           <input type="text" class="form-control" readonly="true" id="filter-ap-invoice-vendor-invoice-date" placeholder="Vendor Inv. Date">
       </div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-ap-invoice-due-date" placeholder="Due date">
+      </div>
       <div class="form-group text-left">
           <%= select_tag "invoice_status", options_for_select(AccountPayable::INVOICE_STATUSES), {include_blank: true, class: "form-control", id: "filter-ap-invoice-status"} %>
         </div>
@@ -23,9 +26,10 @@
             <%= text_field_tag :filter_ap_invoice_invoice_number, '', class: "search form-control", autocomplete: :off %>
               <%= text_field_tag :filter_ap_invoice_vendor_id, '', class: "search form-control", autocomplete: :off %>
                 <%= text_field_tag :filter_ap_invoice_vendor_invoice_date, '', class: "search form-control", autocomplete: :off %>
-                  <%= text_field_tag :filter_ap_invoice_status, '', class: "search form-control", autocomplete: :off %>
-                  <% end %>
-              </div>
+                  <%= text_field_tag :filter_ap_invoice_due_date, '', class: "search form-control", autocomplete: :off %>
+                    <%= text_field_tag :filter_ap_invoice_status, '', class: "search form-control", autocomplete: :off %>
+                    <% end %>
+                </div>
 
-              <%= smart_listing_render(:account_payables) %>
-              <div id="print_ap_invoice_container"></div>
+                <%= smart_listing_render(:account_payables) %>
+                <div id="print_ap_invoice_container"></div>

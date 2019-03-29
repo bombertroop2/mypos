@@ -2,7 +2,7 @@ class AccountPayablePurchasePartial < ApplicationRecord
   attr_accessor :attr_delivery_order_number, :attr_purchase_order_number, :attr_received_quantity,
     :attr_gross_amount, :attr_first_discount_money, :attr_second_discount_money,
     :attr_is_additional_disc_from_net, :attr_vat_in_money, :attr_net_amount, :attr_receiving_date,
-    :attr_purchase_number, :attr_rpo_transaction_number
+    :attr_purchase_number, :attr_rpo_transaction_number, :attr_select
   
   belongs_to :account_payable
   belongs_to :received_purchase_order

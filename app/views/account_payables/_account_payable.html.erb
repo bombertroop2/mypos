@@ -2,6 +2,7 @@
 <td class="text-center" id="vendor_name_<%= object.id %>"><%= object.name rescue "" %></td>
 <td class="text-center"><%= object.vendor_invoice_number %></td>
 <td class="text-center"><%= object.vendor_invoice_date.strftime("%d/%m/%Y") %></td>
+<td class="text-center"><%= object.due_date.strftime("%d/%m/%Y") rescue "" %></td>
 <td class="text-center"><%= number_to_currency(object.total,
       :separator => ",",
       :delimiter => ".",
