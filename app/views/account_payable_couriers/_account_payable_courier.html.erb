@@ -15,6 +15,8 @@
       :precision => 2) %></td>
 <td class="actions text-right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, account_payable_courier_path(object), data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:manage, AccountPayableCourier), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_courier_path(object), :remote => true, :method => :get, title: "Print" ) %>
-    <%= link_to_if(can?(:manage, AccountPayableCourier) && object.account_payable_courier_payment_invoices.select("1 AS one").blank?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+    <% unless action_name.eql?("overdue_invoice_list") %>
+      <%= link_to_if(can?(:manage, AccountPayableCourier), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_account_payable_courier_path(object), :remote => true, :method => :get, title: "Print" ) %>
+      <%= link_to_if(can?(:manage, AccountPayableCourier) && object.account_payable_courier_payment_invoices.select("1 AS one").blank?, content_tag(:i, "", :class => "glyphicon glyphicon-trash"), object, :remote => true, :class => "destroy", :method => :delete, :data => {:confirmation => 'Are you sure that you want to permanently delete the selected item?', placement: :left}, title: "Delete" ) %>
+    <% end %>
 </td>

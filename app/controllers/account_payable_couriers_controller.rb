@@ -1,6 +1,6 @@
 include SmartListing::Helper::ControllerExtensions
 class AccountPayableCouriersController < ApplicationController
-  authorize_resource
+  authorize_resource except: :overdue_invoice_list
   before_action :set_account_payable_courier, only: :destroy
   helper SmartListing::Helper
 
@@ -117,6 +117,28 @@ class AccountPayableCouriersController < ApplicationController
       select(:id, :number, :note, :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, :courier_id, :due_date, "couriers.code AS courier_code", "couriers.name AS courier_name", "couriers.value_added_tax_type AS courier_vat_type").
       joins(:courier).
       find(params[:id])
+  end
+  
+  def overdue_invoice_list
+    authorize! :read, AccountPayableCourier
+    if params[:filter_ap_invoice_courier_courier_invoice_date].present?
+      splitted_date_range = params[:filter_ap_invoice_courier_courier_invoice_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
+    
+    if params[:filter_ap_invoice_courier_due_date].present?
+      splitted_due_date_range = params[:filter_ap_invoice_courier_due_date].split("-")
+      start_due_date = splitted_due_date_range[0].strip.to_date
+      end_due_date = splitted_due_date_range[1].strip.to_date
+    end
+
+    account_payable_couriers_scope = AccountPayableCourier.select(:id, :number, "couriers.code AS courier_code", "couriers.name AS courier_name", :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, :due_date).joins(:courier).where("remaining_debt > 0").where(["account_payable_couriers.due_date < ?", Date.current])
+    account_payable_couriers_scope = account_payable_couriers_scope.where(["number ILIKE ? OR courier_invoice_number ILIKE ?", "%"+params[:filter_ap_invoice_courier_invoice_number]+"%", "%"+params[:filter_ap_invoice_courier_invoice_number]+"%"]) if params[:filter_ap_invoice_courier_invoice_number].present?
+    account_payable_couriers_scope = account_payable_couriers_scope.where(["courier_id = ?", params[:filter_ap_invoice_courier_courier_id]]) if params[:filter_ap_invoice_courier_courier_id].present?
+    account_payable_couriers_scope = account_payable_couriers_scope.where(["courier_invoice_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_ap_invoice_courier_courier_invoice_date].present?
+    account_payable_couriers_scope = account_payable_couriers_scope.where(["due_date BETWEEN ? AND ?", start_due_date, end_due_date]) if params[:filter_ap_invoice_courier_due_date].present?
+    smart_listing_create(:account_payable_couriers, account_payable_couriers_scope, partial: 'account_payable_couriers/listing', default_sort: {due_date: "asc"})
   end
 
   private
