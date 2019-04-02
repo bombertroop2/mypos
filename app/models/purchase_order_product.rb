@@ -1,5 +1,5 @@
 class PurchaseOrderProduct < ApplicationRecord
-  attr_accessor :purchase_order_date, :is_user_adding_new_cost, :po_cost, :prdct_code, :prdct_name
+  attr_accessor :purchase_order_date, :is_user_adding_new_cost, :po_cost, :prdct_code, :prdct_name, :attr_product_desc
   
   audited associated_with: :purchase_order, on: [:create, :update]
   has_associated_audits

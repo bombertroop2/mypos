@@ -13,6 +13,12 @@ class AccountPayableCouriersController < ApplicationController
       end_date = splitted_date_range[1].strip.to_date
     end
     
+    if params[:filter_ap_invoice_courier_due_date].present?
+      splitted_due_date_range = params[:filter_ap_invoice_courier_due_date].split("-")
+      start_due_date = splitted_due_date_range[0].strip.to_date
+      end_due_date = splitted_due_date_range[1].strip.to_date
+    end
+
     if params[:filter_ap_invoice_courier_status].present?
       remaining_debt_query = if params[:filter_ap_invoice_courier_status].eql?("All")
         "remaining_debt >= 0"
@@ -23,19 +29,20 @@ class AccountPayableCouriersController < ApplicationController
       end
     end
 
-    account_payable_couriers_scope = AccountPayableCourier.select(:id, :number, "couriers.code AS courier_code", "couriers.name AS courier_name", :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date).joins(:courier)
+    account_payable_couriers_scope = AccountPayableCourier.select(:id, :number, "couriers.code AS courier_code", "couriers.name AS courier_name", :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, :due_date).joins(:courier)
     account_payable_couriers_scope = account_payable_couriers_scope.where(["number ILIKE ? OR courier_invoice_number ILIKE ?", "%"+params[:filter_ap_invoice_courier_invoice_number]+"%", "%"+params[:filter_ap_invoice_courier_invoice_number]+"%"]) if params[:filter_ap_invoice_courier_invoice_number].present?
     account_payable_couriers_scope = account_payable_couriers_scope.where(["courier_id = ?", params[:filter_ap_invoice_courier_courier_id]]) if params[:filter_ap_invoice_courier_courier_id].present?
     account_payable_couriers_scope = account_payable_couriers_scope.where(["courier_invoice_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_ap_invoice_courier_courier_invoice_date].present?
+    account_payable_couriers_scope = account_payable_couriers_scope.where(["due_date BETWEEN ? AND ?", start_due_date, end_due_date]) if params[:filter_ap_invoice_courier_due_date].present?
     account_payable_couriers_scope = account_payable_couriers_scope.where(remaining_debt_query) if params[:filter_ap_invoice_courier_status].present?
-    smart_listing_create(:account_payable_couriers, account_payable_couriers_scope, partial: 'account_payable_couriers/listing', default_sort: {number: "asc"})
+    smart_listing_create(:account_payable_couriers, account_payable_couriers_scope, partial: 'account_payable_couriers/listing', default_sort: {due_date: "asc"})
   end
 
   # GET /account_payable_couriers/1
   # GET /account_payable_couriers/1.json
   def show
     @account_payable_courier = AccountPayableCourier.
-      select(:id, :number, :note, :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, "couriers.code AS courier_code", "couriers.name AS courier_name", "couriers.value_added_tax_type AS courier_vat_type").
+      select(:id, :number, :note, :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, :due_date, "couriers.code AS courier_code", "couriers.name AS courier_name", "couriers.value_added_tax_type AS courier_vat_type").
       joins(:courier).
       find(params[:id])
   end
@@ -107,7 +114,7 @@ class AccountPayableCouriersController < ApplicationController
   
   def print
     @account_payable_courier = AccountPayableCourier.
-      select(:id, :number, :note, :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, :courier_id, "couriers.code AS courier_code", "couriers.name AS courier_name", "couriers.value_added_tax_type AS courier_vat_type").
+      select(:id, :number, :note, :total, :remaining_debt, :courier_invoice_number, :courier_invoice_date, :courier_id, :due_date, "couriers.code AS courier_code", "couriers.name AS courier_name", "couriers.value_added_tax_type AS courier_vat_type").
       joins(:courier).
       find(params[:id])
   end
