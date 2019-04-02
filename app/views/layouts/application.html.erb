@@ -42,7 +42,13 @@
               <% elsif params[:controller].eql?("account_payable_courier_payments") %>
                 <% opened_menu_name = "AP Payments (Courier)" %>
               <% elsif params[:controller].eql?("accounts_receivable_invoices") %>
-                <% opened_menu_name = "AR Invoices (Direct Sales)" %>
+                <%
+                  opened_menu_name = if action_name.eql?("customer_debts")
+                    "Customer Debts"
+                  else
+                    "AR Invoices (Direct Sales)"
+                  end
+                %>
               <% elsif params[:controller].eql?("accounts_receivable_payments") %>
                 <% opened_menu_name = "AR Payments (Direct Sales)" %>
               <% else %>
@@ -207,6 +213,9 @@
                                                     <% end %>
                                                     <% if can? :read, AccountsReceivablePayment %>
                                                       <li><%= link_to "AR Payments", accounts_receivable_payments_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountsReceivableInvoice %>
+                                                      <li><%= link_to "Customer Debts", customer_debts_accounts_receivable_invoices_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
