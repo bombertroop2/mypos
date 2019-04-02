@@ -30,7 +30,7 @@ class PurchaseOrder < ApplicationRecord
                   validate :prevent_adding_second_discount_if_first_discount_is_100, if: proc {|po| po.second_discount.present?}
                     validate :prevent_adding_second_discount_if_total_discount_greater_than_100, if: proc {|po| !po.receiving_po && po.second_discount.present? && !po.is_additional_disc_from_net}
                       validates :first_discount, presence: true, if: proc {|po| po.second_discount.present?}
-                        validate :vendor_available, :warehouse_available
+                        validate :vendor_available, :warehouse_available, :vendor_not_changed
                                   
                         before_save :set_nil_to_is_additional_disc_from_net, if: proc {|po| !po.receiving_po && !po.closing_po}
                           before_update :calculate_order_value, if: proc {|po| !po.receiving_po && !po.closing_po && !po.edit_document}
@@ -61,6 +61,10 @@ class PurchaseOrder < ApplicationRecord
                                 end
 
                                 private
+                                
+                                def vendor_not_changed
+                                  errors.add(:vendor_id, "change is not allowed!") if vendor_id_changed? && persisted?
+                                end
                               
                                 def update_product_cost
                                   purchase_order_products.select(:id, :cost_list_id, :product_id, :purchase_order_id).each do |purchase_order_product|
