@@ -46,9 +46,10 @@ class PurchaseOrdersController < ApplicationController
     @sizes = []
     @purchase_order.purchase_order_products.each do |pop|
       pop.po_cost = CostList.where(id: pop.cost_list_id).select(:cost).first.cost
-      product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
+      product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name, :description).first
       pop.prdct_code = product.code
       pop.prdct_name = product.name
+      pop.attr_product_desc = product.description
       @colors[product.id] = product.colors.distinct
       @sizes[product.id] = product.sizes.distinct
       @colors[product.id].each do |color|
@@ -77,9 +78,10 @@ class PurchaseOrdersController < ApplicationController
           @sizes = []
           @products = Product.where(code: params[:product_ids].split(",")).select(:id)
           @purchase_order.purchase_order_products.each do |pop|
-            product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
+            product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name, :description).first
             pop.prdct_code = product.code
             pop.prdct_name = product.name
+            pop.attr_product_desc = product.description
             @colors[product.id] = product.colors.distinct
             @sizes[product.id] = product.sizes.distinct
             @colors[product.id].each do |color|
@@ -118,9 +120,10 @@ class PurchaseOrdersController < ApplicationController
         @colors = []
         @sizes = []
         @purchase_order.purchase_order_products.each do |pop|
-          product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name).first
+          product = Product.joins(:brand).where(id: pop.product_id).includes(:colors, :sizes).select(:id, :code, :name, :description).first
           pop.prdct_code = product.code
           pop.prdct_name = product.name
+          pop.attr_product_desc = product.description
           @colors[product.id] = product.colors.distinct
           @sizes[product.id] = product.sizes.distinct
           @colors[product.id].each do |color|
@@ -150,13 +153,13 @@ class PurchaseOrdersController < ApplicationController
       PurchaseOrder.new
     end
     #    if splitted_selected_product_ids.present?
-    products = Product.joins(:brand).where(code: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name)
+    products = Product.joins(:brand).where(code: params[:product_ids].split(",")).includes(:colors, :sizes, :cost_list_costs_effective_dates_product_ids).select(:id, :code, :name, :description)
     products.each do |product|
       @colors[product.id] = product.colors.distinct
       @sizes[product.id] = product.sizes.distinct
       active_cost = product.active_cost_by_po_date(params[:po_date].to_date, product.cost_list_costs_effective_dates_product_ids).cost rescue 0
       @product_costs[product.id] = active_cost
-      pop = @purchase_order.purchase_order_products.build product_id: product.id, po_cost: active_cost, prdct_code: product.code, prdct_name: product.name
+      pop = @purchase_order.purchase_order_products.build product_id: product.id, po_cost: active_cost, prdct_code: product.code, prdct_name: product.name, attr_product_desc: product.description
       @colors[product.id].each do |color|
         @sizes[product.id].each do |size|
           pop.purchase_order_details.build size_id: size.id, color_id: color.id #unless existing_item
@@ -209,6 +212,15 @@ class PurchaseOrdersController < ApplicationController
       format.xls do
         @pos = PurchaseOrder.select(:number, :request_delivery_date).select("products.code, products.target, brands_products.code AS brand_code, brands_products.name AS brand_name, brands_products.description AS brand_desc, models_products.code AS model_code, models_products.name AS mdl_name, models_products.description AS model_desc, common_fields.code AS color_code, common_fields.name AS color_name, sizes.size, product_barcodes.barcode, product_details.id AS product_detail_id, purchase_order_details.quantity, products.description, goods_types_products.code AS goods_type_code, goods_types_products.name AS goods_type_name, goods_types_products.description AS goods_type_desc, common_fields.description AS color_desc").joins(:warehouse, purchase_order_products: [purchase_order_details: [:color, :size], product: [:brand, :model, :goods_type]]).joins("INNER JOIN product_colors ON product_colors.product_id = products.id AND product_colors.color_id = common_fields.id").joins("INNER JOIN product_barcodes ON product_barcodes.product_color_id = product_colors.id AND product_barcodes.size_id = sizes.id").joins("INNER JOIN product_details ON product_details.size_id = sizes.id AND product_details.product_id = products.id AND product_details.price_code_id = warehouses.price_code_id").where(id: params[:id]).order("sizes.size_order")
         headers["Content-Disposition"] = "attachment; filename='export_po_#{@pos.first.number}.xls'"
+      end
+      format.pdf do
+        @purchase_order = PurchaseOrder.joins(:vendor, :warehouse).where(id: params[:id]).
+          select("po_type, note, warehouse_id, vendor_id, status, number, vendors.name AS vendor_name, terms_of_payment, purchase_orders.created_at, purchase_order_date, request_delivery_date, order_value, first_discount, second_discount, is_additional_disc_from_net, purchase_orders.value_added_tax, warehouses.code AS warehouse_code, warehouses.name AS warehouse_name, warehouses.address AS warehouse_address, purchase_orders.is_taxable_entrepreneur, purchase_orders.id").first
+        render pdf: @purchase_order.number,
+          template: "purchase_orders/export_pdf.html.erb",
+          orientation: 'Landscape',
+          layout: 'pdf.html',
+          disposition: 'attachment'
       end
     end
   end
