@@ -38,19 +38,31 @@
                 <% else %>
                 <% end %>
               <% elsif params[:controller].eql?("account_payable_couriers") %>
-                <% opened_menu_name = "AP Invoices (Courier)" %>
+                <% if action_name.eql?("overdue_invoice_list") %>
+                  <% opened_menu_name = "Overdue Invoice List (Courier)" %>
+                <% else %>
+                  <% opened_menu_name = "AP Invoices (Courier)" %>
+                <% end %>
               <% elsif params[:controller].eql?("account_payable_courier_payments") %>
                 <% opened_menu_name = "AP Payments (Courier)" %>
               <% elsif params[:controller].eql?("accounts_receivable_invoices") %>
                 <%
                   opened_menu_name = if action_name.eql?("customer_debts")
                     "Customer Debts"
+                  elsif action_name.eql?("overdue_invoice_list")
+                    "Overdue Invoice List (Direct Sales)"
                   else
                     "AR Invoices (Direct Sales)"
                   end
                 %>
               <% elsif params[:controller].eql?("accounts_receivable_payments") %>
                 <% opened_menu_name = "AR Payments (Direct Sales)" %>
+              <% elsif params[:controller].eql?("account_payables") %>
+                <% if action_name.eql?("overdue_invoice_list") %>
+                  <% opened_menu_name = "Overdue Invoice List" %>
+                <% else %>
+                  <% opened_menu_name = params[:controller].humanize.titleize %>
+                <% end %>
               <% else %>
                 <% opened_menu_name = params[:controller].humanize.titleize %>
               <% end %>
@@ -187,6 +199,9 @@
                                                     <% if can? :read, AccountPayablePayment %>
                                                       <li><%= link_to "AP Payments", account_payable_payments_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, AccountPayable %>
+                                                      <li><%= link_to "Overdue Invoice List", overdue_invoice_list_account_payables_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -217,6 +232,9 @@
                                                     <% if can? :read, AccountsReceivableInvoice %>
                                                       <li><%= link_to "Customer Debts", customer_debts_accounts_receivable_invoices_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, AccountsReceivableInvoice %>
+                                                      <li><%= link_to "Overdue Invoice List", overdue_invoice_list_accounts_receivable_invoices_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>
@@ -235,6 +253,9 @@
                                                     <% end %>
                                                     <% if can? :read, AccountPayableCourierPayment %>
                                                       <li><%= link_to "AP Payments", account_payable_courier_payments_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :read, AccountPayableCourier %>
+                                                      <li><%= link_to "Overdue Invoice List", overdue_invoice_list_account_payable_couriers_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
