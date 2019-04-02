@@ -20,7 +20,9 @@
               <%= smart_listing.render object: apic, partial: "account_payable_couriers/account_payable_courier", locals: {object: apic} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: 8, link: new_account_payable_courier_path %>
+        <% unless action_name.eql?("overdue_invoice_list") %>
+          <%= smart_listing.item_new colspan: 8, link: new_account_payable_courier_path %>
+        <% end %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

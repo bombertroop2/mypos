@@ -9,5 +9,7 @@
       :precision => 2) %></td>
 <td class="actions text-right">
     <%= link_to "<i class=\"glyphicon glyphicon-share-alt\"></i>".html_safe, accounts_receivable_invoice_path(object), data: {remote: true}, title: "Show" %>
-    <%= link_to_if(can?(:manage, AccountsReceivableInvoice), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_accounts_receivable_invoice_path(object), :remote => true, :method => :get, title: "Print" ) %>
+    <% unless action_name.eql?("overdue_invoice_list") %>
+      <%= link_to_if(can?(:manage, AccountsReceivableInvoice), content_tag(:i, "", :class => "glyphicon glyphicon-print"), print_accounts_receivable_invoice_path(object), :remote => true, :method => :get, title: "Print" ) %>
+    <% end %>
 </td>
