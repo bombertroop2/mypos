@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class AccountPayablesController < ApplicationController
   include AccountPayablesHelper
-  authorize_resource
+  authorize_resource except: :overdue_invoice_list
   before_action :set_account_payable, only: [:show, :edit, :update, :destroy, :print]
   helper SmartListing::Helper
 
@@ -269,6 +269,28 @@ class AccountPayablesController < ApplicationController
       end
       @account_payable_purchase_partials << account_payable.account_payable_purchase_partials.build(received_purchase_order_id: rpo.id, attr_delivery_order_number: rpo.delivery_order_number, attr_purchase_order_number: rpo.po_number, attr_received_quantity: rpo.quantity, attr_gross_amount: gross_amount, attr_first_discount_money: first_discount_money, attr_second_discount_money: second_discount_money, attr_is_additional_disc_from_net: is_additional_disc_from_net, attr_vat_in_money: vat_in_money, attr_net_amount: net_amount, attr_receiving_date: rpo.receiving_date, attr_rpo_transaction_number: rpo.transaction_number, attr_select: true)
     end
+  end
+  
+  def overdue_invoice_list
+    authorize! :read, AccountPayable
+    if params[:filter_ap_invoice_vendor_invoice_date].present?
+      splitted_date_range = params[:filter_ap_invoice_vendor_invoice_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
+
+    if params[:filter_ap_invoice_due_date].present?
+      splitted_due_date_range = params[:filter_ap_invoice_due_date].split("-")
+      start_due_date = splitted_due_date_range[0].strip.to_date
+      end_due_date = splitted_due_date_range[1].strip.to_date
+    end
+    
+    account_payables_scope = AccountPayable.select("account_payables.id, number, vendors.name, total, remaining_debt", :vendor_invoice_number, :vendor_invoice_date, :due_date).joins(:vendor).where("remaining_debt > 0").where(["account_payables.due_date < ?", Date.current])
+    account_payables_scope = account_payables_scope.where(["number ILIKE ? OR vendor_invoice_number ILIKE ?", "%"+params[:filter_ap_invoice_invoice_number]+"%", "%"+params[:filter_ap_invoice_invoice_number]+"%"]) if params[:filter_ap_invoice_invoice_number].present?
+    account_payables_scope = account_payables_scope.where(["vendor_id = ?", params[:filter_ap_invoice_vendor_id]]) if params[:filter_ap_invoice_vendor_id].present?
+    account_payables_scope = account_payables_scope.where(["vendor_invoice_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_ap_invoice_vendor_invoice_date].present?
+    account_payables_scope = account_payables_scope.where(["due_date BETWEEN ? AND ?", start_due_date, end_due_date]) if params[:filter_ap_invoice_due_date].present?
+    smart_listing_create(:account_payables, account_payables_scope, partial: 'account_payables/listing', default_sort: {due_date: "asc"})
   end
 
   private

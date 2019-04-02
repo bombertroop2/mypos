@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resources :accounts_receivable_invoices, only: [:index, :show] do
     collection do
       get "customer_debts"
+      get 'overdue_invoice_list'
     end
     member do
       get "print"
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
   resources :account_payable_couriers, except: [:edit, :update] do
     collection do
       get "get_packing_lists"
+      get 'overdue_invoice_list'
     end
     member do
       get "print"
@@ -295,6 +297,7 @@ Rails.application.routes.draw do
       get 'select_purchase_return_for_dp'
       post 'create_dp_payment'
       get 'get_received_purchases'
+      get 'overdue_invoice_list'
     end
     member do
       get 'print'
