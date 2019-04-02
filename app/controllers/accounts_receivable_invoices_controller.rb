@@ -1,7 +1,7 @@
 include SmartListing::Helper::ControllerExtensions
 class AccountsReceivableInvoicesController < ApplicationController
   helper SmartListing::Helper
-  authorize_resource
+  authorize_resource except: :customer_debts
   #  before_action :set_accounts_receivable_invoice, only: :destroy
 
   # GET /accounts_receivable_invoices
@@ -136,6 +136,21 @@ class AccountsReceivableInvoicesController < ApplicationController
       joins(shipment: [order_booking: :customer]).
       includes(shipment_product_items: [:price_list, order_booking_product_item: [:color, :size, order_booking_product: [product: :brand]]]).
       find(params[:id])
+  end
+  
+  def customer_debts
+    authorize! :read, AccountsReceivableInvoice
+    if params[:filter_ar_invoice_due_date].present?
+      splitted_date_range = params[:filter_ar_invoice_due_date].split("-")
+      start_date = splitted_date_range[0].strip.to_date
+      end_date = splitted_date_range[1].strip.to_date
+    end
+    
+    accounts_receivable_invoices_scope = AccountsReceivableInvoice.select(:id, :number, :remaining_debt, :due_date, "shipments.delivery_order_number AS shipment_do_number", "customers.code AS customer_code", "customers.name AS customer_name").joins(shipment: [order_booking: :customer]).where("remaining_debt > 0")
+    accounts_receivable_invoices_scope = accounts_receivable_invoices_scope.where(["accounts_receivable_invoices.number ILIKE ? OR shipments.delivery_order_number ILIKE ?", "%"+params[:filter_ar_invoice_number]+"%", "%"+params[:filter_ar_invoice_number]+"%"]) if params[:filter_ar_invoice_number].present?
+    accounts_receivable_invoices_scope = accounts_receivable_invoices_scope.where(["order_bookings.customer_id = ?", params[:filter_ar_invoice_customer_id]]) if params[:filter_ar_invoice_customer_id].present?
+    accounts_receivable_invoices_scope = accounts_receivable_invoices_scope.where(["due_date BETWEEN ? AND ?", start_date, end_date]) if params[:filter_ar_invoice_due_date].present?
+    smart_listing_create(:accounts_receivable_invoices, accounts_receivable_invoices_scope, partial: 'accounts_receivable_invoices/listing', default_sort: {due_date: "asc"})
   end
 
   private

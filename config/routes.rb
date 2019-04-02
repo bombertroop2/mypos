@@ -6,6 +6,9 @@ Rails.application.routes.draw do
     end
   end
   resources :accounts_receivable_invoices, only: [:index, :show] do
+    collection do
+      get "customer_debts"
+    end
     member do
       get "print"
     end
