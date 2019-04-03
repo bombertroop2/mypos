@@ -1,0 +1,41 @@
+<%= form_tag(print_barcode_temps_path, remote: true, class: "form-horizontal") do %>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Print Barcode</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div>
+                        <div class="form-group">
+                            <%= label_tag :print_barcode_temp_price_code, "Price code", class: "col-sm-2 control-label" %>
+                              <div class="col-sm-10">
+                                  <%= select_tag :print_barcode_temp_price_code, options_from_collection_for_select(PriceCode.select(:id, :code, :name).order(:code), :id, "code_and_name"), {include_blank: true, class: "form-control"} %>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <%= label_tag :print_barcode_temp_effective_date, "Effective date", class: "col-sm-2 control-label" %>
+                                  <div class="col-sm-10">
+                                      <%= text_field_tag :print_barcode_temp_effective_date, Date.current.strftime("%d/%m/%Y"), class: "form-control", readonly: true %>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <%= label_tag :print_barcode_temp_product_code, "Product code", class: "col-sm-2 control-label" %>
+                                      <div class="col-sm-10">
+                                          <div class="form-inline">
+                                              <%= text_field_tag :print_barcode_temp_product_code, nil, class: "form-control" %>
+                                                <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_print_product">
+                                                    <span class="glyphicon glyphicon-plus"></span> Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="form-detail-container"></div>
+                                    <div class="ln_solid"></div>
+                                    <%= submit_tag "Save", class: "btn btn-primary hidden", style: "float: right", id: "btn-save-product" %>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>        
+                    <% end %>

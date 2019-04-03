@@ -1,0 +1,44 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Product code:</strong>
+  <%= @print_barcode_temp.product_code %>
+</p>
+
+<p>
+  <strong>Brand name:</strong>
+  <%= @print_barcode_temp.brand_name %>
+</p>
+
+<p>
+  <strong>Product description:</strong>
+  <%= @print_barcode_temp.product_description %>
+</p>
+
+<p>
+  <strong>Barcode:</strong>
+  <%= @print_barcode_temp.barcode %>
+</p>
+
+<p>
+  <strong>Size:</strong>
+  <%= @print_barcode_temp.size %>
+</p>
+
+<p>
+  <strong>Color name:</strong>
+  <%= @print_barcode_temp.color_name %>
+</p>
+
+<p>
+  <strong>Price:</strong>
+  <%= @print_barcode_temp.price %>
+</p>
+
+<p>
+  <strong>Internet client address:</strong>
+  <%= @print_barcode_temp.internet_client_address %>
+</p>
+
+<%= link_to 'Edit', edit_print_barcode_temp_path(@print_barcode_temp) %> |
+<%= link_to 'Back', print_barcode_temps_path %>
