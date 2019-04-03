@@ -57,6 +57,8 @@
                 %>
               <% elsif params[:controller].eql?("accounts_receivable_payments") %>
                 <% opened_menu_name = "AR Payments (Direct Sales)" %>
+              <% elsif params[:controller].eql?("print_barcode_temps") %>
+                <% opened_menu_name = "Print Barcode" %>
               <% elsif params[:controller].eql?("account_payables") %>
                 <% if action_name.eql?("overdue_invoice_list") %>
                   <% opened_menu_name = "Overdue Invoice List" %>
@@ -409,6 +411,9 @@
                                                     <% end %>
                                                     <% if can? :manage, GeneralVariable %>
                                                       <li><%= link_to "General Variables", new_general_variable_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, PrintBarcodeTemp %>
+                                                      <li><%= link_to "Print Barcode", new_print_barcode_temp_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>

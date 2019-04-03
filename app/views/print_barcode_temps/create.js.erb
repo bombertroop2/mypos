@@ -1,0 +1,4 @@
+var box = bootbox.alert({message: "Record was successfully saved", size: 'small'});
+box.on("hidden.bs.modal", function () {
+  window.location = '<%= new_print_barcode_temp_path %>';
+});

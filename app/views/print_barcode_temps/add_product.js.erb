@@ -1,0 +1,15 @@
+if($("#form-detail-container").html().trim() == "") {
+  $("#form-detail-container").html("<%= j(render(partial: "form_detail")) %>");
+  $("#btn-save-product").removeClass("hidden");
+} else {
+  var valid = true;
+  var productCode = "<%= @product.code %>";
+  $(".listing-product-table-product-code-columns").each(function(){
+    if($(this).html().trim() == productCode)  {
+      bootbox.alert({message: "Sorry, product "+productCode+" is already added to the list",size: 'small'});
+      valid = false;
+    }
+  });
+  if(valid)
+    $(".listing-product-table-content-rows:last").after("<%= j(render(partial: "form_detail_print_product")) %>");
+}

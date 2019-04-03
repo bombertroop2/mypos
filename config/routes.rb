@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :print_barcode_temps, only: [:new, :create] do    
+    collection do
+      get "search_product"
+      get "add_product"
+    end
+  end
   resources :accounts_receivable_payments, except: [:edit, :update, :destroy] do
     collection do
       get "generate_form"
