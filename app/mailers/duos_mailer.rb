@@ -58,5 +58,9 @@ class DuosMailer < ApplicationMailer
     @xls_error_index = xls_error_index
     send_email("no-reply@1s.com", "bombertroop@gmail.com", type, render_to_string(template: "duos_mailer/import_data_email"))
   end
+  
+  def test_email
+    mail to: "bombertroop@gmail.com", subject: "Test Email", template_name: template_name
+  end
 
 end
