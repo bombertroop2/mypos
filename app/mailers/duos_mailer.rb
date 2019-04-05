@@ -60,7 +60,7 @@ class DuosMailer < ApplicationMailer
   end
   
   def test_email
-    mail to: "bombertroop@gmail.com", subject: "Test Email", template_name: template_name
+    mail to: "bombertroop@gmail.com", subject: "Test Email"
   end
 
 end
