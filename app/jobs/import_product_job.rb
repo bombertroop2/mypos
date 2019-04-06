@@ -13,42 +13,42 @@ class ImportProductJob < ApplicationJob
     added_spreadsheet_barcodes = []
     barcode = ""
     (3..spreadsheet.last_row).each do |i|
-      product_code = spreadsheet.row(i)[0].strip rescue nil
+      product_code = spreadsheet.row(i)[0].to_s.strip rescue nil
       if product_code.blank?
         error_message = "Error for row (##{i}) : Article code cannot be empty"
         break
       end
-      brand_code = spreadsheet.row(i)[2].strip rescue nil
+      brand_code = spreadsheet.row(i)[2].to_s.strip rescue nil
       if brand_code.blank?
         error_message = "Error for row (##{i}) : Brand code cannot be empty"
         break
       end
-      sex = spreadsheet.row(i)[3].strip.downcase rescue nil
+      sex = spreadsheet.row(i)[3].to_s.strip.downcase rescue nil
       if sex.blank?
         error_message = "Error for row (##{i}) : Sex cannot be empty"
         break
       end
-      vendor_code = spreadsheet.row(i)[4].strip rescue nil
+      vendor_code = spreadsheet.row(i)[4].to_s.strip rescue nil
       if vendor_code.blank?
         error_message = "Error for row (##{i}) : Vendor code cannot be empty"
         break
       end
-      target = spreadsheet.row(i)[5].strip.downcase rescue nil
+      target = spreadsheet.row(i)[5].to_s.strip.downcase rescue nil
       if target.blank?
         error_message = "Error for row (##{i}) : Target cannot be empty"
         break
       end
-      model_code = spreadsheet.row(i)[6].strip rescue nil
+      model_code = spreadsheet.row(i)[6].to_s.strip rescue nil
       if model_code.blank?
         error_message = "Error for row (##{i}) : Model code cannot be empty"
         break
       end
-      goods_type_code = spreadsheet.row(i)[7].strip rescue nil
+      goods_type_code = spreadsheet.row(i)[7].to_s.strip rescue nil
       if goods_type_code.blank?
         error_message = "Error for row (##{i}) : Goods type code cannot be empty"
         break
       end
-      size_group_code = spreadsheet.row(i)[8].strip rescue nil
+      size_group_code = spreadsheet.row(i)[8].to_s.strip rescue nil
       if size_group_code.blank?
         error_message = "Error for row (##{i}) : Size group code cannot be empty"
         break
@@ -85,14 +85,14 @@ class ImportProductJob < ApplicationJob
           error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].to_s.strip} doesn't exist"
           break
         end
-        price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].strip).pluck(:id).first
+        price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].to_s.strip).pluck(:id).first
         if price_code_id.blank?
-          error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].strip} doesn't exist"
+          error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].to_s.strip} doesn't exist"
           break
         end
-        color_id = Color.where(code: spreadsheet.row(i)[14].strip).pluck(:id).first
+        color_id = Color.where(code: spreadsheet.row(i)[14].to_s.strip).pluck(:id).first
         if color_id.blank?
-          error_message = "Error for row (##{i}) : Color #{spreadsheet.row(i)[14].strip} doesn't exist"
+          error_message = "Error for row (##{i}) : Color #{spreadsheet.row(i)[14].to_s.strip} doesn't exist"
           break
         end
         sex = if sex == "null"
@@ -102,7 +102,7 @@ class ImportProductJob < ApplicationJob
         else
           sex
         end
-        product = Product.new code: product_code, description: spreadsheet.row(i)[1], brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data_via_web: true
+        product = Product.new code: product_code, description: spreadsheet.row(i)[1].to_s, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data_via_web: true
         product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
         product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
         product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
@@ -130,9 +130,9 @@ class ImportProductJob < ApplicationJob
           error_message = "Error for row (##{i}) : Size #{spreadsheet.row(i)[11].to_s.strip} doesn't exist"
           break
         end
-        price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].strip).pluck(:id).first
+        price_code_id = PriceCode.where(code: spreadsheet.row(i)[12].to_s.strip).pluck(:id).first
         if price_code_id.blank?
-          error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].strip} doesn't exist"
+          error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].to_s.strip} doesn't exist"
           break
         end
         product_detail = prdct.product_details.select{|pd| pd.size_id == size_id && pd.price_code_id == price_code_id}.first
@@ -140,7 +140,7 @@ class ImportProductJob < ApplicationJob
           product_detail = prdct.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: prdct.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
           product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
         end
-        color_id = Color.where(code: spreadsheet.row(i)[14].strip).pluck(:id).first
+        color_id = Color.where(code: spreadsheet.row(i)[14].to_s.strip).pluck(:id).first
         product_color = prdct.product_colors.select{|pc| pc.color_id == color_id}.first
         if product_color.blank?
           product_color = prdct.product_colors.build color_id: color_id, attr_importing_data: true

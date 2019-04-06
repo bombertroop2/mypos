@@ -68,4 +68,9 @@ class DuosMailer < ApplicationMailer
     mail to: "rizkinoorlaksana@gmail.com", subject: "Import Product Job"
   end
 
+  def import_beginning_stock_error_email(message)
+    @message = message
+    mail to: "rizkinoorlaksana@gmail.com", subject: "Import Beginning Stock Job"
+  end
+
 end
