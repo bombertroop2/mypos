@@ -62,5 +62,10 @@ class DuosMailer < ApplicationMailer
   def test_email
     mail to: "bombertroop@gmail.com", subject: "Test Email"
   end
+  
+  def import_product_error_email(message)
+    @message = message
+    mail to: "rizkinoorlaksana@gmail.com", subject: "Import Product Job"
+  end
 
 end
