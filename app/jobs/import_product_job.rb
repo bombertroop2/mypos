@@ -102,10 +102,15 @@ class ImportProductJob < ApplicationJob
         else
           sex
         end
-        product = Product.new code: product_code, description: spreadsheet.row(i)[1].to_s, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data_via_web: true
-        product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-        product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
-        product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
+        product = Product.where(code: product_code).first
+        if product.blank?
+          product = Product.new code: product_code, description: spreadsheet.row(i)[1].to_s, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data_via_web: true
+        end
+        if product.blank?
+          product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
+          product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
+          product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
+        end
         product_color = product.product_colors.build color_id: color_id, attr_importing_data: true
         if added_spreadsheet_barcodes.select{|ab| (ab[:product_code] != product_code || ab[:size_id] != size_id || ab[:color_id] != color_id) && ab[:barcode] == spreadsheet.row(i)[17].to_s.strip}.blank?
           product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
@@ -135,10 +140,12 @@ class ImportProductJob < ApplicationJob
           error_message = "Error for row (##{i}) : Price code #{spreadsheet.row(i)[12].to_s.strip} doesn't exist"
           break
         end
-        product_detail = prdct.product_details.select{|pd| pd.size_id == size_id && pd.price_code_id == price_code_id}.first
-        if product_detail.blank?
-          product_detail = prdct.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: prdct.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
-          product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
+        if prdct.new_record?
+          product_detail = prdct.product_details.select{|pd| pd.size_id == size_id && pd.price_code_id == price_code_id}.first
+          if product_detail.blank?
+            product_detail = prdct.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: prdct.size_group_id, attr_importing_data: true, user_is_adding_new_product: true
+            product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
+          end
         end
         color_id = Color.where(code: spreadsheet.row(i)[14].to_s.strip).pluck(:id).first
         product_color = prdct.product_colors.select{|pc| pc.color_id == color_id}.first
@@ -225,6 +232,35 @@ class ImportProductJob < ApplicationJob
                   message = pr.errors.full_messages.map{|error| "#{error}<br/>"}.join
                   error_message = message
                   raise ActiveRecord::Rollback
+                end
+              else
+                raise ActiveRecord::Rollback
+              end
+            else
+              if valid
+                SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
+                  pr.product_colors.each do |pc|
+                    if pc.new_record?
+                      if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                        if barcode.blank?                        
+                          prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                          barcode = if prb.present?
+                            "1S#{prb.barcode.split("1S")[1].succ}"
+                          else
+                            "1S00001"
+                          end
+                        else
+                          barcode = "1S#{barcode.split("1S")[1].succ}"
+                        end
+                        pc.product_barcodes.build size_id: size.id, barcode: barcode
+                      end
+                      unless valid = pc.save
+                        message = pc.errors.full_messages.map{|error| "#{error}<br/>"}.join
+                        error_message = message
+                        raise ActiveRecord::Rollback
+                      end
+                    end
+                  end
                 end
               else
                 raise ActiveRecord::Rollback
