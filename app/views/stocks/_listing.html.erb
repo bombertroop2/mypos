@@ -1,19 +1,20 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;">
     <thead id="listing-stock-thead">
         <tr>
-            <th class="col-md-3" style="text-align: center"><%= smart_listing.sortable "Warehouse", "warehouses.name" %></th>
-            <th class="col-md-9" style="text-align: center">Product</th>
+            <th class="col-md-3" style="text-align: center"><%#= smart_listing.sortable "Warehouse", "warehouses.name" %></th>
+            <th class="col-md-9" style="text-align: center"></th>
         </tr>
     </thead>
     <tbody>
-        <% smart_listing.collection.each do |stock| %>
+        <% stock = smart_listing.collection.first %>
+        <% if stock.present? %>
           <tr class="editable">
               <%= smart_listing.render object: stock, partial: "stocks/stock", locals: {object: stock} %>
           </tr>
         <% end %>
     </tbody>
 </table>
-<%= smart_listing.paginate %>
+<%#= smart_listing.paginate %>
 <script>
   var processId = setInterval(function () {
       if ($("#listing-stock-thead").is(":visible")) {
@@ -21,5 +22,5 @@
       } else {
           $("#listing-stock-thead").show();
       }
-  }, 0);  
+  }, 0);
 </script>
