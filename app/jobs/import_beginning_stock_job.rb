@@ -14,7 +14,7 @@ class ImportBeginningStockJob < ApplicationJob
     beginning_stock_products = []
     if error_message.blank?
       (2..spreadsheet.last_row).each do |i|
-        warehouse_code = spreadsheet.row(i)[0].strip rescue nil
+        warehouse_code = spreadsheet.row(i)[0].to_s.strip rescue nil
         if warehouse_code.blank?
           error_message = "Error for row (##{i}) : Warehouse code cannot be empty"
           break
@@ -27,7 +27,7 @@ class ImportBeginningStockJob < ApplicationJob
             warehouse_id = warehouse.id            
           end
         end
-        article_code = spreadsheet.row(i)[1].strip rescue nil
+        article_code = spreadsheet.row(i)[1].to_s.strip rescue nil
         if article_code.blank?
           error_message = "Error for row (##{i}) : Article code cannot be empty"
           break
@@ -40,7 +40,7 @@ class ImportBeginningStockJob < ApplicationJob
             article_id = article.id
           end
         end
-        color_code = spreadsheet.row(i)[2].strip rescue nil
+        color_code = spreadsheet.row(i)[2].to_s.strip rescue nil
         if color_code.blank?
           error_message = "Error for row (##{i}) : Color code cannot be empty"
           break
