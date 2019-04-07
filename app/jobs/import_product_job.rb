@@ -106,7 +106,7 @@ class ImportProductJob < ApplicationJob
         if product.blank?
           product = Product.new code: product_code, description: spreadsheet.row(i)[1].to_s, brand_id: brand_id, sex: sex, vendor_id: vendor_id, target: target, model_id: model_id, goods_type_id: goods_type_id, size_group_id: size_group_id, attr_importing_data_via_web: true
         end
-        if product.blank?
+        if product.new_record?
           product_detail = product.product_details.build size_id: size_id, price_code_id: price_code_id, size_group_id: size_group_id, attr_importing_data: true, user_is_adding_new_product: true
           product_detail.price_lists.build effective_date: current_date, price: spreadsheet.row(i)[10].to_f, user_is_adding_new_price: true, attr_importing_data: true
           product.cost_lists.build effective_date: current_date, cost: spreadsheet.row(i)[13].to_f, is_user_creating_product: true
@@ -240,24 +240,26 @@ class ImportProductJob < ApplicationJob
               if valid
                 SizeGroup.select(:id).where(id: pr.size_group_id).first.sizes.select(:id).each do |size|
                   pr.product_colors.each do |pc|
-                    if pc.new_record?
-                      if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
-                        if barcode.blank?                        
-                          prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
-                          barcode = if prb.present?
-                            "1S#{prb.barcode.split("1S")[1].succ}"
+                    if ProductColor.select("1 AS one").where(product_id: pr.id, color_id: pc.color_id).blank?
+                      if pc.new_record?
+                        if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                          if barcode.blank?                        
+                            prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                            barcode = if prb.present?
+                              "1S#{prb.barcode.split("1S")[1].succ}"
+                            else
+                              "1S00001"
+                            end
                           else
-                            "1S00001"
+                            barcode = "1S#{barcode.split("1S")[1].succ}"
                           end
-                        else
-                          barcode = "1S#{barcode.split("1S")[1].succ}"
+                          pc.product_barcodes.build size_id: size.id, barcode: barcode
                         end
-                        pc.product_barcodes.build size_id: size.id, barcode: barcode
-                      end
-                      unless valid = pc.save
-                        message = pc.errors.full_messages.map{|error| "#{error}<br/>"}.join
-                        error_message = message
-                        raise ActiveRecord::Rollback
+                        unless valid = pc.save
+                          message = pc.errors.full_messages.map{|error| "#{error}<br/>"}.join
+                          error_message = message
+                          raise ActiveRecord::Rollback
+                        end
                       end
                     end
                   end
