@@ -116,15 +116,16 @@ class ImportProductJob < ApplicationJob
           product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
           added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].to_s.strip}
         else
+          first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
           if barcode.blank?                        
-            prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+            prb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
             barcode = if prb.present?
-              "1S#{prb.barcode.split("1S")[1].succ}"
+              "#{first_three_digits_company_code}1S#{prb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
             else
-              "1S00001"
+              "#{first_three_digits_company_code}1S00001"
             end
           else
-            barcode = "1S#{barcode.split("1S")[1].succ}"
+            barcode = "#{first_three_digits_company_code}1S#{barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
           end
           product_color.product_barcodes.build size_id: size_id, barcode: barcode
         end
@@ -155,15 +156,16 @@ class ImportProductJob < ApplicationJob
             product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
             added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].to_s.strip}
           else
+            first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
             if barcode.blank?                        
-              prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+              prb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
               barcode = if prb.present?
-                "1S#{prb.barcode.split("1S")[1].succ}"
+                "#{first_three_digits_company_code}1S#{prb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
               else
-                "1S00001"
+                "#{first_three_digits_company_code}1S00001"
               end
             else
-              barcode = "1S#{barcode.split("1S")[1].succ}"
+              barcode = "#{first_three_digits_company_code}1S#{barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
             end
             product_color.product_barcodes.build size_id: size_id, barcode: barcode
           end
@@ -174,15 +176,16 @@ class ImportProductJob < ApplicationJob
               product_color.product_barcodes.build size_id: size_id, barcode: spreadsheet.row(i)[17].to_s.strip
               added_spreadsheet_barcodes << {product_code: product_code, size_id: size_id, color_id: color_id, barcode: spreadsheet.row(i)[17].to_s.strip}
             else
+              first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
               if barcode.blank?                        
-                prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                prb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
                 barcode = if prb.present?
-                  "1S#{prb.barcode.split("1S")[1].succ}"
+                  "#{first_three_digits_company_code}1S#{prb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                 else
-                  "1S00001"
+                  "#{first_three_digits_company_code}1S00001"
                 end
               else
-                barcode = "1S#{barcode.split("1S")[1].succ}"
+                barcode = "#{first_three_digits_company_code}1S#{barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
               end
               product_color.product_barcodes.build size_id: size_id, barcode: barcode
             end
@@ -214,15 +217,16 @@ class ImportProductJob < ApplicationJob
                   end
                   pr.product_colors.each do |pc|
                     if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                      first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
                       if barcode.blank?                        
-                        prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                        prb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
                         barcode = if prb.present?
-                          "1S#{prb.barcode.split("1S")[1].succ}"
+                          "#{first_three_digits_company_code}1S#{prb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                         else
-                          "1S00001"
+                          "#{first_three_digits_company_code}1S00001"
                         end
                       else
-                        barcode = "1S#{barcode.split("1S")[1].succ}"
+                        barcode = "#{first_three_digits_company_code}1S#{barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                       end
                       pc.product_barcodes.build size_id: size.id, barcode: barcode
                     end
@@ -243,15 +247,16 @@ class ImportProductJob < ApplicationJob
                     if ProductColor.select("1 AS one").where(product_id: pr.id, color_id: pc.color_id).blank?
                       if pc.new_record?
                         if pc.product_barcodes.select{|pb| pb.size_id == size.id}.blank?
+                          first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
                           if barcode.blank?                        
-                            prb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                            prb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
                             barcode = if prb.present?
-                              "1S#{prb.barcode.split("1S")[1].succ}"
+                              "#{first_three_digits_company_code}1S#{prb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                             else
-                              "1S00001"
+                              "#{first_three_digits_company_code}1S00001"
                             end
                           else
-                            barcode = "1S#{barcode.split("1S")[1].succ}"
+                            barcode = "#{first_three_digits_company_code}1S#{barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                           end
                           pc.product_barcodes.build size_id: size.id, barcode: barcode
                         end
