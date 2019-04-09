@@ -1,2 +1,6 @@
-<%= smart_listing_item :vendors, :create, @vendor, 
-  @vendor.valid? ? "vendors/vendor" : "vendors/form" %>
+<% if @valid %>
+  <%= smart_listing_item :vendors, :create, @vendor, "vendors/vendor" %>
+<% else %>
+  <% puts "errors => #{@vendor.errors.messages}" %>
+  <%= smart_listing_item :vendors, :create, @vendor, "vendors/form" %>
+<% end %>
