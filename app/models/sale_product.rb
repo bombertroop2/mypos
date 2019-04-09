@@ -1,7 +1,7 @@
 class SaleProduct < ApplicationRecord
   attr_accessor :sales_promotion_girl_id, :event_type, :effective_price, :attr_effective_cost,
     :first_plus_discount, :second_plus_discount, :cash_discount, :attr_returned_sale_id,
-    :attr_returning_sale, :attr_gift_event_discount_amount, :attr_member_discount
+    :attr_returning_sale, :attr_gift_event_discount_amount, :attr_member_discount, :attr_product_spg_name
   
   belongs_to :sale
   belongs_to :product_barcode

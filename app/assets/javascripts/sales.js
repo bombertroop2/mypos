@@ -2,6 +2,7 @@ var eventPurchasedProductDataTables = null;
 var bootboxDialogForm = null;
 var bootboxDialogFormGiftEvent = null;
 var bootboxDialogBOGOForm = [];
+var buttonFinishClicked = false;
 
 $(function () {
     $(".actionBar > .buttonNext").click(function () {
@@ -19,23 +20,30 @@ $(function () {
         $($(".stepContainer")[0]).css("overflow-x", "hidden");
     });
     $(".actionBar > .buttonFinish").click(function () {
-        bootbox.confirm({
-            message: "Once you create transaction, you'll not be able to change or delete it</br>Are you sure?",
-            buttons: {
-                confirm: {
-                    label: '<i class="fa fa-check"></i> Confirm'
+        var boxSaleConfirm = null;
+        if (buttonFinishClicked == false) {
+            boxSaleConfirm = bootbox.confirm({
+                message: "Once you create transaction, you'll not be able to change or delete it</br>Are you sure?",
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Confirm'
+                    },
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> Cancel'
+                    }
                 },
-                cancel: {
-                    label: '<i class="fa fa-times"></i> Cancel'
-                }
-            },
-            callback: function (result) {
-                if (result) {
-                    $("body").css('padding-right', '0px');
-                    $("#new_sale").submit();
-                }
-            },
-            size: "small"
+                callback: function (result) {
+                    if (result) {
+                        $("body").css('padding-right', '0px');
+                        $("#new_sale").submit();
+                    }
+                },
+                size: "small"
+            });
+        }
+        buttonFinishClicked = true;
+        boxSaleConfirm.on("hidden.bs.modal", function () {
+            buttonFinishClicked = false;
         });
     });
 
@@ -57,7 +65,7 @@ $(function () {
                 $("#barcode").focus();
             }
         }, 0);
-        $($(".stepContainer")[0]).css("overflow-x", "hidden");
+        $($(".stepContainer")[0]).css("overflow-x", "visible");
     });
 
     $("#list-step-3").click(function () {
@@ -350,5 +358,11 @@ $(function () {
         $("#filter_string_export").val($("#filter-string").val());
         $("#filter_warehouse_export").val($("#filter-sale-warehouse-id").val());
         $("#export_pos").submit();
+    });
+
+    $("#sales_promotion_girl_id").attr("data-placeholder", "Please select").chosen({width: "100%"});
+    $("#sales_promotion_girl_id").change(function () {
+        $("#search-barcode-btn").prop("disabled", false);
+        $("#search-sale-product-btn").prop("disabled", false);
     });
 });
