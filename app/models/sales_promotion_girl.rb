@@ -29,6 +29,10 @@ class SalesPromotionGirl < ApplicationRecord
     ["Cashier", "cashier"],
     ["Supervisor", "supervisor"],
   ]
+  
+  def identifier_and_name
+    "#{identifier} - #{name}"
+  end
 
   private
   
