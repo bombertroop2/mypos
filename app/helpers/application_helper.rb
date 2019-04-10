@@ -102,6 +102,7 @@ module ApplicationHelper
     return true if can? :read, CashDisbursement
     return true if can? :read, Sale
     return true if can? :read, SalesReturn
+    return true if can? :read, Incentive
   end
 
   def consignment_menu_active?

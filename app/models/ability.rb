@@ -14,6 +14,7 @@ class Ability
       can [:read, :export], Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
+      cannot :manage, Incentive
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
@@ -136,6 +137,7 @@ class Ability
               can ability, CashDisbursement
               can ability, Sale
               can ability, SalesReturn
+              can ability, Incentive
             end
           elsif user_menu.name.eql?("Consignment")
             counter_present = Warehouse.joins(:sales_promotion_girls).counter.select("1 AS one").where(is_active: true, :"sales_promotion_girls.id" => user.sales_promotion_girl_id).present? unless user.new_record?
