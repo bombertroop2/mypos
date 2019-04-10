@@ -61,9 +61,6 @@
 
                                   <% colors.each_with_index do |color, idx| %>                          
                                     <tr style="text-align: center">
-                <%# if idx.eql? 0 %>
-                                          <!--<td rowspan="<%#= colors.length %>" style="vertical-align: middle"><strong>Colors</strong></td>-->
-                <%# end %>
                                         <td style="vertical-align: middle" colspan="2"><%= "#{color.code} - #{color.name}" %></td>                            
                                         <% sizes.each do |size| %>
                                           <% if idx == 0 %>
@@ -103,13 +100,11 @@
                             </div>
                         </td>
                     </tr>
-                <%# unless order_booking_product_fields.object.new_record? %>
                     <tr style="text-align: center">
                         <td style="vertical-align: middle;" colspan="2" align="left">
                             <%= order_booking_product_fields.check_box :_destroy %> Delete
                         </td>
                     </tr>
-                <%# end %>
                     <script>
                       $.each(colorSizes, function (index, value) {
                           $('#quantity_<%= product.id %>_' + value).keyup(function () {
