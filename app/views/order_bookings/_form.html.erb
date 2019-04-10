@@ -31,10 +31,6 @@
                                 <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_product">
                                     <span class="glyphicon glyphicon-plus"></span> Add
                                 </button>
-                                <!--
-                                  <button type="button" class="btn btn-default" style="margin-bottom: 0px !important" id="btn_add_all_product">
-                                      <span class="glyphicon glyphicon-plus"></span> Add All
-                                  </button>-->
                             </div>
                             <%= error_help_text(@order_booking, :product_code) %>
                         </div>
@@ -51,13 +47,6 @@
                     </div>
 
                     <% unless @order_booking.new_record? %>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <!--<div class="form-group<%#= control_group_error(@order_booking, :destination_warehouse_id) %>">
-                  <%#= f.label :destination_warehouse_id, "Warehouse to", class: "col-sm-2 control-label" %>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <div class="col-sm-10">
-                  <%#= f.select :destination_warehouse_id, options_from_collection_for_select(@destination_warehouses, 'id', 'code_and_name', @order_booking.destination_warehouse_id.to_s), {prompt: 'Select'}, {class: "form-control"} %>
-                  <%#= error_help_text(@order_booking, :destination_warehouse_id) %>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </div>-->
                     <% else %>
                       <div class="form-group">
                           <label class="col-sm-2 control-label">Dest. Warehouse code</label>
@@ -222,14 +211,6 @@
                                           return false;
                                   }
                               });
-                              /*if ($("#warehouse_to_ids") != undefined && $("#warehouse_to_ids").val() != "") {
-                               var warehouseToIds = $("#warehouse_to_ids").val().split(",");
-                               $.each(warehouseToIds, function (index, value) {
-                               var e = jQuery.Event("click");
-                               e.ctrlKey = true;
-                               $("#destination_warehouse_" + value).find("td:first-child").trigger(e);
-                               });
-                               }*/
                       <% end %>
 
                             $("#warehouse_code").keypress(function (e) {
@@ -254,7 +235,7 @@
                             if ($("#warehouse_product_items_form_container").html().trim() != "") {
                                 $($("#warehouse_product_items_form_container").parent().parent()).removeClass("hidden");
                             }
-                            if ($("#dest_warehouses_form_container").html().trim() != "") {
+                            if ($("#dest_warehouses_form_container").length > 0 && $("#dest_warehouses_form_container").html().trim() != "") {
                                 $($("#dest_warehouses_form_container").parent().parent()).removeClass("hidden");
                             }
                         });
