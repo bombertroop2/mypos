@@ -8,7 +8,7 @@
   <% elsif params[:event][:event_type].strip.eql?("Buy 1 Get 1 Free") %>
     $("#form_container_buy_one_get_one_free").html("<%= j(render(partial: "form_buy_one_get_one")) %>");
   <% elsif params[:event][:event_type].strip.eql?("Gift") %>
-    $("#form_container_reward").html("<%= j(render(partial: "form_gift")) %>");
+    //$("#form_container_reward").html("<%= j(render(partial: "form_gift")) %>");
   <% end %>
 <% else %>
   window.location = '<%= events_path %>';
