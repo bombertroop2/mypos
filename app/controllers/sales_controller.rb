@@ -67,8 +67,8 @@ class SalesController < ApplicationController
   def new
     session.delete("sale")
     @sale = Sale.new
-    warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    @cashier_opened = CashierOpening.select("1 AS one").where(warehouse_id: warehouse_id).where("closed_at IS NULL").where(["open_date = ?", Date.current]).where("opened_by = #{current_user.id}").present?
+    @warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
+    @cashier_opened = CashierOpening.select("1 AS one").where(warehouse_id: @warehouse_id).where("closed_at IS NULL").where(["open_date = ?", Date.current]).where("opened_by = #{current_user.id}").present?
   end
 
   # GET /sales/1/edit
@@ -78,6 +78,7 @@ class SalesController < ApplicationController
   # POST /sales
   # POST /sales.json
   def create
+    @product_spg_ids = []
     convert_money_to_numeric
     add_additional_params_to_sale_products
     set_total
@@ -113,6 +114,8 @@ class SalesController < ApplicationController
             else
               @member = Member.select(:id, :name, :address, :phone, :mobile_phone, :gender, :email, :member_id).where(id: @sale.member_id).first# if @sale.member_id.present?
             end
+          else
+            @product_spg_names = SalesPromotionGirl.where(id: @product_spg_ids.uniq).pluck(:name).join(", ")
           end
         rescue ActiveRecord::RecordNotUnique => e
           if recreate_counter < 3
@@ -220,10 +223,13 @@ class SalesController < ApplicationController
           @store_event = gift_event
         end
       end
+      
+      @product_spg = SalesPromotionGirl.select(:id, :name).find(params[:product_spg_id])
+      
       @sale_product = if @store_event.present?
-        sale.sale_products.build product_barcode_id: @product.id, quantity: 1, event_id: @store_event.id
+        sale.sale_products.build product_barcode_id: @product.id, quantity: 1, event_id: @store_event.id, product_spg_id: @product_spg.id, attr_product_spg_name: @product_spg.name
       else
-        sale.sale_products.build product_barcode_id: @product.id, quantity: 1
+        sale.sale_products.build product_barcode_id: @product.id, quantity: 1, product_spg_id: @product_spg.id, attr_product_spg_name: @product_spg.name
       end
     end
   end
@@ -485,6 +491,7 @@ class SalesController < ApplicationController
           params[:sale][:sale_products_attributes][key][:free_product_id] = nil
         end
         params[:sale][:sale_products_attributes][key][:attr_member_discount] = params[:sale][:member_discount]
+        @product_spg_ids << params[:sale][:sale_products_attributes][key][:product_spg_id]
       end
     end
   end
@@ -523,6 +530,6 @@ class SalesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def sale_params
     params.require(:sale).permit(:gift_event_discount_amount, :gift_event_gift_type, :gift_event_id, :gift_event_product_id, :pay, :warehouse_id, :cashier_id, :member_id, :transaction_time, :bank_id, :payment_method, :total, :trace_number, :card_number, :cash, :change, :transaction_number, :cashier_opening_id, :gross_profit, :member_discount,
-      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost, :attr_gift_event_discount_amount, :attr_member_discount])
+      sale_products_attributes: [:price_list_id, :effective_price, :event_type, :sales_promotion_girl_id, :quantity, :product_barcode_id, :event_id, :free_product_id, :first_plus_discount, :second_plus_discount, :cash_discount, :cost_list_id, :attr_effective_cost, :attr_gift_event_discount_amount, :attr_member_discount, :product_spg_id, :attr_product_spg_name])
   end
 end

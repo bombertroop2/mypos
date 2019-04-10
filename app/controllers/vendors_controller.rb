@@ -37,7 +37,7 @@ class VendorsController < ApplicationController
     @vendor = Vendor.new(vendor_params)
 
     begin
-      @vendor.save
+      @valid = @vendor.save
     rescue ActiveRecord::RecordNotUnique => e
       flash[:alert] = "That code has already been taken"
       render js: "window.location = '#{vendors_url}'"

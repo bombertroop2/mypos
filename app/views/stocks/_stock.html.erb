@@ -1,60 +1,85 @@
-<td style="text-align: center"><%= object.keys.first %></td>
-<td>
+<td colspan="2">
     <table class="table table-condensed table-responsive table-bordered">
-        <tbody>
-            <tr style="text-align: center">
-                <td><strong>Article Code</strong></td>
-                <td><strong>Quantity</strong></td>
-                <td><strong>Total Quantity</strong></td>
+        <thead>
+            <tr>
+                <th colspan="5" style="text-align: center">
+                    <%= object.warehouse_name %>
+                </th>
             </tr>
-            <% total_products = object[object.keys.first].keys.length %>
-            <% object[object.keys.first].each do |key, color_hash| %>
-              <% product_code = object[object.keys.first][key]["code"] %>
-              <% product = Product.where(["code = ?",product_code]).select(:id).first %>
-              <% product_sizes = product.sizes %>
-              <% product_colors = product.colors %>
-              <% total_quantity = 0 %>
-              <tr align="center">
-                  <td style="vertical-align: middle"><%= key %></td>
-                  <td style="vertical-align: middle">
-                      <table class="table table-condensed table-responsive table-bordered">
-                          <tbody>
-                              <!--
-                              <tr>
-                                  <td colspan="2" rowspan="2"></td>
-                                  <td align="center" colspan="<%= product_sizes.length %>">Sizes</td>
-                              </tr>
-                              -->
-                              <tr>
-                                  <td></td>
-                                  <% product_sizes.each do |size| %>
-                                    <td align="center" style="vertical-align: middle"><%= size.size %></td>
-                                  <% end %>
-                                  <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
-                              </tr>
-                              <% product_colors.each_with_index do |color, idx| %>
-                                <tr align="center">
-    <%# if idx == 0 %>
-                                      <!--<td style="vertical-align: middle" rowspan="<%#= product_colors.length %>">Colors</td>-->
-    <%# end %>
-                                    <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
-                                    <% qty_per_color = 0 %>
-                                    <% product_sizes.each do |size| %>
-                                      <td class="quantity-on-hand" align="center" style="vertical-align: middle">
-                                          <% total_quantity += object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>
-                                          <% qty_per_color += object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>                                 
-                                          <%= object[object.keys.first][key][color.name][size.size].to_i rescue 0 %>
-                                      </td>
-                                    <% end %>
-                                    <td align="center" style="vertical-align: middle"><%= qty_per_color %></td>
-                                </tr>
+        </thead>
+    </thead>
+    <tbody>            
+        <tr style="text-align: center">
+            <td colspan="3"><strong>Product</strong></td>
+            <td rowspan="2" style="vertical-align: middle"><strong>Quantity</strong></td>
+            <td rowspan="2" style="vertical-align: middle"><strong>Total Quantity</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Code</strong></td>
+            <td><strong>Name</strong></td>
+            <td><strong>Description</strong></td>
+        </tr>
+        <%
+        grand_total = 0
+        stock_products = if params[:filter_product_criteria].present? && params[:filter_product_criteria].strip.present?
+          object.
+            stock_products.
+            select(:id, "products.code AS product_code", "products.description AS product_description", "common_fields.name AS brand_name").
+            joins(product: :brand).
+            includes(:sizes, :colors, :stock_details).
+            where(["products.code ILIKE ? OR common_fields.name ILIKE ?", "%"+params[:filter_product_criteria]+"%", "%"+params[:filter_product_criteria]+"%"])
+          else
+          object.
+            stock_products.
+            select(:id, "products.code AS product_code", "products.description AS product_description", "common_fields.name AS brand_name").
+            joins(product: :brand).
+            includes(:sizes, :colors, :stock_details)
+          end
+        stock_products.each do |sp|
+          total_quantity = 0
+        %>
+          <tr align="center">
+              <td style="vertical-align: middle"><%= sp.product_code %></td>
+              <td style="vertical-align: middle"><%= sp.brand_name %></td>
+              <td style="vertical-align: middle"><%= sp.product_description %></td>
+              <td style="vertical-align: middle">
+                  <table class="table table-condensed table-responsive table-bordered">
+                      <tbody>
+                          <tr>
+                              <td></td>
+                              <% sp.sizes.uniq.each do |size| %>
+                                <td align="center" style="vertical-align: middle"><%= size.size %></td>
                               <% end %>
-                          </tbody>
-                      </table>
-                  </td>
-                  <td align="right" style="vertical-align: middle"><%= total_quantity %></td>
-              </tr>
-            <% end %>
-        </tbody>
-    </table>
+                              <td align="center" style="vertical-align: middle"><strong>Qty / Color</strong></td>
+                          </tr>
+                          <% sp.colors.uniq.each do |color| %>
+                            <tr align="center">
+                                <td align="center" style="vertical-align: middle"><%= "#{color.code} - #{color.name}" %></td>
+                                <% qty_per_color = 0 %>
+                                <% sp.sizes.uniq.each do |size| %>
+                                  <% stock_detail = sp.stock_details.select{|sd| sd.size_id == size.id && sd.color_id == color.id}.first %>
+                                  <td class="quantity-on-hand" align="center" style="vertical-align: middle">
+                                      <% total_quantity += stock_detail.quantity rescue 0 %>
+                                      <% qty_per_color += stock_detail.quantity rescue 0 %>
+                                      <%= number_to_currency((stock_detail.quantity rescue 0), :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
+                                  </td>
+                                <% end %>
+                                <td align="center" style="vertical-align: middle"><%= number_to_currency(qty_per_color, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+                            </tr>
+                          <% end %>
+                      </tbody>
+                  </table>
+              </td>
+              <td align="right" style="vertical-align: middle"><%= number_to_currency(total_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+          </tr>
+          <% grand_total += total_quantity %>
+        <% end %>              
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4" align="right"><strong>Grand Total</strong></td>
+            <td align="right"><%= number_to_currency(grand_total, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+    </tfoot>
+</table>
 </td>

@@ -21,12 +21,13 @@ class ProductColor < ApplicationRecord
       private
   
       def create_barcode
+        first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
         product.product_details.select(:size_id).distinct.each do |product_detail|
-          pb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+          pb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
           barcode = if pb.present?
-            "1S#{pb.barcode.split("1S")[1].succ}"
+            "#{first_three_digits_company_code}1S#{pb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
           else
-            "1S00001"
+            "#{first_three_digits_company_code}1S00001"
           end
           product_barcode = product_barcodes.build size_id: product_detail.size_id, barcode: barcode
           product_barcode.save

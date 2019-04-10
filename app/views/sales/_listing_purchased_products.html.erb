@@ -11,6 +11,7 @@
                 <th>Price</th>
                 <th>Event</th>
                 <th>Subtotal</th>
+                <th>SPG</th>
                 <th></th>
             </tr>
         </thead>
@@ -18,6 +19,7 @@
             <tr>
                 <th colspan="6" style="text-align:right">Total:</th>
                 <th id="total-sale"></th>
+                <th></th>
                 <th></th>
             </tr>
         </tfoot>
@@ -43,7 +45,7 @@
                   </td>
                   <td>
                       <% if session["sale"]["#{@product.id}"]["store_event"].present? && session["sale"]["#{@product.id}"]["store_event"]["event_type"].eql?("Buy 1 Get 1 Free") %>
-                                  <!--<div id="bogo-product-form-container-<%#= current_miliseconds %>">-->
+                                                <!--<div id="bogo-product-form-container-<%#= current_miliseconds %>">-->
                         <%= render(partial: "bogo_form", locals: {row_index: current_miliseconds}) %>
                         <!--</div>-->
                       <% end %>
@@ -69,6 +71,7 @@
                         <%= @product.price %>
                       <% end %>
                   </td>
+                  <td><%= @product_spg.name %></td>
                   <td>          
                       <button type="button" class="btn btn-danger" id="btn-delete-sale-product-<%= current_miliseconds %>">Delete</button>
                   </td>
@@ -105,7 +108,7 @@
                       <td>
                           <% if store_event.present? %>
                             <% if store_event["event_type"].eql?("Buy 1 Get 1 Free") %>
-                                                  <!--<div id="bogo-product-form-container-<%#= current_miliseconds %>">-->
+                                                                              <!--<div id="bogo-product-form-container-<%#= current_miliseconds %>">-->
                               <%= render(partial: "bogo_form", locals: {row_index: current_miliseconds}) %>
                               <!--</div>-->
                               <%= fields_for "sale[sale_products_attributes][#{current_miliseconds}]", sale_product do |sale_product_fields| %>
@@ -148,7 +151,8 @@
                             0
                           <% end %>
                       </td>
-                      <td>          
+                      <td><%= sale_product.attr_product_spg_name %></td>
+                      <td>
                           <button type="button" class="btn btn-danger btn-delete-sale-product" id="btn-delete-sale-product-<%= current_miliseconds %>">Delete</button>
                           <%= fields_for "sale[sale_products_attributes][#{current_miliseconds}]", sale_product do |sale_product_fields| %>
                             <span style="display: inline-block" class="<%= control_group_error(sale_product_fields.object, :quantity) %>">
@@ -190,6 +194,7 @@
               //{data: 'quantity'},
               {data: 'event'},
               {data: 'subtotal'},
+              {data: 'spg'},
               {data: 'delete_button'}
           ],
           tableTools: {

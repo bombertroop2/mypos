@@ -38,8 +38,8 @@
         <% last_product_code = "" %>
         <% last_color_code = "" %>
         <% @stock_movement_transactions.each do |stock_movement_transaction| %>
-          <% puts "product: #{stock_movement_transaction.product_id}" %>
-          <% product_first_price = PriceList.select(:price).joins(:product_detail).where(["product_details.size_id = ? AND product_details.product_id = ? AND product_details.price_code_id = ?", stock_movement_transaction.size_id, stock_movement_transaction.product_id, @warehouse.price_code_id]).order(:effective_date).first.price rescue 0 %>
+          <% product_detail = stock_movement_transaction.product_details.select{|pd| pd.size_id == stock_movement_transaction.size_id && pd.price_code_id == @warehouse.price_code_id}.first %>
+          <% product_first_price = product_detail.price_lists.select{|pl| pl.product_detail_id == product_detail.id}.sort{|pd1, pd2| pd1.effective_date <=> pd2.effective_date}.first.price rescue 0 %>
           <% unless last_product_code.eql?(stock_movement_transaction.product_code) %>
             <% total_product = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code)}.length %>
             <% total_product_color = @stock_movement_transactions.select{|smt| smt.product_code.eql?(stock_movement_transaction.product_code) && smt.color_code.eql?(stock_movement_transaction.color_code)}.length %>

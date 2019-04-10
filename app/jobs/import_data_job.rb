@@ -377,20 +377,22 @@ class ImportDataJob < ApplicationJob
               size_group_id = product_color.size_group_id
               size_id = Size.select(:id).where(size: row["C#{idx + 1}"], size_group_id: size_group_id).first.id
               barcode = if row["D#{idx + 1}"].blank?
-                pb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
+                pb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
                 if pb.present?
-                  "1S#{pb.barcode.split("1S")[1].succ}"
+                  "#{first_three_digits_company_code}1S#{pb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                 else
-                  "1S00001"
+                  "#{first_three_digits_company_code}1S00001"
                 end
               elsif ProductBarcode.select("1 AS one").where(barcode: row["D#{idx + 1}"]).blank?
                 row["D#{idx + 1}"].strip
               else
-                pb = ProductBarcode.where(["barcode LIKE ?", "1S%"]).select(:barcode).order("barcode DESC").first
+                first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
+                pb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
                 if pb.present?
-                  "1S#{pb.barcode.split("1S")[1].succ}"
+                  "#{first_three_digits_company_code}1S#{pb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
                 else
-                  "1S00001"
+                  "#{first_three_digits_company_code}1S00001"
                 end
               end
               product_barcode = ProductBarcode.new product_color_id: product_color_id, size_id: size_id, barcode: barcode
