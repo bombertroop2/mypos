@@ -12,75 +12,30 @@ class StocksController < ApplicationController
     stocks_scope = if user_roles.include?("area_manager")
       if params[:filter_warehouse_id].blank?
         @warehouses = current_user.supervisor.warehouses.select(:id, :code, :name).order(:code)
-        StockDetail.none
+        Stock.none
       else
-        StockDetail.joins(:size, :color, stock_product: [{product: :brand}, {stock: :warehouse}]).select("warehouses.name, products.code, brands_products.name AS brand_name, common_fields.name AS color_name, size AS size_label, quantity").where("warehouses.id = #{params[:filter_warehouse_id]}")
+        Stock.
+          select(:id, "warehouses.name AS warehouse_name").
+          joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
+          where(warehouse_id: params[:filter_warehouse_id])
       end
     elsif user_roles.include?("staff") || user_roles.include?("manager") || user_roles.include?("administrator") || user_roles.include?("superadmin") || user_roles.include?("accountant")
       if params[:filter_warehouse_id].blank?
         @warehouses = Warehouse.select(:id, :code, :name).order(:code)
-        StockDetail.none
+        Stock.none
       else
-        StockDetail.joins(:size, :color, stock_product: [{product: :brand}, {stock: :warehouse}]).select("warehouses.name, products.code, brands_products.name AS brand_name, common_fields.name AS color_name, size AS size_label, quantity").where("warehouses.id = #{params[:filter_warehouse_id]}")
+        Stock.
+          select(:id, "warehouses.name AS warehouse_name").
+          joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
+          where(warehouse_id: params[:filter_warehouse_id])
       end
     else
-      StockDetail.joins(:size, :color, stock_product: [{product: :brand}, {stock: :warehouse}]).select("warehouses.name, products.code, brands_products.name AS brand_name, common_fields.name AS color_name, size AS size_label, quantity").where("warehouses.id = #{current_user.sales_promotion_girl.warehouse_id}")
+      Stock.
+        select(:id, "warehouses.name AS warehouse_name").
+        joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
+        where(warehouse_id: current_user.sales_promotion_girl.warehouse_id)
     end
-    stocks_scope = stocks_scope.where(["products.code #{like_command} ?", "%"+params[:filter_product_criteria]+"%"]).
-      or(stocks_scope.where(["brands_products.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
-      or(stocks_scope.where(["common_fields.name #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])).
-      or(stocks_scope.where(["size #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) if params[:filter_product_criteria].present?
-    #      or(stocks_scope.where(["quantity #{like_command} ?", "%"+params[:filter_product_criteria]+"%"])) 
-    stocks_scope = if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
-      stocks_scope.order("#{params[:stocks_smart_listing][:sort].keys.first} #{params[:stocks_smart_listing][:sort][params[:stocks_smart_listing][:sort].keys.first]}")
-    else
-      stocks_scope.order("warehouses.name ASC")
-    end
-
-    stocks = []
-    stock_hash = Hash.new    
-    stocks_scope.each_with_index do |stock, index|
-      if index == 0 && stocks_scope.length < 2
-        stock_hash[stock.name] = {"#{stock.code} - #{stock.brand_name}" => {"code" => stock.code, stock.color_name => {stock.size_label => stock.quantity}}}
-        stocks << stock_hash
-      elsif index == 0
-        stock_hash[stock.name] = {"#{stock.code} - #{stock.brand_name}" => {"code" => stock.code, stock.color_name => {stock.size_label => stock.quantity}}}
-      else
-        warehouses_hash_keys = stock_hash.keys
-        if warehouses_hash_keys.include?(stock.name)
-          products_hash_keys = stock_hash[stock.name].keys
-          if products_hash_keys.include?("#{stock.code} - #{stock.brand_name}")
-            colors_hash_keys = stock_hash[stock.name]["#{stock.code} - #{stock.brand_name}"].keys
-            if colors_hash_keys.include?(stock.color_name)
-              stock_hash[stock.name]["#{stock.code} - #{stock.brand_name}"][stock.color_name].merge!({stock.size_label => stock.quantity})
-            else
-              stock_hash[stock.name]["#{stock.code} - #{stock.brand_name}"].merge!({stock.color_name => {stock.size_label => stock.quantity}})
-            end
-          else
-            stock_hash[stock.name].merge!({"#{stock.code} - #{stock.brand_name}" => {"code" => stock.code, stock.color_name => {stock.size_label => stock.quantity}}})
-          end
-          if index == stocks_scope.length - 1
-            stock_hash.each do |key, val|
-              stock_hash[key] = stock_hash[key].sort.to_h
-            end
-            stocks << stock_hash
-          end
-        else
-          stock_hash.each do |key, val|
-            stock_hash[key] = stock_hash[key].sort.to_h
-          end
-          stocks << stock_hash
-          stock_hash = Hash.new    
-          stock_hash[stock.name] = {"#{stock.code} - #{stock.brand_name}" => {"code" => stock.code, stock.color_name => {stock.size_label => stock.quantity}}}
-          if index == stocks_scope.length - 1
-            stocks << stock_hash
-          end
-        end
-      end
-    end
-
-    stocks = stocks.reverse if params[:stocks_smart_listing].present? && params[:stocks_smart_listing][:sort].present?
-    @stocks = smart_listing_create(:stocks, stocks, partial: 'stocks/listing', array: true)
+    smart_listing_create(:stocks, stocks_scope, partial: 'stocks/listing')
   end
 
   # GET /stocks/1

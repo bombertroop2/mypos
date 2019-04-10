@@ -11,7 +11,7 @@
               <li role="presentation"><a href="#discount_cash" aria-controls="discount_cash" role="tab" data-toggle="tab">Discount(Rp)</a></li>
               <li role="presentation"><a href="#special_price" aria-controls="special_price" role="tab" data-toggle="tab">Special Price</a></li>
               <li role="presentation"><a href="#buy_one_get_one_free" aria-controls="buy_one_get_one_free" role="tab" data-toggle="tab">Buy 1 Get 1 Free</a></li>
-              <li role="presentation"><a href="#reward" aria-controls="reward" role="tab" data-toggle="tab">Gift</a></li>
+              <!--<li role="presentation"><a href="#reward" aria-controls="reward" role="tab" data-toggle="tab">Gift</a></li>-->
             <% else %>
               <% if @event.first_plus_discount.present? %>
                 <li role="presentation" class="active"><a href="#discount_percentage" aria-controls="discount_percentage" role="tab" data-toggle="tab">Discount(%)</a></li>
@@ -22,7 +22,7 @@
               <% elsif @event.event_type.eql?("Buy 1 Get 1 Free") %>
                 <li role="presentation" class="active"><a href="#buy_one_get_one_free" aria-controls="buy_one_get_one_free" role="tab" data-toggle="tab">Buy 1 Get 1 Free</a></li>
               <% elsif @event.event_type.eql?("Gift") %>
-                <li role="presentation" class="active"><a href="#reward" aria-controls="reward" role="tab" data-toggle="tab">Gift</a></li>
+                <!--<li role="presentation" class="active"><a href="#reward" aria-controls="reward" role="tab" data-toggle="tab">Gift</a></li>-->
               <% end %>
             <% end %>
         </ul>
@@ -50,11 +50,12 @@
                       <%= render "form_buy_one_get_one" %>
                   </div>
               </div>
+            <!--
               <div role="tabpanel" class="tab-pane fade" id="reward" style="padding-top: 20px">
                   <div id="form_container_reward">
                       <%= render "form_gift" %>
                   </div>
-              </div>
+              </div>-->
             <% else %>
               <% if @event.first_plus_discount.present? %>
                 <div role="tabpanel" class="tab-pane fade in active" id="discount_percentage" style="padding-top: 20px">
@@ -81,11 +82,12 @@
                     </div>
                 </div>
               <% elsif @event.event_type.eql?("Gift") %>
+            <!--
                 <div role="tabpanel" class="tab-pane fade in active" id="reward" style="padding-top: 20px">
                     <div id="form_container_reward">
                         <%= render "form_gift" %>
                     </div>
-                </div>
+                </div>-->
               <% end %>
             <% end %>
         </div>

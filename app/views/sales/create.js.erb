@@ -29,7 +29,7 @@
   }).modal('show');
 <% else %>
   <% if @valid %>
-    window.location = '<%= new_sale_path %>?print_receipt=<%= @sale.id %>';
+    window.location = '<%= new_sale_path %>?print_receipt=<%= @sale.id %>&product_spg_names=<%= @product_spg_names %>';
   <% else %>
     $("#stepContainer").html("<%= j(render(partial: "wizard_form")) %>");
     <% if @sale.errors.details.keys.include?(:member_id) %>

@@ -57,6 +57,8 @@
                 %>
               <% elsif params[:controller].eql?("accounts_receivable_payments") %>
                 <% opened_menu_name = "AR Payments (Direct Sales)" %>
+              <% elsif params[:controller].eql?("print_barcode_temps") %>
+                <% opened_menu_name = "Print Barcode" %>
               <% elsif params[:controller].eql?("account_payables") %>
                 <% if action_name.eql?("overdue_invoice_list") %>
                   <% opened_menu_name = "Overdue Invoice List" %>
@@ -409,6 +411,9 @@
                                                     <% end %>
                                                     <% if can? :manage, GeneralVariable %>
                                                       <li><%= link_to "General Variables", new_general_variable_path, method: :get %></li>
+                                                    <% end %>
+                                                    <% if can? :manage, PrintBarcodeTemp %>
+                                                      <li><%= link_to "Print Barcode", new_print_barcode_temp_path, method: :get %></li>
                                                     <% end %>
                                                 </ul>
                                             </li>
@@ -1079,11 +1084,13 @@
 
                       $("#search-barcode-btn").click(function () {
                           $("#barcode").blur();
-                          $.get("/sales/get_product", {
-                              barcode: $("#barcode").val().trim(),
-                              member_id: $("#sale_member_id").val().trim()
-                          });
-
+                          if($("#sales_promotion_girl_id").val().trim() != "")  {
+                            $.get("/sales/get_product", {
+                                barcode: $("#barcode").val().trim(),
+                                member_id: $("#sale_member_id").val().trim(),
+                                product_spg_id: $("#sales_promotion_girl_id").val().trim()
+                            });
+                          }
                       });
 
                       $('#member-id').keypress(function (e) {
@@ -1201,7 +1208,8 @@
                                   sale_product_code: $("#sale_product_code").val().trim(),
                                   sale_product_color: $("#sale_product_color").val().trim(),
                                   sale_product_size: $("#sale_product_size").val().trim(),
-                                  member_id: $("#sale_member_id").val().trim()
+                                  member_id: $("#sale_member_id").val().trim(),
+                                  product_spg_id: $("#sales_promotion_girl_id").val().trim()
                               });
                       });
                       $('#sale_cash').keypress(function (e) {
@@ -1259,7 +1267,8 @@
                       });
         <% if params[:print_receipt].present? %>
                         $.get("/sales/<%= params[:print_receipt] %>/print", {
-                            update_sale_row: false
+                            update_sale_row: false,
+                            product_spg_names: "<%= params[:product_spg_names] %>"
                         });
         <% end %>
         <% if !@cashier_opened %>

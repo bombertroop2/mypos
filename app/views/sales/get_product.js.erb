@@ -68,6 +68,7 @@
         'price': '<%= number_to_currency(@product.price, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>',
         'event': "<div id='bogo-product-form-container-<%= current_miliseconds %>'></div><%= get_event_value(session["sale"]["#{@product.id}"]["store_event"], current_miliseconds) if session["sale"]["#{@product.id}"]["store_event"].present? %>",
         'subtotal': subtotal,
+        'spg': "<%= @product_spg.name %>",
         'delete_button': "<button type='button' class='btn btn-danger' id='btn-delete-sale-product-<%= current_miliseconds %>'>Delete</button>"
       };
       //'quantity': "<%#= j(render(partial: "purchased_product_fields", locals: {sale_product: @sale_product, form_fields_index: DateTime.now.strftime("%Q")})) %>",
@@ -296,6 +297,7 @@
         //'quantity': "<%#= j(render(partial: "purchased_product_fields", locals: {sale_product: @sale_product, form_fields_index: DateTime.now.strftime("%Q")})) %>",
         'event': "<div id='bogo-product-form-container-<%= current_miliseconds %>'></div><%= get_event_value(@store_event, current_miliseconds) if @store_event.present? %>",
         'subtotal': subtotal,
+        'spg': "<%= @product_spg.name %>",
         'delete_button': "<button type='button' class='btn btn-danger' id='btn-delete-sale-product-<%= current_miliseconds %>'>Delete</button>"
       };
       var rowObject = eventPurchasedProductDataTables.row.add(rowValue).draw(false);

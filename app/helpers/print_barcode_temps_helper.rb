@@ -1,0 +1,2 @@
+module PrintBarcodeTempsHelper
+end

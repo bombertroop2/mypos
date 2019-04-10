@@ -38,6 +38,8 @@ class Ability
             "QuantitySoldChart"
           elsif user_menu.eql?("Sell Thru Report")
             "SellThru"
+          elsif user_menu.eql?("Print Barcode")
+            "PrintBarcodeTemp"
           else
             user_menu
           end
@@ -74,7 +76,7 @@ class Ability
     elsif user_roles.first.present? && SalesPromotionGirl::ROLES.select{|a, b| b.eql?(user_roles.first)}.present?
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       user.user_menus.each do |user_menu|
-        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable (Vendor)") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable (Courier)") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable") && !user_menu.name.eql?("Target") && !user_menu.name.eql?("Accounts Receivable (Direct Sales)")
+        if user_menu.ability != 0 && available_menus.include?(user_menu.name) && !user_menu.name.eql?("Account Payable (Vendor)") && !user_menu.name.eql?("Fiscal Reopening/Closing") && !user_menu.name.eql?("Account Payable (Courier)") && !user_menu.name.eql?("Packing List") && !user_menu.name.eql?("General Variable") && !user_menu.name.eql?("Target") && !user_menu.name.eql?("Accounts Receivable (Direct Sales)") && !user_menu.name.eql?("Print Barcode")
           ability = User::ABILITIES.select{|name, value| value == user_menu.ability}.first.first.downcase.to_sym rescue nil
           class_name = if user_menu.name.eql?("Area Manager")
             "Supervisor"
@@ -173,6 +175,8 @@ class Ability
             "QuantitySoldChart"
           elsif user_menu.name.eql?("Sell Thru Report")
             "SellThru"
+          elsif user_menu.name.eql?("Print Barcode")
+            "PrintBarcodeTemp"
           else
             user_menu.name
           end
@@ -312,6 +316,8 @@ class Ability
                 can ability, class_name.constantize
               end
             end
+          elsif class_name.eql?("PrintBarcodeTemp")
+            can ability, class_name.constantize
           elsif ability && !user_roles.include?("accountant") && !user_roles.include?("area_manager")
             can ability, class_name.gsub(/\s+/, "").constantize
           elsif ability && user_roles.include?("accountant")

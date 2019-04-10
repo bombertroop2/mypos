@@ -1,0 +1,72 @@
+<tr style="text-align: center" class="listing-product-table-content-rows">
+    <td style="vertical-align: middle" class="listing-product-table-product-code-columns">
+        <%= @product.code %>
+    </td>
+    <td style="vertical-align: middle">
+        <%= @product.description %>
+    </td>
+    <td style="vertical-align: middle">
+        <%= @product.brand_name %>
+    </td>
+    <%
+    product_sizes = []
+    product_colors = []
+    @product.product_colors.each do |product_color|
+      product_color.product_barcodes.each do |product_barcode|
+        product_sizes << product_barcode.size
+      end
+      end
+    product_colors = @product.product_colors.sort{|a, b| a.color.code <=> b.color.code}
+    product_sizes = product_sizes.sort{|a, b| a.size_order <=> b.size_order}.uniq
+  %>
+    <td style="vertical-align: middle">
+        <div class="table-responsive">
+            <table border="1" class="table table-condensed table-responsive table-bordered">
+                <tr style="text-align: center">
+                    <td></td>
+                    <% product_sizes.each do |product_size| %>
+                      <td align="center">
+                          <%= product_size.size %>
+                      </td>
+                    <% end %>
+                </tr>
+
+                <% product_colors.each do |product_color| %>
+                  <tr style="text-align: center">
+                      <td style="vertical-align: middle;white-space: nowrap"><%= "#{product_color.color.code} - #{product_color.color.name}" %></td>
+                      <% product_sizes.each do |product_size| %>
+                        <td align="center" style="vertical-align: middle">
+                            <%
+                            product_detail = @available_product_details.select{|apd| apd.product_id == @product.id && apd.size_id == product_size.id}.first
+                            price_list = @price_lists.select{|pl| pl.product_detail_id == product_detail.id}.sort{|a, b| b.effective_date <=> a.effective_date}.first if product_detail.present?
+                          %>
+                            <% if (product_barcode = product_color.product_barcodes.select{|pb| pb.size_id == product_size.id}.first).present? && price_list.present? %>
+                              <div>
+                                  <%= text_field_tag "product[#{@product.code}][#{product_color.color.id}-#{product_color.color.name}][#{product_size.size}][quantity]", "", class: "form-control quantity", size: 16, style: "width: 50px !important" %>
+                                    <%= hidden_field_tag "product[#{@product.code}][#{product_color.color.id}-#{product_color.color.name}][#{product_size.size}][brand_name]", @product.brand_name %>
+                                    <%= hidden_field_tag "product[#{@product.code}][#{product_color.color.id}-#{product_color.color.name}][#{product_size.size}][product_description]", @product.description %>
+                                    <%= hidden_field_tag "product[#{@product.code}][#{product_color.color.id}-#{product_color.color.name}][#{product_size.size}][product_barcode]", product_barcode.barcode %>
+                                    <%= hidden_field_tag "product[#{@product.code}][#{product_color.color.id}-#{product_color.color.name}][#{product_size.size}][price]", price_list.price %>
+                                </div>
+                              <% end %>
+                          </td>
+                        <% end %>
+                    </tr>
+                  <% end %>              
+              </table>
+          </div>                  
+      </td>
+  </tr>              
+
+  <script>
+    $(function () {
+        $(".quantity").numeric({
+            decimal: false,
+            negative: false
+        }, function () {
+            alert("Positive integers only");
+            this.value = "";
+            this.focus();
+        });
+    });
+  </script>
