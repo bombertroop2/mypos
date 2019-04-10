@@ -1,0 +1,44 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Warehouse code:</strong>
+  <%= @incentive.warehouse_code %>
+</p>
+
+<p>
+  <strong>Warehouse name:</strong>
+  <%= @incentive.warehouse_name %>
+</p>
+
+<p>
+  <strong>Transaction date:</strong>
+  <%= @incentive.transaction_date %>
+</p>
+
+<p>
+  <strong>Sales promotion girl name:</strong>
+  <%= @incentive.sales_promotion_girl_name %>
+</p>
+
+<p>
+  <strong>Transaction number:</strong>
+  <%= @incentive.transaction_number %>
+</p>
+
+<p>
+  <strong>Net sales:</strong>
+  <%= @incentive.net_sales %>
+</p>
+
+<p>
+  <strong>Incentive:</strong>
+  <%= @incentive.incentive %>
+</p>
+
+<p>
+  <strong>Quantity:</strong>
+  <%= @incentive.quantity %>
+</p>
+
+<%= link_to 'Edit', edit_incentive_path(@incentive) %> |
+<%= link_to 'Back', incentives_path %>

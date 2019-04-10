@@ -90,13 +90,15 @@ File.open(full_path, 'wb') { |f| f.write blob }
                                     <td></td>
                                 </tr>
                                 <% if (gv = GeneralVariable.select(:pieces_per_koli).first).present? %>
-                                  <tr>
-                                      <td style="vertical-align: top">Total koli</td>
-                                      <td style="vertical-align: top">:</td>
-                                      <td>
-                                          <%= number_to_currency((@shipment.quantity / gv.pieces_per_koli.to_f).ceil, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
-                                      </td>
-                                  </tr>
+                                  <% if gv.pieces_per_koli.present? %>
+                                    <tr>
+                                        <td style="vertical-align: top">Total koli</td>
+                                        <td style="vertical-align: top">:</td>
+                                        <td>
+                                            <%= number_to_currency((@shipment.quantity / gv.pieces_per_koli.to_f).ceil, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
+                                        </td>
+                                    </tr>
+                                  <% end %>                
                                 <% end %>                
                                 <tr>
                                     <td style="vertical-align: top">Note</td>
