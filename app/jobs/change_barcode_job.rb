@@ -10,7 +10,10 @@ class ChangeBarcodeJob < ApplicationJob
     last_barcode = "#{first_three_digits_company_code}1S00001"
     ActiveRecord::Base.transaction do
       ProductBarcode.order(:id).each do |pb|
-        pb.update_column(:barcode, last_barcode)
+        if ProductBarcode.where(["barcode = ?", last_barcode]).select("1 AS one").present?
+        else
+          pb.update_column(:barcode, last_barcode)
+        end
         last_barcode = "#{first_three_digits_company_code}1S#{last_barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
       end
     end
