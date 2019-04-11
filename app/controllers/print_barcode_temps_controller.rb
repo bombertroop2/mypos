@@ -1,4 +1,5 @@
 class PrintBarcodeTempsController < ApplicationController
+  authorize_resource
   before_action :set_print_barcode_temp, only: [:show, :edit, :update, :destroy]
 
   # GET /print_barcode_temps
@@ -27,9 +28,8 @@ class PrintBarcodeTempsController < ApplicationController
     unless validate_quantities
       render js: "bootbox.alert({message: \"Quantity must be greater than or equal to 1\",size: 'small'});"
     else
-      ica = ActiveRecord::Base.connection.execute("SELECT inet_client_addr()")      
       ActiveRecord::Base.transaction do
-        PrintBarcodeTemp.delete_all(internet_client_address: ica.first["inet_client_addr"])
+        PrintBarcodeTemp.delete_all
         params[:product].each do |k, v|
           params[:product][k].each do |key, val|
             params[:product][k][key].each do |x, y|
@@ -38,7 +38,7 @@ class PrintBarcodeTempsController < ApplicationController
                 splitted_key = key.split("-")
                 splitted_key.shift
                 color_name = splitted_key.join("-")
-                @print_barcode_temp = PrintBarcodeTemp.new(product_code: k, brand_name: params[:product][k][key][x][:brand_name], product_description: params[:product][k][key][x][:product_description], barcode: params[:product][k][key][x][:product_barcode], size: x, color_name: color_name, price: params[:product][k][key][x][:price], internet_client_address: ica.first["inet_client_addr"])
+                @print_barcode_temp = PrintBarcodeTemp.new(product_code: k, brand_name: params[:product][k][key][x][:brand_name], product_description: params[:product][k][key][x][:product_description], barcode: params[:product][k][key][x][:product_barcode], size: x, color_name: color_name, price: params[:product][k][key][x][:price])
                 @print_barcode_temp.save
               end
             end
