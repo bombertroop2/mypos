@@ -18,9 +18,9 @@ class CashDisbursementsController < ApplicationController
       CashDisbursement.joins(cashier_opening: :warehouse).select(:id, :description, :price, :station, :open_date).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
     else
       if params[:filter_warehouse_id].present? && params[:filter_warehouse_id].strip.present?
-        CashDisbursement.joins(cashier_opening: :warehouse).select(:id, :description, :price, :station, :open_date).where("opened_by = #{current_user.id} AND warehouse_id = #{params[:filter_warehouse_id].strip}")
+        CashDisbursement.joins(cashier_opening: :warehouse).select(:id, :description, :price, :station, :open_date).where("warehouse_id = #{params[:filter_warehouse_id].strip}")
       else
-        CashDisbursement.joins(:cashier_opening).select(:id, :description, :price, :station, :open_date).where("opened_by = #{current_user.id}")
+        CashDisbursement.joins(:cashier_opening).select(:id, :description, :price, :station, :open_date)
       end
     end
     cash_disbursements_scope = cash_disbursements_scope.where(["description #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
