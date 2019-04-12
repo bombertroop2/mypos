@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  resources :incentives, only: :index
   resources :print_barcode_temps, only: [:new, :create] do    
     collection do
       get "search_product"

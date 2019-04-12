@@ -29,13 +29,13 @@ class ApplicationController < ActionController::Base
           #      else
           #        stored_location_for(resource) || request.referer || root_path
           #      end
-          #          geo_details = Geocoder.search current_user.current_sign_in_ip
-          #          if geo_details.length == 0
-          #            timezone_name = "Jakarta"
-          #          else
-          #            timezone_name = geo_details.first.data["time_zone"] rescue "Jakarta"
-          #          end
-          current_user.timezone_name = "Asia/Makassar"
+          geo_details = Geocoder.search current_user.current_sign_in_ip
+          if geo_details.length == 0
+            timezone_name = "Jakarta"
+          else
+            timezone_name = geo_details.first.data["time_zone"] rescue "Jakarta"
+          end
+          current_user.timezone_name = timezone_name
           current_user.save validate: false
           root_path
         end
@@ -71,7 +71,7 @@ class ApplicationController < ActionController::Base
             begin
               Time.zone = current_user.timezone_name if user_signed_in?
             rescue Exception => e
-              Time.zone = "Asia/Makassar"
+              Time.zone = "Jakarta"
             end
             yield
           ensure

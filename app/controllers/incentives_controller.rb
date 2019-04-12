@@ -1,27 +1,10 @@
 class IncentivesController < ApplicationController
-  authorize_resource
   before_action :set_incentive, only: [:show, :edit, :update, :destroy]
 
   # GET /incentives
   # GET /incentives.json
   def index
-    if params[:incentive_spg].present? || params[:incentive_transaction_date].present? || params[:calculate_by].present?
-      @warehouse = Warehouse.select(:code).find(current_user.sales_promotion_girl.warehouse_id)
-      splitted_transaction_date = params[:incentive_transaction_date].split(" - ")
-      @start_date = splitted_transaction_date[0].strip.to_date
-      @end_date = splitted_transaction_date[1].strip.to_date
-      @incentives = if params[:incentive_spg].strip.eql?("ALL")
-        Incentive.
-          select(:sales_promotion_girl_identifier, :sales_promotion_girl_name, "SUM(net_sales) AS total_net_sales", "SUM(quantity) AS total_quantity").
-          where(["transaction_date BETWEEN ? AND ?", @start_date, @end_date]).
-          group(:sales_promotion_girl_identifier, :sales_promotion_girl_name)
-      else
-        Incentive.
-          select(:sales_promotion_girl_identifier, :sales_promotion_girl_name, "SUM(net_sales) AS total_net_sales", "SUM(quantity) AS total_quantity").
-          where(["transaction_date BETWEEN ? AND ? AND sales_promotion_girl_name = ?", @start_date, @end_date, params[:incentive_spg]]).
-          group(:sales_promotion_girl_identifier, :sales_promotion_girl_name)
-      end
-    end
+    @incentives = Incentive.all
   end
 
   # GET /incentives/1
@@ -79,13 +62,13 @@ class IncentivesController < ApplicationController
   end
 
   private
-  # Use callbacks to share common setup or constraints between actions.
-  def set_incentive
-    @incentive = Incentive.find(params[:id])
-  end
+    # Use callbacks to share common setup or constraints between actions.
+    def set_incentive
+      @incentive = Incentive.find(params[:id])
+    end
 
-  # Never trust parameters from the scary internet, only allow the white list through.
-  def incentive_params
-    params.require(:incentive).permit(:warehouse_code, :warehouse_name, :transaction_date, :sales_promotion_girl_name, :transaction_number, :net_sales, :incentive, :quantity)
-  end
+    # Never trust parameters from the scary internet, only allow the white list through.
+    def incentive_params
+      params.require(:incentive).permit(:warehouse_code, :warehouse_name, :transaction_date, :sales_promotion_girl_name, :transaction_number, :net_sales, :incentive, :quantity)
+    end
 end
