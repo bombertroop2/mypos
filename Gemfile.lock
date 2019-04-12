@@ -134,8 +134,6 @@ GEM
       tzinfo
     execjs (2.7.0)
     ffi (1.9.25)
-    figaro (1.1.1)
-      thor (~> 0.14)
     fugit (1.1.1)
       et-orbi (~> 1.1, >= 1.1.1)
       raabro (~> 1.1)
@@ -361,7 +359,6 @@ DEPENDENCIES
   date_validator
   delayed_job_active_record
   devise
-  figaro
   geocoder
   jbuilder (~> 2.0)
   jquery-rails
