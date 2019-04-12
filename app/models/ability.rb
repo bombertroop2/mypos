@@ -308,6 +308,7 @@ class Ability
             end
           elsif class_name.eql?("Point of Sale")
             can [:read, :export], Sale
+            can :read, CashDisbursement
           elsif class_name.eql?("ReceivedPurchaseOrder")
             if !user_roles.include?("area_manager")
               if ability.eql?(:read)
