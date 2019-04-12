@@ -358,6 +358,9 @@
                                                     <% if can? :read, SalesReturn %>
                                                       <li><%= link_to "Sales Returns", sales_returns_path, method: :get %></li>
                                                     <% end %>
+                                                    <% if can? :read, Incentive %>
+                                                      <li><%= link_to "Incentive", incentives_path, method: :get %></li>
+                                                    <% end %>
                                                 </ul>
                                             </li>
                                           <% end %>

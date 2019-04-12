@@ -59,6 +59,10 @@ class DuosMailer < ApplicationMailer
     send_email("no-reply@1s.com", "bombertroop@gmail.com", type, render_to_string(template: "duos_mailer/import_data_email"))
   end
   
+  def test_email
+    mail to: "bombertroop@gmail.com", subject: "Test Email"
+  end
+	
   def import_product_error_email(message)
     @message = message
     mail to: "rizkinoorlaksana@gmail.com", subject: "Import Product Job"

@@ -1,0 +1,4 @@
+$("#incentive-list-container").html("<%= j(render(partial: "incentive_list")) %>");
+<% if params[:commit].eql?("Print") %>
+  $("#incentive-list-container").print();
+<% end %>

@@ -44,10 +44,11 @@ class ProductDetail < ApplicationRecord
           if product_color.product_barcodes.where(size_id: size_id).select("1 AS one").blank?
             if first_three_digits_company_code.eql?("")
               first_three_digits_company_code = Company.order(:id).pluck(:code).first.first(3)
-            end
-            pb = ProductBarcode.where(["barcode LIKE ?", "#{first_three_digits_company_code}1S%"]).select(:barcode).order("barcode DESC").first
-            barcode = if pb.present?
-              "#{first_three_digits_company_code}1S#{pb.barcode.split("#{first_three_digits_company_code}1S")[1].succ}"
+            end            
+            pb = ProductBarcode.select("MAX(CAST(split_part(barcode, '#{first_three_digits_company_code}1S', 2) AS integer)) AS barcode_seq_number").where("LEFT(barcode, 5) = '#{first_three_digits_company_code}1S'")
+            barcode = if pb.present? && pb.first.present? && pb.first.barcode_seq_number.present?
+              succ_barcode = pb.first.barcode_seq_number.succ
+              "#{first_three_digits_company_code}1S#{succ_barcode.to_s.rjust(5, "0")}"
             else
               "#{first_three_digits_company_code}1S00001"
             end
