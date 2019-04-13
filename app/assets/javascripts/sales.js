@@ -10,6 +10,8 @@ $(function () {
             $("#list-step-2").click();
         } else if ($("#step-3").is(":visible")) {
             $("#list-step-3").click();
+        } else if ($("#step-4").is(":visible")) {
+            $("#list-step-4").click();
         }
     });
     $(".actionBar > .buttonPrevious").click(function () {
@@ -66,6 +68,15 @@ $(function () {
             }
         }, 0);
         $($(".stepContainer")[0]).css("overflow-x", "visible");
+    });
+    $("#list-step-4").click(function () {
+        var stockFormProcessId = setInterval(function () {
+            if ($("#barcode_stock_form").is(":focus")) {
+                clearInterval(stockFormProcessId);
+            } else {
+                $("#barcode_stock_form").focus();
+            }
+        }, 0);
     });
 
     $("#list-step-3").click(function () {

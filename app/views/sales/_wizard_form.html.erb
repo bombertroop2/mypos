@@ -272,23 +272,28 @@
                                                                 </div>
                                                               <% end %>
                                                           </div>
-
-
-                                                          <!--<div id="step-4" class="content" style="display: none;">
-                                                              <h2 class="StepTitle">Step 4 Content</h2>
-                                                              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                                                  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                                              </p>
-                                                              <p>
-                                                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                                                                  in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                                              </p>
-                                                              <p>
-                                                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                                                                  in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                                              </p>
+                                                          <div id="step-4" class="content" style="display: none;">
+                                                              <div class="form-group">
+                                                                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="barcode_stock_form">Barcode</label>
+                                                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                      <input type="text" id="barcode_stock_form" class="form-control col-md-7 col-xs-12" style="width: 100%">
+                                                                  </div>
+                                                              </div>
+                                                              <div class="form-group">
+                                                                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product_code_stock_form">Product code</label>
+                                                                  <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                      <div class="input-group">
+                                                                          <input type="text" id="product_code_stock_form" class="form-control col-md-7 col-xs-12" style="width: 100%">
+                                                                          <span class="input-group-btn">
+                                                                              <button type="button" class="btn btn-primary" style="margin-bottom: 0px !important" id="check-sale-product-btn">
+                                                                                  <span class="glyphicon glyphicon-search"></span> Search
+                                                                              </button>
+                                                                          </span>
+                                                                      </div>
+                                                                  </div>
+                                                              </div>
+                                                              <div id="product-detail-stock-form-container"></div>
                                                           </div>
-                                                          -->
                                                           <%= f.hidden_field :gift_event_gift_type %>
 
                                                         <% end %>
@@ -375,6 +380,12 @@
 
                                                                 });
 
+                                                                $("#check-sale-product-btn").click(function () {
+                                                                    $.get("/sales/get_stock_detail", {
+                                                                        product_code: $("#product_code_stock_form").val().trim()
+                                                                    });
+                                                                });
+
                                                                 $("#search-barcode-btn").click(function () {
                                                                     $("#barcode").blur();
                                                                     if ($("#sales_promotion_girl_id").val().trim() != "") {
@@ -391,6 +402,19 @@
                                                                     if (key == 13)  // the enter key code
                                                                     {
                                                                         $("#search-member-btn").click();
+                                                                        return false;
+                                                                    }
+                                                                });
+
+                                                                $('#barcode_stock_form').keypress(function (e) {
+                                                                    var key = e.which;
+                                                                    if (key == 13)  // the enter key code
+                                                                    {
+                                                                        $("#barcode_stock_form").blur();
+                                                                        $.get("/sales/get_stock_detail", {
+                                                                            barcode: $("#barcode_stock_form").val().trim()
+                                                                        });
+
                                                                         return false;
                                                                     }
                                                                 });
@@ -712,6 +736,18 @@
                                                                 $("#sales_promotion_girl_id").change(function () {
                                                                     $("#search-barcode-btn").prop("disabled", false);
                                                                     $("#search-sale-product-btn").prop("disabled", false);
+                                                                });
+                                                                $("#product_code_stock_form").autocomplete({
+                                                                    source: "/sales/search_product",
+                                                                    minLength: 2
+                                                                });
+                                                                $('#product_code_stock_form').keypress(function (e) {
+                                                                    var key = e.which;
+                                                                    if (key == 13)  // the enter key code
+                                                                    {
+                                                                        $("#check-sale-product-btn").click();
+                                                                        return false;
+                                                                    }
                                                                 });
                                                             });
                                                           </script>

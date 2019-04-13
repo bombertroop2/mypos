@@ -1011,6 +1011,8 @@
                               $("#list-step-2").click();
                           else if (e.ctrlKey && e.altKey && e.which === 51)
                               $("#list-step-3").click();
+                          else if (e.ctrlKey && e.altKey && e.which === 52)
+                              $("#list-step-4").click();
                           else if (e.altKey && e.which === 83 && $("#step-2").is(":visible"))
                               $("#search-sale-product-btn").click();
                           else if (e.shiftKey && e.altKey && e.which === 39)
@@ -1083,6 +1085,12 @@
 
                       });
 
+                      $("#check-sale-product-btn").click(function () {
+                        $.get("/sales/get_stock_detail", {
+                            product_code: $("#product_code_stock_form").val().trim()
+                        });
+                      });
+
                       $("#search-barcode-btn").click(function () {
                           $("#barcode").blur();
                           if($("#sales_promotion_girl_id").val().trim() != "")  {
@@ -1100,6 +1108,27 @@
                           {
                               $("#search-member-btn").click();
                               return false;
+                          }
+                      });
+
+                      $('#barcode_stock_form').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                              $("#barcode_stock_form").blur();
+                              $.get("/sales/get_stock_detail", {
+                                  barcode: $("#barcode_stock_form").val().trim()
+                              });
+                              return false;
+                          }
+                      });
+
+                      $('#product_code_stock_form').keypress(function (e) {
+                          var key = e.which;
+                          if (key == 13)  // the enter key code
+                          {
+                            $("#check-sale-product-btn").click();
+                            return false;
                           }
                       });
 
@@ -1265,6 +1294,10 @@
                           }).on('hide.bs.modal', function (e) {
                               $('#addSaleGiftForm').hide().appendTo('body');
                           }).modal('show');
+                      });
+                      $("#product_code_stock_form").autocomplete({
+                        source: "/sales/search_product",
+                        minLength: 2
                       });
         <% if params[:print_receipt].present? %>
                         $.get("/sales/<%= params[:print_receipt] %>/print", {

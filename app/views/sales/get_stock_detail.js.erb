@@ -1,0 +1,17 @@
+<% if @product.nil? %>    
+  var box = bootbox.alert({message: "Product is not available",size: 'small'});
+  <% if params[:barcode] %>
+    box.on("hidden.bs.modal", function () { 
+      $("#barcode_stock_form").focus();
+    });
+  <% else %>
+    box.on("hidden.bs.modal", function () { 
+      $("#product_code_stock_form").focus();
+    });
+  <% end %>
+<% else %>
+  $("#product-detail-stock-form-container").html("<%= j(render(partial: "product_detail_stock_form")) %>");
+<% end %>
+$("#barcode_stock_form").val("");
+$("#product_code_stock_form").val("");
+$($(".stepContainer")[0]).css("height", "100%");
