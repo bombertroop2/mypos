@@ -1,0 +1,95 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Description</th>
+            <th>Color</th>
+            <th>Size</th>
+            <th>Qty</th>
+            <th>Gross Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% total_qty = 0 %>
+        <% total_gross_price = 0 %>
+        <% if params[:barcode].present? %>
+          <tr>
+              <td><%= "#{@product.product_code} - #{@product.brand_name}" %></td>
+              <td><%= @product.description %></td>
+              <td><%= "#{@product.color_code} - #{@product.color_name}" %></td>
+              <td><%= @product.product_size %></td>
+              <td style="text-align: right"><%= number_to_currency((@product.quantity - @product.booked_quantity), :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+              <td style="text-align: right"><%= number_to_currency(@product.price,
+                    :separator => ",",
+                    :delimiter => ".",
+                    :unit => "Rp",
+                    :precision => 2) %></td>
+          </tr>
+          <% total_qty = @product.quantity - @product.booked_quantity %>
+          <% total_gross_price = @product.price %>
+        <% else %>
+          <% warehouse = current_user.sales_promotion_girl.warehouse %>
+          <% total_sizes = @product.colors.length * @product.sizes.uniq.length %>
+          <% index = 1 %>
+          <% @product.colors.each do |color| %>
+            <% new_color = true %>
+            <% @product.sizes.uniq.each do |size| %>
+              <tr>
+                  <% if index == 1 %>
+                    <td rowspan="<%= total_sizes %>"><%= "#{@product.code} - #{@product.brand_name}" %></td>
+                    <td rowspan="<%= total_sizes %>"><%= @product.description %></td>
+                  <% end %>
+                  <% if new_color %>
+                    <td rowspan="<%= @product.sizes.uniq.length %>"><%= "#{color.code} - #{color.name}" %></td>
+                  <% end %>
+                  <td><%= size.size %></td>
+                  <% stock_detail = nil %>
+                  <% stock_product = @product.stock_products.select{|sp| sp.stock.warehouse_id == warehouse.id}.first %>
+                  <% if stock_product.present? %>
+                    <% stock_detail = stock_product.stock_details.select{|sd| sd.size_id == size.id && sd.color_id == color.id}.first %>
+                  <% end %>
+                  <td style="text-align: right">
+                      <% if stock_detail.blank? %>
+                        <% qty_on_hand = 0 %>
+                      <% else %>
+                        <% qty_on_hand = stock_detail.quantity - stock_detail.booked_quantity %>
+                      <% end %>
+                      <%= number_to_currency(qty_on_hand, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
+                  </td>
+                  <td style="text-align: right">
+                      <% product_detail = @product.product_details.select{|pd| pd.size_id == size.id && pd.price_code_id == warehouse.price_code_id}.first %>
+                      <% price = 0 %>
+                      <% if product_detail.present? %>
+                        <% price_lists = product_detail.price_lists.sort{|pl1, pl2| pl2.effective_date <=> pl1.effective_date} %>
+                        <% price_lists.each do |price_list| %>
+                          <% if price_list.effective_date <= Date.current %>
+                            <% price = price_list.price %>
+                            <% break %>
+                          <% end %>
+                        <% end %>
+                      <% end %>
+                      <%= number_to_currency(price,
+                        :separator => ",",
+                        :delimiter => ".",
+                        :unit => "Rp",
+                        :precision => 2) %>
+                  </td>
+              </tr>
+              <% total_qty += qty_on_hand %>
+              <% total_gross_price += price %>
+              <% new_color = false %>
+              <% index += 1 %>
+            <% end %>
+          <% end %>
+        <% end %>
+    </tbody>
+    <tfoot>
+    <td style="text-align: right" colspan="4"><strong>Total</strong></td>
+    <td style="text-align: right"><%= number_to_currency(total_qty, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+    <td style="text-align: right"><%= number_to_currency(total_gross_price,
+          :separator => ",",
+          :delimiter => ".",
+          :unit => "Rp",
+          :precision => 2) %></td>
+</tfoot>
+</table>

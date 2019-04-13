@@ -370,6 +370,34 @@ class SalesController < ApplicationController
       end
     end
   end
+  
+  def get_stock_detail
+    @product = if params[:barcode].present?
+      ProductBarcode.
+        joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode].upcase).
+        where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+        where(["effective_date <= ?", Date.current]).
+        select(:id, :barcode).
+        select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.booked_quantity, products.description").
+        order("effective_date DESC").
+        first
+    else
+      Product.        
+        select(:id, :code, :description, "common_fields.name AS brand_name").
+        joins(:brand).
+        includes(:sizes, :colors, stock_products: [:stock, :stock_details], product_details: :price_lists).
+        where(code: params[:product_code]).
+        first
+    end    
+  end
+  
+  def search_product
+    products = Product.joins(:brand).where(["products.code ILIKE ?", params[:term]+"%"]).order(:code).pluck(:code)
+    respond_to do |format|
+      format.json  { render :json => products.to_json } # don't do msg.to_json
+    end
+  end
 
   private
   
