@@ -159,7 +159,7 @@ class SalesReturnsController < ApplicationController
       @replacement_product = if params[:barcode]
         ProductBarcode.
           joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
-          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode]).
+          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode].upcase).
           where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
           where(["effective_date <= ? AND warehouses.is_active = ?", @returned_product.transaction_time.to_date, true]).
           select(:id, :barcode).
