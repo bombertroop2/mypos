@@ -5,8 +5,12 @@ class IncentivesController < ApplicationController
   # GET /incentives
   # GET /incentives.json
   def index
-    if params[:incentive_spg].present? || params[:incentive_transaction_date].present? || params[:calculate_by].present?
-      @warehouse = Warehouse.select(:code).find(current_user.sales_promotion_girl.warehouse_id)
+    if params[:warehouse_code].present? || params[:incentive_spg].present? || params[:incentive_transaction_date].present? || params[:calculate_by].present?
+      @warehouse = unless current_user.has_non_spg_role?
+        Warehouse.select(:code).find(current_user.sales_promotion_girl.warehouse_id)
+      else
+        Warehouse.select(:code).find(params[:warehouse_code])
+      end
       splitted_transaction_date = params[:incentive_transaction_date].split(" - ")
       @start_date = splitted_transaction_date[0].strip.to_date
       @end_date = splitted_transaction_date[1].strip.to_date

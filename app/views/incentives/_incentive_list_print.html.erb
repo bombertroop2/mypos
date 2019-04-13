@@ -1,0 +1,68 @@
+<table class="table table-bordered table-condensed">
+    <thead>
+        <tr>
+            <th class="text-center" colspan="4"><%= "#{@start_date.strftime("%d/%m/%Y")} - #{@end_date.strftime("%d/%m/%Y")}" %></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% total_quantity = 0 %>
+        <% total_net_sales = 0 %>
+        <% grand_incentive = 0 %>
+        <% @incentives.each do |incentive| %>
+          <tr>
+              <th style="vertical-align: middle">SPG</th>
+              <th style="vertical-align: middle">:</th>
+              <td style="vertical-align: middle"><%= "#{incentive.sales_promotion_girl_identifier} - #{incentive.sales_promotion_girl_name}" %></td>
+          </tr>
+          <tr>
+              <th style="vertical-align: middle">Qty</th>
+              <th style="vertical-align: middle">:</th>
+              <td class="text-right" style="vertical-align: middle"><%= number_to_currency(incentive.total_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+          </tr>
+          <tr>
+              <th style="vertical-align: middle">Net Sales</th>
+              <th style="vertical-align: middle">:</th>
+              <td class="text-right" style="vertical-align: middle"><%= number_to_currency(incentive.total_net_sales, :separator => ",", :delimiter => ".", :unit => "", :precision => 0) %></td>
+          </tr>
+          <%
+          total_incentive = if params[:calculate_by].eql?("Quantity")
+            incentive.total_quantity * 1500
+            else
+            if @warehouse.code.eql?("SCP1-TRND")
+              incentive.total_net_sales * (1.15 / 100)
+              elsif @warehouse.code.eql?("2YOU-0000")
+              incentive.total_net_sales * (1.8 / 100)
+              elsif @warehouse.code.eql?("PLTR-0000")
+              incentive.total_net_sales * (1.3 / 100)
+              else
+              incentive.total_net_sales * (2.to_f / 100)
+            end
+            end
+        %>
+          <tr>
+              <th style="vertical-align: middle">Incentive</th>
+              <th style="vertical-align: middle">:</th>
+              <td class="text-right" style="vertical-align: middle"><%= number_to_currency(total_incentive, :separator => ",", :delimiter => ".", :unit => "", :precision => 0) %></td>
+          </tr>
+          <tr><td colspan="3"></td></tr>
+          <% total_quantity += incentive.total_quantity %>
+          <% total_net_sales += incentive.total_net_sales %>
+          <% grand_incentive += total_incentive %>
+        <% end %>
+        <tr>
+            <th style="vertical-align: middle">Total Qty</th>
+            <th style="vertical-align: middle">:</th>
+            <td class="text-right" style="vertical-align: middle"><%= number_to_currency(total_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+        <tr>
+            <th style="vertical-align: middle">Total Net Sales</th>
+            <th style="vertical-align: middle">:</th>
+            <td class="text-right" style="vertical-align: middle"><%= number_to_currency(total_net_sales, :separator => ",", :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+        <tr>
+            <th style="vertical-align: middle">Total Incentive</th>
+            <th style="vertical-align: middle">:</th>
+            <td class="text-right" style="vertical-align: middle"><%= number_to_currency(grand_incentive, :separator => ",", :delimiter => ".", :unit => "", :precision => 0) %></td>
+        </tr>
+    </tbody>
+</table>

@@ -1,4 +1,5 @@
 $(function () {
+    $("#warehouse_code").attr("data-placeholder", "Please select").chosen();
     $("#incentive_spg").attr("data-placeholder", "Please select").chosen();
     $("#calculate_by").attr("data-placeholder", "Please select").chosen();
     $('#incentive_transaction_date').daterangepicker(
