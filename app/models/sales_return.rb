@@ -44,7 +44,7 @@ class SalesReturn < ApplicationRecord
       where(["sales.id = ? AND warehouses.is_active = ?", sale_id, true]).
       where(:"sales_promotion_girls.id" => attr_spg_id).first
     transaction_time = @sale.transaction_time
-    if ((Time.current - transaction_time) / 1.hour >= 74) || @sale.gift_event_id.present? || @sale.returned_sale_id.present?
+    if Time.current > (transaction_time + 3.days).end_of_day || @sale.gift_event_id.present? || @sale.returned_sale_id.present?
       @sale = nil
     end
   end
