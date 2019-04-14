@@ -2,7 +2,7 @@
     <div id="step-1" class="content" style="display: block;">
         <%= f.hidden_field :member_id %>
         <%= f.hidden_field :member_discount %>
-        <div class="form-group">
+        <div class="form-group<%= control_group_error(@sale, :member_id) %>">
             <label class="control-label col-md-3 col-sm-3 col-xs-12" for="member-id">Member Id/Mobile Phone</label>
             <div class="col-md-6 col-sm-6 col-xs-12">
                 <div class="input-group">
@@ -11,6 +11,7 @@
                         <button type="button" class="btn btn-primary" id="search-member-btn">Search</button>
                     </span>
                 </div>
+                <%= error_help_text(@sale, :member_id) %>
             </div>
         </div>
 
