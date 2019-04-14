@@ -225,7 +225,7 @@
                                 <div class="form-group<%= control_group_error(sale_fields.object, :bank_id) %>">
                                     <%= sale_fields.label :bank_id, class: "control-label col-sm-2" %>
                                       <div class="col-sm-10">
-                                          <%= sale_fields.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', sale_fields.object.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                          <%= sale_fields.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).where("code <> 'MEMO'").order(:code), 'id', 'code_and_name', sale_fields.object.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
                                             <%= error_help_text(sale_fields.object, :bank_id) %>
                                         </div>
                                     </div>
@@ -257,7 +257,7 @@
                                                 <div class="form-group<%= control_group_error(sale_fields.object, :bank_id) %>">
                                                     <%= sale_fields.label :bank_id, class: "control-label col-sm-2" %>
                                                       <div class="col-sm-10">
-                                                          <%= sale_fields.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).order(:code), 'id', 'code_and_name', sale_fields.object.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
+                                                          <%= sale_fields.select :bank_id, options_from_collection_for_select(Bank.select(:id, :code, :name, :card_type).where("code <> 'MEMO'").order(:code), 'id', 'code_and_name', sale_fields.object.bank_id.to_s), {include_blank: true}, {class: "form-control"} %>
                                                             <%= error_help_text(sale_fields.object, :bank_id) %>
                                                         </div>
                                                     </div>
