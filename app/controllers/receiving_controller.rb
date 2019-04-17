@@ -315,7 +315,12 @@ class ReceivingController < ApplicationController
     end
 
     def add_additional_params_to_direct_purchase_products
-      products = Product.joins(:cost_lists).select("products.id, cost_lists.id AS cost_list_id, cost").where(code: params[:receiving_product_ids].split(",")).where(["effective_date <= ?", params[:direct_purchase][:receiving_date].to_date]).order("effective_date DESC")
+      product_codes = params[:receiving_product_ids].split(",")
+      product_codes = product_codes.map do |pc|
+        parsed_code = Nokogiri::HTML.parse(pc)
+        parsed_code.text
+      end
+      products = Product.joins(:cost_lists).select("products.id, cost_lists.id AS cost_list_id, cost").where(code: product_codes).where(["effective_date <= ?", params[:direct_purchase][:receiving_date].to_date]).order("effective_date DESC")
       params[:direct_purchase][:direct_purchase_products_attributes].each do |key, value|
         product_id = params[:direct_purchase][:direct_purchase_products_attributes][key][:product_id]
         cost_list = products.select{|product| product.id == product_id.to_i}.first
