@@ -11,10 +11,12 @@ class Ability
       cannot :manage, CashierOpening
       cannot :manage, CashDisbursement
       cannot :manage, Sale
-      can [:read, :export], Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
       cannot :manage, Incentive
+      can [:read, :export], Sale
+      can :read, CashDisbursement
+      can :read, Incentive
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
