@@ -9,7 +9,7 @@
                     <td align="center" colspan="2"><strong>GENERAL SALES SUMMARY</strong></td>
                 </tr>
                 <tr>
-                    <td>
+                    <td style="vertical-align: top">
                         <table>
                             <tr>
                                 <td>Store</td>
@@ -84,6 +84,11 @@
                                 <td>Total Credit Card Payment</td>
                                 <td>:</td>
                                 <td><%= number_to_currency(@cashier_opening.present? ? @cashier_opening.credit_card_payment : 0, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Memo</td>
+                                <td>:</td>
+                                <td><%= number_to_currency((@cashier_opening.present? ? @cashier_opening.memo_payment : 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                             </tr>
                         </table>
                     </td>

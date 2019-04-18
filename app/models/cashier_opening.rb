@@ -54,6 +54,7 @@ class CashierOpening < ApplicationRecord
                   total_credits = 0
                   total_quantity = 0
                   total_gift_quantity = 0
+                  memo_payment = 0
                   sale_products.each_with_index do |sale_product, index|
                     if sale_product.event_id.blank? && sale_product.gift_event_id.blank?
                       total_quantity += 1
@@ -62,11 +63,15 @@ class CashierOpening < ApplicationRecord
                       if sale_product.payment_method.eql?("Cash")
                         cash_payment += sale_product.subtotal
                       elsif sale_product.payment_method.eql?("Card")
-                        card_payment += sale_product.subtotal
-                        if sale_product.card_type.eql?("Credit")
-                          total_credits += sale_product.subtotal
+                        unless sale_product.bank_code.eql?("MEMO")
+                          card_payment += sale_product.subtotal
+                          if sale_product.card_type.eql?("Credit")
+                            total_credits += sale_product.subtotal
+                          else
+                            total_debits += sale_product.subtotal
+                          end
                         else
-                          total_debits += sale_product.subtotal
+                          memo_payment += sale_product.subtotal
                         end
                       end
                     elsif sale_product.gift_event_id.blank?
@@ -80,11 +85,15 @@ class CashierOpening < ApplicationRecord
                       if sale_product.payment_method.eql?("Cash")
                         cash_payment += sale_product.subtotal
                       elsif sale_product.payment_method.eql?("Card")
-                        card_payment += sale_product.subtotal
-                        if sale_product.card_type.eql?("Credit")
-                          total_credits += sale_product.subtotal
+                        unless sale_product.bank_code.eql?("MEMO")
+                          card_payment += sale_product.subtotal
+                          if sale_product.card_type.eql?("Credit")
+                            total_credits += sale_product.subtotal
+                          else
+                            total_debits += sale_product.subtotal
+                          end
                         else
-                          total_debits += sale_product.subtotal
+                          memo_payment += sale_product.subtotal
                         end
                       end
                       #                    else
@@ -210,6 +219,7 @@ class CashierOpening < ApplicationRecord
                   self.credit_card_payment = total_credits
                   self.total_quantity = total_quantity
                   self.total_gift_quantity = total_gift_quantity
+                  self.memo_payment = memo_payment
                 end
             
                 def closable

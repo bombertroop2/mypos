@@ -72,6 +72,11 @@
         <td>:</td>
         <td><%= number_to_currency(@cashier_opening.credit_card_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
     </tr>
+    <tr style="overflow: hidden; white-space: nowrap">
+        <td>Memo</td>
+        <td>:</td>
+        <td><%= number_to_currency(@cashier_opening.memo_payment, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
+    </tr>
     <!--    
         <tr><td>&nbsp;</td></tr>
         <tr><td colspan="3" align="center">

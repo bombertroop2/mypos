@@ -42,13 +42,13 @@ class DuosMailer < ApplicationMailer
 
   def cash_disbursement_report_and_sales_general_summary_email(cashier_opening_id, recipient)
     @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: cashier_opening_id).
-      select("sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, cashier_openings.warehouse_id, opened_by, gross_sales, net_sales, total_quantity, total_gift_quantity, cash_payment, card_payment, debit_card_payment, credit_card_payment").first
+      select(:memo_payment, "sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, cashier_openings.warehouse_id, opened_by, gross_sales, net_sales, total_quantity, total_gift_quantity, cash_payment, card_payment, debit_card_payment, credit_card_payment").first
     mail to: recipient, subject: "Cash Disbursement Report and General Sales Summary"
   end
 
   def sales_general_summary_email(cashier_opening_id, recipient)
     @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: cashier_opening_id).
-      select("sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, cashier_openings.warehouse_id, opened_by, gross_sales, net_sales, total_quantity, total_gift_quantity, cash_payment, card_payment, debit_card_payment, credit_card_payment").first
+      select(:memo_payment, "sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, cashier_openings.warehouse_id, opened_by, gross_sales, net_sales, total_quantity, total_gift_quantity, cash_payment, card_payment, debit_card_payment, credit_card_payment").first
     mail to: recipient, subject: "General Sales Summary"
   end
 

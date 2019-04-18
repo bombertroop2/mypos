@@ -86,7 +86,7 @@ class CashierOpeningsController < ApplicationController
       end
     end
     @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: params[:id], :"warehouses.warehouse_type" => "showroom").
-      select("sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, net_sales, gross_sales, cash_payment, card_payment, debit_card_payment, credit_card_payment, total_quantity, total_gift_quantity, cashier_openings.warehouse_id, opened_by").first if @valid
+      select(:memo_payment, "sales_promotion_girls.name AS cashier_name, warehouses.code, warehouses.name, cashier_openings.id, cashier_openings.created_at, station, shift, beginning_cash, cash_balance, closed_at, net_sales, gross_sales, cash_payment, card_payment, debit_card_payment, credit_card_payment, total_quantity, total_gift_quantity, cashier_openings.warehouse_id, opened_by").first if @valid
   end
 
   private
