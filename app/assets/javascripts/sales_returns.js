@@ -18,4 +18,6 @@ $(function () {
     $('#filter-sales-return-date').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
+
+    $("#filter-sales-return-warehouse-id").attr("data-placeholder", "Store").chosen({width: "200px"});
 });

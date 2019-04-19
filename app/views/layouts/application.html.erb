@@ -991,6 +991,7 @@
                     $("#search-sales-return-btn").click(function () {
                         $("#filter_date").val($("#filter-sales-return-date").val());
                         $("#filter_string").val($("#filter-string").val());
+                        $("#filter_warehouse_id").val($("#filter-sales-return-warehouse-id").val());
                         $(".smart-listing-controls").submit();
                     });
       <% if cannot?(:manage, SalesReturn) %>

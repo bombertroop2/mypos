@@ -14,6 +14,7 @@ class Ability
       can [:read, :export], Sale
       cannot :manage, SalesReturn
       cannot [:approve, :unapprove], ConsignmentSale
+      can :read, SalesReturn
     elsif user_roles.include? "administrator"
       available_menus = AvailableMenu.where(active: true).pluck(:name)
       (User::MENUS.clone << "User").each do |user_menu|
@@ -65,6 +66,7 @@ class Ability
             else
               if user_menu.eql?("Point of Sale")
                 can [:read, :export], Sale
+                can :read, SalesReturn
               elsif !user_menu.eql?("Company")
                 can :manage, class_name.gsub(/\s+/, "").constantize
               end
@@ -309,6 +311,7 @@ class Ability
           elsif class_name.eql?("Point of Sale")
             can [:read, :export], Sale
             can :read, CashDisbursement
+            can :read, SalesReturn
           elsif class_name.eql?("ReceivedPurchaseOrder")
             if !user_roles.include?("area_manager")
               if ability.eql?(:read)
