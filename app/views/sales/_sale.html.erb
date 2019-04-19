@@ -1,6 +1,6 @@
 <td><%= object.transaction_number %></td>
 <td><%= object.transaction_time.strftime("%d/%m/%Y %H:%M:%S") %></td>
-<td><%= object.payment_method %></td>
+<td><%= object.bank_code.eql?("MEMO") ? object.bank_code : object.payment_method %></td>
 <td><%= number_to_currency(object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
 <td>
     <% if current_user.has_managerial_role? || current_user.is_accountant? %>

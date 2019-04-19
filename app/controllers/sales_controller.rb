@@ -20,15 +20,28 @@ class SalesController < ApplicationController
 
     unless current_user.has_non_spg_role?
       warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-      sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id, :gross_profit).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+      sales_scope = Sale.
+        select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id, :gross_profit, "banks.code AS bank_code").
+        joins(:cashier_opening).
+        joins("LEFT JOIN banks ON sales.bank_id = banks.id").
+        where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
     else
-      sales_scope = Sale.joins(:cashier_opening).select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id, :gross_profit)
+      sales_scope = Sale.
+        select(:id, :transaction_time, :total, :transaction_number, :payment_method, :sales_return_id, :gross_profit, "banks.code AS bank_code").
+        joins(:cashier_opening).
+        joins("LEFT JOIN banks ON sales.bank_id = banks.id")
     end
     sales_scope = sales_scope.where(["transaction_time BETWEEN ? AND ?", start_start_time, end_start_time]) if params[:filter_date].present?
     sales_scope = sales_scope.where(["transaction_number #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
-    sales_scope = sales_scope.where(["payment_method = ?", params[:filter_payment_method]]) if params[:filter_payment_method].present?
+    if params[:filter_payment_method].present? && params[:filter_payment_method].eql?("Memo")
+      sales_scope = sales_scope.where("banks.code = 'MEMO'")
+    elsif params[:filter_payment_method].present? && params[:filter_payment_method].eql?("Card")
+      sales_scope = sales_scope.where(["payment_method = ? AND banks.code <> 'MEMO'", params[:filter_payment_method]])
+    elsif params[:filter_payment_method].present?
+      sales_scope = sales_scope.where(["payment_method = ?", params[:filter_payment_method]])
+    end
     sales_scope = sales_scope.where(["cashier_openings.warehouse_id = ?", params[:filter_warehouse]]) if params[:filter_warehouse].present?
-    @sales = smart_listing_create(:sales, sales_scope, partial: 'sales/listing', default_sort: {transaction_time: "DESC"})
+    smart_listing_create(:sales, sales_scope, partial: 'sales/listing', default_sort: {transaction_time: "DESC"})
   end
 
   # GET /sales/1
