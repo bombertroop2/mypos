@@ -225,7 +225,11 @@ class Ability
               can :read, class_name.gsub(/\s+/, "").constantize
             end
           elsif class_name.eql?("CostList")            
-            can ability, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
+            if !user_roles.include?("area_manager") && !user_roles.include?("accountant")
+              can ability, class_name.gsub(/\s+/, "").constantize
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           elsif class_name.eql?("Stock Mutation") && !user_roles.include?("area_manager")
             if ability.eql?(:read) || user_roles.include?("accountant")
               alias_action :index, :show, to: :read_store_to_store_mutations

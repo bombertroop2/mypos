@@ -56,7 +56,7 @@
         <dd><%= latest_cost.effective_date.strftime("%d/%m/%Y") rescue "" %></dd>
     </dl>        
 
-    <% if current_user.has_managerial_role? %>
+    <% if current_user.is_accountant_or_managerial_role? %>
       <dl class="dl-horizontal">
           <dt>Cost</dt>
           <dd><%= number_to_currency((latest_cost.cost rescue 0), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>

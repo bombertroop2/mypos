@@ -1,7 +1,7 @@
 <table class="table table-striped" style="table-layout: fixed;word-wrap: break-word;margin-top: 10px">
     <thead id="listing-cost-thead">
         <tr>
-            <% if current_user.has_managerial_role? %>
+            <% if current_user.is_accountant_or_managerial_role? %>
               <th class="col-md-3"><%= smart_listing.sortable "Product code", "products.code" %></th>
               <th class="col-md-3"><%= smart_listing.sortable "Cost", "cost" %></th>
               <th class="col-md-3"><%= smart_listing.sortable "Effective date", "effective_date" %></th>
@@ -19,7 +19,7 @@
               <%= smart_listing.render object: cost, partial: "cost_prices/cost", locals: {object: cost} %>
           </tr>
         <% end %>
-        <%= smart_listing.item_new colspan: (current_user.has_managerial_role? ? 4 : 3), link: new_cost_price_path %>
+        <%= smart_listing.item_new colspan: (current_user.is_accountant_or_managerial_role? ? 4 : 3), link: new_cost_price_path %>
     </tbody>
 </table>
 <%= smart_listing.paginate %>

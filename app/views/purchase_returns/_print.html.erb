@@ -51,7 +51,7 @@
                       <tr align="center">
                           <td style="vertical-align: middle"><%= idx.succ %></td>
                           <td style="vertical-align: middle"><%= "#{(pr_product.purchase_order_product.product.code rescue pr_product.direct_purchase_product.product.code)} - #{(pr_product.purchase_order_product.product.brand.name rescue pr_product.direct_purchase_product.product.brand.name)}" %></td>
-                          <td style="vertical-align: middle"><%= number_to_currency((pr_product.purchase_order_product.cost_list.cost rescue pr_product.direct_purchase_product.cost_list.cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) if current_user.has_managerial_role? %></td>
+                          <td style="vertical-align: middle"><%= number_to_currency((pr_product.purchase_order_product.cost_list.cost rescue pr_product.direct_purchase_product.cost_list.cost), :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
                           <td style="vertical-align: middle;text-align: center">
                               <table class="table table-condensed table-bordered">
                                   <tbody>
@@ -126,7 +126,7 @@
                                 :separator => ",",
                                 :delimiter => ".",
                                 :unit => "Rp",
-                                :precision => 2) if current_user.has_managerial_role? %>
+                                :precision => 2) %>
                           </td>
                       </tr>
                       <% total_qty_all_products += pr_product.total_quantity %>
@@ -142,7 +142,7 @@
                               :separator => ",",
                               :delimiter => ".",
                               :unit => "Rp",
-                              :precision => 2) if current_user.has_managerial_role? %>
+                              :precision => 2) %>
                         </td>
                     </tr>
                     <tr>
@@ -152,7 +152,7 @@
                                       :separator => ",",
                                       :delimiter => ".",
                                       :unit => "Rp",
-                                      :precision => 2) if current_user.has_managerial_role? %>
+                                      :precision => 2) %>
                                 </td>
                     </tr>
                     <tr>
@@ -163,7 +163,7 @@
                         :separator => ",",
                         :delimiter => ".",
                         :unit => "Rp",
-                        :precision => 2) if current_user.has_managerial_role? %>
+                        :precision => 2) %>
                         </td>
                     </tr>
               <% if @purchase_return.purchase_order && @purchase_return.purchase_order.is_taxable_entrepreneur %>
@@ -181,7 +181,7 @@
                           :separator => ",",
                           :delimiter => ".",
                           :unit => "Rp",
-                          :precision => 2) if current_user.has_managerial_role? %>
+                          :precision => 2) %>
                         </td>
                     </tr>
               <% elsif @purchase_return.direct_purchase && @purchase_return.direct_purchase.is_taxable_entrepreneur %>
@@ -199,7 +199,7 @@
                           :separator => ",",
                           :delimiter => ".",
                           :unit => "Rp",
-                          :precision => 2) if current_user.has_managerial_role? %>
+                          :precision => 2) %>
                         </td>
                     </tr>
               <% end %>
@@ -210,7 +210,7 @@
                         :separator => ",",
                         :delimiter => ".",
                         :unit => "Rp",
-                        :precision => 2) if current_user.has_managerial_role? %>
+                        :precision => 2) %>
                         </td>
                     </tr>
                 </tbody>

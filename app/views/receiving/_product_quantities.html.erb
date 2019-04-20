@@ -26,7 +26,7 @@
                   <%= fields_for direct_purchase_product_array_index, dpp do |dpp_form| %>
                     <%= dpp_form.hidden_field :product_id %>
                     <%= dpp_form.hidden_field :prdct_code %>
-                    <%= dpp_form.hidden_field :dp_cost, id: "dp-cost-#{dpp.product_id}" if current_user.has_managerial_role? %>
+                    <%= dpp_form.hidden_field :dp_cost, id: "dp-cost-#{dpp.product_id}" if current_user.is_accountant_or_managerial_role? %>
                   <% end %>
 
                   <% sizes = @sizes[dpp.product_id] %>

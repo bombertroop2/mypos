@@ -110,7 +110,7 @@
       </dl>
     <% end %>
 
-    <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+    <% if current_user.is_accountant_or_managerial_role? %>
       <dl class="dl-horizontal">
           <dt>Gross Profit</dt>
           <dd><%= number_to_currency(object.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></dd>
@@ -155,7 +155,7 @@
                   <td><%= "#{sale_product.color_code} - #{sale_product.color_name}" %></td>
                   <td><%= sale_product.product_size %></td>
                   <td>
-                      <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+                      <% if current_user.is_accountant_or_managerial_role? %>
                         <%= number_to_currency(sale_product.cost, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                       <% end %>
                   </td>
@@ -230,7 +230,7 @@
                       <%= number_to_currency(subtotal, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                   </td>
                   <td>
-                      <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+                      <% if current_user.is_accountant_or_managerial_role? %>
                         <%= number_to_currency(sale_product.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
                       <% end %>
                   </td>

@@ -84,6 +84,10 @@ class User < ApplicationRecord
                       end
                     end
 
+                    def is_accountant_or_managerial_role?
+                      roles.select("1 AS one").where(["(roles.name = ? OR roles.name = ? OR roles.name = ? OR roles.name = ?) AND roles.resource_type IS NULL AND roles.resource_id IS NULL", "manager", "administrator", "superadmin", "accountant"]).present?
+                    end
+
                     def is_accountant?
                       roles.select("1 AS one").where(["roles.name = ? AND roles.resource_type IS NULL AND roles.resource_id IS NULL", "accountant"]).present?
                     end
