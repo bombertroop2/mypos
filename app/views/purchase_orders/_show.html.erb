@@ -156,7 +156,7 @@
                                 <tfoot>
                                     <tr>
                                         <td colspan="7" align="right"><strong>Total Quantity</strong></td>
-                                        <td align="right"><%= number_to_currency(total_qty_all_products, :separator => "", :delimiter => ".", :unit => "", :precision => 0) if current_user.has_managerial_role? %></td>
+                                        <td align="right"><%= number_to_currency(total_qty_all_products, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                                     </tr>
                                     <tr>
                                         <td colspan="7" align="right"><strong>Gross Amount</strong></td>
