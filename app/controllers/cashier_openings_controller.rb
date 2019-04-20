@@ -82,6 +82,7 @@ class CashierOpeningsController < ApplicationController
       if @valid = @cashier_opening.update(closed_at: Time.current, user_id: current_user.id, closing_cashier: true)      
         SendEmailJob.perform_later(@cashier_opening.id, "cash disbursement report and sales general summary")
         SendEmailJob.perform_later(@cashier_opening.id, "sales general summary")
+        IncentiveJob.perform_later(@cashier_opening.id)
       end
     end
     @cashier_opening = CashierOpening.joins(:warehouse, user: :sales_promotion_girl).where(id: params[:id], :"warehouses.warehouse_type" => "showroom").

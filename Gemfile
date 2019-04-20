@@ -84,8 +84,6 @@ gem 'tag-it-rails'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-gem 'figaro'
-
 gem 'daemons'
 
 gem 'whenever', require: false

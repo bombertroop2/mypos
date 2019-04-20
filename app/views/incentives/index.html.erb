@@ -1,0 +1,41 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Incentives</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Warehouse code</th>
+      <th>Warehouse name</th>
+      <th>Transaction date</th>
+      <th>Sales promotion girl name</th>
+      <th>Transaction number</th>
+      <th>Net sales</th>
+      <th>Incentive</th>
+      <th>Quantity</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @incentives.each do |incentive| %>
+      <tr>
+        <td><%= incentive.warehouse_code %></td>
+        <td><%= incentive.warehouse_name %></td>
+        <td><%= incentive.transaction_date %></td>
+        <td><%= incentive.sales_promotion_girl_name %></td>
+        <td><%= incentive.transaction_number %></td>
+        <td><%= incentive.net_sales %></td>
+        <td><%= incentive.incentive %></td>
+        <td><%= incentive.quantity %></td>
+        <td><%= link_to 'Show', incentive %></td>
+        <td><%= link_to 'Edit', edit_incentive_path(incentive) %></td>
+        <td><%= link_to 'Destroy', incentive, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Incentive', new_incentive_path %>

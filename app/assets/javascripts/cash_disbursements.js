@@ -14,5 +14,5 @@ $(function () {
     $('#filter-date').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
-
+    $("#filter-warehouse-id-cash-disbursement").attr("data-placeholder", "Store").chosen();
 });

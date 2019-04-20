@@ -6,7 +6,7 @@
     });
   <% elsif @sale_products.first.gift_event_id.blank? %>
     <% transaction_time = Time.zone.parse @sale_products.first.transaction_time.to_datetime.to_s %>
-    <% if (Time.current - transaction_time) / 1.hour >= 74 %>
+    <% if Time.current > (transaction_time + 3.days).end_of_day %>
       var box = bootbox.alert({message: "Sorry, receipt <%= params[:receipt_number] %> has expired",size: 'small'});
       box.on("hidden.bs.modal", function () { 
         $("#receipt_number").focus();
