@@ -222,11 +222,18 @@ class Ability
             elsif user_roles.first.eql?("manager")
               can [:read_action_for_staff, :undelete_action, :edit_action], class_name.gsub(/\s+/, "").constantize
             end
-          elsif class_name.eql?("Purchase Order") && !user.has_managerial_role?
-            # cegah staff untuk manage PO
-            can :read, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
+          elsif class_name.eql?("Purchase Order")
+            if !user_roles.include?("area_manager") && !user_roles.include?("accountant")
+              can ability, class_name.gsub(/\s+/, "").constantize
+            elsif user_roles.include?("accountant")
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           elsif class_name.eql?("CostList")            
-            can ability, class_name.gsub(/\s+/, "").constantize if !user_roles.include?("area_manager")
+            if !user_roles.include?("area_manager") && !user_roles.include?("accountant")
+              can ability, class_name.gsub(/\s+/, "").constantize
+            else
+              can :read, class_name.gsub(/\s+/, "").constantize
+            end
           elsif class_name.eql?("Stock Mutation") && !user_roles.include?("area_manager")
             if ability.eql?(:read) || user_roles.include?("accountant")
               alias_action :index, :show, to: :read_store_to_store_mutations

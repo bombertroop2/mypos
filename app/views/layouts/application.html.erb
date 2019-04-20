@@ -585,7 +585,7 @@
                     $("#search-cost-btn").click(function () {
                         $("#filter_effective_date").val($("#filter-effective-date").val());
                         $("#filter_product_code").val($("#filter-product-code").val());
-      <% if current_user.has_managerial_role? %>
+      <% if current_user.is_accountant_or_managerial_role? %>
                           $("#filter_cost").val($("#search-cost").val());
       <% end %>
                         //$(".smart-listing-controls").html($("#search-form-container").html());

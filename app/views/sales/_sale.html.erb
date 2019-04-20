@@ -3,7 +3,7 @@
 <td><%= object.bank_code.eql?("MEMO") ? object.bank_code : object.payment_method %></td>
 <td><%= number_to_currency(object.total, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %></td>
 <td>
-    <% if current_user.has_managerial_role? || current_user.is_accountant? %>
+    <% if current_user.is_accountant_or_managerial_role? %>
         <%= number_to_currency(object.gross_profit, :separator => ",", :delimiter => ".", :unit => "Rp", :precision => 2) %>
       <% end %>
   </td>

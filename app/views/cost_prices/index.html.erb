@@ -16,7 +16,7 @@
     <div class="form-group">
         <input type="text" id="filter-product-code" class="form-control" placeholder="Product code/name">
     </div>
-    <% if current_user.has_managerial_role? %>
+    <% if current_user.is_accountant_or_managerial_role? %>
       <div class="form-group">
           <input size="16" style="text-align: right" data-a-sep="." data-a-dec="," data-a-sign="Rp" type="text" class="form-control" id="search-cost" placeholder="Cost">
       </div>
@@ -27,7 +27,7 @@
     <%= smart_listing_controls_for(:costs, {class: "form-inline text-right"}) do %>
         <%= text_field_tag :filter_effective_date, '', class: "search form-control", autocomplete: :off %>
           <%= text_field_tag :filter_product_code, '', class: "search form-control", autocomplete: :off %>
-            <%= text_field_tag :filter_cost, '', class: "search form-control", autocomplete: :off if current_user.has_managerial_role? %>
+            <%= text_field_tag :filter_cost, '', class: "search form-control", autocomplete: :off if current_user.is_accountant_or_managerial_role? %>
             <% end %>
         </div>
         <%= smart_listing_render(:costs) %>

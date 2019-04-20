@@ -126,22 +126,18 @@
                           </td>
                           <td align="right" style="vertical-align: middle"><%= number_to_currency(total_quantity, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
                           <td align="right" style="vertical-align: middle">
-                              <% if current_user.has_managerial_role? %>
-                                <%= number_to_currency((po_product.cost rescue 0),
-                                  :separator => ",",
-                                  :delimiter => ".",
-                                  :unit => "Rp",
-                                  :precision => 2) %>
-                              <% end %>
+                              <%= number_to_currency((po_product.cost rescue 0),
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %>
                           </td>
                           <td align="right" style="vertical-align: middle">
-                              <% if current_user.has_managerial_role? %>
-                                <%= number_to_currency(((total_quantity * po_product.cost) rescue 0),
-                                  :separator => ",",
-                                  :delimiter => ".",
-                                  :unit => "Rp",
-                                  :precision => 2) %>
-                              <% end %>
+                              <%= number_to_currency(((total_quantity * po_product.cost) rescue 0),
+                                :separator => ",",
+                                :delimiter => ".",
+                                :unit => "Rp",
+                                :precision => 2) %>
                           </td>
                       </tr>
                       <% total_qty_all_products += total_quantity %>
@@ -156,7 +152,7 @@
                               :separator => ",",
                               :delimiter => ".",
                               :unit => "Rp",
-                              :precision => 2) if current_user.has_managerial_role? %></td>
+                              :precision => 2) %></td>
                     </tr>
                     <tr>
                         <td colspan="7" align="right"><strong>1st Discount (<%= @purchase_order.first_discount.to_f %>%)</strong></td>
@@ -164,7 +160,7 @@
                                       :separator => ",",
                                       :delimiter => ".",
                                       :unit => "Rp",
-                                      :precision => 2) if current_user.has_managerial_role? %></td>
+                                      :precision => 2) %></td>
                     </tr>
                     <tr>
                         <td colspan="7" align="right"><strong>2nd Discount (<%= @purchase_order.second_discount.to_f %>%)<% if @purchase_order.is_additional_disc_from_net %> (net)<% elsif @purchase_order.second_discount.present? %> (gross)<% end %></strong></td>
@@ -172,7 +168,7 @@
                                   :separator => ",",
                                   :delimiter => ".",
                                   :unit => "Rp",
-                                  :precision => 2) if current_user.has_managerial_role? %></td>
+                                  :precision => 2) %></td>
                     </tr>
                 <% if @purchase_order.is_taxable_entrepreneur %>                            
                   <%
@@ -189,7 +185,7 @@
                             :separator => ",",
                             :delimiter => ".",
                             :unit => "Rp",
-                            :precision => 2) if current_user.has_managerial_role? %>
+                            :precision => 2) %>
                         </td>
                     </tr>
                 <% end %>
@@ -200,7 +196,7 @@
                           :separator => ",",
                           :delimiter => ".",
                           :unit => "Rp",
-                          :precision => 2) if current_user.has_managerial_role? %>
+                          :precision => 2) %>
                         </td>
                     </tr>
 
