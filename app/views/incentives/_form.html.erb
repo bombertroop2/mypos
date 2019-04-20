@@ -1,0 +1,57 @@
+<%= form_for(incentive) do |f| %>
+  <% if incentive.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(incentive.errors.count, "error") %> prohibited this incentive from being saved:</h2>
+
+      <ul>
+      <% incentive.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :warehouse_code %>
+    <%= f.text_field :warehouse_code %>
+  </div>
+
+  <div class="field">
+    <%= f.label :warehouse_name %>
+    <%= f.text_field :warehouse_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :transaction_date %>
+    <%= f.date_select :transaction_date %>
+  </div>
+
+  <div class="field">
+    <%= f.label :sales_promotion_girl_name %>
+    <%= f.text_field :sales_promotion_girl_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :transaction_number %>
+    <%= f.text_field :transaction_number %>
+  </div>
+
+  <div class="field">
+    <%= f.label :net_sales %>
+    <%= f.text_field :net_sales %>
+  </div>
+
+  <div class="field">
+    <%= f.label :incentive %>
+    <%= f.text_field :incentive %>
+  </div>
+
+  <div class="field">
+    <%= f.label :quantity %>
+    <%= f.number_field :quantity %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

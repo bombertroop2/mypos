@@ -3,20 +3,26 @@
 </div>
 
 <div id="search-form-container" class="form-inline text-right">
-    <div class="form-group">
-        <input type="text" id="filter-string" class="form-control" placeholder="Return/Receipt number">
-    </div>
-    <div class="form-group">
-        <input type="text" class="form-control" readonly="true" id="filter-sales-return-date" placeholder="Date">
-    </div>
-    <button id="search-sales-return-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
-</div>
-
-<div class="hidden">
-    <%= smart_listing_controls_for(:sales_returns, {class: "form-inline text-right"}) do %>
-        <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
-          <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
-          <% end %>
+    <% if current_user.has_non_spg_role? %>
+      <div class="form-group text-left">
+          <%= select_tag "warehouse_id", options_from_collection_for_select(Warehouse.showroom.actived.select(:id, :code, :name), :id, "code_and_name"), {include_blank: true, class: "form-control", id: "filter-sales-return-warehouse-id"} %>
+        </div>
+      <% end %>
+      <div class="form-group">
+          <input type="text" id="filter-string" class="form-control" placeholder="Return/Receipt number">
       </div>
-      <%= smart_listing_render(:sales_returns) %>
-      <div id="receipt-container"></div>
+      <div class="form-group">
+          <input type="text" class="form-control" readonly="true" id="filter-sales-return-date" placeholder="Date">
+      </div>
+      <button id="search-sales-return-btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+  </div>
+
+  <div class="hidden">
+      <%= smart_listing_controls_for(:sales_returns, {class: "form-inline text-right"}) do %>
+          <%= text_field_tag :filter_date, '', class: "search form-control", autocomplete: :off %>
+            <%= text_field_tag :filter_string, '', class: "search form-control", autocomplete: :off %>
+              <%= text_field_tag :filter_warehouse_id, '', class: "search form-control", autocomplete: :off %>
+              <% end %>
+          </div>
+          <%= smart_listing_render(:sales_returns) %>
+          <div id="receipt-container"></div>

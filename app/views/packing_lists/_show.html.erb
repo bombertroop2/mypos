@@ -89,13 +89,15 @@
                                   </tr>
                                 <% end %>
                                 <% if (gv = GeneralVariable.select(:pieces_per_koli).first).present? %>
-                                  <tr>
-                                      <td style="vertical-align: top">Total koli</td>
-                                      <td style="vertical-align: top">:</td>
-                                      <td>
-                                          <%= (@packing_list.total_quantity / gv.pieces_per_koli.to_f).ceil %>
-                                      </td>
-                                  </tr>
+                                  <% if gv.pieces_per_koli.present? %>
+                                    <tr>
+                                        <td style="vertical-align: top">Total koli</td>
+                                        <td style="vertical-align: top">:</td>
+                                        <td>
+                                            <%= (@packing_list.total_quantity / gv.pieces_per_koli.to_f).ceil %>
+                                        </td>
+                                    </tr>
+                                  <% end %>
                                 <% end %>
                             </table>
                         </td>

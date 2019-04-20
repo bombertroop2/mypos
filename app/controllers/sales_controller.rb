@@ -169,7 +169,7 @@ class SalesController < ApplicationController
     @product = if params[:barcode]
       ProductBarcode.
         joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
-        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode].upcase).
         where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
         where(["effective_date <= ?", Date.current]).
         select(:id, :barcode).
@@ -239,7 +239,7 @@ class SalesController < ApplicationController
       #      StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").select(:id, "sizes.size AS product_size", "common_fields.name", "colors_product_colors.name AS color_name").first
       StockDetail.
         joins(:size, stock_product: [product: [:brand, product_details: :price_lists, product_colors: [:product_barcodes, :color]], stock: [warehouse: :sales_promotion_girls]]).
-        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode].upcase).
         where(["price_lists.effective_date <= ?", Date.current]).
         where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id AND product_details.size_id = stock_details.size_id AND product_details.price_code_id = warehouses.price_code_id").
         select(:id, "stock_products.product_id", "sizes.size AS product_size", "common_fields.name AS brand_name", "colors_product_colors.name AS color_name", "product_barcodes.id AS product_barcode_id", "price_lists.price", "product_barcodes.barcode AS product_barcode", "products.code AS product_code", "colors_product_colors.code AS color_code", "price_lists.id AS price_list_id").
@@ -282,7 +282,7 @@ class SalesController < ApplicationController
     current_time = Time.current
     if params[:barcode]
       @gift_item = StockDetail.joins(:size, stock_product: [product: [:brand, product_colors: [:product_barcodes, :color], event_products: [event_warehouse: :event]], stock: [warehouse: :sales_promotion_girls]]).
-        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode].upcase).
         where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
         #        where(["events.start_date_time <= ? AND events.end_date_time > ? AND event_warehouses.warehouse_id = stocks.warehouse_id AND event_warehouses.select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND events.event_type = 'Gift' AND events.id = ?", current_time, current_time, true, true, true, session["sale"]["event"]["id"]]).
       where(["event_warehouses.warehouse_id = stocks.warehouse_id AND event_warehouses.select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND events.id = ?", true, true, true, session["sale"]["event"]["id"]]).
@@ -290,7 +290,7 @@ class SalesController < ApplicationController
         order("events.created_at DESC").first
       if @gift_item.blank?
         @gift_item = StockDetail.joins(:size, stock_product: [product: [:brand, :event_general_products, product_colors: [:product_barcodes, :color]], stock: [warehouse: [:sales_promotion_girls, event_warehouses: :event]]]).
-          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode]).
+          where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, :"product_barcodes.barcode" => params[:barcode].upcase).
           where("stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
           #          where(["events.start_date_time <= ? AND events.end_date_time > ? AND event_general_products.event_id = events.id AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND events.event_type = 'Gift' AND events.id = ?", current_time, current_time, false, true, true, session["sale"]["event"]["id"]]).
         where(["event_general_products.event_id = events.id AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND events.id = ?", false, true, true, session["sale"]["event"]["id"]]).
@@ -368,6 +368,34 @@ class SalesController < ApplicationController
         end
         headers["Content-Disposition"] = "attachment; filename='pos_report.xls'"
       end
+    end
+  end
+  
+  def get_stock_detail
+    @product = if params[:barcode].present?
+      ProductBarcode.
+        joins(:size, product_color: [:color, product: [:brand, product_details: :price_lists, stock_products: [:stock_details, stock: [warehouse: :sales_promotion_girls]]]]).
+        where(:"sales_promotion_girls.id" => current_user.sales_promotion_girl_id, barcode: params[:barcode].upcase).
+        where("product_details.size_id = product_barcodes.size_id AND product_details.price_code_id = warehouses.price_code_id AND stock_details.size_id = product_barcodes.size_id AND stock_details.color_id = product_colors.color_id").
+        where(["effective_date <= ?", Date.current]).
+        select(:id, :barcode).
+        select("size AS product_size, common_fields.code AS color_code, common_fields.name AS color_name, products.code AS product_code, brands_products.name AS brand_name, price_lists.price, product_colors.product_id, stock_details.id AS stock_detail_id, price_lists.id AS price_list_id, stock_details.quantity, stock_details.booked_quantity, products.description").
+        order("effective_date DESC").
+        first
+    else
+      Product.        
+        select(:id, :code, :description, "common_fields.name AS brand_name").
+        joins(:brand).
+        includes(:sizes, :colors, stock_products: [:stock, :stock_details], product_details: :price_lists).
+        where(code: params[:product_code]).
+        first
+    end    
+  end
+  
+  def search_product
+    products = Product.joins(:brand).where(["products.code ILIKE ?", params[:term]+"%"]).order(:code).pluck(:code)
+    respond_to do |format|
+      format.json  { render :json => products.to_json } # don't do msg.to_json
     end
   end
 

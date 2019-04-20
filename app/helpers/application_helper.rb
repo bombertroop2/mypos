@@ -83,6 +83,7 @@ module ApplicationHelper
     return true if can? :read, Customer
     return true if can? :manage, Adjustment
     return true if can? :manage, GeneralVariable
+    return true if can? :manage, PrintBarcodeTemp
   end
 
   def event_menu_active?

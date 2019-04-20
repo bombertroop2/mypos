@@ -13,8 +13,16 @@ class CashDisbursementsController < ApplicationController
       start_date = splitted_date_range[0].strip.to_date
       end_date = splitted_date_range[1].strip.to_date
     end
-    warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
-    cash_disbursements_scope = CashDisbursement.joins(cashier_opening: :warehouse).select(:id, :description, :price, :station, :open_date).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}").where(["warehouses.is_active = ?", true])
+    cash_disbursements_scope = unless current_user.has_non_spg_role?
+      warehouse_id = SalesPromotionGirl.select(:warehouse_id).where(id: current_user.sales_promotion_girl_id).first.warehouse_id
+      CashDisbursement.joins(cashier_opening: :warehouse).select(:id, :description, :price, :station, :open_date).where("opened_by = #{current_user.id} AND warehouse_id = #{warehouse_id}")
+    else
+      if params[:filter_warehouse_id].present? && params[:filter_warehouse_id].strip.present?
+        CashDisbursement.joins(cashier_opening: :warehouse).select(:id, :description, :price, :station, :open_date).where("warehouse_id = #{params[:filter_warehouse_id].strip}")
+      else
+        CashDisbursement.joins(:cashier_opening).select(:id, :description, :price, :station, :open_date)
+      end
+    end
     cash_disbursements_scope = cash_disbursements_scope.where(["description #{like_command} ?", "%"+params[:filter_string]+"%"]) if params[:filter_string].present?
     cash_disbursements_scope = cash_disbursements_scope.where(["DATE(open_date) BETWEEN ? AND ?", start_date, end_date]) if params[:filter_date].present?
     cash_disbursements_scope = cash_disbursements_scope.where(["station = ?", params[:filter_station]]) if params[:filter_station].present?
