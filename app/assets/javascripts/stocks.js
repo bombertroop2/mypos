@@ -10,5 +10,15 @@ $(function () {
             $(".smart-listing-controls").submit();
         }
     });
-
+    $('input[type=radio][name=product_filter_mode]').change(function () {
+        if (this.value == 'All') {
+            $("#product_criteria").val("");
+            $("#product_criteria").css("cursor", "not-allowed");
+            $("#product_criteria").attr("readonly", true);
+        } else if (this.value == 'Filter') {
+            $("#product_criteria").css("cursor", "auto");
+            $("#product_criteria").attr("readonly", false);
+            $("#product_criteria").focus();
+        }
+    });    
 });

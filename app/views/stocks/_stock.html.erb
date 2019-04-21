@@ -11,7 +11,7 @@
     <tbody>            
         <tr style="text-align: center">
             <td colspan="3"><strong>Product</strong></td>
-            <td rowspan="2" style="vertical-align: middle"><strong>Quantity</strong></td>
+            <td rowspan="2" style="vertical-align: middle"><strong>Quantity & Price</strong></td>
             <td rowspan="2" style="vertical-align: middle"><strong>Total Quantity</strong></td>
         </tr>
         <tr style="text-align: center">
@@ -24,19 +24,64 @@
         stock_products = if params[:filter_product_criteria].present? && params[:filter_product_criteria].strip.present?
           object.
             stock_products.
-            select(:id, "products.code AS product_code", "products.description AS product_description", "common_fields.name AS brand_name").
+            select(:id, :product_id, "products.code AS product_code", "products.description AS product_description", "common_fields.name AS brand_name").
             joins(product: :brand).
             includes(:sizes, :colors, :stock_details).
-            where(["products.code ILIKE ? OR common_fields.name ILIKE ?", "%"+params[:filter_product_criteria]+"%", "%"+params[:filter_product_criteria]+"%"])
+            where(["products.code ILIKE ? OR common_fields.name ILIKE ? OR products.description ILIKE ?", "%"+params[:filter_product_criteria]+"%", "%"+params[:filter_product_criteria]+"%", "%"+params[:filter_product_criteria]+"%"])
           else
           object.
             stock_products.
-            select(:id, "products.code AS product_code", "products.description AS product_description", "common_fields.name AS brand_name").
+            select(:id, :product_id, "products.code AS product_code", "products.description AS product_description", "common_fields.name AS brand_name").
             joins(product: :brand).
             includes(:sizes, :colors, :stock_details)
           end
+        product_ids = stock_products.map(&:product_id).uniq
+        size_ids = []
+        stock_products.each do |sp|
+          size_ids << sp.sizes.map(&:id)
+          end
+        size_ids = size_ids.flatten.uniq
+        product_details = ProductDetail.select(:id, :size_id, :product_id).where(product_id: product_ids, size_id: size_ids, price_code_id: @warehouse.price_code_id)
+        price_lists = PriceList.select(:effective_date, :price, :product_detail_id).where(product_detail_id: product_details.map(&:id).uniq).where(["price_lists.effective_date <= ?", Date.current])
+        current_time = Time.current        
+        event_specific_products = if product_ids.present?
+          Event.
+            select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, "event_products.product_id").
+            joins(event_warehouses: :event_products).
+            where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift' AND event_type <> 'Buy 1 Get 1 Free'", current_time, current_time, @warehouse.id, true, true, true]).
+            where(:"event_products.product_id" => product_ids).
+            order("events.created_at DESC")
+          else
+          Event.none
+          end
+
+        event_general_products = if product_ids.present?
+          Event.
+            select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount, "event_general_products.product_id").
+            joins(:event_warehouses, :event_general_products).
+            where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift' AND event_type <> 'Buy 1 Get 1 Free'", current_time, current_time, @warehouse.id, false, true, true]).
+            where(:"event_general_products.product_id" => product_ids).
+            order("events.created_at DESC")
+          else
+          Event.none
+          end
         stock_products.each do |sp|
           total_quantity = 0
+          event_specific_product = event_specific_products.select{|esp| esp.product_id == sp.product_id}.sort{|esp1, esp2| esp2.created_at <=> esp1.created_at}.first
+          event_general_product = event_general_products.select{|egp| egp.product_id == sp.product_id}.sort{|egp1, egp2| egp2.created_at <=> egp1.created_at}.first
+          if event_specific_product.nil? && event_general_product.present?
+            store_event = event_general_product
+            elsif event_specific_product.present? && event_general_product.nil?
+            store_event = event_specific_product
+            elsif event_specific_product.present? && event_general_product.present?
+            if event_specific_product.created_at >= event_general_product.created_at
+              store_event = event_specific_product
+              else          
+              store_event = event_general_product
+            end
+            else
+            store_event = nil
+            end
         %>
           <tr align="center">
               <td style="vertical-align: middle"><%= sp.product_code %></td>
@@ -58,10 +103,43 @@
                                 <% qty_per_color = 0 %>
                                 <% sp.sizes.uniq.each do |size| %>
                                   <% stock_detail = sp.stock_details.select{|sd| sd.size_id == size.id && sd.color_id == color.id}.first %>
-                                  <td class="quantity-on-hand" align="center" style="vertical-align: middle">
+                                  <td class="quantity-on-hand" style="vertical-align: middle">
                                       <% total_quantity += stock_detail.quantity rescue 0 %>
-                                      <% qty_per_color += stock_detail.quantity rescue 0 %>
-                                      <%= number_to_currency((stock_detail.quantity rescue 0), :separator => "", :delimiter => ".", :unit => "", :precision => 0) %>
+                                      <% qty_per_color += stock_detail.quantity rescue 0 %>                                      
+                                      <table width="100%">
+                                          <tr><td style="text-align: right"><%= number_to_currency((stock_detail.quantity rescue 0), :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td></tr>
+                                          <tr><td><div class="ln_solid"></div></td></tr>
+                                          <%
+                                          product_detail = product_details.select{|pd| pd.size_id == size.id && pd.product_id == sp.product_id}.first
+                                          price_list = if product_detail.present?
+                                            price_lists.select{|pl| pl.product_detail_id == product_detail.id}.sort{|pl1, pl2| pl2.effective_date <=> pl1.effective_date}.first
+                                            else
+                                          nil
+                                            end
+
+                                          price = 0                                            
+                                          if price_list.present?
+                                            price = price_list.price
+                                            if store_event.present?
+                                              if store_event.event_type.eql?("Discount(%)") && store_event.first_plus_discount.present? && store_event.second_plus_discount.present?
+                                                first_discounted_price = price_list.price - price_list.price * store_event.first_plus_discount.to_f / 100
+                                                price = first_discounted_price - first_discounted_price * store_event.second_plus_discount.to_f / 100
+                                                elsif store_event.event_type.eql?("Discount(%)") && store_event.first_plus_discount.present?
+                                                price = price_list.price - price_list.price * store_event.first_plus_discount.to_f / 100
+                                                elsif store_event.event_type.eql?("Special Price") && store_event.special_price.present?
+                                                price = store_event.special_price
+                                                elsif store_event.event_type.eql?("Discount(Rp)") && store_event.cash_discount.present?
+                                                price = price_list.price - store_event.cash_discount.to_f
+                                              end
+                                            end
+                                            end
+                                        %>
+                                          <tr><td style="text-align: right"><%= number_to_currency(price,
+                                                    :separator => ",",
+                                                    :delimiter => ".",
+                                                    :unit => "Rp",
+                                                    :precision => 2) %></td></tr>
+                                      </table>
                                   </td>
                                 <% end %>
                                 <td align="center" style="vertical-align: middle"><%= number_to_currency(qty_per_color, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
