@@ -17,7 +17,7 @@ class IncentivesController < ApplicationController
       @incentives = if params[:incentive_spg].strip.eql?("ALL")
         Incentive.
           select(:sales_promotion_girl_identifier, :sales_promotion_girl_name, "SUM(net_sales) AS total_net_sales", "SUM(quantity) AS total_quantity").
-          where(["transaction_date BETWEEN ? AND ?", @start_date, @end_date]).
+          where(["transaction_date BETWEEN ? AND ? AND warehouse_code = ?", @start_date, @end_date, @warehouse.code]).
           group(:sales_promotion_girl_identifier, :sales_promotion_girl_name)
       else
         Incentive.
