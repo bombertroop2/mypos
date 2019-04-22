@@ -389,7 +389,45 @@ class SalesController < ApplicationController
         includes(:sizes, :colors, stock_products: [:stock, :stock_details], product_details: :price_lists).
         where(code: params[:product_code]).
         first
-    end    
+    end
+    
+    if @product.present?
+      current_time = Time.current        
+      product_id = if params[:barcode].present?
+        @product.product_id
+      else
+        @product.id
+      end
+      event_specific_product = Event.
+        select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type).
+        joins(event_warehouses: :event_products).
+        where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift' AND event_type <> 'Buy 1 Get 1 Free'", current_time, current_time, current_user.sales_promotion_girl.warehouse_id, true, true, true]).
+        where(:"event_products.product_id" => product_id).
+        order("events.created_at DESC").
+        first
+      
+      event_general_product = Event.
+        select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount).
+        joins(:event_warehouses, :event_general_products).
+        where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift' AND event_type <> 'Buy 1 Get 1 Free'", current_time, current_time, current_user.sales_promotion_girl.warehouse_id, false, true, true]).
+        where(:"event_general_products.product_id" => product_id).
+        order("events.created_at DESC").
+        first        
+
+      if event_specific_product.nil? && event_general_product.present?
+        @store_event = event_general_product
+      elsif event_specific_product.present? && event_general_product.nil?
+        @store_event = event_specific_product
+      elsif event_specific_product.present? && event_general_product.present?
+        if event_specific_product.created_at >= event_general_product.created_at
+          @store_event = event_specific_product
+        else          
+          @store_event = event_general_product
+        end
+      else
+        @store_event = nil
+      end
+    end
   end
   
   def search_product
