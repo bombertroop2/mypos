@@ -43,45 +43,8 @@
         size_ids = size_ids.flatten.uniq
         product_details = ProductDetail.select(:id, :size_id, :product_id).where(product_id: product_ids, size_id: size_ids, price_code_id: @warehouse.price_code_id)
         price_lists = PriceList.select(:effective_date, :price, :product_detail_id).where(product_detail_id: product_details.map(&:id).uniq).where(["price_lists.effective_date <= ?", Date.current])
-        current_time = Time.current        
-        event_specific_products = if product_ids.present?
-          Event.
-            select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, "event_products.product_id").
-            joins(event_warehouses: :event_products).
-            where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND select_different_products = ? AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift' AND event_type <> 'Buy 1 Get 1 Free'", current_time, current_time, @warehouse.id, true, true, true]).
-            where(:"event_products.product_id" => product_ids).
-            order("events.created_at DESC")
-          else
-          Event.none
-          end
-
-        event_general_products = if product_ids.present?
-          Event.
-            select(:created_at, :id, :first_plus_discount, :second_plus_discount, :cash_discount, :special_price, :event_type, :minimum_purchase_amount, :discount_amount, "event_general_products.product_id").
-            joins(:event_warehouses, :event_general_products).
-            where(["start_date_time <= ? AND end_date_time > ? AND event_warehouses.warehouse_id = ? AND (select_different_products = ? OR select_different_products IS NULL) AND (events.is_active = ? OR event_warehouses.is_active = ?) AND event_type <> 'Gift' AND event_type <> 'Buy 1 Get 1 Free'", current_time, current_time, @warehouse.id, false, true, true]).
-            where(:"event_general_products.product_id" => product_ids).
-            order("events.created_at DESC")
-          else
-          Event.none
-          end
         stock_products.each do |sp|
           total_quantity = 0
-          event_specific_product = event_specific_products.select{|esp| esp.product_id == sp.product_id}.sort{|esp1, esp2| esp2.created_at <=> esp1.created_at}.first
-          event_general_product = event_general_products.select{|egp| egp.product_id == sp.product_id}.sort{|egp1, egp2| egp2.created_at <=> egp1.created_at}.first
-          if event_specific_product.nil? && event_general_product.present?
-            store_event = event_general_product
-            elsif event_specific_product.present? && event_general_product.nil?
-            store_event = event_specific_product
-            elsif event_specific_product.present? && event_general_product.present?
-            if event_specific_product.created_at >= event_general_product.created_at
-              store_event = event_specific_product
-              else          
-              store_event = event_general_product
-            end
-            else
-            store_event = nil
-            end
         %>
           <tr align="center">
               <td style="vertical-align: middle"><%= sp.product_code %></td>
@@ -117,21 +80,9 @@
                                           nil
                                             end
 
-                                          price = 0                                            
+                                          price = 0
                                           if price_list.present?
                                             price = price_list.price
-                                            if store_event.present?
-                                              if store_event.event_type.eql?("Discount(%)") && store_event.first_plus_discount.present? && store_event.second_plus_discount.present?
-                                                first_discounted_price = price_list.price - price_list.price * store_event.first_plus_discount.to_f / 100
-                                                price = first_discounted_price - first_discounted_price * store_event.second_plus_discount.to_f / 100
-                                                elsif store_event.event_type.eql?("Discount(%)") && store_event.first_plus_discount.present?
-                                                price = price_list.price - price_list.price * store_event.first_plus_discount.to_f / 100
-                                                elsif store_event.event_type.eql?("Special Price") && store_event.special_price.present?
-                                                price = store_event.special_price
-                                                elsif store_event.event_type.eql?("Discount(Rp)") && store_event.cash_discount.present?
-                                                price = price_list.price - store_event.cash_discount.to_f
-                                              end
-                                            end
                                             end
                                         %>
                                           <tr><td style="text-align: right"><%= number_to_currency(price,

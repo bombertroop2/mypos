@@ -6,12 +6,12 @@
             <th>Color</th>
             <th>Size</th>
             <th>Qty</th>
-            <th>Gross Price</th>
+            <th>Price</th>
         </tr>
     </thead>
     <tbody>
         <% total_qty = 0 %>
-        <% total_gross_price = 0 %>
+        <% total_price = 0 %>
         <% if params[:barcode].present? %>
           <tr>
               <td><%= "#{@product.product_code} - #{@product.brand_name}" %></td>
@@ -19,14 +19,31 @@
               <td><%= "#{@product.color_code} - #{@product.color_name}" %></td>
               <td><%= @product.product_size %></td>
               <td style="text-align: right"><%= number_to_currency((@product.quantity - @product.booked_quantity), :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
-              <td style="text-align: right"><%= number_to_currency(@product.price,
+              <%
+              price = @product.price
+              if price > 0
+                if @store_event.present?
+                  if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present?
+                    first_discounted_price = price - price * @store_event.first_plus_discount.to_f / 100
+                    price = first_discounted_price - first_discounted_price * @store_event.second_plus_discount.to_f / 100
+                    elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present?
+                    price = price - price * @store_event.first_plus_discount.to_f / 100
+                    elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present?
+                    price = @store_event.special_price
+                    elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present?
+                    price = price - @store_event.cash_discount.to_f
+                  end
+                end
+                end
+            %>
+              <td style="text-align: right"><%= number_to_currency(price,
                     :separator => ",",
                     :delimiter => ".",
                     :unit => "Rp",
                     :precision => 2) %></td>
           </tr>
           <% total_qty = @product.quantity - @product.booked_quantity %>
-          <% total_gross_price = @product.price %>
+          <% total_price = price %>
         <% else %>
           <% warehouse = current_user.sales_promotion_girl.warehouse %>
           <% total_sizes = @product.colors.length * @product.sizes.uniq.length %>
@@ -68,6 +85,22 @@
                           <% end %>
                         <% end %>
                       <% end %>
+                      <%
+                      if price > 0
+                        if @store_event.present?
+                          if @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present? && @store_event.second_plus_discount.present?
+                            first_discounted_price = price - price * @store_event.first_plus_discount.to_f / 100
+                            price = first_discounted_price - first_discounted_price * @store_event.second_plus_discount.to_f / 100
+                            elsif @store_event.event_type.eql?("Discount(%)") && @store_event.first_plus_discount.present?
+                            price = price - price * @store_event.first_plus_discount.to_f / 100
+                            elsif @store_event.event_type.eql?("Special Price") && @store_event.special_price.present?
+                            price = @store_event.special_price
+                            elsif @store_event.event_type.eql?("Discount(Rp)") && @store_event.cash_discount.present?
+                            price = price - @store_event.cash_discount.to_f
+                          end
+                        end
+                        end
+                    %>
                       <%= number_to_currency(price,
                         :separator => ",",
                         :delimiter => ".",
@@ -76,7 +109,7 @@
                   </td>
               </tr>
               <% total_qty += qty_on_hand %>
-              <% total_gross_price += price %>
+              <% total_price += price %>
               <% new_color = false %>
               <% index += 1 %>
             <% end %>
@@ -86,7 +119,7 @@
     <tfoot>
     <td style="text-align: right" colspan="4"><strong>Total</strong></td>
     <td style="text-align: right"><%= number_to_currency(total_qty, :separator => "", :delimiter => ".", :unit => "", :precision => 0) %></td>
-    <td style="text-align: right"><%= number_to_currency(total_gross_price,
+    <td style="text-align: right"><%= number_to_currency(total_price,
           :separator => ",",
           :delimiter => ".",
           :unit => "Rp",
