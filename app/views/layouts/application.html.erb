@@ -989,6 +989,8 @@
                     $("#menu_toggle").click();
     <% elsif controller_name.eql?("sell_thrus") %>
                     $("#menu_toggle").click();
+    <% elsif controller_name.eql?("stocks") && action_name.eql?("index") %>
+                    $("#menu_toggle").click();
     <% elsif controller_name.eql?("sales_returns") %>
                     $("#menu_toggle").click();
                     $("#search-sales-return-btn").click(function () {

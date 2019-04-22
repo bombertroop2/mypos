@@ -14,6 +14,7 @@ class StocksController < ApplicationController
         @warehouses = current_user.supervisor.warehouses.select(:id, :code, :name).order(:code)
         Stock.none
       else
+        @warehouse = Warehouse.select(:id, :price_code_id).find(params[:filter_warehouse_id])
         Stock.
           select(:id, "warehouses.name AS warehouse_name").
           joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
@@ -24,16 +25,22 @@ class StocksController < ApplicationController
         @warehouses = Warehouse.select(:id, :code, :name).order(:code)
         Stock.none
       else
+        @warehouse = Warehouse.select(:id, :price_code_id).find(params[:filter_warehouse_id])
         Stock.
           select(:id, "warehouses.name AS warehouse_name").
           joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
           where(warehouse_id: params[:filter_warehouse_id])
       end
     else
-      Stock.
-        select(:id, "warehouses.name AS warehouse_name").
-        joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
-        where(warehouse_id: current_user.sales_promotion_girl.warehouse_id)
+      if params[:filter_product_criteria]
+        @warehouse = current_user.sales_promotion_girl.warehouse
+        Stock.
+          select(:id, "warehouses.name AS warehouse_name").
+          joins(:warehouse, stock_products: [stock_details: [:size, :color], product: :brand]).
+          where(warehouse_id: current_user.sales_promotion_girl.warehouse_id)
+      else
+        Stock.none
+      end
     end
     smart_listing_create(:stocks, stocks_scope, partial: 'stocks/listing')
   end
