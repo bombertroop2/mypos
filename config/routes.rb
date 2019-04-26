@@ -145,6 +145,7 @@ Rails.application.routes.draw do
       get "get_replacement_product_sizes"
     end
   end
+  
   #  get 'fake_consignment_sale/sale_entry'
   #  get 'consignments/new' => 'fake_consignment_sale#sale_entry'
   #  get 'fake_consignment_sale/get_product'
